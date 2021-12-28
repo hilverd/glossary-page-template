@@ -1,0 +1,52 @@
+#! /usr/bin/env bash
+#
+# Prepares files to be released.
+#
+# * release/glossary.html contains a template with static assets hosted by glstatic.net
+# * release/glossary-page-template-$release_tag contains a template including static assets
+
+set -eo pipefail
+
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
+log() {
+  echo >&2 "$@"
+}
+
+fail() {
+  echo >&2 "$@"
+  exit 1
+}
+
+cd "$SCRIPT_DIR/../dist"
+release_tag="$(git describe --tags)"
+release_tag_without_v=$(echo "$release_tag" | sed 's/^v//')
+major=$(echo "$release_tag_without_v" | sed 's/^\([^\.]*\)\.\([^\.]*\)\.\(.*\)$/\1/')
+
+# Use release number in static asset file names instead of hash
+mv assets/glossary.*.js "glossary-$release_tag".min.js
+mv assets/glossary.*.css "glossary-$release_tag".min.css
+
+cat glossary.html | \
+  sed 's!/assets/glossary.[^\.]*.js!'"glossary-$release_tag"'.min.js!' | \
+  sed 's!/assets/glossary.[^\.]*.css!'"glossary-$release_tag"'.min.css!' \
+  >glossary-with-correct-file-names.html
+
+cat glossary.html | \
+  sed 's!/assets/glossary.[^\.]*.js!'"https://glstatic.net/glossary-page-template@$major/glossary"'.min.js!' | \
+  sed 's!/assets/glossary.[^\.]*.css!'"https://glstatic.net/glossary-page-template@$major/glossary"'.min.css!' \
+  >glossary-with-cdn-links.html
+
+mv glossary-with-correct-file-names.html glossary.html
+
+rmdir assets
+cd ..
+
+mkdir release
+mv dist/glossary-with-cdn-links.html release/glossary.html
+
+package_without_cdn="glossary-page-template-$release_tag"
+mv dist "$package_without_cdn"
+tar -zvcf "${package_without_cdn}.tar.gz" "$package_without_cdn"
+rm -rf "$package_without_cdn"
+mv "${package_without_cdn}.tar.gz" release

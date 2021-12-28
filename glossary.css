@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@tailwind variants;
+
+/* Prevent FOUC */
+.no-js {
+  visibility: visible;
+}
+
+@layer components {
+  article#glossary dl {
+    @apply grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 print:grid-cols-2;
+  }
+
+  article#glossary dl > div {
+    @apply bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-600 print:border-gray-200 rounded-lg px-4 py-4;
+  }
+
+  article#glossary dl dt {
+    @apply font-semibold text-gray-600 dark:text-gray-200 print:text-black;
+  }
+
+  article#glossary dl dt dfn {
+    @apply not-italic;
+  }
+
+  article#glossary dl dd {
+    @apply mt-1 py-2 text-gray-600 dark:text-gray-300 print:text-black;
+  }
+
+  article#glossary dl dd a {
+    @apply text-gray-600 dark:text-gray-300 print:text-black;
+  }
+
+  a {
+    @apply hover:underline text-indigo-600 dark:text-amber-300 print:text-black;
+  }
+}
