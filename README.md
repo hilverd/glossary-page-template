@@ -2,7 +2,7 @@
 
 This project makes it easy to create a glossary as a single HTML page that can be hosted anywhere.
 
-![GitLab Release (latest by SemVer)](https://img.shields.io/gitlab/v/release/hilverd/glossary-page-template?sort=semver)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/hilverd/glossary-page-template)
 ![GitHub](https://img.shields.io/github/license/hilverd/glossary-page-template)
 
 ## Features
