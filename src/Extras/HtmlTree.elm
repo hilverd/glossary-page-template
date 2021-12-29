@@ -19,6 +19,16 @@ toHtml =
     toIndentedHtml 3 0
 
 
+escape : String -> String
+escape string =
+    string
+        |> String.replace "&" "&amp;"
+        |> String.replace "<" "&lt;"
+        |> String.replace ">" "&gt;"
+        |> String.replace "\"" "&quot;"
+        |> String.replace "'" "&#39;"
+
+
 toIndentedHtml : Int -> Int -> HtmlTree -> String
 toIndentedHtml initialLevel level tree =
     let
@@ -27,13 +37,13 @@ toIndentedHtml initialLevel level tree =
     in
     case tree of
         Leaf text ->
-            prefix ++ text
+            prefix ++ escape text
 
         Node name attributes children ->
             let
                 attributesString =
                     attributes
-                        |> List.map (\attribute -> attribute.name ++ "=" ++ "\"" ++ attribute.value ++ "\"")
+                        |> List.map (\attribute -> attribute.name ++ "=" ++ "\"" ++ escape attribute.value ++ "\"")
                         |> String.join " "
             in
             [ prefix
