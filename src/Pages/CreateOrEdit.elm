@@ -286,6 +286,7 @@ viewCreateDescriptionTerm showValidationErrors canBeDeleted index term =
                                 , id <| idForTermInputField index
                                 , value term.body
                                 , required True
+                                , Html.Attributes.autocomplete False
                                 , attribute "aria-required" "true"
                                 , attribute "aria-invalid" "true" |> Extras.HtmlAttribute.showIf (term.validationError /= Nothing)
                                 , Html.Events.onInput (PageMsg.Internal << UpdateTerm index)
