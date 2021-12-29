@@ -79,7 +79,7 @@ init enableHelpForMakingChanges maybeIndex loadedGlossaryItems =
       , errorMessageWhileSaving = Nothing
       }
     , if maybeIndex == Nothing then
-        giveFocusToFirstTermInputField
+        giveFocusToTermInputField 0
 
       else
         Cmd.none
@@ -97,7 +97,16 @@ update msg model =
             ( model, Cmd.none )
 
         AddTerm ->
-            ( { model | form = Form.addTerm model.form }, Cmd.none )
+            let
+                form =
+                    Form.addTerm model.form
+
+                latestTermIndex =
+                    Array.length form.terms - 1
+            in
+            ( { model | form = form }
+            , giveFocusToTermInputField latestTermIndex
+            )
 
         DeleteTerm termIndex ->
             ( { model | form = Form.deleteTerm termIndex model.form }, Cmd.none )
@@ -208,9 +217,9 @@ patchHtmlFile enableHelpForMakingChanges glossaryItems =
 -- VIEW
 
 
-giveFocusToFirstTermInputField : Cmd Msg
-giveFocusToFirstTermInputField =
-    Task.attempt (\_ -> PageMsg.Internal NoOp) (Dom.focus <| idForTermInputField 0)
+giveFocusToTermInputField : Int -> Cmd Msg
+giveFocusToTermInputField index =
+    Task.attempt (\_ -> PageMsg.Internal NoOp) (Dom.focus <| idForTermInputField index)
 
 
 idForTermInputField : Int -> String
