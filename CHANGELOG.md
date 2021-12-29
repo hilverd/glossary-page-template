@@ -12,6 +12,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Removed
 
+## [0.0.2] - 2021-12-29
+
+### Added
+
+- Give focus to newly created term input fields.
+- Give focus to newly created description details fields.
+
+### Changed
+
+- Disable autocompletion for term input fields.
+- Say "See" instead of "See also" if item has no details.
+
+### Fixed
+
+- Bug fix: escape special chars when saving HTML.
+- Correct release badge URL.
+
 ## [0.0.1] - 2021-12-28
 
 ### Added
