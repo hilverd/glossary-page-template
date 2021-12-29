@@ -118,7 +118,16 @@ update msg model =
             ( { model | form = Form.toggleAbbreviation termIndex model.form }, Cmd.none )
 
         AddDetails ->
-            ( { model | form = Form.addDetails model.form }, Cmd.none )
+            let
+                form =
+                    Form.addDetails model.form
+
+                latestDetailsIndex =
+                    Array.length form.details - 1
+            in
+            ( { model | form = form }
+            , giveFocusToDescriptionDetailsSingle latestDetailsIndex
+            )
 
         UpdateDetails detailsIndex body ->
             ( { model | form = Form.updateDetails detailsIndex model.form body }, Cmd.none )
@@ -222,9 +231,19 @@ giveFocusToTermInputField index =
     Task.attempt (\_ -> PageMsg.Internal NoOp) (Dom.focus <| idForTermInputField index)
 
 
+giveFocusToDescriptionDetailsSingle : Int -> Cmd Msg
+giveFocusToDescriptionDetailsSingle index =
+    Task.attempt (\_ -> PageMsg.Internal NoOp) (Dom.focus <| idForDescriptionDetailsSingle index)
+
+
 idForTermInputField : Int -> String
 idForTermInputField index =
     "term-" ++ String.fromInt index
+
+
+idForDescriptionDetailsSingle : Int -> String
+idForDescriptionDetailsSingle index =
+    "details-" ++ String.fromInt index
 
 
 viewCreateDescriptionTerm : Bool -> Bool -> Int -> Form.Term -> Html Msg
@@ -401,6 +420,7 @@ viewCreateDescriptionDetailsSingle showValidationErrors index detailsSingle =
                         class "shadow-sm w-full rounded-md border-red-300 text-red-900 placeholder-red-300 focus:outline-none focus:ring-red-500 focus:border-red-500 dark:bg-gray-700"
                     , required True
                     , attribute "aria-required" "true"
+                    , id <| idForDescriptionDetailsSingle index
                     , Html.Events.onInput (PageMsg.Internal << UpdateDetails index)
                     ]
                     [ text detailsSingle.body ]
