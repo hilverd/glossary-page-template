@@ -1,4 +1,4 @@
-module Data.GlossaryItem exposing (GlossaryItem, RelatedTerm, Term, decode, empty, toHtmlTree)
+module Data.GlossaryItem exposing (GlossaryItem, RelatedTerm, Term, decode, empty, hasSomeDetails, toHtmlTree)
 
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Json.Decode as Decode exposing (Decoder)
@@ -55,6 +55,11 @@ decode =
         (Decode.field "relatedTerms" <| Decode.list <| decodeRelatedTerms)
 
 
+hasSomeDetails : GlossaryItem -> Bool
+hasSomeDetails glossaryItem =
+    not <| List.isEmpty glossaryItem.details
+
+
 termToHtmlTree : Term -> HtmlTree
 termToHtmlTree term =
     HtmlTree.Node "dt"
@@ -87,11 +92,17 @@ relatedTermToHtmlTree relatedTerm =
         [ HtmlTree.Leaf relatedTerm.body ]
 
 
-nonemptyRelatedTermsToHtmlTree : List RelatedTerm -> HtmlTree
-nonemptyRelatedTermsToHtmlTree relatedTerms =
+nonemptyRelatedTermsToHtmlTree : Bool -> List RelatedTerm -> HtmlTree
+nonemptyRelatedTermsToHtmlTree itemHasSomeDetails relatedTerms =
     HtmlTree.Node "dd"
         [ HtmlTree.Attribute "class" "related-terms" ]
-        (HtmlTree.Leaf "See also:"
+        (HtmlTree.Leaf
+            (if itemHasSomeDetails then
+                "See also:"
+
+             else
+                "See:"
+            )
             :: (relatedTerms
                     |> List.map relatedTermToHtmlTree
                     |> List.intersperse (HtmlTree.Leaf ",")
@@ -109,6 +120,9 @@ toHtmlTree glossaryItem =
                     []
 
                 else
-                    [ nonemptyRelatedTermsToHtmlTree glossaryItem.relatedTerms ]
+                    [ nonemptyRelatedTermsToHtmlTree
+                        (hasSomeDetails glossaryItem)
+                        glossaryItem.relatedTerms
+                    ]
                )
         )

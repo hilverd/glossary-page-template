@@ -300,15 +300,21 @@ viewGlossaryItemDetails details =
         [ text details ]
 
 
-viewGlossaryItemRelatedTerms : List GlossaryItem.RelatedTerm -> List (Html Msg)
-viewGlossaryItemRelatedTerms relatedTerms =
+viewGlossaryItemRelatedTerms : Bool -> List GlossaryItem.RelatedTerm -> List (Html Msg)
+viewGlossaryItemRelatedTerms itemHasSomeDetails relatedTerms =
     if List.isEmpty relatedTerms then
         []
 
     else
         [ Html.dd
             [ class "related-terms" ]
-            (text "See also: "
+            (text
+                (if itemHasSomeDetails then
+                    "See also: "
+
+                 else
+                    "See: "
+                )
                 :: (relatedTerms
                         |> List.map
                             (\relatedTerm ->
@@ -347,6 +353,9 @@ viewGlossaryItem enableHelpForMakingChanges glossaryItems editable errorWhileDel
                     [ class "text-red-600" ]
                     [ text message ]
                 ]
+
+        itemSomeDetails =
+            GlossaryItem.hasSomeDetails glossaryItem
     in
     if editable then
         div
@@ -355,7 +364,7 @@ viewGlossaryItem enableHelpForMakingChanges glossaryItems editable errorWhileDel
                 []
                 (List.map viewGlossaryTerm glossaryItem.terms
                     ++ List.map viewGlossaryItemDetails glossaryItem.details
-                    ++ viewGlossaryItemRelatedTerms glossaryItem.relatedTerms
+                    ++ viewGlossaryItemRelatedTerms itemSomeDetails glossaryItem.relatedTerms
                 )
             , div
                 [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
@@ -392,7 +401,7 @@ viewGlossaryItem enableHelpForMakingChanges glossaryItems editable errorWhileDel
         div []
             (List.map viewGlossaryTerm glossaryItem.terms
                 ++ List.map viewGlossaryItemDetails glossaryItem.details
-                ++ viewGlossaryItemRelatedTerms glossaryItem.relatedTerms
+                ++ viewGlossaryItemRelatedTerms itemSomeDetails glossaryItem.relatedTerms
             )
 
 
