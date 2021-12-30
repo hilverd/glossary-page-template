@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- Add `meta name="generator"` tag pointing to GitHub project page.
+
 ### Changed
 ### Fixed
 
