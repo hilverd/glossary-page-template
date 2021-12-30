@@ -182,7 +182,7 @@ patchHtmlFile enableHelpForMakingChanges indexOfItemBeingDeleted glossaryItems =
 viewMakingChangesHelp : Bool -> Html Msg
 viewMakingChangesHelp expanded =
     div
-        [ class "mb-5 rounded-md overflow-x-auto bg-amber-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 print:hidden"
+        [ class "mb-5 rounded-md overflow-x-auto bg-amber-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 print:hidden"
         , class <|
             if expanded then
                 "p-4"

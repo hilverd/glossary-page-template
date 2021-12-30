@@ -14,7 +14,7 @@
   }
 
   article#glossary dl > div {
-    @apply bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-600 print:border-gray-200 rounded-lg px-4 py-4;
+    @apply bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-700 print:border-gray-200 rounded-lg px-4 py-4;
   }
 
   article#glossary dl dt {

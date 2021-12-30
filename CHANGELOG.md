@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+
+- In dark mode, make cards a bit lighter than background for consistency with non-dark mode.
+
 ### Removed
 
 ## [0.0.2] - 2021-12-29
