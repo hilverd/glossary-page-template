@@ -225,10 +225,7 @@ viewMakingChangesHelp expanded =
                     ]
                 , p
                     [ class "max-w-xl" ]
-                    [ text "where "
-                    , code [] [ text "glossary.html" ]
-                    , text " is the name of the glossary file (you'll need to be in the same directory). This works best if the file is under version control."
-                    ]
+                    [ text "(You'll need to be in the same directory.) This works best if the file is under version control." ]
                 , p
                     [ class "mt-3 max-w-xl" ]
                     [ text "You can hide these instructions altogether by setting the "
