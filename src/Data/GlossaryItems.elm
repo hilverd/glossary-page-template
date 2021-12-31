@@ -1,6 +1,5 @@
 module Data.GlossaryItems exposing (GlossaryItems, sanitise, toHtmlTree)
 
-import Array
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Layout as Layout exposing (Layout)
@@ -14,6 +13,7 @@ type alias GlossaryItems =
 toHtmlTree : Bool -> Layout -> GlossaryItems -> HtmlTree
 toHtmlTree enableHelpForMakingChanges defaultLayout glossaryItems =
     HtmlTree.Node "article"
+        True
         [ HtmlTree.Attribute "id" "glossary"
         , HtmlTree.Attribute "data-enable-help-for-making-changes"
             (if enableHelpForMakingChanges then
@@ -32,6 +32,7 @@ toHtmlTree enableHelpForMakingChanges defaultLayout glossaryItems =
             )
         ]
         [ HtmlTree.Node "dl"
+            True
             []
             (List.map GlossaryItem.toHtmlTree glossaryItems)
         ]

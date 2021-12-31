@@ -63,13 +63,15 @@ hasSomeDetails glossaryItem =
 termToHtmlTree : Term -> HtmlTree
 termToHtmlTree term =
     HtmlTree.Node "dt"
+        True
         []
         [ HtmlTree.Node "dfn"
+            True
             [ HtmlTree.Attribute "id" term.id ]
             [ HtmlTree.Leaf term.body
                 |> (\inner ->
                         if term.isAbbreviation then
-                            HtmlTree.Node "abbr" [] [ inner ]
+                            HtmlTree.Node "abbr" True [] [ inner ]
 
                         else
                             inner
@@ -81,6 +83,7 @@ termToHtmlTree term =
 detailsToHtmlTree : String -> HtmlTree
 detailsToHtmlTree details =
     HtmlTree.Node "dd"
+        True
         []
         [ HtmlTree.Leaf details ]
 
@@ -88,6 +91,7 @@ detailsToHtmlTree details =
 relatedTermToHtmlTree : RelatedTerm -> HtmlTree
 relatedTermToHtmlTree relatedTerm =
     HtmlTree.Node "a"
+        True
         [ HtmlTree.Attribute "href" ("#" ++ relatedTerm.idReference) ]
         [ HtmlTree.Leaf relatedTerm.body ]
 
@@ -95,17 +99,18 @@ relatedTermToHtmlTree relatedTerm =
 nonemptyRelatedTermsToHtmlTree : Bool -> List RelatedTerm -> HtmlTree
 nonemptyRelatedTermsToHtmlTree itemHasSomeDetails relatedTerms =
     HtmlTree.Node "dd"
+        False
         [ HtmlTree.Attribute "class" "related-terms" ]
         (HtmlTree.Leaf
             (if itemHasSomeDetails then
-                "See also:"
+                "See also: "
 
              else
-                "See:"
+                "See: "
             )
             :: (relatedTerms
                     |> List.map relatedTermToHtmlTree
-                    |> List.intersperse (HtmlTree.Leaf ",")
+                    |> List.intersperse (HtmlTree.Leaf ", ")
                )
         )
 
@@ -113,6 +118,7 @@ nonemptyRelatedTermsToHtmlTree itemHasSomeDetails relatedTerms =
 toHtmlTree : GlossaryItem -> HtmlTree
 toHtmlTree glossaryItem =
     HtmlTree.Node "div"
+        True
         []
         (List.map termToHtmlTree glossaryItem.terms
             ++ List.map detailsToHtmlTree glossaryItem.details

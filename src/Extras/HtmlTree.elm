@@ -11,12 +11,12 @@ type alias Attribute =
 
 type HtmlTree
     = Leaf String
-    | Node String (List Attribute) (List HtmlTree)
+    | Node String Bool (List Attribute) (List HtmlTree)
 
 
 toHtml : HtmlTree -> String
 toHtml =
-    toIndentedHtml 3 0
+    toIndentedHtml 3 0 True
 
 
 escape : String -> String
@@ -29,17 +29,21 @@ escape string =
         |> String.replace "'" "&#39;"
 
 
-toIndentedHtml : Int -> Int -> HtmlTree -> String
-toIndentedHtml initialLevel level tree =
+toIndentedHtml : Int -> Int -> Bool -> HtmlTree -> String
+toIndentedHtml initialLevel level format tree =
     let
         prefix =
-            String.repeat (4 * (initialLevel + level)) " "
+            if format then
+                String.repeat (4 * (initialLevel + level)) " "
+
+            else
+                ""
     in
     case tree of
         Leaf text ->
             prefix ++ escape text
 
-        Node name attributes children ->
+        Node name formatChildren attributes children ->
             let
                 attributesString =
                     attributes
@@ -56,9 +60,21 @@ toIndentedHtml initialLevel level tree =
                         " " ++ attributesString
                    )
                 ++ ">"
-            , children
-                |> List.map (toIndentedHtml initialLevel (level + 1))
-                |> String.join "\n"
+            , if format && formatChildren then
+                children
+                    |> List.map (toIndentedHtml initialLevel (level + 1) True)
+                    |> String.join "\n"
+
+              else
+                children
+                    |> List.map (toIndentedHtml initialLevel (level + 1) False)
+                    |> String.join ""
             , prefix ++ "</" ++ name ++ ">"
             ]
-                |> String.join "\n"
+                |> String.join
+                    (if format then
+                        "\n"
+
+                     else
+                        ""
+                    )

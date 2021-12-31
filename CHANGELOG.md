@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve instructions for making changes. These were implying that the name of the HTML file doesn't matter, but at the moment it is expected to be `glossary.html`.
 - Make `bin/prepare-release` not fail if `release/` already exists.
 - Sort items in case-insensitive order (TOC and main list).
+- Fix formatting error when JavaScript is disabled (a space would appear before the commas that separate related items).
 
 ### Removed
 
