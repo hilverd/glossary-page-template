@@ -8,11 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [0.0.3] - 2021-12-31
+
+### Added
 
 - Add `meta name="generator"` tag pointing to GitHub project page.
 - Add instructions for building from sources to README.
 
-### Changed
 ### Fixed
 
 - In dark mode, make cards a bit lighter than background for consistency with non-dark mode.
@@ -20,8 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Make `bin/prepare-release` not fail if `release/` already exists.
 - Sort items in case-insensitive order (TOC and main list).
 - Fix formatting error when JavaScript is disabled (a space would appear before the commas that separate related items).
-
-### Removed
 
 ## [0.0.2] - 2021-12-29
 
@@ -46,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.0.2...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.0.3...HEAD
+[0.0.3]: https://github.com/hilverd/glossary-page-template/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/hilverd/glossary-page-template/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/hilverd/glossary-page-template/releases/tag/v0.0.1
