@@ -268,7 +268,7 @@ viewToc glossaryItems =
             []
             (glossaryItems
                 |> List.concatMap .terms
-                |> List.sortBy .body
+                |> List.sortBy (.body >> String.toLower)
                 |> List.map viewTocItem
                 |> List.intersperse separator
             )

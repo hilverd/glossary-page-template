@@ -181,7 +181,7 @@ update msg model =
                                         newOrUpdatedGlossaryItem :: glossaryItems
                                 )
                                     |> GlossaryItems.sanitise
-                                    |> List.sortBy (.terms >> List.head >> Maybe.map .body >> Maybe.withDefault "")
+                                    |> List.sortBy (.terms >> List.head >> Maybe.map .body >> Maybe.withDefault "" >> String.toLower)
                         in
                         ( { model | glossaryItems = Ok updatedGlossaryItems }
                         , patchHtmlFile model.enableHelpForMakingChanges updatedGlossaryItems
