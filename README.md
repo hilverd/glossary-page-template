@@ -38,3 +38,10 @@ cd glossary-page-template
 pnpm install
 pnpm run dev
 ```
+
+### Building a release from sources
+
+```
+pnpm run build
+./bin/prepare-release
+```

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add `meta name="generator"` tag pointing to GitHub project page.
+- Add instructions for building from sources to README.
 
 ### Changed
 ### Fixed
