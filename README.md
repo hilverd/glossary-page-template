@@ -7,7 +7,7 @@ This project makes it easy to create a glossary as a single HTML page that can b
 
 ## Features
 
-* Integrated editor UI that saves changes back to the HTML file.
+* Includes integrated editor UI that saves changes back to the HTML file.
 * Represents a glossary as a standard [`dl`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dl) element for accessibility and portability.
 * Supports different screen sizes using responsive design and includes dark mode support.
 
