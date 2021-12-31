@@ -42,7 +42,7 @@ mv glossary-with-correct-file-names.html glossary.html
 rmdir assets
 cd ..
 
-mkdir release
+mkdir -p release
 mv dist/glossary-with-cdn-links.html release/glossary.html
 
 package_without_cdn="glossary-page-template-$release_tag"
