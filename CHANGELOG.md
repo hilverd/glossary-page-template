@@ -9,12 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 ### Changed
+### Fixed
+### Removed
+
+## [0.0.4] - 2022-01-01
+
+### Changed
 
 - Only allow listing the first term of an item as a related term. This should encourage people to list the "primary" term first and reduce unnecessary choices.
 - Make it easier to release styling changes without having to update the HTML template. Most CSS classes in the template have now been moved to the CSS file.
-
-### Fixed
-### Removed
 
 ## [0.0.3] - 2021-12-31
 
@@ -54,7 +57,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.0.3...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.0.4...HEAD
+[0.0.4]: https://github.com/hilverd/glossary-page-template/compare/v0.0.3...v0.0.4
 [0.0.3]: https://github.com/hilverd/glossary-page-template/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/hilverd/glossary-page-template/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/hilverd/glossary-page-template/releases/tag/v0.0.1
