@@ -2,9 +2,6 @@
 
 This project makes it easy to create a glossary as a single HTML page that can be hosted anywhere.
 
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/hilverd/glossary-page-template)
-![GitHub](https://img.shields.io/github/license/hilverd/glossary-page-template)
-
 ## Features
 
 * Includes integrated editor UI that saves changes back to the HTML file.
