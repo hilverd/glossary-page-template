@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Only allow listing the first term of an item as a related term. This should encourage people to list the "primary" term first and reduce unnecessary choices.
+- Make it easier to release styling changes without having to update the HTML template. Most CSS classes in the template have now been moved to the CSS file.
 
 ### Fixed
 ### Removed

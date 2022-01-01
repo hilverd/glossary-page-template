@@ -9,6 +9,30 @@
 }
 
 @layer components {
+  body {
+    @apply invisible no-js antialiased bg-gray-100 dark:bg-gray-900 print:bg-white;
+  }
+
+  div#outer {
+    @apply min-h-screen mb-10 print:mb-0 text-gray-900 dark:text-gray-100 print:text-black;
+  }
+
+  header#title-header {
+    @apply pt-6 pb-4 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  header#title-header h1 {
+    @apply text-3xl font-bold leading-tight;
+  }
+
+  div#outer main {
+    @apply max-w-7xl mx-auto px-6 lg:px-8;
+  }
+
+  div#about {
+    @apply pb-4;
+  }
+
   article#glossary dl {
     @apply grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 print:grid-cols-2;
   }

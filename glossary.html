@@ -14,22 +14,22 @@
     <script type="module" src="./glossary.js"></script>
 </head>
 
-<body class="invisible no-js antialiased bg-gray-100 dark:bg-gray-900 print:bg-white">
+<body>
     <script>
         // Prevent FOUC
         document.querySelector('body').classList.remove('no-js');
     </script>
 
-    <div class="min-h-screen mb-10 print:mb-0 text-gray-900 dark:text-gray-100 print:text-black">
-        <header id="title-header" class="pt-6 pb-4 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold leading-tight">
+    <div id="outer">
+        <header id="title-header">
+            <h1>
                 <!-- To be modified manually. -->
                 Glossary Page Template
             </h1>
         </header>
 
-        <main class="max-w-7xl mx-auto px-6 lg:px-8">
-            <div id="about" class="pb-4">
+        <main>
+            <div id="about">
                 <p>
                   <!-- To be modified manually. -->
                   This is a template for a glossary page. It contains a few example items borrowed from the
