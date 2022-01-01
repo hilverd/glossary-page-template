@@ -639,7 +639,7 @@ viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray =
 
         allTerms : List GlossaryItem.Term
         allTerms =
-            List.concatMap .terms glossaryItems
+            List.filterMap (.terms >> List.head) glossaryItems
     in
     div [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
