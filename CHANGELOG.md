@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Removed
 
+- Remove unused `data-default-layout` attribute for now.
+
 ## [0.0.4] - 2022-01-01
 
 ### Changed

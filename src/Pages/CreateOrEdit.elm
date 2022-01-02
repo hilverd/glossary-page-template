@@ -9,7 +9,6 @@ import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
-import Extras.Layout as Layout
 import GlossaryItemForm as Form exposing (GlossaryItemForm)
 import Html exposing (Html, button, div, form, h1, h3, input, option, p, select, span, text, textarea)
 import Html.Attributes exposing (attribute, class, disabled, id, required, rows, selected, type_, value)
@@ -204,7 +203,7 @@ patchHtmlFile enableHelpForMakingChanges glossaryItems =
         , url = "/"
         , body =
             glossaryItems
-                |> GlossaryItems.toHtmlTree enableHelpForMakingChanges Layout.Cards
+                |> GlossaryItems.toHtmlTree enableHelpForMakingChanges
                 |> HtmlTree.toHtml
                 |> Http.stringBody "text/html"
         , expect =

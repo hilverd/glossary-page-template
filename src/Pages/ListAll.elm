@@ -9,7 +9,6 @@ import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
-import Extras.Layout as Layout
 import Html exposing (Attribute, Html, a, button, code, div, h3, p, pre, span, text)
 import Html.Attributes exposing (attribute, class, href, id)
 import Html.Events
@@ -157,7 +156,7 @@ patchHtmlFile enableHelpForMakingChanges indexOfItemBeingDeleted glossaryItems =
         , url = "/"
         , body =
             glossaryItems
-                |> GlossaryItems.toHtmlTree enableHelpForMakingChanges Layout.Cards
+                |> GlossaryItems.toHtmlTree enableHelpForMakingChanges
                 |> HtmlTree.toHtml
                 |> Http.stringBody "text/html"
         , expect =

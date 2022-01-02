@@ -2,7 +2,6 @@ module Data.GlossaryItems exposing (GlossaryItems, sanitise, toHtmlTree)
 
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
-import Extras.Layout as Layout exposing (Layout)
 import Set
 
 
@@ -10,8 +9,8 @@ type alias GlossaryItems =
     List GlossaryItem
 
 
-toHtmlTree : Bool -> Layout -> GlossaryItems -> HtmlTree
-toHtmlTree enableHelpForMakingChanges defaultLayout glossaryItems =
+toHtmlTree : Bool -> GlossaryItems -> HtmlTree
+toHtmlTree enableHelpForMakingChanges glossaryItems =
     HtmlTree.Node "article"
         True
         [ HtmlTree.Attribute "id" "glossary"
@@ -21,14 +20,6 @@ toHtmlTree enableHelpForMakingChanges defaultLayout glossaryItems =
 
              else
                 "false"
-            )
-        , HtmlTree.Attribute "data-default-layout"
-            (case defaultLayout of
-                Layout.Cards ->
-                    "cards"
-
-                Layout.Table ->
-                    "table"
             )
         ]
         [ HtmlTree.Node "dl"
