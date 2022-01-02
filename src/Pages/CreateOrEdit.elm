@@ -412,19 +412,23 @@ viewCreateDescriptionDetailsSingle showValidationErrors index detailsSingle =
                     [ Icons.trashSolid ]
                 ]
             , div [ class "relative block min-w-0 w-full" ]
-                [ textarea
-                    [ rows 3
-                    , if not showValidationErrors || detailsSingle.validationError == Nothing then
-                        class "shadow-sm w-full rounded-md focus:ring-indigo-500 focus:border-indigo-500 border border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white"
-
-                      else
-                        class "shadow-sm w-full rounded-md border-red-300 text-red-900 placeholder-red-300 focus:outline-none focus:ring-red-500 focus:border-red-500 dark:bg-gray-700"
-                    , required True
-                    , attribute "aria-required" "true"
-                    , id <| idForDescriptionDetailsSingle index
-                    , Html.Events.onInput (PageMsg.Internal << UpdateDetails index)
+                [ div
+                    [ class "grow-wrap"
+                    , attribute "data-replicated-value" <| detailsSingle.body ++ "\n"
                     ]
-                    [ text detailsSingle.body ]
+                    [ textarea
+                        [ if not showValidationErrors || detailsSingle.validationError == Nothing then
+                            class "shadow-sm w-full rounded-md border border-gray-300 dark:border-gray-500 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+
+                          else
+                            class "shadow-sm w-full rounded-md border-red-300 text-red-900 placeholder-red-300 focus:outline-none focus:ring-red-500 focus:border-red-500 dark:bg-gray-700"
+                        , required True
+                        , attribute "aria-required" "true"
+                        , id <| idForDescriptionDetailsSingle index
+                        , Html.Events.onInput (PageMsg.Internal << UpdateDetails index)
+                        ]
+                        [ text detailsSingle.body ]
+                    ]
                 , Extras.Html.showIf (showValidationErrors && detailsSingle.validationError /= Nothing) <|
                     div [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
                         [ Icons.exclamationSolidRed ]

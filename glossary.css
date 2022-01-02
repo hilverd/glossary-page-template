@@ -60,4 +60,28 @@
   a {
     @apply hover:underline text-indigo-600 dark:text-amber-300 print:text-black;
   }
+
+  /* Start of trick for autogrowing textareas
+     https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */
+
+  .grow-wrap {
+    @apply grid;
+  }
+
+  .grow-wrap::after {
+    @apply whitespace-pre-wrap invisible;
+    content: attr(data-replicated-value) " ";
+  }
+
+  .grow-wrap > textarea {
+    @apply resize-none overflow-hidden;
+  }
+
+  .grow-wrap > textarea,
+  .grow-wrap::after {
+    @apply shadow-sm w-full rounded-md border;
+    grid-area: 1 / 1 / 2 / 2;
+  }
+
+  /* End of trick for autogrowing textareas */
 }
