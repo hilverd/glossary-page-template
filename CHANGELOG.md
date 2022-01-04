@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+
+- Fix bug: abbreviations not correctly recognised from HTML source.
+
 ### Removed
 
 ## [0.0.5] - 2022-01-02

@@ -144,7 +144,7 @@ fromGlossaryItem : GlossaryItem -> GlossaryItemForm
 fromGlossaryItem item =
     let
         validatedTerms =
-            List.map (\term -> Term term.body False False Nothing) item.terms
+            List.map (\term -> Term term.body term.isAbbreviation False Nothing) item.terms
 
         validatedDetails =
             List.map (\detailsElem -> Details detailsElem Nothing) item.details
