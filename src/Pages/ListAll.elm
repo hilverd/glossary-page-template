@@ -241,29 +241,26 @@ viewMakingChangesHelp expanded =
 
 viewTocItem : GlossaryItem.Term -> Html Msg
 viewTocItem term =
-    Html.li
-        [ class "toc inline" ]
-        [ Html.a
-            [ class "font-medium"
-            , "#" ++ term.id |> Html.Attributes.href
-            ]
-            [ text term.body ]
+    Html.a
+        [ class "font-medium"
+        , "#" ++ term.id |> Html.Attributes.href
         ]
+        [ text term.body ]
 
 
 viewToc : List GlossaryItem -> Html Msg
 viewToc glossaryItems =
     let
         separator =
-            Html.li
-                [ class "toc inline px-1 text-gray-500" ]
-                [ text "•" ]
+            Html.span
+                [ class "text-gray-500" ]
+                [ text " • " ]
     in
     Html.nav
         [ Html.Attributes.id "toc"
         , class "pb-4 print:hidden"
         ]
-        [ Html.ul
+        [ Html.span
             []
             (glossaryItems
                 |> List.concatMap .terms

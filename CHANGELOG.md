@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix bug: abbreviations not correctly recognised from HTML source.
+- Fix layout bug affecting the table of contents.
 
 ### Removed
 
