@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 ### Changed
+### Fixed
+### Removed
+
+## [0.0.6] - 2022-01-05
+
+### Changed
 
 - Reduce width of "about" section for readability.
 
@@ -16,8 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix bug: abbreviations not correctly recognised from HTML source.
 - Fix layout bug affecting the table of contents.
-
-### Removed
 
 ## [0.0.5] - 2022-01-02
 
@@ -74,7 +78,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.0.5...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.0.6...HEAD
+[0.0.6]: https://github.com/hilverd/glossary-page-template/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/hilverd/glossary-page-template/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/hilverd/glossary-page-template/compare/v0.0.3...v0.0.4
 [0.0.3]: https://github.com/hilverd/glossary-page-template/compare/v0.0.2...v0.0.3
