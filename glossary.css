@@ -30,7 +30,7 @@
   }
 
   div#about {
-    @apply pb-4;
+    @apply pb-4 max-w-prose;
   }
 
   article#glossary dl {
