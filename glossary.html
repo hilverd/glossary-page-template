@@ -156,6 +156,7 @@ This allows the Elm application to save any updates made in the UI.
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const HOST = process.env['HOST'] || 'localhost';
 const PORT = process.env['PORT'] || 3003;
 const glossaryFile = './glossary.html'
 
@@ -179,8 +180,8 @@ const server = http.createServer(async (req, res) => {
     }
 });
 
-server.listen(PORT, 'localhost', () => {
-    console.log(`Server started at http://localhost:${PORT}`);
+server.listen(PORT, HOST, () => {
+    console.log(`Server started at http://${HOST}:${PORT}`);
 });
 
 function serveLocalFile(req, res) {
