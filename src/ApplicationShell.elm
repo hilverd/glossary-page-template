@@ -90,8 +90,8 @@ port hideTitleHeaderAndAbout : () -> Cmd msg
 withoutInternal : Msg -> PageMsg ()
 withoutInternal msg =
     case msg of
-        ListAllMsg (NavigateToListAll editorIsRunning enableHelpForMakingChanges glossaryItems) ->
-            PageMsg.NavigateToListAll editorIsRunning enableHelpForMakingChanges glossaryItems
+        ListAllMsg (NavigateToListAll enableHelpForMakingChanges glossaryItems) ->
+            PageMsg.NavigateToListAll enableHelpForMakingChanges glossaryItems
 
         ListAllMsg (NavigateToCreateOrEdit enableHelpForMakingChanges maybeIndex glossaryItems) ->
             PageMsg.NavigateToCreateOrEdit enableHelpForMakingChanges maybeIndex glossaryItems
@@ -99,8 +99,8 @@ withoutInternal msg =
         ListAllMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
-        CreateOrEditMsg (NavigateToListAll editorIsRunning enableHelpForMakingChanges glossaryItems) ->
-            PageMsg.NavigateToListAll editorIsRunning enableHelpForMakingChanges glossaryItems
+        CreateOrEditMsg (NavigateToListAll enableHelpForMakingChanges glossaryItems) ->
+            PageMsg.NavigateToListAll enableHelpForMakingChanges glossaryItems
 
         CreateOrEditMsg (NavigateToCreateOrEdit enableHelpForMakingChanges maybeIndex glossaryItems) ->
             PageMsg.NavigateToCreateOrEdit enableHelpForMakingChanges maybeIndex glossaryItems
@@ -115,10 +115,10 @@ withoutInternal msg =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, withoutInternal msg, model.page ) of
-        ( _, NavigateToListAll editorIsRunning enableHelpForMakingChanges glossaryItems, _ ) ->
+        ( _, NavigateToListAll enableHelpForMakingChanges glossaryItems, _ ) ->
             let
                 ( listAllModel, listAllCmd ) =
-                    Pages.ListAll.init editorIsRunning enableHelpForMakingChanges glossaryItems
+                    Pages.ListAll.init True enableHelpForMakingChanges glossaryItems
             in
             ( { model | page = ListAll listAllModel }
             , Cmd.batch [ showTitleHeaderAndAbout (), resetViewport, Cmd.map ListAllMsg listAllCmd ]

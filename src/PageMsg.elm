@@ -4,6 +4,6 @@ import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
 
 
 type PageMsg a
-    = NavigateToListAll Bool Bool LoadedGlossaryItems
+    = NavigateToListAll Bool LoadedGlossaryItems
     | NavigateToCreateOrEdit Bool (Maybe Int) LoadedGlossaryItems
     | Internal a

@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+
+- Fix bug where `data-enable-help-for-making-changes` was always being set to true.
+
 ### Removed
 
 ## [0.0.6] - 2022-01-05
