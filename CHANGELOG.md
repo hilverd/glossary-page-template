@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix bug where `data-enable-help-for-making-changes` was always being set to true.
+- Make `$PORT` actually work when launching editor.
 
 ### Removed
 
