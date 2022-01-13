@@ -1,6 +1,7 @@
 port module Pages.ListAll exposing (Model, Msg, init, update, view)
 
 import Array
+import Browser.Dom as Dom
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItems as GlossaryItems
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
@@ -18,6 +19,7 @@ import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
 import Svg exposing (path, svg)
 import Svg.Attributes exposing (d, fill, stroke, strokeLinecap, strokeLinejoin, strokeWidth, viewBox)
+import Task
 
 
 
@@ -34,6 +36,7 @@ type MakingChanges
 type alias Model =
     { enableHelpForMakingChanges : Bool
     , makingChanges : MakingChanges
+    , maybeIndex : Maybe Int
     , glossaryItems : LoadedGlossaryItems
     , confirmDeleteIndex : Maybe Int
     , errorWhileDeleting : Maybe ( Int, String )
@@ -41,7 +44,8 @@ type alias Model =
 
 
 type InternalMsg
-    = ToggleMakingChangesHelp
+    = NoOp
+    | ToggleMakingChangesHelp
     | ConfirmDelete Int
     | CancelDelete
     | Delete Int
@@ -53,8 +57,8 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init : Bool -> Bool -> LoadedGlossaryItems -> ( Model, Cmd Msg )
-init editorIsRunning enableHelpForMakingChanges glossaryItems =
+init : Bool -> Bool -> Maybe Int -> LoadedGlossaryItems -> ( Model, Cmd Msg )
+init editorIsRunning enableHelpForMakingChanges maybeIndex glossaryItems =
     ( { enableHelpForMakingChanges = enableHelpForMakingChanges
       , makingChanges =
             case ( editorIsRunning, enableHelpForMakingChanges ) of
@@ -66,11 +70,17 @@ init editorIsRunning enableHelpForMakingChanges glossaryItems =
 
                 ( False, False ) ->
                     NoHelpForMakingChanges
+      , maybeIndex = maybeIndex
       , glossaryItems = glossaryItems
       , confirmDeleteIndex = Nothing
       , errorWhileDeleting = Nothing
       }
-    , Cmd.none
+    , case maybeIndex of
+        Just index ->
+            jumpToGlossaryItem index
+
+        Nothing ->
+            Cmd.none
     )
 
 
@@ -91,6 +101,9 @@ port preventBackgroundScrolling : () -> Cmd msg
 update : InternalMsg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        NoOp ->
+            ( model, Cmd.none )
+
         ToggleMakingChangesHelp ->
             let
                 makingChangesToggled =
@@ -172,6 +185,19 @@ patchHtmlFile enableHelpForMakingChanges indexOfItemBeingDeleted glossaryItems =
         , timeout = Nothing
         , tracker = Nothing
         }
+
+
+jumpToGlossaryItem : Int -> Cmd Msg
+jumpToGlossaryItem =
+    idForGlossaryItemDiv >> jumpToElement
+
+
+jumpToElement : String -> Cmd Msg
+jumpToElement id =
+    id
+        |> Dom.getViewportOf
+        |> Task.andThen (always <| Dom.setViewportOf id 0 0)
+        |> Task.attempt (always <| PageMsg.Internal NoOp)
 
 
 
@@ -336,6 +362,11 @@ viewGlossaryItemButton attributes icon label =
         ]
 
 
+idForGlossaryItemDiv : Int -> String
+idForGlossaryItemDiv index =
+    "glossary-item-" ++ String.fromInt index
+
+
 viewGlossaryItem : Bool -> LoadedGlossaryItems -> Bool -> Maybe ( Int, String ) -> GlossaryItem -> Int -> Html Msg
 viewGlossaryItem enableHelpForMakingChanges glossaryItems editable errorWhileDeleting glossaryItem index =
     let
@@ -352,7 +383,9 @@ viewGlossaryItem enableHelpForMakingChanges glossaryItems editable errorWhileDel
     in
     if editable then
         div
-            [ class "flex flex-col justify-items-end" ]
+            [ class "flex flex-col justify-items-end"
+            , id <| idForGlossaryItemDiv index
+            ]
             [ div
                 []
                 (List.map viewGlossaryTerm glossaryItem.terms

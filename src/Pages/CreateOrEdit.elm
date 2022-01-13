@@ -183,7 +183,7 @@ update msg model =
                                     |> List.sortBy (.terms >> List.head >> Maybe.map .body >> Maybe.withDefault "" >> String.toLower)
                         in
                         ( { model | glossaryItems = Ok updatedGlossaryItems }
-                        , patchHtmlFile model.enableHelpForMakingChanges updatedGlossaryItems
+                        , patchHtmlFile model.enableHelpForMakingChanges model.maybeIndex updatedGlossaryItems
                         )
 
                 _ ->
@@ -195,8 +195,8 @@ update msg model =
             )
 
 
-patchHtmlFile : Bool -> List GlossaryItem -> Cmd Msg
-patchHtmlFile enableHelpForMakingChanges glossaryItems =
+patchHtmlFile : Bool -> Maybe Int -> List GlossaryItem -> Cmd Msg
+patchHtmlFile enableHelpForMakingChanges maybeIndex glossaryItems =
     Http.request
         { method = "PATCH"
         , headers = []
@@ -211,7 +211,7 @@ patchHtmlFile enableHelpForMakingChanges glossaryItems =
                 (\result ->
                     case result of
                         Ok _ ->
-                            PageMsg.NavigateToListAll enableHelpForMakingChanges <| Ok glossaryItems
+                            PageMsg.NavigateToListAll enableHelpForMakingChanges maybeIndex <| Ok glossaryItems
 
                         Err error ->
                             PageMsg.Internal <| FailedToSave error
@@ -677,8 +677,8 @@ viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray =
         ]
 
 
-viewCreateFormFooter : Bool -> Bool -> Maybe String -> List GlossaryItem -> GlossaryItemForm -> Html Msg
-viewCreateFormFooter showValidationErrors enableHelpForMakingChanges errorMessageWhileSaving glossaryItems form =
+viewCreateFormFooter : Bool -> Bool -> Maybe Int -> Maybe String -> List GlossaryItem -> GlossaryItemForm -> Html Msg
+viewCreateFormFooter showValidationErrors enableHelpForMakingChanges maybeIndex errorMessageWhileSaving glossaryItems form =
     let
         errorDiv message =
             div
@@ -699,7 +699,7 @@ viewCreateFormFooter showValidationErrors enableHelpForMakingChanges errorMessag
             [ button
                 [ Html.Attributes.type_ "button"
                 , class "bg-white dark:bg-gray-700 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                , Html.Events.onClick <| PageMsg.NavigateToListAll enableHelpForMakingChanges <| Ok glossaryItems
+                , Html.Events.onClick <| PageMsg.NavigateToListAll enableHelpForMakingChanges maybeIndex <| Ok glossaryItems
                 ]
                 [ text "Cancel" ]
             , button
@@ -734,7 +734,7 @@ view model =
                         [ viewCreateDescriptionTerms model.triedToSaveWhenFormInvalid model.form.terms
                         , viewCreateDescriptionDetails model.triedToSaveWhenFormInvalid model.form.details
                         , viewCreateSeeAlso model.triedToSaveWhenFormInvalid glossaryItems model.form.terms model.form.relatedTerms
-                        , viewCreateFormFooter model.triedToSaveWhenFormInvalid model.enableHelpForMakingChanges model.errorMessageWhileSaving glossaryItems model.form
+                        , viewCreateFormFooter model.triedToSaveWhenFormInvalid model.enableHelpForMakingChanges model.maybeIndex model.errorMessageWhileSaving glossaryItems model.form
                         ]
                     ]
                 ]

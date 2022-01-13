@@ -60,6 +60,7 @@ init flags =
             Pages.ListAll.init
                 editorIsRunning
                 enableHelpForMakingChanges
+                Nothing
                 loadedGlossaryItems
     in
     ( { page = ListAll listAllModel }
@@ -90,8 +91,8 @@ port hideTitleHeaderAndAbout : () -> Cmd msg
 withoutInternal : Msg -> PageMsg ()
 withoutInternal msg =
     case msg of
-        ListAllMsg (NavigateToListAll enableHelpForMakingChanges glossaryItems) ->
-            PageMsg.NavigateToListAll enableHelpForMakingChanges glossaryItems
+        ListAllMsg (NavigateToListAll enableHelpForMakingChanges maybeIndex glossaryItems) ->
+            PageMsg.NavigateToListAll enableHelpForMakingChanges maybeIndex glossaryItems
 
         ListAllMsg (NavigateToCreateOrEdit enableHelpForMakingChanges maybeIndex glossaryItems) ->
             PageMsg.NavigateToCreateOrEdit enableHelpForMakingChanges maybeIndex glossaryItems
@@ -99,8 +100,8 @@ withoutInternal msg =
         ListAllMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
-        CreateOrEditMsg (NavigateToListAll enableHelpForMakingChanges glossaryItems) ->
-            PageMsg.NavigateToListAll enableHelpForMakingChanges glossaryItems
+        CreateOrEditMsg (NavigateToListAll enableHelpForMakingChanges maybeIndex glossaryItems) ->
+            PageMsg.NavigateToListAll enableHelpForMakingChanges maybeIndex glossaryItems
 
         CreateOrEditMsg (NavigateToCreateOrEdit enableHelpForMakingChanges maybeIndex glossaryItems) ->
             PageMsg.NavigateToCreateOrEdit enableHelpForMakingChanges maybeIndex glossaryItems
@@ -115,13 +116,13 @@ withoutInternal msg =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, withoutInternal msg, model.page ) of
-        ( _, NavigateToListAll enableHelpForMakingChanges glossaryItems, _ ) ->
+        ( _, NavigateToListAll enableHelpForMakingChanges maybeIndex glossaryItems, _ ) ->
             let
                 ( listAllModel, listAllCmd ) =
-                    Pages.ListAll.init True enableHelpForMakingChanges glossaryItems
+                    Pages.ListAll.init True enableHelpForMakingChanges maybeIndex glossaryItems
             in
             ( { model | page = ListAll listAllModel }
-            , Cmd.batch [ showTitleHeaderAndAbout (), resetViewport, Cmd.map ListAllMsg listAllCmd ]
+            , Cmd.batch [ showTitleHeaderAndAbout (), Cmd.map ListAllMsg listAllCmd ]
             )
 
         ( _, NavigateToCreateOrEdit enableHelpForMakingChanges maybeIndex glossaryItems, _ ) ->
