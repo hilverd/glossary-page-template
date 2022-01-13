@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 ### Changed
-
-- Scroll to relevant item after editing.
-
 ### Fixed
 ### Removed
+
+## [0.0.8] - 2022-01-13
+
+### Changed
+
+- Scroll to relevant item after editing.
 
 ## [0.0.7] - 2022-01-10
 
@@ -92,7 +95,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.0.7...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.0.8...HEAD
+[0.0.8]: https://github.com/hilverd/glossary-page-template/compare/v0.0.7...v0.0.8
 [0.0.7]: https://github.com/hilverd/glossary-page-template/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/hilverd/glossary-page-template/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/hilverd/glossary-page-template/compare/v0.0.4...v0.0.5
