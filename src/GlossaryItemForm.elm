@@ -22,6 +22,7 @@ module GlossaryItemForm exposing
 
 import Array exposing (Array)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+import Data.TermIndex as TermIndex exposing (TermIndex)
 import Dict exposing (Dict)
 import Extras.Array
 
@@ -218,25 +219,25 @@ addTerm form =
     validate { form | terms = Array.push emptyTerm form.terms }
 
 
-updateTerm : Int -> GlossaryItemForm -> String -> GlossaryItemForm
-updateTerm index form body =
+updateTerm : TermIndex -> GlossaryItemForm -> String -> GlossaryItemForm
+updateTerm termIndex form body =
     validate
         { form
             | terms =
                 Extras.Array.update
                     (\term -> { term | body = body })
-                    index
+                    (TermIndex.toInt termIndex)
                     form.terms
         }
 
 
-deleteTerm : Int -> GlossaryItemForm -> GlossaryItemForm
-deleteTerm index form =
-    validate { form | terms = Extras.Array.delete index form.terms }
+deleteTerm : TermIndex -> GlossaryItemForm -> GlossaryItemForm
+deleteTerm termIndex form =
+    validate { form | terms = Extras.Array.delete (TermIndex.toInt termIndex) form.terms }
 
 
-toggleAbbreviation : Int -> GlossaryItemForm -> GlossaryItemForm
-toggleAbbreviation index form =
+toggleAbbreviation : TermIndex -> GlossaryItemForm -> GlossaryItemForm
+toggleAbbreviation termIndex form =
     validate
         { form
             | terms =
@@ -247,7 +248,7 @@ toggleAbbreviation index form =
                             , isAbbreviationManuallyOverridden = True
                         }
                     )
-                    index
+                    (TermIndex.toInt termIndex)
                     form.terms
         }
 

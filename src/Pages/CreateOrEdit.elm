@@ -5,6 +5,7 @@ import Browser.Dom as Dom
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItems as GlossaryItems
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
+import Data.TermIndex as TermIndex exposing (TermIndex)
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
@@ -40,9 +41,9 @@ type alias Model =
 type InternalMsg
     = NoOp
     | AddTerm
-    | DeleteTerm Int
-    | UpdateTerm Int String
-    | ToggleAbbreviation Int
+    | DeleteTerm TermIndex
+    | UpdateTerm TermIndex String
+    | ToggleAbbreviation TermIndex
     | AddDetails
     | UpdateDetails Int String
     | DeleteDetails Int
@@ -78,7 +79,7 @@ init enableHelpForMakingChanges maybeIndex loadedGlossaryItems =
       , errorMessageWhileSaving = Nothing
       }
     , if maybeIndex == Nothing then
-        giveFocusToTermInputField 0
+        0 |> TermIndex.fromInt |> giveFocusToTermInputField
 
       else
         Cmd.none
@@ -101,7 +102,7 @@ update msg model =
                     Form.addTerm model.form
 
                 latestTermIndex =
-                    Array.length form.terms - 1
+                    Array.length form.terms - 1 |> TermIndex.fromInt
             in
             ( { model | form = form }
             , giveFocusToTermInputField latestTermIndex
@@ -225,9 +226,9 @@ patchHtmlFile enableHelpForMakingChanges maybeIndex glossaryItems =
 -- VIEW
 
 
-giveFocusToTermInputField : Int -> Cmd Msg
-giveFocusToTermInputField index =
-    Task.attempt (\_ -> PageMsg.Internal NoOp) (Dom.focus <| idForTermInputField index)
+giveFocusToTermInputField : TermIndex -> Cmd Msg
+giveFocusToTermInputField termIndex =
+    Task.attempt (\_ -> PageMsg.Internal NoOp) (Dom.focus <| idForTermInputField termIndex)
 
 
 giveFocusToDescriptionDetailsSingle : Int -> Cmd Msg
@@ -235,9 +236,9 @@ giveFocusToDescriptionDetailsSingle index =
     Task.attempt (\_ -> PageMsg.Internal NoOp) (Dom.focus <| idForDescriptionDetailsSingle index)
 
 
-idForTermInputField : Int -> String
-idForTermInputField index =
-    "term-" ++ String.fromInt index
+idForTermInputField : TermIndex -> String
+idForTermInputField termIndex =
+    "term-" ++ (termIndex |> TermIndex.toInt |> String.fromInt)
 
 
 idForDescriptionDetailsSingle : Int -> String
@@ -247,9 +248,14 @@ idForDescriptionDetailsSingle index =
 
 viewCreateDescriptionTerm : Bool -> Bool -> Int -> Form.Term -> Html Msg
 viewCreateDescriptionTerm showValidationErrors canBeDeleted index term =
+    viewCreateDescriptionTermInternal showValidationErrors canBeDeleted (TermIndex.fromInt index) term
+
+
+viewCreateDescriptionTermInternal : Bool -> Bool -> TermIndex -> Form.Term -> Html Msg
+viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex term =
     let
         abbreviationLabelId =
-            "term-" ++ String.fromInt index ++ "-abbreviation"
+            "term-" ++ (termIndex |> TermIndex.toInt |> String.fromInt) ++ "-abbreviation"
     in
     div []
         [ div
@@ -264,7 +270,7 @@ viewCreateDescriptionTerm showValidationErrors canBeDeleted index term =
                         , class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-sm rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
                         , Extras.HtmlAttribute.showIf canBeDeleted <| class "hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         , Extras.HtmlAttribute.showIf (not canBeDeleted) <| class "opacity-50"
-                        , Html.Events.onClick <| PageMsg.Internal <| DeleteTerm index
+                        , Html.Events.onClick <| PageMsg.Internal <| DeleteTerm termIndex
                         , disabled <| not canBeDeleted
                         ]
                         [ Icons.trashSolid ]
@@ -282,13 +288,13 @@ viewCreateDescriptionTerm showValidationErrors canBeDeleted index term =
                                   else
                                     class "w-full min-w-0 rounded-md border-red-300 dark:bg-gray-700 text-red-900 dark:text-red-700 placeholder-red-300 focus:outline-none focus:ring-red-500 focus:border-red-500"
                                 , type_ "text"
-                                , id <| idForTermInputField index
+                                , id <| idForTermInputField termIndex
                                 , value term.body
                                 , required True
                                 , Html.Attributes.autocomplete False
                                 , attribute "aria-required" "true"
                                 , attribute "aria-invalid" "true" |> Extras.HtmlAttribute.showIf (term.validationError /= Nothing)
-                                , Html.Events.onInput (PageMsg.Internal << UpdateTerm index)
+                                , Html.Events.onInput (PageMsg.Internal << UpdateTerm termIndex)
                                 ]
                                 []
                             , Extras.Html.showIf (showValidationErrors && term.validationError /= Nothing) <|
@@ -301,7 +307,7 @@ viewCreateDescriptionTerm showValidationErrors canBeDeleted index term =
                                 [ class "sm:ml-5" ]
                                 [ div
                                     [ class "flex items-center"
-                                    , Html.Events.onClick <| PageMsg.Internal <| ToggleAbbreviation index
+                                    , Html.Events.onClick <| PageMsg.Internal <| ToggleAbbreviation termIndex
                                     ]
                                     [ button
                                         [ Html.Attributes.type_ "button"
