@@ -245,12 +245,12 @@ viewMakingChangesHelp expanded =
                     , text " installed, then just run"
                     ]
                 , pre
-                    [ class "mt-5 mb-5" ]
+                    [ class "mt-5" ]
                     [ code []
                         [ text "sed -n '/START OF editor.js$/,$p' glossary.html | node" ]
                     ]
                 , p
-                    [ class "max-w-xl" ]
+                    [ class "mt-5 max-w-xl" ]
                     [ text "(You'll need to be in the same directory.) This works best if the file is under version control." ]
                 , p
                     [ class "mt-3 max-w-xl" ]
@@ -261,6 +261,15 @@ viewMakingChangesHelp expanded =
                     , text " on the "
                     , code [] [ text "<article id=\"glossary\">" ]
                     , text " element."
+                    ]
+                , p
+                    [ class "mt-3 max-w-xl" ]
+                    [ text "Custom file names are supported via"
+                    ]
+                , pre
+                    [ class "mt-5" ]
+                    [ code []
+                        [ text "sed -n '/START OF editor.js$/,$p' custom.html | FILE=custom.html node" ]
                     ]
                 ]
         ]

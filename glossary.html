@@ -158,7 +158,7 @@ const fs = require('fs');
 const path = require('path');
 const HOST = process.env['HOST'] || 'localhost';
 const PORT = process.env['PORT'] || 3003;
-const glossaryFile = './glossary.html'
+const FILE = process.env['FILE'] || './glossary.html';
 
 const mimeTypes = {
     '.html': 'text/html',
@@ -186,7 +186,7 @@ server.listen(PORT, HOST, () => {
 
 function serveLocalFile(req, res) {
     var filePath = '.' + req.url;
-    if (filePath === './') filePath = './glossary.html';
+    if (filePath === './') filePath = FILE;
 
     const extname = String(path.extname(filePath)).toLowerCase();
     const contentType = mimeTypes[extname] || 'application/octet-stream';
@@ -195,7 +195,7 @@ function serveLocalFile(req, res) {
         if (err) {
             serveErrorPage(err, res);
         } else {
-            if (filePath === glossaryFile)
+            if (filePath === FILE)
                 fileContents = fileContents.replace(
                     /<article id="glossary"/,
                     `<article id="glossary" data-editor-is-running="true"`
@@ -218,7 +218,7 @@ function serveErrorPage(err, res) {
 }
 
 function replaceGlossaryElementInFile(newElementString) {
-    fs.readFile(glossaryFile, 'utf8', (err, fileContents) => {
+    fs.readFile(FILE, 'utf8', (err, fileContents) => {
         if (err) return console.log(err);
 
         const regex = /\n[ \t]*<article id="glossary".*<\/article>\n/s;
@@ -229,7 +229,7 @@ function replaceGlossaryElementInFile(newElementString) {
 
         const updatedFileContents = fileContents.replace(regex, "\n" + newElementString + "\n");
 
-        fs.writeFile(glossaryFile, updatedFileContents, 'utf8', (err) => {
+        fs.writeFile(FILE, updatedFileContents, 'utf8', (err) => {
             if (err) return console.log(err);
         });
     });
