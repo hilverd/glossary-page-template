@@ -3,6 +3,7 @@ port module Pages.ListAll exposing (Model, Msg, init, update, view)
 import Array
 import Browser.Dom as Dom
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Extras.Array
@@ -36,28 +37,28 @@ type MakingChanges
 type alias Model =
     { enableHelpForMakingChanges : Bool
     , makingChanges : MakingChanges
-    , maybeIndex : Maybe Int
+    , maybeIndex : Maybe GlossaryItemIndex
     , glossaryItems : LoadedGlossaryItems
-    , confirmDeleteIndex : Maybe Int
-    , errorWhileDeleting : Maybe ( Int, String )
+    , confirmDeleteIndex : Maybe GlossaryItemIndex
+    , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
     }
 
 
 type InternalMsg
     = NoOp
     | ToggleMakingChangesHelp
-    | ConfirmDelete Int
+    | ConfirmDelete GlossaryItemIndex
     | CancelDelete
-    | Delete Int
+    | Delete GlossaryItemIndex
     | Deleted (List GlossaryItem)
-    | FailedToDelete Int Http.Error
+    | FailedToDelete GlossaryItemIndex Http.Error
 
 
 type alias Msg =
     PageMsg InternalMsg
 
 
-init : Bool -> Bool -> Maybe Int -> LoadedGlossaryItems -> ( Model, Cmd Msg )
+init : Bool -> Bool -> Maybe GlossaryItemIndex -> LoadedGlossaryItems -> ( Model, Cmd Msg )
 init editorIsRunning enableHelpForMakingChanges maybeIndex glossaryItems =
     ( { enableHelpForMakingChanges = enableHelpForMakingChanges
       , makingChanges =
@@ -132,7 +133,7 @@ update msg model =
                         updatedGlossaryItems =
                             glossaryItems
                                 |> Array.fromList
-                                |> Extras.Array.delete index
+                                |> Extras.Array.delete (GlossaryItemIndex.toInt index)
                                 |> Array.toList
                                 |> GlossaryItems.sanitise
                     in
@@ -161,7 +162,7 @@ update msg model =
             )
 
 
-patchHtmlFile : Bool -> Int -> List GlossaryItem -> Cmd Msg
+patchHtmlFile : Bool -> GlossaryItemIndex -> List GlossaryItem -> Cmd Msg
 patchHtmlFile enableHelpForMakingChanges indexOfItemBeingDeleted glossaryItems =
     Http.request
         { method = "PATCH"
@@ -187,7 +188,7 @@ patchHtmlFile enableHelpForMakingChanges indexOfItemBeingDeleted glossaryItems =
         }
 
 
-jumpToGlossaryItem : Int -> Cmd Msg
+jumpToGlossaryItem : GlossaryItemIndex -> Cmd Msg
 jumpToGlossaryItem =
     idForGlossaryItemDiv >> jumpToElement
 
@@ -362,13 +363,18 @@ viewGlossaryItemButton attributes icon label =
         ]
 
 
-idForGlossaryItemDiv : Int -> String
+idForGlossaryItemDiv : GlossaryItemIndex -> String
 idForGlossaryItemDiv index =
-    "glossary-item-" ++ String.fromInt index
+    "glossary-item-" ++ (index |> GlossaryItemIndex.toInt |> String.fromInt)
 
 
-viewGlossaryItem : Bool -> LoadedGlossaryItems -> Bool -> Maybe ( Int, String ) -> GlossaryItem -> Int -> Html Msg
-viewGlossaryItem enableHelpForMakingChanges glossaryItems editable errorWhileDeleting glossaryItem index =
+viewGlossaryItem : Int -> Bool -> LoadedGlossaryItems -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
+viewGlossaryItem =
+    GlossaryItemIndex.fromInt >> viewGlossaryItem1
+
+
+viewGlossaryItem1 : GlossaryItemIndex -> Bool -> LoadedGlossaryItems -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
+viewGlossaryItem1 index enableHelpForMakingChanges glossaryItems editable errorWhileDeleting glossaryItem =
     let
         errorDiv message =
             div
@@ -431,7 +437,7 @@ viewGlossaryItem enableHelpForMakingChanges glossaryItems editable errorWhileDel
             )
 
 
-viewConfirmDeleteModal : Maybe Int -> Html Msg
+viewConfirmDeleteModal : Maybe GlossaryItemIndex -> Html Msg
 viewConfirmDeleteModal maybeIndex =
     div
         [ class "fixed z-10 inset-0 overflow-y-auto print:hidden"
@@ -595,12 +601,12 @@ view model =
                         |> List.map
                             (\( index, glossaryItem ) ->
                                 viewGlossaryItem
+                                    index
                                     model.enableHelpForMakingChanges
                                     model.glossaryItems
                                     editable
                                     model.errorWhileDeleting
                                     glossaryItem
-                                    index
                             )
                     )
                 , Extras.Html.showIf editable <|

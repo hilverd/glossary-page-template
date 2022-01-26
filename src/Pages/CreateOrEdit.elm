@@ -2,9 +2,12 @@ module Pages.CreateOrEdit exposing (Model, Msg, init, update, view)
 
 import Array exposing (Array)
 import Browser.Dom as Dom
+import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
-import Data.GlossaryItems as GlossaryItems
+import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
+import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import Extras.Html
 import Extras.HtmlAttribute
@@ -30,7 +33,7 @@ import Task
 
 type alias Model =
     { enableHelpForMakingChanges : Bool
-    , maybeIndex : Maybe Int
+    , maybeIndex : Maybe GlossaryItemIndex
     , glossaryItems : LoadedGlossaryItems
     , form : GlossaryItemForm
     , triedToSaveWhenFormInvalid : Bool
@@ -45,11 +48,11 @@ type InternalMsg
     | UpdateTerm TermIndex String
     | ToggleAbbreviation TermIndex
     | AddDetails
-    | UpdateDetails Int String
-    | DeleteDetails Int
+    | UpdateDetails DetailsIndex String
+    | DeleteDetails DetailsIndex
     | AddRelatedTerm
-    | SelectRelatedTerm Int String
-    | DeleteRelatedTerm Int
+    | SelectRelatedTerm RelatedTermIndex String
+    | DeleteRelatedTerm RelatedTermIndex
     | Save
     | FailedToSave Http.Error
 
@@ -58,7 +61,7 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init : Bool -> Maybe Int -> LoadedGlossaryItems -> ( Model, Cmd Msg )
+init : Bool -> Maybe GlossaryItemIndex -> LoadedGlossaryItems -> ( Model, Cmd Msg )
 init enableHelpForMakingChanges maybeIndex loadedGlossaryItems =
     ( { enableHelpForMakingChanges = enableHelpForMakingChanges
       , maybeIndex = maybeIndex
@@ -68,7 +71,7 @@ init enableHelpForMakingChanges maybeIndex loadedGlossaryItems =
                 (\index glossaryItems ->
                     glossaryItems
                         |> Array.fromList
-                        |> Array.get index
+                        |> Array.get (GlossaryItemIndex.toInt index)
                         |> Maybe.map Form.fromGlossaryItem
                         |> Maybe.withDefault Form.empty
                 )
@@ -123,7 +126,7 @@ update msg model =
                     Form.addDetails model.form
 
                 latestDetailsIndex =
-                    Array.length form.details - 1
+                    Array.length form.details - 1 |> DetailsIndex.fromInt
             in
             ( { model | form = form }
             , giveFocusToDescriptionDetailsSingle latestDetailsIndex
@@ -174,7 +177,7 @@ update msg model =
                                     Just index ->
                                         glossaryItems
                                             |> Array.fromList
-                                            |> Array.set index newOrUpdatedGlossaryItem
+                                            |> Array.set (GlossaryItemIndex.toInt index) newOrUpdatedGlossaryItem
                                             |> Array.toList
 
                                     Nothing ->
@@ -196,7 +199,7 @@ update msg model =
             )
 
 
-patchHtmlFile : Bool -> Maybe Int -> List GlossaryItem -> Cmd Msg
+patchHtmlFile : Bool -> Maybe GlossaryItemIndex -> List GlossaryItem -> Cmd Msg
 patchHtmlFile enableHelpForMakingChanges maybeIndex glossaryItems =
     Http.request
         { method = "PATCH"
@@ -231,7 +234,7 @@ giveFocusToTermInputField termIndex =
     Task.attempt (\_ -> PageMsg.Internal NoOp) (Dom.focus <| idForTermInputField termIndex)
 
 
-giveFocusToDescriptionDetailsSingle : Int -> Cmd Msg
+giveFocusToDescriptionDetailsSingle : DetailsIndex -> Cmd Msg
 giveFocusToDescriptionDetailsSingle index =
     Task.attempt (\_ -> PageMsg.Internal NoOp) (Dom.focus <| idForDescriptionDetailsSingle index)
 
@@ -241,9 +244,9 @@ idForTermInputField termIndex =
     "term-" ++ (termIndex |> TermIndex.toInt |> String.fromInt)
 
 
-idForDescriptionDetailsSingle : Int -> String
+idForDescriptionDetailsSingle : DetailsIndex -> String
 idForDescriptionDetailsSingle index =
-    "details-" ++ String.fromInt index
+    "details-" ++ (index |> DetailsIndex.toInt |> String.fromInt)
 
 
 viewCreateDescriptionTerm : Bool -> Bool -> Int -> Form.Term -> Html Msg
@@ -404,6 +407,11 @@ viewCreateDescriptionTerms showValidationErrors termsArray =
 
 viewCreateDescriptionDetailsSingle : Bool -> Int -> Form.Details -> Html Msg
 viewCreateDescriptionDetailsSingle showValidationErrors index detailsSingle =
+    viewCreateDescriptionDetailsSingle1 showValidationErrors (DetailsIndex.fromInt index) detailsSingle
+
+
+viewCreateDescriptionDetailsSingle1 : Bool -> DetailsIndex -> Form.Details -> Html Msg
+viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
     div []
         [ div [ class "flex-auto max-w-2xl flex" ]
             [ span [ class "inline-flex items-center" ]
@@ -526,6 +534,11 @@ viewCreateDescriptionDetails showValidationErrors detailsArray =
 
 viewCreateSeeAlsoSingle : Bool -> Set String -> List GlossaryItem.Term -> Int -> Form.RelatedTerm -> Html Msg
 viewCreateSeeAlsoSingle showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
+    viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms (RelatedTermIndex.fromInt index) relatedTerm
+
+
+viewCreateSeeAlsoSingle1 : Bool -> Set String -> List GlossaryItem.Term -> RelatedTermIndex -> Form.RelatedTerm -> Html Msg
+viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
     let
         pleaseSelectOption =
             option
@@ -683,7 +696,7 @@ viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray =
         ]
 
 
-viewCreateFormFooter : Bool -> Bool -> Maybe Int -> Maybe String -> List GlossaryItem -> GlossaryItemForm -> Html Msg
+viewCreateFormFooter : Bool -> Bool -> Maybe GlossaryItemIndex -> Maybe String -> List GlossaryItem -> GlossaryItemForm -> Html Msg
 viewCreateFormFooter showValidationErrors enableHelpForMakingChanges maybeIndex errorMessageWhileSaving glossaryItems form =
     let
         errorDiv message =

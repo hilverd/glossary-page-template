@@ -21,7 +21,10 @@ module GlossaryItemForm exposing
     )
 
 import Array exposing (Array)
+import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
+import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import Dict exposing (Dict)
 import Extras.Array
@@ -258,21 +261,21 @@ addDetails form =
     validate { form | details = Array.push emptyDetails form.details }
 
 
-updateDetails : Int -> GlossaryItemForm -> String -> GlossaryItemForm
-updateDetails index form body =
+updateDetails : DetailsIndex -> GlossaryItemForm -> String -> GlossaryItemForm
+updateDetails detailsIndex form body =
     validate
         { form
             | details =
                 Extras.Array.update
                     (\detailsSingle -> { detailsSingle | body = body })
-                    index
+                    (DetailsIndex.toInt detailsIndex)
                     form.details
         }
 
 
-deleteDetails : Int -> GlossaryItemForm -> GlossaryItemForm
+deleteDetails : DetailsIndex -> GlossaryItemForm -> GlossaryItemForm
 deleteDetails index form =
-    validate { form | details = Extras.Array.delete index form.details }
+    validate { form | details = Extras.Array.delete (DetailsIndex.toInt index) form.details }
 
 
 addRelatedTerm : GlossaryItemForm -> GlossaryItemForm
@@ -283,18 +286,18 @@ addRelatedTerm form =
         }
 
 
-selectRelatedTerm : Int -> GlossaryItemForm -> Maybe String -> GlossaryItemForm
+selectRelatedTerm : RelatedTermIndex -> GlossaryItemForm -> Maybe String -> GlossaryItemForm
 selectRelatedTerm index form relatedTermIdReference =
     validate
         { form
             | relatedTerms =
                 Extras.Array.update
                     (always <| RelatedTerm relatedTermIdReference Nothing)
-                    index
+                    (RelatedTermIndex.toInt index)
                     form.relatedTerms
         }
 
 
-deleteRelatedTerm : Int -> GlossaryItemForm -> GlossaryItemForm
+deleteRelatedTerm : RelatedTermIndex -> GlossaryItemForm -> GlossaryItemForm
 deleteRelatedTerm index form =
-    validate { form | relatedTerms = Extras.Array.delete index form.relatedTerms }
+    validate { form | relatedTerms = Extras.Array.delete (RelatedTermIndex.toInt index) form.relatedTerms }
