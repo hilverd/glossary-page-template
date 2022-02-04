@@ -22,6 +22,7 @@ import Http
 import Icons
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
+import Process
 import Svg exposing (circle, path, svg)
 import Svg.Attributes exposing (cx, cy, d, fill, height, r, stroke, strokeLinecap, strokeLinejoin, strokeWidth, viewBox, width)
 import Task
@@ -38,10 +39,16 @@ type MakingChanges
     | MakingChangesHelpExpanded
 
 
+type MenuForMobileVisibility
+    = Visible
+    | Disappearing
+    | Invisible
+
+
 type alias Model =
     { enableHelpForMakingChanges : Bool
     , makingChanges : MakingChanges
-    , menuForMobileVisible : Bool
+    , menuForMobileVisibility : MenuForMobileVisibility
     , titleHeaderHtml : TitleHeaderHtml
     , aboutHtml : AboutHtml
     , maybeIndex : Maybe GlossaryItemIndex
@@ -55,7 +62,8 @@ type InternalMsg
     = NoOp
     | ToggleMakingChangesHelp
     | ShowMenuForMobile
-    | HideMenuForMobile
+    | StartHidingMenuForMobile
+    | CompleteHidingMenuForMobile
     | ConfirmDelete GlossaryItemIndex
     | CancelDelete
     | Delete GlossaryItemIndex
@@ -80,7 +88,7 @@ init editorIsRunning enableHelpForMakingChanges titleHeaderHtml aboutHtml maybeI
 
                 ( False, False ) ->
                     NoHelpForMakingChanges
-      , menuForMobileVisible = False
+      , menuForMobileVisibility = Invisible
       , titleHeaderHtml = titleHeaderHtml
       , aboutHtml = aboutHtml
       , maybeIndex = maybeIndex
@@ -133,10 +141,18 @@ update msg model =
             ( { model | makingChanges = makingChangesToggled }, Cmd.none )
 
         ShowMenuForMobile ->
-            ( { model | menuForMobileVisible = True }, preventBackgroundScrolling () )
+            ( { model | menuForMobileVisibility = Visible }, preventBackgroundScrolling () )
 
-        HideMenuForMobile ->
-            ( { model | menuForMobileVisible = False }, allowBackgroundScrolling () )
+        StartHidingMenuForMobile ->
+            ( { model | menuForMobileVisibility = Disappearing }
+            , Cmd.batch
+                [ Process.sleep 100 |> Task.perform (always <| PageMsg.Internal CompleteHidingMenuForMobile)
+                , allowBackgroundScrolling ()
+                ]
+            )
+
+        CompleteHidingMenuForMobile ->
+            ( { model | menuForMobileVisibility = Invisible }, Cmd.none )
 
         ConfirmDelete index ->
             ( { model | confirmDeleteIndex = Just index }, preventBackgroundScrolling () )
@@ -299,7 +315,7 @@ viewIndexItem term =
         [ a
             [ class "block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
             , Html.Attributes.href <| "#" ++ term.id
-            , Html.Events.onClick <| PageMsg.Internal HideMenuForMobile
+            , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
             ]
             [ text term.body
             ]
@@ -694,25 +710,42 @@ viewCards model editable glossaryItems =
 viewMenuForMobile : Model -> List GlossaryItem -> Html Msg
 viewMenuForMobile model glossaryItems =
     div
-        [ class "invisible" |> Extras.HtmlAttribute.showIf (not model.menuForMobileVisible)
+        [ class "invisible" |> Extras.HtmlAttribute.showIf (model.menuForMobileVisibility == Invisible)
         , class "fixed inset-0 flex z-40 lg:hidden"
         , attribute "role" "dialog"
         , attribute "aria-modal" "true"
         ]
         [ div
             [ class "fixed inset-0 bg-gray-600 bg-opacity-75"
-            , Html.Events.onClick <| PageMsg.Internal HideMenuForMobile
+            , if model.menuForMobileVisibility == Visible then
+                class "transition-opacity ease-linear duration-300 opacity-100"
+
+              else
+                class "transition-opacity ease-linear duration-300 opacity-0"
+            , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
             , attribute "aria-hidden" "true"
             ]
             []
         , div
-            [ class "relative flex-1 flex flex-col max-w-xs w-full pt-5 bg-white dark:bg-gray-900" ]
+            [ class "relative flex-1 flex flex-col max-w-xs w-full pt-5 bg-white dark:bg-gray-900"
+            , if model.menuForMobileVisibility == Visible then
+                class "transition ease-in-out duration-300 transform translate-x-0"
+
+              else
+                class "transition ease-in-out duration-300 transform -translate-x-full"
+            ]
             [ div
-                [ class "absolute top-0 right-0 -mr-12 pt-2" ]
+                [ class "absolute top-0 right-0 -mr-12 pt-2"
+                , if model.menuForMobileVisibility == Visible then
+                    class "ease-in-out duration-300 opacity-100"
+
+                  else
+                    class "ease-in-out duration-300 opacity-0"
+                ]
                 [ button
                     [ Html.Attributes.type_ "button"
                     , class "ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-                    , Html.Events.onClick <| PageMsg.Internal HideMenuForMobile
+                    , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
                     ]
                     [ span
                         [ class "sr-only" ]
