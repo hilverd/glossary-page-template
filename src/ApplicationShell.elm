@@ -1,9 +1,12 @@
-port module ApplicationShell exposing (main)
+module ApplicationShell exposing (main)
 
 import Browser
 import Browser.Dom as Dom
+import Data.AboutHtml as AboutHtml exposing (AboutHtml)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
+import Data.TitleHeaderHtml as TitleHeaderHtml exposing (TitleHeaderHtml)
 import Html exposing (Html)
+import Html.Parser
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg(..))
 import Pages.CreateOrEdit
@@ -41,17 +44,27 @@ type alias Model =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
+        titleHeaderHtml =
+            flags
+                |> Decode.decodeValue (Decode.field "titleHeaderHtmlString" Decode.string)
+                |> Result.withDefault "Element not found"
+                |> TitleHeaderHtml.fromString
+
+        aboutHtml =
+            flags
+                |> Decode.decodeValue (Decode.field "aboutHtmlString" Decode.string)
+                |> Result.withDefault "Element not found"
+                |> AboutHtml.fromString
+
         editorIsRunning =
             flags
                 |> Decode.decodeValue (Decode.field "editorIsRunning" Decode.bool)
-                |> Result.toMaybe
-                |> Maybe.withDefault False
+                |> Result.withDefault False
 
         enableHelpForMakingChanges =
             flags
                 |> Decode.decodeValue (Decode.field "enableHelpForMakingChanges" Decode.bool)
-                |> Result.toMaybe
-                |> Maybe.withDefault False
+                |> Result.withDefault False
 
         loadedGlossaryItems =
             LoadedGlossaryItems.decodeFromFlags flags
@@ -60,6 +73,8 @@ init flags =
             Pages.ListAll.init
                 editorIsRunning
                 enableHelpForMakingChanges
+                titleHeaderHtml
+                aboutHtml
                 Nothing
                 loadedGlossaryItems
     in
@@ -75,36 +90,26 @@ type Msg
 
 
 
--- PORTS
-
-
-port showTitleHeaderAndAbout : () -> Cmd msg
-
-
-port hideTitleHeaderAndAbout : () -> Cmd msg
-
-
-
 -- UPDATE
 
 
 withoutInternal : Msg -> PageMsg ()
 withoutInternal msg =
     case msg of
-        ListAllMsg (NavigateToListAll enableHelpForMakingChanges maybeIndex glossaryItems) ->
-            PageMsg.NavigateToListAll enableHelpForMakingChanges maybeIndex glossaryItems
+        ListAllMsg (NavigateToListAll enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems) ->
+            PageMsg.NavigateToListAll enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems
 
-        ListAllMsg (NavigateToCreateOrEdit enableHelpForMakingChanges maybeIndex glossaryItems) ->
-            PageMsg.NavigateToCreateOrEdit enableHelpForMakingChanges maybeIndex glossaryItems
+        ListAllMsg (NavigateToCreateOrEdit enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems) ->
+            PageMsg.NavigateToCreateOrEdit enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems
 
         ListAllMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
-        CreateOrEditMsg (NavigateToListAll enableHelpForMakingChanges maybeIndex glossaryItems) ->
-            PageMsg.NavigateToListAll enableHelpForMakingChanges maybeIndex glossaryItems
+        CreateOrEditMsg (NavigateToListAll enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems) ->
+            PageMsg.NavigateToListAll enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems
 
-        CreateOrEditMsg (NavigateToCreateOrEdit enableHelpForMakingChanges maybeIndex glossaryItems) ->
-            PageMsg.NavigateToCreateOrEdit enableHelpForMakingChanges maybeIndex glossaryItems
+        CreateOrEditMsg (NavigateToCreateOrEdit enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems) ->
+            PageMsg.NavigateToCreateOrEdit enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems
 
         CreateOrEditMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
@@ -116,22 +121,22 @@ withoutInternal msg =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, withoutInternal msg, model.page ) of
-        ( _, NavigateToListAll enableHelpForMakingChanges maybeIndex glossaryItems, _ ) ->
+        ( _, NavigateToListAll enableHelpForMakingChanges titleHeaderHtml aboutHtml maybeIndex glossaryItems, _ ) ->
             let
                 ( listAllModel, listAllCmd ) =
-                    Pages.ListAll.init True enableHelpForMakingChanges maybeIndex glossaryItems
+                    Pages.ListAll.init True enableHelpForMakingChanges titleHeaderHtml aboutHtml maybeIndex glossaryItems
             in
             ( { model | page = ListAll listAllModel }
-            , Cmd.batch [ showTitleHeaderAndAbout (), Cmd.map ListAllMsg listAllCmd ]
+            , Cmd.map ListAllMsg listAllCmd
             )
 
-        ( _, NavigateToCreateOrEdit enableHelpForMakingChanges maybeIndex glossaryItems, _ ) ->
+        ( _, NavigateToCreateOrEdit enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems, _ ) ->
             let
                 ( createOrEditModel, createOrEditCmd ) =
-                    Pages.CreateOrEdit.init enableHelpForMakingChanges maybeIndex glossaryItems
+                    Pages.CreateOrEdit.init enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems
             in
             ( { model | page = CreateOrEdit createOrEditModel }
-            , Cmd.batch [ hideTitleHeaderAndAbout (), resetViewport, Cmd.map CreateOrEditMsg createOrEditCmd ]
+            , Cmd.batch [ resetViewport, Cmd.map CreateOrEditMsg createOrEditCmd ]
             )
 
         ( ListAllMsg (PageMsg.Internal msg_), _, ListAll listAllModel ) ->

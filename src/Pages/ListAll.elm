@@ -2,10 +2,12 @@ port module Pages.ListAll exposing (Model, Msg, init, update, view)
 
 import Array
 import Browser.Dom as Dom
+import Data.AboutHtml as AboutHtml exposing (AboutHtml)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
+import Data.TitleHeaderHtml as TitleHeaderHtml exposing (TitleHeaderHtml)
 import Extras.Array
 import Extras.Html
 import Extras.HtmlAttribute
@@ -14,6 +16,8 @@ import Extras.Http
 import Html exposing (Attribute, Html, a, button, code, div, h3, p, pre, span, text)
 import Html.Attributes exposing (attribute, class, href, id)
 import Html.Events
+import Html.Parser
+import Html.Parser.Util
 import Http
 import Icons
 import Json.Decode as Decode
@@ -37,6 +41,8 @@ type MakingChanges
 type alias Model =
     { enableHelpForMakingChanges : Bool
     , makingChanges : MakingChanges
+    , titleHeaderHtml : TitleHeaderHtml
+    , aboutHtml : AboutHtml
     , maybeIndex : Maybe GlossaryItemIndex
     , glossaryItems : LoadedGlossaryItems
     , confirmDeleteIndex : Maybe GlossaryItemIndex
@@ -58,8 +64,8 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init : Bool -> Bool -> Maybe GlossaryItemIndex -> LoadedGlossaryItems -> ( Model, Cmd Msg )
-init editorIsRunning enableHelpForMakingChanges maybeIndex glossaryItems =
+init : Bool -> Bool -> TitleHeaderHtml -> AboutHtml -> Maybe GlossaryItemIndex -> LoadedGlossaryItems -> ( Model, Cmd Msg )
+init editorIsRunning enableHelpForMakingChanges titleHeaderHtml aboutHtml maybeIndex glossaryItems =
     ( { enableHelpForMakingChanges = enableHelpForMakingChanges
       , makingChanges =
             case ( editorIsRunning, enableHelpForMakingChanges ) of
@@ -71,6 +77,8 @@ init editorIsRunning enableHelpForMakingChanges maybeIndex glossaryItems =
 
                 ( False, False ) ->
                     NoHelpForMakingChanges
+      , titleHeaderHtml = titleHeaderHtml
+      , aboutHtml = aboutHtml
       , maybeIndex = maybeIndex
       , glossaryItems = glossaryItems
       , confirmDeleteIndex = Nothing
@@ -377,13 +385,13 @@ idForGlossaryItemDiv index =
     "glossary-item-" ++ (index |> GlossaryItemIndex.toInt |> String.fromInt)
 
 
-viewGlossaryItem : Int -> Bool -> LoadedGlossaryItems -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
+viewGlossaryItem : Int -> Model -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
 viewGlossaryItem =
     GlossaryItemIndex.fromInt >> viewGlossaryItem1
 
 
-viewGlossaryItem1 : GlossaryItemIndex -> Bool -> LoadedGlossaryItems -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
-viewGlossaryItem1 index enableHelpForMakingChanges glossaryItems editable errorWhileDeleting glossaryItem =
+viewGlossaryItem1 : GlossaryItemIndex -> Model -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
+viewGlossaryItem1 index model editable errorWhileDeleting glossaryItem =
     let
         errorDiv message =
             div
@@ -414,7 +422,14 @@ viewGlossaryItem1 index enableHelpForMakingChanges glossaryItems editable errorW
                     [ span
                         [ class "inline-flex items-center" ]
                         [ viewGlossaryItemButton
-                            [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit enableHelpForMakingChanges (Just index) glossaryItems ]
+                            [ Html.Events.onClick <|
+                                PageMsg.NavigateToCreateOrEdit
+                                    model.enableHelpForMakingChanges
+                                    model.titleHeaderHtml
+                                    model.aboutHtml
+                                    (Just index)
+                                    model.glossaryItems
+                            ]
                             Icons.pencilSolid
                             "Edit"
                         ]
@@ -536,13 +551,19 @@ viewConfirmDeleteModal maybeIndex =
         ]
 
 
-viewCreateGlossaryItemButtonForEmptyState : Bool -> LoadedGlossaryItems -> Html Msg
-viewCreateGlossaryItemButtonForEmptyState enableHelpForMakingChanges glossaryItems =
+viewCreateGlossaryItemButtonForEmptyState : Model -> Html Msg
+viewCreateGlossaryItemButtonForEmptyState model =
     div [ class "print:hidden" ]
         [ button
             [ Html.Attributes.type_ "button"
             , class "relative block max-w-lg border-2 border-gray-300 border-dashed rounded-lg p-9 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit enableHelpForMakingChanges Nothing glossaryItems
+            , Html.Events.onClick <|
+                PageMsg.NavigateToCreateOrEdit
+                    model.enableHelpForMakingChanges
+                    model.titleHeaderHtml
+                    model.aboutHtml
+                    Nothing
+                    model.glossaryItems
             ]
             [ svg
                 [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400"
@@ -561,13 +582,19 @@ viewCreateGlossaryItemButtonForEmptyState enableHelpForMakingChanges glossaryIte
         ]
 
 
-viewCreateGlossaryItemButton : Bool -> LoadedGlossaryItems -> Html Msg
-viewCreateGlossaryItemButton enableHelpForMakingChanges glossaryItems =
+viewCreateGlossaryItemButton : Model -> Html Msg
+viewCreateGlossaryItemButton model =
     div [ class "pt-4 print:hidden" ]
         [ button
             [ Html.Attributes.type_ "button"
             , class "inline-flex items-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit enableHelpForMakingChanges Nothing glossaryItems
+            , Html.Events.onClick <|
+                PageMsg.NavigateToCreateOrEdit
+                    model.enableHelpForMakingChanges
+                    model.titleHeaderHtml
+                    model.aboutHtml
+                    Nothing
+                    model.glossaryItems
             ]
             [ svg
                 [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5", viewBox "0 0 20 20", fill "currentColor" ]
@@ -591,38 +618,45 @@ view model =
                 editable =
                     model.makingChanges == ReadyForMakingChanges
             in
-            Html.article
-                [ Html.Attributes.id "glossary" ]
-                [ case model.makingChanges of
-                    MakingChangesHelpCollapsed ->
-                        viewMakingChangesHelp False
-
-                    MakingChangesHelpExpanded ->
-                        viewMakingChangesHelp True
-
-                    _ ->
-                        Extras.Html.nothing
-                , viewToc glossaryItems
-                , Html.dl
+            div
+                [ Html.Attributes.id "outer" ]
+                [ div [] <| TitleHeaderHtml.toVirtualDom model.titleHeaderHtml
+                , Html.main_
                     []
-                    (glossaryItems
-                        |> List.indexedMap Tuple.pair
-                        |> List.map
-                            (\( index, glossaryItem ) ->
-                                viewGlossaryItem
-                                    index
-                                    model.enableHelpForMakingChanges
-                                    model.glossaryItems
-                                    editable
-                                    model.errorWhileDeleting
-                                    glossaryItem
-                            )
-                    )
-                , Extras.Html.showIf editable <|
-                    if List.isEmpty glossaryItems then
-                        viewCreateGlossaryItemButtonForEmptyState model.enableHelpForMakingChanges model.glossaryItems
+                    [ div [] <| AboutHtml.toVirtualDom model.aboutHtml
+                    , Html.article
+                        [ Html.Attributes.id "glossary" ]
+                        [ case model.makingChanges of
+                            MakingChangesHelpCollapsed ->
+                                viewMakingChangesHelp False
 
-                    else
-                        viewCreateGlossaryItemButton model.enableHelpForMakingChanges model.glossaryItems
-                , viewConfirmDeleteModal model.confirmDeleteIndex
+                            MakingChangesHelpExpanded ->
+                                viewMakingChangesHelp True
+
+                            _ ->
+                                Extras.Html.nothing
+                        , viewToc glossaryItems
+                        , Html.dl
+                            []
+                            (glossaryItems
+                                |> List.indexedMap Tuple.pair
+                                |> List.map
+                                    (\( index, glossaryItem ) ->
+                                        viewGlossaryItem
+                                            index
+                                            model
+                                            editable
+                                            model.errorWhileDeleting
+                                            glossaryItem
+                                    )
+                            )
+                        , Extras.Html.showIf editable <|
+                            if List.isEmpty glossaryItems then
+                                viewCreateGlossaryItemButtonForEmptyState model
+
+                            else
+                                viewCreateGlossaryItemButton model
+                        , viewConfirmDeleteModal model.confirmDeleteIndex
+                        ]
+                    ]
                 ]

@@ -1,6 +1,8 @@
 import './glossary.css';
 import { Elm } from './src/ApplicationShell.elm';
 
+const titleHeaderElement = document.getElementById('title-header');
+const aboutElement = document.getElementById('about');
 const glossaryElement = document.getElementById('glossary');
 
 const runningInDevelopment = import.meta.env.DEV;
@@ -55,22 +57,14 @@ function glossaryItemRelatedTermFromDdElement(ddElement) {
 }
 
 const app = Elm.ApplicationShell.init({
-    node: glossaryElement,
+    node: document.getElementById('outer'),
     flags: {
+        titleHeaderHtmlString: titleHeaderElement.outerHTML,
+        aboutHtmlString: aboutElement.outerHTML,
         glossaryItems: glossaryItems,
         editorIsRunning: editorIsRunning,
         enableHelpForMakingChanges: enableHelpForMakingChanges
     }
-});
-
-app.ports.showTitleHeaderAndAbout.subscribe(() => {
-    document.getElementById('title-header').classList.toggle('hidden', false);
-    document.getElementById('about').classList.toggle('hidden', false);
-});
-
-app.ports.hideTitleHeaderAndAbout.subscribe(() => {
-    document.getElementById('title-header').classList.toggle('hidden', true);
-    document.getElementById('about').classList.toggle('hidden', true);
 });
 
 app.ports.allowBackgroundScrolling.subscribe(() => {

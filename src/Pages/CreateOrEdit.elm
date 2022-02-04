@@ -2,6 +2,7 @@ module Pages.CreateOrEdit exposing (Model, Msg, init, update, view)
 
 import Array exposing (Array)
 import Browser.Dom as Dom
+import Data.AboutHtml as AboutHtml exposing (AboutHtml)
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
@@ -9,6 +10,7 @@ import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
+import Data.TitleHeaderHtml as TitleHeaderHtml exposing (TitleHeaderHtml)
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
@@ -17,6 +19,7 @@ import GlossaryItemForm as Form exposing (GlossaryItemForm)
 import Html exposing (Html, button, div, form, h1, h3, input, option, p, select, span, text, textarea)
 import Html.Attributes exposing (attribute, class, disabled, id, required, selected, type_, value)
 import Html.Events
+import Html.Parser
 import Http
 import Icons
 import Json.Decode as Decode
@@ -33,6 +36,8 @@ import Task
 
 type alias Model =
     { enableHelpForMakingChanges : Bool
+    , titleHeaderHtml : TitleHeaderHtml
+    , aboutHtml : AboutHtml
     , maybeIndex : Maybe GlossaryItemIndex
     , glossaryItems : LoadedGlossaryItems
     , form : GlossaryItemForm
@@ -61,9 +66,11 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init : Bool -> Maybe GlossaryItemIndex -> LoadedGlossaryItems -> ( Model, Cmd Msg )
-init enableHelpForMakingChanges maybeIndex loadedGlossaryItems =
+init : Bool -> TitleHeaderHtml -> AboutHtml -> Maybe GlossaryItemIndex -> LoadedGlossaryItems -> ( Model, Cmd Msg )
+init enableHelpForMakingChanges titleHeaderHtml aboutHtml maybeIndex loadedGlossaryItems =
     ( { enableHelpForMakingChanges = enableHelpForMakingChanges
+      , titleHeaderHtml = titleHeaderHtml
+      , aboutHtml = aboutHtml
       , maybeIndex = maybeIndex
       , glossaryItems = loadedGlossaryItems
       , form =
@@ -187,7 +194,7 @@ update msg model =
                                     |> List.sortBy (.terms >> List.head >> Maybe.map .body >> Maybe.withDefault "" >> String.toLower)
                         in
                         ( { model | glossaryItems = Ok updatedGlossaryItems }
-                        , patchHtmlFile model.enableHelpForMakingChanges model.maybeIndex updatedGlossaryItems
+                        , patchHtmlFile model updatedGlossaryItems
                         )
 
                 _ ->
@@ -199,15 +206,15 @@ update msg model =
             )
 
 
-patchHtmlFile : Bool -> Maybe GlossaryItemIndex -> List GlossaryItem -> Cmd Msg
-patchHtmlFile enableHelpForMakingChanges maybeIndex glossaryItems =
+patchHtmlFile : Model -> List GlossaryItem -> Cmd Msg
+patchHtmlFile model glossaryItems =
     Http.request
         { method = "PATCH"
         , headers = []
         , url = "/"
         , body =
             glossaryItems
-                |> GlossaryItems.toHtmlTree enableHelpForMakingChanges
+                |> GlossaryItems.toHtmlTree model.enableHelpForMakingChanges
                 |> HtmlTree.toHtml
                 |> Http.stringBody "text/html"
         , expect =
@@ -215,7 +222,12 @@ patchHtmlFile enableHelpForMakingChanges maybeIndex glossaryItems =
                 (\result ->
                     case result of
                         Ok _ ->
-                            PageMsg.NavigateToListAll enableHelpForMakingChanges maybeIndex <| Ok glossaryItems
+                            PageMsg.NavigateToListAll
+                                model.enableHelpForMakingChanges
+                                model.titleHeaderHtml
+                                model.aboutHtml
+                                model.maybeIndex
+                                (Ok glossaryItems)
 
                         Err error ->
                             PageMsg.Internal <| FailedToSave error
@@ -696,8 +708,8 @@ viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray =
         ]
 
 
-viewCreateFormFooter : Bool -> Bool -> Maybe GlossaryItemIndex -> Maybe String -> List GlossaryItem -> GlossaryItemForm -> Html Msg
-viewCreateFormFooter showValidationErrors enableHelpForMakingChanges maybeIndex errorMessageWhileSaving glossaryItems form =
+viewCreateFormFooter : Model -> Bool -> Maybe String -> List GlossaryItem -> GlossaryItemForm -> Html Msg
+viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossaryItems form =
     let
         errorDiv message =
             div
@@ -718,7 +730,7 @@ viewCreateFormFooter showValidationErrors enableHelpForMakingChanges maybeIndex 
             [ button
                 [ Html.Attributes.type_ "button"
                 , class "bg-white dark:bg-gray-700 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                , Html.Events.onClick <| PageMsg.NavigateToListAll enableHelpForMakingChanges maybeIndex <| Ok glossaryItems
+                , Html.Events.onClick <| PageMsg.NavigateToListAll model.enableHelpForMakingChanges model.titleHeaderHtml model.aboutHtml model.maybeIndex <| Ok glossaryItems
                 ]
                 [ text "Cancel" ]
             , button
@@ -736,24 +748,27 @@ view model =
     case model.glossaryItems of
         Ok glossaryItems ->
             div
-                []
-                [ h1
-                    [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
-                    [ text <|
-                        if model.maybeIndex == Nothing then
-                            "Create a New Glossary Item"
+                [ Html.Attributes.id "outer" ]
+                [ Html.main_
+                    []
+                    [ h1
+                        [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
+                        [ text <|
+                            if model.maybeIndex == Nothing then
+                                "Create a New Glossary Item"
 
-                        else
-                            "Edit Glossary Item"
-                    ]
-                , form
-                    [ class "pt-7" ]
-                    [ div
-                        [ class "space-y-8 divide-y divide-gray-200 sm:space-y-5" ]
-                        [ viewCreateDescriptionTerms model.triedToSaveWhenFormInvalid model.form.terms
-                        , viewCreateDescriptionDetails model.triedToSaveWhenFormInvalid model.form.details
-                        , viewCreateSeeAlso model.triedToSaveWhenFormInvalid glossaryItems model.form.terms model.form.relatedTerms
-                        , viewCreateFormFooter model.triedToSaveWhenFormInvalid model.enableHelpForMakingChanges model.maybeIndex model.errorMessageWhileSaving glossaryItems model.form
+                            else
+                                "Edit Glossary Item"
+                        ]
+                    , form
+                        [ class "pt-7" ]
+                        [ div
+                            [ class "space-y-8 divide-y divide-gray-200 sm:space-y-5" ]
+                            [ viewCreateDescriptionTerms model.triedToSaveWhenFormInvalid model.form.terms
+                            , viewCreateDescriptionDetails model.triedToSaveWhenFormInvalid model.form.details
+                            , viewCreateSeeAlso model.triedToSaveWhenFormInvalid glossaryItems model.form.terms model.form.relatedTerms
+                            , viewCreateFormFooter model model.triedToSaveWhenFormInvalid model.errorMessageWhileSaving glossaryItems model.form
+                            ]
                         ]
                     ]
                 ]
