@@ -747,7 +747,7 @@ view model =
     case model.glossaryItems of
         Ok glossaryItems ->
             div
-                [ Html.Attributes.id "outer" ]
+                [ class "container mx-auto px-6 lg:px-8 max-w-4xl" ]
                 [ Html.main_
                     []
                     [ h1
