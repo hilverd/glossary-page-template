@@ -348,12 +348,7 @@ viewIndex glossaryItems =
         grouped =
             termListsByFirstCharacter
                 |> Dict.toList
-                |> List.map
-                    (\( firstCharacter, termList ) ->
-                        ( firstCharacter
-                        , List.sortBy (.body >> String.toLower) termList
-                        )
-                    )
+                |> List.map (Tuple.mapSecond <| List.sortBy <| .body >> String.toLower)
     in
     ul
         [ class "mb-10" ]
