@@ -2,11 +2,10 @@ module ApplicationShell exposing (main)
 
 import Browser
 import Browser.Dom as Dom
-import Data.AboutHtml as AboutHtml exposing (AboutHtml)
+import Data.AboutHtml as AboutHtml
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
-import Data.TitleHeaderHtml as TitleHeaderHtml exposing (TitleHeaderHtml)
+import Data.TitleHeaderHtml as TitleHeaderHtml
 import Html exposing (Html)
-import Html.Parser
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg(..))
 import Pages.CreateOrEdit

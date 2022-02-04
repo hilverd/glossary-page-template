@@ -2,15 +2,15 @@ module Pages.CreateOrEdit exposing (Model, Msg, init, update, view)
 
 import Array exposing (Array)
 import Browser.Dom as Dom
-import Data.AboutHtml as AboutHtml exposing (AboutHtml)
+import Data.AboutHtml exposing (AboutHtml)
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItems as GlossaryItems
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
-import Data.TitleHeaderHtml as TitleHeaderHtml exposing (TitleHeaderHtml)
+import Data.TitleHeaderHtml exposing (TitleHeaderHtml)
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
@@ -19,7 +19,6 @@ import GlossaryItemForm as Form exposing (GlossaryItemForm)
 import Html exposing (Html, button, div, form, h1, h3, input, option, p, select, span, text, textarea)
 import Html.Attributes exposing (attribute, class, disabled, id, required, selected, type_, value)
 import Html.Events
-import Html.Parser
 import Http
 import Icons
 import Json.Decode as Decode

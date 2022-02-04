@@ -11,6 +11,7 @@ module.exports = {
   theme: {
     extend: {
       screens: {
+        '3xl': '1800px',
         'print': { 'raw': 'print' },
       },
       fontFamily: {

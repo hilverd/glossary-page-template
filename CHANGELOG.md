@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support custom file names via the `$FILE` environment variable.
 
 ### Changed
+
+* Move index to sidebar and widen layout.
+
 ### Fixed
 ### Removed
 

@@ -8,22 +8,22 @@ import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Data.TitleHeaderHtml as TitleHeaderHtml exposing (TitleHeaderHtml)
+import Dict exposing (Dict)
 import Extras.Array
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
-import Html exposing (Attribute, Html, a, button, code, div, h3, p, pre, span, text)
+import Html exposing (Attribute, Html, a, button, code, div, h2, h3, h5, li, nav, p, pre, span, text, ul)
 import Html.Attributes exposing (attribute, class, href, id)
 import Html.Events
-import Html.Parser
-import Html.Parser.Util
+import Html.Lazy
 import Http
 import Icons
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
-import Svg exposing (path, svg)
-import Svg.Attributes exposing (d, fill, stroke, strokeLinecap, strokeLinejoin, strokeWidth, viewBox)
+import Svg exposing (circle, path, svg)
+import Svg.Attributes exposing (cx, cy, d, fill, height, r, stroke, strokeLinecap, strokeLinejoin, strokeWidth, viewBox, width)
 import Task
 
 
@@ -41,6 +41,7 @@ type MakingChanges
 type alias Model =
     { enableHelpForMakingChanges : Bool
     , makingChanges : MakingChanges
+    , menuForMobileVisible : Bool
     , titleHeaderHtml : TitleHeaderHtml
     , aboutHtml : AboutHtml
     , maybeIndex : Maybe GlossaryItemIndex
@@ -53,6 +54,8 @@ type alias Model =
 type InternalMsg
     = NoOp
     | ToggleMakingChangesHelp
+    | ShowMenuForMobile
+    | HideMenuForMobile
     | ConfirmDelete GlossaryItemIndex
     | CancelDelete
     | Delete GlossaryItemIndex
@@ -77,6 +80,7 @@ init editorIsRunning enableHelpForMakingChanges titleHeaderHtml aboutHtml maybeI
 
                 ( False, False ) ->
                     NoHelpForMakingChanges
+      , menuForMobileVisible = False
       , titleHeaderHtml = titleHeaderHtml
       , aboutHtml = aboutHtml
       , maybeIndex = maybeIndex
@@ -127,6 +131,12 @@ update msg model =
                             model.makingChanges
             in
             ( { model | makingChanges = makingChangesToggled }, Cmd.none )
+
+        ShowMenuForMobile ->
+            ( { model | menuForMobileVisible = True }, preventBackgroundScrolling () )
+
+        HideMenuForMobile ->
+            ( { model | menuForMobileVisible = False }, allowBackgroundScrolling () )
 
         ConfirmDelete index ->
             ( { model | confirmDeleteIndex = Just index }, preventBackgroundScrolling () )
@@ -283,36 +293,71 @@ viewMakingChangesHelp expanded =
         ]
 
 
-viewTocItem : GlossaryItem.Term -> Html Msg
-viewTocItem term =
-    Html.a
-        [ class "font-medium"
-        , "#" ++ term.id |> Html.Attributes.href
+viewIndexItem : GlossaryItem.Term -> Html Msg
+viewIndexItem term =
+    li []
+        [ a
+            [ class "block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
+            , Html.Attributes.href <| "#" ++ term.id
+            , Html.Events.onClick <| PageMsg.Internal HideMenuForMobile
+            ]
+            [ text term.body
+            ]
         ]
-        [ text term.body ]
 
 
-viewToc : List GlossaryItem -> Html Msg
-viewToc glossaryItems =
+viewIndexGroup : ( String, List GlossaryItem.Term ) -> Html Msg
+viewIndexGroup ( label, terms ) =
+    li [ class "mt-6" ]
+        [ h5
+            [ class "mb-8 lg:mb-3 font-semibold text-slate-900 dark:text-slate-200" ]
+            [ text label
+            ]
+        , ul
+            [ class "space-y-6 lg:space-y-2 border-l border-slate-200 dark:border-slate-600" ]
+            (List.map viewIndexItem terms)
+        ]
+
+
+viewIndex : List GlossaryItem -> Html Msg
+viewIndex glossaryItems =
     let
-        separator =
-            Html.span
-                [ class "text-gray-500" ]
-                [ text " • " ]
-    in
-    Html.nav
-        [ Html.Attributes.id "toc"
-        , class "pb-4 print:hidden"
-        ]
-        [ Html.span
-            []
-            (glossaryItems
+        termListsByFirstCharacter : Dict String (List GlossaryItem.Term)
+        termListsByFirstCharacter =
+            glossaryItems
                 |> List.concatMap .terms
-                |> List.sortBy (.body >> String.toLower)
-                |> List.map viewTocItem
-                |> List.intersperse separator
-            )
-        ]
+                |> List.foldl
+                    (\term result ->
+                        let
+                            firstCharacterUpper =
+                                term.body |> String.toUpper |> String.left 1
+                        in
+                        Dict.update
+                            firstCharacterUpper
+                            (\termList ->
+                                termList
+                                    |> Maybe.map (\terms -> term :: terms)
+                                    |> Maybe.withDefault [ term ]
+                                    |> Just
+                            )
+                            result
+                    )
+                    Dict.empty
+
+        grouped : List ( String, List GlossaryItem.Term )
+        grouped =
+            termListsByFirstCharacter
+                |> Dict.toList
+                |> List.map
+                    (\( firstCharacter, termList ) ->
+                        ( firstCharacter
+                        , List.sortBy (.body >> String.toLower) termList
+                        )
+                    )
+    in
+    ul
+        [ class "mb-10" ]
+        (List.map viewIndexGroup grouped)
 
 
 viewGlossaryTerm : GlossaryItem.Term -> Html Msg
@@ -484,7 +529,9 @@ viewConfirmDeleteModal maybeIndex =
                 ]
                 []
             , span
-                [ class "hidden sm:inline-block sm:align-middle sm:h-screen", attribute "aria-hidden" "true" ]
+                [ class "hidden sm:inline-block sm:align-middle sm:h-screen"
+                , attribute "aria-hidden" "true"
+                ]
                 [ text "\u{200B}" ]
             , div
                 [ class "inline-block align-bottom bg-white dark:bg-gray-700 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
@@ -553,7 +600,8 @@ viewConfirmDeleteModal maybeIndex =
 
 viewCreateGlossaryItemButtonForEmptyState : Model -> Html Msg
 viewCreateGlossaryItemButtonForEmptyState model =
-    div [ class "print:hidden" ]
+    div
+        [ class "pt-4 print:hidden" ]
         [ button
             [ Html.Attributes.type_ "button"
             , class "relative block max-w-lg border-2 border-gray-300 border-dashed rounded-lg p-9 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -584,7 +632,8 @@ viewCreateGlossaryItemButtonForEmptyState model =
 
 viewCreateGlossaryItemButton : Model -> Html Msg
 viewCreateGlossaryItemButton model =
-    div [ class "pt-4 print:hidden" ]
+    div
+        [ class "pb-2 print:hidden" ]
         [ button
             [ Html.Attributes.type_ "button"
             , class "inline-flex items-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -607,56 +656,254 @@ viewCreateGlossaryItemButton model =
         ]
 
 
-view : Model -> Html Msg
-view model =
-    case model.glossaryItems of
-        Err error ->
-            pre [] [ text <| Decode.errorToString error ]
+viewCards : Model -> Bool -> List GlossaryItem -> Html Msg
+viewCards model editable glossaryItems =
+    Html.article
+        [ Html.Attributes.id "glossary" ]
+        [ case model.makingChanges of
+            MakingChangesHelpCollapsed ->
+                viewMakingChangesHelp False
 
-        Ok glossaryItems ->
-            let
-                editable =
-                    model.makingChanges == ReadyForMakingChanges
-            in
+            MakingChangesHelpExpanded ->
+                viewMakingChangesHelp True
+
+            _ ->
+                Extras.Html.nothing
+        , Extras.Html.showIf editable <|
             div
-                [ Html.Attributes.id "outer" ]
-                [ div [] <| TitleHeaderHtml.toVirtualDom model.titleHeaderHtml
-                , Html.main_
-                    []
-                    [ div [] <| AboutHtml.toVirtualDom model.aboutHtml
-                    , Html.article
-                        [ Html.Attributes.id "glossary" ]
-                        [ case model.makingChanges of
-                            MakingChangesHelpCollapsed ->
-                                viewMakingChangesHelp False
+                [ class "pb-4" ]
+                [ if List.isEmpty glossaryItems then
+                    viewCreateGlossaryItemButtonForEmptyState model
 
-                            MakingChangesHelpExpanded ->
-                                viewMakingChangesHelp True
+                  else
+                    viewCreateGlossaryItemButton model
+                ]
+        , Html.dl
+            []
+            (glossaryItems
+                |> List.indexedMap Tuple.pair
+                |> List.map
+                    (\( index, glossaryItem ) ->
+                        viewGlossaryItem
+                            index
+                            model
+                            editable
+                            model.errorWhileDeleting
+                            glossaryItem
+                    )
+            )
+        , viewConfirmDeleteModal model.confirmDeleteIndex
+        ]
 
-                            _ ->
-                                Extras.Html.nothing
-                        , viewToc glossaryItems
-                        , Html.dl
+
+viewMenuForMobile : Model -> List GlossaryItem -> Html Msg
+viewMenuForMobile model glossaryItems =
+    div
+        [ class "invisible" |> Extras.HtmlAttribute.showIf (not model.menuForMobileVisible)
+        , class "fixed inset-0 flex z-40 lg:hidden"
+        , attribute "role" "dialog"
+        , attribute "aria-modal" "true"
+        ]
+        [ div
+            [ class "fixed inset-0 bg-gray-600 bg-opacity-75"
+            , Html.Events.onClick <| PageMsg.Internal HideMenuForMobile
+            , attribute "aria-hidden" "true"
+            ]
+            []
+        , div
+            [ class "relative flex-1 flex flex-col max-w-xs w-full pt-5 bg-white dark:bg-gray-900" ]
+            [ div
+                [ class "absolute top-0 right-0 -mr-12 pt-2" ]
+                [ button
+                    [ Html.Attributes.type_ "button"
+                    , class "ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                    , Html.Events.onClick <| PageMsg.Internal HideMenuForMobile
+                    ]
+                    [ span
+                        [ class "sr-only" ]
+                        [ text "Close sidebar"
+                        ]
+                    , svg
+                        [ Svg.Attributes.class "h-6 w-6 text-white"
+                        , fill "none"
+                        , viewBox "0 0 24 24"
+                        , stroke "currentColor"
+                        ]
+                        [ path
+                            [ strokeLinecap "round"
+                            , strokeLinejoin "round"
+                            , strokeWidth "2"
+                            , d "M6 18L18 6M6 6l12 12"
+                            ]
                             []
-                            (glossaryItems
-                                |> List.indexedMap Tuple.pair
-                                |> List.map
-                                    (\( index, glossaryItem ) ->
-                                        viewGlossaryItem
-                                            index
-                                            model
-                                            editable
-                                            model.errorWhileDeleting
-                                            glossaryItem
-                                    )
-                            )
-                        , Extras.Html.showIf editable <|
-                            if List.isEmpty glossaryItems then
-                                viewCreateGlossaryItemButtonForEmptyState model
-
-                            else
-                                viewCreateGlossaryItemButton model
-                        , viewConfirmDeleteModal model.confirmDeleteIndex
                         ]
                     ]
                 ]
+            , div
+                [ class "flex-1 h-0 overflow-y-auto" ]
+                [ nav
+                    [ class "-mt-6 px-4 pb-6" ]
+                    [ viewIndex glossaryItems ]
+                ]
+            ]
+        , div
+            [ class "flex-shrink-0 w-14", attribute "aria-hidden" "true" ]
+            []
+        ]
+
+
+viewQuickSearchButton : Html Msg
+viewQuickSearchButton =
+    div
+        [ class "hidden -mb-6 sticky top-0 -ml-0.5 pointer-events-none" ]
+        [ div
+            [ class "h-7 bg-gray-50 dark:bg-slate-900" ]
+            []
+        , div [ class "px-3" ]
+            [ div
+                [ class "bg-gray-50 dark:bg-slate-900 relative pointer-events-auto" ]
+                [ button
+                    [ Html.Attributes.type_ "button"
+                    , class "hidden w-full lg:flex items-center text-sm leading-6 text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-700"
+                    , attribute "aria-hidden" "true"
+                    ]
+                    [ svg
+                        [ width "24"
+                        , height "24"
+                        , fill "none"
+                        , Svg.Attributes.class "mr-3 flex-none"
+                        ]
+                        [ path
+                            [ d "m19 19-3.5-3.5"
+                            , stroke "currentColor"
+                            , strokeWidth "2"
+                            , strokeLinecap "round"
+                            , strokeLinejoin "round"
+                            ]
+                            []
+                        , circle
+                            [ cx "11"
+                            , cy "11"
+                            , r "6"
+                            , stroke "currentColor"
+                            , strokeWidth "2"
+                            , strokeLinecap "round"
+                            , strokeLinejoin "round"
+                            ]
+                            []
+                        ]
+                    , text "Quick search..."
+                    , span
+                        [ class "ml-auto pl-3 flex-none text-xs font-semibold" ]
+                        [ text "Ctrl K"
+                        ]
+                    ]
+                ]
+            ]
+        , div [ class "h-8 bg-gradient-to-b from-white dark:from-slate-900" ]
+            []
+        ]
+
+
+viewStaticSidebarForDesktop : Model -> List GlossaryItem -> Html Msg
+viewStaticSidebarForDesktop model glossaryItems =
+    div
+        [ class "hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-gray-50 lg:dark:border-gray-800 lg:dark:bg-gray-900" ]
+        [ div
+            [ class "h-0 flex-1 flex flex-col overflow-y-auto" ]
+            [ viewQuickSearchButton
+            , nav
+                [ class "px-3" ]
+                [ viewIndex glossaryItems ]
+            ]
+        ]
+
+
+viewTopBar : Html Msg
+viewTopBar =
+    div
+        [ class "sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden items-center" ]
+        [ button
+            [ Html.Attributes.type_ "button"
+            , class "px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 lg:hidden"
+            , Html.Events.onClick <| PageMsg.Internal ShowMenuForMobile
+            ]
+            [ span
+                [ class "sr-only" ]
+                [ text "Open sidebar"
+                ]
+            , svg
+                [ Svg.Attributes.class "h-6 w-6"
+                , fill "none"
+                , viewBox "0 0 24 24"
+                , stroke "currentColor"
+                , attribute "aria-hidden" "true"
+                ]
+                [ path
+                    [ strokeLinecap "round"
+                    , strokeLinejoin "round"
+                    , strokeWidth "2"
+                    , d "M4 6h16M4 12h8m-8 6h16"
+                    ]
+                    []
+                ]
+            ]
+        , div
+            [ class "hidden flex-1 flex justify-between px-4 sm:px-6 lg:px-8 dark:bg-gray-900 dark:text-white" ]
+            [ button
+                [ Html.Attributes.type_ "button"
+                , class "ml-auto text-slate-500 w-8 h-8 -my-1 flex items-center justify-center hover:text-slate-600 lg:hidden dark:text-slate-400 dark:hover:text-slate-300"
+                ]
+                [ span
+                    [ class "sr-only" ]
+                    [ text "Search" ]
+                , svg
+                    [ width "24"
+                    , height "24"
+                    , fill "none"
+                    , stroke "currentColor"
+                    , strokeWidth "2"
+                    , strokeLinecap "round"
+                    , strokeLinejoin "round"
+                    , attribute "aria-hidden" "true"
+                    ]
+                    [ path [ d "m19 19-3.5-3.5" ] []
+                    , circle [ cx "11", cy "11", r "6" ] []
+                    ]
+                ]
+            ]
+        ]
+
+
+view : Model -> Html Msg
+view =
+    Html.Lazy.lazy
+        (\model ->
+            case model.glossaryItems of
+                Err error ->
+                    pre [] [ text <| Decode.errorToString error ]
+
+                Ok glossaryItems ->
+                    let
+                        editable =
+                            model.makingChanges == ReadyForMakingChanges
+                    in
+                    div
+                        [ class "min-h-full" ]
+                        [ viewMenuForMobile model glossaryItems
+                        , viewStaticSidebarForDesktop model glossaryItems
+                        , div
+                            [ class "lg:pl-64 flex flex-col" ]
+                            [ viewTopBar
+                            , div
+                                [ Html.Attributes.id "outer" ]
+                                [ div [] <| TitleHeaderHtml.toVirtualDom model.titleHeaderHtml
+                                , Html.main_
+                                    []
+                                    [ div [] <| AboutHtml.toVirtualDom model.aboutHtml
+                                    , viewCards model editable glossaryItems
+                                    ]
+                                ]
+                            ]
+                        ]
+        )
