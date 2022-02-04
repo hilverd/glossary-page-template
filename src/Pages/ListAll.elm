@@ -800,8 +800,8 @@ viewQuickSearchButton =
         ]
 
 
-viewStaticSidebarForDesktop : Model -> List GlossaryItem -> Html Msg
-viewStaticSidebarForDesktop model glossaryItems =
+viewStaticSidebarForDesktop : List GlossaryItem -> Html Msg
+viewStaticSidebarForDesktop glossaryItems =
     div
         [ class "hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-gray-50 lg:dark:border-gray-800 lg:dark:bg-gray-900" ]
         [ div
@@ -820,7 +820,7 @@ viewTopBar =
         [ class "sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden items-center" ]
         [ button
             [ Html.Attributes.type_ "button"
-            , class "px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 lg:hidden"
+            , class "px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 focus:outline-none lg:hidden"
             , Html.Events.onClick <| PageMsg.Internal ShowMenuForMobile
             ]
             [ span
@@ -886,7 +886,7 @@ view =
                     div
                         [ class "min-h-full" ]
                         [ viewMenuForMobile model glossaryItems
-                        , viewStaticSidebarForDesktop model glossaryItems
+                        , viewStaticSidebarForDesktop glossaryItems
                         , div
                             [ class "lg:pl-64 flex flex-col" ]
                             [ viewTopBar
