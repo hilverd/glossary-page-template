@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [0.1.0] - 2022-02-05
+
+## Added
 
 - Support custom file names via the `$FILE` environment variable.
 
@@ -15,8 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Move index to sidebar and widen layout.
 
-### Fixed
-### Removed
+### Migrating from 0.0.8
+
+TBD.
 
 ## [0.0.8] - 2022-01-13
 
@@ -105,7 +113,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.0.8...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/hilverd/glossary-page-template/compare/v0.0.8...v0.1.0
 [0.0.8]: https://github.com/hilverd/glossary-page-template/compare/v0.0.7...v0.0.8
 [0.0.7]: https://github.com/hilverd/glossary-page-template/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/hilverd/glossary-page-template/compare/v0.0.5...v0.0.6
