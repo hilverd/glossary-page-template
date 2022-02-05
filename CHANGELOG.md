@@ -35,6 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix bug where `data-enable-help-for-making-changes` was always being set to true.
 - Make `$PORT` actually work when launching editor.
 
+### Migrating from 0.0.6
+
+Make the [relevant changes](https://github.com/hilverd/glossary-page-template/compare/v0.0.6...v0.0.7#diff-98bc2a2d2bb8717b67810a53ae6b5d1648649e912f6fe838d9f35ba770a9f506) to `glossary.html`.
+
 ## [0.0.6] - 2022-01-05
 
 ### Changed
