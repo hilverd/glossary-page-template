@@ -141,7 +141,12 @@ update msg model =
             ( { model | makingChanges = makingChangesToggled }, Cmd.none )
 
         ShowMenuForMobile ->
-            ( { model | menuForMobileVisibility = Visible }, preventBackgroundScrolling () )
+            ( { model | menuForMobileVisibility = Visible }
+            , Cmd.batch
+                [ preventBackgroundScrolling ()
+                , jumpToTopOfIndexForMobile
+                ]
+            )
 
         StartHidingMenuForMobile ->
             ( { model | menuForMobileVisibility = Disappearing }
@@ -233,6 +238,11 @@ jumpToElement id =
         |> Dom.getViewportOf
         |> Task.andThen (always <| Dom.setViewportOf id 0 0)
         |> Task.attempt (always <| PageMsg.Internal NoOp)
+
+
+jumpToTopOfIndexForMobile : Cmd Msg
+jumpToTopOfIndexForMobile =
+    jumpToElement idOfIndexForMobile
 
 
 
@@ -707,6 +717,11 @@ viewCards model editable glossaryItems =
         ]
 
 
+idOfIndexForMobile : String
+idOfIndexForMobile =
+    "menu-for-mobile"
+
+
 viewMenuForMobile : Model -> List GlossaryItem -> Html Msg
 viewMenuForMobile model glossaryItems =
     div
@@ -768,7 +783,9 @@ viewMenuForMobile model glossaryItems =
                     ]
                 ]
             , div
-                [ class "flex-1 h-0 overflow-y-auto" ]
+                [ id idOfIndexForMobile
+                , class "flex-1 h-0 overflow-y-auto"
+                ]
                 [ nav
                     [ class "-mt-6 px-4 pb-6" ]
                     [ viewIndex glossaryItems ]
