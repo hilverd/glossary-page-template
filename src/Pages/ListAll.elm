@@ -802,7 +802,7 @@ viewQuickSearchButton =
     div
         [ class "hidden -mb-6 sticky top-0 -ml-0.5 pointer-events-none" ]
         [ div
-            [ class "h-7 bg-gray-50 dark:bg-slate-900" ]
+            [ class "h-7 bg-white dark:bg-slate-900" ]
             []
         , div [ class "px-3" ]
             [ div
@@ -853,7 +853,7 @@ viewQuickSearchButton =
 viewStaticSidebarForDesktop : List GlossaryItem -> Html Msg
 viewStaticSidebarForDesktop glossaryItems =
     div
-        [ class "hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-gray-50 lg:dark:border-gray-800 lg:dark:bg-gray-900" ]
+        [ class "hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900" ]
         [ div
             [ class "h-0 flex-1 flex flex-col overflow-y-auto" ]
             [ viewQuickSearchButton
