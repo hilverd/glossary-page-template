@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- Add letter grid to sidebar for easier navigation.
+
 ### Changed
 ### Fixed
 ### Removed
