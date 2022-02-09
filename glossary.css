@@ -22,7 +22,7 @@
   }
 
   header#title-header {
-    @apply pt-6 pb-4 mx-auto px-4 sm:px-6 lg:px-8;
+    @apply pt-6 pb-4 mx-auto px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-prose;
   }
 
   header#title-header h1 {
@@ -30,7 +30,7 @@
   }
 
   div#outer main {
-    @apply mx-auto px-6 lg:px-8;
+    @apply mx-auto px-6 lg:px-8 print:px-0 print:max-w-prose;
   }
 
   div#about {
@@ -38,27 +38,31 @@
   }
 
   article#glossary dl {
-    @apply grid gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 print:grid-cols-2;
+    @apply grid print:block print:space-y-5 gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4;
   }
 
   article#glossary dl > div {
-    @apply bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-700 print:border-gray-200 rounded-lg px-4 py-4;
+    @apply bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0;
   }
 
   article#glossary dl dt {
-    @apply font-semibold text-gray-600 dark:text-gray-200 print:text-black;
+    @apply font-semibold print:font-normal text-gray-600 dark:text-gray-200 print:text-black;
   }
 
   article#glossary dl dt dfn {
-    @apply not-italic scroll-mt-24;
+    @apply not-italic print:italic scroll-mt-24;
   }
 
   article#glossary dl dd {
-    @apply mt-1 py-2 text-gray-600 dark:text-gray-300 print:text-black;
+    @apply mt-1 print:mt-0 py-2 print:py-0 text-gray-600 dark:text-gray-300 print:text-black;
   }
 
   article#glossary dl dd a {
     @apply text-gray-600 dark:text-gray-300 print:text-black;
+  }
+
+  article#glossary dl dd.related-terms {
+    @apply print:mt-2;
   }
 
   a {

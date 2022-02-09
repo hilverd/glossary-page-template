@@ -1014,7 +1014,7 @@ idOfStaticSidebarForDesktop =
 viewStaticSidebarForDesktop : TermIndex -> Html Msg
 viewStaticSidebarForDesktop termIndex =
     div
-        [ class "hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900"
+        [ class "hidden print:hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900"
         ]
         [ div
             [ id idOfStaticSidebarForDesktop
@@ -1031,7 +1031,7 @@ viewStaticSidebarForDesktop termIndex =
 viewTopBar : Html Msg
 viewTopBar =
     div
-        [ class "sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden items-center" ]
+        [ class "sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
         [ button
             [ Html.Attributes.type_ "button"
             , class "px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 focus:outline-none lg:hidden"
