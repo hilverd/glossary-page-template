@@ -8,12 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-
-- Add letter grid to sidebar for easier navigation.
-
 ### Changed
 ### Fixed
 ### Removed
+
+## [0.2.0] - 2022-02-09
+
+### Added
+
+- Add letter grid to sidebar for easier navigation.
 
 ## [0.1.0] - 2022-02-05
 
@@ -116,7 +119,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/hilverd/glossary-page-template/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/hilverd/glossary-page-template/compare/v0.0.8...v0.1.0
 [0.0.8]: https://github.com/hilverd/glossary-page-template/compare/v0.0.7...v0.0.8
 [0.0.7]: https://github.com/hilverd/glossary-page-template/compare/v0.0.6...v0.0.7
