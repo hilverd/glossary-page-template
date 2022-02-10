@@ -1,6 +1,7 @@
 module Data.GlossaryItem exposing (GlossaryItem, RelatedTerm, Term, decode, empty, hasSomeDetails, toHtmlTree)
 
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
+import Html.Attributes
 import Json.Decode as Decode exposing (Decoder)
 
 
@@ -64,7 +65,7 @@ termToHtmlTree : Term -> HtmlTree
 termToHtmlTree term =
     HtmlTree.Node "dt"
         True
-        []
+        [ HtmlTree.Attribute "class" "group" ]
         [ HtmlTree.Node "dfn"
             True
             [ HtmlTree.Attribute "id" term.id ]
@@ -76,6 +77,14 @@ termToHtmlTree term =
                         else
                             inner
                    )
+            ]
+        , HtmlTree.Node "span"
+            False
+            [ HtmlTree.Attribute "class" "pilcrow invisible group-hover:visible hover:visible" ]
+            [ HtmlTree.Node "a"
+                False
+                [ hrefToTerm term ]
+                [ HtmlTree.Leaf "§" ]
             ]
         ]
 
@@ -92,7 +101,7 @@ relatedTermToHtmlTree : RelatedTerm -> HtmlTree
 relatedTermToHtmlTree relatedTerm =
     HtmlTree.Node "a"
         True
-        [ HtmlTree.Attribute "href" ("#" ++ relatedTerm.idReference) ]
+        [ hrefFromRelatedTerm relatedTerm ]
         [ HtmlTree.Leaf relatedTerm.body ]
 
 
@@ -132,3 +141,13 @@ toHtmlTree glossaryItem =
                     ]
                )
         )
+
+
+hrefToTerm : Term -> HtmlTree.Attribute
+hrefToTerm term =
+    HtmlTree.Attribute "href" ("#" ++ term.id)
+
+
+hrefFromRelatedTerm : RelatedTerm -> HtmlTree.Attribute
+hrefFromRelatedTerm relatedTerm =
+    HtmlTree.Attribute "href" ("#" ++ relatedTerm.idReference)

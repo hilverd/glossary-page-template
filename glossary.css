@@ -73,6 +73,14 @@
     @apply bg-amber-100 dark:bg-pink-900;
   }
 
+  dt span.pilcrow {
+    @apply ml-1.5;
+  }
+
+  dt span.pilcrow a {
+    @apply text-inherit no-underline text-gray-500 dark:text-gray-400 font-normal;
+  }
+
   /* Start of trick for autogrowing textareas
      https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */
 

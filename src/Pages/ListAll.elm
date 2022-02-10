@@ -489,7 +489,7 @@ viewTermsIndex staticSidebar termIndex =
 viewGlossaryTerm : GlossaryItem.Term -> Html Msg
 viewGlossaryTerm term =
     Html.dt
-        []
+        [ class "group" ]
         [ Html.dfn
             [ Html.Attributes.id term.id ]
             [ if term.isAbbreviation then
@@ -497,6 +497,12 @@ viewGlossaryTerm term =
 
               else
                 text term.body
+            ]
+        , span
+            [ class "pilcrow invisible group-hover:visible hover:visible" ]
+            [ Html.a
+                [ "#" ++ term.id |> Html.Attributes.href ]
+                [ text "§" ]
             ]
         ]
 

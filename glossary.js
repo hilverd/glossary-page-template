@@ -36,7 +36,7 @@ function glossaryItemTermFromDtElement(dtElement) {
     const dfnElement = dtElement.querySelector('dfn');
     const id = dfnElement.id || null;
     const isAbbreviation = Boolean(dfnElement.querySelector('abbr'));
-    const body = dtElement.textContent;
+    const body = dfnElement.textContent;
 
     return {
         id: normaliseWhitespace(id),
