@@ -190,7 +190,7 @@ update msg model =
                                         newOrUpdatedGlossaryItem :: glossaryItems
                                 )
                                     |> GlossaryItems.sanitise
-                                    |> List.sortBy (.terms >> List.head >> Maybe.map .body >> Maybe.withDefault "" >> String.toLower)
+                                    |> GlossaryItems.orderAlphabetically
                         in
                         ( { model | glossaryItems = Ok updatedGlossaryItems }
                         , patchHtmlFile model updatedGlossaryItems

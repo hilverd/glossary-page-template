@@ -1,4 +1,4 @@
-module Data.GlossaryItems exposing (GlossaryItems, sanitise, toHtmlTree)
+module Data.GlossaryItems exposing (GlossaryItems, orderAlphabetically, sanitise, toHtmlTree)
 
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
@@ -48,3 +48,8 @@ sanitise glossaryItems =
                             |> List.filter (\relatedTerm -> Set.member relatedTerm.idReference termIdsSet)
                 }
             )
+
+
+orderAlphabetically : GlossaryItems -> GlossaryItems
+orderAlphabetically =
+    List.sortBy (.terms >> List.head >> Maybe.map .body >> Maybe.withDefault "" >> String.toLower)
