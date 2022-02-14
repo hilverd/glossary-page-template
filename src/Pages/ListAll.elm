@@ -1119,7 +1119,9 @@ view =
                                 , Html.main_
                                     []
                                     [ div [] <| AboutHtml.toVirtualDom model.aboutHtml
-                                    , viewCards model editable glossaryItems
+                                    , glossaryItems
+                                        |> GlossaryItems.orderAlphabetically
+                                        |> viewCards model editable
                                     ]
                                 ]
                             ]
