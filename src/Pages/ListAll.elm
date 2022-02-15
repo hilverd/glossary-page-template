@@ -14,8 +14,8 @@ import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
-import Html exposing (Attribute, Html, a, button, code, div, h2, h3, h4, h5, li, nav, p, pre, span, text, ul)
-import Html.Attributes exposing (attribute, class, href, id)
+import Html exposing (Attribute, Html, a, button, code, div, fieldset, h2, h3, h4, h5, input, label, legend, li, nav, p, pre, span, text, ul)
+import Html.Attributes exposing (attribute, checked, class, for, href, id, name)
 import Html.Events
 import Html.Lazy
 import Http
@@ -45,6 +45,11 @@ type MenuForMobileVisibility
     | Invisible
 
 
+type OrderItemsBy
+    = Alphabetically
+    | MostFrequentFirst
+
+
 type alias Model =
     { enableHelpForMakingChanges : Bool
     , makingChanges : MakingChanges
@@ -55,6 +60,7 @@ type alias Model =
     , glossaryItems : LoadedGlossaryItems
     , confirmDeleteIndex : Maybe GlossaryItemIndex
     , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
+    , orderItemsBy : OrderItemsBy
     }
 
 
@@ -70,6 +76,7 @@ type InternalMsg
     | Deleted (List GlossaryItem)
     | FailedToDelete GlossaryItemIndex Http.Error
     | JumpToTermIndexGroup Bool String
+    | ChangeOrderItemsBy OrderItemsBy
 
 
 type alias Msg =
@@ -96,6 +103,7 @@ init editorIsRunning enableHelpForMakingChanges titleHeaderHtml aboutHtml maybeI
       , glossaryItems = glossaryItems
       , confirmDeleteIndex = Nothing
       , errorWhileDeleting = Nothing
+      , orderItemsBy = Alphabetically
       }
     , case maybeIndex of
         Just index ->
@@ -240,6 +248,11 @@ update msg model =
                                 )
                     )
                 |> Task.attempt (always <| PageMsg.Internal NoOp)
+            )
+
+        ChangeOrderItemsBy orderItemsBy ->
+            ( { model | orderItemsBy = orderItemsBy }
+            , Cmd.none
             )
 
 
@@ -810,6 +823,7 @@ viewCards model editable glossaryItems =
                   else
                     viewCreateGlossaryItemButton model
                 ]
+        , viewOrderItemsBy model
         , Html.dl
             []
             (glossaryItems
@@ -1090,6 +1104,58 @@ viewTopBar =
         ]
 
 
+viewOrderItemsBy : Model -> Html Msg
+viewOrderItemsBy model =
+    div
+        [ class "pb-6" ]
+        [ label
+            [ class "font-medium text-gray-900 dark:text-gray-100" ]
+            [ text "Order items" ]
+        , fieldset [ class "mt-4" ]
+            [ legend
+                [ class "sr-only" ]
+                [ text "Sort order" ]
+            , div
+                [ class "space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6" ]
+                [ div
+                    [ class "flex items-center" ]
+                    [ input
+                        [ checked <| model.orderItemsBy == Alphabetically
+                        , class "focus:ring-indigo-500 h-4 w-4 dark:bg-gray-200 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-500"
+                        , id "order-items-alphabetically"
+                        , name "order-items-by"
+                        , Html.Attributes.type_ "radio"
+                        , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy Alphabetically
+                        ]
+                        []
+                    , label
+                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300"
+                        , for "order-items-alphabetically"
+                        ]
+                        [ text "alphabetically" ]
+                    ]
+                , div
+                    [ class "flex items-center" ]
+                    [ input
+                        [ checked <| model.orderItemsBy == MostFrequentFirst
+                        , class "focus:ring-indigo-500 h-4 w-4 dark:bg-gray-200 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-500"
+                        , id "order-items-most-frequent-first"
+                        , name "order-items-by"
+                        , Html.Attributes.type_ "radio"
+                        , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy MostFrequentFirst
+                        ]
+                        []
+                    , label
+                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300"
+                        , for "order-items-most-frequent-first"
+                        ]
+                        [ text "most frequent first" ]
+                    ]
+                ]
+            ]
+        ]
+
+
 view : Model -> Html Msg
 view =
     Html.Lazy.lazy
@@ -1120,7 +1186,12 @@ view =
                                     []
                                     [ div [] <| AboutHtml.toVirtualDom model.aboutHtml
                                     , glossaryItems
-                                        |> GlossaryItems.orderAlphabetically
+                                        |> (if model.orderItemsBy == Alphabetically then
+                                                GlossaryItems.orderAlphabetically
+
+                                            else
+                                                GlossaryItems.orderByFrequency
+                                           )
                                         |> viewCards model editable
                                     ]
                                 ]

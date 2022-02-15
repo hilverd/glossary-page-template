@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- Allow sorting items either alphabetically or by most frequent first. An item is considered more frequent if its terms occur more often in other items.
+
 ### Changed
 ### Fixed
 ### Removed
