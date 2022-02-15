@@ -8,12 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-
-- Allow sorting items either alphabetically or by most frequent first. An item is considered more frequent if its terms occur more often in other items.
-
 ### Changed
 ### Fixed
 ### Removed
+
+## [0.4.0] - 2022-02-15
+
+### Added
+
+- Allow sorting items either alphabetically or by most frequent first. An item is considered more frequent if its terms occur more often in other items.
 
 ## [0.3.0] - 2022-02-10
 
@@ -132,7 +135,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/hilverd/glossary-page-template/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/hilverd/glossary-page-template/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/hilverd/glossary-page-template/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/hilverd/glossary-page-template/compare/v0.0.8...v0.1.0
