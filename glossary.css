@@ -74,7 +74,7 @@
   }
 
   dt span.pilcrow {
-    @apply ml-1.5;
+    @apply ml-1.5 select-none;
   }
 
   dt span.pilcrow a {

@@ -1107,7 +1107,7 @@ viewTopBar =
 viewOrderItemsBy : Model -> Html Msg
 viewOrderItemsBy model =
     div
-        [ class "pb-6" ]
+        [ class "border-t border-gray-300 dark:border-gray-700 pt-4 pb-6" ]
         [ label
             [ class "font-medium text-gray-900 dark:text-gray-100" ]
             [ text "Order items" ]
@@ -1129,7 +1129,7 @@ viewOrderItemsBy model =
                         ]
                         []
                     , label
-                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300"
+                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
                         , for "order-items-alphabetically"
                         ]
                         [ text "alphabetically" ]
@@ -1146,7 +1146,7 @@ viewOrderItemsBy model =
                         ]
                         []
                     , label
-                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300"
+                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
                         , for "order-items-most-frequent-first"
                         ]
                         [ text "most frequent first" ]
