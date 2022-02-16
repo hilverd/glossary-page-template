@@ -652,10 +652,10 @@ viewGlossaryItem1 index model editable errorWhileDeleting glossaryItem =
 
 
 viewConfirmDeleteModal : Maybe GlossaryItemIndex -> Html Msg
-viewConfirmDeleteModal maybeIndex =
+viewConfirmDeleteModal maybeIndexOfItemToDelete =
     div
         [ class "fixed z-10 inset-0 overflow-y-auto print:hidden"
-        , Extras.HtmlAttribute.showIf (maybeIndex == Nothing) <| class "invisible"
+        , Extras.HtmlAttribute.showIf (maybeIndexOfItemToDelete == Nothing) <| class "invisible"
         , attribute "aria-labelledby" "modal-title"
         , attribute "role" "dialog"
         , attribute "aria-modal" "true"
@@ -664,7 +664,7 @@ viewConfirmDeleteModal maybeIndex =
             [ class "flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0" ]
             [ div
                 [ class "fixed inset-0 bg-gray-500 dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 transition-opacity"
-                , if maybeIndex == Nothing then
+                , if maybeIndexOfItemToDelete == Nothing then
                     class "ease-in duration-200 opacity-0"
 
                   else
@@ -680,7 +680,7 @@ viewConfirmDeleteModal maybeIndex =
                 [ text "\u{200B}" ]
             , div
                 [ class "inline-block align-bottom bg-white dark:bg-gray-700 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
-                , if maybeIndex == Nothing then
+                , if maybeIndexOfItemToDelete == Nothing then
                     class "ease-in duration-200 opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
 
                   else
@@ -726,7 +726,7 @@ viewConfirmDeleteModal maybeIndex =
                     [ button
                         [ Html.Attributes.type_ "button"
                         , class "w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 dark:bg-red-400 text-base font-medium text-white dark:text-gray-800 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
-                        , maybeIndex
+                        , maybeIndexOfItemToDelete
                             |> Maybe.map (Html.Events.onClick << PageMsg.Internal << Delete)
                             |> Maybe.withDefault Extras.HtmlAttribute.empty
                         ]
