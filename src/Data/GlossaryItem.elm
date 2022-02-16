@@ -1,7 +1,14 @@
-module Data.GlossaryItem exposing (GlossaryItem, RelatedTerm, Term, decode, empty, hasSomeDetails, toHtmlTree)
+module Data.GlossaryItem exposing
+    ( GlossaryItem
+    , RelatedTerm
+    , Term
+    , decode
+    , empty
+    , hasSomeDetails
+    , toHtmlTree
+    )
 
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
-import Html.Attributes
 import Json.Decode as Decode exposing (Decoder)
 
 

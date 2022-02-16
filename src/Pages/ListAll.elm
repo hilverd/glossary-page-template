@@ -14,7 +14,7 @@ import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
-import Html exposing (Attribute, Html, a, button, code, div, fieldset, h2, h3, h4, h5, input, label, legend, li, nav, p, pre, span, text, ul)
+import Html exposing (Attribute, Html, a, button, code, div, fieldset, h3, h5, input, label, legend, li, nav, p, pre, span, text, ul)
 import Html.Attributes exposing (attribute, checked, class, for, href, id, name)
 import Html.Events
 import Html.Lazy
@@ -51,11 +51,11 @@ type OrderItemsBy
 
 
 type alias Model =
-    { enableHelpForMakingChanges : Bool
-    , makingChanges : MakingChanges
-    , menuForMobileVisibility : MenuForMobileVisibility
+    { makingChanges : MakingChanges
+    , enableHelpForMakingChanges : Bool
     , titleHeaderHtml : TitleHeaderHtml
     , aboutHtml : AboutHtml
+    , menuForMobileVisibility : MenuForMobileVisibility
     , maybeIndex : Maybe GlossaryItemIndex
     , glossaryItems : LoadedGlossaryItems
     , confirmDeleteIndex : Maybe GlossaryItemIndex
@@ -85,8 +85,7 @@ type alias Msg =
 
 init : Bool -> Bool -> TitleHeaderHtml -> AboutHtml -> Maybe GlossaryItemIndex -> LoadedGlossaryItems -> ( Model, Cmd Msg )
 init editorIsRunning enableHelpForMakingChanges titleHeaderHtml aboutHtml maybeIndex glossaryItems =
-    ( { enableHelpForMakingChanges = enableHelpForMakingChanges
-      , makingChanges =
+    ( { makingChanges =
             case ( editorIsRunning, enableHelpForMakingChanges ) of
                 ( True, _ ) ->
                     ReadyForMakingChanges
@@ -96,9 +95,10 @@ init editorIsRunning enableHelpForMakingChanges titleHeaderHtml aboutHtml maybeI
 
                 ( False, False ) ->
                     NoHelpForMakingChanges
-      , menuForMobileVisibility = Invisible
+      , enableHelpForMakingChanges = enableHelpForMakingChanges
       , titleHeaderHtml = titleHeaderHtml
       , aboutHtml = aboutHtml
+      , menuForMobileVisibility = Invisible
       , maybeIndex = maybeIndex
       , glossaryItems = glossaryItems
       , confirmDeleteIndex = Nothing

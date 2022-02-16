@@ -1,4 +1,10 @@
-module Data.GlossaryItems exposing (GlossaryItems, orderAlphabetically, orderByFrequency, sanitise, toHtmlTree)
+module Data.GlossaryItems exposing
+    ( GlossaryItems
+    , orderAlphabetically
+    , orderByFrequency
+    , sanitise
+    , toHtmlTree
+    )
 
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Dict exposing (Dict)
