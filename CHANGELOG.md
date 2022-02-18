@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 ### Changed
-
-- Speed up switching between ordering alphabetically and by frequency (at the expense of keeping more data in memory).
-
 ### Fixed
 ### Removed
+
+## [0.4.1] - 2022-02-18
+
+### Changed
+
+- Speed up switching between ordering alphabetically and by frequency (at the expense of keeping more data in memory).
 
 ## [0.4.0] - 2022-02-15
 
@@ -138,7 +141,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/hilverd/glossary-page-template/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/hilverd/glossary-page-template/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/hilverd/glossary-page-template/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/hilverd/glossary-page-template/compare/v0.1.0...v0.2.0
