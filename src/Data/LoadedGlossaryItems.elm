@@ -1,7 +1,7 @@
 module Data.LoadedGlossaryItems exposing (LoadedGlossaryItems, decodeFromFlags)
 
 import Data.GlossaryItem as GlossaryItem
-import Data.GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Extras.HtmlTree exposing (HtmlTree(..))
 import Json.Decode as Decode
 
@@ -13,3 +13,4 @@ type alias LoadedGlossaryItems =
 decodeFromFlags : Decode.Value -> LoadedGlossaryItems
 decodeFromFlags =
     Decode.decodeValue (Decode.field "glossaryItems" <| Decode.list GlossaryItem.decode)
+        >> Result.map GlossaryItems.fromList

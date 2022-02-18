@@ -1,12 +1,18 @@
 module Data.GlossaryItems exposing
     ( GlossaryItems
-    , orderAlphabetically
-    , orderByFrequency
-    , sanitise
+    , fromList
+    , get
+    , insert
+    , orderedAlphabetically
+    , orderedByFrequency
+    , remove
     , toHtmlTree
+    , update
     )
 
+import Array
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Dict exposing (Dict)
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Regex
@@ -14,59 +20,36 @@ import Regex
 import Set
 
 
-type alias GlossaryItems =
-    List GlossaryItem
+type GlossaryItems
+    = GlossaryItems
+        { orderedAlphabetically : List GlossaryItem
+        , orderedByFrequency : List GlossaryItem
+        }
 
 
-toHtmlTree : Bool -> GlossaryItems -> HtmlTree
-toHtmlTree enableHelpForMakingChanges glossaryItems =
-    HtmlTree.Node "article"
-        True
-        [ HtmlTree.Attribute "id" "glossary"
-        , HtmlTree.Attribute "data-enable-help-for-making-changes"
-            (if enableHelpForMakingChanges then
-                "true"
-
-             else
-                "false"
-            )
-        ]
-        [ HtmlTree.Node "dl"
-            True
-            []
-            (List.map GlossaryItem.toHtmlTree glossaryItems)
-        ]
-
-
-sanitise : GlossaryItems -> GlossaryItems
-sanitise glossaryItems =
+fromList : List GlossaryItem -> GlossaryItems
+fromList glossaryItems =
     let
-        termIdsSet =
-            glossaryItems
-                |> List.map .terms
-                |> List.concat
-                |> List.map .id
-                |> Set.fromList
+        sanitised =
+            sanitiseList glossaryItems
     in
-    glossaryItems
-        |> List.map
-            (\glossaryItem ->
-                { glossaryItem
-                    | relatedTerms =
-                        glossaryItem.relatedTerms
-                            |> List.filter (\relatedTerm -> Set.member relatedTerm.idReference termIdsSet)
-                }
-            )
+    GlossaryItems <|
+        { orderedAlphabetically = orderListAlphabetically sanitised
+        , orderedByFrequency = orderListByFrequency sanitised
+        }
 
 
-orderAlphabetically : GlossaryItems -> GlossaryItems
-orderAlphabetically =
+orderListAlphabetically : List GlossaryItem -> List GlossaryItem
+orderListAlphabetically =
     List.sortBy (.terms >> List.head >> Maybe.map .body >> Maybe.withDefault "" >> String.toLower)
 
 
-orderByFrequency : GlossaryItems -> GlossaryItems
-orderByFrequency glossaryItems =
+orderListByFrequency : List GlossaryItem -> List GlossaryItem
+orderListByFrequency glossaryItems =
     let
+        indexed =
+            List.indexedMap Tuple.pair glossaryItems
+
         -- Maps a term to a score based on whether or not it occurs in glossaryItem.
         -- This is done in a primitive way. A more sophisticated solution could use stemming
         -- or other techniques.
@@ -92,8 +75,7 @@ orderByFrequency glossaryItems =
         -- Maps a term to a score based on how often it occurs in glossaryItems.
         termScore : GlossaryItem.Term -> Int -> Int
         termScore term exceptIndex =
-            glossaryItems
-                |> List.indexedMap Tuple.pair
+            indexed
                 |> List.foldl
                     (\( index, glossaryItem ) result ->
                         result
@@ -108,9 +90,9 @@ orderByFrequency glossaryItems =
 
         termBodyScores : Dict String Int
         termBodyScores =
-            glossaryItems
-                |> List.indexedMap
-                    (\index glossaryItem ->
+            indexed
+                |> List.map
+                    (\( index, glossaryItem ) ->
                         List.map (\term -> ( index, term )) glossaryItem.terms
                     )
                 |> List.concat
@@ -149,3 +131,121 @@ orderByFrequency glossaryItems =
                     GT ->
                         LT
             )
+
+
+sanitiseList : List GlossaryItem -> List GlossaryItem
+sanitiseList glossaryItems =
+    let
+        termIdsSet =
+            glossaryItems
+                |> List.map .terms
+                |> List.concat
+                |> List.map .id
+                |> Set.fromList
+    in
+    glossaryItems
+        |> List.map
+            (\glossaryItem ->
+                { glossaryItem
+                    | relatedTerms =
+                        glossaryItem.relatedTerms
+                            |> List.filter (\relatedTerm -> Set.member relatedTerm.idReference termIdsSet)
+                }
+            )
+
+
+zipListWithIndexes : List GlossaryItem -> List ( GlossaryItemIndex, GlossaryItem )
+zipListWithIndexes =
+    List.indexedMap Tuple.pair
+        >> List.map (Tuple.mapFirst GlossaryItemIndex.fromInt)
+
+
+get : GlossaryItemIndex -> GlossaryItems -> Maybe GlossaryItem
+get indexWhenOrderedAlphabetically glossaryItems =
+    glossaryItems
+        |> orderedAlphabetically
+        |> List.map Tuple.second
+        |> Array.fromList
+        |> Array.get (GlossaryItemIndex.toInt indexWhenOrderedAlphabetically)
+
+
+insert : GlossaryItem -> GlossaryItems -> GlossaryItems
+insert glossaryItem glossaryItems =
+    let
+        itemsList =
+            glossaryItems
+                |> orderedAlphabetically
+                |> List.map Tuple.second
+    in
+    glossaryItem :: itemsList |> fromList
+
+
+update : GlossaryItemIndex -> GlossaryItem -> GlossaryItems -> GlossaryItems
+update indexWhenOrderedAlphabetically glossaryItem glossaryItems =
+    glossaryItems
+        |> orderedAlphabetically
+        |> List.map
+            (\( index, item ) ->
+                if index == indexWhenOrderedAlphabetically then
+                    glossaryItem
+
+                else
+                    item
+            )
+        |> fromList
+
+
+remove : GlossaryItemIndex -> GlossaryItems -> GlossaryItems
+remove indexWhenOrderedAlphabetically glossaryItems =
+    glossaryItems
+        |> orderedAlphabetically
+        |> List.filterMap
+            (\( index, item ) ->
+                if index == indexWhenOrderedAlphabetically then
+                    Nothing
+
+                else
+                    Just item
+            )
+        |> fromList
+
+
+orderedAlphabetically : GlossaryItems -> List ( GlossaryItemIndex, GlossaryItem )
+orderedAlphabetically glossaryItems =
+    case glossaryItems of
+        GlossaryItems items ->
+            items
+                |> .orderedAlphabetically
+                |> zipListWithIndexes
+
+
+orderedByFrequency : GlossaryItems -> List ( GlossaryItemIndex, GlossaryItem )
+orderedByFrequency glossaryItems =
+    case glossaryItems of
+        GlossaryItems items ->
+            items
+                |> .orderedByFrequency
+                |> zipListWithIndexes
+
+
+toHtmlTree : Bool -> GlossaryItems -> HtmlTree
+toHtmlTree enableHelpForMakingChanges glossaryItems =
+    HtmlTree.Node "article"
+        True
+        [ HtmlTree.Attribute "id" "glossary"
+        , HtmlTree.Attribute "data-enable-help-for-making-changes"
+            (if enableHelpForMakingChanges then
+                "true"
+
+             else
+                "false"
+            )
+        ]
+        [ HtmlTree.Node "dl"
+            True
+            []
+            (glossaryItems
+                |> orderedAlphabetically
+                |> List.map (Tuple.second >> GlossaryItem.toHtmlTree)
+            )
+        ]

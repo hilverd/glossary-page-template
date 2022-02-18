@@ -23,6 +23,7 @@ module GlossaryItemForm exposing
 import Array exposing (Array)
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import Dict exposing (Dict)
@@ -167,25 +168,21 @@ termBodyToId body =
     String.replace " " "_" body
 
 
-toGlossaryItem : List GlossaryItem -> GlossaryItemForm -> GlossaryItem
+toGlossaryItem : GlossaryItems -> GlossaryItemForm -> GlossaryItem
 toGlossaryItem glossaryItems form =
     let
         bodyByIdReference : Dict String String
         bodyByIdReference =
-            List.foldl
-                (\glossaryItem result ->
-                    List.foldl
-                        (\term result1 ->
-                            Dict.update
-                                term.id
-                                (always <| Just term.body)
-                                result1
-                        )
-                        result
-                        glossaryItem.terms
-                )
-                Dict.empty
-                glossaryItems
+            glossaryItems
+                |> GlossaryItems.orderedAlphabetically
+                |> List.foldl
+                    (\( _, glossaryItem ) result ->
+                        List.foldl
+                            (\term -> Dict.update term.id (always <| Just term.body))
+                            result
+                            glossaryItem.terms
+                    )
+                    Dict.empty
     in
     { terms =
         form.terms

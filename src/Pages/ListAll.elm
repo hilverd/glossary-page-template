@@ -1,15 +1,13 @@
 port module Pages.ListAll exposing (Model, Msg, init, update, view)
 
-import Array
 import Browser.Dom as Dom
 import Data.AboutHtml as AboutHtml exposing (AboutHtml)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
-import Data.GlossaryItems as GlossaryItems
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Data.TitleHeaderHtml as TitleHeaderHtml exposing (TitleHeaderHtml)
 import Dict exposing (Dict)
-import Extras.Array
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
@@ -17,7 +15,6 @@ import Extras.Http
 import Html exposing (Attribute, Html, a, button, code, div, fieldset, h3, h5, input, label, legend, li, nav, p, pre, span, text, ul)
 import Html.Attributes exposing (attribute, checked, class, for, href, id, name)
 import Html.Events
-import Html.Lazy
 import Http
 import Icons
 import Json.Decode as Decode
@@ -73,7 +70,7 @@ type InternalMsg
     | ConfirmDelete GlossaryItemIndex
     | CancelDelete
     | Delete GlossaryItemIndex
-    | Deleted (List GlossaryItem)
+    | Deleted GlossaryItems
     | FailedToDelete GlossaryItemIndex Http.Error
     | JumpToTermIndexGroup Bool String
     | ChangeOrderItemsBy OrderItemsBy
@@ -179,11 +176,7 @@ update msg model =
                 Ok glossaryItems ->
                     let
                         updatedGlossaryItems =
-                            glossaryItems
-                                |> Array.fromList
-                                |> Extras.Array.delete (GlossaryItemIndex.toInt index)
-                                |> Array.toList
-                                |> GlossaryItems.sanitise
+                            GlossaryItems.remove index glossaryItems
                     in
                     ( { model
                         | confirmDeleteIndex = Nothing
@@ -256,7 +249,7 @@ update msg model =
             )
 
 
-patchHtmlFile : Bool -> GlossaryItemIndex -> List GlossaryItem -> Cmd Msg
+patchHtmlFile : Bool -> GlossaryItemIndex -> GlossaryItems -> Cmd Msg
 patchHtmlFile enableHelpForMakingChanges indexOfItemBeingDeleted glossaryItems =
     Http.request
         { method = "PATCH"
@@ -415,13 +408,14 @@ type alias TermIndex =
     List TermIndexGroup
 
 
-termIndexFromGlossaryItems : List GlossaryItem -> TermIndex
+termIndexFromGlossaryItems : GlossaryItems -> TermIndex
 termIndexFromGlossaryItems glossaryItems =
     let
         termListsByFirstCharacter : Dict String (List GlossaryItem.Term)
         termListsByFirstCharacter =
             glossaryItems
-                |> List.concatMap .terms
+                |> GlossaryItems.orderedAlphabetically
+                |> List.concatMap (Tuple.second >> .terms)
                 |> List.foldl
                     (\term result ->
                         let
@@ -575,13 +569,8 @@ idForGlossaryItemDiv index =
     "glossary-item-" ++ (index |> GlossaryItemIndex.toInt |> String.fromInt)
 
 
-viewGlossaryItem : Int -> Model -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
-viewGlossaryItem =
-    GlossaryItemIndex.fromInt >> viewGlossaryItem1
-
-
-viewGlossaryItem1 : GlossaryItemIndex -> Model -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
-viewGlossaryItem1 index model editable errorWhileDeleting glossaryItem =
+viewGlossaryItem : GlossaryItemIndex -> Model -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
+viewGlossaryItem index model editable errorWhileDeleting glossaryItem =
     let
         errorDiv message =
             div
@@ -801,8 +790,8 @@ viewCreateGlossaryItemButton model =
         ]
 
 
-viewCards : Model -> Bool -> List GlossaryItem -> Html Msg
-viewCards model editable glossaryItems =
+viewCards : Model -> Bool -> List ( GlossaryItemIndex, GlossaryItem ) -> Html Msg
+viewCards model editable indexedGlossaryItems =
     Html.article
         [ Html.Attributes.id "glossary" ]
         [ case model.makingChanges of
@@ -817,7 +806,7 @@ viewCards model editable glossaryItems =
         , Extras.Html.showIf editable <|
             div
                 [ class "pb-4" ]
-                [ if List.isEmpty glossaryItems then
+                [ if List.isEmpty indexedGlossaryItems then
                     viewCreateGlossaryItemButtonForEmptyState model
 
                   else
@@ -826,8 +815,7 @@ viewCards model editable glossaryItems =
         , viewOrderItemsBy model
         , Html.dl
             []
-            (glossaryItems
-                |> List.indexedMap Tuple.pair
+            (indexedGlossaryItems
                 |> List.map
                     (\( index, glossaryItem ) ->
                         viewGlossaryItem
@@ -921,52 +909,6 @@ viewMenuForMobile model termIndex =
         , div
             [ class "flex-shrink-0 w-14", attribute "aria-hidden" "true" ]
             []
-        ]
-
-
-viewQuickSearchButton : Html Msg
-viewQuickSearchButton =
-    div
-        [ class "px-3 pb-4 bg-white dark:bg-slate-900" ]
-        [ div
-            [ class "bg-gray-50 dark:bg-slate-900 relative pointer-events-auto" ]
-            [ button
-                [ Html.Attributes.type_ "button"
-                , class "hidden w-full lg:flex items-center text-sm leading-6 text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-600 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800"
-                , attribute "aria-hidden" "true"
-                ]
-                [ svg
-                    [ width "24"
-                    , height "24"
-                    , fill "none"
-                    , Svg.Attributes.class "mr-3 flex-none"
-                    ]
-                    [ path
-                        [ d "m19 19-3.5-3.5"
-                        , stroke "currentColor"
-                        , strokeWidth "2"
-                        , strokeLinecap "round"
-                        , strokeLinejoin "round"
-                        ]
-                        []
-                    , circle
-                        [ cx "11"
-                        , cy "11"
-                        , r "6"
-                        , stroke "currentColor"
-                        , strokeWidth "2"
-                        , strokeLinecap "round"
-                        , strokeLinejoin "round"
-                        ]
-                        []
-                    ]
-                , text "Quick search..."
-                , span
-                    [ class "ml-auto pl-3 flex-none text-xs font-semibold" ]
-                    [ text "Ctrl K"
-                    ]
-                ]
-            ]
         ]
 
 
@@ -1157,44 +1099,41 @@ viewOrderItemsBy model =
 
 
 view : Model -> Html Msg
-view =
-    Html.Lazy.lazy
-        (\model ->
-            case model.glossaryItems of
-                Err error ->
-                    pre [] [ text <| Decode.errorToString error ]
+view model =
+    case model.glossaryItems of
+        Err error ->
+            pre [] [ text <| Decode.errorToString error ]
 
-                Ok glossaryItems ->
-                    let
-                        editable =
-                            model.makingChanges == ReadyForMakingChanges
+        Ok glossaryItems ->
+            let
+                editable =
+                    model.makingChanges == ReadyForMakingChanges
 
-                        termIndex =
-                            termIndexFromGlossaryItems glossaryItems
-                    in
-                    div
-                        [ class "min-h-full" ]
-                        [ viewMenuForMobile model termIndex
-                        , viewStaticSidebarForDesktop termIndex
-                        , div
-                            [ class "lg:pl-64 flex flex-col" ]
-                            [ viewTopBar
-                            , div
-                                [ Html.Attributes.id "outer" ]
-                                [ div [] <| TitleHeaderHtml.toVirtualDom model.titleHeaderHtml
-                                , Html.main_
-                                    []
-                                    [ div [] <| AboutHtml.toVirtualDom model.aboutHtml
-                                    , glossaryItems
-                                        |> (if model.orderItemsBy == Alphabetically then
-                                                GlossaryItems.orderAlphabetically
+                termIndex =
+                    termIndexFromGlossaryItems glossaryItems
+            in
+            div
+                [ class "min-h-full" ]
+                [ viewMenuForMobile model termIndex
+                , viewStaticSidebarForDesktop termIndex
+                , div
+                    [ class "lg:pl-64 flex flex-col" ]
+                    [ viewTopBar
+                    , div
+                        [ Html.Attributes.id "outer" ]
+                        [ div [] <| TitleHeaderHtml.toVirtualDom model.titleHeaderHtml
+                        , Html.main_
+                            []
+                            [ div [] <| AboutHtml.toVirtualDom model.aboutHtml
+                            , glossaryItems
+                                |> (if model.orderItemsBy == Alphabetically then
+                                        GlossaryItems.orderedAlphabetically
 
-                                            else
-                                                GlossaryItems.orderByFrequency
-                                           )
-                                        |> viewCards model editable
-                                    ]
-                                ]
+                                    else
+                                        GlossaryItems.orderedByFrequency
+                                   )
+                                |> viewCards model editable
                             ]
                         ]
-        )
+                    ]
+                ]

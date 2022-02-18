@@ -6,7 +6,7 @@ import Data.AboutHtml exposing (AboutHtml)
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
-import Data.GlossaryItems as GlossaryItems
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
@@ -76,8 +76,7 @@ init enableHelpForMakingChanges titleHeaderHtml aboutHtml maybeIndex loadedGloss
             Maybe.map2
                 (\index glossaryItems ->
                     glossaryItems
-                        |> Array.fromList
-                        |> Array.get (GlossaryItemIndex.toInt index)
+                        |> GlossaryItems.get index
                         |> Maybe.map Form.fromGlossaryItem
                         |> Maybe.withDefault Form.empty
                 )
@@ -177,20 +176,14 @@ update msg model =
                             newOrUpdatedGlossaryItem =
                                 Form.toGlossaryItem glossaryItems model.form
 
-                            updatedGlossaryItems : List GlossaryItem
+                            updatedGlossaryItems : GlossaryItems
                             updatedGlossaryItems =
-                                (case model.maybeIndex of
+                                case model.maybeIndex of
                                     Just index ->
-                                        glossaryItems
-                                            |> Array.fromList
-                                            |> Array.set (GlossaryItemIndex.toInt index) newOrUpdatedGlossaryItem
-                                            |> Array.toList
+                                        GlossaryItems.update index newOrUpdatedGlossaryItem glossaryItems
 
                                     Nothing ->
-                                        newOrUpdatedGlossaryItem :: glossaryItems
-                                )
-                                    |> GlossaryItems.sanitise
-                                    |> GlossaryItems.orderAlphabetically
+                                        GlossaryItems.insert newOrUpdatedGlossaryItem glossaryItems
                         in
                         ( { model | glossaryItems = Ok updatedGlossaryItems }
                         , patchHtmlFile model updatedGlossaryItems
@@ -205,7 +198,7 @@ update msg model =
             )
 
 
-patchHtmlFile : Model -> List GlossaryItem -> Cmd Msg
+patchHtmlFile : Model -> GlossaryItems -> Cmd Msg
 patchHtmlFile model glossaryItems =
     Http.request
         { method = "PATCH"
@@ -661,7 +654,7 @@ viewAddRelatedTermButtonForEmptyState =
         ]
 
 
-viewCreateSeeAlso : Bool -> List GlossaryItem -> Array Form.Term -> Array Form.RelatedTerm -> Html Msg
+viewCreateSeeAlso : Bool -> GlossaryItems -> Array Form.Term -> Array Form.RelatedTerm -> Html Msg
 viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray =
     let
         termIdsSet =
@@ -672,7 +665,9 @@ viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray =
 
         allTerms : List GlossaryItem.Term
         allTerms =
-            List.filterMap (.terms >> List.head) glossaryItems
+            glossaryItems
+                |> GlossaryItems.orderedAlphabetically
+                |> List.filterMap (Tuple.second >> .terms >> List.head)
     in
     div [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
@@ -707,7 +702,7 @@ viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray =
         ]
 
 
-viewCreateFormFooter : Model -> Bool -> Maybe String -> List GlossaryItem -> GlossaryItemForm -> Html Msg
+viewCreateFormFooter : Model -> Bool -> Maybe String -> GlossaryItems -> GlossaryItemForm -> Html Msg
 viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossaryItems form =
     let
         errorDiv message =
