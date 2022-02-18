@@ -98,9 +98,6 @@ validate form =
         existingTermIdsSet =
             existingTermIds form
 
-        _ =
-            Debug.log "existingTermIdsSet" existingTermIdsSet
-
         validatedTerms =
             form
                 |> terms
