@@ -2,15 +2,14 @@ module Pages.CreateOrEdit exposing (Model, Msg, init, update, view)
 
 import Array exposing (Array)
 import Browser.Dom as Dom
-import Data.AboutHtml exposing (AboutHtml)
+import CommonModel exposing (CommonModel)
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
-import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
+import Data.GlossaryItem as GlossaryItem
+import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
-import Data.TitleHeaderHtml exposing (TitleHeaderHtml)
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
@@ -34,9 +33,7 @@ import Task
 
 
 type alias Model =
-    { enableHelpForMakingChanges : Bool
-    , titleHeaderHtml : TitleHeaderHtml
-    , aboutHtml : AboutHtml
+    { common : CommonModel
     , maybeIndex : Maybe GlossaryItemIndex
     , glossaryItems : LoadedGlossaryItems
     , form : GlossaryItemForm
@@ -65,11 +62,9 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init : Bool -> TitleHeaderHtml -> AboutHtml -> Maybe GlossaryItemIndex -> LoadedGlossaryItems -> ( Model, Cmd Msg )
-init enableHelpForMakingChanges titleHeaderHtml aboutHtml maybeIndex loadedGlossaryItems =
-    ( { enableHelpForMakingChanges = enableHelpForMakingChanges
-      , titleHeaderHtml = titleHeaderHtml
-      , aboutHtml = aboutHtml
+init : CommonModel -> Maybe GlossaryItemIndex -> LoadedGlossaryItems -> ( Model, Cmd Msg )
+init commonModel maybeIndex loadedGlossaryItems =
+    ( { common = commonModel
       , maybeIndex = maybeIndex
       , glossaryItems = loadedGlossaryItems
       , form =
@@ -206,7 +201,7 @@ patchHtmlFile model glossaryItems =
         , url = "/"
         , body =
             glossaryItems
-                |> GlossaryItems.toHtmlTree model.enableHelpForMakingChanges
+                |> GlossaryItems.toHtmlTree model.common.enableHelpForMakingChanges
                 |> HtmlTree.toHtml
                 |> Http.stringBody "text/html"
         , expect =
@@ -214,12 +209,7 @@ patchHtmlFile model glossaryItems =
                 (\result ->
                     case result of
                         Ok _ ->
-                            PageMsg.NavigateToListAll
-                                model.enableHelpForMakingChanges
-                                model.titleHeaderHtml
-                                model.aboutHtml
-                                model.maybeIndex
-                                (Ok glossaryItems)
+                            PageMsg.NavigateToListAll model.common model.maybeIndex (Ok glossaryItems)
 
                         Err error ->
                             PageMsg.Internal <| FailedToSave error
@@ -724,7 +714,8 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
             [ button
                 [ Html.Attributes.type_ "button"
                 , class "bg-white dark:bg-gray-700 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                , Html.Events.onClick <| PageMsg.NavigateToListAll model.enableHelpForMakingChanges model.titleHeaderHtml model.aboutHtml model.maybeIndex <| Ok glossaryItems
+                , Html.Events.onClick <|
+                    PageMsg.NavigateToListAll model.common model.maybeIndex (Ok glossaryItems)
                 ]
                 [ text "Cancel" ]
             , button

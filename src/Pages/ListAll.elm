@@ -1,12 +1,13 @@
 port module Pages.ListAll exposing (Model, Msg, init, update, view)
 
 import Browser.Dom as Dom
-import Data.AboutHtml as AboutHtml exposing (AboutHtml)
+import CommonModel exposing (CommonModel)
+import Data.AboutHtml as AboutHtml
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
-import Data.TitleHeaderHtml as TitleHeaderHtml exposing (TitleHeaderHtml)
+import Data.TitleHeaderHtml as TitleHeaderHtml
 import Dict exposing (Dict)
 import Extras.Html
 import Extras.HtmlAttribute
@@ -29,13 +30,6 @@ import Task
 -- MODEL
 
 
-type MakingChanges
-    = NoHelpForMakingChanges
-    | ReadyForMakingChanges
-    | MakingChangesHelpCollapsed
-    | MakingChangesHelpExpanded
-
-
 type MenuForMobileVisibility
     = Visible
     | Disappearing
@@ -47,11 +41,16 @@ type OrderItemsBy
     | MostFrequentFirst
 
 
+type MakingChanges
+    = NoHelpForMakingChanges
+    | ReadyForMakingChanges
+    | MakingChangesHelpCollapsed
+    | MakingChangesHelpExpanded
+
+
 type alias Model =
-    { makingChanges : MakingChanges
-    , enableHelpForMakingChanges : Bool
-    , titleHeaderHtml : TitleHeaderHtml
-    , aboutHtml : AboutHtml
+    { common : CommonModel
+    , makingChanges : MakingChanges
     , menuForMobileVisibility : MenuForMobileVisibility
     , maybeIndex : Maybe GlossaryItemIndex
     , glossaryItems : LoadedGlossaryItems
@@ -80,10 +79,10 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init : Bool -> Bool -> TitleHeaderHtml -> AboutHtml -> Maybe GlossaryItemIndex -> LoadedGlossaryItems -> ( Model, Cmd Msg )
-init editorIsRunning enableHelpForMakingChanges titleHeaderHtml aboutHtml maybeIndex glossaryItems =
+init : Bool -> CommonModel -> Maybe GlossaryItemIndex -> LoadedGlossaryItems -> ( Model, Cmd Msg )
+init editorIsRunning commonModel maybeIndex glossaryItems =
     ( { makingChanges =
-            case ( editorIsRunning, enableHelpForMakingChanges ) of
+            case ( editorIsRunning, commonModel.enableHelpForMakingChanges ) of
                 ( True, _ ) ->
                     ReadyForMakingChanges
 
@@ -92,9 +91,7 @@ init editorIsRunning enableHelpForMakingChanges titleHeaderHtml aboutHtml maybeI
 
                 ( False, False ) ->
                     NoHelpForMakingChanges
-      , enableHelpForMakingChanges = enableHelpForMakingChanges
-      , titleHeaderHtml = titleHeaderHtml
-      , aboutHtml = aboutHtml
+      , common = commonModel
       , menuForMobileVisibility = Invisible
       , maybeIndex = maybeIndex
       , glossaryItems = glossaryItems
@@ -183,7 +180,7 @@ update msg model =
                         , errorWhileDeleting = Nothing
                       }
                     , Cmd.batch
-                        [ patchHtmlFile model.enableHelpForMakingChanges index updatedGlossaryItems
+                        [ patchHtmlFile model.common.enableHelpForMakingChanges index updatedGlossaryItems
                         , allowBackgroundScrolling ()
                         ]
                     )
@@ -602,12 +599,7 @@ viewGlossaryItem index model editable errorWhileDeleting glossaryItem =
                         [ class "inline-flex items-center" ]
                         [ viewGlossaryItemButton
                             [ Html.Events.onClick <|
-                                PageMsg.NavigateToCreateOrEdit
-                                    model.enableHelpForMakingChanges
-                                    model.titleHeaderHtml
-                                    model.aboutHtml
-                                    (Just index)
-                                    model.glossaryItems
+                                PageMsg.NavigateToCreateOrEdit model.common (Just index) model.glossaryItems
                             ]
                             Icons.pencilSolid
                             "Edit"
@@ -740,12 +732,7 @@ viewCreateGlossaryItemButtonForEmptyState model =
             [ Html.Attributes.type_ "button"
             , class "relative block max-w-lg border-2 border-gray-300 border-dashed rounded-lg p-9 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             , Html.Events.onClick <|
-                PageMsg.NavigateToCreateOrEdit
-                    model.enableHelpForMakingChanges
-                    model.titleHeaderHtml
-                    model.aboutHtml
-                    Nothing
-                    model.glossaryItems
+                PageMsg.NavigateToCreateOrEdit model.common Nothing model.glossaryItems
             ]
             [ svg
                 [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400"
@@ -771,13 +758,7 @@ viewCreateGlossaryItemButton model =
         [ button
             [ Html.Attributes.type_ "button"
             , class "inline-flex items-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            , Html.Events.onClick <|
-                PageMsg.NavigateToCreateOrEdit
-                    model.enableHelpForMakingChanges
-                    model.titleHeaderHtml
-                    model.aboutHtml
-                    Nothing
-                    model.glossaryItems
+            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit model.common Nothing model.glossaryItems
             ]
             [ svg
                 [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5", viewBox "0 0 20 20", fill "currentColor" ]
@@ -1121,10 +1102,10 @@ view model =
                     [ viewTopBar
                     , div
                         [ Html.Attributes.id "outer" ]
-                        [ div [] <| TitleHeaderHtml.toVirtualDom model.titleHeaderHtml
+                        [ div [] <| TitleHeaderHtml.toVirtualDom model.common.titleHeaderHtml
                         , Html.main_
                             []
-                            [ div [] <| AboutHtml.toVirtualDom model.aboutHtml
+                            [ div [] <| AboutHtml.toVirtualDom model.common.aboutHtml
                             , glossaryItems
                                 |> (if model.orderItemsBy == Alphabetically then
                                         GlossaryItems.orderedAlphabetically

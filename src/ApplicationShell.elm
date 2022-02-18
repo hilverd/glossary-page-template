@@ -2,6 +2,7 @@ module ApplicationShell exposing (main)
 
 import Browser
 import Browser.Dom as Dom
+import CommonModel exposing (CommonModel)
 import Data.AboutHtml as AboutHtml
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
 import Data.TitleHeaderHtml as TitleHeaderHtml
@@ -71,9 +72,7 @@ init flags =
         ( listAllModel, listAllCmd ) =
             Pages.ListAll.init
                 editorIsRunning
-                enableHelpForMakingChanges
-                titleHeaderHtml
-                aboutHtml
+                (CommonModel enableHelpForMakingChanges titleHeaderHtml aboutHtml)
                 Nothing
                 loadedGlossaryItems
     in
@@ -95,20 +94,20 @@ type Msg
 withoutInternal : Msg -> PageMsg ()
 withoutInternal msg =
     case msg of
-        ListAllMsg (NavigateToListAll enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems) ->
-            PageMsg.NavigateToListAll enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems
+        ListAllMsg (NavigateToListAll commonModel maybeIndex glossaryItems) ->
+            PageMsg.NavigateToListAll commonModel maybeIndex glossaryItems
 
-        ListAllMsg (NavigateToCreateOrEdit enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems) ->
-            PageMsg.NavigateToCreateOrEdit enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems
+        ListAllMsg (NavigateToCreateOrEdit commonModel maybeIndex glossaryItems) ->
+            PageMsg.NavigateToCreateOrEdit commonModel maybeIndex glossaryItems
 
         ListAllMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
-        CreateOrEditMsg (NavigateToListAll enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems) ->
-            PageMsg.NavigateToListAll enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems
+        CreateOrEditMsg (NavigateToListAll commonModel maybeIndex glossaryItems) ->
+            PageMsg.NavigateToListAll commonModel maybeIndex glossaryItems
 
-        CreateOrEditMsg (NavigateToCreateOrEdit enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems) ->
-            PageMsg.NavigateToCreateOrEdit enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems
+        CreateOrEditMsg (NavigateToCreateOrEdit commonModel maybeIndex glossaryItems) ->
+            PageMsg.NavigateToCreateOrEdit commonModel maybeIndex glossaryItems
 
         CreateOrEditMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
@@ -120,19 +119,19 @@ withoutInternal msg =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, withoutInternal msg, model.page ) of
-        ( _, NavigateToListAll enableHelpForMakingChanges titleHeaderHtml aboutHtml maybeIndex glossaryItems, _ ) ->
+        ( _, NavigateToListAll commonModel maybeIndex glossaryItems, _ ) ->
             let
                 ( listAllModel, listAllCmd ) =
-                    Pages.ListAll.init True enableHelpForMakingChanges titleHeaderHtml aboutHtml maybeIndex glossaryItems
+                    Pages.ListAll.init True commonModel maybeIndex glossaryItems
             in
             ( { model | page = ListAll listAllModel }
             , Cmd.map ListAllMsg listAllCmd
             )
 
-        ( _, NavigateToCreateOrEdit enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems, _ ) ->
+        ( _, NavigateToCreateOrEdit commonModel maybeIndex glossaryItems, _ ) ->
             let
                 ( createOrEditModel, createOrEditCmd ) =
-                    Pages.CreateOrEdit.init enableHelpForMakingChanges aboutHtml titleHeaderHtml maybeIndex glossaryItems
+                    Pages.CreateOrEdit.init commonModel maybeIndex glossaryItems
             in
             ( { model | page = CreateOrEdit createOrEditModel }
             , Cmd.batch [ resetViewport, Cmd.map CreateOrEditMsg createOrEditCmd ]
