@@ -1,6 +1,6 @@
 {
   "name": "glossary-page-template",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Create a glossary as a single HTML page hosted anywhere.",
   "private": true,
   "author": "Hilverd Reker",
