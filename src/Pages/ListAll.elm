@@ -1030,7 +1030,7 @@ viewTopBar =
 viewOrderItemsBy : Model -> Html Msg
 viewOrderItemsBy model =
     div
-        [ class "border-t border-gray-300 dark:border-gray-700 pt-4 pb-6" ]
+        [ class "border-t border-gray-300 dark:border-gray-700 pt-6 pb-6" ]
         [ label
             [ class "font-medium text-gray-900 dark:text-gray-100" ]
             [ text "Order items" ]
