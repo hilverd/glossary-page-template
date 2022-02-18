@@ -72,7 +72,7 @@ init flags =
         ( listAllModel, listAllCmd ) =
             Pages.ListAll.init
                 editorIsRunning
-                (CommonModel enableHelpForMakingChanges titleHeaderHtml aboutHtml)
+                (CommonModel enableHelpForMakingChanges titleHeaderHtml aboutHtml CommonModel.Alphabetically)
                 Nothing
                 loadedGlossaryItems
     in

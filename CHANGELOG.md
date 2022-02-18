@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+
+- Fix bug that would occur when trying to edit/delete while items are ordered by most frequent.
+- Scroll back to item after editing it.
+
 ### Removed
 
 ## [0.4.1] - 2022-02-18

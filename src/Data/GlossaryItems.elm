@@ -22,8 +22,8 @@ import Set
 
 type GlossaryItems
     = GlossaryItems
-        { orderedAlphabetically : List GlossaryItem
-        , orderedByFrequency : List GlossaryItem
+        { orderedAlphabetically : List ( GlossaryItemIndex, GlossaryItem )
+        , orderedByFrequency : List ( GlossaryItemIndex, GlossaryItem )
         }
 
 
@@ -32,23 +32,27 @@ fromList glossaryItems =
     let
         sanitised =
             sanitiseList glossaryItems
+
+        alphabetically =
+            sanitised
+                |> List.sortBy (.terms >> List.head >> Maybe.map .body >> Maybe.withDefault "" >> String.toLower)
+                |> zipListWithIndexes
+
+        byFrequency =
+            alphabetically
+                |> orderListByFrequency
     in
     GlossaryItems <|
-        { orderedAlphabetically = orderListAlphabetically sanitised
-        , orderedByFrequency = orderListByFrequency sanitised
+        { orderedAlphabetically = alphabetically
+        , orderedByFrequency = byFrequency
         }
 
 
-orderListAlphabetically : List GlossaryItem -> List GlossaryItem
-orderListAlphabetically =
-    List.sortBy (.terms >> List.head >> Maybe.map .body >> Maybe.withDefault "" >> String.toLower)
-
-
-orderListByFrequency : List GlossaryItem -> List GlossaryItem
-orderListByFrequency glossaryItems =
+orderListByFrequency : List ( GlossaryItemIndex, GlossaryItem ) -> List ( GlossaryItemIndex, GlossaryItem )
+orderListByFrequency indexedGlossaryItems =
     let
         indexed =
-            List.indexedMap Tuple.pair glossaryItems
+            List.map (Tuple.mapFirst GlossaryItemIndex.toInt) indexedGlossaryItems
 
         -- Maps a term to a score based on whether or not it occurs in glossaryItem.
         -- This is done in a primitive way. A more sophisticated solution could use stemming
@@ -105,9 +109,9 @@ orderListByFrequency glossaryItems =
                     )
                     Dict.empty
     in
-    glossaryItems
+    indexedGlossaryItems
         |> List.sortWith
-            (\item1 item2 ->
+            (\( _, item1 ) ( _, item2 ) ->
                 let
                     itemScore =
                         .terms
@@ -214,18 +218,14 @@ orderedAlphabetically : GlossaryItems -> List ( GlossaryItemIndex, GlossaryItem 
 orderedAlphabetically glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
-            items
-                |> .orderedAlphabetically
-                |> zipListWithIndexes
+            items.orderedAlphabetically
 
 
 orderedByFrequency : GlossaryItems -> List ( GlossaryItemIndex, GlossaryItem )
 orderedByFrequency glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
-            items
-                |> .orderedByFrequency
-                |> zipListWithIndexes
+            items.orderedByFrequency
 
 
 toHtmlTree : Bool -> GlossaryItems -> HtmlTree

@@ -36,11 +36,6 @@ type MenuForMobileVisibility
     | Invisible
 
 
-type OrderItemsBy
-    = Alphabetically
-    | MostFrequentFirst
-
-
 type MakingChanges
     = NoHelpForMakingChanges
     | ReadyForMakingChanges
@@ -56,7 +51,6 @@ type alias Model =
     , glossaryItems : LoadedGlossaryItems
     , confirmDeleteIndex : Maybe GlossaryItemIndex
     , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
-    , orderItemsBy : OrderItemsBy
     }
 
 
@@ -72,7 +66,7 @@ type InternalMsg
     | Deleted GlossaryItems
     | FailedToDelete GlossaryItemIndex Http.Error
     | JumpToTermIndexGroup Bool String
-    | ChangeOrderItemsBy OrderItemsBy
+    | ChangeOrderItemsBy CommonModel.OrderItemsBy
 
 
 type alias Msg =
@@ -97,14 +91,13 @@ init editorIsRunning commonModel maybeIndex glossaryItems =
       , glossaryItems = glossaryItems
       , confirmDeleteIndex = Nothing
       , errorWhileDeleting = Nothing
-      , orderItemsBy = Alphabetically
       }
     , case maybeIndex of
         Just index ->
-            jumpToGlossaryItem index
+            scrollGlossaryItemIntoView index
 
         Nothing ->
-            Cmd.none
+            scrollToTop
     )
 
 
@@ -147,7 +140,7 @@ update msg model =
             ( { model | menuForMobileVisibility = Visible }
             , Cmd.batch
                 [ preventBackgroundScrolling ()
-                , jumpToElement idOfIndexForMobile
+                , scrollToTopInElement idOfIndexForMobile
                 ]
             )
 
@@ -189,7 +182,9 @@ update msg model =
                     ( model, Cmd.none )
 
         Deleted updatedGlossaryItems ->
-            ( { model | glossaryItems = Ok updatedGlossaryItems }, Cmd.none )
+            ( { model | glossaryItems = Ok updatedGlossaryItems }
+            , scrollToTop
+            )
 
         FailedToDelete indexOfItemBeingDeleted error ->
             ( { model
@@ -241,7 +236,11 @@ update msg model =
             )
 
         ChangeOrderItemsBy orderItemsBy ->
-            ( { model | orderItemsBy = orderItemsBy }
+            let
+                common =
+                    model.common
+            in
+            ( { model | common = { common | orderItemsBy = orderItemsBy } }
             , Cmd.none
             )
 
@@ -272,13 +271,29 @@ patchHtmlFile enableHelpForMakingChanges indexOfItemBeingDeleted glossaryItems =
         }
 
 
-jumpToGlossaryItem : GlossaryItemIndex -> Cmd Msg
-jumpToGlossaryItem =
-    idForGlossaryItemDiv >> jumpToElement
+scrollToTop : Cmd Msg
+scrollToTop =
+    Dom.setViewport 0 0
+        |> Task.onError (always <| Task.succeed ())
+        |> Task.attempt (always <| PageMsg.Internal NoOp)
 
 
-jumpToElement : String -> Cmd Msg
-jumpToElement id =
+scrollGlossaryItemIntoView : GlossaryItemIndex -> Cmd Msg
+scrollGlossaryItemIntoView =
+    idForGlossaryItemDiv >> scrollElementIntoView
+
+
+scrollElementIntoView : String -> Cmd Msg
+scrollElementIntoView id =
+    id
+        |> Dom.getElement
+        |> Task.andThen (\element -> Dom.setViewport 0 <| element.element.y - 96)
+        |> Task.onError (always <| Task.succeed ())
+        |> Task.attempt (always <| PageMsg.Internal NoOp)
+
+
+scrollToTopInElement : String -> Cmd Msg
+scrollToTopInElement id =
     id
         |> Dom.getViewportOf
         |> Task.andThen (always <| Dom.setViewportOf id 0 0)
@@ -1043,12 +1058,12 @@ viewOrderItemsBy model =
                 [ div
                     [ class "flex items-center" ]
                     [ input
-                        [ checked <| model.orderItemsBy == Alphabetically
+                        [ checked <| model.common.orderItemsBy == CommonModel.Alphabetically
                         , class "focus:ring-indigo-500 h-4 w-4 dark:bg-gray-200 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-500"
                         , id "order-items-alphabetically"
                         , name "order-items-by"
                         , Html.Attributes.type_ "radio"
-                        , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy Alphabetically
+                        , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy CommonModel.Alphabetically
                         ]
                         []
                     , label
@@ -1060,12 +1075,12 @@ viewOrderItemsBy model =
                 , div
                     [ class "flex items-center" ]
                     [ input
-                        [ checked <| model.orderItemsBy == MostFrequentFirst
+                        [ checked <| model.common.orderItemsBy == CommonModel.MostFrequentFirst
                         , class "focus:ring-indigo-500 h-4 w-4 dark:bg-gray-200 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-500"
                         , id "order-items-most-frequent-first"
                         , name "order-items-by"
                         , Html.Attributes.type_ "radio"
-                        , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy MostFrequentFirst
+                        , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy CommonModel.MostFrequentFirst
                         ]
                         []
                     , label
@@ -1107,7 +1122,7 @@ view model =
                             []
                             [ div [] <| AboutHtml.toVirtualDom model.common.aboutHtml
                             , glossaryItems
-                                |> (if model.orderItemsBy == Alphabetically then
+                                |> (if model.common.orderItemsBy == CommonModel.Alphabetically then
                                         GlossaryItems.orderedAlphabetically
 
                                     else
