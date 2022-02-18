@@ -64,6 +64,13 @@ type alias Msg =
 
 init : CommonModel -> Maybe GlossaryItemIndex -> LoadedGlossaryItems -> ( Model, Cmd Msg )
 init commonModel maybeIndex loadedGlossaryItems =
+    let
+        existingTermIds =
+            loadedGlossaryItems
+                |> Result.toMaybe
+                |> Maybe.map GlossaryItems.termIds
+                |> Maybe.withDefault Set.empty
+    in
     ( { common = commonModel
       , maybeIndex = maybeIndex
       , glossaryItems = loadedGlossaryItems
@@ -72,12 +79,12 @@ init commonModel maybeIndex loadedGlossaryItems =
                 (\index glossaryItems ->
                     glossaryItems
                         |> GlossaryItems.get index
-                        |> Maybe.map Form.fromGlossaryItem
-                        |> Maybe.withDefault Form.empty
+                        |> Maybe.map (Form.fromGlossaryItem existingTermIds)
+                        |> Maybe.withDefault (Form.empty existingTermIds)
                 )
                 maybeIndex
                 (loadedGlossaryItems |> Result.toMaybe)
-                |> Maybe.withDefault Form.empty
+                |> Maybe.withDefault (Form.empty existingTermIds)
       , triedToSaveWhenFormInvalid = False
       , errorMessageWhileSaving = Nothing
       }
@@ -105,7 +112,7 @@ update msg model =
                     Form.addTerm model.form
 
                 latestTermIndex =
-                    Array.length form.terms - 1 |> TermIndex.fromInt
+                    Array.length (Form.terms form) - 1 |> TermIndex.fromInt
             in
             ( { model | form = form }
             , giveFocusToTermInputField latestTermIndex
@@ -126,7 +133,7 @@ update msg model =
                     Form.addDetails model.form
 
                 latestDetailsIndex =
-                    Array.length form.details - 1 |> DetailsIndex.fromInt
+                    Array.length (Form.detailsArray form) - 1 |> DetailsIndex.fromInt
             in
             ( { model | form = form }
             , giveFocusToDescriptionDetailsSingle latestDetailsIndex
@@ -732,6 +739,16 @@ view : Model -> Html Msg
 view model =
     case model.glossaryItems of
         Ok glossaryItems ->
+            let
+                terms =
+                    Form.terms model.form
+
+                detailsArray =
+                    Form.detailsArray model.form
+
+                relatedTerms =
+                    Form.relatedTerms model.form
+            in
             div
                 [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl" ]
                 [ Html.main_
@@ -749,9 +766,9 @@ view model =
                         [ class "pt-7" ]
                         [ div
                             [ class "space-y-8 divide-y divide-gray-200 sm:space-y-5" ]
-                            [ viewCreateDescriptionTerms model.triedToSaveWhenFormInvalid model.form.terms
-                            , viewCreateDescriptionDetails model.triedToSaveWhenFormInvalid model.form.details
-                            , viewCreateSeeAlso model.triedToSaveWhenFormInvalid glossaryItems model.form.terms model.form.relatedTerms
+                            [ viewCreateDescriptionTerms model.triedToSaveWhenFormInvalid terms
+                            , viewCreateDescriptionDetails model.triedToSaveWhenFormInvalid detailsArray
+                            , viewCreateSeeAlso model.triedToSaveWhenFormInvalid glossaryItems terms relatedTerms
                             , viewCreateFormFooter model model.triedToSaveWhenFormInvalid model.errorMessageWhileSaving glossaryItems model.form
                             ]
                         ]

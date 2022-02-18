@@ -6,6 +6,7 @@ module Data.GlossaryItems exposing
     , orderedAlphabetically
     , orderedByFrequency
     , remove
+    , termIds
     , toHtmlTree
     , update
     )
@@ -17,7 +18,7 @@ import Dict exposing (Dict)
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Regex
 import Regex
-import Set
+import Set exposing (Set)
 
 
 type GlossaryItems
@@ -226,6 +227,14 @@ orderedByFrequency glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             items.orderedByFrequency
+
+
+termIds : GlossaryItems -> Set String
+termIds =
+    orderedAlphabetically
+        >> List.map (Tuple.second >> .terms >> List.map .id)
+        >> List.concat
+        >> Set.fromList
 
 
 toHtmlTree : Bool -> GlossaryItems -> HtmlTree

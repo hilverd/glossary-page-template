@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+
+- Improve form validation by showing an error when trying to add a term that already exists.
+
 ### Removed
 
 ## [0.4.2] - 2022-02-18
