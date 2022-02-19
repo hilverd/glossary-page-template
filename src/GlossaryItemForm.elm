@@ -31,7 +31,6 @@ import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import Dict exposing (Dict)
 import Extras.Array
-import Html.Attributes exposing (id)
 import Set exposing (Set)
 
 
@@ -60,7 +59,7 @@ type GlossaryItemForm
         { terms : Array Term
         , detailsArray : Array Details
         , relatedTerms : Array RelatedTerm
-        , existingTermIds : Set String
+        , termIdsOutside : Set String
         }
 
 
@@ -85,18 +84,31 @@ relatedTerms glossaryItemForm =
             form.relatedTerms
 
 
-existingTermIds : GlossaryItemForm -> Set String
-existingTermIds glossaryItemForm =
+termIdsOutside : GlossaryItemForm -> Set String
+termIdsOutside glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
-            form.existingTermIds
+            form.termIdsOutside
 
 
 validate : GlossaryItemForm -> GlossaryItemForm
 validate form =
     let
-        existingTermIdsSet =
-            existingTermIds form
+        termIdsOutsideSet =
+            termIdsOutside form
+
+        termIdsInsideForm : Dict String Int
+        termIdsInsideForm =
+            form
+                |> terms
+                |> Array.map (.body >> termBodyToId)
+                |> Array.foldl
+                    (\termId ->
+                        Dict.update
+                            termId
+                            (Maybe.map ((+) 1) >> Maybe.withDefault 1 >> Just)
+                    )
+                    Dict.empty
 
         validatedTerms =
             form
@@ -108,8 +120,11 @@ validate form =
                                 if String.isEmpty term.body then
                                     Just "This field can't be empty"
 
-                                else if Set.member (termBodyToId term.body) existingTermIdsSet then
-                                    Just "This term already exists"
+                                else if Set.member (termBodyToId term.body) termIdsOutsideSet then
+                                    Just "This term already exists elsewhere"
+
+                                else if (Dict.get (termBodyToId term.body) termIdsInsideForm |> Maybe.withDefault 0) > 1 then
+                                    Just "This term occurs multiple times"
 
                                 else
                                     Nothing
@@ -150,24 +165,28 @@ validate form =
         { terms = validatedTerms
         , detailsArray = validatedDetails
         , relatedTerms = validatedRelatedTerms
-        , existingTermIds = existingTermIds form
+        , termIdsOutside = termIdsOutside form
         }
 
 
 hasValidationErrors : GlossaryItemForm -> Bool
 hasValidationErrors form =
-    (form |> terms |> Array.toList |> List.any (.validationError >> (/=) Nothing))
-        || (form |> detailsArray |> Array.toList |> List.any (.validationError >> (/=) Nothing))
-        || (form |> relatedTerms |> Array.toList |> List.any (.validationError >> (/=) Nothing))
+    let
+        hasErrors =
+            Array.toList >> List.any (.validationError >> (/=) Nothing)
+    in
+    (form |> terms |> hasErrors)
+        || (form |> detailsArray |> hasErrors)
+        || (form |> relatedTerms |> hasErrors)
 
 
 empty : Set String -> GlossaryItemForm
-empty withExistingTermIds =
+empty withTermIdsOutside =
     GlossaryItemForm
         { terms = Array.fromList [ emptyTerm ]
         , detailsArray = Array.empty
         , relatedTerms = Array.empty
-        , existingTermIds = withExistingTermIds
+        , termIdsOutside = withTermIdsOutside
         }
         |> validate
 
@@ -196,7 +215,7 @@ emptyRelatedTerm =
 
 
 fromGlossaryItem : Set String -> GlossaryItem -> GlossaryItemForm
-fromGlossaryItem withExistingTermIds item =
+fromGlossaryItem existingTermIds item =
     let
         termsForItem =
             List.map (\term -> Term term.body term.isAbbreviation False Nothing) item.terms
@@ -216,8 +235,7 @@ fromGlossaryItem withExistingTermIds item =
             item.relatedTerms
                 |> List.map (\term -> RelatedTerm (Just term.idReference) Nothing)
                 |> Array.fromList
-        , existingTermIds =
-            Set.diff withExistingTermIds termIdsForItem
+        , termIdsOutside = Set.diff existingTermIds termIdsForItem
         }
         |> validate
 

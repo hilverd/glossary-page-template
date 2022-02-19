@@ -11,7 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 ### Fixed
 
-- Improve form validation by showing an error when trying to add a term that already exists.
+- Improve form validation.
+  - Prevent adding a term that already exists elsewhere.
+  - Prevent having multiple terms with the same ID in a single form.
 
 ### Removed
 
