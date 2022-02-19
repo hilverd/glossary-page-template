@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Scroll to new items after creating them.
+- When adding related term, auto focus on select menu.
 
 ### Fixed
 

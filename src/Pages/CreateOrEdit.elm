@@ -142,7 +142,16 @@ update msg model =
             ( { model | form = Form.deleteDetails detailsIndex model.form }, Cmd.none )
 
         AddRelatedTerm ->
-            ( { model | form = Form.addRelatedTerm model.form }, Cmd.none )
+            let
+                form =
+                    Form.addRelatedTerm model.form
+
+                latestRelatedTermIndex =
+                    Array.length (Form.relatedTerms form) - 1 |> RelatedTermIndex.fromInt
+            in
+            ( { model | form = form }
+            , giveFocusToSeeAlsoSelect latestRelatedTermIndex
+            )
 
         SelectRelatedTerm relatedTermIndex selection ->
             let
@@ -259,12 +268,17 @@ patchHtmlFile model glossaryItems =
 
 giveFocusToTermInputField : TermIndex -> Cmd Msg
 giveFocusToTermInputField termIndex =
-    Task.attempt (\_ -> PageMsg.Internal NoOp) (Dom.focus <| idForTermInputField termIndex)
+    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| idForTermInputField termIndex)
 
 
 giveFocusToDescriptionDetailsSingle : DetailsIndex -> Cmd Msg
 giveFocusToDescriptionDetailsSingle index =
-    Task.attempt (\_ -> PageMsg.Internal NoOp) (Dom.focus <| idForDescriptionDetailsSingle index)
+    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| idForDescriptionDetailsSingle index)
+
+
+giveFocusToSeeAlsoSelect : RelatedTermIndex -> Cmd Msg
+giveFocusToSeeAlsoSelect index =
+    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| idForSeeAlsoSelect index)
 
 
 idForTermInputField : TermIndex -> String
@@ -275,6 +289,11 @@ idForTermInputField termIndex =
 idForDescriptionDetailsSingle : DetailsIndex -> String
 idForDescriptionDetailsSingle index =
     "details-" ++ (index |> DetailsIndex.toInt |> String.fromInt)
+
+
+idForSeeAlsoSelect : RelatedTermIndex -> String
+idForSeeAlsoSelect index =
+    "see-also-" ++ (index |> RelatedTermIndex.toInt |> String.fromInt)
 
 
 viewCreateDescriptionTerm : Bool -> Bool -> Int -> Form.Term -> Html Msg
@@ -592,7 +611,8 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms 
                 , div
                     [ class "flex-auto" ]
                     [ select
-                        [ class "mt-1 block w-full pl-3 pr-10 py-2 dark:bg-gray-700 dark:text-gray-200 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
+                        [ id <| idForSeeAlsoSelect index
+                        , class "mt-1 block w-full pl-3 pr-10 py-2 dark:bg-gray-700 dark:text-gray-200 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
                         , Html.Events.on "change" <|
                             Decode.map (PageMsg.Internal << SelectRelatedTerm index) <|
                                 Decode.andThen Decode.succeed Html.Events.targetValue
