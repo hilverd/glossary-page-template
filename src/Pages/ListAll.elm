@@ -47,8 +47,6 @@ type alias Model =
     { common : CommonModel
     , makingChanges : MakingChanges
     , menuForMobileVisibility : MenuForMobileVisibility
-    , maybeIndex : Maybe GlossaryItemIndex
-    , glossaryItems : LoadedGlossaryItems
     , confirmDeleteIndex : Maybe GlossaryItemIndex
     , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
     }
@@ -73,8 +71,8 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init : Bool -> CommonModel -> Maybe GlossaryItemIndex -> LoadedGlossaryItems -> ( Model, Cmd Msg )
-init editorIsRunning commonModel maybeIndex glossaryItems =
+init : Bool -> CommonModel -> ( Model, Cmd Msg )
+init editorIsRunning commonModel =
     ( { makingChanges =
             case ( editorIsRunning, commonModel.enableHelpForMakingChanges ) of
                 ( True, _ ) ->
@@ -87,12 +85,10 @@ init editorIsRunning commonModel maybeIndex glossaryItems =
                     NoHelpForMakingChanges
       , common = commonModel
       , menuForMobileVisibility = Invisible
-      , maybeIndex = maybeIndex
-      , glossaryItems = glossaryItems
       , confirmDeleteIndex = Nothing
       , errorWhileDeleting = Nothing
       }
-    , case maybeIndex of
+    , case commonModel.maybeIndex of
         Just index ->
             scrollGlossaryItemIntoView index
 
@@ -162,7 +158,7 @@ update msg model =
             ( { model | confirmDeleteIndex = Nothing }, allowBackgroundScrolling () )
 
         Delete index ->
-            case model.glossaryItems of
+            case model.common.loadedGlossaryItems of
                 Ok glossaryItems ->
                     let
                         updatedGlossaryItems =
@@ -182,7 +178,11 @@ update msg model =
                     ( model, Cmd.none )
 
         Deleted updatedGlossaryItems ->
-            ( { model | glossaryItems = Ok updatedGlossaryItems }
+            let
+                common =
+                    model.common
+            in
+            ( { model | common = { common | loadedGlossaryItems = Ok updatedGlossaryItems } }
             , scrollToTop
             )
 
@@ -594,6 +594,9 @@ viewGlossaryItem index model editable errorWhileDeleting glossaryItem =
 
         itemSomeDetails =
             GlossaryItem.hasSomeDetails glossaryItem
+
+        common =
+            model.common
     in
     if editable then
         div
@@ -614,7 +617,7 @@ viewGlossaryItem index model editable errorWhileDeleting glossaryItem =
                         [ class "inline-flex items-center" ]
                         [ viewGlossaryItemButton
                             [ Html.Events.onClick <|
-                                PageMsg.NavigateToCreateOrEdit model.common (Just index) model.glossaryItems
+                                PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
                             ]
                             Icons.pencilSolid
                             "Edit"
@@ -741,13 +744,17 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
 
 viewCreateGlossaryItemButtonForEmptyState : Model -> Html Msg
 viewCreateGlossaryItemButtonForEmptyState model =
+    let
+        common =
+            model.common
+    in
     div
         [ class "pt-4 print:hidden" ]
         [ button
             [ Html.Attributes.type_ "button"
             , class "relative block max-w-lg border-2 border-gray-300 border-dashed rounded-lg p-9 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             , Html.Events.onClick <|
-                PageMsg.NavigateToCreateOrEdit model.common Nothing model.glossaryItems
+                PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
             ]
             [ svg
                 [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400"
@@ -768,12 +775,16 @@ viewCreateGlossaryItemButtonForEmptyState model =
 
 viewCreateGlossaryItemButton : Model -> Html Msg
 viewCreateGlossaryItemButton model =
+    let
+        common =
+            model.common
+    in
     div
         [ class "pb-2 print:hidden" ]
         [ button
             [ Html.Attributes.type_ "button"
             , class "inline-flex items-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit model.common Nothing model.glossaryItems
+            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
             ]
             [ svg
                 [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5", viewBox "0 0 20 20", fill "currentColor" ]
@@ -1096,7 +1107,7 @@ viewOrderItemsBy model =
 
 view : Model -> Html Msg
 view model =
-    case model.glossaryItems of
+    case model.common.loadedGlossaryItems of
         Err error ->
             pre [] [ text <| Decode.errorToString error ]
 

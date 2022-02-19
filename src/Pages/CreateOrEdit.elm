@@ -2,7 +2,7 @@ module Pages.CreateOrEdit exposing (Model, Msg, init, update, view)
 
 import Array exposing (Array)
 import Browser.Dom as Dom
-import CommonModel exposing (CommonModel)
+import CommonModel exposing (CommonModel, OrderItemsBy(..))
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
@@ -34,8 +34,6 @@ import Task
 
 type alias Model =
     { common : CommonModel
-    , maybeIndex : Maybe GlossaryItemIndex
-    , glossaryItems : LoadedGlossaryItems
     , form : GlossaryItemForm
     , triedToSaveWhenFormInvalid : Bool
     , errorMessageWhileSaving : Maybe String
@@ -62,18 +60,16 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init : CommonModel -> Maybe GlossaryItemIndex -> LoadedGlossaryItems -> ( Model, Cmd Msg )
-init commonModel maybeIndex loadedGlossaryItems =
+init : CommonModel -> ( Model, Cmd Msg )
+init commonModel =
     let
         existingTermIds =
-            loadedGlossaryItems
+            commonModel.loadedGlossaryItems
                 |> Result.toMaybe
                 |> Maybe.map GlossaryItems.termIds
                 |> Maybe.withDefault Set.empty
     in
     ( { common = commonModel
-      , maybeIndex = maybeIndex
-      , glossaryItems = loadedGlossaryItems
       , form =
             Maybe.map2
                 (\index glossaryItems ->
@@ -82,13 +78,13 @@ init commonModel maybeIndex loadedGlossaryItems =
                         |> Maybe.map (Form.fromGlossaryItem existingTermIds)
                         |> Maybe.withDefault (Form.empty existingTermIds)
                 )
-                maybeIndex
-                (loadedGlossaryItems |> Result.toMaybe)
+                commonModel.maybeIndex
+                (commonModel.loadedGlossaryItems |> Result.toMaybe)
                 |> Maybe.withDefault (Form.empty existingTermIds)
       , triedToSaveWhenFormInvalid = False
       , errorMessageWhileSaving = Nothing
       }
-    , if maybeIndex == Nothing then
+    , if commonModel.maybeIndex == Nothing then
         0 |> TermIndex.fromInt |> giveFocusToTermInputField
 
       else
@@ -163,7 +159,7 @@ update msg model =
             ( { model | form = Form.deleteRelatedTerm relatedTermIndex model.form }, Cmd.none )
 
         Save ->
-            case model.glossaryItems of
+            case model.common.loadedGlossaryItems of
                 Ok glossaryItems ->
                     if Form.hasValidationErrors model.form then
                         ( { model
@@ -178,16 +174,43 @@ update msg model =
                             newOrUpdatedGlossaryItem =
                                 Form.toGlossaryItem glossaryItems model.form
 
-                            updatedGlossaryItems : GlossaryItems
-                            updatedGlossaryItems =
-                                case model.maybeIndex of
+                            common =
+                                model.common
+
+                            ( updatedGlossaryItems, maybeIndex ) =
+                                case common.maybeIndex of
                                     Just index ->
-                                        GlossaryItems.update index newOrUpdatedGlossaryItem glossaryItems
+                                        ( GlossaryItems.update index newOrUpdatedGlossaryItem glossaryItems
+                                        , Just index
+                                        )
 
                                     Nothing ->
-                                        GlossaryItems.insert newOrUpdatedGlossaryItem glossaryItems
+                                        let
+                                            updated =
+                                                GlossaryItems.insert newOrUpdatedGlossaryItem glossaryItems
+                                        in
+                                        ( updated
+                                        , -- Find index of newly inserted item
+                                          updated
+                                            |> (case common.orderItemsBy of
+                                                    Alphabetically ->
+                                                        GlossaryItems.orderedAlphabetically
+
+                                                    MostFrequentFirst ->
+                                                        GlossaryItems.orderedByFrequency
+                                               )
+                                            |> List.filter (Tuple.second >> (==) newOrUpdatedGlossaryItem)
+                                            |> List.head
+                                            |> Maybe.map Tuple.first
+                                        )
                         in
-                        ( { model | glossaryItems = Ok updatedGlossaryItems }
+                        ( { model
+                            | common =
+                                { common
+                                    | loadedGlossaryItems = Ok updatedGlossaryItems
+                                    , maybeIndex = maybeIndex
+                                }
+                          }
                         , patchHtmlFile model updatedGlossaryItems
                         )
 
@@ -202,6 +225,10 @@ update msg model =
 
 patchHtmlFile : Model -> GlossaryItems -> Cmd Msg
 patchHtmlFile model glossaryItems =
+    let
+        common =
+            model.common
+    in
     Http.request
         { method = "PATCH"
         , headers = []
@@ -216,7 +243,7 @@ patchHtmlFile model glossaryItems =
                 (\result ->
                     case result of
                         Ok _ ->
-                            PageMsg.NavigateToListAll model.common model.maybeIndex (Ok glossaryItems)
+                            PageMsg.NavigateToListAll { common | loadedGlossaryItems = Ok glossaryItems }
 
                         Err error ->
                             PageMsg.Internal <| FailedToSave error
@@ -709,6 +736,9 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
                     [ class "text-red-600" ]
                     [ text message ]
                 ]
+
+        common =
+            model.common
     in
     div
         [ class "pt-5" ]
@@ -722,7 +752,7 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
                 [ Html.Attributes.type_ "button"
                 , class "bg-white dark:bg-gray-700 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 , Html.Events.onClick <|
-                    PageMsg.NavigateToListAll model.common model.maybeIndex (Ok glossaryItems)
+                    PageMsg.NavigateToListAll { common | loadedGlossaryItems = Ok glossaryItems }
                 ]
                 [ text "Cancel" ]
             , button
@@ -737,7 +767,7 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
 
 view : Model -> Html Msg
 view model =
-    case model.glossaryItems of
+    case model.common.loadedGlossaryItems of
         Ok glossaryItems ->
             let
                 terms =
@@ -756,7 +786,7 @@ view model =
                     [ h1
                         [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
                         [ text <|
-                            if model.maybeIndex == Nothing then
+                            if model.common.maybeIndex == Nothing then
                                 "Create a New Glossary Item"
 
                             else

@@ -72,9 +72,14 @@ init flags =
         ( listAllModel, listAllCmd ) =
             Pages.ListAll.init
                 editorIsRunning
-                (CommonModel enableHelpForMakingChanges titleHeaderHtml aboutHtml CommonModel.Alphabetically)
-                Nothing
-                loadedGlossaryItems
+                (CommonModel
+                    enableHelpForMakingChanges
+                    titleHeaderHtml
+                    aboutHtml
+                    CommonModel.Alphabetically
+                    loadedGlossaryItems
+                    Nothing
+                )
     in
     ( { page = ListAll listAllModel }
     , Cmd.map ListAllMsg listAllCmd
@@ -94,20 +99,20 @@ type Msg
 withoutInternal : Msg -> PageMsg ()
 withoutInternal msg =
     case msg of
-        ListAllMsg (NavigateToListAll commonModel maybeIndex glossaryItems) ->
-            PageMsg.NavigateToListAll commonModel maybeIndex glossaryItems
+        ListAllMsg (NavigateToListAll commonModel) ->
+            PageMsg.NavigateToListAll commonModel
 
-        ListAllMsg (NavigateToCreateOrEdit commonModel maybeIndex glossaryItems) ->
-            PageMsg.NavigateToCreateOrEdit commonModel maybeIndex glossaryItems
+        ListAllMsg (NavigateToCreateOrEdit commonModel) ->
+            PageMsg.NavigateToCreateOrEdit commonModel
 
         ListAllMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
-        CreateOrEditMsg (NavigateToListAll commonModel maybeIndex glossaryItems) ->
-            PageMsg.NavigateToListAll commonModel maybeIndex glossaryItems
+        CreateOrEditMsg (NavigateToListAll commonModel) ->
+            PageMsg.NavigateToListAll commonModel
 
-        CreateOrEditMsg (NavigateToCreateOrEdit commonModel maybeIndex glossaryItems) ->
-            PageMsg.NavigateToCreateOrEdit commonModel maybeIndex glossaryItems
+        CreateOrEditMsg (NavigateToCreateOrEdit commonModel) ->
+            PageMsg.NavigateToCreateOrEdit commonModel
 
         CreateOrEditMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
@@ -119,19 +124,19 @@ withoutInternal msg =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, withoutInternal msg, model.page ) of
-        ( _, NavigateToListAll commonModel maybeIndex glossaryItems, _ ) ->
+        ( _, NavigateToListAll commonModel, _ ) ->
             let
                 ( listAllModel, listAllCmd ) =
-                    Pages.ListAll.init True commonModel maybeIndex glossaryItems
+                    Pages.ListAll.init True commonModel
             in
             ( { model | page = ListAll listAllModel }
             , Cmd.map ListAllMsg listAllCmd
             )
 
-        ( _, NavigateToCreateOrEdit commonModel maybeIndex glossaryItems, _ ) ->
+        ( _, NavigateToCreateOrEdit commonModel, _ ) ->
             let
                 ( createOrEditModel, createOrEditCmd ) =
-                    Pages.CreateOrEdit.init commonModel maybeIndex glossaryItems
+                    Pages.CreateOrEdit.init commonModel
             in
             ( { model | page = CreateOrEdit createOrEditModel }
             , Cmd.batch [ resetViewport, Cmd.map CreateOrEditMsg createOrEditCmd ]
