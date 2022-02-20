@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [0.5.0] - 2022-02-20
+
+### Added
 
 - When adding a new term, try to guess whether it is an abbreviation (but let the user override this choice).
 - Show warning if details field contains line breaks.
@@ -18,9 +25,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Don't change scroll position after deleting an item.
 - Trim whitespace around terms/details when creating/editing.
 - Only show silcrow if JavaScript is enabled.
-
-### Fixed
-### Removed
 
 ## [0.4.3] - 2022-02-19
 
