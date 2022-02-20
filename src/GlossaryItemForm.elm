@@ -269,14 +269,14 @@ toGlossaryItem glossaryItems form =
                 (\formTerm ->
                     { id = termBodyToId formTerm.body
                     , isAbbreviation = formTerm.isAbbreviation
-                    , body = formTerm.body
+                    , body = formTerm.body |> String.trim
                     }
                 )
     , details =
         form
             |> detailsArray
             |> Array.toList
-            |> List.map .body
+            |> List.map (.body >> String.trim)
     , relatedTerms =
         form
             |> relatedTerms
