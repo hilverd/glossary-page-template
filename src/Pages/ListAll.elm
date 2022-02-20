@@ -6,7 +6,6 @@ import Data.AboutHtml as AboutHtml
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
-import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Data.TitleHeaderHtml as TitleHeaderHtml
 import Dict exposing (Dict)
 import Extras.Html
