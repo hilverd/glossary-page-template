@@ -38,7 +38,7 @@ type Page
 
 
 type alias Model =
-    { page : Page }
+    Page
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -81,7 +81,7 @@ init flags =
                     Nothing
                 )
     in
-    ( { page = ListAll listAllModel }
+    ( ListAll listAllModel
     , Cmd.map ListAllMsg listAllCmd
     )
 
@@ -123,13 +123,13 @@ withoutInternal msg =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case ( msg, withoutInternal msg, model.page ) of
+    case ( msg, withoutInternal msg, model ) of
         ( _, NavigateToListAll commonModel, _ ) ->
             let
                 ( listAllModel, listAllCmd ) =
                     Pages.ListAll.init True commonModel
             in
-            ( { model | page = ListAll listAllModel }
+            ( ListAll listAllModel
             , Cmd.map ListAllMsg listAllCmd
             )
 
@@ -138,7 +138,7 @@ update msg model =
                 ( createOrEditModel, createOrEditCmd ) =
                     Pages.CreateOrEdit.init commonModel
             in
-            ( { model | page = CreateOrEdit createOrEditModel }
+            ( CreateOrEdit createOrEditModel
             , Cmd.batch [ resetViewport, Cmd.map CreateOrEditMsg createOrEditCmd ]
             )
 
@@ -147,14 +147,14 @@ update msg model =
                 ( listAllModel_, listAllCmd ) =
                     Pages.ListAll.update msg_ listAllModel
             in
-            ( { model | page = ListAll listAllModel_ }, listAllCmd |> Cmd.map ListAllMsg )
+            ( ListAll listAllModel_, listAllCmd |> Cmd.map ListAllMsg )
 
         ( CreateOrEditMsg (PageMsg.Internal msg_), _, CreateOrEdit createOrEditModel ) ->
             let
                 ( createOrEditModel_, createOrEditCmd ) =
                     Pages.CreateOrEdit.update msg_ createOrEditModel
             in
-            ( { model | page = CreateOrEdit createOrEditModel_ }, createOrEditCmd |> Cmd.map CreateOrEditMsg )
+            ( CreateOrEdit createOrEditModel_, createOrEditCmd |> Cmd.map CreateOrEditMsg )
 
         _ ->
             ( model, Cmd.none )
@@ -171,7 +171,7 @@ resetViewport =
 
 view : Model -> Html Msg
 view model =
-    case model.page of
+    case model of
         ListAll page ->
             Pages.ListAll.view page
                 |> Html.map ListAllMsg
