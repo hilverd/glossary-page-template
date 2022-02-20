@@ -218,7 +218,7 @@ fromGlossaryItem : Set String -> GlossaryItem -> GlossaryItemForm
 fromGlossaryItem existingTermIds item =
     let
         termsForItem =
-            List.map (\term -> Term term.body term.isAbbreviation False Nothing) item.terms
+            List.map (\term -> Term term.body term.isAbbreviation True Nothing) item.terms
 
         termIdsForItem =
             termsForItem
@@ -310,7 +310,18 @@ updateTerm termIndex glossaryItemForm body =
                 { form
                     | terms =
                         Extras.Array.update
-                            (\term -> { term | body = body })
+                            (\term ->
+                                if not term.isAbbreviationManuallyOverridden then
+                                    { term
+                                        | body = body
+                                        , isAbbreviation = termBodyLooksLikeAnAbbreviation body
+                                    }
+
+                                else
+                                    { term
+                                        | body = body
+                                    }
+                            )
                             (TermIndex.toInt termIndex)
                             form.terms
                 }
@@ -410,3 +421,8 @@ deleteRelatedTerm index glossaryItemForm =
             GlossaryItemForm
                 { form | relatedTerms = Extras.Array.delete (RelatedTermIndex.toInt index) form.relatedTerms }
                 |> validate
+
+
+termBodyLooksLikeAnAbbreviation : String -> Bool
+termBodyLooksLikeAnAbbreviation body =
+    (not <| String.isEmpty body) && body == String.toUpper body

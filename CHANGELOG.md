@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- When adding a new term, try to guess whether it is an abbreviation (but let the user override this choice).
+
 ### Changed
 
 - Hide "Order items" radio buttons when printing.
