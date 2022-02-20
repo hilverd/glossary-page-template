@@ -183,7 +183,7 @@ update msg model =
                     model.common
             in
             ( { model | common = { common | loadedGlossaryItems = Ok updatedGlossaryItems } }
-            , scrollToTop
+            , Cmd.none
             )
 
         FailedToDelete indexOfItemBeingDeleted error ->

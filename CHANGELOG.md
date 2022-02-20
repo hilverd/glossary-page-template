@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Hide "Order items" radio buttons when printing.
+- Don't change scroll position after deleting an item.
 
 ### Fixed
 ### Removed
