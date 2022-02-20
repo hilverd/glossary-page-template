@@ -504,6 +504,10 @@ viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
              else
                 Nothing
             )
+        , Extras.Html.showIf (String.trim detailsSingle.body |> String.contains "\n") <|
+            p
+                [ class "mt-2 text-red-800" ]
+                [ text "This will be turned into a single paragraph — line breaks are automatically converted to spaces" ]
         ]
 
 
