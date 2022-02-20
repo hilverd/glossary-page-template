@@ -115,15 +115,19 @@ validate form =
                 |> terms
                 |> Array.map
                     (\term ->
+                        let
+                            body =
+                                String.trim term.body
+                        in
                         { term
                             | validationError =
-                                if String.isEmpty term.body then
+                                if String.isEmpty body then
                                     Just "This field can't be empty"
 
-                                else if Set.member (termBodyToId term.body) termIdsOutsideSet then
+                                else if Set.member (termBodyToId body) termIdsOutsideSet then
                                     Just "This term already exists elsewhere"
 
-                                else if (Dict.get (termBodyToId term.body) termIdsInsideForm |> Maybe.withDefault 0) > 1 then
+                                else if (Dict.get (termBodyToId body) termIdsInsideForm |> Maybe.withDefault 0) > 1 then
                                     Just "This term occurs multiple times"
 
                                 else
@@ -136,9 +140,13 @@ validate form =
                 |> detailsArray
                 |> Array.map
                     (\details ->
+                        let
+                            body =
+                                String.trim details.body
+                        in
                         { details
                             | validationError =
-                                if String.isEmpty details.body then
+                                if String.isEmpty body then
                                     Just "This field can't be empty"
 
                                 else
@@ -424,5 +432,9 @@ deleteRelatedTerm index glossaryItemForm =
 
 
 termBodyLooksLikeAnAbbreviation : String -> Bool
-termBodyLooksLikeAnAbbreviation body =
+termBodyLooksLikeAnAbbreviation bodyRaw =
+    let
+        body =
+            String.trim bodyRaw
+    in
     (not <| String.isEmpty body) && body == String.toUpper body
