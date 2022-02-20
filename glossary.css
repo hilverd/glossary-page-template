@@ -73,11 +73,11 @@
     @apply bg-amber-100 dark:bg-pink-900;
   }
 
-  dt span.pilcrow {
+  dt span.silcrow {
     @apply ml-1.5 select-none;
   }
 
-  dt span.pilcrow a {
+  dt span.silcrow a {
     @apply text-inherit no-underline text-gray-500 dark:text-gray-400 font-normal;
   }
 

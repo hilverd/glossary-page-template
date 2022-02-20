@@ -78,20 +78,19 @@ termToHtmlTree term =
             [ HtmlTree.Attribute "id" term.id ]
             [ HtmlTree.Leaf term.body
                 |> (\inner ->
+                        let
+                            linkedTerm =
+                                HtmlTree.Node "a"
+                                    True
+                                    [ hrefToTerm term ]
+                                    [ inner ]
+                        in
                         if term.isAbbreviation then
-                            HtmlTree.Node "abbr" True [] [ inner ]
+                            HtmlTree.Node "abbr" True [] [ linkedTerm ]
 
                         else
-                            inner
+                            linkedTerm
                    )
-            ]
-        , HtmlTree.Node "span"
-            False
-            [ HtmlTree.Attribute "class" "pilcrow invisible group-hover:visible hover:visible" ]
-            [ HtmlTree.Node "a"
-                False
-                [ hrefToTerm term ]
-                [ HtmlTree.Leaf "§" ]
             ]
         ]
 

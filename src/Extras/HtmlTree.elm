@@ -38,6 +38,13 @@ toIndentedHtml initialLevel level format tree =
 
             else
                 ""
+
+        newLineIfFormat =
+            if format then
+                "\n"
+
+            else
+                ""
     in
     case tree of
         Leaf text ->
@@ -45,36 +52,43 @@ toIndentedHtml initialLevel level format tree =
 
         Node name formatChildren attributes children ->
             let
+                newLineIfFormatChildren =
+                    if format && formatChildren then
+                        "\n"
+
+                    else
+                        ""
+
                 attributesString =
                     attributes
                         |> List.map (\attribute -> attribute.name ++ "=" ++ "\"" ++ escape attribute.value ++ "\"")
                         |> String.join " "
+
+                openingTag =
+                    "<"
+                        ++ name
+                        ++ (if List.isEmpty attributes then
+                                ""
+
+                            else
+                                " " ++ attributesString
+                           )
+                        ++ ">"
+
+                closingTag =
+                    "</" ++ name ++ ">"
             in
-            [ prefix
-                ++ "<"
-                ++ name
-                ++ (if List.isEmpty attributes then
-                        ""
-
-                    else
-                        " " ++ attributesString
+            (prefix ++ openingTag ++ newLineIfFormatChildren)
+                ++ (children
+                        |> List.map (toIndentedHtml initialLevel (level + 1) (format && formatChildren))
+                        |> String.join newLineIfFormatChildren
                    )
-                ++ ">"
-            , if format && formatChildren then
-                children
-                    |> List.map (toIndentedHtml initialLevel (level + 1) True)
-                    |> String.join "\n"
+                ++ (newLineIfFormatChildren
+                        ++ (if formatChildren then
+                                prefix
 
-              else
-                children
-                    |> List.map (toIndentedHtml initialLevel (level + 1) False)
-                    |> String.join ""
-            , prefix ++ "</" ++ name ++ ">"
-            ]
-                |> String.join
-                    (if format then
-                        "\n"
-
-                     else
-                        ""
-                    )
+                            else
+                                ""
+                           )
+                        ++ closingTag
+                   )

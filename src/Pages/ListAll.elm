@@ -517,7 +517,7 @@ viewGlossaryTerm term =
                 text term.body
             ]
         , span
-            [ class "pilcrow invisible group-hover:visible hover:visible" ]
+            [ class "silcrow invisible group-hover:visible hover:visible" ]
             [ Html.a
                 [ "#" ++ term.id |> Html.Attributes.href ]
                 [ text "§" ]
