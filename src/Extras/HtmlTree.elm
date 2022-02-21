@@ -38,13 +38,6 @@ toIndentedHtml initialLevel level format tree =
 
             else
                 ""
-
-        newLineIfFormat =
-            if format then
-                "\n"
-
-            else
-                ""
     in
     case tree of
         Leaf text ->
