@@ -30,6 +30,7 @@ import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import Dict exposing (Dict)
+import ElementIds
 import Extras.Array
 import Set exposing (Set)
 
@@ -118,17 +119,23 @@ validate form =
                         let
                             body =
                                 String.trim term.body
+
+                            termId =
+                                termBodyToId body
                         in
                         { term
                             | validationError =
                                 if String.isEmpty body then
                                     Just "This field can't be empty"
 
-                                else if Set.member (termBodyToId body) termIdsOutsideSet then
+                                else if Set.member termId termIdsOutsideSet then
                                     Just "This term already exists elsewhere"
 
-                                else if (Dict.get (termBodyToId body) termIdsInsideForm |> Maybe.withDefault 0) > 1 then
+                                else if (Dict.get termId termIdsInsideForm |> Maybe.withDefault 0) > 1 then
                                     Just "This term occurs multiple times"
+
+                                else if ElementIds.reserved termId then
+                                    Just "This term is reserved"
 
                                 else
                                     Nothing

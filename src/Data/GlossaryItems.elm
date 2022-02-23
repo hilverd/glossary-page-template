@@ -15,6 +15,7 @@ import Array
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Dict exposing (Dict)
+import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Regex
 import Regex
@@ -241,7 +242,7 @@ toHtmlTree : Bool -> GlossaryItems -> HtmlTree
 toHtmlTree enableHelpForMakingChanges glossaryItems =
     HtmlTree.Node "article"
         True
-        [ HtmlTree.Attribute "id" "glossary"
+        [ HtmlTree.Attribute "id" ElementIds.items
         , HtmlTree.Attribute "data-enable-help-for-making-changes"
             (if enableHelpForMakingChanges then
                 "true"

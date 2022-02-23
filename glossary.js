@@ -1,9 +1,9 @@
 import './glossary.css';
 import { Elm } from './src/ApplicationShell.elm';
 
-const titleHeaderElement = document.getElementById('title-header');
-const aboutElement = document.getElementById('about');
-const glossaryElement = document.getElementById('glossary');
+const titleHeaderElement = document.getElementById('glossary-page-title-header');
+const aboutElement = document.getElementById('glossary-page-about');
+const glossaryElement = document.getElementById('glossary-page-items');
 
 const runningInDevelopment = import.meta.env.DEV;
 const editorIsRunning = glossaryElement.getAttribute('data-editor-is-running') === 'true' || runningInDevelopment;
@@ -57,7 +57,7 @@ function glossaryItemRelatedTermFromDdElement(ddElement) {
 }
 
 const app = Elm.ApplicationShell.init({
-    node: document.getElementById('outer'),
+    node: document.getElementById('glossary-page-outer'),
     flags: {
         titleHeaderHtmlString: titleHeaderElement.outerHTML,
         aboutHtmlString: aboutElement.outerHTML,

@@ -8,6 +8,7 @@ import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.TitleHeaderHtml as TitleHeaderHtml
 import Dict exposing (Dict)
+import ElementIds
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
@@ -654,7 +655,7 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
     div
         [ class "fixed z-10 inset-0 overflow-y-auto print:hidden"
         , Extras.HtmlAttribute.showIf (maybeIndexOfItemToDelete == Nothing) <| class "invisible"
-        , attribute "aria-labelledby" "modal-title"
+        , attribute "aria-labelledby" ElementIds.modalTitle
         , attribute "role" "dialog"
         , attribute "aria-modal" "true"
         ]
@@ -708,7 +709,9 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
                     , div
                         [ class "mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left" ]
                         [ h3
-                            [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100", id "modal-title" ]
+                            [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100"
+                            , id ElementIds.modalTitle
+                            ]
                             [ text "Delete item"
                             ]
                         , div
@@ -799,7 +802,7 @@ viewCreateGlossaryItemButton model =
 viewCards : Model -> Bool -> List ( GlossaryItemIndex, GlossaryItem ) -> Html Msg
 viewCards model editable indexedGlossaryItems =
     Html.article
-        [ Html.Attributes.id "glossary" ]
+        [ Html.Attributes.id ElementIds.items ]
         [ case model.makingChanges of
             MakingChangesHelpCollapsed ->
                 viewMakingChangesHelp False
@@ -1070,7 +1073,7 @@ viewOrderItemsBy model =
                     [ input
                         [ checked <| model.common.orderItemsBy == CommonModel.Alphabetically
                         , class "focus:ring-indigo-500 h-4 w-4 dark:bg-gray-200 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-500"
-                        , id "order-items-alphabetically"
+                        , id ElementIds.orderItemsAlphabetically
                         , name "order-items-by"
                         , Html.Attributes.type_ "radio"
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy CommonModel.Alphabetically
@@ -1078,7 +1081,7 @@ viewOrderItemsBy model =
                         []
                     , label
                         [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
-                        , for "order-items-alphabetically"
+                        , for ElementIds.orderItemsAlphabetically
                         ]
                         [ text "alphabetically" ]
                     ]
@@ -1087,7 +1090,7 @@ viewOrderItemsBy model =
                     [ input
                         [ checked <| model.common.orderItemsBy == CommonModel.MostFrequentFirst
                         , class "focus:ring-indigo-500 h-4 w-4 dark:bg-gray-200 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-500"
-                        , id "order-items-most-frequent-first"
+                        , id ElementIds.orderItemsMostFrequentFirst
                         , name "order-items-by"
                         , Html.Attributes.type_ "radio"
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy CommonModel.MostFrequentFirst
@@ -1095,7 +1098,7 @@ viewOrderItemsBy model =
                         []
                     , label
                         [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
-                        , for "order-items-most-frequent-first"
+                        , for ElementIds.orderItemsMostFrequentFirst
                         ]
                         [ text "most frequent first" ]
                     ]
@@ -1126,7 +1129,7 @@ view model =
                     [ class "lg:pl-64 flex flex-col" ]
                     [ viewTopBar
                     , div
-                        [ Html.Attributes.id "outer" ]
+                        [ Html.Attributes.id ElementIds.outer ]
                         [ div [] <| TitleHeaderHtml.toVirtualDom model.common.titleHeaderHtml
                         , Html.main_
                             []

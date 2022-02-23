@@ -9,8 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 ### Changed
+
+- Prevent HTML element ID clashes caused by user-provided terms.
+
 ### Fixed
 ### Removed
+
+### Migrating from 0.5.0
+
+- In the glossary HTML file, rename the following element IDs.
+  - `outer` to `glossary-page-outer`
+  - `about` to `glossary-page-about`
+  - `glossary` to `glossary-page-items`
+- In the `editor.js` part of the glossary HTML file, replace all occurrences of `id="glossary"` with `id="glossary-page-items"`.
 
 ## [0.5.0] - 2022-02-20
 

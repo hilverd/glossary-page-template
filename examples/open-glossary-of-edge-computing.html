@@ -20,8 +20,8 @@
         document.querySelector('body').classList.remove('no-js');
     </script>
 
-    <div id="outer">
-        <header id="title-header">
+    <div id="glossary-page-outer">
+        <header id="glossary-page-title-header">
             <h1>
                 <!-- To be modified manually. -->
                 Open Glossary of Edge Computing
@@ -29,7 +29,7 @@
         </header>
 
         <main>
-            <div id="about">
+            <div id="glossary-page-about">
                 <p>
                     <!-- To be modified manually. -->
                     This example glossary was adapted in January 2022 from the
@@ -41,7 +41,7 @@
             </div>
 
             <!-- The element below is updated via the built-in editor functionality. -->
-            <article id="glossary" data-enable-help-for-making-changes="true">
+            <article id="glossary-page-items" data-enable-help-for-making-changes="true">
                 <dl>
                     <div>
                         <dt class="group">
@@ -2007,7 +2007,7 @@ This script starts a simple server listening on localhost.
 * GET requests are served by local HTML/JS/CSS files.
 * PATCH requests to / expect to receive an HTML fragment string in the body.
   This string is used to update the glossary file, replacing
-    <article id="glossary"
+    <article id="glossary-page-items"
       ...
     </article>.
 
@@ -2059,8 +2059,8 @@ function serveLocalFile(req, res) {
         } else {
             if (filePath === FILE)
                 fileContents = fileContents.replace(
-                    /<article id="glossary"/,
-                    `<article id="glossary" data-editor-is-running="true"`
+                    /<article id="glossary-page-items"/,
+                    `<article id="glossary-page-items" data-editor-is-running="true"`
                 );
 
             res.writeHead(200, { 'Content-Type': contentType });
@@ -2083,7 +2083,7 @@ function replaceGlossaryElementInFile(newElementString) {
     fs.readFile(FILE, 'utf8', (err, fileContents) => {
         if (err) return console.log(err);
 
-        const regex = /\n[ \t]*<article id="glossary".*<\/article>\n/s;
+        const regex = /\n[ \t]*<article id="glossary-page-items".*<\/article>\n/s;
 
         if (!fileContents.replace(regex, 'replacing-worked').includes('replacing-worked')) {
             return console.log(`Unable to save changes using the regex ${regex}`);
