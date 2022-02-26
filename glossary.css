@@ -21,11 +21,11 @@
     @apply min-h-screen mb-10 print:mb-0 text-gray-900 dark:text-gray-100 print:text-black;
   }
 
-  header#glossary-page-title-header {
+  div#glossary-page-outer header {
     @apply pt-6 pb-4 mx-auto px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-prose;
   }
 
-  header#glossary-page-title-header h1 {
+  h1#glossary-page-title  {
     @apply text-3xl font-bold leading-tight;
   }
 
@@ -35,6 +35,10 @@
 
   div#glossary-page-about {
     @apply pb-4 max-w-prose;
+  }
+
+  div#glossary-page-about ul {
+    @apply pt-4 ml-1 list-disc list-inside;
   }
 
   article#glossary-page-items dl {

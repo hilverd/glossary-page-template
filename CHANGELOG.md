@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `about` to `glossary-page-about`
   - `glossary` to `glossary-page-items`
 - In the `editor.js` part of the glossary HTML file, replace all occurrences of `id="glossary"` with `id="glossary-page-items"`.
+- In the glossary HTML file, change the `glossary-page-about` div so it contains a paragraph followed by one or more links in an unordered list.
 
 ## [0.5.0] - 2022-02-20
 

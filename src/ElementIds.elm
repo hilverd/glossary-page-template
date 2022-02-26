@@ -6,7 +6,7 @@ module ElementIds exposing
     , orderItemsMostFrequentFirst
     , outer
     , reserved
-    , titleHeader
+    , title
     )
 
 
@@ -19,7 +19,7 @@ reserved : String -> Bool
 reserved id =
     List.member id
         [ outer
-        , titleHeader
+        , title
         , about
         , items
         , orderItemsAlphabetically
@@ -32,8 +32,8 @@ outer =
     prefixed "outer"
 
 
-titleHeader =
-    prefixed "title-header"
+title =
+    prefixed "title"
 
 
 about =

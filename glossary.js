@@ -1,9 +1,16 @@
 import './glossary.css';
 import { Elm } from './src/ApplicationShell.elm';
 
-const titleHeaderElement = document.getElementById('glossary-page-title-header');
+const titleElement = document.getElementById('glossary-page-title');
 const aboutElement = document.getElementById('glossary-page-about');
+
 const glossaryElement = document.getElementById('glossary-page-items');
+
+const aboutParagraph = normaliseWhitespace(aboutElement.querySelector('p').textContent);
+
+const aboutUlElement = aboutElement.querySelector('ul');
+const aboutLiElements = Array.prototype.slice.apply(aboutUlElement.querySelectorAll('li'));
+const aboutLinks = aboutLiElements.map(aboutLinkFromLiElement);
 
 const runningInDevelopment = import.meta.env.DEV;
 const editorIsRunning = glossaryElement.getAttribute('data-editor-is-running') === 'true' || runningInDevelopment;
@@ -15,6 +22,14 @@ const glossaryItems = glossaryItemDivElements.map(glossaryItemFromDivElement);
 
 function normaliseWhitespace(s) {
     return s.replace(/\s+/g, ' ').trim();
+}
+
+function aboutLinkFromLiElement(aboutLiElement) {
+    const aElement = aboutLiElement.querySelector('a');
+    return {
+        href: aElement.getAttribute('href'),
+        body: normaliseWhitespace(aElement.textContent)
+    }
 }
 
 function glossaryItemFromDivElement(glossaryItemDivElement) {
@@ -59,8 +74,9 @@ function glossaryItemRelatedTermFromDdElement(ddElement) {
 const app = Elm.ApplicationShell.init({
     node: document.getElementById('glossary-page-outer'),
     flags: {
-        titleHeaderHtmlString: titleHeaderElement.outerHTML,
-        aboutHtmlString: aboutElement.outerHTML,
+        titleString: normaliseWhitespace(titleElement.textContent),
+        aboutParagraph: aboutParagraph,
+        aboutLinks: aboutLinks,
         glossaryItems: glossaryItems,
         editorIsRunning: editorIsRunning,
         enableHelpForMakingChanges: enableHelpForMakingChanges

@@ -2,19 +2,19 @@ port module Pages.ListAll exposing (Model, Msg, init, update, view)
 
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
-import Data.AboutHtml as AboutHtml
+import Data.AboutLink as AboutLink
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
-import Data.TitleHeaderHtml as TitleHeaderHtml
+import Data.Title as Title
 import Dict exposing (Dict)
 import ElementIds
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
-import Html exposing (Attribute, Html, a, button, code, div, fieldset, h3, h5, input, label, legend, li, nav, p, pre, span, text, ul)
-import Html.Attributes exposing (attribute, checked, class, for, href, id, name)
+import Html exposing (Attribute, Html, a, button, code, div, fieldset, h1, h3, h5, header, input, label, legend, li, nav, p, pre, span, text, ul)
+import Html.Attributes exposing (attribute, checked, class, for, href, id, name, target)
 import Html.Events
 import Http
 import Icons
@@ -1130,10 +1130,30 @@ view model =
                     [ viewTopBar
                     , div
                         [ Html.Attributes.id ElementIds.outer ]
-                        [ div [] <| TitleHeaderHtml.toVirtualDom model.common.titleHeaderHtml
+                        [ header []
+                            [ h1
+                                [ id ElementIds.title ]
+                                [ text <| Title.toString model.common.title ]
+                            ]
                         , Html.main_
                             []
-                            [ div [] <| AboutHtml.toVirtualDom model.common.aboutHtml
+                            [ div
+                                [ id "glossary-page-about" ]
+                                [ p []
+                                    [ text model.common.aboutParagraph ]
+                                , ul [] <|
+                                    List.map
+                                        (\aboutLink ->
+                                            li []
+                                                [ a
+                                                    [ target "_blank"
+                                                    , href <| AboutLink.href aboutLink
+                                                    ]
+                                                    [ text <| AboutLink.body aboutLink ]
+                                                ]
+                                        )
+                                        model.common.aboutLinks
+                                ]
                             , glossaryItems
                                 |> (if model.common.orderItemsBy == CommonModel.Alphabetically then
                                         GlossaryItems.orderedAlphabetically

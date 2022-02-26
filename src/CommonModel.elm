@@ -1,9 +1,9 @@
 module CommonModel exposing (CommonModel, OrderItemsBy(..))
 
-import Data.AboutHtml exposing (AboutHtml)
+import Data.AboutLink exposing (AboutLink)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
-import Data.TitleHeaderHtml exposing (TitleHeaderHtml)
+import Data.Title exposing (Title)
 import Extras.HtmlTree exposing (HtmlTree(..))
 
 
@@ -14,8 +14,9 @@ type OrderItemsBy
 
 type alias CommonModel =
     { enableHelpForMakingChanges : Bool
-    , titleHeaderHtml : TitleHeaderHtml
-    , aboutHtml : AboutHtml
+    , title : Title
+    , aboutParagraph : String
+    , aboutLinks : List AboutLink
     , orderItemsBy : OrderItemsBy
     , loadedGlossaryItems : LoadedGlossaryItems
     , maybeIndex : Maybe GlossaryItemIndex

@@ -3,9 +3,9 @@ module ApplicationShell exposing (main)
 import Browser
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
-import Data.AboutHtml as AboutHtml
+import Data.AboutLink as AboutLink
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
-import Data.TitleHeaderHtml as TitleHeaderHtml
+import Data.Title as Title
 import Html exposing (Html)
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg(..))
@@ -44,17 +44,21 @@ type alias Model =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
-        titleHeaderHtml =
+        title =
             flags
-                |> Decode.decodeValue (Decode.field "titleHeaderHtmlString" Decode.string)
+                |> Decode.decodeValue (Decode.field "titleString" Decode.string)
                 |> Result.withDefault "Element not found"
-                |> TitleHeaderHtml.fromString
+                |> Title.fromString
 
-        aboutHtml =
+        aboutParagraph =
             flags
-                |> Decode.decodeValue (Decode.field "aboutHtmlString" Decode.string)
+                |> Decode.decodeValue (Decode.field "aboutParagraph" Decode.string)
                 |> Result.withDefault "Element not found"
-                |> AboutHtml.fromString
+
+        aboutLinks =
+            flags
+                |> Decode.decodeValue (Decode.field "aboutLinks" <| Decode.list AboutLink.decode)
+                |> Result.withDefault []
 
         editorIsRunning =
             flags
@@ -74,8 +78,9 @@ init flags =
                 editorIsRunning
                 (CommonModel
                     enableHelpForMakingChanges
-                    titleHeaderHtml
-                    aboutHtml
+                    title
+                    aboutParagraph
+                    aboutLinks
                     CommonModel.Alphabetically
                     loadedGlossaryItems
                     Nothing
