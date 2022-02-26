@@ -821,7 +821,7 @@ viewCards model editable indexedGlossaryItems =
                   else
                     viewCreateGlossaryItemButton model
                 ]
-        , viewOrderItemsBy model
+        , Extras.Html.showIf (not <| List.isEmpty indexedGlossaryItems) <| viewOrderItemsBy model
         , Html.dl
             []
             (indexedGlossaryItems
