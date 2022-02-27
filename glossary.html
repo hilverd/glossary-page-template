@@ -20,20 +20,18 @@
         document.querySelector('body').classList.remove('no-js');
     </script>
 
-    <div id="glossary-page-outer">
+    <div id="glossary-page-container" data-enable-help-for-making-changes="true">
         <header>
             <h1 id="glossary-page-title">
                 Glossary Page Template
             </h1>
         </header>
-
         <main>
             <div id="glossary-page-about">
                 <p>
                     This is a template for a glossary page.
                     It contains a few example items borrowed from the Open Glossary of Edge Computing.
                 </p>
-
                 <ul>
                     <li>
                         <a target="_blank" href="https://github.com/State-of-the-Edge/glossary">
@@ -47,8 +45,7 @@
                     </li>
                 </ul>
             </div>
-
-            <article id="glossary-page-items" data-enable-help-for-making-changes="true">
+            <article id="glossary-page-items">
                 <dl>
                     <div>
                         <dt class="group">
@@ -158,9 +155,9 @@ This script starts a simple server listening on localhost.
 * GET requests are served by local HTML/JS/CSS files.
 * PATCH requests to / expect to receive an HTML fragment string in the body.
   This string is used to update the glossary file, replacing
-    <article id="glossary-page-items"
+    <div id="glossary-page-container"
       ...
-    </article>.
+    </div>.
 
 This allows the Elm application to save any updates made in the UI.
 
@@ -210,8 +207,8 @@ function serveLocalFile(req, res) {
         } else {
             if (filePath === FILE)
                 fileContents = fileContents.replace(
-                    /<article id="glossary-page-items"/,
-                    `<article id="glossary-page-items" data-editor-is-running="true"`
+                    /<div id="glossary-page-container"/,
+                    `<div id="glossary-page-container" data-editor-is-running="true"`
                 );
 
             res.writeHead(200, { 'Content-Type': contentType });
@@ -234,7 +231,7 @@ function replaceGlossaryElementInFile(newElementString) {
     fs.readFile(FILE, 'utf8', (err, fileContents) => {
         if (err) return console.log(err);
 
-        const regex = /\n[ \t]*<article id="glossary-page-items".*<\/article>\n/s;
+        const regex = /\n[ \t]*<div id="glossary-page-container".*<\/div>\n/s;
 
         if (!fileContents.replace(regex, 'replacing-worked').includes('replacing-worked')) {
             return console.log(`Unable to save changes using the regex ${regex}`);

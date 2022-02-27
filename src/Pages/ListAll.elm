@@ -169,7 +169,7 @@ update msg model =
                         , errorWhileDeleting = Nothing
                       }
                     , Cmd.batch
-                        [ patchHtmlFile model.common.enableHelpForMakingChanges index updatedGlossaryItems
+                        [ patchHtmlFile model.common index updatedGlossaryItems
                         , allowBackgroundScrolling ()
                         ]
                     )
@@ -245,15 +245,19 @@ update msg model =
             )
 
 
-patchHtmlFile : Bool -> GlossaryItemIndex -> GlossaryItems -> Cmd Msg
-patchHtmlFile enableHelpForMakingChanges indexOfItemBeingDeleted glossaryItems =
+patchHtmlFile : CommonModel -> GlossaryItemIndex -> GlossaryItems -> Cmd Msg
+patchHtmlFile common indexOfItemBeingDeleted glossaryItems =
     Http.request
         { method = "PATCH"
         , headers = []
         , url = "/"
         , body =
             glossaryItems
-                |> GlossaryItems.toHtmlTree enableHelpForMakingChanges
+                |> GlossaryItems.toHtmlTree
+                    common.enableHelpForMakingChanges
+                    common.title
+                    common.aboutParagraph
+                    common.aboutLinks
                 |> HtmlTree.toHtml
                 |> Http.stringBody "text/html"
         , expect =
@@ -358,7 +362,7 @@ viewMakingChangesHelp expanded =
                     , text " attribute to "
                     , code [] [ text "false" ]
                     , text " on the "
-                    , code [] [ text "<article id=\"glossary\">" ]
+                    , code [] [ text "<div id=\"glossary-page-container\">" ]
                     , text " element."
                     ]
                 , p
@@ -1129,7 +1133,7 @@ view model =
                     [ class "lg:pl-64 flex flex-col" ]
                     [ viewTopBar
                     , div
-                        [ Html.Attributes.id ElementIds.outer ]
+                        [ Html.Attributes.id ElementIds.container ]
                         [ header []
                             [ h1
                                 [ id ElementIds.title ]

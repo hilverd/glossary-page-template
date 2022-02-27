@@ -12,8 +12,10 @@ module Data.GlossaryItems exposing
     )
 
 import Array
+import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
+import Data.Title as Title exposing (Title)
 import Dict exposing (Dict)
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
@@ -238,11 +240,11 @@ termIds =
         >> Set.fromList
 
 
-toHtmlTree : Bool -> GlossaryItems -> HtmlTree
-toHtmlTree enableHelpForMakingChanges glossaryItems =
-    HtmlTree.Node "article"
+toHtmlTree : Bool -> Title -> String -> List AboutLink -> GlossaryItems -> HtmlTree
+toHtmlTree enableHelpForMakingChanges title aboutParagraph aboutLinks glossaryItems =
+    HtmlTree.Node "div"
         True
-        [ HtmlTree.Attribute "id" ElementIds.items
+        [ HtmlTree.Attribute "id" ElementIds.container
         , HtmlTree.Attribute "data-enable-help-for-making-changes"
             (if enableHelpForMakingChanges then
                 "true"
@@ -251,11 +253,53 @@ toHtmlTree enableHelpForMakingChanges glossaryItems =
                 "false"
             )
         ]
-        [ HtmlTree.Node "dl"
+        [ HtmlTree.Node "header"
             True
             []
-            (glossaryItems
-                |> orderedAlphabetically
-                |> List.map (Tuple.second >> GlossaryItem.toHtmlTree)
-            )
+            [ HtmlTree.Node "h1"
+                True
+                [ HtmlTree.Attribute "id" ElementIds.title ]
+                [ HtmlTree.Leaf <| Title.toString title ]
+            ]
+        , HtmlTree.Node "main"
+            True
+            []
+            [ HtmlTree.Node "div"
+                True
+                [ HtmlTree.Attribute "id" ElementIds.about ]
+                [ HtmlTree.Node "p"
+                    True
+                    []
+                    [ HtmlTree.Leaf aboutParagraph ]
+                , HtmlTree.Node "ul"
+                    True
+                    []
+                    (List.map
+                        (\aboutLink ->
+                            HtmlTree.Node "li"
+                                True
+                                []
+                                [ HtmlTree.Node "a"
+                                    True
+                                    [ HtmlTree.Attribute "target" "_blank"
+                                    , HtmlTree.Attribute "href" <| AboutLink.href aboutLink
+                                    ]
+                                    [ HtmlTree.Leaf <| AboutLink.body aboutLink ]
+                                ]
+                        )
+                        aboutLinks
+                    )
+                ]
+            , HtmlTree.Node "article"
+                True
+                [ HtmlTree.Attribute "id" ElementIds.items ]
+                [ HtmlTree.Node "dl"
+                    True
+                    []
+                    (glossaryItems
+                        |> orderedAlphabetically
+                        |> List.map (Tuple.second >> GlossaryItem.toHtmlTree)
+                    )
+                ]
+            ]
         ]

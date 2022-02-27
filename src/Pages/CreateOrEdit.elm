@@ -218,7 +218,7 @@ update msg model =
                                     , maybeIndex = maybeIndex
                                 }
                           }
-                        , patchHtmlFile model updatedGlossaryItems
+                        , patchHtmlFile model.common updatedGlossaryItems
                         )
 
                 _ ->
@@ -230,19 +230,19 @@ update msg model =
             )
 
 
-patchHtmlFile : Model -> GlossaryItems -> Cmd Msg
-patchHtmlFile model glossaryItems =
-    let
-        common =
-            model.common
-    in
+patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
+patchHtmlFile common glossaryItems =
     Http.request
         { method = "PATCH"
         , headers = []
         , url = "/"
         , body =
             glossaryItems
-                |> GlossaryItems.toHtmlTree model.common.enableHelpForMakingChanges
+                |> GlossaryItems.toHtmlTree
+                    common.enableHelpForMakingChanges
+                    common.title
+                    common.aboutParagraph
+                    common.aboutLinks
                 |> HtmlTree.toHtml
                 |> Http.stringBody "text/html"
         , expect =

@@ -20,19 +20,17 @@
         document.querySelector('body').classList.remove('no-js');
     </script>
 
-    <div id="glossary-page-outer">
+    <div id="glossary-page-container" data-enable-help-for-making-changes="true">
         <header>
             <h1 id="glossary-page-title">
                 Glossary — UK Parliament
             </h1>
         </header>
-
         <main>
             <div id="glossary-page-about">
                 <p>
                     This example glossary was adapted in February 2022 from the UK Parliament glossary.
                 </p>
-
                 <ul>
                     <li>
                         <a target="_blank" href="https://www.parliament.uk/site-information/glossary/">
@@ -47,8 +45,7 @@
                     </li>
                 </ul>
             </div>
-
-            <article id="glossary-page-items" data-enable-help-for-making-changes="true">
+            <article id="glossary-page-items">
                 <dl>
                     <div>
                         <dt class="group">
@@ -5009,8 +5006,8 @@ function serveLocalFile(req, res) {
         } else {
             if (filePath === FILE)
                 fileContents = fileContents.replace(
-                    /<article id="glossary-page-items"/,
-                    `<article id="glossary-page-items" data-editor-is-running="true"`
+                    /<div id="glossary-page-container"/,
+                    `<div id="glossary-page-container" data-editor-is-running="true"`
                 );
 
             res.writeHead(200, { 'Content-Type': contentType });

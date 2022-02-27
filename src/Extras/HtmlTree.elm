@@ -16,7 +16,7 @@ type HtmlTree
 
 toHtml : HtmlTree -> String
 toHtml =
-    toIndentedHtml 3 0 True
+    toIndentedHtml 1 0 True
 
 
 escape : String -> String

@@ -17,11 +17,11 @@
     @apply invisible no-js antialiased bg-gray-100 dark:bg-gray-900 print:bg-white min-h-full;
   }
 
-  div#glossary-page-outer {
+  div#glossary-page-container {
     @apply min-h-screen mb-10 print:mb-0 text-gray-900 dark:text-gray-100 print:text-black;
   }
 
-  div#glossary-page-outer header {
+  div#glossary-page-container header {
     @apply pt-6 pb-4 mx-auto px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-prose;
   }
 
@@ -29,7 +29,7 @@
     @apply text-3xl font-bold leading-tight;
   }
 
-  div#glossary-page-outer main {
+  div#glossary-page-container main {
     @apply mx-auto px-6 lg:px-8 print:px-0 print:max-w-prose;
   }
 

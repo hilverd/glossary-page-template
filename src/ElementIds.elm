@@ -1,10 +1,10 @@
 module ElementIds exposing
     ( about
+    , container
     , items
     , modalTitle
     , orderItemsAlphabetically
     , orderItemsMostFrequentFirst
-    , outer
     , reserved
     , title
     )
@@ -18,7 +18,7 @@ prefixed =
 reserved : String -> Bool
 reserved id =
     List.member id
-        [ outer
+        [ container
         , title
         , about
         , items
@@ -28,29 +28,36 @@ reserved id =
         ]
 
 
-outer =
-    prefixed "outer"
+container : String
+container =
+    prefixed "container"
 
 
+title : String
 title =
     prefixed "title"
 
 
+about : String
 about =
     prefixed "about"
 
 
+items : String
 items =
     prefixed "items"
 
 
+orderItemsAlphabetically : String
 orderItemsAlphabetically =
     prefixed "order-items-alphabetically"
 
 
+orderItemsMostFrequentFirst : String
 orderItemsMostFrequentFirst =
     prefixed "order-items-most-frequent-first"
 
 
+modalTitle : String
 modalTitle =
     prefixed "modal-title"
