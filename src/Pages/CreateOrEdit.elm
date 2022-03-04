@@ -12,6 +12,7 @@ import Data.TermIndex as TermIndex exposing (TermIndex)
 import ElementIds
 import Extras.Html
 import Extras.HtmlAttribute
+import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
 import GlossaryItemForm as Form exposing (GlossaryItemForm)
@@ -330,6 +331,7 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                                 , attribute "aria-required" "true"
                                 , attribute "aria-invalid" "true" |> Extras.HtmlAttribute.showIf (term.validationError /= Nothing)
                                 , Html.Events.onInput (PageMsg.Internal << UpdateTerm termIndex)
+                                , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                                 ]
                                 []
                             , Extras.Html.showIf (showValidationErrors && term.validationError /= Nothing) <|

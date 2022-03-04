@@ -10,6 +10,7 @@ import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import ElementIds
 import Extras.Html
 import Extras.HtmlAttribute
+import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
 import Html exposing (Html, button, div, form, h1, h3, input, label, p, span, text, textarea)
@@ -222,6 +223,7 @@ viewEditTitle showValidationErrors titleField =
                                     , attribute "aria-required" "true"
                                     , attribute "aria-invalid" "true" |> Extras.HtmlAttribute.showIf (titleField.validationError /= Nothing)
                                     , Html.Events.onInput (PageMsg.Internal << UpdateTitle)
+                                    , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                                     ]
                                     []
                                 , Extras.Html.showIf (showValidationErrors && titleField.validationError /= Nothing) <|
@@ -426,6 +428,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                         , attribute "aria-required" "true"
                         , attribute "aria-invalid" "true" |> Extras.HtmlAttribute.showIf (aboutLinkHref.validationError /= Nothing)
                         , Html.Events.onInput (PageMsg.Internal << UpdateAboutLinkHref index)
+                        , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                         ]
                         []
                     , Extras.Html.showIf (showValidationErrors && aboutLinkHref.validationError /= Nothing) <|
@@ -462,6 +465,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                             , attribute "aria-required" "true"
                             , attribute "aria-invalid" "true" |> Extras.HtmlAttribute.showIf (aboutLinkHref.validationError /= Nothing)
                             , Html.Events.onInput (PageMsg.Internal << UpdateAboutLinkBody index)
+                            , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                             ]
                             []
                         , Extras.Html.showIf (showValidationErrors && aboutLinkBody.validationError /= Nothing) <|
