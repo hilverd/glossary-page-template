@@ -4,25 +4,20 @@ import Array exposing (Array)
 import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel, OrderItemsBy(..))
-import Data.AboutLink as AboutLink exposing (AboutLink)
+import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
-import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
-import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
-import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
-import Data.TermIndex as TermIndex exposing (TermIndex)
 import ElementIds
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
-import Html exposing (Html, a, button, div, form, h1, h3, input, label, option, p, select, span, text, textarea)
-import Html.Attributes exposing (attribute, class, disabled, for, id, name, placeholder, required, selected, spellcheck, type_, value)
+import Html exposing (Html, button, div, form, h1, h3, input, label, p, span, text, textarea)
+import Html.Attributes exposing (attribute, class, for, id, name, placeholder, required, spellcheck, type_, value)
 import Html.Events
 import Http
 import Icons
 import PageMsg exposing (PageMsg)
-import Set exposing (Set)
 import Svg exposing (path, svg)
 import Svg.Attributes exposing (d, fill, stroke, viewBox)
 import Task
