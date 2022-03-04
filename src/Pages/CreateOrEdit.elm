@@ -1,6 +1,7 @@
 module Pages.CreateOrEdit exposing (Model, Msg, init, update, view)
 
 import Array exposing (Array)
+import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel, OrderItemsBy(..))
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
@@ -781,7 +782,7 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
         ]
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
     case model.common.loadedGlossaryItems of
         Ok glossaryItems ->
@@ -795,31 +796,37 @@ view model =
                 relatedTerms =
                     Form.relatedTermFields model.form
             in
-            div
-                [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl" ]
-                [ Html.main_
-                    []
-                    [ h1
-                        [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
-                        [ text <|
-                            if model.common.maybeIndex == Nothing then
-                                "Create a New Glossary Item"
+            { title = model.common.title
+            , body =
+                [ div
+                    [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl" ]
+                    [ Html.main_
+                        []
+                        [ h1
+                            [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
+                            [ text <|
+                                if model.common.maybeIndex == Nothing then
+                                    "Create a New Glossary Item"
 
-                            else
-                                "Edit Glossary Item"
-                        ]
-                    , form
-                        [ class "pt-7" ]
-                        [ div
-                            [ class "space-y-8 divide-y divide-gray-200 dark:divide-gray-800 sm:space-y-5" ]
-                            [ viewCreateDescriptionTerms model.triedToSaveWhenFormInvalid terms
-                            , viewCreateDescriptionDetails model.triedToSaveWhenFormInvalid detailsArray
-                            , viewCreateSeeAlso model.triedToSaveWhenFormInvalid glossaryItems terms relatedTerms
-                            , viewCreateFormFooter model model.triedToSaveWhenFormInvalid model.errorMessageWhileSaving glossaryItems model.form
+                                else
+                                    "Edit Glossary Item"
+                            ]
+                        , form
+                            [ class "pt-7" ]
+                            [ div
+                                [ class "space-y-8 divide-y divide-gray-200 dark:divide-gray-800 sm:space-y-5" ]
+                                [ viewCreateDescriptionTerms model.triedToSaveWhenFormInvalid terms
+                                , viewCreateDescriptionDetails model.triedToSaveWhenFormInvalid detailsArray
+                                , viewCreateSeeAlso model.triedToSaveWhenFormInvalid glossaryItems terms relatedTerms
+                                , viewCreateFormFooter model model.triedToSaveWhenFormInvalid model.errorMessageWhileSaving glossaryItems model.form
+                                ]
                             ]
                         ]
                     ]
                 ]
+            }
 
         Err _ ->
-            text "Something went wrong."
+            { title = "Glossary"
+            , body = [ text "Something went wrong." ]
+            }

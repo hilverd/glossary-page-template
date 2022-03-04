@@ -1,5 +1,6 @@
 port module Pages.ListAll exposing (Model, Msg, init, update, view)
 
+import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
 import Data.AboutLink as AboutLink
@@ -1119,11 +1120,13 @@ viewOrderItemsBy model =
         ]
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
     case model.common.loadedGlossaryItems of
         Err error ->
-            pre [] [ text <| Decode.errorToString error ]
+            { title = "Glossary"
+            , body = [ pre [] [ text <| Decode.errorToString error ] ]
+            }
 
         Ok glossaryItems ->
             let
@@ -1133,59 +1136,63 @@ view model =
                 termIndex =
                     termIndexFromGlossaryItems glossaryItems
             in
-            div
-                [ class "min-h-full" ]
-                [ viewMenuForMobile model termIndex
-                , viewStaticSidebarForDesktop termIndex
-                , div
-                    [ class "lg:pl-64 flex flex-col" ]
-                    [ viewTopBar
+            { title = model.common.title
+            , body =
+                [ div
+                    [ class "min-h-full" ]
+                    [ viewMenuForMobile model termIndex
+                    , viewStaticSidebarForDesktop termIndex
                     , div
-                        [ Html.Attributes.id ElementIds.container ]
-                        [ header []
-                            [ case model.makingChanges of
-                                MakingChangesHelpCollapsed ->
-                                    viewMakingChangesHelp False
+                        [ class "lg:pl-64 flex flex-col" ]
+                        [ viewTopBar
+                        , div
+                            [ Html.Attributes.id ElementIds.container ]
+                            [ header []
+                                [ case model.makingChanges of
+                                    MakingChangesHelpCollapsed ->
+                                        viewMakingChangesHelp False
 
-                                MakingChangesHelpExpanded ->
-                                    viewMakingChangesHelp True
+                                    MakingChangesHelpExpanded ->
+                                        viewMakingChangesHelp True
 
-                                _ ->
-                                    Extras.Html.nothing
-                            , Extras.Html.showIf editable <|
-                                viewEditTitleAndAboutButton model.common
-                            , h1
-                                [ id ElementIds.title ]
-                                [ text model.common.title ]
-                            ]
-                        , Html.main_
-                            []
-                            [ div
-                                [ id ElementIds.about ]
-                                [ p []
-                                    [ text model.common.aboutParagraph ]
-                                , ul [] <|
-                                    List.map
-                                        (\aboutLink ->
-                                            li []
-                                                [ a
-                                                    [ target "_blank"
-                                                    , href <| AboutLink.href aboutLink
-                                                    ]
-                                                    [ text <| AboutLink.body aboutLink ]
-                                                ]
-                                        )
-                                        model.common.aboutLinks
+                                    _ ->
+                                        Extras.Html.nothing
+                                , Extras.Html.showIf editable <|
+                                    viewEditTitleAndAboutButton model.common
+                                , h1
+                                    [ id ElementIds.title ]
+                                    [ text model.common.title ]
                                 ]
-                            , glossaryItems
-                                |> (if model.common.orderItemsBy == CommonModel.Alphabetically then
-                                        GlossaryItems.orderedAlphabetically
+                            , Html.main_
+                                []
+                                [ div
+                                    [ id ElementIds.about ]
+                                    [ p []
+                                        [ text model.common.aboutParagraph ]
+                                    , ul [] <|
+                                        List.map
+                                            (\aboutLink ->
+                                                li []
+                                                    [ a
+                                                        [ target "_blank"
+                                                        , href <| AboutLink.href aboutLink
+                                                        ]
+                                                        [ text <| AboutLink.body aboutLink ]
+                                                    ]
+                                            )
+                                            model.common.aboutLinks
+                                    ]
+                                , glossaryItems
+                                    |> (if model.common.orderItemsBy == CommonModel.Alphabetically then
+                                            GlossaryItems.orderedAlphabetically
 
-                                    else
-                                        GlossaryItems.orderedByFrequency
-                                   )
-                                |> viewCards model editable
+                                        else
+                                            GlossaryItems.orderedByFrequency
+                                       )
+                                    |> viewCards model editable
+                                ]
                             ]
                         ]
                     ]
                 ]
+            }

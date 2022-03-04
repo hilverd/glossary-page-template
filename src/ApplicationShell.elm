@@ -1,6 +1,6 @@
 module ApplicationShell exposing (main)
 
-import Browser
+import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
 import Data.AboutLink as AboutLink
@@ -20,7 +20,7 @@ import Task
 
 main : Program Flags Model Msg
 main =
-    Browser.element
+    Browser.document
         { init = init
         , view = view
         , update = update
@@ -209,20 +209,23 @@ resetViewport =
 -- VIEW
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
+    let
+        mapDocument msg { title, body } =
+            { title = title
+            , body = body |> List.map (Html.map msg)
+            }
+    in
     case model of
         ListAll page ->
-            Pages.ListAll.view page
-                |> Html.map ListAllMsg
+            page |> Pages.ListAll.view |> mapDocument ListAllMsg
 
         CreateOrEdit page ->
-            Pages.CreateOrEdit.view page
-                |> Html.map CreateOrEditMsg
+            page |> Pages.CreateOrEdit.view |> mapDocument CreateOrEditMsg
 
         EditTitleAndAbout page ->
-            Pages.EditTitleAndAbout.view page
-                |> Html.map EditTitleAndAboutMsg
+            page |> Pages.EditTitleAndAbout.view |> mapDocument EditTitleAndAboutMsg
 
 
 

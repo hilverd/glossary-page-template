@@ -1,6 +1,7 @@
 module Pages.EditTitleAndAbout exposing (..)
 
 import Array exposing (Array)
+import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel, OrderItemsBy(..))
 import Data.AboutLink as AboutLink exposing (AboutLink)
@@ -539,30 +540,36 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
         ]
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
     case model.common.loadedGlossaryItems of
         Ok glossaryItems ->
-            div
-                [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl" ]
-                [ Html.main_
-                    []
-                    [ h1
-                        [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
-                        [ text "Edit Title and About Section"
-                        ]
-                    , form
-                        [ class "pt-7" ]
-                        [ div
-                            [ class "space-y-7 sm:space-y-8" ]
-                            [ viewEditTitle model.triedToSaveWhenFormInvalid <| Form.titleField model.form
-                            , viewEditAboutParagraph model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
-                            , viewEditAboutLinks model.triedToSaveWhenFormInvalid <| Form.aboutLinkFields model.form
-                            , viewCreateFormFooter model model.triedToSaveWhenFormInvalid model.errorMessageWhileSaving glossaryItems model.form
+            { title = model.common.title
+            , body =
+                [ div
+                    [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl" ]
+                    [ Html.main_
+                        []
+                        [ h1
+                            [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
+                            [ text "Edit Title and About Section"
+                            ]
+                        , form
+                            [ class "pt-7" ]
+                            [ div
+                                [ class "space-y-7 sm:space-y-8" ]
+                                [ viewEditTitle model.triedToSaveWhenFormInvalid <| Form.titleField model.form
+                                , viewEditAboutParagraph model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
+                                , viewEditAboutLinks model.triedToSaveWhenFormInvalid <| Form.aboutLinkFields model.form
+                                , viewCreateFormFooter model model.triedToSaveWhenFormInvalid model.errorMessageWhileSaving glossaryItems model.form
+                                ]
                             ]
                         ]
                     ]
                 ]
+            }
 
         Err _ ->
-            text "Something went wrong."
+            { title = "Glossary"
+            , body = [ text "Something went wrong." ]
+            }
