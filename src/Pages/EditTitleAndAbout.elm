@@ -409,7 +409,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                         class "relative border border-red-300 dark:border-red-700 rounded-md rounded-b-none px-3 py-2 focus-within:z-10 focus-within:ring-1 focus-within:ring-red-500 focus-within:border-red-500"
                     ]
                     [ label
-                        [ class "block text-xs font-semibold text-gray-900 dark:text-gray-100"
+                        [ class "block text-sm font-semibold text-gray-500 dark:text-gray-300"
                         , for <| ElementIds.aboutLinkHref index
                         ]
                         [ text "URL" ]
@@ -445,7 +445,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                         class "relative border border-red-300 dark:border-red-700 rounded-md rounded-t-none px-3 py-2 focus-within:z-10 focus-within:ring-1 focus-within:ring-red-500 focus-within:border-red-500"
                     ]
                     [ label
-                        [ class "block text-xs font-semibold text-gray-900 dark:text-gray-100"
+                        [ class "block text-sm font-semibold text-gray-500 dark:text-gray-300"
                         , for <| ElementIds.aboutLinkBody index
                         ]
                         [ text "Text" ]
