@@ -8,6 +8,7 @@ import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
+import ElementIds
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
@@ -106,7 +107,7 @@ update msg model =
                     Form.addTerm model.form
 
                 latestTermIndex =
-                    Array.length (Form.terms form) - 1 |> TermIndex.fromInt
+                    Array.length (Form.termFields form) - 1 |> TermIndex.fromInt
             in
             ( { model | form = form }
             , giveFocusToTermInputField latestTermIndex
@@ -127,7 +128,7 @@ update msg model =
                     Form.addDetails model.form
 
                 latestDetailsIndex =
-                    Array.length (Form.detailsArray form) - 1 |> DetailsIndex.fromInt
+                    Array.length (Form.detailsFields form) - 1 |> DetailsIndex.fromInt
             in
             ( { model | form = form }
             , giveFocusToDescriptionDetailsSingle latestDetailsIndex
@@ -145,7 +146,7 @@ update msg model =
                     Form.addRelatedTerm model.form
 
                 latestRelatedTermIndex =
-                    Array.length (Form.relatedTerms form) - 1 |> RelatedTermIndex.fromInt
+                    Array.length (Form.relatedTermFields form) - 1 |> RelatedTermIndex.fromInt
             in
             ( { model | form = form }
             , giveFocusToSeeAlsoSelect latestRelatedTermIndex
@@ -266,40 +267,25 @@ patchHtmlFile common glossaryItems =
 
 giveFocusToTermInputField : TermIndex -> Cmd Msg
 giveFocusToTermInputField termIndex =
-    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| idForTermInputField termIndex)
+    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.termInputField termIndex)
 
 
 giveFocusToDescriptionDetailsSingle : DetailsIndex -> Cmd Msg
 giveFocusToDescriptionDetailsSingle index =
-    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| idForDescriptionDetailsSingle index)
+    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.descriptionDetailsSingle index)
 
 
 giveFocusToSeeAlsoSelect : RelatedTermIndex -> Cmd Msg
 giveFocusToSeeAlsoSelect index =
-    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| idForSeeAlsoSelect index)
+    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.seeAlsoSelect index)
 
 
-idForTermInputField : TermIndex -> String
-idForTermInputField termIndex =
-    "term-" ++ (termIndex |> TermIndex.toInt |> String.fromInt)
-
-
-idForDescriptionDetailsSingle : DetailsIndex -> String
-idForDescriptionDetailsSingle index =
-    "details-" ++ (index |> DetailsIndex.toInt |> String.fromInt)
-
-
-idForSeeAlsoSelect : RelatedTermIndex -> String
-idForSeeAlsoSelect index =
-    "see-also-" ++ (index |> RelatedTermIndex.toInt |> String.fromInt)
-
-
-viewCreateDescriptionTerm : Bool -> Bool -> Int -> Form.Term -> Html Msg
+viewCreateDescriptionTerm : Bool -> Bool -> Int -> Form.TermField -> Html Msg
 viewCreateDescriptionTerm showValidationErrors canBeDeleted index term =
     viewCreateDescriptionTermInternal showValidationErrors canBeDeleted (TermIndex.fromInt index) term
 
 
-viewCreateDescriptionTermInternal : Bool -> Bool -> TermIndex -> Form.Term -> Html Msg
+viewCreateDescriptionTermInternal : Bool -> Bool -> TermIndex -> Form.TermField -> Html Msg
 viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex term =
     let
         abbreviationLabelId =
@@ -334,9 +320,9 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                                     class "w-full min-w-0 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white"
 
                                   else
-                                    class "w-full min-w-0 rounded-md border-red-300 dark:bg-gray-700 text-red-900 dark:text-red-700 placeholder-red-300 focus:outline-none focus:ring-red-500 focus:border-red-500"
+                                    class "w-full min-w-0 rounded-md border-red-300 dark:border-red-700 dark:bg-gray-700 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500"
                                 , type_ "text"
-                                , id <| idForTermInputField termIndex
+                                , id <| ElementIds.termInputField termIndex
                                 , value term.body
                                 , required True
                                 , Html.Attributes.autocomplete False
@@ -400,7 +386,7 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
         , Extras.Html.showMaybe
             (\validationError ->
                 p
-                    [ class "mt-2 text-red-600" ]
+                    [ class "mt-2 text-red-600 dark:text-red-400" ]
                     [ text validationError ]
             )
             (if showValidationErrors then
@@ -412,7 +398,7 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
         ]
 
 
-viewCreateDescriptionTerms : Bool -> Array Form.Term -> Html Msg
+viewCreateDescriptionTerms : Bool -> Array Form.TermField -> Html Msg
 viewCreateDescriptionTerms showValidationErrors termsArray =
     let
         terms =
@@ -450,15 +436,16 @@ viewCreateDescriptionTerms showValidationErrors termsArray =
         ]
 
 
-viewCreateDescriptionDetailsSingle : Bool -> Int -> Form.Details -> Html Msg
+viewCreateDescriptionDetailsSingle : Bool -> Int -> Form.DetailsField -> Html Msg
 viewCreateDescriptionDetailsSingle showValidationErrors index detailsSingle =
     viewCreateDescriptionDetailsSingle1 showValidationErrors (DetailsIndex.fromInt index) detailsSingle
 
 
-viewCreateDescriptionDetailsSingle1 : Bool -> DetailsIndex -> Form.Details -> Html Msg
+viewCreateDescriptionDetailsSingle1 : Bool -> DetailsIndex -> Form.DetailsField -> Html Msg
 viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
     div []
-        [ div [ class "flex-auto max-w-2xl flex" ]
+        [ div
+            [ class "flex-auto max-w-2xl flex" ]
             [ span [ class "inline-flex items-center" ]
                 [ button
                     [ Html.Attributes.type_ "button"
@@ -469,9 +456,10 @@ viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
                     ]
                     [ Icons.trashSolid ]
                 ]
-            , div [ class "relative block min-w-0 w-full" ]
+            , div
+                [ class "relative block min-w-0 w-full" ]
                 [ div
-                    [ class "grow-wrap"
+                    [ class "grow-wrap max-w-prose"
                     , attribute "data-replicated-value" <| detailsSingle.body ++ "\n"
                     ]
                     [ textarea
@@ -479,23 +467,25 @@ viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
                             class "shadow-sm w-full rounded-md border border-gray-300 dark:border-gray-500 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
 
                           else
-                            class "shadow-sm w-full rounded-md border-red-300 text-red-900 placeholder-red-300 focus:outline-none focus:ring-red-500 focus:border-red-500 dark:bg-gray-700"
+                            class "shadow-sm w-full rounded-md border-red-300 dark:border-red-700 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500 dark:bg-gray-700"
                         , required True
                         , attribute "aria-required" "true"
-                        , id <| idForDescriptionDetailsSingle index
+                        , attribute "aria-invalid" "true" |> Extras.HtmlAttribute.showIf (detailsSingle.validationError /= Nothing)
+                        , id <| ElementIds.descriptionDetailsSingle index
                         , Html.Events.onInput (PageMsg.Internal << UpdateDetails index)
                         ]
                         [ text detailsSingle.body ]
                     ]
                 , Extras.Html.showIf (showValidationErrors && detailsSingle.validationError /= Nothing) <|
-                    div [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
+                    div
+                        [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
                         [ Icons.exclamationSolidRed ]
                 ]
             ]
         , Extras.Html.showMaybe
             (\validationError ->
                 p
-                    [ class "mt-2 text-red-600" ]
+                    [ class "mt-2 text-red-600 dark:text-red-400" ]
                     [ text validationError ]
             )
             (if showValidationErrors then
@@ -506,7 +496,7 @@ viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
             )
         , Extras.Html.showIf (String.trim detailsSingle.body |> String.contains "\n") <|
             p
-                [ class "mt-2 text-red-800" ]
+                [ class "mt-2 text-red-800 dark:text-red-200" ]
                 [ text "This will be turned into a single paragraph — line breaks are automatically converted to spaces" ]
         ]
 
@@ -556,20 +546,24 @@ viewAddDetailsButtonForEmptyState =
         ]
 
 
-viewCreateDescriptionDetails : Bool -> Array Form.Details -> Html Msg
+viewCreateDescriptionDetails : Bool -> Array Form.DetailsField -> Html Msg
 viewCreateDescriptionDetails showValidationErrors detailsArray =
     let
         details =
             Array.toList detailsArray
     in
-    div [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
+    div
+        [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
-            [ h3 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
+            [ h3
+                [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
                 [ text "Description Details" ]
-            , p [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
+            , p
+                [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
                 [ text "Provide one or more definitions for this group of terms." ]
             ]
-        , div [ class "space-y-6 sm:space-y-5" ]
+        , div
+            [ class "space-y-6 sm:space-y-5" ]
             (List.indexedMap (viewCreateDescriptionDetailsSingle showValidationErrors) details
                 ++ [ if List.isEmpty details then
                         viewAddDetailsButtonForEmptyState
@@ -581,12 +575,12 @@ viewCreateDescriptionDetails showValidationErrors detailsArray =
         ]
 
 
-viewCreateSeeAlsoSingle : Bool -> Set String -> List GlossaryItem.Term -> Int -> Form.RelatedTerm -> Html Msg
+viewCreateSeeAlsoSingle : Bool -> Set String -> List GlossaryItem.Term -> Int -> Form.RelatedTermField -> Html Msg
 viewCreateSeeAlsoSingle showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
     viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms (RelatedTermIndex.fromInt index) relatedTerm
 
 
-viewCreateSeeAlsoSingle1 : Bool -> Set String -> List GlossaryItem.Term -> RelatedTermIndex -> Form.RelatedTerm -> Html Msg
+viewCreateSeeAlsoSingle1 : Bool -> Set String -> List GlossaryItem.Term -> RelatedTermIndex -> Form.RelatedTermField -> Html Msg
 viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
     let
         pleaseSelectOption =
@@ -613,7 +607,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms 
                 , div
                     [ class "flex-auto" ]
                     [ select
-                        [ id <| idForSeeAlsoSelect index
+                        [ id <| ElementIds.seeAlsoSelect index
                         , class "mt-1 block w-full pl-3 pr-10 py-2 dark:bg-gray-700 dark:text-gray-200 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
                         , Html.Events.on "change" <|
                             Decode.map (PageMsg.Internal << SelectRelatedTerm index) <|
@@ -648,7 +642,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms 
         , Extras.Html.showMaybe
             (\validationError ->
                 p
-                    [ class "mt-2 text-red-600" ]
+                    [ class "mt-2 text-red-600 dark:text-red-400" ]
                     [ text validationError ]
             )
             (if showValidationErrors then
@@ -700,7 +694,7 @@ viewAddRelatedTermButtonForEmptyState =
         ]
 
 
-viewCreateSeeAlso : Bool -> GlossaryItems -> Array Form.Term -> Array Form.RelatedTerm -> Html Msg
+viewCreateSeeAlso : Bool -> GlossaryItems -> Array Form.TermField -> Array Form.RelatedTermField -> Html Msg
 viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray =
     let
         termIdsSet =
@@ -755,7 +749,7 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
             div
                 [ class "flex justify-end mb-2" ]
                 [ p
-                    [ class "text-red-600" ]
+                    [ class "text-red-600 dark:text-red-400" ]
                     [ text message ]
                 ]
 
@@ -793,13 +787,13 @@ view model =
         Ok glossaryItems ->
             let
                 terms =
-                    Form.terms model.form
+                    Form.termFields model.form
 
                 detailsArray =
-                    Form.detailsArray model.form
+                    Form.detailsFields model.form
 
                 relatedTerms =
-                    Form.relatedTerms model.form
+                    Form.relatedTermFields model.form
             in
             div
                 [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl" ]
@@ -817,7 +811,7 @@ view model =
                     , form
                         [ class "pt-7" ]
                         [ div
-                            [ class "space-y-8 divide-y divide-gray-200 sm:space-y-5" ]
+                            [ class "space-y-8 divide-y divide-gray-200 dark:divide-gray-800 sm:space-y-5" ]
                             [ viewCreateDescriptionTerms model.triedToSaveWhenFormInvalid terms
                             , viewCreateDescriptionDetails model.triedToSaveWhenFormInvalid detailsArray
                             , viewCreateSeeAlso model.triedToSaveWhenFormInvalid glossaryItems terms relatedTerms

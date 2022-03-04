@@ -5,11 +5,11 @@ import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
 import Data.AboutLink as AboutLink
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
-import Data.Title as Title
 import Html exposing (Html)
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg(..))
 import Pages.CreateOrEdit
+import Pages.EditTitleAndAbout
 import Pages.ListAll
 import Task
 
@@ -35,6 +35,7 @@ type alias Flags =
 type Page
     = ListAll Pages.ListAll.Model
     | CreateOrEdit Pages.CreateOrEdit.Model
+    | EditTitleAndAbout Pages.EditTitleAndAbout.Model
 
 
 type alias Model =
@@ -48,7 +49,6 @@ init flags =
             flags
                 |> Decode.decodeValue (Decode.field "titleString" Decode.string)
                 |> Result.withDefault "Element not found"
-                |> Title.fromString
 
         aboutParagraph =
             flags
@@ -95,6 +95,7 @@ type Msg
     = NoOp
     | ListAllMsg Pages.ListAll.Msg
     | CreateOrEditMsg Pages.CreateOrEdit.Msg
+    | EditTitleAndAboutMsg Pages.EditTitleAndAbout.Msg
 
 
 
@@ -110,6 +111,9 @@ withoutInternal msg =
         ListAllMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
 
+        ListAllMsg (NavigateToEditTitleAndAbout commonModel) ->
+            PageMsg.NavigateToEditTitleAndAbout commonModel
+
         ListAllMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
@@ -119,7 +123,22 @@ withoutInternal msg =
         CreateOrEditMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
 
+        CreateOrEditMsg (NavigateToEditTitleAndAbout commonModel) ->
+            PageMsg.NavigateToEditTitleAndAbout commonModel
+
         CreateOrEditMsg (PageMsg.Internal _) ->
+            PageMsg.Internal ()
+
+        EditTitleAndAboutMsg (NavigateToListAll commonModel) ->
+            PageMsg.NavigateToListAll commonModel
+
+        EditTitleAndAboutMsg (NavigateToCreateOrEdit commonModel) ->
+            PageMsg.NavigateToCreateOrEdit commonModel
+
+        EditTitleAndAboutMsg (NavigateToEditTitleAndAbout commonModel) ->
+            PageMsg.NavigateToEditTitleAndAbout commonModel
+
+        EditTitleAndAboutMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
         NoOp ->
@@ -147,6 +166,15 @@ update msg model =
             , Cmd.batch [ resetViewport, Cmd.map CreateOrEditMsg createOrEditCmd ]
             )
 
+        ( _, NavigateToEditTitleAndAbout commonModel, _ ) ->
+            let
+                ( editTitleAndAboutModel, editTitleAndAboutCmd ) =
+                    Pages.EditTitleAndAbout.init commonModel
+            in
+            ( EditTitleAndAbout editTitleAndAboutModel
+            , Cmd.batch [ resetViewport, Cmd.map EditTitleAndAboutMsg editTitleAndAboutCmd ]
+            )
+
         ( ListAllMsg (PageMsg.Internal msg_), _, ListAll listAllModel ) ->
             let
                 ( listAllModel_, listAllCmd ) =
@@ -160,6 +188,13 @@ update msg model =
                     Pages.CreateOrEdit.update msg_ createOrEditModel
             in
             ( CreateOrEdit createOrEditModel_, createOrEditCmd |> Cmd.map CreateOrEditMsg )
+
+        ( EditTitleAndAboutMsg (PageMsg.Internal msg_), _, EditTitleAndAbout editTitleAndAboutModel ) ->
+            let
+                ( editTitleAndAboutModel_, editTitleAndAboutCmd ) =
+                    Pages.EditTitleAndAbout.update msg_ editTitleAndAboutModel
+            in
+            ( EditTitleAndAbout editTitleAndAboutModel_, editTitleAndAboutCmd |> Cmd.map EditTitleAndAboutMsg )
 
         _ ->
             ( model, Cmd.none )
@@ -184,6 +219,10 @@ view model =
         CreateOrEdit page ->
             Pages.CreateOrEdit.view page
                 |> Html.map CreateOrEditMsg
+
+        EditTitleAndAbout page ->
+            Pages.EditTitleAndAbout.view page
+                |> Html.map EditTitleAndAboutMsg
 
 
 

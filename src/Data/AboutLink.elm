@@ -1,4 +1,4 @@
-module Data.AboutLink exposing (AboutLink, body, decode, href)
+module Data.AboutLink exposing (AboutLink, body, create, decode, href)
 
 import Json.Decode as Decode exposing (Decoder)
 
@@ -29,3 +29,8 @@ body aboutLink =
     case aboutLink of
         AboutLink link ->
             link.body
+
+
+create : String -> String -> AboutLink
+create href0 body0 =
+    AboutLink { href = href0, body = body0 }

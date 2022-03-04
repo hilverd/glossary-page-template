@@ -34,7 +34,7 @@
   }
 
   div#glossary-page-about {
-    @apply pb-4 max-w-prose;
+    @apply pb-3 max-w-prose;
   }
 
   div#glossary-page-about ul {

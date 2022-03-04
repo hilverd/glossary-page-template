@@ -6,7 +6,6 @@ import Data.AboutLink as AboutLink
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
-import Data.Title as Title
 import Dict exposing (Dict)
 import ElementIds
 import Extras.Html
@@ -136,7 +135,7 @@ update msg model =
             ( { model | menuForMobileVisibility = Visible }
             , Cmd.batch
                 [ preventBackgroundScrolling ()
-                , scrollToTopInElement idOfIndexForMobile
+                , scrollToTopInElement ElementIds.indexForMobile
                 ]
             )
 
@@ -198,22 +197,22 @@ update msg model =
             let
                 idOfSidebarOrMenu =
                     if staticSidebar then
-                        idOfStaticSidebarForDesktop
+                        ElementIds.staticSidebarForDesktop
 
                     else
-                        idOfIndexForMobile
+                        ElementIds.indexForMobile
             in
             ( model
             , Dom.getViewportOf idOfSidebarOrMenu
                 |> Task.andThen
                     (\viewport ->
                         termIndexGroupLabel
-                            |> idForTermIndexGroupLabel staticSidebar
+                            |> ElementIds.termIndexGroupLabel staticSidebar
                             |> Dom.getElement
                             |> Task.andThen
                                 (\termIndexGroupElement ->
                                     if staticSidebar then
-                                        idOfQuickSearchButtonAndLetterGrid
+                                        ElementIds.quickSearchButtonAndLetterGrid
                                             |> Dom.getElement
                                             |> Task.andThen
                                                 (\quickSearchButtonAndLetterGridElement ->
@@ -284,7 +283,7 @@ scrollToTop =
 
 scrollGlossaryItemIntoView : GlossaryItemIndex -> Cmd Msg
 scrollGlossaryItemIntoView =
-    idForGlossaryItemDiv >> scrollElementIntoView
+    ElementIds.glossaryItemDiv >> scrollElementIntoView
 
 
 scrollElementIntoView : String -> Cmd Msg
@@ -362,7 +361,7 @@ viewMakingChangesHelp expanded =
                     , text " attribute to "
                     , code [] [ text "false" ]
                     , text " on the "
-                    , code [] [ text "<div id=\"glossary-page-container\">" ]
+                    , code [] [ text <| "<div id=\"" ++ ElementIds.container ++ "\">" ]
                     , text " element."
                     ]
                 , p
@@ -390,19 +389,10 @@ viewTermIndexItem term =
         ]
 
 
-idForTermIndexGroupLabel : Bool -> String -> String
-idForTermIndexGroupLabel staticSidebar termIndexGroupLabel =
-    if staticSidebar then
-        "index-group-static-sidebar-" ++ termIndexGroupLabel
-
-    else
-        "index-group-" ++ termIndexGroupLabel
-
-
 viewTermIndexGroup : Bool -> TermIndexGroup -> Html Msg
 viewTermIndexGroup staticSidebar { label, terms } =
     li
-        [ id <| idForTermIndexGroupLabel staticSidebar label
+        [ id <| ElementIds.termIndexGroupLabel staticSidebar label
         , class "mt-6"
         ]
         [ h5
@@ -482,19 +472,10 @@ termIndexFromGlossaryItems glossaryItems =
     termIndex
 
 
-idOfTermsIndex : Bool -> String
-idOfTermsIndex staticSidebar =
-    if staticSidebar then
-        "terms-index-static-sidebar"
-
-    else
-        "terms-index"
-
-
 viewTermsIndex : Bool -> TermIndex -> Html Msg
 viewTermsIndex staticSidebar termIndex =
     ul
-        [ id <| idOfTermsIndex staticSidebar
+        [ id <| ElementIds.termsIndex staticSidebar
         , class "mb-10"
         ]
         (List.filterMap
@@ -580,11 +561,6 @@ viewGlossaryItemButton attributes icon label =
         ]
 
 
-idForGlossaryItemDiv : GlossaryItemIndex -> String
-idForGlossaryItemDiv index =
-    "glossary-item-" ++ (index |> GlossaryItemIndex.toInt |> String.fromInt)
-
-
 viewGlossaryItem : GlossaryItemIndex -> Model -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
 viewGlossaryItem index model editable errorWhileDeleting glossaryItem =
     let
@@ -605,7 +581,7 @@ viewGlossaryItem index model editable errorWhileDeleting glossaryItem =
     if editable then
         div
             [ class "flex flex-col justify-items-end"
-            , id <| idForGlossaryItemDiv index
+            , id <| ElementIds.glossaryItemDiv index
             ]
             [ div
                 []
@@ -748,12 +724,23 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
         ]
 
 
-viewCreateGlossaryItemButtonForEmptyState : Model -> Html Msg
-viewCreateGlossaryItemButtonForEmptyState model =
-    let
-        common =
-            model.common
-    in
+viewEditTitleAndAboutButton : CommonModel -> Html Msg
+viewEditTitleAndAboutButton common =
+    div
+        [ class "pb-6 print:hidden" ]
+        [ button
+            [ Html.Attributes.type_ "button"
+            , class "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            , Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout { common | maybeIndex = Nothing }
+            ]
+            [ Icons.pencilSolid
+            , span [ class "ml-2" ] [ text "Edit title and about section" ]
+            ]
+        ]
+
+
+viewCreateGlossaryItemButtonForEmptyState : CommonModel -> Html Msg
+viewCreateGlossaryItemButtonForEmptyState common =
     div
         [ class "pt-4 print:hidden" ]
         [ button
@@ -779,12 +766,8 @@ viewCreateGlossaryItemButtonForEmptyState model =
         ]
 
 
-viewCreateGlossaryItemButton : Model -> Html Msg
-viewCreateGlossaryItemButton model =
-    let
-        common =
-            model.common
-    in
+viewCreateGlossaryItemButton : CommonModel -> Html Msg
+viewCreateGlossaryItemButton common =
     div
         [ class "pb-2 print:hidden" ]
         [ button
@@ -807,25 +790,20 @@ viewCards : Model -> Bool -> List ( GlossaryItemIndex, GlossaryItem ) -> Html Ms
 viewCards model editable indexedGlossaryItems =
     Html.article
         [ Html.Attributes.id ElementIds.items ]
-        [ case model.makingChanges of
-            MakingChangesHelpCollapsed ->
-                viewMakingChangesHelp False
+        [ div
+            [ class "pt-2 border-t border-gray-300 dark:border-gray-700" ]
+            [ Extras.Html.showIf editable <|
+                div
+                    [ class "pt-2" ]
+                    [ if List.isEmpty indexedGlossaryItems then
+                        viewCreateGlossaryItemButtonForEmptyState model.common
 
-            MakingChangesHelpExpanded ->
-                viewMakingChangesHelp True
-
-            _ ->
-                Extras.Html.nothing
-        , Extras.Html.showIf editable <|
-            div
-                [ class "pb-4" ]
-                [ if List.isEmpty indexedGlossaryItems then
-                    viewCreateGlossaryItemButtonForEmptyState model
-
-                  else
-                    viewCreateGlossaryItemButton model
-                ]
-        , Extras.Html.showIf (not <| List.isEmpty indexedGlossaryItems) <| viewOrderItemsBy model
+                      else
+                        viewCreateGlossaryItemButton model.common
+                    ]
+            ]
+        , Extras.Html.showIf (not <| List.isEmpty indexedGlossaryItems) <|
+            viewOrderItemsBy model
         , Html.dl
             []
             (indexedGlossaryItems
@@ -841,11 +819,6 @@ viewCards model editable indexedGlossaryItems =
             )
         , viewConfirmDeleteModal model.confirmDeleteIndex
         ]
-
-
-idOfIndexForMobile : String
-idOfIndexForMobile =
-    "menu-for-mobile"
 
 
 viewMenuForMobile : Model -> TermIndex -> Html Msg
@@ -909,7 +882,7 @@ viewMenuForMobile model termIndex =
                     ]
                 ]
             , div
-                [ id idOfIndexForMobile
+                [ id ElementIds.indexForMobile
                 , class "flex-1 h-0 overflow-y-auto"
                 ]
                 [ nav
@@ -922,6 +895,52 @@ viewMenuForMobile model termIndex =
         , div
             [ class "flex-shrink-0 w-14", attribute "aria-hidden" "true" ]
             []
+        ]
+
+
+viewQuickSearchButton : Html Msg
+viewQuickSearchButton =
+    div
+        [ class "hidden px-3 pb-4 bg-white dark:bg-slate-900" ]
+        [ div
+            [ class "bg-gray-50 dark:bg-slate-900 relative pointer-events-auto" ]
+            [ button
+                [ Html.Attributes.type_ "button"
+                , class "hidden w-full lg:flex items-center text-sm leading-6 text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-600 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800"
+                , attribute "aria-hidden" "true"
+                ]
+                [ svg
+                    [ width "24"
+                    , height "24"
+                    , fill "none"
+                    , Svg.Attributes.class "mr-3 flex-none"
+                    ]
+                    [ path
+                        [ d "m19 19-3.5-3.5"
+                        , stroke "currentColor"
+                        , strokeWidth "2"
+                        , strokeLinecap "round"
+                        , strokeLinejoin "round"
+                        ]
+                        []
+                    , circle
+                        [ cx "11"
+                        , cy "11"
+                        , r "6"
+                        , stroke "currentColor"
+                        , strokeWidth "2"
+                        , strokeLinecap "round"
+                        , strokeLinejoin "round"
+                        ]
+                        []
+                    ]
+                , text "Quick search..."
+                , span
+                    [ class "ml-auto pl-3 flex-none text-xs font-semibold" ]
+                    [ text "Ctrl K"
+                    ]
+                ]
+            ]
         ]
 
 
@@ -956,22 +975,16 @@ viewTermIndexFirstCharacterGrid staticSidebar termIndex =
         )
 
 
-idOfQuickSearchButtonAndLetterGrid : String
-idOfQuickSearchButtonAndLetterGrid =
-    "search-button-and-letter-grid"
-
-
 viewQuickSearchButtonAndLetterGrid : Bool -> TermIndex -> Html Msg
 viewQuickSearchButtonAndLetterGrid staticSidebar termIndex =
     div
-        [ id idOfQuickSearchButtonAndLetterGrid
+        [ id ElementIds.quickSearchButtonAndLetterGrid
         , class "-mb-6 sticky top-0 -ml-0.5 pointer-events-none"
         ]
         [ div
             [ class "h-7 bg-white dark:bg-slate-900" ]
             []
-
-        -- , viewQuickSearchButton
+        , viewQuickSearchButton
         , div
             [ class "px-3 bg-white dark:bg-slate-900" ]
             [ viewTermIndexFirstCharacterGrid staticSidebar termIndex ]
@@ -981,18 +994,13 @@ viewQuickSearchButtonAndLetterGrid staticSidebar termIndex =
         ]
 
 
-idOfStaticSidebarForDesktop : String
-idOfStaticSidebarForDesktop =
-    "static-sidebar-for-desktop"
-
-
 viewStaticSidebarForDesktop : TermIndex -> Html Msg
 viewStaticSidebarForDesktop termIndex =
     div
         [ class "hidden print:hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900"
         ]
         [ div
-            [ id idOfStaticSidebarForDesktop
+            [ id ElementIds.staticSidebarForDesktop
             , class "h-0 flex-1 flex flex-col overflow-y-auto"
             ]
             [ viewQuickSearchButtonAndLetterGrid True termIndex
@@ -1062,7 +1070,7 @@ viewTopBar =
 viewOrderItemsBy : Model -> Html Msg
 viewOrderItemsBy model =
     div
-        [ class "print:hidden border-t border-gray-300 dark:border-gray-700 pt-6 pb-6" ]
+        [ class "print:hidden pt-4 pb-6" ]
         [ label
             [ class "font-medium text-gray-900 dark:text-gray-100" ]
             [ text "Order items" ]
@@ -1135,14 +1143,25 @@ view model =
                     , div
                         [ Html.Attributes.id ElementIds.container ]
                         [ header []
-                            [ h1
+                            [ case model.makingChanges of
+                                MakingChangesHelpCollapsed ->
+                                    viewMakingChangesHelp False
+
+                                MakingChangesHelpExpanded ->
+                                    viewMakingChangesHelp True
+
+                                _ ->
+                                    Extras.Html.nothing
+                            , Extras.Html.showIf editable <|
+                                viewEditTitleAndAboutButton model.common
+                            , h1
                                 [ id ElementIds.title ]
-                                [ text <| Title.toString model.common.title ]
+                                [ text model.common.title ]
                             ]
                         , Html.main_
                             []
                             [ div
-                                [ id "glossary-page-about" ]
+                                [ id ElementIds.about ]
                                 [ p []
                                     [ text model.common.aboutParagraph ]
                                 , ul [] <|

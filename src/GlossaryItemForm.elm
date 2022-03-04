@@ -1,22 +1,22 @@
 module GlossaryItemForm exposing
-    ( Details
+    ( DetailsField
     , GlossaryItemForm
-    , RelatedTerm
-    , Term
+    , RelatedTermField
+    , TermField
     , addDetails
     , addRelatedTerm
     , addTerm
     , deleteDetails
     , deleteRelatedTerm
     , deleteTerm
-    , detailsArray
+    , detailsFields
     , empty
     , fromGlossaryItem
     , hasValidationErrors
-    , relatedTerms
+    , relatedTermFields
     , selectRelatedTerm
     , termBodyToId
-    , terms
+    , termFields
     , toGlossaryItem
     , toggleAbbreviation
     , updateDetails
@@ -35,7 +35,7 @@ import Extras.Array
 import Set exposing (Set)
 
 
-type alias Term =
+type alias TermField =
     { body : String
     , isAbbreviation : Bool
     , isAbbreviationManuallyOverridden : Bool
@@ -43,13 +43,13 @@ type alias Term =
     }
 
 
-type alias Details =
+type alias DetailsField =
     { body : String
     , validationError : Maybe String
     }
 
 
-type alias RelatedTerm =
+type alias RelatedTermField =
     { idReference : Maybe String
     , validationError : Maybe String
     }
@@ -57,32 +57,32 @@ type alias RelatedTerm =
 
 type GlossaryItemForm
     = GlossaryItemForm
-        { terms : Array Term
-        , detailsArray : Array Details
-        , relatedTerms : Array RelatedTerm
+        { termFields : Array TermField
+        , detailsFields : Array DetailsField
+        , relatedTermFields : Array RelatedTermField
         , termIdsOutside : Set String
         }
 
 
-terms : GlossaryItemForm -> Array Term
-terms glossaryItemForm =
+termFields : GlossaryItemForm -> Array TermField
+termFields glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
-            form.terms
+            form.termFields
 
 
-detailsArray : GlossaryItemForm -> Array Details
-detailsArray glossaryItemForm =
+detailsFields : GlossaryItemForm -> Array DetailsField
+detailsFields glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
-            form.detailsArray
+            form.detailsFields
 
 
-relatedTerms : GlossaryItemForm -> Array RelatedTerm
-relatedTerms glossaryItemForm =
+relatedTermFields : GlossaryItemForm -> Array RelatedTermField
+relatedTermFields glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
-            form.relatedTerms
+            form.relatedTermFields
 
 
 termIdsOutside : GlossaryItemForm -> Set String
@@ -101,7 +101,7 @@ validate form =
         termIdsInsideForm : Dict String Int
         termIdsInsideForm =
             form
-                |> terms
+                |> termFields
                 |> Array.map (.body >> termBodyToId)
                 |> Array.foldl
                     (\termId ->
@@ -111,19 +111,19 @@ validate form =
                     )
                     Dict.empty
 
-        validatedTerms =
+        validatedTermFields =
             form
-                |> terms
+                |> termFields
                 |> Array.map
-                    (\term ->
+                    (\termField ->
                         let
                             body =
-                                String.trim term.body
+                                String.trim termField.body
 
                             termId =
                                 termBodyToId body
                         in
-                        { term
+                        { termField
                             | validationError =
                                 if String.isEmpty body then
                                     Just "This field can't be empty"
@@ -142,16 +142,16 @@ validate form =
                         }
                     )
 
-        validatedDetails =
+        validatedDetailsFields =
             form
-                |> detailsArray
+                |> detailsFields
                 |> Array.map
-                    (\details ->
+                    (\detailsField ->
                         let
                             body =
-                                String.trim details.body
+                                String.trim detailsField.body
                         in
-                        { details
+                        { detailsField
                             | validationError =
                                 if String.isEmpty body then
                                     Just "This field can't be empty"
@@ -161,14 +161,14 @@ validate form =
                         }
                     )
 
-        validatedRelatedTerms =
+        validatedRelatedTermFields =
             form
-                |> relatedTerms
+                |> relatedTermFields
                 |> Array.map
-                    (\relatedTerm ->
-                        { relatedTerm
+                    (\relatedTermField ->
+                        { relatedTermField
                             | validationError =
-                                if relatedTerm.idReference == Nothing then
+                                if relatedTermField.idReference == Nothing then
                                     Just "Please select an item"
 
                                 else
@@ -177,9 +177,9 @@ validate form =
                     )
     in
     GlossaryItemForm
-        { terms = validatedTerms
-        , detailsArray = validatedDetails
-        , relatedTerms = validatedRelatedTerms
+        { termFields = validatedTermFields
+        , detailsFields = validatedDetailsFields
+        , relatedTermFields = validatedRelatedTermFields
         , termIdsOutside = termIdsOutside form
         }
 
@@ -190,24 +190,24 @@ hasValidationErrors form =
         hasErrors =
             Array.toList >> List.any (.validationError >> (/=) Nothing)
     in
-    (form |> terms |> hasErrors)
-        || (form |> detailsArray |> hasErrors)
-        || (form |> relatedTerms |> hasErrors)
+    (form |> termFields |> hasErrors)
+        || (form |> detailsFields |> hasErrors)
+        || (form |> relatedTermFields |> hasErrors)
 
 
 empty : Set String -> GlossaryItemForm
 empty withTermIdsOutside =
     GlossaryItemForm
-        { terms = Array.fromList [ emptyTerm ]
-        , detailsArray = Array.empty
-        , relatedTerms = Array.empty
+        { termFields = Array.fromList [ emptyTermField ]
+        , detailsFields = Array.empty
+        , relatedTermFields = Array.empty
         , termIdsOutside = withTermIdsOutside
         }
         |> validate
 
 
-emptyTerm : Term
-emptyTerm =
+emptyTermField : TermField
+emptyTermField =
     { body = ""
     , isAbbreviation = False
     , isAbbreviationManuallyOverridden = False
@@ -215,15 +215,15 @@ emptyTerm =
     }
 
 
-emptyDetails : Details
-emptyDetails =
+emptyDetailsField : DetailsField
+emptyDetailsField =
     { body = ""
     , validationError = Nothing
     }
 
 
-emptyRelatedTerm : RelatedTerm
-emptyRelatedTerm =
+emptyRelatedTermField : RelatedTermField
+emptyRelatedTermField =
     { idReference = Nothing
     , validationError = Nothing
     }
@@ -233,22 +233,22 @@ fromGlossaryItem : Set String -> GlossaryItem -> GlossaryItemForm
 fromGlossaryItem existingTermIds item =
     let
         termsForItem =
-            List.map (\term -> Term term.body term.isAbbreviation True Nothing) item.terms
+            List.map (\term -> TermField term.body term.isAbbreviation True Nothing) item.terms
 
         termIdsForItem =
             termsForItem
                 |> List.map (.body >> termBodyToId)
                 |> Set.fromList
 
-        detailsList =
-            List.map (\detailsElem -> Details detailsElem Nothing) item.details
+        detailsFieldsList =
+            List.map (\detailsElem -> DetailsField detailsElem Nothing) item.details
     in
     GlossaryItemForm
-        { terms = Array.fromList termsForItem
-        , detailsArray = Array.fromList detailsList
-        , relatedTerms =
+        { termFields = Array.fromList termsForItem
+        , detailsFields = Array.fromList detailsFieldsList
+        , relatedTermFields =
             item.relatedTerms
-                |> List.map (\term -> RelatedTerm (Just term.idReference) Nothing)
+                |> List.map (\term -> RelatedTermField (Just term.idReference) Nothing)
                 |> Array.fromList
         , termIdsOutside = Set.diff existingTermIds termIdsForItem
         }
@@ -278,27 +278,27 @@ toGlossaryItem glossaryItems form =
     in
     { terms =
         form
-            |> terms
+            |> termFields
             |> Array.toList
             |> List.map
-                (\formTerm ->
-                    { id = termBodyToId formTerm.body
-                    , isAbbreviation = formTerm.isAbbreviation
-                    , body = formTerm.body |> String.trim
+                (\termField ->
+                    { id = termBodyToId termField.body
+                    , isAbbreviation = termField.isAbbreviation
+                    , body = termField.body |> String.trim
                     }
                 )
     , details =
         form
-            |> detailsArray
+            |> detailsFields
             |> Array.toList
             |> List.map (.body >> String.trim)
     , relatedTerms =
         form
-            |> relatedTerms
+            |> relatedTermFields
             |> Array.toList
             |> List.filterMap
-                (\formRelatedTerm ->
-                    formRelatedTerm.idReference
+                (\relatedTermField ->
+                    relatedTermField.idReference
                         |> Maybe.andThen
                             (\ref ->
                                 Dict.get ref bodyByIdReference
@@ -313,7 +313,7 @@ addTerm glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
-                { form | terms = Array.push emptyTerm form.terms }
+                { form | termFields = Array.push emptyTermField form.termFields }
                 |> validate
 
 
@@ -323,22 +323,22 @@ updateTerm termIndex glossaryItemForm body =
         GlossaryItemForm form ->
             GlossaryItemForm
                 { form
-                    | terms =
+                    | termFields =
                         Extras.Array.update
-                            (\term ->
-                                if not term.isAbbreviationManuallyOverridden then
-                                    { term
+                            (\termField ->
+                                if not termField.isAbbreviationManuallyOverridden then
+                                    { termField
                                         | body = body
                                         , isAbbreviation = termBodyLooksLikeAnAbbreviation body
                                     }
 
                                 else
-                                    { term
+                                    { termField
                                         | body = body
                                     }
                             )
                             (TermIndex.toInt termIndex)
-                            form.terms
+                            form.termFields
                 }
                 |> validate
 
@@ -348,7 +348,7 @@ deleteTerm termIndex glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
-                { form | terms = Extras.Array.delete (TermIndex.toInt termIndex) form.terms }
+                { form | termFields = Extras.Array.delete (TermIndex.toInt termIndex) form.termFields }
                 |> validate
 
 
@@ -358,16 +358,16 @@ toggleAbbreviation termIndex glossaryItemForm =
         GlossaryItemForm form ->
             GlossaryItemForm
                 { form
-                    | terms =
+                    | termFields =
                         Extras.Array.update
-                            (\term ->
-                                { term
-                                    | isAbbreviation = not term.isAbbreviation
+                            (\termField ->
+                                { termField
+                                    | isAbbreviation = not termField.isAbbreviation
                                     , isAbbreviationManuallyOverridden = True
                                 }
                             )
                             (TermIndex.toInt termIndex)
-                            form.terms
+                            form.termFields
                 }
                 |> validate
 
@@ -377,7 +377,7 @@ addDetails glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
-                { form | detailsArray = form.detailsArray |> Array.push emptyDetails }
+                { form | detailsFields = form.detailsFields |> Array.push emptyDetailsField }
                 |> validate
 
 
@@ -387,11 +387,11 @@ updateDetails detailsIndex glossaryItemForm body =
         GlossaryItemForm form ->
             GlossaryItemForm
                 { form
-                    | detailsArray =
+                    | detailsFields =
                         Extras.Array.update
-                            (\detailsSingle -> { detailsSingle | body = body })
+                            (\detailsField -> { detailsField | body = body })
                             (DetailsIndex.toInt detailsIndex)
-                            form.detailsArray
+                            form.detailsFields
                 }
                 |> validate
 
@@ -401,7 +401,7 @@ deleteDetails index glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
-                { form | detailsArray = Extras.Array.delete (DetailsIndex.toInt index) form.detailsArray }
+                { form | detailsFields = Extras.Array.delete (DetailsIndex.toInt index) form.detailsFields }
                 |> validate
 
 
@@ -410,7 +410,7 @@ addRelatedTerm glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
-                { form | relatedTerms = Array.push emptyRelatedTerm form.relatedTerms }
+                { form | relatedTermFields = Array.push emptyRelatedTermField form.relatedTermFields }
                 |> validate
 
 
@@ -420,11 +420,11 @@ selectRelatedTerm index glossaryItemForm relatedTermIdReference =
         GlossaryItemForm form ->
             GlossaryItemForm
                 { form
-                    | relatedTerms =
+                    | relatedTermFields =
                         Extras.Array.update
-                            (always <| RelatedTerm relatedTermIdReference Nothing)
+                            (always <| RelatedTermField relatedTermIdReference Nothing)
                             (RelatedTermIndex.toInt index)
-                            form.relatedTerms
+                            form.relatedTermFields
                 }
                 |> validate
 
@@ -434,7 +434,7 @@ deleteRelatedTerm index glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
-                { form | relatedTerms = Extras.Array.delete (RelatedTermIndex.toInt index) form.relatedTerms }
+                { form | relatedTermFields = Extras.Array.delete (RelatedTermIndex.toInt index) form.relatedTermFields }
                 |> validate
 
 
