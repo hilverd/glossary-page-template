@@ -11,6 +11,7 @@ import Dict exposing (Dict)
 import ElementIds
 import Extras.Html
 import Extras.HtmlAttribute
+import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
 import Html exposing (Attribute, Html, a, button, code, div, fieldset, h1, h3, h5, header, input, label, legend, li, nav, p, pre, span, text, ul)
@@ -155,7 +156,11 @@ update msg model =
             ( { model | confirmDeleteIndex = Just index }, preventBackgroundScrolling () )
 
         CancelDelete ->
-            ( { model | confirmDeleteIndex = Nothing }, allowBackgroundScrolling () )
+            if model.confirmDeleteIndex /= Nothing then
+                ( { model | confirmDeleteIndex = Nothing }, allowBackgroundScrolling () )
+
+            else
+                ( model, Cmd.none )
 
         Delete index ->
             case model.common.loadedGlossaryItems of
@@ -636,6 +641,7 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
     div
         [ class "fixed z-10 inset-0 overflow-y-auto print:hidden"
         , Extras.HtmlAttribute.showIf (maybeIndexOfItemToDelete == Nothing) <| class "invisible"
+        , Extras.HtmlEvents.onEscape <| PageMsg.Internal CancelDelete
         , attribute "aria-labelledby" ElementIds.modalTitle
         , attribute "role" "dialog"
         , attribute "aria-modal" "true"
@@ -1139,7 +1145,9 @@ view model =
             { title = model.common.title
             , body =
                 [ div
-                    [ class "min-h-full" ]
+                    [ class "min-h-full"
+                    , Extras.HtmlEvents.onEscape <| PageMsg.Internal CancelDelete
+                    ]
                     [ viewMenuForMobile model termIndex
                     , viewStaticSidebarForDesktop termIndex
                     , div
