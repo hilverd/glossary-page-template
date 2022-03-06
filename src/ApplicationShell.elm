@@ -5,7 +5,7 @@ import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
 import Data.AboutLink as AboutLink
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
-import Html exposing (Html)
+import Html
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg(..))
 import Pages.CreateOrEdit

@@ -5,7 +5,7 @@ import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
 import Data.AboutLink as AboutLink
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
-import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
+import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Dict exposing (Dict)
 import ElementIds
@@ -1146,7 +1146,17 @@ view model =
             , body =
                 [ div
                     [ class "min-h-full"
-                    , Extras.HtmlEvents.onEscape <| PageMsg.Internal CancelDelete
+                    , Extras.HtmlEvents.onKeydown
+                        (\code ->
+                            if code == Extras.HtmlEvents.enter then
+                                Maybe.map (PageMsg.Internal << Delete) model.confirmDeleteIndex
+
+                            else if code == Extras.HtmlEvents.escape then
+                                Just <| PageMsg.Internal CancelDelete
+
+                            else
+                                Nothing
+                        )
                     ]
                     [ viewMenuForMobile model termIndex
                     , viewStaticSidebarForDesktop termIndex

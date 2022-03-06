@@ -1,4 +1,4 @@
-module Extras.HtmlAttribute exposing (empty, showIf)
+module Extras.HtmlAttribute exposing (empty, showIf, showMaybe)
 
 import Html
 import Html.Attributes
@@ -16,3 +16,10 @@ showIf condition attribute =
 
     else
         empty
+
+
+showMaybe : (a -> Html.Attribute msg) -> Maybe a -> Html.Attribute msg
+showMaybe f maybe =
+    maybe
+        |> Maybe.map f
+        |> Maybe.withDefault empty

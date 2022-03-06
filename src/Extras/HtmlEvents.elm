@@ -1,31 +1,54 @@
-module Extras.HtmlEvents exposing (onEnter, onEscape)
+module Extras.HtmlEvents exposing (enter, escape, onEnter, onEscape, onKeydown)
 
 import Html exposing (Attribute)
 import Html.Events exposing (keyCode)
 import Json.Decode as Decode
 
 
+onKeydown : (Int -> Maybe msg) -> Attribute msg
+onKeydown f =
+    Html.Events.custom "keydown" <|
+        Decode.andThen
+            (\code ->
+                case f code of
+                    Just msg ->
+                        Decode.succeed { message = msg, stopPropagation = True, preventDefault = True }
+
+                    Nothing ->
+                        Decode.fail "no message for key"
+            )
+            keyCode
+
+
+enter : Int
+enter =
+    13
+
+
+escape : Int
+escape =
+    27
+
+
 onEnter : msg -> Attribute msg
 onEnter msg =
-    let
-        isEnter code =
-            if code == 13 then
-                Decode.succeed { message = msg, stopPropagation = True, preventDefault = True }
+    onKeydown
+        (\code ->
+            if code == enter then
+                Just msg
 
             else
-                Decode.fail "not ENTER"
-    in
-    Html.Events.custom "keydown" <| Decode.andThen isEnter keyCode
+                Nothing
+        )
 
 
 onEscape : msg -> Attribute msg
 onEscape msg =
-    let
-        isEscape code =
-            if code == 27 then
-                Decode.succeed { message = msg, stopPropagation = True, preventDefault = True }
+    onKeydown
+        (\code ->
+            if code == escape then
+                Just msg
 
             else
-                Decode.fail "not ESCAPE"
-    in
-    Html.Events.custom "keydown" <| Decode.andThen isEscape keyCode
+                Nothing
+        )
