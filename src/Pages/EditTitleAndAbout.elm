@@ -314,7 +314,7 @@ viewEditAboutLinks showValidationErrors aboutLinkFieldsArray =
             Array.toList aboutLinkFieldsArray
     in
     div
-        [ class "space-y-6 sm:space-y-5" ]
+        [ class "space-y-5 sm:space-y-6" ]
         [ div []
             [ h3
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
