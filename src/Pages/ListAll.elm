@@ -1,5 +1,8 @@
 port module Pages.ListAll exposing (Model, Msg, init, update, view)
 
+import Accessibility as Accessibility exposing (..)
+import Accessibility.Aria
+import Accessibility.Key exposing (tabbable)
 import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
@@ -14,7 +17,7 @@ import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
-import Html exposing (Attribute, Html, a, button, code, div, fieldset, h1, h3, h5, header, input, label, legend, li, nav, p, pre, span, text, ul)
+import Html
 import Html.Attributes exposing (attribute, checked, class, for, href, id, name, target)
 import Html.Events
 import Http
@@ -313,8 +316,8 @@ scrollToTopInElement id =
 -- VIEW
 
 
-viewMakingChangesHelp : Bool -> Html Msg
-viewMakingChangesHelp expanded =
+viewMakingChangesHelp : Bool -> Bool -> Html Msg
+viewMakingChangesHelp tabbable expanded =
     div
         [ class "mb-5 rounded-md overflow-x-auto bg-amber-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 print:hidden"
         , class <|
@@ -324,7 +327,7 @@ viewMakingChangesHelp expanded =
             else
                 "pt-4 pr-4 pl-4 pb-2"
         ]
-        [ h3
+        [ Html.h3
             [ class "inline-flex text-lg leading-6 items-center font-medium text-gray-900 dark:text-gray-100 select-none"
             , Html.Events.onClick <| PageMsg.Internal ToggleMakingChangesHelp
             ]
@@ -348,6 +351,7 @@ viewMakingChangesHelp expanded =
                     , a
                         [ href "https://nodejs.org/"
                         , Html.Attributes.target "_blank"
+                        , Accessibility.Key.tabbable tabbable
                         ]
                         [ text "Node.js" ]
                     , text " installed, then just run"
@@ -383,20 +387,21 @@ viewMakingChangesHelp expanded =
         ]
 
 
-viewTermIndexItem : GlossaryItem.Term -> Html Msg
-viewTermIndexItem term =
+viewTermIndexItem : Bool -> GlossaryItem.Term -> Html Msg
+viewTermIndexItem tabbable term =
     li []
-        [ a
+        [ Html.a
             [ class "block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
             , Html.Attributes.href <| "#" ++ term.id
+            , Accessibility.Key.tabbable tabbable
             , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
             ]
             [ text term.body ]
         ]
 
 
-viewTermIndexGroup : Bool -> TermIndexGroup -> Html Msg
-viewTermIndexGroup staticSidebar { label, terms } =
+viewTermIndexGroup : Bool -> Bool -> TermIndexGroup -> Html Msg
+viewTermIndexGroup tabbable staticSidebar { label, terms } =
     li
         [ id <| ElementIds.termIndexGroupLabel staticSidebar label
         , class "mt-6"
@@ -406,7 +411,7 @@ viewTermIndexGroup staticSidebar { label, terms } =
             [ text label ]
         , ul
             [ class "space-y-6 lg:space-y-2 border-l border-slate-200 dark:border-slate-600" ]
-            (List.map viewTermIndexItem terms)
+            (List.map (viewTermIndexItem tabbable) terms)
         ]
 
 
@@ -478,8 +483,8 @@ termIndexFromGlossaryItems glossaryItems =
     termIndex
 
 
-viewTermsIndex : Bool -> TermIndex -> Html Msg
-viewTermsIndex staticSidebar termIndex =
+viewTermsIndex : Bool -> Bool -> TermIndex -> Html Msg
+viewTermsIndex tabbable staticSidebar termIndex =
     ul
         [ id <| ElementIds.termsIndex staticSidebar
         , class "mb-10"
@@ -490,14 +495,14 @@ viewTermsIndex staticSidebar termIndex =
                     Nothing
 
                 else
-                    Just <| viewTermIndexGroup staticSidebar termIndexGroup
+                    Just <| viewTermIndexGroup tabbable staticSidebar termIndexGroup
             )
             termIndex
         )
 
 
-viewGlossaryTerm : GlossaryItem.Term -> Html Msg
-viewGlossaryTerm term =
+viewGlossaryTerm : Bool -> GlossaryItem.Term -> Html Msg
+viewGlossaryTerm tabbable term =
     Html.dt
         [ class "group" ]
         [ Html.dfn
@@ -511,7 +516,9 @@ viewGlossaryTerm term =
         , span
             [ class "silcrow invisible group-hover:visible hover:visible" ]
             [ Html.a
-                [ "#" ++ term.id |> Html.Attributes.href ]
+                [ "#" ++ term.id |> Html.Attributes.href
+                , Accessibility.Key.tabbable tabbable
+                ]
                 [ text "§" ]
             ]
         ]
@@ -524,8 +531,8 @@ viewGlossaryItemDetails details =
         [ text details ]
 
 
-viewGlossaryItemRelatedTerms : Bool -> List GlossaryItem.RelatedTerm -> List (Html Msg)
-viewGlossaryItemRelatedTerms itemHasSomeDetails relatedTerms =
+viewGlossaryItemRelatedTerms : Bool -> Bool -> List GlossaryItem.RelatedTerm -> List (Html Msg)
+viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails relatedTerms =
     if List.isEmpty relatedTerms then
         []
 
@@ -543,7 +550,9 @@ viewGlossaryItemRelatedTerms itemHasSomeDetails relatedTerms =
                         |> List.map
                             (\relatedTerm ->
                                 Html.a
-                                    [ "#" ++ relatedTerm.idReference |> Html.Attributes.href ]
+                                    [ "#" ++ relatedTerm.idReference |> Html.Attributes.href
+                                    , Accessibility.Key.tabbable tabbable
+                                    ]
                                     [ text relatedTerm.body ]
                             )
                         |> List.intersperse (text ", ")
@@ -567,8 +576,8 @@ viewGlossaryItemButton attributes icon label =
         ]
 
 
-viewGlossaryItem : GlossaryItemIndex -> Model -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
-viewGlossaryItem index model editable errorWhileDeleting glossaryItem =
+viewGlossaryItem : GlossaryItemIndex -> Bool -> Model -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
+viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
     let
         errorDiv message =
             div
@@ -578,7 +587,7 @@ viewGlossaryItem index model editable errorWhileDeleting glossaryItem =
                     [ text message ]
                 ]
 
-        itemSomeDetails =
+        itemHasSomeDetails =
             GlossaryItem.hasSomeDetails glossaryItem
 
         common =
@@ -591,9 +600,9 @@ viewGlossaryItem index model editable errorWhileDeleting glossaryItem =
             ]
             [ div
                 []
-                (List.map viewGlossaryTerm glossaryItem.terms
+                (List.map (viewGlossaryTerm tabbable) glossaryItem.terms
                     ++ List.map viewGlossaryItemDetails glossaryItem.details
-                    ++ viewGlossaryItemRelatedTerms itemSomeDetails glossaryItem.relatedTerms
+                    ++ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails glossaryItem.relatedTerms
                 )
             , div
                 [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
@@ -604,6 +613,7 @@ viewGlossaryItem index model editable errorWhileDeleting glossaryItem =
                         [ viewGlossaryItemButton
                             [ Html.Events.onClick <|
                                 PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
+                            , Accessibility.Key.tabbable tabbable
                             ]
                             Icons.pencilSolid
                             "Edit"
@@ -611,7 +621,9 @@ viewGlossaryItem index model editable errorWhileDeleting glossaryItem =
                     , span
                         [ class "ml-3 inline-flex items-center" ]
                         [ viewGlossaryItemButton
-                            [ Html.Events.onClick <| PageMsg.Internal <| ConfirmDelete index ]
+                            [ Html.Events.onClick <| PageMsg.Internal <| ConfirmDelete index
+                            , Accessibility.Key.tabbable tabbable
+                            ]
                             Icons.trashSolid
                             "Delete"
                         ]
@@ -630,38 +642,38 @@ viewGlossaryItem index model editable errorWhileDeleting glossaryItem =
 
     else
         div []
-            (List.map viewGlossaryTerm glossaryItem.terms
+            (List.map (viewGlossaryTerm tabbable) glossaryItem.terms
                 ++ List.map viewGlossaryItemDetails glossaryItem.details
-                ++ viewGlossaryItemRelatedTerms itemSomeDetails glossaryItem.relatedTerms
+                ++ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails glossaryItem.relatedTerms
             )
 
 
 viewConfirmDeleteModal : Maybe GlossaryItemIndex -> Html Msg
 viewConfirmDeleteModal maybeIndexOfItemToDelete =
-    div
+    Html.div
         [ class "fixed z-10 inset-0 overflow-y-auto print:hidden"
         , Extras.HtmlAttribute.showIf (maybeIndexOfItemToDelete == Nothing) <| class "invisible"
         , Extras.HtmlEvents.onEscape <| PageMsg.Internal CancelDelete
-        , attribute "aria-labelledby" ElementIds.modalTitle
+        , Accessibility.Aria.labelledBy ElementIds.modalTitle
         , attribute "role" "dialog"
-        , attribute "aria-modal" "true"
+        , Accessibility.Aria.modal True
         ]
         [ div
             [ class "flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0" ]
-            [ div
+            [ Html.div
                 [ class "fixed inset-0 bg-gray-500 dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 transition-opacity"
                 , if maybeIndexOfItemToDelete == Nothing then
                     class "ease-in duration-200 opacity-0"
 
                   else
                     class "ease-out duration-300 opacity-100"
-                , attribute "aria-hidden" "true"
+                , Accessibility.Aria.hidden True
                 , Html.Events.onClick <| PageMsg.Internal CancelDelete
                 ]
                 []
             , span
                 [ class "hidden sm:inline-block sm:align-middle sm:h-screen"
-                , attribute "aria-hidden" "true"
+                , Accessibility.Aria.hidden True
                 ]
                 [ text "\u{200B}" ]
             , div
@@ -681,7 +693,7 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
                             , fill "none"
                             , viewBox "0 0 24 24"
                             , stroke "currentColor"
-                            , attribute "aria-hidden" "true"
+                            , Accessibility.Aria.hidden True
                             ]
                             [ path
                                 [ strokeLinecap "round"
@@ -723,6 +735,7 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
                         [ Html.Attributes.type_ "button"
                         , class "mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-500 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
                         , Html.Events.onClick <| PageMsg.Internal CancelDelete
+                        , Extras.HtmlEvents.onEnter <| PageMsg.Internal CancelDelete
                         ]
                         [ text "Cancel" ]
                     ]
@@ -731,14 +744,15 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
         ]
 
 
-viewEditTitleAndAboutButton : CommonModel -> Html Msg
-viewEditTitleAndAboutButton common =
+viewEditTitleAndAboutButton : Bool -> CommonModel -> Html Msg
+viewEditTitleAndAboutButton tabbable common =
     div
         [ class "pb-6 print:hidden" ]
         [ button
             [ Html.Attributes.type_ "button"
             , class "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             , Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout { common | maybeIndex = Nothing }
+            , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.pencilSolid
             , span [ class "ml-2" ] [ text "Edit title and about section" ]
@@ -746,8 +760,8 @@ viewEditTitleAndAboutButton common =
         ]
 
 
-viewCreateGlossaryItemButtonForEmptyState : CommonModel -> Html Msg
-viewCreateGlossaryItemButtonForEmptyState common =
+viewCreateGlossaryItemButtonForEmptyState : Bool -> CommonModel -> Html Msg
+viewCreateGlossaryItemButtonForEmptyState tabbable common =
     div
         [ class "pt-4 print:hidden" ]
         [ button
@@ -755,6 +769,7 @@ viewCreateGlossaryItemButtonForEmptyState common =
             , class "relative block max-w-lg border-2 border-gray-300 border-dashed rounded-lg p-9 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             , Html.Events.onClick <|
                 PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
+            , Accessibility.Key.tabbable tabbable
             ]
             [ svg
                 [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400"
@@ -773,14 +788,15 @@ viewCreateGlossaryItemButtonForEmptyState common =
         ]
 
 
-viewCreateGlossaryItemButton : CommonModel -> Html Msg
-viewCreateGlossaryItemButton common =
+viewCreateGlossaryItemButton : Bool -> CommonModel -> Html Msg
+viewCreateGlossaryItemButton tabbable common =
     div
         [ class "pb-2 print:hidden" ]
         [ button
             [ Html.Attributes.type_ "button"
             , class "inline-flex items-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
+            , Accessibility.Key.tabbable tabbable
             ]
             [ svg
                 [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5", viewBox "0 0 20 20", fill "currentColor" ]
@@ -793,8 +809,8 @@ viewCreateGlossaryItemButton common =
         ]
 
 
-viewCards : Model -> Bool -> List ( GlossaryItemIndex, GlossaryItem ) -> Html Msg
-viewCards model editable indexedGlossaryItems =
+viewCards : Model -> Bool -> Bool -> List ( GlossaryItemIndex, GlossaryItem ) -> Html Msg
+viewCards model editable tabbable indexedGlossaryItems =
     Html.article
         [ Html.Attributes.id ElementIds.items ]
         [ div
@@ -803,10 +819,10 @@ viewCards model editable indexedGlossaryItems =
                 div
                     [ class "pt-2" ]
                     [ if List.isEmpty indexedGlossaryItems then
-                        viewCreateGlossaryItemButtonForEmptyState model.common
+                        viewCreateGlossaryItemButtonForEmptyState tabbable model.common
 
                       else
-                        viewCreateGlossaryItemButton model.common
+                        viewCreateGlossaryItemButton tabbable model.common
                     ]
             ]
         , Extras.Html.showIf (not <| List.isEmpty indexedGlossaryItems) <|
@@ -818,6 +834,7 @@ viewCards model editable indexedGlossaryItems =
                     (\( index, glossaryItem ) ->
                         viewGlossaryItem
                             index
+                            tabbable
                             model
                             editable
                             model.errorWhileDeleting
@@ -828,15 +845,15 @@ viewCards model editable indexedGlossaryItems =
         ]
 
 
-viewMenuForMobile : Model -> TermIndex -> Html Msg
-viewMenuForMobile model termIndex =
+viewMenuForMobile : Model -> Bool -> TermIndex -> Html Msg
+viewMenuForMobile model tabbable termIndex =
     div
         [ class "invisible" |> Extras.HtmlAttribute.showIf (model.menuForMobileVisibility == Invisible)
         , class "fixed inset-0 flex z-40 lg:hidden"
         , attribute "role" "dialog"
-        , attribute "aria-modal" "true"
+        , Accessibility.Aria.modal True
         ]
-        [ div
+        [ Html.div
             [ class "fixed inset-0 bg-gray-600 bg-opacity-75"
             , if model.menuForMobileVisibility == Visible then
                 class "transition-opacity ease-linear duration-300 opacity-100"
@@ -844,7 +861,7 @@ viewMenuForMobile model termIndex =
               else
                 class "transition-opacity ease-linear duration-300 opacity-0"
             , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
-            , attribute "aria-hidden" "true"
+            , Accessibility.Aria.hidden True
             ]
             []
         , div
@@ -894,13 +911,13 @@ viewMenuForMobile model termIndex =
                 ]
                 [ nav
                     [ class "px-4 pt-1 pb-6" ]
-                    [ viewTermIndexFirstCharacterGrid False termIndex
-                    , viewTermsIndex False termIndex
+                    [ viewTermIndexFirstCharacterGrid False tabbable termIndex
+                    , viewTermsIndex tabbable False termIndex
                     ]
                 ]
             ]
         , div
-            [ class "flex-shrink-0 w-14", attribute "aria-hidden" "true" ]
+            [ class "flex-shrink-0 w-14", Accessibility.Aria.hidden True ]
             []
         ]
 
@@ -914,7 +931,7 @@ viewQuickSearchButton =
             [ button
                 [ Html.Attributes.type_ "button"
                 , class "hidden w-full lg:flex items-center text-sm leading-6 text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-600 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800"
-                , attribute "aria-hidden" "true"
+                , Accessibility.Aria.hidden True
                 ]
                 [ svg
                     [ width "24"
@@ -951,13 +968,14 @@ viewQuickSearchButton =
         ]
 
 
-viewTermIndexFirstCharacter : Bool -> String -> Bool -> Html Msg
-viewTermIndexFirstCharacter staticSidebar firstCharacter enabled =
+viewTermIndexFirstCharacter : Bool -> String -> Bool -> Bool -> Html Msg
+viewTermIndexFirstCharacter staticSidebar firstCharacter enabled tabbable =
     if enabled then
         button
             [ Html.Attributes.type_ "button"
             , class "inline-flex items-center m-0.5 px-3 py-2 border border-gray-200 dark:border-gray-800 shadow-sm leading-4 font-medium rounded-md text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500"
             , Html.Events.onClick <| PageMsg.Internal <| JumpToTermIndexGroup staticSidebar firstCharacter
+            , Accessibility.Key.tabbable tabbable
             ]
             [ text firstCharacter ]
 
@@ -970,20 +988,24 @@ viewTermIndexFirstCharacter staticSidebar firstCharacter enabled =
             [ text firstCharacter ]
 
 
-viewTermIndexFirstCharacterGrid : Bool -> TermIndex -> Html Msg
-viewTermIndexFirstCharacterGrid staticSidebar termIndex =
+viewTermIndexFirstCharacterGrid : Bool -> Bool -> TermIndex -> Html Msg
+viewTermIndexFirstCharacterGrid staticSidebar tabbable termIndex =
     div
         [ class "bg-white dark:bg-slate-900 select-none pointer-events-auto" ]
         (List.map
             (\termIndexGroup ->
-                viewTermIndexFirstCharacter staticSidebar termIndexGroup.label <| not <| List.isEmpty termIndexGroup.terms
+                viewTermIndexFirstCharacter
+                    staticSidebar
+                    termIndexGroup.label
+                    (not <| List.isEmpty termIndexGroup.terms)
+                    tabbable
             )
             termIndex
         )
 
 
-viewQuickSearchButtonAndLetterGrid : Bool -> TermIndex -> Html Msg
-viewQuickSearchButtonAndLetterGrid staticSidebar termIndex =
+viewQuickSearchButtonAndLetterGrid : Bool -> Bool -> TermIndex -> Html Msg
+viewQuickSearchButtonAndLetterGrid staticSidebar tabbable termIndex =
     div
         [ id ElementIds.quickSearchButtonAndLetterGrid
         , class "-mb-6 sticky top-0 -ml-0.5 pointer-events-none"
@@ -994,15 +1016,15 @@ viewQuickSearchButtonAndLetterGrid staticSidebar termIndex =
         , viewQuickSearchButton
         , div
             [ class "px-3 bg-white dark:bg-slate-900" ]
-            [ viewTermIndexFirstCharacterGrid staticSidebar termIndex ]
+            [ viewTermIndexFirstCharacterGrid staticSidebar tabbable termIndex ]
         , div
             [ class "h-8 bg-gradient-to-b from-white dark:from-slate-900" ]
             []
         ]
 
 
-viewStaticSidebarForDesktop : TermIndex -> Html Msg
-viewStaticSidebarForDesktop termIndex =
+viewStaticSidebarForDesktop : Bool -> TermIndex -> Html Msg
+viewStaticSidebarForDesktop tabbable termIndex =
     div
         [ class "hidden print:hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900"
         ]
@@ -1010,10 +1032,10 @@ viewStaticSidebarForDesktop termIndex =
             [ id ElementIds.staticSidebarForDesktop
             , class "h-0 flex-1 flex flex-col overflow-y-auto"
             ]
-            [ viewQuickSearchButtonAndLetterGrid True termIndex
+            [ viewQuickSearchButtonAndLetterGrid True tabbable termIndex
             , nav
                 [ class "px-3" ]
-                [ viewTermsIndex True termIndex ]
+                [ viewTermsIndex tabbable True termIndex ]
             ]
         ]
 
@@ -1036,7 +1058,7 @@ viewTopBar =
                 , fill "none"
                 , viewBox "0 0 24 24"
                 , stroke "currentColor"
-                , attribute "aria-hidden" "true"
+                , Accessibility.Aria.hidden True
                 ]
                 [ path
                     [ strokeLinecap "round"
@@ -1064,7 +1086,7 @@ viewTopBar =
                     , strokeWidth "2"
                     , strokeLinecap "round"
                     , strokeLinejoin "round"
-                    , attribute "aria-hidden" "true"
+                    , Accessibility.Aria.hidden True
                     ]
                     [ path [ d "m19 19-3.5-3.5" ] []
                     , circle [ cx "11", cy "11", r "6" ] []
@@ -1076,6 +1098,10 @@ viewTopBar =
 
 viewOrderItemsBy : Model -> Html Msg
 viewOrderItemsBy model =
+    let
+        tabbable =
+            model.confirmDeleteIndex == Nothing
+    in
     div
         [ class "print:hidden pt-4 pb-6" ]
         [ label
@@ -1089,15 +1115,15 @@ viewOrderItemsBy model =
                 [ class "space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6" ]
                 [ div
                     [ class "flex items-center" ]
-                    [ input
-                        [ checked <| model.common.orderItemsBy == CommonModel.Alphabetically
-                        , class "focus:ring-indigo-500 h-4 w-4 dark:bg-gray-200 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-500"
+                    [ radio
+                        "order-items-by"
+                        "order-items-alphabetically"
+                        (model.common.orderItemsBy == CommonModel.Alphabetically)
+                        [ class "focus:ring-indigo-500 h-4 w-4 dark:bg-gray-200 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-500"
                         , id ElementIds.orderItemsAlphabetically
-                        , name "order-items-by"
-                        , Html.Attributes.type_ "radio"
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy CommonModel.Alphabetically
+                        , Accessibility.Key.tabbable tabbable
                         ]
-                        []
                     , label
                         [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
                         , for ElementIds.orderItemsAlphabetically
@@ -1106,15 +1132,15 @@ viewOrderItemsBy model =
                     ]
                 , div
                     [ class "flex items-center" ]
-                    [ input
-                        [ checked <| model.common.orderItemsBy == CommonModel.MostFrequentFirst
-                        , class "focus:ring-indigo-500 h-4 w-4 dark:bg-gray-200 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-500"
+                    [ radio
+                        "order-items-by"
+                        "order-items-most-frequent-first"
+                        (model.common.orderItemsBy == CommonModel.MostFrequentFirst)
+                        [ class "focus:ring-indigo-500 h-4 w-4 dark:bg-gray-200 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-500"
                         , id ElementIds.orderItemsMostFrequentFirst
-                        , name "order-items-by"
-                        , Html.Attributes.type_ "radio"
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy CommonModel.MostFrequentFirst
+                        , Accessibility.Key.tabbable tabbable
                         ]
-                        []
                     , label
                         [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
                         , for ElementIds.orderItemsMostFrequentFirst
@@ -1139,12 +1165,15 @@ view model =
                 editable =
                     model.makingChanges == ReadyForMakingChanges
 
+                noModalDialogShown =
+                    model.confirmDeleteIndex == Nothing
+
                 termIndex =
                     termIndexFromGlossaryItems glossaryItems
             in
             { title = model.common.title
             , body =
-                [ div
+                [ Html.div
                     [ class "min-h-full"
                     , Extras.HtmlEvents.onKeydown
                         (\code ->
@@ -1158,8 +1187,8 @@ view model =
                                 Nothing
                         )
                     ]
-                    [ viewMenuForMobile model termIndex
-                    , viewStaticSidebarForDesktop termIndex
+                    [ viewMenuForMobile model noModalDialogShown termIndex
+                    , viewStaticSidebarForDesktop noModalDialogShown termIndex
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar
@@ -1168,15 +1197,15 @@ view model =
                             [ header []
                                 [ case model.makingChanges of
                                     MakingChangesHelpCollapsed ->
-                                        viewMakingChangesHelp False
+                                        viewMakingChangesHelp noModalDialogShown False
 
                                     MakingChangesHelpExpanded ->
-                                        viewMakingChangesHelp True
+                                        viewMakingChangesHelp noModalDialogShown True
 
                                     _ ->
                                         Extras.Html.nothing
                                 , Extras.Html.showIf editable <|
-                                    viewEditTitleAndAboutButton model.common
+                                    viewEditTitleAndAboutButton noModalDialogShown model.common
                                 , h1
                                     [ id ElementIds.title ]
                                     [ text model.common.title ]
@@ -1194,6 +1223,7 @@ view model =
                                                     [ a
                                                         [ target "_blank"
                                                         , href <| AboutLink.href aboutLink
+                                                        , Accessibility.Key.tabbable <| (model.confirmDeleteIndex == Nothing)
                                                         ]
                                                         [ text <| AboutLink.body aboutLink ]
                                                     ]
@@ -1207,7 +1237,7 @@ view model =
                                         else
                                             GlossaryItems.orderedByFrequency
                                        )
-                                    |> viewCards model editable
+                                    |> viewCards model editable noModalDialogShown
                                 ]
                             ]
                         ]

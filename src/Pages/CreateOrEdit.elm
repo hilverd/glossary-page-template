@@ -1,5 +1,7 @@
 module Pages.CreateOrEdit exposing (Model, Msg, init, update, view)
 
+import Accessibility as Accessibility exposing (..)
+import Accessibility.Aria
 import Array exposing (Array)
 import Browser exposing (Document)
 import Browser.Dom as Dom
@@ -16,7 +18,7 @@ import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
 import GlossaryItemForm as Form exposing (GlossaryItemForm)
-import Html exposing (Html, button, div, form, h1, h3, input, option, p, select, span, text, textarea)
+import Html
 import Html.Attributes exposing (attribute, class, disabled, id, required, selected, type_, value)
 import Html.Events
 import Http
@@ -302,7 +304,7 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                     [ class "inline-flex items-center" ]
                     [ button
                         [ Html.Attributes.type_ "button"
-                        , attribute "aria-label" "Delete"
+                        , Accessibility.Aria.label "Delete"
                         , class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-sm rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
                         , Extras.HtmlAttribute.showIf canBeDeleted <| class "hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         , Extras.HtmlAttribute.showIf (not canBeDeleted) <| class "opacity-50"
@@ -317,7 +319,7 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                         [ class "sm:flex sm:flex-row sm:items-center" ]
                         [ div
                             [ class "relative block w-full min-w-0" ]
-                            [ input
+                            [ inputText term.body
                                 [ if not showValidationErrors || term.validationError == Nothing then
                                     class "w-full min-w-0 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white"
 
@@ -325,15 +327,13 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                                     class "w-full min-w-0 rounded-md border-red-300 dark:border-red-700 dark:bg-gray-700 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500"
                                 , type_ "text"
                                 , id <| ElementIds.termInputField termIndex
-                                , value term.body
                                 , required True
                                 , Html.Attributes.autocomplete False
-                                , attribute "aria-required" "true"
-                                , attribute "aria-invalid" "true" |> Extras.HtmlAttribute.showIf (term.validationError /= Nothing)
+                                , Accessibility.Aria.required True
+                                , Accessibility.Aria.invalid <| term.validationError /= Nothing
                                 , Html.Events.onInput (PageMsg.Internal << UpdateTerm termIndex)
                                 , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                                 ]
-                                []
                             , Extras.Html.showIf (showValidationErrors && term.validationError /= Nothing) <|
                                 div [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
                                     [ Icons.exclamationSolidRed ]
@@ -342,7 +342,7 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                             [ class "flex-auto mt-2 sm:mt-0 relative flex items-baseline" ]
                             [ div
                                 [ class "sm:ml-5" ]
-                                [ div
+                                [ Html.div
                                     [ class "flex items-center"
                                     , Html.Events.onClick <| PageMsg.Internal <| ToggleAbbreviation termIndex
                                     ]
@@ -356,11 +356,11 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                                             else
                                                 "bg-gray-200 dark:bg-gray-400"
                                         , attribute "role" "switch"
-                                        , attribute "aria-checked" "false"
-                                        , attribute "aria-labelledby" abbreviationLabelId
+                                        , Accessibility.Aria.checked <| Just term.isAbbreviation
+                                        , Accessibility.Aria.labelledBy abbreviationLabelId
                                         ]
                                         [ span
-                                            [ attribute "aria-hidden" "true"
+                                            [ Accessibility.Aria.hidden True
                                             , class "pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
                                             , class <|
                                                 if term.isAbbreviation then
@@ -452,7 +452,7 @@ viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
             [ span [ class "inline-flex items-center" ]
                 [ button
                     [ Html.Attributes.type_ "button"
-                    , attribute "aria-label" "Delete"
+                    , Accessibility.Aria.label "Delete"
                     , class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-sm rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
                     , class "hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     , Html.Events.onClick <| PageMsg.Internal <| DeleteDetails index
@@ -472,8 +472,8 @@ viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
                           else
                             class "shadow-sm w-full rounded-md border-red-300 dark:border-red-700 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500 dark:bg-gray-700"
                         , required True
-                        , attribute "aria-required" "true"
-                        , attribute "aria-invalid" "true" |> Extras.HtmlAttribute.showIf (detailsSingle.validationError /= Nothing)
+                        , Accessibility.Aria.required True
+                        , Accessibility.Aria.invalid <| detailsSingle.validationError /= Nothing
                         , id <| ElementIds.descriptionDetailsSingle index
                         , Html.Events.onInput (PageMsg.Internal << UpdateDetails index)
                         ]
@@ -601,7 +601,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms 
                     [ class "inline-flex items-center" ]
                     [ button
                         [ Html.Attributes.type_ "button"
-                        , attribute "aria-label" "Delete"
+                        , Accessibility.Aria.label "Delete"
                         , class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-sm rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         , Html.Events.onClick <| PageMsg.Internal <| DeleteRelatedTerm index
                         ]

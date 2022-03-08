@@ -11,7 +11,6 @@ import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import ElementIds
 import Extras.Html
-import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
