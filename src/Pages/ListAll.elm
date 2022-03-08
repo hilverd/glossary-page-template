@@ -1,6 +1,6 @@
 port module Pages.ListAll exposing (Model, Msg, init, update, view)
 
-import Accessibility as Accessibility exposing (..)
+import Accessibility exposing (..)
 import Accessibility.Aria
 import Accessibility.Key exposing (tabbable)
 import Browser exposing (Document)
@@ -18,7 +18,7 @@ import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
 import Html
-import Html.Attributes exposing (attribute, checked, class, for, href, id, name, target)
+import Html.Attributes exposing (attribute, class, for, href, id, target)
 import Html.Events
 import Http
 import Icons

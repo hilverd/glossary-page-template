@@ -1,6 +1,6 @@
-module Pages.EditTitleAndAbout exposing (..)
+module Pages.EditTitleAndAbout exposing (Model, Msg, init, update, view)
 
-import Accessibility as Accessibility exposing (..)
+import Accessibility exposing (..)
 import Accessibility.Aria
 import Array exposing (Array)
 import Browser exposing (Document)
