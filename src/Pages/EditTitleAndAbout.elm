@@ -1,5 +1,7 @@
 module Pages.EditTitleAndAbout exposing (..)
 
+import Accessibility as Accessibility exposing (..)
+import Accessibility.Aria
 import Array exposing (Array)
 import Browser exposing (Document)
 import Browser.Dom as Dom
@@ -13,7 +15,7 @@ import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
-import Html exposing (Html, button, div, form, h1, h3, input, label, p, span, text, textarea)
+import Html
 import Html.Attributes exposing (attribute, class, for, id, name, placeholder, required, spellcheck, type_, value)
 import Html.Events
 import Http
@@ -210,22 +212,20 @@ viewEditTitle showValidationErrors titleField =
                             [ class "sm:flex sm:flex-row sm:items-center" ]
                             [ div
                                 [ class "relative block w-full min-w-0" ]
-                                [ input
+                                [ inputText titleField.body
                                     [ if not showValidationErrors || titleField.validationError == Nothing then
                                         class "w-full min-w-0 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white"
 
                                       else
                                         class "w-full min-w-0 rounded-md border-red-300 dark:bg-gray-700 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500"
                                     , type_ "text"
-                                    , value titleField.body
                                     , required True
                                     , Html.Attributes.autocomplete False
-                                    , attribute "aria-required" "true"
-                                    , attribute "aria-invalid" "true" |> Extras.HtmlAttribute.showIf (titleField.validationError /= Nothing)
+                                    , Accessibility.Aria.required True
+                                    , Accessibility.Aria.invalid <| titleField.validationError /= Nothing
                                     , Html.Events.onInput (PageMsg.Internal << UpdateTitle)
                                     , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                                     ]
-                                    []
                                 , Extras.Html.showIf (showValidationErrors && titleField.validationError /= Nothing) <|
                                     div [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
                                         [ Icons.exclamationSolidRed ]
@@ -275,8 +275,8 @@ viewEditAboutParagraph showValidationErrors aboutParagraphField =
                               else
                                 class "shadow-sm w-full rounded-md border-red-300 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500 dark:bg-gray-700"
                             , required True
-                            , attribute "aria-required" "true"
-                            , attribute "aria-invalid" "true" |> Extras.HtmlAttribute.showIf (aboutParagraphField.validationError /= Nothing)
+                            , Accessibility.Aria.required True
+                            , Accessibility.Aria.invalid <| aboutParagraphField.validationError /= Nothing
                             , Html.Events.onInput (PageMsg.Internal << UpdateAboutParagraph)
                             ]
                             [ text aboutParagraphField.body ]
@@ -389,7 +389,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                 [ class "flex-none inline-flex items-center" ]
                 [ button
                     [ Html.Attributes.type_ "button"
-                    , attribute "aria-label" "Delete"
+                    , Accessibility.Aria.label "Delete"
                     , class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-sm rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
                     , class "hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     , Html.Events.onClick <| PageMsg.Internal <| DeleteAboutLink index
@@ -410,7 +410,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                         , for <| ElementIds.aboutLinkHref index
                         ]
                         [ text "URL" ]
-                    , input
+                    , Html.input
                         [ class "block w-full border-0 p-0 focus:ring-0 dark:bg-gray-700 dark:text-white"
                         , if not showValidationErrors || aboutLinkBody.validationError == Nothing then
                             class "text-gray-900 placeholder-gray-500 dark:placeholder-gray-400"
@@ -425,8 +425,8 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                         , value aboutLinkHref.href
                         , required True
                         , Html.Attributes.autocomplete False
-                        , attribute "aria-required" "true"
-                        , attribute "aria-invalid" "true" |> Extras.HtmlAttribute.showIf (aboutLinkHref.validationError /= Nothing)
+                        , Accessibility.Aria.required True
+                        , Accessibility.Aria.invalid <| aboutLinkHref.validationError /= Nothing
                         , Html.Events.onInput (PageMsg.Internal << UpdateAboutLinkHref index)
                         , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                         ]
@@ -448,7 +448,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                         ]
                         [ text "Text" ]
                     , div []
-                        [ input
+                        [ inputText aboutLinkBody.body
                             [ class "block w-full border-0 p-0 focus:ring-0 dark:bg-gray-700 dark:text-white"
                             , if not showValidationErrors || aboutLinkBody.validationError == Nothing then
                                 class "text-gray-900 placeholder-gray-500 dark:placeholder-gray-400"
@@ -459,15 +459,13 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                             , name <| ElementIds.aboutLinkBody index
                             , placeholder "Example"
                             , type_ "text"
-                            , value aboutLinkBody.body
                             , required True
                             , Html.Attributes.autocomplete False
-                            , attribute "aria-required" "true"
-                            , attribute "aria-invalid" "true" |> Extras.HtmlAttribute.showIf (aboutLinkHref.validationError /= Nothing)
+                            , Accessibility.Aria.required True
+                            , Accessibility.Aria.invalid <| aboutLinkHref.validationError /= Nothing
                             , Html.Events.onInput (PageMsg.Internal << UpdateAboutLinkBody index)
                             , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                             ]
-                            []
                         , Extras.Html.showIf (showValidationErrors && aboutLinkBody.validationError /= Nothing) <|
                             div [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
                                 [ Icons.exclamationSolidRed ]
@@ -547,7 +545,7 @@ view model =
             , body =
                 [ div
                     [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl" ]
-                    [ Html.main_
+                    [ main_
                         []
                         [ h1
                             [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
