@@ -329,6 +329,7 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                                 , id <| ElementIds.termInputField termIndex
                                 , required True
                                 , Html.Attributes.autocomplete False
+                                , Accessibility.Aria.label "Term"
                                 , Accessibility.Aria.required True
                                 , Accessibility.Aria.invalid <| term.validationError /= Nothing
                                 , Html.Events.onInput (PageMsg.Internal << UpdateTerm termIndex)
@@ -409,7 +410,7 @@ viewCreateDescriptionTerms showValidationErrors termsArray =
     in
     div []
         [ div []
-            [ h3
+            [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
                 [ text "Description Terms" ]
             , p
@@ -472,6 +473,7 @@ viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
                           else
                             class "shadow-sm w-full rounded-md border-red-300 dark:border-red-700 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500 dark:bg-gray-700"
                         , required True
+                        , Accessibility.Aria.label "Details"
                         , Accessibility.Aria.required True
                         , Accessibility.Aria.invalid <| detailsSingle.validationError /= Nothing
                         , id <| ElementIds.descriptionDetailsSingle index
@@ -558,7 +560,7 @@ viewCreateDescriptionDetails showValidationErrors detailsArray =
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
-            [ h3
+            [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
                 [ text "Description Details" ]
             , p
@@ -612,6 +614,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms 
                     [ select
                         [ id <| ElementIds.seeAlsoSelect index
                         , class "mt-1 block w-full pl-3 pr-10 py-2 dark:bg-gray-700 dark:text-gray-200 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
+                        , Accessibility.Aria.label "Related term"
                         , Html.Events.on "change" <|
                             Decode.map (PageMsg.Internal << SelectRelatedTerm index) <|
                                 Decode.andThen Decode.succeed Html.Events.targetValue
@@ -714,7 +717,7 @@ viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray =
     in
     div [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
-            [ h3
+            [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
                 [ text "See Also" ]
             , p

@@ -707,7 +707,7 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
                         ]
                     , div
                         [ class "mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left" ]
-                        [ h3
+                        [ h2
                             [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100"
                             , id ElementIds.modalTitle
                             ]

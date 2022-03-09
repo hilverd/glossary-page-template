@@ -195,7 +195,7 @@ viewEditTitle : Bool -> Form.TitleField -> Html Msg
 viewEditTitle showValidationErrors titleField =
     div []
         [ div []
-            [ h3
+            [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
                 [ text "Title" ]
             ]
@@ -220,6 +220,7 @@ viewEditTitle showValidationErrors titleField =
                                     , type_ "text"
                                     , required True
                                     , Html.Attributes.autocomplete False
+                                    , Accessibility.Aria.label "Title"
                                     , Accessibility.Aria.required True
                                     , Accessibility.Aria.invalid <| titleField.validationError /= Nothing
                                     , Html.Events.onInput (PageMsg.Internal << UpdateTitle)
@@ -253,7 +254,7 @@ viewEditAboutParagraph : Bool -> Form.AboutParagraphField -> Html Msg
 viewEditAboutParagraph showValidationErrors aboutParagraphField =
     div []
         [ div []
-            [ h3
+            [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
                 [ text "About" ]
             ]
@@ -274,6 +275,7 @@ viewEditAboutParagraph showValidationErrors aboutParagraphField =
                               else
                                 class "shadow-sm w-full rounded-md border-red-300 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500 dark:bg-gray-700"
                             , required True
+                            , Accessibility.Aria.label "About"
                             , Accessibility.Aria.required True
                             , Accessibility.Aria.invalid <| aboutParagraphField.validationError /= Nothing
                             , Html.Events.onInput (PageMsg.Internal << UpdateAboutParagraph)
@@ -315,7 +317,7 @@ viewEditAboutLinks showValidationErrors aboutLinkFieldsArray =
     div
         [ class "space-y-5 sm:space-y-6" ]
         [ div []
-            [ h3
+            [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
                 [ text "Links" ]
             ]
