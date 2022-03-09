@@ -72,7 +72,7 @@ termToHtmlTree : Term -> HtmlTree
 termToHtmlTree term =
     HtmlTree.Node "dt"
         True
-        [ HtmlTree.Attribute "class" "group" ]
+        []
         [ HtmlTree.Node "dfn"
             True
             [ HtmlTree.Attribute "id" term.id ]
