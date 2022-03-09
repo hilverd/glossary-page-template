@@ -12,8 +12,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Allow changing title and about section in editor.
+
 ### Changed
 
+- Improve accessibility.
+- Host fonts on `glstatic.net` along with the other static assets, don't use Google Fonts.
 - Prevent HTML element ID clashes caused by user-provided terms.
 
 ### Fixed
@@ -21,13 +26,10 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Migrating from 0.5.0
 
-- Make the relevant changes to `glossary.html`.
-  - Rename the following element IDs.
-    - `outer` to `glossary-page-container`
-    - `about` to `glossary-page-about`
-    - `glossary` to `glossary-page-items`
-  - In the `editor.js` part, replace all occurrences of `id="glossary"` with `id="glossary-page-items"`.
-  - Change the `glossary-page-about` div so it contains a paragraph followed by one or more links in an unordered list.
+- Quite a few changes need to be made to `glossary.html`. It is probably easiest to follow the steps below.
+    1. Download the `glossary.html` template from the [latest release](https://github.com/hilverd/glossary-page-template/releases/latest).
+    2. Copy the entire `<dl>...</dl>` element from your existing glossary and replace the `<dl>...</dl>` element in the newest template.
+    3. Change the title and about section using the built-in editor.
 
 ## [0.5.0] - 2022-02-20
 
