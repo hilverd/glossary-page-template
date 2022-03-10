@@ -12,6 +12,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [1.0.0] - 2022-03-10
+
+### Added
 
 - Allow changing title and about section in editor.
 
@@ -19,10 +26,10 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 - Improve accessibility.
 - Host fonts on `glstatic.net` along with the other static assets, don't use Google Fonts.
-- Prevent HTML element ID clashes caused by user-provided terms.
 
 ### Fixed
-### Removed
+
+- Prevent HTML element ID clashes caused by user-provided terms.
 
 ### Migrating from 0.5.0
 
@@ -194,7 +201,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/hilverd/glossary-page-template/compare/v0.5.0...v1.0.0
 [0.5.0]: https://github.com/hilverd/glossary-page-template/compare/v0.4.3...v0.5.0
 [0.4.3]: https://github.com/hilverd/glossary-page-template/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/hilverd/glossary-page-template/compare/v0.4.1...v0.4.2
