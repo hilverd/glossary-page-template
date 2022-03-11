@@ -15,6 +15,7 @@ module GlossaryItemForm exposing
     , hasValidationErrors
     , relatedTermFields
     , selectRelatedTerm
+    , suggestRelatedTerms
     , termBodyToId
     , termFields
     , toGlossaryItem
@@ -60,7 +61,8 @@ type GlossaryItemForm
         { termFields : Array TermField
         , detailsFields : Array DetailsField
         , relatedTermFields : Array RelatedTermField
-        , termIdsOutside : Set String
+        , termsOutside : List GlossaryItem.Term
+        , primaryTermsOutside : List GlossaryItem.Term
         }
 
 
@@ -85,18 +87,25 @@ relatedTermFields glossaryItemForm =
             form.relatedTermFields
 
 
-termIdsOutside : GlossaryItemForm -> Set String
-termIdsOutside glossaryItemForm =
+termsOutside : GlossaryItemForm -> List GlossaryItem.Term
+termsOutside glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
-            form.termIdsOutside
+            form.termsOutside
+
+
+primaryTermsOutside : GlossaryItemForm -> List GlossaryItem.Term
+primaryTermsOutside glossaryItemForm =
+    case glossaryItemForm of
+        GlossaryItemForm form ->
+            form.primaryTermsOutside
 
 
 validate : GlossaryItemForm -> GlossaryItemForm
 validate form =
     let
         termIdsOutsideSet =
-            termIdsOutside form
+            form |> termsOutside |> List.map .id |> Set.fromList
 
         termIdsInsideForm : Dict String Int
         termIdsInsideForm =
@@ -180,7 +189,8 @@ validate form =
         { termFields = validatedTermFields
         , detailsFields = validatedDetailsFields
         , relatedTermFields = validatedRelatedTermFields
-        , termIdsOutside = termIdsOutside form
+        , termsOutside = termsOutside form
+        , primaryTermsOutside = primaryTermsOutside form
         }
 
 
@@ -195,13 +205,14 @@ hasValidationErrors form =
         || (form |> relatedTermFields |> hasErrors)
 
 
-empty : Set String -> GlossaryItemForm
-empty withTermIdsOutside =
+empty : List GlossaryItem.Term -> List GlossaryItem.Term -> GlossaryItemForm
+empty withTermsOutside withPrimaryTermsOutside =
     GlossaryItemForm
         { termFields = Array.fromList [ emptyTermField ]
         , detailsFields = Array.empty
         , relatedTermFields = Array.empty
-        , termIdsOutside = withTermIdsOutside
+        , termsOutside = withTermsOutside
+        , primaryTermsOutside = withPrimaryTermsOutside
         }
         |> validate
 
@@ -229,28 +240,46 @@ emptyRelatedTermField =
     }
 
 
-fromGlossaryItem : Set String -> GlossaryItem -> GlossaryItemForm
-fromGlossaryItem existingTermIds item =
+fromGlossaryItem : List GlossaryItem.Term -> List GlossaryItem.Term -> GlossaryItem -> GlossaryItemForm
+fromGlossaryItem existingTerms existingPrimaryTerms item =
     let
-        termsForItem =
+        termFieldsForItem =
             List.map (\term -> TermField term.body term.isAbbreviation True Nothing) item.terms
 
+        termIdsForItem : Set String
         termIdsForItem =
-            termsForItem
+            termFieldsForItem
                 |> List.map (.body >> termBodyToId)
                 |> Set.fromList
+
+        termsOutside1 : List GlossaryItem.Term
+        termsOutside1 =
+            List.filter
+                (\existingTerm ->
+                    not <| Set.member existingTerm.id termIdsForItem
+                )
+                existingTerms
+
+        primaryTermsOutside1 : List GlossaryItem.Term
+        primaryTermsOutside1 =
+            List.filter
+                (\existingTerm ->
+                    not <| Set.member existingTerm.id termIdsForItem
+                )
+                existingPrimaryTerms
 
         detailsFieldsList =
             List.map (\detailsElem -> DetailsField detailsElem Nothing) item.details
     in
     GlossaryItemForm
-        { termFields = Array.fromList termsForItem
+        { termFields = Array.fromList termFieldsForItem
         , detailsFields = Array.fromList detailsFieldsList
         , relatedTermFields =
             item.relatedTerms
                 |> List.map (\term -> RelatedTermField (Just term.idReference) Nothing)
                 |> Array.fromList
-        , termIdsOutside = Set.diff existingTermIds termIdsForItem
+        , termsOutside = termsOutside1
+        , primaryTermsOutside = primaryTermsOutside1
         }
         |> validate
 
@@ -405,12 +434,18 @@ deleteDetails index glossaryItemForm =
                 |> validate
 
 
-addRelatedTerm : GlossaryItemForm -> GlossaryItemForm
-addRelatedTerm glossaryItemForm =
+addRelatedTerm : Maybe String -> GlossaryItemForm -> GlossaryItemForm
+addRelatedTerm maybeTermId glossaryItemForm =
+    let
+        relatedTermField =
+            maybeTermId
+                |> Maybe.map (\termId -> { idReference = Just termId, validationError = Nothing })
+                |> Maybe.withDefault emptyRelatedTermField
+    in
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
-                { form | relatedTermFields = Array.push emptyRelatedTermField form.relatedTermFields }
+                { form | relatedTermFields = Array.push relatedTermField form.relatedTermFields }
                 |> validate
 
 
@@ -445,3 +480,10 @@ termBodyLooksLikeAnAbbreviation bodyRaw =
             String.trim bodyRaw
     in
     (not <| String.isEmpty body) && body == String.toUpper body
+
+
+suggestRelatedTerms : GlossaryItemForm -> List GlossaryItem.Term
+suggestRelatedTerms glossaryItemForm =
+    -- glossaryItemForm
+    --     |> primaryTermsOutside
+    []

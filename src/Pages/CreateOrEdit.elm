@@ -17,7 +17,7 @@ import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
-import GlossaryItemForm as Form exposing (GlossaryItemForm)
+import GlossaryItemForm as Form exposing (GlossaryItemForm, suggestRelatedTerms)
 import Html
 import Html.Attributes exposing (attribute, class, disabled, id, required, selected, type_, value)
 import Html.Events
@@ -52,7 +52,7 @@ type InternalMsg
     | AddDetails
     | UpdateDetails DetailsIndex String
     | DeleteDetails DetailsIndex
-    | AddRelatedTerm
+    | AddRelatedTerm (Maybe String)
     | SelectRelatedTerm RelatedTermIndex String
     | DeleteRelatedTerm RelatedTermIndex
     | Save
@@ -66,11 +66,17 @@ type alias Msg =
 init : CommonModel -> ( Model, Cmd Msg )
 init commonModel =
     let
-        existingTermIds =
+        existingTerms =
             commonModel.loadedGlossaryItems
                 |> Result.toMaybe
-                |> Maybe.map GlossaryItems.termIds
-                |> Maybe.withDefault Set.empty
+                |> Maybe.map GlossaryItems.terms
+                |> Maybe.withDefault []
+
+        existingPrimaryTerms =
+            commonModel.loadedGlossaryItems
+                |> Result.toMaybe
+                |> Maybe.map GlossaryItems.primaryTerms
+                |> Maybe.withDefault []
     in
     ( { common = commonModel
       , form =
@@ -78,12 +84,12 @@ init commonModel =
                 (\index glossaryItems ->
                     glossaryItems
                         |> GlossaryItems.get index
-                        |> Maybe.map (Form.fromGlossaryItem existingTermIds)
-                        |> Maybe.withDefault (Form.empty existingTermIds)
+                        |> Maybe.map (Form.fromGlossaryItem existingTerms existingPrimaryTerms)
+                        |> Maybe.withDefault (Form.empty existingTerms existingPrimaryTerms)
                 )
                 commonModel.maybeIndex
                 (commonModel.loadedGlossaryItems |> Result.toMaybe)
-                |> Maybe.withDefault (Form.empty existingTermIds)
+                |> Maybe.withDefault (Form.empty existingTerms existingPrimaryTerms)
       , triedToSaveWhenFormInvalid = False
       , errorMessageWhileSaving = Nothing
       }
@@ -144,10 +150,10 @@ update msg model =
         DeleteDetails detailsIndex ->
             ( { model | form = Form.deleteDetails detailsIndex model.form }, Cmd.none )
 
-        AddRelatedTerm ->
+        AddRelatedTerm maybeTermId ->
             let
                 form =
-                    Form.addRelatedTerm model.form
+                    Form.addRelatedTerm maybeTermId model.form
 
                 latestRelatedTermIndex =
                     Array.length (Form.relatedTermFields form) - 1 |> RelatedTermIndex.fromInt
@@ -665,7 +671,7 @@ viewAddRelatedTermButton =
     button
         [ Html.Attributes.type_ "button"
         , class "inline-flex items-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        , Html.Events.onClick <| PageMsg.Internal AddRelatedTerm
+        , Html.Events.onClick <| PageMsg.Internal (AddRelatedTerm Nothing)
         ]
         [ svg
             [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5", viewBox "0 0 20 20", fill "currentColor" ]
@@ -682,7 +688,7 @@ viewAddRelatedTermButtonForEmptyState =
     button
         [ Html.Attributes.type_ "button"
         , class "relative block max-w-lg border-2 border-gray-300 border-dashed rounded-lg p-5 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        , Html.Events.onClick <| PageMsg.Internal AddRelatedTerm
+        , Html.Events.onClick <| PageMsg.Internal (AddRelatedTerm Nothing)
         ]
         [ svg
             [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400"
@@ -700,8 +706,14 @@ viewAddRelatedTermButtonForEmptyState =
         ]
 
 
-viewCreateSeeAlso : Bool -> GlossaryItems -> Array Form.TermField -> Array Form.RelatedTermField -> Html Msg
-viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray =
+viewCreateSeeAlso :
+    Bool
+    -> GlossaryItems
+    -> Array Form.TermField
+    -> Array Form.RelatedTermField
+    -> List GlossaryItem.Term
+    -> Html Msg
+viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray suggestedRelatedTerms =
     let
         termIdsSet =
             terms |> Array.toList |> List.map (.body >> Form.termBodyToId) |> Set.fromList
@@ -744,6 +756,40 @@ viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray =
 
               else
                 viewAddRelatedTermButton
+            ]
+        , viewAddSuggestedSeeAlso suggestedRelatedTerms |> Extras.Html.showIf (not <| List.isEmpty suggestedRelatedTerms)
+        ]
+
+
+viewAddSuggestedSeeAlso : List GlossaryItem.Term -> Html Msg
+viewAddSuggestedSeeAlso suggestedRelatedTerms =
+    div
+        []
+        [ p
+            [ class "mb-2 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
+            [ text "Suggestions" ]
+        , div
+            [ class "flow-root" ]
+            [ div
+                [ class "-m-1 flex flex-wrap" ]
+                (suggestedRelatedTerms
+                    |> List.map
+                        (\suggestedRelatedTerm ->
+                            button
+                                [ Html.Attributes.type_ "button"
+                                , class "m-1 inline-flex items-center px-4 py-2 bg-white text-sm dark:bg-gray-700 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                , Html.Events.onClick <| PageMsg.Internal (AddRelatedTerm <| Just suggestedRelatedTerm.id)
+                                ]
+                                [ svg
+                                    [ Svg.Attributes.class "-ml-1 mr-2 h-4 w-4", viewBox "0 0 20 20", fill "currentColor" ]
+                                    [ path
+                                        [ d "M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" ]
+                                        []
+                                    ]
+                                , text suggestedRelatedTerm.body
+                                ]
+                        )
+                )
             ]
         ]
 
@@ -800,6 +846,9 @@ view model =
 
                 relatedTerms =
                     Form.relatedTermFields model.form
+
+                suggestedRelatedTerms =
+                    Form.suggestRelatedTerms model.form
             in
             { title = model.common.title
             , body =
@@ -822,7 +871,7 @@ view model =
                                 [ class "space-y-8 divide-y divide-gray-200 dark:divide-gray-800 sm:space-y-5" ]
                                 [ viewCreateDescriptionTerms model.triedToSaveWhenFormInvalid terms
                                 , viewCreateDescriptionDetails model.triedToSaveWhenFormInvalid detailsArray
-                                , viewCreateSeeAlso model.triedToSaveWhenFormInvalid glossaryItems terms relatedTerms
+                                , viewCreateSeeAlso model.triedToSaveWhenFormInvalid glossaryItems terms relatedTerms suggestedRelatedTerms
                                 , viewCreateFormFooter model model.triedToSaveWhenFormInvalid model.errorMessageWhileSaving glossaryItems model.form
                                 ]
                             ]

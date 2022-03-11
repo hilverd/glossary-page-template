@@ -5,8 +5,9 @@ module Data.GlossaryItems exposing
     , insert
     , orderedAlphabetically
     , orderedByFrequency
+    , primaryTerms
     , remove
-    , termIds
+    , terms
     , toHtmlTree
     , update
     )
@@ -231,12 +232,18 @@ orderedByFrequency glossaryItems =
             items.orderedByFrequency
 
 
-termIds : GlossaryItems -> Set String
-termIds =
+terms : GlossaryItems -> List GlossaryItem.Term
+terms =
     orderedAlphabetically
-        >> List.map (Tuple.second >> .terms >> List.map .id)
+        >> List.map (Tuple.second >> .terms)
         >> List.concat
-        >> Set.fromList
+
+
+primaryTerms : GlossaryItems -> List GlossaryItem.Term
+primaryTerms =
+    orderedAlphabetically
+        >> List.map (Tuple.second >> .terms >> List.take 1)
+        >> List.concat
 
 
 toHtmlTree : Bool -> String -> String -> List AboutLink -> GlossaryItems -> HtmlTree
