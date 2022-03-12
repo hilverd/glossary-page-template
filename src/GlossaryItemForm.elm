@@ -33,6 +33,9 @@ import Data.TermIndex as TermIndex exposing (TermIndex)
 import Dict exposing (Dict)
 import ElementIds
 import Extras.Array
+import Extras.Regex
+import Html exposing (form)
+import Regex
 import Set exposing (Set)
 
 
@@ -484,6 +487,48 @@ termBodyLooksLikeAnAbbreviation bodyRaw =
 
 suggestRelatedTerms : GlossaryItemForm -> List GlossaryItem.Term
 suggestRelatedTerms glossaryItemForm =
-    -- glossaryItemForm
-    --     |> primaryTermsOutside
-    []
+    let
+        relatedTermIdsAlreadyInForm : Set String
+        relatedTermIdsAlreadyInForm =
+            glossaryItemForm
+                |> relatedTermFields
+                |> Array.foldl
+                    (\relatedTermField result ->
+                        relatedTermField.idReference
+                            |> Maybe.map (\idReference -> Set.insert idReference result)
+                            |> Maybe.withDefault result
+                    )
+                    Set.empty
+
+        candidateTerms : List GlossaryItem.Term
+        candidateTerms =
+            glossaryItemForm
+                |> primaryTermsOutside
+                |> List.filter
+                    (\term -> not <| Set.member term.id relatedTermIdsAlreadyInForm)
+
+        detailsFieldBodies =
+            glossaryItemForm
+                |> detailsFields
+                |> Array.toList
+                |> List.map (.body >> String.toLower)
+
+        candidateTermsAppearingInDetails : List GlossaryItem.Term
+        candidateTermsAppearingInDetails =
+            candidateTerms
+                |> List.filter
+                    (\candidateTerm ->
+                        let
+                            candidateTermAsWord =
+                                ("\\b" ++ Extras.Regex.escapeStringForUseInRegex (String.toLower candidateTerm.body) ++ "\\b")
+                                    |> Regex.fromString
+                                    |> Maybe.withDefault Regex.never
+                        in
+                        List.any
+                            (\detailsFieldBody ->
+                                Regex.contains candidateTermAsWord detailsFieldBody
+                            )
+                            detailsFieldBodies
+                    )
+    in
+    candidateTermsAppearingInDetails
