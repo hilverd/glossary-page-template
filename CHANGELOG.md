@@ -13,7 +13,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 
-- Suggest related terms if they occur in a definition for the current term.
+- Show suggestions for related (primary) terms. These are either terms that occur in a definition for the current term, or primary terms for items that list the current term as related.
 
 ### Changed
 ### Fixed

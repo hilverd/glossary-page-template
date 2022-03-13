@@ -66,6 +66,7 @@ type GlossaryItemForm
         , relatedTermFields : Array RelatedTermField
         , termsOutside : List GlossaryItem.Term
         , primaryTermsOutside : List GlossaryItem.Term
+        , itemsListingThisItemAsRelated : List GlossaryItem
         }
 
 
@@ -102,6 +103,13 @@ primaryTermsOutside glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             form.primaryTermsOutside
+
+
+itemsListingThisTermAsRelated : GlossaryItemForm -> List GlossaryItem
+itemsListingThisTermAsRelated glossaryItemForm =
+    case glossaryItemForm of
+        GlossaryItemForm form ->
+            form.itemsListingThisItemAsRelated
 
 
 validate : GlossaryItemForm -> GlossaryItemForm
@@ -194,6 +202,7 @@ validate form =
         , relatedTermFields = validatedRelatedTermFields
         , termsOutside = termsOutside form
         , primaryTermsOutside = primaryTermsOutside form
+        , itemsListingThisItemAsRelated = itemsListingThisTermAsRelated form
         }
 
 
@@ -208,14 +217,15 @@ hasValidationErrors form =
         || (form |> relatedTermFields |> hasErrors)
 
 
-empty : List GlossaryItem.Term -> List GlossaryItem.Term -> GlossaryItemForm
-empty withTermsOutside withPrimaryTermsOutside =
+empty : List GlossaryItem.Term -> List GlossaryItem.Term -> List GlossaryItem -> GlossaryItemForm
+empty withTermsOutside withPrimaryTermsOutside withItemsListingThisTermAsRelated =
     GlossaryItemForm
         { termFields = Array.fromList [ emptyTermField ]
         , detailsFields = Array.empty
         , relatedTermFields = Array.empty
         , termsOutside = withTermsOutside
         , primaryTermsOutside = withPrimaryTermsOutside
+        , itemsListingThisItemAsRelated = withItemsListingThisTermAsRelated
         }
         |> validate
 
@@ -243,8 +253,8 @@ emptyRelatedTermField =
     }
 
 
-fromGlossaryItem : List GlossaryItem.Term -> List GlossaryItem.Term -> GlossaryItem -> GlossaryItemForm
-fromGlossaryItem existingTerms existingPrimaryTerms item =
+fromGlossaryItem : List GlossaryItem.Term -> List GlossaryItem.Term -> List GlossaryItem -> GlossaryItem -> GlossaryItemForm
+fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRelated item =
     let
         termFieldsForItem =
             List.map (\term -> TermField term.body term.isAbbreviation True Nothing) item.terms
@@ -283,6 +293,7 @@ fromGlossaryItem existingTerms existingPrimaryTerms item =
                 |> Array.fromList
         , termsOutside = termsOutside1
         , primaryTermsOutside = primaryTermsOutside1
+        , itemsListingThisItemAsRelated = withItemsListingThisTermAsRelated
         }
         |> validate
 
@@ -513,8 +524,16 @@ suggestRelatedTerms glossaryItemForm =
                 |> Array.toList
                 |> List.map (.body >> String.toLower)
 
-        candidateTermsAppearingInDetails : List GlossaryItem.Term
-        candidateTermsAppearingInDetails =
+        primaryTermIdsOfItemsListingThisItemAsRelated =
+            glossaryItemForm
+                |> itemsListingThisTermAsRelated
+                |> List.map (.terms >> List.head)
+                |> List.filterMap identity
+                |> List.map .id
+                |> Set.fromList
+
+        relevantCandidateTerms : List GlossaryItem.Term
+        relevantCandidateTerms =
             candidateTerms
                 |> List.filter
                     (\candidateTerm ->
@@ -524,11 +543,12 @@ suggestRelatedTerms glossaryItemForm =
                                     |> Regex.fromString
                                     |> Maybe.withDefault Regex.never
                         in
-                        List.any
-                            (\detailsFieldBody ->
-                                Regex.contains candidateTermAsWord detailsFieldBody
-                            )
-                            detailsFieldBodies
+                        Set.member candidateTerm.id primaryTermIdsOfItemsListingThisItemAsRelated
+                            || List.any
+                                (\detailsFieldBody ->
+                                    Regex.contains candidateTermAsWord detailsFieldBody
+                                )
+                                detailsFieldBodies
                     )
     in
-    candidateTermsAppearingInDetails
+    relevantCandidateTerms

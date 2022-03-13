@@ -9,6 +9,7 @@ import CommonModel exposing (CommonModel, OrderItemsBy(..))
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import ElementIds
@@ -65,40 +66,75 @@ type alias Msg =
 
 init : CommonModel -> ( Model, Cmd Msg )
 init commonModel =
-    let
-        existingTerms =
-            commonModel.loadedGlossaryItems
-                |> Result.toMaybe
-                |> Maybe.map GlossaryItems.terms
-                |> Maybe.withDefault []
+    case commonModel.loadedGlossaryItems of
+        Ok glossaryItems ->
+            let
+                existingTerms =
+                    GlossaryItems.terms glossaryItems
 
-        existingPrimaryTerms =
-            commonModel.loadedGlossaryItems
-                |> Result.toMaybe
-                |> Maybe.map GlossaryItems.primaryTerms
-                |> Maybe.withDefault []
-    in
-    ( { common = commonModel
-      , form =
-            Maybe.map2
-                (\index glossaryItems ->
-                    glossaryItems
-                        |> GlossaryItems.get index
-                        |> Maybe.map (Form.fromGlossaryItem existingTerms existingPrimaryTerms)
-                        |> Maybe.withDefault (Form.empty existingTerms existingPrimaryTerms)
-                )
-                commonModel.maybeIndex
-                (commonModel.loadedGlossaryItems |> Result.toMaybe)
-                |> Maybe.withDefault (Form.empty existingTerms existingPrimaryTerms)
-      , triedToSaveWhenFormInvalid = False
-      , errorMessageWhileSaving = Nothing
-      }
-    , if commonModel.maybeIndex == Nothing then
-        0 |> TermIndex.fromInt |> giveFocusToTermInputField
+                existingPrimaryTerms =
+                    GlossaryItems.primaryTerms glossaryItems
 
-      else
-        Cmd.none
-    )
+                itemsListingThisItemAsRelated =
+                    commonModel.maybeIndex
+                        |> Maybe.andThen
+                            (\index ->
+                                glossaryItems
+                                    |> GlossaryItems.get index
+                                    |> Maybe.map
+                                        (\currentItem ->
+                                            GlossaryItems.orderedAlphabetically glossaryItems
+                                                |> List.map Tuple.second
+                                                |> List.filter
+                                                    (\item ->
+                                                        item.relatedTerms
+                                                            |> List.any
+                                                                (\relatedTerm ->
+                                                                    currentItem.terms
+                                                                        |> List.any (\term -> term.id == relatedTerm.idReference)
+                                                                )
+                                                    )
+                                        )
+                            )
+                        |> Maybe.withDefault []
+
+                emptyForm =
+                    Form.empty existingTerms existingPrimaryTerms itemsListingThisItemAsRelated
+            in
+            ( { common = commonModel
+              , form =
+                    Maybe.map
+                        (\index ->
+                            glossaryItems
+                                |> GlossaryItems.get index
+                                |> Maybe.map
+                                    (Form.fromGlossaryItem
+                                        existingTerms
+                                        existingPrimaryTerms
+                                        itemsListingThisItemAsRelated
+                                    )
+                                |> Maybe.withDefault emptyForm
+                        )
+                        commonModel.maybeIndex
+                        |> Maybe.withDefault emptyForm
+              , triedToSaveWhenFormInvalid = False
+              , errorMessageWhileSaving = Nothing
+              }
+            , if commonModel.maybeIndex == Nothing then
+                0 |> TermIndex.fromInt |> giveFocusToTermInputField
+
+              else
+                Cmd.none
+            )
+
+        Err _ ->
+            ( { common = commonModel
+              , form = Form.empty [] [] []
+              , triedToSaveWhenFormInvalid = False
+              , errorMessageWhileSaving = Nothing
+              }
+            , Cmd.none
+            )
 
 
 
