@@ -12,12 +12,15 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
-
-- Show suggestions for related (primary) terms. These are either terms that occur in a definition for the current term, or primary terms for items that list the current term as related.
-
 ### Changed
 ### Fixed
 ### Removed
+
+## [1.1.0] - 2022-03-13
+
+### Added
+
+- Show suggestions for related (primary) terms. These are either terms that occur in a definition for the current term, or primary terms for items that list the current term as related.
 
 ## [1.0.0] - 2022-03-10
 
@@ -204,7 +207,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/hilverd/glossary-page-template/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/hilverd/glossary-page-template/compare/v0.5.0...v1.0.0
 [0.5.0]: https://github.com/hilverd/glossary-page-template/compare/v0.4.3...v0.5.0
 [0.4.3]: https://github.com/hilverd/glossary-page-template/compare/v0.4.2...v0.4.3
