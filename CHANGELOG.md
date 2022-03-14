@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- Don't allow listing related terms that are not primary.
+
 ### Removed
 
 ## [1.1.0] - 2022-03-13

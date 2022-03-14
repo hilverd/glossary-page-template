@@ -144,9 +144,9 @@ orderListByFrequency indexedGlossaryItems =
 sanitiseList : List GlossaryItem -> List GlossaryItem
 sanitiseList glossaryItems =
     let
-        termIdsSet =
+        primaryTermIdsSet =
             glossaryItems
-                |> List.map .terms
+                |> List.map (.terms >> List.take 1)
                 |> List.concat
                 |> List.map .id
                 |> Set.fromList
@@ -157,7 +157,10 @@ sanitiseList glossaryItems =
                 { glossaryItem
                     | relatedTerms =
                         glossaryItem.relatedTerms
-                            |> List.filter (\relatedTerm -> Set.member relatedTerm.idReference termIdsSet)
+                            |> List.filter
+                                (\relatedTerm ->
+                                    Set.member relatedTerm.idReference primaryTermIdsSet
+                                )
                 }
             )
 
