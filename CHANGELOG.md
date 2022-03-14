@@ -14,10 +14,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+### Removed
+
+## [1.1.1] - 2022-03-14
+
+### Fixed
 
 - Don't allow listing related terms that are not primary.
-
-### Removed
 
 ## [1.1.0] - 2022-03-13
 
@@ -210,7 +213,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/hilverd/glossary-page-template/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/hilverd/glossary-page-template/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/hilverd/glossary-page-template/compare/v0.5.0...v1.0.0
 [0.5.0]: https://github.com/hilverd/glossary-page-template/compare/v0.4.3...v0.5.0
