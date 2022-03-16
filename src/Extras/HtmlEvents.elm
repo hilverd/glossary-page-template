@@ -1,4 +1,13 @@
-module Extras.HtmlEvents exposing (enter, escape, onEnter, onEscape, onKeydown)
+module Extras.HtmlEvents exposing
+    ( downArrow
+    , enter
+    , escape
+    , onClickPreventDefaultAndStopPropagation
+    , onEnter
+    , onEscape
+    , onKeydown
+    , upArrow
+    )
 
 import Html exposing (Attribute)
 import Html.Events exposing (keyCode)
@@ -18,6 +27,16 @@ onKeydown f =
                         Decode.fail "no message for key"
             )
             keyCode
+
+
+upArrow : Int
+upArrow =
+    38
+
+
+downArrow : Int
+downArrow =
+    40
 
 
 enter : Int
@@ -52,3 +71,9 @@ onEscape msg =
             else
                 Nothing
         )
+
+
+onClickPreventDefaultAndStopPropagation : msg -> Attribute msg
+onClickPreventDefaultAndStopPropagation msg =
+    Html.Events.custom "click" <|
+        Decode.succeed { message = msg, stopPropagation = True, preventDefault = True }

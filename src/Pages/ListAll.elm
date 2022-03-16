@@ -3,6 +3,7 @@ port module Pages.ListAll exposing (Model, Msg, init, update, view)
 import Accessibility exposing (..)
 import Accessibility.Aria
 import Accessibility.Key exposing (tabbable)
+import Accessibility.Role
 import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
@@ -34,10 +35,18 @@ import Task
 -- MODEL
 
 
-type MenuForMobileVisibility
+type GradualVisibility
     = Visible
     | Disappearing
     | Invisible
+
+
+type alias MenuForMobileVisibility =
+    GradualVisibility
+
+
+type alias ExportDropdownVisibility =
+    GradualVisibility
 
 
 type MakingChanges
@@ -51,6 +60,7 @@ type alias Model =
     { common : CommonModel
     , makingChanges : MakingChanges
     , menuForMobileVisibility : MenuForMobileVisibility
+    , exportDropdownVisibility : ExportDropdownVisibility
     , confirmDeleteIndex : Maybe GlossaryItemIndex
     , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
     }
@@ -62,6 +72,9 @@ type InternalMsg
     | ShowMenuForMobile
     | StartHidingMenuForMobile
     | CompleteHidingMenuForMobile
+    | ShowExportDropdown
+    | StartHidingExportDropdown
+    | CompleteHidingExportDropdown
     | ConfirmDelete GlossaryItemIndex
     | CancelDelete
     | Delete GlossaryItemIndex
@@ -89,6 +102,7 @@ init editorIsRunning commonModel =
                     NoHelpForMakingChanges
       , common = commonModel
       , menuForMobileVisibility = Invisible
+      , exportDropdownVisibility = Invisible
       , confirmDeleteIndex = Nothing
       , errorWhileDeleting = Nothing
       }
@@ -154,6 +168,17 @@ update msg model =
 
         CompleteHidingMenuForMobile ->
             ( { model | menuForMobileVisibility = Invisible }, Cmd.none )
+
+        ShowExportDropdown ->
+            ( { model | exportDropdownVisibility = Visible }, Cmd.none )
+
+        StartHidingExportDropdown ->
+            ( { model | exportDropdownVisibility = Disappearing }
+            , Process.sleep 100 |> Task.perform (always <| PageMsg.Internal CompleteHidingExportDropdown)
+            )
+
+        CompleteHidingExportDropdown ->
+            ( { model | exportDropdownVisibility = Invisible }, Cmd.none )
 
         ConfirmDelete index ->
             ( { model | confirmDeleteIndex = Just index }, preventBackgroundScrolling () )
@@ -611,8 +636,7 @@ viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
                     [ span
                         [ class "inline-flex items-center" ]
                         [ viewGlossaryItemButton
-                            [ Html.Events.onClick <|
-                                PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
+                            [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
                             , Accessibility.Key.tabbable tabbable
                             ]
                             Icons.pencilSolid
@@ -655,7 +679,7 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
         , Extras.HtmlAttribute.showIf (maybeIndexOfItemToDelete == Nothing) <| class "invisible"
         , Extras.HtmlEvents.onEscape <| PageMsg.Internal CancelDelete
         , Accessibility.Aria.labelledBy ElementIds.modalTitle
-        , attribute "role" "dialog"
+        , Accessibility.Role.dialog
         , Accessibility.Aria.modal True
         ]
         [ div
@@ -750,7 +774,7 @@ viewEditTitleAndAboutButton tabbable common =
         [ class "pb-6 print:hidden" ]
         [ button
             [ Html.Attributes.type_ "button"
-            , class "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            , class "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-indigo-800"
             , Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout { common | maybeIndex = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
@@ -766,9 +790,8 @@ viewCreateGlossaryItemButtonForEmptyState tabbable common =
         [ class "pt-4 print:hidden" ]
         [ button
             [ Html.Attributes.type_ "button"
-            , class "relative block max-w-lg border-2 border-gray-300 border-dashed rounded-lg p-9 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            , Html.Events.onClick <|
-                PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
+            , class "relative block max-w-lg border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-lg p-9 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800"
+            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
             [ svg
@@ -794,7 +817,7 @@ viewCreateGlossaryItemButton tabbable common =
         [ class "pb-2 print:hidden" ]
         [ button
             [ Html.Attributes.type_ "button"
-            , class "inline-flex items-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            , class "inline-flex items-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
             , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
@@ -850,7 +873,7 @@ viewMenuForMobile model tabbable termIndex =
     div
         [ class "invisible" |> Extras.HtmlAttribute.showIf (model.menuForMobileVisibility == Invisible)
         , class "fixed inset-0 flex z-40 lg:hidden"
-        , attribute "role" "dialog"
+        , Accessibility.Role.dialog
         , Accessibility.Aria.modal True
         ]
         [ Html.div
@@ -882,7 +905,7 @@ viewMenuForMobile model tabbable termIndex =
                 ]
                 [ button
                     [ Html.Attributes.type_ "button"
-                    , class "ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                    , class "ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white dark:focus:ring-gray-500"
                     , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
                     ]
                     [ span
@@ -917,7 +940,7 @@ viewMenuForMobile model tabbable termIndex =
                 ]
             ]
         , div
-            [ class "flex-shrink-0 w-14", Accessibility.Aria.hidden True ]
+            [ class "shrink-0 w-14", Accessibility.Aria.hidden True ]
             []
         ]
 
@@ -973,7 +996,7 @@ viewTermIndexFirstCharacter staticSidebar firstCharacter enabled tabbable =
     if enabled then
         button
             [ Html.Attributes.type_ "button"
-            , class "inline-flex items-center m-0.5 px-3 py-2 border border-gray-200 dark:border-gray-800 shadow-sm leading-4 font-medium rounded-md text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500"
+            , class "inline-flex items-center m-0.5 px-3 py-2 border border-gray-200 dark:border-gray-800 shadow-sm leading-4 font-medium rounded-md text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-3 focus:ring-indigo-500 dark:focus:ring-indigo-400"
             , Html.Events.onClick <| PageMsg.Internal <| JumpToTermIndexGroup staticSidebar firstCharacter
             , Accessibility.Key.tabbable tabbable
             ]
@@ -1040,40 +1063,43 @@ viewStaticSidebarForDesktop tabbable termIndex =
         ]
 
 
-viewTopBar : Html Msg
-viewTopBar =
+viewTopBar : Model -> Html Msg
+viewTopBar model =
     div
-        [ class "sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
-        [ button
-            [ Html.Attributes.type_ "button"
-            , class "px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 focus:outline-none lg:hidden"
-            , Html.Events.onClick <| PageMsg.Internal ShowMenuForMobile
-            ]
-            [ span
-                [ class "sr-only" ]
-                [ text "Open sidebar"
+        [ class "sticky top-0 z-10 shrink-0 flex justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
+        [ div
+            [ class "flex-1" ]
+            [ button
+                [ Html.Attributes.type_ "button"
+                , class "px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 focus:outline-none lg:hidden"
+                , Html.Events.onClick <| PageMsg.Internal ShowMenuForMobile
                 ]
-            , svg
-                [ Svg.Attributes.class "h-6 w-6"
-                , fill "none"
-                , viewBox "0 0 24 24"
-                , stroke "currentColor"
-                , Accessibility.Aria.hidden True
-                ]
-                [ path
-                    [ strokeLinecap "round"
-                    , strokeLinejoin "round"
-                    , strokeWidth "2"
-                    , d "M4 6h16M4 12h8m-8 6h16"
+                [ span
+                    [ class "sr-only" ]
+                    [ text "Open sidebar"
                     ]
-                    []
+                , svg
+                    [ Svg.Attributes.class "h-6 w-6"
+                    , fill "none"
+                    , viewBox "0 0 24 24"
+                    , stroke "currentColor"
+                    , Accessibility.Aria.hidden True
+                    ]
+                    [ path
+                        [ strokeLinecap "round"
+                        , strokeLinejoin "round"
+                        , strokeWidth "2"
+                        , d "M4 6h16M4 12h8m-8 6h16"
+                        ]
+                        []
+                    ]
                 ]
             ]
         , div
-            [ class "hidden flex-1 flex justify-between px-4 sm:px-6 lg:px-8 dark:bg-gray-900 dark:text-white" ]
+            [ class "pr-4" ]
             [ button
                 [ Html.Attributes.type_ "button"
-                , class "ml-auto text-slate-500 w-8 h-8 -my-1 flex items-center justify-center hover:text-slate-600 lg:hidden dark:text-slate-400 dark:hover:text-slate-300"
+                , class "hidden ml-auto text-slate-500 w-8 h-8 -my-1 flex items-center justify-center hover:text-slate-600 lg:hidden dark:text-slate-400 dark:hover:text-slate-300"
                 ]
                 [ span
                     [ class "sr-only" ]
@@ -1090,6 +1116,89 @@ viewTopBar =
                     ]
                     [ path [ d "m19 19-3.5-3.5" ] []
                     , circle [ cx "11", cy "11", r "6" ] []
+                    ]
+                ]
+            ]
+        , div
+            [ class "flex pr-4" ]
+            [ viewExportButton model ]
+        ]
+
+
+viewExportButton : Model -> Html Msg
+viewExportButton model =
+    div
+        [ class "relative inline-block text-left" ]
+        [ div
+            []
+            [ button
+                [ Html.Attributes.type_ "button"
+                , class "inline-flex justify-center w-full rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-indigo-500"
+                , id ElementIds.exportDropdownButton
+                , Accessibility.Aria.expanded <| model.exportDropdownVisibility == Visible
+                , Accessibility.Aria.hasMenuPopUp
+                , Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <|
+                    PageMsg.Internal
+                        (case model.exportDropdownVisibility of
+                            Visible ->
+                                StartHidingExportDropdown
+
+                            Disappearing ->
+                                NoOp
+
+                            Invisible ->
+                                ShowExportDropdown
+                        )
+                , Extras.HtmlEvents.onKeydown
+                    (\code ->
+                        if code == Extras.HtmlEvents.enter then
+                            Just <| PageMsg.Internal NoOp
+
+                        else if code == Extras.HtmlEvents.escape then
+                            Just <| PageMsg.Internal StartHidingExportDropdown
+
+                        else
+                            Nothing
+                    )
+                ]
+                [ text "Export"
+                , svg
+                    [ Svg.Attributes.class "-mr-1 ml-2 h-5 w-5"
+                    , viewBox "0 0 20 20"
+                    , fill "currentColor"
+                    ]
+                    [ path
+                        [ d "M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" ]
+                        []
+                    ]
+                ]
+            ]
+        , div
+            [ Accessibility.Aria.labelledBy ElementIds.exportDropdownButton
+            , Accessibility.Aria.orientationVertical
+            , class "origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-600 ring-opacity-5 divide-y divide-gray-100 focus:outline-none"
+            , class "hidden" |> Extras.HtmlAttribute.showIf (model.exportDropdownVisibility /= Visible)
+            , if model.exportDropdownVisibility == Visible then
+                class "transition ease-out duration-100 transform opacity-100 scale-100"
+
+              else
+                class "transition ease-in duration-75 transform opacity-0 scale-95"
+            , Accessibility.Role.menu
+            , Accessibility.Key.tabbable False
+            ]
+            [ div
+                [ class "py-1"
+                , attribute "role" "none"
+                ]
+                [ a
+                    [ class "group flex items-center px-4 py-2 hover:no-underline text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900"
+                    , href "#"
+                    , id <| ElementIds.exportDropdownMenuItem 0
+                    , Accessibility.Role.menuItem
+                    , Accessibility.Key.tabbable False
+                    ]
+                    [ -- TODO: SVG icon here.
+                      text "Markdown"
                     ]
                 ]
             ]
@@ -1186,16 +1295,27 @@ view model =
                             else
                                 Nothing
                         )
+                    , Html.Events.onClick <| PageMsg.Internal StartHidingExportDropdown
                     ]
                     [ viewMenuForMobile model noModalDialogShown termIndex
                     , viewStaticSidebarForDesktop noModalDialogShown termIndex
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
-                        [ viewTopBar
+                        [ viewTopBar model
                         , div
                             [ Html.Attributes.id ElementIds.container ]
                             [ header []
-                                [ case model.makingChanges of
+                                [ div
+                                    [ class "flex flex-row justify-start lg:justify-end lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
+                                    [ Extras.Html.showIf editable <|
+                                        div
+                                            [ class "flex-none" ]
+                                            [ viewEditTitleAndAboutButton noModalDialogShown model.common ]
+                                    , div
+                                        [ class "hidden lg:block ml-auto pb-3" ]
+                                        [ viewExportButton model ]
+                                    ]
+                                , case model.makingChanges of
                                     MakingChangesHelpCollapsed ->
                                         viewMakingChangesHelp noModalDialogShown False
 
@@ -1204,8 +1324,6 @@ view model =
 
                                     _ ->
                                         Extras.Html.nothing
-                                , Extras.Html.showIf editable <|
-                                    viewEditTitleAndAboutButton noModalDialogShown model.common
                                 , h1
                                     [ id ElementIds.title ]
                                     [ text model.common.title ]

@@ -4,6 +4,8 @@ module ElementIds exposing
     , aboutLinkHref
     , container
     , descriptionDetailsSingle
+    , exportDropdownButton
+    , exportDropdownMenuItem
     , glossaryItemDiv
     , indexForMobile
     , items
@@ -108,26 +110,26 @@ glossaryItemDiv index =
 
 indexForMobile : String
 indexForMobile =
-    prefixed <| "menu-for-mobile"
+    prefixed "menu-for-mobile"
 
 
 staticSidebarForDesktop : String
 staticSidebarForDesktop =
-    prefixed <| "static-sidebar-for-desktop"
+    prefixed "static-sidebar-for-desktop"
 
 
 quickSearchButtonAndLetterGrid : String
 quickSearchButtonAndLetterGrid =
-    prefixed <| "search-button-and-letter-grid"
+    prefixed "search-button-and-letter-grid"
 
 
 termsIndex : Bool -> String
 termsIndex staticSidebar =
     if staticSidebar then
-        prefixed <| "terms-index-static-sidebar"
+        prefixed "terms-index-static-sidebar"
 
     else
-        prefixed <| "terms-index"
+        prefixed "terms-index"
 
 
 aboutLinkHref : AboutLinkIndex -> String
@@ -138,3 +140,13 @@ aboutLinkHref index =
 aboutLinkBody : AboutLinkIndex -> String
 aboutLinkBody index =
     prefixed <| "about-link-body-" ++ (index |> AboutLinkIndex.toInt |> String.fromInt)
+
+
+exportDropdownButton : String
+exportDropdownButton =
+    prefixed "export-dropdown-button"
+
+
+exportDropdownMenuItem : Int -> String
+exportDropdownMenuItem index =
+    prefixed <| "export-dropdown-menu-item-" ++ String.fromInt index
