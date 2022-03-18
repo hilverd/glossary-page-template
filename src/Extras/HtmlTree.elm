@@ -1,4 +1,4 @@
-module Extras.HtmlTree exposing (Attribute, HtmlTree(..), toHtml)
+module Extras.HtmlTree exposing (Attribute, HtmlTree(..), escape, toHtml)
 
 import Http exposing (Response(..))
 

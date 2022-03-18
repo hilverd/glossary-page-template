@@ -1,21 +1,39 @@
 module Export.Markdown exposing (download)
 
 import Data.AboutLink as AboutLink exposing (AboutLink)
-import Data.GlossaryItem exposing (GlossaryItem, RelatedTerm)
+import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
+import Extras.HtmlTree
 import File.Download as Download
 import Regex
 
 
+escape : String -> String
+escape string =
+    let
+        charactersToEscape =
+            -- It might be necessary to escape this set too: [().!-]
+            -- but these are left out for now.
+            "[\\`*_{}\\[\\]#+]"
+                |> Regex.fromString
+                |> Maybe.withDefault Regex.never
+    in
+    Regex.replace charactersToEscape (.match >> (++) "\\") string
+
+
 bold : String -> String
 bold string =
-    "**" ++ string ++ "**"
+    "**" ++ escape string ++ "**"
 
 
 link : AboutLink -> String
 link aboutLink =
-    "[" ++ AboutLink.body aboutLink ++ "](" ++ AboutLink.href aboutLink ++ ")"
+    "["
+        ++ (aboutLink |> AboutLink.body |> escape)
+        ++ "]("
+        ++ (aboutLink |> AboutLink.href |> Extras.HtmlTree.escape)
+        ++ ")"
 
 
 horizontalRule : String
@@ -23,18 +41,28 @@ horizontalRule =
     "---------"
 
 
+lines : List String -> String
+lines =
+    String.join "\n"
+
+
+paragraphs : List String -> String
+paragraphs =
+    String.join "\n\n"
+
+
 itemToMarkdown : GlossaryItem -> String
 itemToMarkdown { terms, details, relatedTerms } =
     let
         termsString =
             terms
-                |> List.map (\term -> escape term.body |> bold)
-                |> String.join "\n"
+                |> List.map (.body >> bold)
+                |> lines
 
         detailsString =
             details
-                |> List.map (\detailsSingle -> escape detailsSingle)
-                |> String.join "\n\n"
+                |> List.map escape
+                |> paragraphs
 
         relatedTermsPrefix =
             if List.isEmpty relatedTerms then
@@ -48,23 +76,12 @@ itemToMarkdown { terms, details, relatedTerms } =
 
         relatedTermsString =
             relatedTerms
-                |> List.map (\relatedTerm -> relatedTerm.body)
+                |> List.map (.body >> escape)
                 |> String.join ", "
                 |> (++) relatedTermsPrefix
     in
-    termsString ++ "\n\n" ++ detailsString ++ "\n\n" ++ relatedTermsString
-
-
-escape : String -> String
-escape string =
-    let
-        charactersToEscape =
-            -- Here I'm leaving out [().!-]
-            "[\\`*_{}\\[\\]#+]"
-                |> Regex.fromString
-                |> Maybe.withDefault Regex.never
-    in
-    Regex.replace charactersToEscape (.match >> (++) "\\") string
+    [ termsString, detailsString, relatedTermsString ]
+        |> paragraphs
 
 
 download : GlossaryTitle -> String -> List AboutLink -> GlossaryItems -> Cmd msg
@@ -82,23 +99,21 @@ download glossaryTitle aboutParagraph aboutLinks glossaryItems =
         aboutLinksString =
             aboutLinks
                 |> List.map (link >> (++) "* ")
-                |> String.join "\n"
+                |> lines
 
         itemsString =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
                 |> List.map (Tuple.second >> itemToMarkdown)
-                |> String.join "\n\n"
+                |> paragraphs
 
         content =
-            titleHeaderString
-                ++ "\n\n"
-                ++ aboutParagraphString
-                ++ "\n\n"
-                ++ aboutLinksString
-                ++ "\n\n"
-                ++ horizontalRule
-                ++ "\n\n"
-                ++ itemsString
+            [ titleHeaderString
+            , aboutParagraphString
+            , aboutLinksString
+            , horizontalRule
+            , itemsString
+            ]
+                |> paragraphs
     in
     Download.string filename "text/markdown" content
