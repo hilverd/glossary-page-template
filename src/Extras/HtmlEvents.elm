@@ -2,7 +2,9 @@ module Extras.HtmlEvents exposing
     ( downArrow
     , enter
     , escape
+    , onClickPreventDefault
     , onClickPreventDefaultAndStopPropagation
+    , onClickStopPropagation
     , onEnter
     , onEscape
     , onKeydown
@@ -71,6 +73,18 @@ onEscape msg =
             else
                 Nothing
         )
+
+
+onClickStopPropagation : msg -> Attribute msg
+onClickStopPropagation msg =
+    Html.Events.custom "click" <|
+        Decode.succeed { message = msg, stopPropagation = True, preventDefault = False }
+
+
+onClickPreventDefault : msg -> Attribute msg
+onClickPreventDefault msg =
+    Html.Events.custom "click" <|
+        Decode.succeed { message = msg, stopPropagation = False, preventDefault = True }
 
 
 onClickPreventDefaultAndStopPropagation : msg -> Attribute msg

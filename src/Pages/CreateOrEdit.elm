@@ -9,6 +9,7 @@ import CommonModel exposing (CommonModel, OrderItemsBy(..))
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
@@ -287,7 +288,7 @@ patchHtmlFile common glossaryItems =
             glossaryItems
                 |> GlossaryItems.toHtmlTree
                     common.enableHelpForMakingChanges
-                    common.title
+                    (GlossaryTitle.toString common.title)
                     common.aboutParagraph
                     common.aboutLinks
                 |> HtmlTree.toHtml
@@ -886,7 +887,7 @@ view model =
                 suggestedRelatedTerms =
                     Form.suggestRelatedTerms model.form
             in
-            { title = model.common.title
+            { title = GlossaryTitle.toString model.common.title
             , body =
                 [ div
                     [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl" ]

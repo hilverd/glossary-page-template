@@ -6,13 +6,16 @@ import Accessibility.Key exposing (tabbable)
 import Accessibility.Role
 import Browser exposing (Document)
 import Browser.Dom as Dom
+import Browser.Events exposing (Visibility)
 import CommonModel exposing (CommonModel)
 import Data.AboutLink as AboutLink
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Dict exposing (Dict)
 import ElementIds
+import Export.Markdown
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
@@ -82,6 +85,7 @@ type InternalMsg
     | FailedToDelete GlossaryItemIndex Http.Error
     | JumpToTermIndexGroup Bool String
     | ChangeOrderItemsBy CommonModel.OrderItemsBy
+    | DownloadMarkdown GlossaryItems
 
 
 type alias Msg =
@@ -277,6 +281,15 @@ update msg model =
             , Cmd.none
             )
 
+        DownloadMarkdown glossaryItems ->
+            ( model
+            , Export.Markdown.download
+                model.common.title
+                model.common.aboutParagraph
+                model.common.aboutLinks
+                glossaryItems
+            )
+
 
 patchHtmlFile : CommonModel -> GlossaryItemIndex -> GlossaryItems -> Cmd Msg
 patchHtmlFile common indexOfItemBeingDeleted glossaryItems =
@@ -288,7 +301,7 @@ patchHtmlFile common indexOfItemBeingDeleted glossaryItems =
             glossaryItems
                 |> GlossaryItems.toHtmlTree
                     common.enableHelpForMakingChanges
-                    common.title
+                    (GlossaryTitle.toString common.title)
                     common.aboutParagraph
                     common.aboutLinks
                 |> HtmlTree.toHtml
@@ -1063,8 +1076,8 @@ viewStaticSidebarForDesktop tabbable termIndex =
         ]
 
 
-viewTopBar : Model -> Html Msg
-viewTopBar model =
+viewTopBar : GlossaryTitle -> GlossaryItems -> GradualVisibility -> Html Msg
+viewTopBar glossaryTitle glossaryItems exportDropdownVisibility =
     div
         [ class "sticky top-0 z-10 shrink-0 flex justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
         [ div
@@ -1121,12 +1134,12 @@ viewTopBar model =
             ]
         , div
             [ class "flex pr-4" ]
-            [ viewExportButton model ]
+            [ viewExportButton glossaryTitle glossaryItems exportDropdownVisibility ]
         ]
 
 
-viewExportButton : Model -> Html Msg
-viewExportButton model =
+viewExportButton : GlossaryTitle -> GlossaryItems -> GradualVisibility -> Html Msg
+viewExportButton glossaryTitle glossaryItems exportDropdownVisibility =
     div
         [ class "relative inline-block text-left" ]
         [ div
@@ -1135,11 +1148,11 @@ viewExportButton model =
                 [ Html.Attributes.type_ "button"
                 , class "inline-flex justify-center w-full rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-indigo-500"
                 , id ElementIds.exportDropdownButton
-                , Accessibility.Aria.expanded <| model.exportDropdownVisibility == Visible
+                , Accessibility.Aria.expanded <| exportDropdownVisibility == Visible
                 , Accessibility.Aria.hasMenuPopUp
                 , Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <|
                     PageMsg.Internal
-                        (case model.exportDropdownVisibility of
+                        (case exportDropdownVisibility of
                             Visible ->
                                 StartHidingExportDropdown
 
@@ -1177,8 +1190,8 @@ viewExportButton model =
             [ Accessibility.Aria.labelledBy ElementIds.exportDropdownButton
             , Accessibility.Aria.orientationVertical
             , class "origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-600 ring-opacity-5 divide-y divide-gray-100 focus:outline-none"
-            , class "hidden" |> Extras.HtmlAttribute.showIf (model.exportDropdownVisibility /= Visible)
-            , if model.exportDropdownVisibility == Visible then
+            , class "hidden" |> Extras.HtmlAttribute.showIf (exportDropdownVisibility /= Visible)
+            , if exportDropdownVisibility == Visible then
                 class "transition ease-out duration-100 transform opacity-100 scale-100"
 
               else
@@ -1190,12 +1203,15 @@ viewExportButton model =
                 [ class "py-1"
                 , attribute "role" "none"
                 ]
-                [ a
+                [ Html.a
                     [ class "group flex items-center px-4 py-2 hover:no-underline text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900"
                     , href "#"
                     , id <| ElementIds.exportDropdownMenuItem 0
                     , Accessibility.Role.menuItem
                     , Accessibility.Key.tabbable False
+                    , Extras.HtmlEvents.onClickPreventDefault <|
+                        PageMsg.Internal <|
+                            DownloadMarkdown glossaryItems
                     ]
                     [ -- TODO: SVG icon here.
                       text "Markdown"
@@ -1280,7 +1296,7 @@ view model =
                 termIndex =
                     termIndexFromGlossaryItems glossaryItems
             in
-            { title = model.common.title
+            { title = GlossaryTitle.toString model.common.title
             , body =
                 [ Html.div
                     [ class "min-h-full"
@@ -1301,7 +1317,7 @@ view model =
                     , viewStaticSidebarForDesktop noModalDialogShown termIndex
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
-                        [ viewTopBar model
+                        [ viewTopBar model.common.title glossaryItems model.exportDropdownVisibility
                         , div
                             [ Html.Attributes.id ElementIds.container ]
                             [ header []
@@ -1313,7 +1329,7 @@ view model =
                                             [ viewEditTitleAndAboutButton noModalDialogShown model.common ]
                                     , div
                                         [ class "hidden lg:block ml-auto pb-3" ]
-                                        [ viewExportButton model ]
+                                        [ viewExportButton model.common.title glossaryItems model.exportDropdownVisibility ]
                                     ]
                                 , case model.makingChanges of
                                     MakingChangesHelpCollapsed ->
@@ -1326,7 +1342,7 @@ view model =
                                         Extras.Html.nothing
                                 , h1
                                     [ id ElementIds.title ]
-                                    [ text model.common.title ]
+                                    [ text <| GlossaryTitle.toString model.common.title ]
                                 ]
                             , Html.main_
                                 []

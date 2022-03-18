@@ -9,6 +9,7 @@ import CommonModel exposing (CommonModel, OrderItemsBy(..))
 import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import ElementIds
 import Extras.Html
 import Extras.HtmlEvents
@@ -124,7 +125,7 @@ update msg model =
 
                             common1 =
                                 { common0
-                                    | title = model.form |> Form.titleField |> .body
+                                    | title = model.form |> Form.titleField |> .body |> GlossaryTitle.fromString
                                     , aboutParagraph = model.form |> Form.aboutParagraphField |> .body
                                     , aboutLinks =
                                         model.form
@@ -162,7 +163,7 @@ patchHtmlFile common glossaryItems =
             glossaryItems
                 |> GlossaryItems.toHtmlTree
                     common.enableHelpForMakingChanges
-                    common.title
+                    (GlossaryTitle.toString common.title)
                     common.aboutParagraph
                     common.aboutLinks
                 |> HtmlTree.toHtml
@@ -542,7 +543,7 @@ view : Model -> Document Msg
 view model =
     case model.common.loadedGlossaryItems of
         Ok glossaryItems ->
-            { title = model.common.title
+            { title = GlossaryTitle.toString model.common.title
             , body =
                 [ div
                     [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl" ]

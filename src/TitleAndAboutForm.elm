@@ -21,6 +21,7 @@ module TitleAndAboutForm exposing
 import Array exposing (Array)
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
+import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Extras.Array
 
 
@@ -143,10 +144,10 @@ validate form =
         }
 
 
-create : String -> String -> List AboutLink -> TitleAndAboutForm
+create : GlossaryTitle -> String -> List AboutLink -> TitleAndAboutForm
 create title aboutParagraph aboutLinks =
     TitleAndAboutForm
-        { titleField = { body = title, validationError = Nothing }
+        { titleField = { body = GlossaryTitle.toString title, validationError = Nothing }
         , aboutParagraphField = { body = aboutParagraph, validationError = Nothing }
         , aboutLinkFields =
             aboutLinks
