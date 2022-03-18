@@ -4,7 +4,7 @@ import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
 import Data.AboutLink as AboutLink
-import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
+import Data.GlossaryTitle as GlossaryTitle
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
 import Html
 import Json.Decode as Decode

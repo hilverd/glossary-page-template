@@ -6,11 +6,11 @@ import Array exposing (Array)
 import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel, OrderItemsBy(..))
+import Components.Button
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
-import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
-import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
+import Data.GlossaryTitle as GlossaryTitle
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import ElementIds
@@ -19,7 +19,7 @@ import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
-import GlossaryItemForm as Form exposing (GlossaryItemForm, suggestRelatedTerms)
+import GlossaryItemForm as Form exposing (GlossaryItemForm)
 import Html
 import Html.Attributes exposing (attribute, class, disabled, id, required, selected, type_, value)
 import Html.Events
@@ -464,17 +464,9 @@ viewCreateDescriptionTerms showValidationErrors termsArray =
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
             (List.indexedMap (viewCreateDescriptionTerm showValidationErrors (List.length terms > 1)) terms
                 ++ [ div []
-                        [ button
-                            [ Html.Attributes.type_ "button"
-                            , class "inline-flex items-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                            , Html.Events.onClick <| PageMsg.Internal AddTerm
-                            ]
-                            [ svg
-                                [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5", viewBox "0 0 20 20", fill "currentColor" ]
-                                [ path
-                                    [ d "M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" ]
-                                    []
-                                ]
+                        [ Components.Button.secondary
+                            [ Html.Events.onClick <| PageMsg.Internal AddTerm ]
+                            [ Icons.plus [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5" ]
                             , text "Add term"
                             ]
                         ]
@@ -552,20 +544,9 @@ viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
 viewAddDetailsButton : Html Msg
 viewAddDetailsButton =
     div []
-        [ button
-            [ Html.Attributes.type_ "button"
-            , class "inline-flex items-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            , Html.Events.onClick <| PageMsg.Internal AddDetails
-            ]
-            [ svg
-                [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5"
-                , viewBox "0 0 20 20"
-                , fill "currentColor"
-                ]
-                [ path
-                    [ d "M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" ]
-                    []
-                ]
+        [ Components.Button.secondary
+            [ Html.Events.onClick <| PageMsg.Internal AddDetails ]
+            [ Icons.plus [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5" ]
             , text "Add details"
             ]
         ]
@@ -573,21 +554,9 @@ viewAddDetailsButton =
 
 viewAddDetailsButtonForEmptyState : Html Msg
 viewAddDetailsButtonForEmptyState =
-    button
-        [ Html.Attributes.type_ "button"
-        , class "relative block max-w-lg border-2 border-gray-300 border-dashed rounded-lg p-5 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        , Html.Events.onClick <| PageMsg.Internal AddDetails
-        ]
-        [ svg
-            [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400"
-            , stroke "none"
-            , fill "currentColor"
-            , viewBox "0 0 20 20"
-            ]
-            [ path
-                [ d "M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" ]
-                []
-            ]
+    Components.Button.emptyState
+        [ Html.Events.onClick <| PageMsg.Internal AddDetails ]
+        [ Icons.plus [ Svg.Attributes.class "h-12 w-12 text-gray-400" ]
         , span
             [ class "mt-2 block font-medium text-gray-900 dark:text-gray-200" ]
             [ text "Add details" ]
@@ -853,16 +822,13 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
             |> Extras.Html.showMaybe (\errorMessage -> errorDiv <| "Failed to save — " ++ errorMessage ++ ".")
         , div
             [ class "flex justify-end" ]
-            [ button
-                [ Html.Attributes.type_ "button"
-                , class "bg-white dark:bg-gray-700 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                , Html.Events.onClick <|
+            [ Components.Button.white
+                [ Html.Events.onClick <|
                     PageMsg.NavigateToListAll { common | loadedGlossaryItems = Ok glossaryItems }
                 ]
                 [ text "Cancel" ]
-            , button
-                [ Html.Attributes.type_ "button"
-                , class "ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            , Components.Button.primary
+                [ class "ml-3"
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]
                 [ text "Save" ]

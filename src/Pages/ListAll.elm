@@ -6,8 +6,8 @@ import Accessibility.Key exposing (tabbable)
 import Accessibility.Role
 import Browser exposing (Document)
 import Browser.Dom as Dom
-import Browser.Events exposing (Visibility)
 import CommonModel exposing (CommonModel)
+import Components.Button
 import Data.AboutLink as AboutLink
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
@@ -785,10 +785,8 @@ viewEditTitleAndAboutButton : Bool -> CommonModel -> Html Msg
 viewEditTitleAndAboutButton tabbable common =
     div
         [ class "pb-6 print:hidden" ]
-        [ button
-            [ Html.Attributes.type_ "button"
-            , class "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-indigo-800"
-            , Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout { common | maybeIndex = Nothing }
+        [ Components.Button.white
+            [ Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout { common | maybeIndex = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.pencilSolid
@@ -801,22 +799,13 @@ viewCreateGlossaryItemButtonForEmptyState : Bool -> CommonModel -> Html Msg
 viewCreateGlossaryItemButtonForEmptyState tabbable common =
     div
         [ class "pt-4 print:hidden" ]
-        [ button
-            [ Html.Attributes.type_ "button"
-            , class "relative block max-w-lg border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-lg p-9 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800"
+        [ Components.Button.emptyState
+            [ class "p-9"
             , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
-            [ svg
-                [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400"
-                , stroke "currentColor"
-                , fill "none"
-                , viewBox "0 0 20 20"
-                ]
-                [ path
-                    [ d "M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z" ]
-                    []
-                ]
+            [ Icons.viewGridAddSolid
+                [ Svg.Attributes.class "h-12 w-12 text-gray-400" ]
             , span
                 [ class "mt-2 block font-medium text-gray-900 dark:text-gray-200" ]
                 [ text "Create a new glossary item" ]
@@ -828,17 +817,14 @@ viewCreateGlossaryItemButton : Bool -> CommonModel -> Html Msg
 viewCreateGlossaryItemButton tabbable common =
     div
         [ class "pb-2 print:hidden" ]
-        [ button
-            [ Html.Attributes.type_ "button"
-            , class "inline-flex items-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
-            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
+        [ Components.Button.secondary
+            [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
-            [ svg
-                [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5", viewBox "0 0 20 20", fill "currentColor" ]
-                [ path
-                    [ d "M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z" ]
-                    []
+            [ Icons.viewGridAddSolid
+                [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5"
+                , fill "currentColor"
+                , stroke "none"
                 ]
             , text "Create a new glossary item"
             ]
