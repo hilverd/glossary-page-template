@@ -12,12 +12,15 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
-
-* Allow exporting as Markdown.
-
 ### Changed
 ### Fixed
 ### Removed
+
+## [1.2.0] - 2022-03-18
+
+### Added
+
+- Allow exporting as Markdown.
 
 ## [1.1.1] - 2022-03-14
 
@@ -123,7 +126,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Changed
 
-* Move index to sidebar and widen layout.
+- Move index to sidebar and widen layout.
 
 ### Migrating from 0.0.8
 
@@ -216,7 +219,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/hilverd/glossary-page-template/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/hilverd/glossary-page-template/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/hilverd/glossary-page-template/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/hilverd/glossary-page-template/compare/v0.5.0...v1.0.0
