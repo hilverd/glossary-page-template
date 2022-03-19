@@ -21,7 +21,7 @@ import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Regex
 import Regex
-import Set exposing (Set)
+import Set
 
 
 type GlossaryItems

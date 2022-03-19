@@ -354,7 +354,10 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                         , Html.Events.onClick <| PageMsg.Internal <| DeleteTerm termIndex
                         , disabled <| not canBeDeleted
                         ]
-                        [ Icons.trashSolid ]
+                        [ Icons.trash
+                            [ Svg.Attributes.class "h-5 w-5"
+                            ]
+                        ]
                     ]
                 , div
                     [ class "flex-auto" ]
@@ -380,7 +383,9 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                                 ]
                             , Extras.Html.showIf (showValidationErrors && term.validationError /= Nothing) <|
                                 div [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
-                                    [ Icons.exclamationSolidRed ]
+                                    [ Icons.exclamationCircle
+                                        [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
+                                    ]
                             ]
                         , div
                             [ class "flex-auto mt-2 sm:mt-0 relative flex items-baseline" ]
@@ -466,7 +471,7 @@ viewCreateDescriptionTerms showValidationErrors termsArray =
                 ++ [ div []
                         [ Components.Button.secondary
                             [ Html.Events.onClick <| PageMsg.Internal AddTerm ]
-                            [ Icons.plus [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5" ]
+                            [ Icons.plus [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
                             , text "Add term"
                             ]
                         ]
@@ -493,7 +498,10 @@ viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
                     , class "hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     , Html.Events.onClick <| PageMsg.Internal <| DeleteDetails index
                     ]
-                    [ Icons.trashSolid ]
+                    [ Icons.trash
+                        [ Svg.Attributes.class "h-5 w-5"
+                        ]
+                    ]
                 ]
             , div
                 [ class "relative block min-w-0 w-full" ]
@@ -519,7 +527,9 @@ viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
                 , Extras.Html.showIf (showValidationErrors && detailsSingle.validationError /= Nothing) <|
                     div
                         [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
-                        [ Icons.exclamationSolidRed ]
+                        [ Icons.exclamationCircle
+                            [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
+                        ]
                 ]
             ]
         , Extras.Html.showMaybe
@@ -546,7 +556,7 @@ viewAddDetailsButton =
     div []
         [ Components.Button.secondary
             [ Html.Events.onClick <| PageMsg.Internal AddDetails ]
-            [ Icons.plus [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5" ]
+            [ Icons.plus [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
             , text "Add details"
             ]
         ]
@@ -556,7 +566,7 @@ viewAddDetailsButtonForEmptyState : Html Msg
 viewAddDetailsButtonForEmptyState =
     Components.Button.emptyState
         [ Html.Events.onClick <| PageMsg.Internal AddDetails ]
-        [ Icons.plus [ Svg.Attributes.class "h-12 w-12 text-gray-400" ]
+        [ Icons.plus [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
         , span
             [ class "mt-2 block font-medium text-gray-900 dark:text-gray-200" ]
             [ text "Add details" ]
@@ -619,7 +629,10 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms 
                         , class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-sm rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         , Html.Events.onClick <| PageMsg.Internal <| DeleteRelatedTerm index
                         ]
-                        [ Icons.trashSolid ]
+                        [ Icons.trash
+                            [ Svg.Attributes.class "h-5 w-5"
+                            ]
+                        ]
                     ]
                 , div
                     [ class "flex-auto" ]

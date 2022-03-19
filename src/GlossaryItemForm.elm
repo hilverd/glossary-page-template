@@ -34,7 +34,6 @@ import Dict exposing (Dict)
 import ElementIds
 import Extras.Array
 import Extras.Regex
-import Html exposing (form)
 import Regex
 import Set exposing (Set)
 

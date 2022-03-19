@@ -12,7 +12,7 @@ import Data.AboutLink as AboutLink
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
-import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
+import Data.GlossaryTitle as GlossaryTitle
 import Dict exposing (Dict)
 import ElementIds
 import Export.Markdown
@@ -29,8 +29,7 @@ import Icons
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
 import Process
-import Svg exposing (circle, path, svg)
-import Svg.Attributes exposing (cx, cy, d, fill, height, r, stroke, strokeLinecap, strokeLinejoin, strokeWidth, viewBox, width)
+import Svg.Attributes exposing (fill, height, stroke, width)
 import Task
 
 
@@ -372,10 +371,12 @@ viewMakingChangesHelp tabbable expanded =
             [ span
                 [ class "text-gray-500 dark:text-gray-300" ]
                 [ if expanded then
-                    Icons.chevronDownSolid
+                    Icons.chevronDown
+                        [ Svg.Attributes.class "h-5 w-5 mb-0.5" ]
 
                   else
-                    Icons.chevronRightSolid
+                    Icons.chevronRight
+                        [ Svg.Attributes.class "h-5 w-5 mb-0.5" ]
                 ]
             , span
                 [ class "ml-2" ]
@@ -652,7 +653,9 @@ viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
                             [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
                             , Accessibility.Key.tabbable tabbable
                             ]
-                            Icons.pencilSolid
+                            (Icons.pencil
+                                [ Svg.Attributes.class "h-5 w-5" ]
+                            )
                             "Edit"
                         ]
                     , span
@@ -661,7 +664,9 @@ viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
                             [ Html.Events.onClick <| PageMsg.Internal <| ConfirmDelete index
                             , Accessibility.Key.tabbable tabbable
                             ]
-                            Icons.trashSolid
+                            (Icons.trash
+                                [ Svg.Attributes.class "h-5 w-5" ]
+                            )
                             "Delete"
                         ]
                     ]
@@ -725,21 +730,9 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
                     [ class "sm:flex sm:items-start" ]
                     [ div
                         [ class "mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-300 sm:mx-0 sm:h-10 sm:w-10" ]
-                        [ svg
+                        [ Icons.exclamation
                             [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-800"
-                            , fill "none"
-                            , viewBox "0 0 24 24"
-                            , stroke "currentColor"
                             , Accessibility.Aria.hidden True
-                            ]
-                            [ path
-                                [ strokeLinecap "round"
-                                , strokeLinejoin "round"
-                                , strokeWidth "2"
-                                , d
-                                    "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                ]
-                                []
                             ]
                         ]
                     , div
@@ -789,8 +782,11 @@ viewEditTitleAndAboutButton tabbable common =
             [ Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout { common | maybeIndex = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
-            [ Icons.pencilSolid
-            , span [ class "ml-2" ] [ text "Edit title and about section" ]
+            [ Icons.pencil
+                [ Svg.Attributes.class "h-5 w-5" ]
+            , span
+                [ class "ml-2" ]
+                [ text "Edit title and about section" ]
             ]
         ]
 
@@ -804,8 +800,8 @@ viewCreateGlossaryItemButtonForEmptyState tabbable common =
             , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
-            [ Icons.viewGridAddSolid
-                [ Svg.Attributes.class "h-12 w-12 text-gray-400" ]
+            [ Icons.viewGridAdd
+                [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
             , span
                 [ class "mt-2 block font-medium text-gray-900 dark:text-gray-200" ]
                 [ text "Create a new glossary item" ]
@@ -821,8 +817,8 @@ viewCreateGlossaryItemButton tabbable common =
             [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
-            [ Icons.viewGridAddSolid
-                [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5"
+            [ Icons.viewGridAdd
+                [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5"
                 , fill "currentColor"
                 , stroke "none"
                 ]
@@ -911,20 +907,8 @@ viewMenuForMobile model tabbable termIndex =
                         [ class "sr-only" ]
                         [ text "Close sidebar"
                         ]
-                    , svg
-                        [ Svg.Attributes.class "h-6 w-6 text-white"
-                        , fill "none"
-                        , viewBox "0 0 24 24"
-                        , stroke "currentColor"
-                        ]
-                        [ path
-                            [ strokeLinecap "round"
-                            , strokeLinejoin "round"
-                            , strokeWidth "2"
-                            , d "M6 18L18 6M6 6l12 12"
-                            ]
-                            []
-                        ]
+                    , Icons.x
+                        [ Svg.Attributes.class "h-6 w-6 text-white" ]
                     ]
                 ]
             , div
@@ -955,30 +939,10 @@ viewQuickSearchButton =
                 , class "hidden w-full lg:flex items-center text-sm leading-6 text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-600 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800"
                 , Accessibility.Aria.hidden True
                 ]
-                [ svg
+                [ Icons.search
                     [ width "24"
                     , height "24"
-                    , fill "none"
                     , Svg.Attributes.class "mr-3 flex-none"
-                    ]
-                    [ path
-                        [ d "m19 19-3.5-3.5"
-                        , stroke "currentColor"
-                        , strokeWidth "2"
-                        , strokeLinecap "round"
-                        , strokeLinejoin "round"
-                        ]
-                        []
-                    , circle
-                        [ cx "11"
-                        , cy "11"
-                        , r "6"
-                        , stroke "currentColor"
-                        , strokeWidth "2"
-                        , strokeLinecap "round"
-                        , strokeLinejoin "round"
-                        ]
-                        []
                     ]
                 , text "Quick search..."
                 , span
@@ -1062,8 +1026,8 @@ viewStaticSidebarForDesktop tabbable termIndex =
         ]
 
 
-viewTopBar : GlossaryTitle -> GlossaryItems -> GradualVisibility -> Html Msg
-viewTopBar glossaryTitle glossaryItems exportDropdownVisibility =
+viewTopBar : GlossaryItems -> GradualVisibility -> Html Msg
+viewTopBar glossaryItems exportDropdownVisibility =
     div
         [ class "sticky top-0 z-10 shrink-0 flex justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
         [ div
@@ -1077,20 +1041,9 @@ viewTopBar glossaryTitle glossaryItems exportDropdownVisibility =
                     [ class "sr-only" ]
                     [ text "Open sidebar"
                     ]
-                , svg
+                , Icons.menu
                     [ Svg.Attributes.class "h-6 w-6"
-                    , fill "none"
-                    , viewBox "0 0 24 24"
-                    , stroke "currentColor"
                     , Accessibility.Aria.hidden True
-                    ]
-                    [ path
-                        [ strokeLinecap "round"
-                        , strokeLinejoin "round"
-                        , strokeWidth "2"
-                        , d "M4 6h16M4 12h8m-8 6h16"
-                        ]
-                        []
                     ]
                 ]
             ]
@@ -1103,29 +1056,21 @@ viewTopBar glossaryTitle glossaryItems exportDropdownVisibility =
                 [ span
                     [ class "sr-only" ]
                     [ text "Search" ]
-                , svg
+                , Icons.search
                     [ width "24"
                     , height "24"
-                    , fill "none"
-                    , stroke "currentColor"
-                    , strokeWidth "2"
-                    , strokeLinecap "round"
-                    , strokeLinejoin "round"
                     , Accessibility.Aria.hidden True
-                    ]
-                    [ path [ d "m19 19-3.5-3.5" ] []
-                    , circle [ cx "11", cy "11", r "6" ] []
                     ]
                 ]
             ]
         , div
             [ class "flex pr-4" ]
-            [ viewExportButton glossaryTitle glossaryItems exportDropdownVisibility ]
+            [ viewExportButton glossaryItems exportDropdownVisibility ]
         ]
 
 
-viewExportButton : GlossaryTitle -> GlossaryItems -> GradualVisibility -> Html Msg
-viewExportButton glossaryTitle glossaryItems exportDropdownVisibility =
+viewExportButton : GlossaryItems -> GradualVisibility -> Html Msg
+viewExportButton glossaryItems exportDropdownVisibility =
     div
         [ class "relative inline-block text-left" ]
         [ div
@@ -1161,15 +1106,8 @@ viewExportButton glossaryTitle glossaryItems exportDropdownVisibility =
                     )
                 ]
                 [ text "Export"
-                , svg
-                    [ Svg.Attributes.class "-mr-1 ml-2 h-5 w-5"
-                    , viewBox "0 0 20 20"
-                    , fill "currentColor"
-                    ]
-                    [ path
-                        [ d "M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" ]
-                        []
-                    ]
+                , Icons.chevronDown
+                    [ Svg.Attributes.class "-mr-1 ml-2 h-5 w-5" ]
                 ]
             ]
         , div
@@ -1199,7 +1137,7 @@ viewExportButton glossaryTitle glossaryItems exportDropdownVisibility =
                         PageMsg.Internal <|
                             DownloadMarkdown glossaryItems
                     ]
-                    [ -- TODO: SVG icon here.
+                    [ -- Maybe add an SVG icon here.
                       text "Markdown"
                     ]
                 ]
@@ -1303,7 +1241,7 @@ view model =
                     , viewStaticSidebarForDesktop noModalDialogShown termIndex
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
-                        [ viewTopBar model.common.title glossaryItems model.exportDropdownVisibility
+                        [ viewTopBar glossaryItems model.exportDropdownVisibility
                         , div
                             [ Html.Attributes.id ElementIds.container ]
                             [ header []
@@ -1315,7 +1253,7 @@ view model =
                                             [ viewEditTitleAndAboutButton noModalDialogShown model.common ]
                                     , div
                                         [ class "hidden lg:block ml-auto pb-3" ]
-                                        [ viewExportButton model.common.title glossaryItems model.exportDropdownVisibility ]
+                                        [ viewExportButton glossaryItems model.exportDropdownVisibility ]
                                     ]
                                 , case model.makingChanges of
                                     MakingChangesHelpCollapsed ->

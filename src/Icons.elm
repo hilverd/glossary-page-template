@@ -1,23 +1,35 @@
 module Icons exposing
-    ( chevronDownSolid
-    , chevronRightSolid
-    , exclamationSolidRed
-    , pencilSolid
+    ( chevronDown
+    , chevronRight
+    , exclamation
+    , exclamationCircle
+    , menu
+    , pencil
     , plus
-    , trashSolid
-    , viewGridAddSolid
+    , search
+    , trash
+    , viewGridAdd
+    , x
     )
 
 import Html exposing (Html)
-import Svg exposing (path, svg)
-import Svg.Attributes exposing (clipRule, d, fill, fillRule, stroke, viewBox)
+import Svg exposing (circle, path, svg)
+import Svg.Attributes exposing (clipRule, cx, cy, d, fill, fillRule, r, stroke, strokeLinecap, strokeLinejoin, strokeWidth, viewBox)
 
 
-pencilSolid : Html msg
-pencilSolid =
-    svg
-        [ Svg.Attributes.class "h-5 w-5"
-        , viewBox "0 0 20 20"
+withAdditionalAttributes :
+    List (Html.Attribute msg)
+    -> List (Html msg)
+    -> List (Html.Attribute msg)
+    -> Html msg
+withAdditionalAttributes attributes children additionalAttributes =
+    svg (attributes ++ additionalAttributes) children
+
+
+pencil : List (Html.Attribute msg) -> Html msg
+pencil =
+    withAdditionalAttributes
+        [ viewBox "0 0 20 20"
         , fill "currentColor"
         ]
         [ path
@@ -26,11 +38,10 @@ pencilSolid =
         ]
 
 
-trashSolid : Html msg
-trashSolid =
-    svg
-        [ Svg.Attributes.class "h-5 w-5"
-        , viewBox "0 0 20 20"
+trash : List (Html.Attribute msg) -> Html msg
+trash =
+    withAdditionalAttributes
+        [ viewBox "0 0 20 20"
         , fill "currentColor"
         ]
         [ path
@@ -42,11 +53,10 @@ trashSolid =
         ]
 
 
-exclamationSolidRed : Html msg
-exclamationSolidRed =
-    svg
-        [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400"
-        , viewBox "0 0 20 20"
+exclamationCircle : List (Html.Attribute msg) -> Html msg
+exclamationCircle =
+    withAdditionalAttributes
+        [ viewBox "0 0 20 20"
         , fill "currentColor"
         ]
         [ path
@@ -58,11 +68,10 @@ exclamationSolidRed =
         ]
 
 
-chevronRightSolid : Html msg
-chevronRightSolid =
-    svg
-        [ Svg.Attributes.class "h-5 w-5 mb-0.5"
-        , viewBox "0 0 20 20"
+chevronRight : List (Html.Attribute msg) -> Html msg
+chevronRight =
+    withAdditionalAttributes
+        [ viewBox "0 0 20 20"
         , fill "currentColor"
         ]
         [ path
@@ -74,11 +83,10 @@ chevronRightSolid =
         ]
 
 
-chevronDownSolid : Html msg
-chevronDownSolid =
-    svg
-        [ Svg.Attributes.class "h-5 w-5 mb-0.5"
-        , viewBox "0 0 20 20"
+chevronDown : List (Html.Attribute msg) -> Html msg
+chevronDown =
+    withAdditionalAttributes
+        [ viewBox "0 0 20 20"
         , fill "currentColor"
         ]
         [ path
@@ -90,16 +98,13 @@ chevronDownSolid =
         ]
 
 
-viewGridAddSolid : List (Html.Attribute msg) -> Html msg
-viewGridAddSolid attributes =
-    svg
-        ([ Svg.Attributes.class "mx-auto"
-         , stroke "currentColor"
-         , fill "none"
-         , viewBox "0 0 20 20"
-         ]
-            ++ attributes
-        )
+viewGridAdd : List (Html.Attribute msg) -> Html msg
+viewGridAdd =
+    withAdditionalAttributes
+        [ stroke "currentColor"
+        , fill "none"
+        , viewBox "0 0 20 20"
+        ]
         [ path
             [ d "M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z" ]
             []
@@ -107,16 +112,92 @@ viewGridAddSolid attributes =
 
 
 plus : List (Html.Attribute msg) -> Html msg
-plus attributes =
-    svg
-        ([ Svg.Attributes.class "mx-auto"
-         , stroke "none"
-         , fill "currentColor"
-         , viewBox "0 0 20 20"
-         ]
-            ++ attributes
-        )
+plus =
+    withAdditionalAttributes
+        [ stroke "none"
+        , fill "currentColor"
+        , viewBox "0 0 20 20"
+        ]
         [ path
             [ d "M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" ]
+            []
+        ]
+
+
+exclamation : List (Html.Attribute msg) -> Html msg
+exclamation =
+    withAdditionalAttributes
+        [ fill "none"
+        , viewBox "0 0 24 24"
+        , stroke "currentColor"
+        ]
+        [ path
+            [ strokeLinecap "round"
+            , strokeLinejoin "round"
+            , strokeWidth "2"
+            , d
+                "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            ]
+            []
+        ]
+
+
+x : List (Html.Attribute msg) -> Html msg
+x =
+    withAdditionalAttributes
+        [ fill "none"
+        , viewBox "0 0 24 24"
+        , stroke "currentColor"
+        ]
+        [ path
+            [ strokeLinecap "round"
+            , strokeLinejoin "round"
+            , strokeWidth "2"
+            , d "M6 18L18 6M6 6l12 12"
+            ]
+            []
+        ]
+
+
+search : List (Html.Attribute msg) -> Html msg
+search =
+    withAdditionalAttributes
+        [ fill "none"
+        , stroke "currentColor"
+        ]
+        [ path
+            [ d "m19 19-3.5-3.5"
+            , stroke "currentColor"
+            , strokeWidth "2"
+            , strokeLinecap "round"
+            , strokeLinejoin "round"
+            ]
+            []
+        , circle
+            [ cx "11"
+            , cy "11"
+            , r "6"
+            , stroke "currentColor"
+            , strokeWidth "2"
+            , strokeLinecap "round"
+            , strokeLinejoin "round"
+            ]
+            []
+        ]
+
+
+menu : List (Html.Attribute msg) -> Html msg
+menu =
+    withAdditionalAttributes
+        [ fill "none"
+        , viewBox "0 0 24 24"
+        , stroke "currentColor"
+        ]
+        [ path
+            [ strokeLinecap "round"
+            , strokeLinejoin "round"
+            , strokeWidth "2"
+            , d "M4 6h16M4 12h8m-8 6h16"
+            ]
             []
         ]

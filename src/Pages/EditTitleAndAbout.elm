@@ -229,7 +229,9 @@ viewEditTitle showValidationErrors titleField =
                                     ]
                                 , Extras.Html.showIf (showValidationErrors && titleField.validationError /= Nothing) <|
                                     div [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
-                                        [ Icons.exclamationSolidRed ]
+                                        [ Icons.exclamationCircle
+                                            [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
+                                        ]
                                 ]
                             ]
                         ]
@@ -286,7 +288,9 @@ viewEditAboutParagraph showValidationErrors aboutParagraphField =
                     , Extras.Html.showIf (showValidationErrors && aboutParagraphField.validationError /= Nothing) <|
                         div
                             [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
-                            [ Icons.exclamationSolidRed ]
+                            [ Icons.exclamationCircle
+                                [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
+                            ]
                     ]
                 ]
             , Extras.Html.showMaybe
@@ -344,7 +348,8 @@ viewAddAboutLinkButtonForEmptyState =
         , class "relative block max-w-lg border-2 border-gray-300 border-dashed rounded-lg p-5 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         , Html.Events.onClick <| PageMsg.Internal AddAboutLink
         ]
-        [ Icons.plus [ Svg.Attributes.class "h-12 w-12 text-gray-400" ]
+        [ Icons.plus
+            [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
         , span
             [ class "mt-2 block font-medium text-gray-900 dark:text-gray-200" ]
             [ text "Add link" ]
@@ -356,7 +361,8 @@ viewAddAboutLinkButton =
     div []
         [ Components.Button.secondary
             [ Html.Events.onClick <| PageMsg.Internal AddAboutLink ]
-            [ Icons.plus [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5" ]
+            [ Icons.plus
+                [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
             , text "Add link"
             ]
         ]
@@ -376,7 +382,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                     , class "hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     , Html.Events.onClick <| PageMsg.Internal <| DeleteAboutLink index
                     ]
-                    [ Icons.trashSolid ]
+                    [ Icons.trash [ Svg.Attributes.class "h-5 w-5" ] ]
                 ]
             , div
                 [ class "flex-1 isolate -space-y-px rounded-md shadow-sm bg-white dark:bg-gray-700" ]
@@ -415,7 +421,9 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                         []
                     , Extras.Html.showIf (showValidationErrors && aboutLinkHref.validationError /= Nothing) <|
                         div [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
-                            [ Icons.exclamationSolidRed ]
+                            [ Icons.exclamationCircle
+                                [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
+                            ]
                     ]
                 , div
                     [ if not showValidationErrors || aboutLinkBody.validationError == Nothing then
@@ -450,7 +458,9 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                             ]
                         , Extras.Html.showIf (showValidationErrors && aboutLinkBody.validationError /= Nothing) <|
                             div [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
-                                [ Icons.exclamationSolidRed ]
+                                [ Icons.exclamationCircle
+                                    [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
+                                ]
                         ]
                     ]
                 ]
