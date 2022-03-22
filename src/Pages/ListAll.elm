@@ -1026,8 +1026,7 @@ viewTopBar glossaryItems exportDropdownVisibility =
                 ]
                 [ span
                     [ class "sr-only" ]
-                    [ text "Open sidebar"
-                    ]
+                    [ text "Open sidebar" ]
                 , Icons.menu
                     [ Svg.Attributes.class "h-6 w-6"
                     , Accessibility.Aria.hidden True
@@ -1062,9 +1061,8 @@ viewExportButton glossaryItems exportDropdownVisibility =
         [ class "relative inline-block text-left" ]
         [ div
             []
-            [ button
-                [ Html.Attributes.type_ "button"
-                , class "inline-flex justify-center w-full rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-indigo-500"
+            [ Components.Button.white
+                [ class "w-full"
                 , id ElementIds.exportDropdownButton
                 , Accessibility.Aria.expanded <| exportDropdownVisibility == Visible
                 , Accessibility.Aria.hasMenuPopUp
