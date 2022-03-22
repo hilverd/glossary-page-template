@@ -600,21 +600,6 @@ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails relatedTerms =
         ]
 
 
-viewGlossaryItemButton : List (Attribute Msg) -> Html Msg -> String -> Html Msg
-viewGlossaryItemButton attributes icon label =
-    button
-        ([ Html.Attributes.type_ "button"
-         , class "inline-flex space-x-2 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400"
-         ]
-            ++ attributes
-        )
-        [ icon
-        , span
-            [ class "font-medium text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-400" ]
-            [ text label ]
-        ]
-
-
 viewGlossaryItem : GlossaryItemIndex -> Bool -> Model -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
 viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
     let
@@ -649,25 +634,29 @@ viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
                     [ class "flex justify-between" ]
                     [ span
                         [ class "inline-flex items-center" ]
-                        [ viewGlossaryItemButton
+                        [ Components.Button.text
                             [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
                             , Accessibility.Key.tabbable tabbable
                             ]
-                            (Icons.pencil
+                            [ Icons.pencil
                                 [ Svg.Attributes.class "h-5 w-5" ]
-                            )
-                            "Edit"
+                            , span
+                                [ class "font-medium text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-400" ]
+                                [ text "Edit" ]
+                            ]
                         ]
                     , span
                         [ class "ml-3 inline-flex items-center" ]
-                        [ viewGlossaryItemButton
+                        [ Components.Button.text
                             [ Html.Events.onClick <| PageMsg.Internal <| ConfirmDelete index
                             , Accessibility.Key.tabbable tabbable
                             ]
-                            (Icons.trash
+                            [ Icons.trash
                                 [ Svg.Attributes.class "h-5 w-5" ]
-                            )
-                            "Delete"
+                            , span
+                                [ class "font-medium text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-400" ]
+                                [ text "Delete" ]
+                            ]
                         ]
                     ]
                 , errorWhileDeleting
@@ -753,17 +742,15 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
                     ]
                 , div
                     [ class "mt-5 sm:mt-4 sm:flex sm:flex-row-reverse" ]
-                    [ button
-                        [ Html.Attributes.type_ "button"
-                        , class "w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 dark:bg-red-400 text-base font-medium text-white dark:text-gray-800 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
-                        , maybeIndexOfItemToDelete
-                            |> Maybe.map (Html.Events.onClick << PageMsg.Internal << Delete)
-                            |> Maybe.withDefault Extras.HtmlAttribute.empty
+                    [ Components.Button.primary
+                        [ class "w-full bg-red-600 dark:bg-red-400 hover:bg-red-700 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm dark:text-gray-800 "
+                        , Extras.HtmlAttribute.showMaybe
+                            (Html.Events.onClick << PageMsg.Internal << Delete)
+                            maybeIndexOfItemToDelete
                         ]
                         [ text "Delete" ]
-                    , button
-                        [ Html.Attributes.type_ "button"
-                        , class "mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-500 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
+                    , Components.Button.white
+                        [ class "mt-3 w-full sm:mt-0 sm:w-auto sm:text-sm"
                         , Html.Events.onClick <| PageMsg.Internal CancelDelete
                         , Extras.HtmlEvents.onEnter <| PageMsg.Internal CancelDelete
                         ]
