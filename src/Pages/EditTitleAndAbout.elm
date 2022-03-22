@@ -375,14 +375,13 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
             [ class "flex flex-auto max-w-2xl" ]
             [ span
                 [ class "flex-none inline-flex items-center" ]
-                [ button
-                    [ Html.Attributes.type_ "button"
-                    , Accessibility.Aria.label "Delete"
-                    , class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-sm rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
-                    , class "hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                [ Components.Button.rounded True
+                    [ Accessibility.Aria.label "Delete"
                     , Html.Events.onClick <| PageMsg.Internal <| DeleteAboutLink index
                     ]
-                    [ Icons.trash [ Svg.Attributes.class "h-5 w-5" ] ]
+                    [ Icons.trash
+                        [ Svg.Attributes.class "h-5 w-5" ]
+                    ]
                 ]
             , div
                 [ class "flex-1 isolate -space-y-px rounded-md shadow-sm bg-white dark:bg-gray-700" ]

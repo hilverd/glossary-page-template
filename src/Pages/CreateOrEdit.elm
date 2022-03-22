@@ -345,18 +345,12 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                 [ class "flex-auto max-w-2xl flex" ]
                 [ span
                     [ class "inline-flex items-center" ]
-                    [ button
-                        [ Html.Attributes.type_ "button"
-                        , Accessibility.Aria.label "Delete"
-                        , class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-sm rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
-                        , Extras.HtmlAttribute.showIf canBeDeleted <| class "hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        , Extras.HtmlAttribute.showIf (not canBeDeleted) <| class "opacity-50"
+                    [ Components.Button.rounded canBeDeleted
+                        [ Accessibility.Aria.label "Delete"
                         , Html.Events.onClick <| PageMsg.Internal <| DeleteTerm termIndex
-                        , disabled <| not canBeDeleted
                         ]
                         [ Icons.trash
-                            [ Svg.Attributes.class "h-5 w-5"
-                            ]
+                            [ Svg.Attributes.class "h-5 w-5" ]
                         ]
                     ]
                 , div
@@ -491,16 +485,12 @@ viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
         [ div
             [ class "flex-auto max-w-2xl flex" ]
             [ span [ class "inline-flex items-center" ]
-                [ button
-                    [ Html.Attributes.type_ "button"
-                    , Accessibility.Aria.label "Delete"
-                    , class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-sm rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
-                    , class "hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                [ Components.Button.rounded True
+                    [ Accessibility.Aria.label "Delete"
                     , Html.Events.onClick <| PageMsg.Internal <| DeleteDetails index
                     ]
                     [ Icons.trash
-                        [ Svg.Attributes.class "h-5 w-5"
-                        ]
+                        [ Svg.Attributes.class "h-5 w-5" ]
                     ]
                 ]
             , div
@@ -623,15 +613,12 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms 
                 [ class "flex-auto max-w-lg flex" ]
                 [ span
                     [ class "inline-flex items-center" ]
-                    [ button
-                        [ Html.Attributes.type_ "button"
-                        , Accessibility.Aria.label "Delete"
-                        , class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-sm rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    [ Components.Button.rounded True
+                        [ Accessibility.Aria.label "Delete"
                         , Html.Events.onClick <| PageMsg.Internal <| DeleteRelatedTerm index
                         ]
                         [ Icons.trash
-                            [ Svg.Attributes.class "h-5 w-5"
-                            ]
+                            [ Svg.Attributes.class "h-5 w-5" ]
                         ]
                     ]
                 , div
