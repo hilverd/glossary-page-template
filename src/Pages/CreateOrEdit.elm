@@ -15,13 +15,12 @@ import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import ElementIds
 import Extras.Html
-import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
 import GlossaryItemForm as Form exposing (GlossaryItemForm)
 import Html
-import Html.Attributes exposing (attribute, class, disabled, id, required, selected, type_, value)
+import Html.Attributes exposing (attribute, class, id, required, selected, type_, value)
 import Html.Events
 import Http
 import Icons
@@ -29,7 +28,7 @@ import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
 import Set exposing (Set)
 import Svg exposing (path, svg)
-import Svg.Attributes exposing (d, fill, stroke, viewBox)
+import Svg.Attributes exposing (d, fill, viewBox)
 import Task
 
 
@@ -674,38 +673,18 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms 
 
 viewAddRelatedTermButton : Html Msg
 viewAddRelatedTermButton =
-    button
-        [ Html.Attributes.type_ "button"
-        , class "inline-flex items-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        , Html.Events.onClick <| PageMsg.Internal (AddRelatedTerm Nothing)
-        ]
-        [ svg
-            [ Svg.Attributes.class "-ml-1 mr-2 h-5 w-5", viewBox "0 0 20 20", fill "currentColor" ]
-            [ path
-                [ d "M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" ]
-                []
-            ]
+    Components.Button.secondary
+        [ Html.Events.onClick <| PageMsg.Internal <| AddRelatedTerm Nothing ]
+        [ Icons.plus [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
         , text "Add related term"
         ]
 
 
 viewAddRelatedTermButtonForEmptyState : Html Msg
 viewAddRelatedTermButtonForEmptyState =
-    button
-        [ Html.Attributes.type_ "button"
-        , class "relative block max-w-lg border-2 border-gray-300 border-dashed rounded-lg p-5 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        , Html.Events.onClick <| PageMsg.Internal (AddRelatedTerm Nothing)
-        ]
-        [ svg
-            [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400"
-            , stroke "none"
-            , fill "currentColor"
-            , viewBox "0 0 20 20"
-            ]
-            [ path
-                [ d "M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" ]
-                []
-            ]
+    Components.Button.emptyState
+        [ Html.Events.onClick <| PageMsg.Internal <| AddRelatedTerm Nothing ]
+        [ Icons.plus [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
         , span
             [ class "mt-2 block font-medium text-gray-900 dark:text-gray-200" ]
             [ text "Add related term" ]
@@ -733,7 +712,8 @@ viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray sug
                 |> GlossaryItems.orderedAlphabetically
                 |> List.filterMap (Tuple.second >> .terms >> List.head)
     in
-    div [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
+    div
+        [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
