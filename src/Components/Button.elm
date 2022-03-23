@@ -1,6 +1,7 @@
-module Components.Button exposing (emptyState, primary, rounded, secondary, text, white)
+module Components.Button exposing (emptyState, primary, rounded, secondary, text, toggle, white)
 
 import Accessibility exposing (..)
+import Accessibility.Aria
 import Accessibility.Key
 import Extras.HtmlTree exposing (HtmlTree(..))
 import Html exposing (Html)
@@ -69,4 +70,44 @@ rounded enabled =
             class "opacity-50"
         , Html.Attributes.disabled <| not enabled
         , Accessibility.Key.tabbable enabled
+        ]
+
+
+toggle : Bool -> String -> List (Attribute msg) -> List (Html msg) -> Html msg
+toggle on labelId additionalAttributes children =
+    Html.div
+        (class "flex items-center" :: additionalAttributes)
+        [ button
+            [ Html.Attributes.type_ "button"
+            , class "relative inline-flex shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            , class <|
+                if on then
+                    "bg-indigo-600"
+
+                else
+                    "bg-gray-200 dark:bg-gray-400"
+            , Html.Attributes.attribute "role" "switch"
+            , Accessibility.Aria.checked <| Just on
+            , Accessibility.Aria.labelledBy labelId
+            ]
+            [ span
+                [ Accessibility.Aria.hidden True
+                , class "pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
+                , class <|
+                    if on then
+                        "translate-x-5"
+
+                    else
+                        "translate-x-0"
+                ]
+                []
+            ]
+        , span
+            [ class "ml-3 select-none"
+            , Html.Attributes.id labelId
+            ]
+            [ span
+                [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                children
+            ]
         ]

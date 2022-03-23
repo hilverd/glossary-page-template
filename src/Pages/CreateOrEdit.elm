@@ -383,43 +383,13 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                             [ class "flex-auto mt-2 sm:mt-0 relative flex items-baseline" ]
                             [ div
                                 [ class "sm:ml-5" ]
-                                [ Html.div
-                                    [ class "flex items-center"
-                                    , Html.Events.onClick <| PageMsg.Internal <| ToggleAbbreviation termIndex
-                                    ]
-                                    [ button
-                                        [ Html.Attributes.type_ "button"
-                                        , class "relative inline-flex shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                        , class <|
-                                            if term.isAbbreviation then
-                                                "bg-indigo-600"
-
-                                            else
-                                                "bg-gray-200 dark:bg-gray-400"
-                                        , attribute "role" "switch"
-                                        , Accessibility.Aria.checked <| Just term.isAbbreviation
-                                        , Accessibility.Aria.labelledBy abbreviationLabelId
-                                        ]
-                                        [ span
-                                            [ Accessibility.Aria.hidden True
-                                            , class "pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
-                                            , class <|
-                                                if term.isAbbreviation then
-                                                    "translate-x-5"
-
-                                                else
-                                                    "translate-x-0"
-                                            ]
-                                            []
-                                        ]
-                                    , span
-                                        [ class "ml-3 select-none"
-                                        , id abbreviationLabelId
-                                        ]
-                                        [ span
-                                            [ class "font-medium text-gray-900 dark:text-gray-300" ]
-                                            [ text "Abbreviation" ]
-                                        ]
+                                [ Components.Button.toggle
+                                    term.isAbbreviation
+                                    abbreviationLabelId
+                                    [ Html.Events.onClick <| PageMsg.Internal <| ToggleAbbreviation termIndex ]
+                                    [ span
+                                        [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                                        [ text "Abbreviation" ]
                                     ]
                                 ]
                             ]
