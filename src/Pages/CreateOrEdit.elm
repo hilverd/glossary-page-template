@@ -7,6 +7,7 @@ import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel, OrderItemsBy(..))
 import Components.Button
+import Components.Form
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -355,29 +356,20 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                     [ class "flex-auto" ]
                     [ div
                         [ class "sm:flex sm:flex-row sm:items-center" ]
-                        [ div
+                        [ Html.div
                             [ class "relative block w-full min-w-0" ]
-                            [ inputText term.body
-                                [ if not showValidationErrors || term.validationError == Nothing then
-                                    class "w-full min-w-0 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white"
-
-                                  else
-                                    class "w-full min-w-0 rounded-md border-red-300 dark:border-red-700 dark:bg-gray-700 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500"
-                                , type_ "text"
-                                , id <| ElementIds.termInputField termIndex
+                            [ Components.Form.inputText
+                                term.body
+                                showValidationErrors
+                                term.validationError
+                                [ id <| ElementIds.termInputField termIndex
                                 , required True
                                 , Html.Attributes.autocomplete False
                                 , Accessibility.Aria.label "Term"
                                 , Accessibility.Aria.required True
-                                , Accessibility.Aria.invalid <| term.validationError /= Nothing
                                 , Html.Events.onInput (PageMsg.Internal << UpdateTerm termIndex)
                                 , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                                 ]
-                            , Extras.Html.showIf (showValidationErrors && term.validationError /= Nothing) <|
-                                div [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
-                                    [ Icons.exclamationCircle
-                                        [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
-                                    ]
                             ]
                         , div
                             [ class "flex-auto mt-2 sm:mt-0 relative flex items-baseline" ]

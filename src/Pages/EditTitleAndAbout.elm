@@ -7,11 +7,12 @@ import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel, OrderItemsBy(..))
 import Components.Button
+import Components.Form
 import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
-import ElementIds
+import ElementIds exposing (aboutLinkBody)
 import Extras.Html
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
@@ -210,28 +211,19 @@ viewEditTitle showValidationErrors titleField =
                         [ class "flex-auto" ]
                         [ div
                             [ class "sm:flex sm:flex-row sm:items-center" ]
-                            [ div
+                            [ Html.div
                                 [ class "relative block w-full min-w-0" ]
-                                [ inputText titleField.body
-                                    [ if not showValidationErrors || titleField.validationError == Nothing then
-                                        class "w-full min-w-0 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white"
-
-                                      else
-                                        class "w-full min-w-0 rounded-md border-red-300 dark:bg-gray-700 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500"
-                                    , type_ "text"
-                                    , required True
+                                [ Components.Form.inputText
+                                    titleField.body
+                                    showValidationErrors
+                                    titleField.validationError
+                                    [ required True
                                     , Html.Attributes.autocomplete False
                                     , Accessibility.Aria.label "Title"
                                     , Accessibility.Aria.required True
-                                    , Accessibility.Aria.invalid <| titleField.validationError /= Nothing
                                     , Html.Events.onInput (PageMsg.Internal << UpdateTitle)
                                     , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                                     ]
-                                , Extras.Html.showIf (showValidationErrors && titleField.validationError /= Nothing) <|
-                                    div [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
-                                        [ Icons.exclamationCircle
-                                            [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
-                                        ]
                                 ]
                             ]
                         ]
@@ -394,32 +386,21 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                         , for <| ElementIds.aboutLinkHref index
                         ]
                         [ text "URL" ]
-                    , Html.input
-                        [ class "block w-full border-0 p-0 focus:ring-0 dark:bg-gray-700 dark:text-white"
-                        , if not showValidationErrors || aboutLinkBody.validationError == Nothing then
-                            class "text-gray-900 placeholder-gray-500 dark:placeholder-gray-400"
-
-                          else
-                            class "text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-orange-700"
-                        , id <| ElementIds.aboutLinkHref index
+                    , Components.Form.input
+                        aboutLinkHref.href
+                        showValidationErrors
+                        aboutLinkHref.validationError
+                        [ id <| ElementIds.aboutLinkHref index
                         , name <| ElementIds.aboutLinkHref index
                         , placeholder "https://example.com"
                         , type_ "url"
                         , spellcheck False
-                        , value aboutLinkHref.href
                         , required True
                         , Html.Attributes.autocomplete False
                         , Accessibility.Aria.required True
-                        , Accessibility.Aria.invalid <| aboutLinkHref.validationError /= Nothing
                         , Html.Events.onInput (PageMsg.Internal << UpdateAboutLinkHref index)
                         , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                         ]
-                        []
-                    , Extras.Html.showIf (showValidationErrors && aboutLinkHref.validationError /= Nothing) <|
-                        div [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
-                            [ Icons.exclamationCircle
-                                [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
-                            ]
                     ]
                 , div
                     [ if not showValidationErrors || aboutLinkBody.validationError == Nothing then
@@ -433,30 +414,27 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                         , for <| ElementIds.aboutLinkBody index
                         ]
                         [ text "Text" ]
-                    , div []
-                        [ inputText aboutLinkBody.body
-                            [ class "block w-full border-0 p-0 focus:ring-0 dark:bg-gray-700 dark:text-white"
-                            , if not showValidationErrors || aboutLinkBody.validationError == Nothing then
-                                class "text-gray-900 placeholder-gray-500 dark:placeholder-gray-400"
-
-                              else
-                                class "text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-orange-700"
-                            , id <| ElementIds.aboutLinkBody index
-                            , name <| ElementIds.aboutLinkBody index
-                            , placeholder "Example"
-                            , type_ "text"
-                            , required True
-                            , Html.Attributes.autocomplete False
-                            , Accessibility.Aria.required True
-                            , Accessibility.Aria.invalid <| aboutLinkHref.validationError /= Nothing
-                            , Html.Events.onInput (PageMsg.Internal << UpdateAboutLinkBody index)
-                            , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
-                            ]
-                        , Extras.Html.showIf (showValidationErrors && aboutLinkBody.validationError /= Nothing) <|
-                            div [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
-                                [ Icons.exclamationCircle
-                                    [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
+                    , Html.div
+                        [ class "block w-full min-w-0" ]
+                        [ Html.div
+                            [ class "block w-full min-w-0" ]
+                            [ Components.Form.inputText
+                                aboutLinkBody.body
+                                showValidationErrors
+                                aboutLinkBody.validationError
+                                [ class "block w-full border-0 p-0 focus:ring-0 dark:bg-gray-700 dark:text-white"
+                                , id <| ElementIds.aboutLinkBody index
+                                , name <| ElementIds.aboutLinkBody index
+                                , placeholder "Example"
+                                , type_ "text"
+                                , required True
+                                , Html.Attributes.autocomplete False
+                                , Accessibility.Aria.required True
+                                , Accessibility.Aria.invalid <| aboutLinkHref.validationError /= Nothing
+                                , Html.Events.onInput (PageMsg.Internal << UpdateAboutLinkBody index)
+                                , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                                 ]
+                            ]
                         ]
                     ]
                 ]
