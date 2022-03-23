@@ -334,7 +334,7 @@ viewCreateDescriptionTermInternal : Bool -> Bool -> TermIndex -> Form.TermField 
 viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex term =
     let
         abbreviationLabelId =
-            "term-" ++ (termIndex |> TermIndex.toInt |> String.fromInt) ++ "-abbreviation"
+            ElementIds.abbreviationLabel termIndex
     in
     div []
         [ div

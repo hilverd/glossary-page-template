@@ -1,5 +1,6 @@
 module ElementIds exposing
-    ( about
+    ( abbreviationLabel
+    , about
     , aboutLinkBody
     , aboutLinkHref
     , container
@@ -150,3 +151,8 @@ exportDropdownButton =
 exportDropdownMenuItem : Int -> String
 exportDropdownMenuItem index =
     prefixed <| "export-dropdown-menu-item-" ++ String.fromInt index
+
+
+abbreviationLabel : TermIndex -> String
+abbreviationLabel termIndex =
+    prefixed <| "term-" ++ (termIndex |> TermIndex.toInt |> String.fromInt) ++ "-abbreviation"
