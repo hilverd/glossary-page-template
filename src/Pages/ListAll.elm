@@ -1143,14 +1143,13 @@ viewOrderItemsBy model =
                 [ class "space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6" ]
                 [ div
                     [ class "flex items-center" ]
-                    [ radio
+                    [ Components.Button.radio
                         "order-items-by"
                         "order-items-alphabetically"
                         (model.common.orderItemsBy == CommonModel.Alphabetically)
-                        [ class "focus:ring-indigo-500 h-4 w-4 dark:bg-gray-200 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-500"
-                        , id ElementIds.orderItemsAlphabetically
+                        tabbable
+                        [ id ElementIds.orderItemsAlphabetically
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy CommonModel.Alphabetically
-                        , Accessibility.Key.tabbable tabbable
                         ]
                     , label
                         [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
@@ -1160,14 +1159,13 @@ viewOrderItemsBy model =
                     ]
                 , div
                     [ class "flex items-center" ]
-                    [ radio
+                    [ Components.Button.radio
                         "order-items-by"
                         "order-items-most-frequent-first"
                         (model.common.orderItemsBy == CommonModel.MostFrequentFirst)
-                        [ class "focus:ring-indigo-500 h-4 w-4 dark:bg-gray-200 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-500"
-                        , id ElementIds.orderItemsMostFrequentFirst
+                        tabbable
+                        [ id ElementIds.orderItemsMostFrequentFirst
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy CommonModel.MostFrequentFirst
-                        , Accessibility.Key.tabbable tabbable
                         ]
                     , label
                         [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"

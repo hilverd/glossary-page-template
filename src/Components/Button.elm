@@ -1,6 +1,6 @@
-module Components.Button exposing (emptyState, primary, rounded, secondary, text, toggle, white)
+module Components.Button exposing (emptyState, primary, radio, rounded, secondary, text, toggle, white)
 
-import Accessibility exposing (..)
+import Accessibility exposing (Attribute)
 import Accessibility.Aria
 import Accessibility.Key
 import Extras.HtmlTree exposing (HtmlTree(..))
@@ -14,7 +14,7 @@ withAdditionalAttributes :
     -> List (Html msg)
     -> Html msg
 withAdditionalAttributes attributes additionalAttributes children =
-    button
+    Accessibility.button
         (Html.Attributes.type_ "button"
             :: (attributes ++ additionalAttributes)
         )
@@ -77,7 +77,7 @@ toggle : Bool -> String -> List (Attribute msg) -> List (Html msg) -> Html msg
 toggle on labelId additionalAttributes children =
     Html.div
         (class "flex items-center" :: additionalAttributes)
-        [ button
+        [ Accessibility.button
             [ Html.Attributes.type_ "button"
             , class "relative inline-flex shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             , class <|
@@ -90,7 +90,7 @@ toggle on labelId additionalAttributes children =
             , Accessibility.Aria.checked <| Just on
             , Accessibility.Aria.labelledBy labelId
             ]
-            [ span
+            [ Accessibility.span
                 [ Accessibility.Aria.hidden True
                 , class "pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
                 , class <|
@@ -102,12 +102,25 @@ toggle on labelId additionalAttributes children =
                 ]
                 []
             ]
-        , span
+        , Accessibility.span
             [ class "ml-3 select-none"
             , Html.Attributes.id labelId
             ]
-            [ span
+            [ Accessibility.span
                 [ class "font-medium text-gray-900 dark:text-gray-300" ]
                 children
             ]
         ]
+
+
+radio : String -> String -> Bool -> Bool -> List (Attribute msg) -> Html msg
+radio name_ value_ checked_ tabbable additionalAttributes =
+    Accessibility.radio
+        name_
+        value_
+        checked_
+        ([ class "focus:ring-indigo-500 h-4 w-4 dark:bg-gray-200 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-500"
+         , Accessibility.Key.tabbable tabbable
+         ]
+            ++ additionalAttributes
+        )
