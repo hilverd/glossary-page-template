@@ -27,8 +27,7 @@ import Icons
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
 import Set exposing (Set)
-import Svg exposing (path, svg)
-import Svg.Attributes exposing (d, fill, viewBox)
+import Svg.Attributes
 import Task
 
 
@@ -761,17 +760,12 @@ viewAddSuggestedSeeAlso suggestedRelatedTerms =
                 (suggestedRelatedTerms
                     |> List.map
                         (\suggestedRelatedTerm ->
-                            button
-                                [ Html.Attributes.type_ "button"
-                                , class "m-1 inline-flex items-center px-4 py-2 bg-white text-sm dark:bg-gray-700 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            Components.Button.white True
+                                [ class "m-1 text-sm"
                                 , Html.Events.onClick <| PageMsg.Internal (AddRelatedTerm <| Just suggestedRelatedTerm.id)
                                 ]
-                                [ svg
-                                    [ Svg.Attributes.class "-ml-1 mr-2 h-4 w-4", viewBox "0 0 20 20", fill "currentColor" ]
-                                    [ path
-                                        [ d "M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" ]
-                                        []
-                                    ]
+                                [ Icons.plus
+                                    [ Svg.Attributes.class "-ml-1 mr-2 h-4 w-4" ]
                                 , text suggestedRelatedTerm.body
                                 ]
                         )
@@ -802,7 +796,7 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
             |> Extras.Html.showMaybe (\errorMessage -> errorDiv <| "Failed to save — " ++ errorMessage ++ ".")
         , div
             [ class "flex justify-end" ]
-            [ Components.Button.white
+            [ Components.Button.white True
                 [ Html.Events.onClick <|
                     PageMsg.NavigateToListAll { common | loadedGlossaryItems = Ok glossaryItems }
                 ]

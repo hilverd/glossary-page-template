@@ -749,7 +749,7 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
                             maybeIndexOfItemToDelete
                         ]
                         [ text "Delete" ]
-                    , Components.Button.white
+                    , Components.Button.white True
                         [ class "mt-3 w-full sm:mt-0 sm:w-auto sm:text-sm"
                         , Html.Events.onClick <| PageMsg.Internal CancelDelete
                         , Extras.HtmlEvents.onEnter <| PageMsg.Internal CancelDelete
@@ -765,7 +765,7 @@ viewEditTitleAndAboutButton : Bool -> CommonModel -> Html Msg
 viewEditTitleAndAboutButton tabbable common =
     div
         [ class "pb-6 print:hidden" ]
-        [ Components.Button.white
+        [ Components.Button.white True
             [ Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout { common | maybeIndex = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
@@ -904,7 +904,7 @@ viewMenuForMobile model tabbable termIndex =
                 ]
                 [ nav
                     [ class "px-4 pt-1 pb-6" ]
-                    [ viewTermIndexFirstCharacterGrid False tabbable termIndex
+                    [ viewTermIndexFirstCharacterGrid False termIndex
                     , viewTermsIndex tabbable False termIndex
                     ]
                 ]
@@ -941,28 +941,23 @@ viewQuickSearchButton =
         ]
 
 
-viewTermIndexFirstCharacter : Bool -> String -> Bool -> Bool -> Html Msg
-viewTermIndexFirstCharacter staticSidebar firstCharacter enabled tabbable =
-    if enabled then
-        button
-            [ Html.Attributes.type_ "button"
-            , class "inline-flex items-center m-0.5 px-3 py-2 border border-gray-200 dark:border-gray-800 shadow-sm leading-4 font-medium rounded-md text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-3 focus:ring-indigo-500 dark:focus:ring-indigo-400"
-            , Html.Events.onClick <| PageMsg.Internal <| JumpToTermIndexGroup staticSidebar firstCharacter
-            , Accessibility.Key.tabbable tabbable
-            ]
-            [ text firstCharacter ]
+viewTermIndexFirstCharacter : Bool -> String -> Bool -> Html Msg
+viewTermIndexFirstCharacter staticSidebar firstCharacter enabled =
+    Components.Button.white enabled
+        [ class "m-0.5 px-3 py-2 leading-4"
+        , Html.Events.onClick <|
+            PageMsg.Internal <|
+                if enabled then
+                    JumpToTermIndexGroup staticSidebar firstCharacter
 
-    else
-        button
-            [ Html.Attributes.type_ "button"
-            , Html.Attributes.disabled True
-            , class "inline-flex items-center m-0.5 px-3 py-2 border border-gray-200 dark:border-gray-800 shadow-sm leading-4 font-medium rounded-md text-gray-300 dark:text-slate-600 bg-white dark:bg-slate-900"
-            ]
-            [ text firstCharacter ]
+                else
+                    NoOp
+        ]
+        [ text firstCharacter ]
 
 
-viewTermIndexFirstCharacterGrid : Bool -> Bool -> TermIndex -> Html Msg
-viewTermIndexFirstCharacterGrid staticSidebar tabbable termIndex =
+viewTermIndexFirstCharacterGrid : Bool -> TermIndex -> Html Msg
+viewTermIndexFirstCharacterGrid staticSidebar termIndex =
     div
         [ class "bg-white dark:bg-slate-900 select-none pointer-events-auto" ]
         (List.map
@@ -971,14 +966,13 @@ viewTermIndexFirstCharacterGrid staticSidebar tabbable termIndex =
                     staticSidebar
                     termIndexGroup.label
                     (not <| List.isEmpty termIndexGroup.terms)
-                    tabbable
             )
             termIndex
         )
 
 
-viewQuickSearchButtonAndLetterGrid : Bool -> Bool -> TermIndex -> Html Msg
-viewQuickSearchButtonAndLetterGrid staticSidebar tabbable termIndex =
+viewQuickSearchButtonAndLetterGrid : Bool -> TermIndex -> Html Msg
+viewQuickSearchButtonAndLetterGrid staticSidebar termIndex =
     div
         [ id ElementIds.quickSearchButtonAndLetterGrid
         , class "-mb-6 sticky top-0 -ml-0.5 pointer-events-none"
@@ -989,7 +983,7 @@ viewQuickSearchButtonAndLetterGrid staticSidebar tabbable termIndex =
         , viewQuickSearchButton
         , div
             [ class "px-3 bg-white dark:bg-slate-900" ]
-            [ viewTermIndexFirstCharacterGrid staticSidebar tabbable termIndex ]
+            [ viewTermIndexFirstCharacterGrid staticSidebar termIndex ]
         , div
             [ class "h-8 bg-gradient-to-b from-white dark:from-slate-900" ]
             []
@@ -1005,7 +999,7 @@ viewStaticSidebarForDesktop tabbable termIndex =
             [ id ElementIds.staticSidebarForDesktop
             , class "h-0 flex-1 flex flex-col overflow-y-auto"
             ]
-            [ viewQuickSearchButtonAndLetterGrid True tabbable termIndex
+            [ viewQuickSearchButtonAndLetterGrid True termIndex
             , nav
                 [ class "px-3" ]
                 [ viewTermsIndex tabbable True termIndex ]
@@ -1061,7 +1055,7 @@ viewExportButton glossaryItems exportDropdownVisibility =
         [ class "relative inline-block text-left" ]
         [ div
             []
-            [ Components.Button.white
+            [ Components.Button.white True
                 [ class "w-full"
                 , id ElementIds.exportDropdownButton
                 , Accessibility.Aria.expanded <| exportDropdownVisibility == Visible

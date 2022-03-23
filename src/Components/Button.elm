@@ -1,6 +1,7 @@
 module Components.Button exposing (emptyState, primary, rounded, secondary, text, white)
 
 import Accessibility exposing (..)
+import Accessibility.Key
 import Extras.HtmlTree exposing (HtmlTree(..))
 import Html exposing (Html)
 import Html.Attributes exposing (class)
@@ -31,10 +32,18 @@ secondary =
         [ class "inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300" ]
 
 
-white : List (Attribute msg) -> List (Html msg) -> Html msg
-white =
+white : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
+white enabled =
     withAdditionalAttributes
-        [ class "inline-flex justify-center items-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-indigo-500" ]
+        [ class "inline-flex justify-center items-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 font-medium"
+        , if enabled then
+            class "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-indigo-500"
+
+          else
+            class "text-gray-300 dark:text-slate-600 bg-white dark:bg-slate-900"
+        , Html.Attributes.disabled <| not enabled
+        , Accessibility.Key.tabbable enabled
+        ]
 
 
 text : List (Attribute msg) -> List (Html msg) -> Html msg
@@ -59,4 +68,5 @@ rounded enabled =
           else
             class "opacity-50"
         , Html.Attributes.disabled <| not enabled
+        , Accessibility.Key.tabbable enabled
         ]

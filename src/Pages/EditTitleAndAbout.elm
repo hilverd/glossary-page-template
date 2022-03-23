@@ -343,11 +343,8 @@ viewEditAboutLinks showValidationErrors aboutLinkFieldsArray =
 
 viewAddAboutLinkButtonForEmptyState : Html Msg
 viewAddAboutLinkButtonForEmptyState =
-    button
-        [ Html.Attributes.type_ "button"
-        , class "relative block max-w-lg border-2 border-gray-300 border-dashed rounded-lg p-5 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        , Html.Events.onClick <| PageMsg.Internal AddAboutLink
-        ]
+    Components.Button.emptyState
+        [ Html.Events.onClick <| PageMsg.Internal AddAboutLink ]
         [ Icons.plus
             [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
         , span
@@ -511,7 +508,7 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
             |> Extras.Html.showMaybe (\errorMessage -> errorDiv <| "Failed to save — " ++ errorMessage ++ ".")
         , div
             [ class "flex justify-end" ]
-            [ Components.Button.white
+            [ Components.Button.white True
                 [ Html.Events.onClick <|
                     PageMsg.NavigateToListAll { common | loadedGlossaryItems = Ok glossaryItems }
                 ]
