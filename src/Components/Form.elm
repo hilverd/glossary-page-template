@@ -1,4 +1,4 @@
-module Components.Form exposing (input, inputText)
+module Components.Form exposing (input, inputText, textarea)
 
 import Accessibility exposing (Attribute)
 import Accessibility.Aria
@@ -49,6 +49,34 @@ inputText value_ showValidationErrors validationError additionalAttributes =
             )
         , Extras.Html.showIf (showValidationErrors && validationError /= Nothing) <|
             Accessibility.div
+                [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
+                [ Icons.exclamationCircle
+                    [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
+                ]
+        ]
+
+
+textarea : String -> Bool -> Maybe String -> List (Attribute msg) -> Html msg
+textarea body showValidationErrors validationError additionalAttributes =
+    Html.div []
+        [ Html.div
+            [ class "grow-wrap"
+            , Html.Attributes.attribute "data-replicated-value" <| body ++ "\n"
+            ]
+            [ Accessibility.textarea
+                ([ if not showValidationErrors || validationError == Nothing then
+                    class "shadow-sm w-full rounded-md border border-gray-300 dark:border-gray-500 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+
+                   else
+                    class "shadow-sm w-full rounded-md border-red-300 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500 dark:bg-gray-700"
+                 , Accessibility.Aria.invalid <| validationError /= Nothing
+                 ]
+                    ++ additionalAttributes
+                )
+                [ Html.text body ]
+            ]
+        , Extras.Html.showIf (showValidationErrors && validationError /= Nothing) <|
+            Html.div
                 [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
                 [ Icons.exclamationCircle
                     [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]

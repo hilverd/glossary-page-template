@@ -259,30 +259,15 @@ viewEditAboutParagraph showValidationErrors aboutParagraphField =
                 [ class "sm:flex sm:flex-row sm:items-center" ]
                 [ div
                     [ class "relative block min-w-0 w-full" ]
-                    [ div
-                        [ class "grow-wrap"
-                        , attribute "data-replicated-value" <| aboutParagraphField.body ++ "\n"
+                    [ Components.Form.textarea
+                        aboutParagraphField.body
+                        showValidationErrors
+                        aboutParagraphField.validationError
+                        [ required True
+                        , Accessibility.Aria.label "About"
+                        , Accessibility.Aria.required True
+                        , Html.Events.onInput (PageMsg.Internal << UpdateAboutParagraph)
                         ]
-                        [ textarea
-                            [ if not showValidationErrors || aboutParagraphField.validationError == Nothing then
-                                class "shadow-sm w-full rounded-md border border-gray-300 dark:border-gray-500 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-
-                              else
-                                class "shadow-sm w-full rounded-md border-red-300 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500 dark:bg-gray-700"
-                            , required True
-                            , Accessibility.Aria.label "About"
-                            , Accessibility.Aria.required True
-                            , Accessibility.Aria.invalid <| aboutParagraphField.validationError /= Nothing
-                            , Html.Events.onInput (PageMsg.Internal << UpdateAboutParagraph)
-                            ]
-                            [ text aboutParagraphField.body ]
-                        ]
-                    , Extras.Html.showIf (showValidationErrors && aboutParagraphField.validationError /= Nothing) <|
-                        div
-                            [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
-                            [ Icons.exclamationCircle
-                                [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
-                            ]
                     ]
                 ]
             , Extras.Html.showMaybe
