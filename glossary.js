@@ -74,6 +74,7 @@ function glossaryItemRelatedTermFromDdElement(ddElement) {
 
 const app = Elm.ApplicationShell.init({
     flags: {
+        windowLocationHref: window.location.href,
         titleString: normaliseWhitespace(titleElement.textContent),
         aboutParagraph: aboutParagraph,
         aboutLinks: aboutLinks,

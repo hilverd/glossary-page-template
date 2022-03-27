@@ -13,6 +13,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+
+- The help message for making changes now tries to adapt to custom file names.
+
 ### Fixed
 ### Removed
 

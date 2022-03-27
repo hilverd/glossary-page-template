@@ -1,6 +1,7 @@
-module Extras.Html exposing (nothing, showIf, showMaybe)
+module Extras.Html exposing (inlineCode, nothing, showIf, showMaybe)
 
-import Html exposing (Html)
+import Html exposing (Html, code, span, text)
+import Html.Attributes exposing (class)
 
 
 nothing : Html msg
@@ -22,3 +23,18 @@ showMaybe f maybe =
     maybe
         |> Maybe.map f
         |> Maybe.withDefault nothing
+
+
+inlineCode : String -> Html msg
+inlineCode string =
+    span []
+        [ code
+            [ class "select-none" ]
+            [ text "`" ]
+        , code
+            []
+            [ text string ]
+        , code
+            [ class "select-none" ]
+            [ text "`" ]
+        ]

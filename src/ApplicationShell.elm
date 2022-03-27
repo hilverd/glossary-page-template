@@ -13,6 +13,7 @@ import Pages.CreateOrEdit
 import Pages.EditTitleAndAbout
 import Pages.ListAll
 import Task
+import Url
 
 
 
@@ -46,6 +47,15 @@ type alias Model =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
+        filename =
+            flags
+                |> Decode.decodeValue (Decode.field "windowLocationHref" Decode.string)
+                |> Result.toMaybe
+                |> Maybe.andThen Url.fromString
+                |> Maybe.map .path
+                |> Maybe.andThen (String.split "/" >> List.reverse >> List.head)
+                |> Maybe.withDefault "glossary.html"
+
         title =
             flags
                 |> Decode.decodeValue (Decode.field "titleString" Decode.string)
@@ -79,6 +89,7 @@ init flags =
             Pages.ListAll.init
                 editorIsRunning
                 (CommonModel
+                    filename
                     enableHelpForMakingChanges
                     title
                     aboutParagraph

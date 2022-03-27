@@ -353,8 +353,8 @@ scrollToTopInElement id =
 -- VIEW
 
 
-viewMakingChangesHelp : Bool -> Bool -> Html Msg
-viewMakingChangesHelp tabbable expanded =
+viewMakingChangesHelp : String -> Bool -> Bool -> Html Msg
+viewMakingChangesHelp filename tabbable expanded =
     div
         [ class "mb-5 rounded-md overflow-x-auto bg-amber-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 print:hidden"
         , class <|
@@ -398,29 +398,27 @@ viewMakingChangesHelp tabbable expanded =
                 , pre
                     [ class "mt-5" ]
                     [ code []
-                        [ text "sed -n '/START OF editor.js$/,$p' glossary.html | node" ]
+                        [ text "sed -n '/START OF editor.js$/,$p' "
+                        , text filename
+                        , if filename == "glossary.html" then
+                            text " | node"
+
+                          else
+                            text <| " | FILE=" ++ filename ++ " node"
+                        ]
                     ]
                 , p
                     [ class "mt-5 max-w-xl" ]
-                    [ text "(You'll need to be in the same directory.) This works best if the file is under version control." ]
+                    [ text "This works best if the file is under version control." ]
                 , p
                     [ class "mt-3 max-w-xl" ]
                     [ text "You can hide these instructions altogether by setting the "
-                    , code [] [ text "data-enable-help-for-making-changes" ]
+                    , Extras.Html.inlineCode "data-enable-help-for-making-changes"
                     , text " attribute to "
-                    , code [] [ text "false" ]
+                    , Extras.Html.inlineCode "false"
                     , text " on the "
                     , code [] [ text <| "<div id=\"" ++ ElementIds.container ++ "\">" ]
                     , text " element."
-                    ]
-                , p
-                    [ class "mt-3 max-w-xl" ]
-                    [ text "Custom file names are supported via"
-                    ]
-                , pre
-                    [ class "mt-5" ]
-                    [ code []
-                        [ text "sed -n '/START OF editor.js$/,$p' custom.html | FILE=custom.html node" ]
                     ]
                 ]
         ]
@@ -1234,10 +1232,10 @@ view model =
                                     ]
                                 , case model.makingChanges of
                                     MakingChangesHelpCollapsed ->
-                                        viewMakingChangesHelp noModalDialogShown False
+                                        viewMakingChangesHelp model.common.filename noModalDialogShown False
 
                                     MakingChangesHelpExpanded ->
-                                        viewMakingChangesHelp noModalDialogShown True
+                                        viewMakingChangesHelp model.common.filename noModalDialogShown True
 
                                     _ ->
                                         Extras.Html.nothing

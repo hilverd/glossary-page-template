@@ -13,7 +13,8 @@ type OrderItemsBy
 
 
 type alias CommonModel =
-    { enableHelpForMakingChanges : Bool
+    { filename : String
+    , enableHelpForMakingChanges : Bool
     , title : GlossaryTitle
     , aboutParagraph : String
     , aboutLinks : List AboutLink
