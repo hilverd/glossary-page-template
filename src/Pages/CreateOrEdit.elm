@@ -21,7 +21,7 @@ import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
 import GlossaryItemForm as Form exposing (GlossaryItemForm)
 import Html
-import Html.Attributes exposing (attribute, class, id, required, selected, type_, value)
+import Html.Attributes exposing (class, id, required, selected, value)
 import Html.Events
 import Http
 import Icons

@@ -12,13 +12,13 @@ import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
-import ElementIds exposing (aboutLinkBody)
+import ElementIds
 import Extras.Html
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
 import Html
-import Html.Attributes exposing (attribute, class, for, id, name, placeholder, required, spellcheck, type_, value)
+import Html.Attributes exposing (class, for, id, name, placeholder, required, spellcheck, type_)
 import Html.Events
 import Http
 import Icons
