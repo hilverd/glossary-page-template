@@ -570,7 +570,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms 
                     [ class "flex-auto" ]
                     [ select
                         [ id <| ElementIds.seeAlsoSelect index
-                        , class "mt-1 block w-full pl-3 pr-10 py-2 dark:bg-gray-700 dark:text-gray-200 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
+                        , class "mt-1 block w-full pl-3 pr-10 py-2 dark:bg-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
                         , Accessibility.Aria.label "Related term"
                         , Html.Events.on "change" <|
                             Decode.map (PageMsg.Internal << SelectRelatedTerm index) <|
