@@ -12,7 +12,7 @@ import Svg.Attributes
 
 input : String -> Bool -> Maybe String -> List (Attribute msg) -> Html msg
 input value_ showValidationErrors validationError additionalAttributes =
-    Html.div []
+    Accessibility.div []
         [ Html.input
             ([ class "block w-full border-0 p-0 focus:ring-0 dark:bg-gray-700 dark:text-white"
              , if not showValidationErrors || validationError == Nothing then
@@ -36,7 +36,7 @@ input value_ showValidationErrors validationError additionalAttributes =
 
 inputText : String -> Bool -> Maybe String -> List (Attribute msg) -> Html msg
 inputText value_ showValidationErrors validationError additionalAttributes =
-    Html.div []
+    Accessibility.div []
         [ Accessibility.inputText value_
             ([ if not showValidationErrors || validationError == Nothing then
                 class "w-full min-w-0 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white"
@@ -59,7 +59,7 @@ inputText value_ showValidationErrors validationError additionalAttributes =
 textarea : String -> Bool -> Maybe String -> List (Attribute msg) -> Html msg
 textarea body showValidationErrors validationError additionalAttributes =
     Html.div []
-        [ Html.div
+        [ Accessibility.div
             [ class "grow-wrap max-w-prose"
             , Html.Attributes.attribute "data-replicated-value" <| body ++ "\n"
             ]
@@ -76,7 +76,7 @@ textarea body showValidationErrors validationError additionalAttributes =
                 [ Html.text body ]
             ]
         , Extras.Html.showIf (showValidationErrors && validationError /= Nothing) <|
-            Html.div
+            Accessibility.div
                 [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
                 [ Icons.exclamationCircle
                     [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]

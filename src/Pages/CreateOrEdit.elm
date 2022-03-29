@@ -599,21 +599,21 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms 
                                         )
                                )
                         )
+                    , Extras.Html.showMaybe
+                        (\validationError ->
+                            p
+                                [ class "mt-2 text-red-600 dark:text-red-400" ]
+                                [ text validationError ]
+                        )
+                        (if showValidationErrors then
+                            relatedTerm.validationError
+
+                         else
+                            Nothing
+                        )
                     ]
                 ]
             ]
-        , Extras.Html.showMaybe
-            (\validationError ->
-                p
-                    [ class "mt-2 text-red-600 dark:text-red-400" ]
-                    [ text validationError ]
-            )
-            (if showValidationErrors then
-                relatedTerm.validationError
-
-             else
-                Nothing
-            )
         ]
 
 
