@@ -114,6 +114,9 @@ itemsListingThisTermAsRelated glossaryItemForm =
 validate : GlossaryItemForm -> GlossaryItemForm
 validate form =
     let
+        cannotBeEmptyMessage =
+            "This field can't be empty"
+
         termIdsOutsideSet =
             form |> termsOutside |> List.map .id |> Set.fromList
 
@@ -145,7 +148,7 @@ validate form =
                         { termField
                             | validationError =
                                 if String.isEmpty body then
-                                    Just "This field can't be empty"
+                                    Just cannotBeEmptyMessage
 
                                 else if Set.member termId termIdsOutsideSet then
                                     Just "This term already exists elsewhere"
@@ -173,7 +176,7 @@ validate form =
                         { detailsField
                             | validationError =
                                 if String.isEmpty body then
-                                    Just "This field can't be empty"
+                                    Just cannotBeEmptyMessage
 
                                 else
                                     Nothing

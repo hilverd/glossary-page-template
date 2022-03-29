@@ -85,6 +85,9 @@ aboutLinkFields titleAndAboutForm =
 validate : TitleAndAboutForm -> TitleAndAboutForm
 validate form =
     let
+        cannotBeEmptyMessage =
+            "This field can't be empty"
+
         titleField0 =
             titleField form
 
@@ -98,7 +101,7 @@ validate form =
             { titleField0
                 | validationError =
                     if titleField0 |> .body |> String.trim |> String.isEmpty then
-                        Just "This field can't be empty"
+                        Just cannotBeEmptyMessage
 
                     else
                         Nothing
@@ -108,7 +111,7 @@ validate form =
             { aboutParagraphField0
                 | validationError =
                     if aboutParagraphField0 |> .body |> String.trim |> String.isEmpty then
-                        Just "This field can't be empty"
+                        Just cannotBeEmptyMessage
 
                     else
                         Nothing
@@ -121,7 +124,7 @@ validate form =
                         ( { aboutLinkHref
                             | validationError =
                                 if aboutLinkHref.href |> String.trim |> String.isEmpty then
-                                    Just "This field can't be empty"
+                                    Just cannotBeEmptyMessage
 
                                 else
                                     Nothing
@@ -129,7 +132,7 @@ validate form =
                         , { aboutLinkBody
                             | validationError =
                                 if aboutLinkBody.body |> String.trim |> String.isEmpty then
-                                    Just "This field can't be empty"
+                                    Just cannotBeEmptyMessage
 
                                 else
                                     Nothing
