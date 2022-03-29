@@ -60,7 +60,7 @@ textarea : String -> Bool -> Maybe String -> List (Attribute msg) -> Html msg
 textarea body showValidationErrors validationError additionalAttributes =
     Html.div []
         [ Html.div
-            [ class "grow-wrap"
+            [ class "grow-wrap max-w-prose"
             , Html.Attributes.attribute "data-replicated-value" <| body ++ "\n"
             ]
             [ Accessibility.textarea
