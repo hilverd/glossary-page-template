@@ -8,6 +8,7 @@ import Browser.Dom as Dom
 import CommonModel exposing (CommonModel, OrderItemsBy(..))
 import Components.Button
 import Components.Form
+import Components.SelectMenu
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -21,11 +22,10 @@ import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
 import GlossaryItemForm as Form exposing (GlossaryItemForm)
 import Html
-import Html.Attributes exposing (class, id, required, selected, value)
+import Html.Attributes exposing (class, id, required)
 import Html.Events
 import Http
 import Icons
-import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
 import Set exposing (Set)
 import Svg.Attributes
@@ -544,12 +544,6 @@ viewCreateSeeAlsoSingle showValidationErrors relatedTermsIdReferences allTerms i
 
 viewCreateSeeAlsoSingle1 : Bool -> Set String -> List GlossaryItem.Term -> RelatedTermIndex -> Form.RelatedTermField -> Html Msg
 viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
-    let
-        pleaseSelectOption =
-            option
-                [ value "" ]
-                [ text "--- Please select ---" ]
-    in
     div
         []
         [ div
@@ -566,52 +560,27 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms 
                             [ Svg.Attributes.class "h-5 w-5" ]
                         ]
                     ]
-                , div
-                    [ class "flex-auto" ]
-                    [ select
-                        [ id <| ElementIds.seeAlsoSelect index
-                        , class "mt-1 block w-full pl-3 pr-10 py-2 dark:bg-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
-                        , Accessibility.Aria.label "Related term"
-                        , Html.Events.on "change" <|
-                            Decode.map (PageMsg.Internal << SelectRelatedTerm index) <|
-                                Decode.andThen Decode.succeed Html.Events.targetValue
-                        ]
-                        ((if relatedTerm.idReference == Nothing then
-                            [ pleaseSelectOption ]
-
-                          else
-                            []
-                         )
-                            ++ (allTerms
-                                    |> List.filter
-                                        (\term ->
-                                            (not <| Set.member term.id relatedTermsIdReferences)
-                                                || Just term.id
-                                                == relatedTerm.idReference
-                                        )
-                                    |> List.map
-                                        (\term ->
-                                            option
-                                                [ value term.id
-                                                , selected <| Just term.id == relatedTerm.idReference
-                                                ]
-                                                [ text term.body ]
-                                        )
-                               )
-                        )
-                    , Extras.Html.showMaybe
-                        (\validationError ->
-                            p
-                                [ class "mt-2 text-red-600 dark:text-red-400" ]
-                                [ text validationError ]
-                        )
-                        (if showValidationErrors then
-                            relatedTerm.validationError
-
-                         else
-                            Nothing
-                        )
+                , Components.SelectMenu.render
+                    [ Components.SelectMenu.id <| ElementIds.seeAlsoSelect index
+                    , Components.SelectMenu.ariaLabel "Related term"
+                    , Components.SelectMenu.validationError relatedTerm.validationError
+                    , Components.SelectMenu.showValidationErrors showValidationErrors
+                    , Components.SelectMenu.onChange (PageMsg.Internal << SelectRelatedTerm index)
                     ]
+                    (allTerms
+                        |> List.filter
+                            (\term ->
+                                (not <| Set.member term.id relatedTermsIdReferences)
+                                    || (Just term.id == relatedTerm.idReference)
+                            )
+                        |> List.map
+                            (\term ->
+                                Components.SelectMenu.Choice
+                                    term.id
+                                    term.body
+                                    (Just term.id == relatedTerm.idReference)
+                            )
+                    )
                 ]
             ]
         ]
