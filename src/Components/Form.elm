@@ -3,7 +3,6 @@ module Components.Form exposing (input, inputText, textarea)
 import Accessibility exposing (Attribute)
 import Accessibility.Aria
 import Extras.Html
-import Extras.HtmlTree exposing (HtmlTree(..))
 import Html exposing (Html)
 import Html.Attributes exposing (class)
 import Icons
@@ -39,7 +38,7 @@ inputText value_ showValidationErrors validationError additionalAttributes =
     Accessibility.div []
         [ Accessibility.inputText value_
             ([ if not showValidationErrors || validationError == Nothing then
-                class "w-full min-w-0 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white"
+                class "w-full min-w-0 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
 
                else
                 class "w-full min-w-0 rounded-md border-red-300 dark:border-red-700 dark:bg-gray-700 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500"
