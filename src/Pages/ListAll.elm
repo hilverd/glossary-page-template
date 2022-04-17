@@ -8,6 +8,7 @@ import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
 import Components.Button
+import Components.DropdownMenu
 import Data.AboutLink as AboutLink
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
@@ -47,10 +48,6 @@ type alias MenuForMobileVisibility =
     GradualVisibility
 
 
-type alias ExportDropdownVisibility =
-    GradualVisibility
-
-
 type MakingChanges
     = NoHelpForMakingChanges
     | ReadyForMakingChanges
@@ -62,7 +59,7 @@ type alias Model =
     { common : CommonModel
     , makingChanges : MakingChanges
     , menuForMobileVisibility : MenuForMobileVisibility
-    , exportDropdownVisibility : ExportDropdownVisibility
+    , exportDropdownMenu : Components.DropdownMenu.Model Msg
     , confirmDeleteIndex : Maybe GlossaryItemIndex
     , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
     }
@@ -74,9 +71,7 @@ type InternalMsg
     | ShowMenuForMobile
     | StartHidingMenuForMobile
     | CompleteHidingMenuForMobile
-    | ShowExportDropdown
-    | StartHidingExportDropdown
-    | CompleteHidingExportDropdown
+    | ExportDropdownMenuMsg Components.DropdownMenu.Msg
     | ConfirmDelete GlossaryItemIndex
     | CancelDelete
     | Delete GlossaryItemIndex
@@ -105,7 +100,9 @@ init editorIsRunning commonModel =
                     NoHelpForMakingChanges
       , common = commonModel
       , menuForMobileVisibility = Invisible
-      , exportDropdownVisibility = Invisible
+      , exportDropdownMenu =
+            Components.DropdownMenu.init
+                [ Components.DropdownMenu.id ElementIds.exportDropdownButton ]
       , confirmDeleteIndex = Nothing
       , errorWhileDeleting = Nothing
       }
@@ -172,16 +169,12 @@ update msg model =
         CompleteHidingMenuForMobile ->
             ( { model | menuForMobileVisibility = Invisible }, Cmd.none )
 
-        ShowExportDropdown ->
-            ( { model | exportDropdownVisibility = Visible }, Cmd.none )
-
-        StartHidingExportDropdown ->
-            ( { model | exportDropdownVisibility = Disappearing }
-            , Process.sleep 100 |> Task.perform (always <| PageMsg.Internal CompleteHidingExportDropdown)
-            )
-
-        CompleteHidingExportDropdown ->
-            ( { model | exportDropdownVisibility = Invisible }, Cmd.none )
+        ExportDropdownMenuMsg msg_ ->
+            Components.DropdownMenu.update
+                (\x -> { model | exportDropdownMenu = x })
+                (PageMsg.Internal << ExportDropdownMenuMsg)
+                msg_
+                model.exportDropdownMenu
 
         ConfirmDelete index ->
             ( { model | confirmDeleteIndex = Just index }, preventBackgroundScrolling () )
@@ -1005,8 +998,8 @@ viewStaticSidebarForDesktop tabbable termIndex =
         ]
 
 
-viewTopBar : GlossaryItems -> GradualVisibility -> Html Msg
-viewTopBar glossaryItems exportDropdownVisibility =
+viewTopBar : GlossaryItems -> Components.DropdownMenu.Model Msg -> Html Msg
+viewTopBar glossaryItems exportDropdownMenu =
     div
         [ class "sticky top-0 z-10 shrink-0 flex justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
         [ div
@@ -1043,82 +1036,20 @@ viewTopBar glossaryItems exportDropdownVisibility =
             ]
         , div
             [ class "flex pr-4" ]
-            [ viewExportButton glossaryItems exportDropdownVisibility ]
+            [ viewExportButton glossaryItems exportDropdownMenu ]
         ]
 
 
-viewExportButton : GlossaryItems -> GradualVisibility -> Html Msg
-viewExportButton glossaryItems exportDropdownVisibility =
-    div
-        [ class "relative inline-block text-left" ]
-        [ div
-            []
-            [ Components.Button.white True
-                [ class "w-full"
-                , id ElementIds.exportDropdownButton
-                , Accessibility.Aria.expanded <| exportDropdownVisibility == Visible
-                , Accessibility.Aria.hasMenuPopUp
-                , Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <|
-                    PageMsg.Internal
-                        (case exportDropdownVisibility of
-                            Visible ->
-                                StartHidingExportDropdown
-
-                            Disappearing ->
-                                NoOp
-
-                            Invisible ->
-                                ShowExportDropdown
-                        )
-                , Extras.HtmlEvents.onKeydown
-                    (\code ->
-                        if code == Extras.HtmlEvents.enter then
-                            Just <| PageMsg.Internal NoOp
-
-                        else if code == Extras.HtmlEvents.escape then
-                            Just <| PageMsg.Internal StartHidingExportDropdown
-
-                        else
-                            Nothing
-                    )
-                ]
-                [ text "Export"
-                , Icons.chevronDown
-                    [ Svg.Attributes.class "-mr-1 ml-2 h-5 w-5" ]
-                ]
-            ]
-        , div
-            [ Accessibility.Aria.labelledBy ElementIds.exportDropdownButton
-            , Accessibility.Aria.orientationVertical
-            , class "origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-600 ring-opacity-5 divide-y divide-gray-100 focus:outline-none"
-            , class "hidden" |> Extras.HtmlAttribute.showIf (exportDropdownVisibility == Invisible)
-            , if exportDropdownVisibility == Visible then
-                class "transition ease-out duration-100 transform opacity-100 scale-100"
-
-              else
-                class "transition ease-in duration-75 transform opacity-0 scale-95"
-            , Accessibility.Role.menu
-            , Accessibility.Key.tabbable False
-            ]
-            [ div
-                [ class "py-1"
-                , attribute "role" "none"
-                ]
-                [ Html.a
-                    [ class "group flex items-center px-4 py-2 hover:no-underline text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900"
-                    , href "#"
-                    , id <| ElementIds.exportDropdownMenuItem 0
-                    , Accessibility.Role.menuItem
-                    , Accessibility.Key.tabbable False
-                    , Extras.HtmlEvents.onClickPreventDefault <|
-                        PageMsg.Internal <|
-                            DownloadMarkdown glossaryItems
-                    ]
-                    [ -- Maybe add an SVG icon here.
-                      text "Markdown"
-                    ]
-                ]
-            ]
+viewExportButton : GlossaryItems -> Components.DropdownMenu.Model Msg -> Html Msg
+viewExportButton glossaryItems exportDropdownMenu =
+    Components.DropdownMenu.view
+        (PageMsg.Internal << ExportDropdownMenuMsg)
+        exportDropdownMenu
+        [ text "Export" ]
+        [ { id = ElementIds.exportDropdownMenuItem 0
+          , body = [ text "Markdown" ]
+          , onSelect = PageMsg.Internal <| DownloadMarkdown glossaryItems
+          }
         ]
 
 
@@ -1210,13 +1141,15 @@ view model =
                             else
                                 Nothing
                         )
-                    , Html.Events.onClick <| PageMsg.Internal StartHidingExportDropdown
+                    , Html.Events.onClick <|
+                        PageMsg.Internal <|
+                            ExportDropdownMenuMsg Components.DropdownMenu.hide
                     ]
                     [ viewMenuForMobile model noModalDialogShown termIndex
                     , viewStaticSidebarForDesktop noModalDialogShown termIndex
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
-                        [ viewTopBar glossaryItems model.exportDropdownVisibility
+                        [ viewTopBar glossaryItems model.exportDropdownMenu
                         , div
                             [ Html.Attributes.id ElementIds.container ]
                             [ header []
@@ -1228,7 +1161,7 @@ view model =
                                             [ viewEditTitleAndAboutButton noModalDialogShown model.common ]
                                     , div
                                         [ class "hidden lg:block ml-auto pb-3" ]
-                                        [ viewExportButton glossaryItems model.exportDropdownVisibility ]
+                                        [ viewExportButton glossaryItems model.exportDropdownMenu ]
                                     ]
                                 , case model.makingChanges of
                                     MakingChangesHelpCollapsed ->
