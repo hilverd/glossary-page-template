@@ -23,7 +23,7 @@ import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
 import Html
-import Html.Attributes exposing (attribute, class, for, href, id, target)
+import Html.Attributes exposing (class, for, href, id, target)
 import Html.Events
 import Http
 import Icons

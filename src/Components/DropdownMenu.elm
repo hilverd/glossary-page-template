@@ -12,7 +12,7 @@ import Html
 import Html.Attributes exposing (attribute, class, href)
 import Icons
 import Process
-import Svg.Attributes exposing (fill, height, stroke, width)
+import Svg.Attributes
 import Task
 
 
