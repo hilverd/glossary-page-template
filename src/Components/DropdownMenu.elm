@@ -1,15 +1,17 @@
-module Components.DropdownMenu exposing (Choice, Model, Msg, hide, id, init, update, view)
+module Components.DropdownMenu exposing (Choice, Model, Msg, choice, hidden, hide, id, init, update, view)
 
 import Accessibility exposing (..)
 import Accessibility.Aria
 import Accessibility.Key
 import Accessibility.Role
+import Array
 import Components.Button
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.HtmlTree exposing (HtmlTree(..))
 import Html
 import Html.Attributes exposing (attribute, class, href)
+import Html.Events
 import Icons
 import Process
 import Svg.Attributes
@@ -26,27 +28,31 @@ type GradualVisibility
     | Invisible
 
 
-type Model parentMsg
+type Model
     = Model
         { visibility : GradualVisibility
         , config : Config
+        , activeChoice : Maybe ChoiceIndex
         }
 
 
-init : List (Property parentMsg) -> Model parentMsg
+hidden : Model -> Model
+hidden model =
+    case model of
+        Model model_ ->
+            Model { model_ | visibility = Invisible }
+
+
+init : List (Property parentMsg) -> Model
 init properties =
     Model
         { visibility = Invisible
         , config = configFromProperties properties
+        , activeChoice = Nothing
         }
 
 
-innerModel :
-    Model parentMsg
-    ->
-        { visibility : GradualVisibility
-        , config : Config
-        }
+innerModel : Model -> { visibility : GradualVisibility, config : Config, activeChoice : Maybe ChoiceIndex }
 innerModel model =
     case model of
         Model model_ ->
@@ -62,6 +68,8 @@ type Msg
     | Show
     | StartHiding
     | CompleteHiding
+    | MakeChoiceActive ChoiceIndex
+    | MakeChoiceInactive ChoiceIndex
 
 
 hide : Msg
@@ -69,12 +77,7 @@ hide =
     StartHiding
 
 
-update :
-    (Model parentMsg -> parentModel)
-    -> (Msg -> parentMsg)
-    -> Msg
-    -> Model parentMsg
-    -> ( parentModel, Cmd parentMsg )
+update : (Model -> parentModel) -> (Msg -> parentMsg) -> Msg -> Model -> ( parentModel, Cmd parentMsg )
 update updateParentModel toParentMsg msg model =
     let
         model_ =
@@ -86,15 +89,30 @@ update updateParentModel toParentMsg msg model =
                     ( model_, Cmd.none )
 
                 Show ->
-                    ( { model_ | visibility = Visible }, Cmd.none )
+                    ( { model_ | visibility = Visible, activeChoice = Nothing }, Cmd.none )
 
                 StartHiding ->
-                    ( { model_ | visibility = Disappearing }
+                    ( { model_ | visibility = Disappearing, activeChoice = Nothing }
                     , Process.sleep 100 |> Task.perform (always CompleteHiding)
                     )
 
                 CompleteHiding ->
-                    ( { model_ | visibility = Invisible }, Cmd.none )
+                    ( { model_ | visibility = Invisible, activeChoice = Nothing }, Cmd.none )
+
+                MakeChoiceActive choiceIndex ->
+                    ( { model_ | activeChoice = Just choiceIndex }, Cmd.none )
+
+                MakeChoiceInactive choiceIndex ->
+                    ( { model_
+                        | activeChoice =
+                            if model_.activeChoice == Just choiceIndex then
+                                Nothing
+
+                            else
+                                model_.activeChoice
+                      }
+                    , Cmd.none
+                    )
     in
     ( updateParentModel <| Model model1, Cmd.map toParentMsg cmd )
 
@@ -112,11 +130,20 @@ type alias Config =
     }
 
 
-type alias Choice parentMsg =
-    { id : String
-    , body : List (Html parentMsg)
-    , onSelect : parentMsg
-    }
+type alias ChoiceIndex =
+    Int
+
+
+type Choice parentMsg
+    = Choice
+        { body : List (Html parentMsg)
+        , onSelect : parentMsg
+        }
+
+
+choice : List (Html parentMsg) -> parentMsg -> Choice parentMsg
+choice body onSelect =
+    Choice { body = body, onSelect = onSelect }
 
 
 id : String -> Property msg
@@ -137,11 +164,11 @@ configFromProperties =
 
 view :
     (Msg -> parentMsg)
-    -> Model parentMsg
+    -> Model
     -> List (Html parentMsg)
     -> List (Choice parentMsg)
     -> Html parentMsg
-view toParentMsg model body choices =
+view toParentMsg model body_ choices =
     let
         model_ =
             innerModel model
@@ -171,18 +198,80 @@ view toParentMsg model body choices =
                                 Show
                 , Extras.HtmlEvents.onKeydown
                     (\code ->
-                        Maybe.map toParentMsg <|
-                            if code == Extras.HtmlEvents.enter then
-                                Just NoOp
+                        if code == Extras.HtmlEvents.enter then
+                            Just <|
+                                case model_.visibility of
+                                    Visible ->
+                                        case model_.activeChoice of
+                                            Just active ->
+                                                choices
+                                                    |> Array.fromList
+                                                    |> Array.get active
+                                                    |> Maybe.map
+                                                        (\choice_ ->
+                                                            case choice_ of
+                                                                Choice { onSelect } ->
+                                                                    onSelect
+                                                        )
+                                                    |> Maybe.withDefault (toParentMsg NoOp)
 
-                            else if code == Extras.HtmlEvents.escape then
-                                Just StartHiding
+                                            Nothing ->
+                                                toParentMsg StartHiding
 
-                            else
-                                Nothing
+                                    Disappearing ->
+                                        toParentMsg NoOp
+
+                                    Invisible ->
+                                        toParentMsg Show
+
+                        else if code == Extras.HtmlEvents.escape then
+                            Just <| toParentMsg StartHiding
+
+                        else if code == Extras.HtmlEvents.downArrow then
+                            let
+                                numberOfChoices =
+                                    List.length choices
+                            in
+                            Just <|
+                                case model_.activeChoice of
+                                    Just active ->
+                                        toParentMsg <| MakeChoiceActive <| remainderBy numberOfChoices (active + 1)
+
+                                    Nothing ->
+                                        if numberOfChoices > 0 then
+                                            toParentMsg <| MakeChoiceActive 0
+
+                                        else
+                                            toParentMsg NoOp
+
+                        else if code == Extras.HtmlEvents.upArrow then
+                            let
+                                numberOfChoices =
+                                    List.length choices
+                            in
+                            Just <|
+                                case model_.activeChoice of
+                                    Just active ->
+                                        toParentMsg <|
+                                            MakeChoiceActive <|
+                                                if active == 0 then
+                                                    numberOfChoices - 1
+
+                                                else
+                                                    active - 1
+
+                                    Nothing ->
+                                        if numberOfChoices > 0 then
+                                            toParentMsg <| MakeChoiceActive <| numberOfChoices - 1
+
+                                        else
+                                            toParentMsg <| NoOp
+
+                        else
+                            Nothing
                     )
                 ]
-                (body
+                (body_
                     ++ [ Icons.chevronDown
                             [ Svg.Attributes.class "-mr-1 ml-2 h-5 w-5" ]
                        ]
@@ -206,17 +295,25 @@ view toParentMsg model body choices =
                 , attribute "role" "none"
                 ]
                 (choices
-                    |> List.map
-                        (\choice ->
-                            Html.a
-                                [ class "group flex items-center px-4 py-2 hover:no-underline text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900"
-                                , href "#"
-                                , Html.Attributes.id choice.id
-                                , Accessibility.Role.menuItem
-                                , Accessibility.Key.tabbable False
-                                , Extras.HtmlEvents.onClickPreventDefault choice.onSelect
-                                ]
-                                choice.body
+                    |> List.indexedMap
+                        (\choiceIndex choice_ ->
+                            case choice_ of
+                                Choice { body, onSelect } ->
+                                    Html.a
+                                        [ class "group flex items-center px-4 py-2 hover:no-underline"
+                                        , if model_.activeChoice == Just choiceIndex then
+                                            class "text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-900"
+
+                                          else
+                                            class "text-gray-700 dark:text-gray-300"
+                                        , href "#"
+                                        , Accessibility.Role.menuItem
+                                        , Accessibility.Key.tabbable False
+                                        , Extras.HtmlEvents.onClickPreventDefault onSelect
+                                        , Html.Events.onMouseEnter <| toParentMsg <| MakeChoiceActive choiceIndex
+                                        , Html.Events.onMouseLeave <| toParentMsg <| MakeChoiceInactive choiceIndex
+                                        ]
+                                        body
                         )
                 )
             ]

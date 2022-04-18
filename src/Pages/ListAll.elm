@@ -59,7 +59,7 @@ type alias Model =
     { common : CommonModel
     , makingChanges : MakingChanges
     , menuForMobileVisibility : MenuForMobileVisibility
-    , exportDropdownMenu : Components.DropdownMenu.Model Msg
+    , exportDropdownMenu : Components.DropdownMenu.Model
     , confirmDeleteIndex : Maybe GlossaryItemIndex
     , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
     }
@@ -274,12 +274,14 @@ update msg model =
             )
 
         DownloadMarkdown glossaryItems ->
-            ( model
-            , Export.Markdown.download
-                model.common.title
-                model.common.aboutParagraph
-                model.common.aboutLinks
-                glossaryItems
+            ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
+            , Cmd.batch
+                [ Export.Markdown.download
+                    model.common.title
+                    model.common.aboutParagraph
+                    model.common.aboutLinks
+                    glossaryItems
+                ]
             )
 
 
@@ -998,7 +1000,7 @@ viewStaticSidebarForDesktop tabbable termIndex =
         ]
 
 
-viewTopBar : GlossaryItems -> Components.DropdownMenu.Model Msg -> Html Msg
+viewTopBar : GlossaryItems -> Components.DropdownMenu.Model -> Html Msg
 viewTopBar glossaryItems exportDropdownMenu =
     div
         [ class "sticky top-0 z-10 shrink-0 flex justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
@@ -1040,16 +1042,15 @@ viewTopBar glossaryItems exportDropdownMenu =
         ]
 
 
-viewExportButton : GlossaryItems -> Components.DropdownMenu.Model Msg -> Html Msg
+viewExportButton : GlossaryItems -> Components.DropdownMenu.Model -> Html Msg
 viewExportButton glossaryItems exportDropdownMenu =
     Components.DropdownMenu.view
         (PageMsg.Internal << ExportDropdownMenuMsg)
         exportDropdownMenu
         [ text "Export" ]
-        [ { id = ElementIds.exportDropdownMenuItem 0
-          , body = [ text "Markdown" ]
-          , onSelect = PageMsg.Internal <| DownloadMarkdown glossaryItems
-          }
+        [ Components.DropdownMenu.choice
+            [ text "Markdown" ]
+            (PageMsg.Internal <| DownloadMarkdown glossaryItems)
         ]
 
 

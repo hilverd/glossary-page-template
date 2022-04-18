@@ -6,7 +6,6 @@ module ElementIds exposing
     , container
     , descriptionDetailsSingle
     , exportDropdownButton
-    , exportDropdownMenuItem
     , glossaryItemDiv
     , indexForMobile
     , items
@@ -146,11 +145,6 @@ aboutLinkBody index =
 exportDropdownButton : String
 exportDropdownButton =
     prefixed "export-dropdown-button"
-
-
-exportDropdownMenuItem : Int -> String
-exportDropdownMenuItem index =
-    prefixed <| "export-dropdown-menu-item-" ++ String.fromInt index
 
 
 abbreviationLabel : TermIndex -> String
