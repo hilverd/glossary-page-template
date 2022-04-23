@@ -17,6 +17,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - The help message for making changes now tries to adapt to custom file names.
 
 ### Fixed
+
+- Make highlighting anchors work better on Safari.
+
 ### Removed
 
 ## [1.2.0] - 2022-03-18

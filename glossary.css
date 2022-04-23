@@ -54,7 +54,7 @@
   }
 
   article#glossary-page-items dl dt dfn {
-    @apply not-italic print:italic scroll-mt-24;
+    @apply not-italic print:italic pt-24 -mt-24;
   }
 
   article#glossary-page-items dl dd {
@@ -74,7 +74,8 @@
   }
 
   :target {
-    @apply bg-amber-100 dark:bg-pink-900;
+    text-decoration-line: underline overline;
+    @apply decoration-4 underline-offset-2 decoration-amber-400 dark:decoration-pink-900;
   }
 
   dt span.silcrow {
