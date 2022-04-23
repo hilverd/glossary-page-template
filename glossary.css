@@ -58,6 +58,10 @@
     @apply not-italic print:italic pt-24 -mt-24;
   }
 
+  article#glossary-page-items dfn {
+    @apply -z-10;
+  }
+
   article#glossary-page-items dl dd {
     @apply mt-1 print:mt-0 py-2 print:py-0 text-gray-600 dark:text-gray-300 print:text-black;
   }
