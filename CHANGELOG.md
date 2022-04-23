@@ -18,6 +18,10 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ## [1.2.1] - 2022-04-23
 
+### Added
+
+- On Chrome and Firefox, make enter, escape and arrow keys work for dropdown menu.
+
 ### Changed
 
 - The help message for making changes now tries to adapt to custom file names.
