@@ -1142,9 +1142,10 @@ view model =
                             else
                                 Nothing
                         )
-                    , Html.Events.onClick <|
-                        PageMsg.Internal <|
-                            ExportDropdownMenuMsg Components.DropdownMenu.hide
+                    , Extras.HtmlAttribute.showIf (Components.DropdownMenu.visible model.exportDropdownMenu) <|
+                        Html.Events.onClick <|
+                            PageMsg.Internal <|
+                                ExportDropdownMenuMsg Components.DropdownMenu.hide
                     ]
                     [ viewMenuForMobile model noModalDialogShown termIndex
                     , viewStaticSidebarForDesktop noModalDialogShown termIndex

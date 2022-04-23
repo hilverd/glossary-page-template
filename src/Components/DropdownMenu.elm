@@ -1,4 +1,4 @@
-module Components.DropdownMenu exposing (Choice, Model, Msg, choice, hidden, hide, id, init, update, view)
+module Components.DropdownMenu exposing (Choice, Model, Msg, choice, hidden, hide, id, init, update, view, visible)
 
 import Accessibility exposing (..)
 import Accessibility.Aria
@@ -70,6 +70,13 @@ type Msg
     | CompleteHiding
     | MakeChoiceActive ChoiceIndex
     | MakeChoiceInactive ChoiceIndex
+
+
+visible : Model -> Bool
+visible =
+    innerModel
+        >> .visibility
+        >> (/=) Invisible
 
 
 hide : Msg
