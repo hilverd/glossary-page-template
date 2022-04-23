@@ -48,7 +48,8 @@ lines =
 
 paragraphs : List String -> String
 paragraphs =
-    String.join "\n\n"
+    List.filter (not << String.isEmpty)
+        >> String.join "\n\n"
 
 
 itemToMarkdown : GlossaryItem -> String
