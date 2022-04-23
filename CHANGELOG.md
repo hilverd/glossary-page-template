@@ -13,6 +13,12 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+### Fixed
+### Removed
+
+## [1.2.1] - 2022-04-23
+
+### Changed
 
 - The help message for making changes now tries to adapt to custom file names.
 
@@ -20,8 +26,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 - Make highlighting anchors work better on Safari.
 - Remove superfluous empty lines when exporting to Markdown.
-
-### Removed
 
 ## [1.2.0] - 2022-03-18
 
@@ -226,7 +230,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/hilverd/glossary-page-template/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/hilverd/glossary-page-template/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/hilverd/glossary-page-template/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/hilverd/glossary-page-template/compare/v1.0.0...v1.1.0
