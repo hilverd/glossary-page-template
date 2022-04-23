@@ -1061,7 +1061,7 @@ viewOrderItemsBy model =
             model.confirmDeleteIndex == Nothing
     in
     div
-        [ class "print:hidden pt-4 pb-6" ]
+        [ class "print:hidden pt-4 pb-6 z-10" ]
         [ label
             [ class "font-medium text-gray-900 dark:text-gray-100" ]
             [ text "Order items" ]
