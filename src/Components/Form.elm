@@ -60,7 +60,7 @@ textarea body showValidationErrors validationError additionalAttributes =
     Html.div []
         [ Accessibility.div
             [ class "grow-wrap max-w-prose"
-            , Html.Attributes.attribute "data-replicated-value" <| body ++ "\n"
+            , Html.Attributes.attribute "data-replicated-value" <| body ++ "\n\n"
             ]
             [ Accessibility.textarea
                 ([ if not showValidationErrors || validationError == Nothing then
