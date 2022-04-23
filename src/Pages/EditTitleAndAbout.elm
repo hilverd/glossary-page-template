@@ -1,4 +1,4 @@
-module Pages.EditTitleAndAbout exposing (Model, Msg, init, update, view)
+module Pages.EditTitleAndAbout exposing (Model, Msg, init, subscriptions, update, view)
 
 import Accessibility exposing (..)
 import Accessibility.Aria
@@ -518,3 +518,12 @@ view model =
             { title = "Glossary"
             , body = [ text "Something went wrong." ]
             }
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none

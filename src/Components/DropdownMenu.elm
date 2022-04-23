@@ -1,10 +1,11 @@
-module Components.DropdownMenu exposing (Choice, Model, Msg, choice, hidden, hide, id, init, update, view, visible)
+module Components.DropdownMenu exposing (Choice, Model, Msg, choice, hidden, id, init, subscriptions, update, view, visible)
 
 import Accessibility exposing (..)
 import Accessibility.Aria
 import Accessibility.Key
 import Accessibility.Role
 import Array
+import Browser.Events as Events
 import Components.Button
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
@@ -13,6 +14,7 @@ import Html
 import Html.Attributes exposing (attribute, class, href)
 import Html.Events
 import Icons
+import Json.Decode as Decode
 import Process
 import Svg.Attributes
 import Task
@@ -77,11 +79,6 @@ visible =
     innerModel
         >> .visibility
         >> (/=) Invisible
-
-
-hide : Msg
-hide =
-    StartHiding
 
 
 update : (Model -> parentModel) -> (Msg -> parentMsg) -> Msg -> Model -> ( parentModel, Cmd parentMsg )
@@ -325,3 +322,12 @@ view toParentMsg model body_ choices =
                 )
             ]
         ]
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    if model |> innerModel |> .visibility |> (==) Visible then
+        Events.onClick <| Decode.succeed StartHiding
+
+    else
+        Sub.none

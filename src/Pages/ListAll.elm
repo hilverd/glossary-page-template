@@ -1,4 +1,4 @@
-port module Pages.ListAll exposing (Model, Msg, init, update, view)
+port module Pages.ListAll exposing (Model, Msg, init, subscriptions, update, view)
 
 import Accessibility exposing (..)
 import Accessibility.Aria
@@ -6,6 +6,7 @@ import Accessibility.Key exposing (tabbable)
 import Accessibility.Role
 import Browser exposing (Document)
 import Browser.Dom as Dom
+import Browser.Events as Events
 import CommonModel exposing (CommonModel)
 import Components.Button
 import Components.DropdownMenu
@@ -1061,7 +1062,7 @@ viewOrderItemsBy model =
             model.confirmDeleteIndex == Nothing
     in
     div
-        [ class "print:hidden pt-4 pb-6 z-10" ]
+        [ class "print:hidden pt-4 pb-6" ]
         [ label
             [ class "font-medium text-gray-900 dark:text-gray-100" ]
             [ text "Order items" ]
@@ -1142,10 +1143,6 @@ view model =
                             else
                                 Nothing
                         )
-                    , Extras.HtmlAttribute.showIf (Components.DropdownMenu.visible model.exportDropdownMenu) <|
-                        Html.Events.onClick <|
-                            PageMsg.Internal <|
-                                ExportDropdownMenuMsg Components.DropdownMenu.hide
                     ]
                     [ viewMenuForMobile model noModalDialogShown termIndex
                     , viewStaticSidebarForDesktop noModalDialogShown termIndex
@@ -1212,3 +1209,15 @@ view model =
                     ]
                 ]
             }
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ Components.DropdownMenu.subscriptions model.exportDropdownMenu
+            |> Sub.map (ExportDropdownMenuMsg >> PageMsg.Internal)
+        ]

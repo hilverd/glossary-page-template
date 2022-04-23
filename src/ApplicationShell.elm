@@ -246,5 +246,13 @@ view model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
-    Sub.none
+subscriptions model =
+    case model of
+        ListAll page ->
+            page |> Pages.ListAll.subscriptions |> Sub.map ListAllMsg
+
+        CreateOrEdit page ->
+            page |> Pages.CreateOrEdit.subscriptions |> Sub.map CreateOrEditMsg
+
+        EditTitleAndAbout page ->
+            page |> Pages.EditTitleAndAbout.subscriptions |> Sub.map EditTitleAndAboutMsg
