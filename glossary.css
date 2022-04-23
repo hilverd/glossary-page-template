@@ -54,6 +54,7 @@
   }
 
   article#glossary-page-items dl dt dfn {
+    /* The "pt-24 -mt-24" below is a hack as WebKit/Safari doesn't seem to support scroll-mt-24 */
     @apply not-italic print:italic pt-24 -mt-24;
   }
 
