@@ -41,15 +41,20 @@ horizontalRule =
     "---------"
 
 
+crlf : String
+crlf =
+    "\u{000D}\n"
+
+
 lines : List String -> String
 lines =
-    String.join "\n"
+    String.join crlf
 
 
 paragraphs : List String -> String
 paragraphs =
     List.filter (not << String.isEmpty)
-        >> String.join "\n\n"
+        >> String.join (crlf ++ crlf)
 
 
 itemToMarkdown : GlossaryItem -> String

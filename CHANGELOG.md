@@ -17,6 +17,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Roll back v1.2.1's hacks to work around Webkit/Safari's lack of support for `scroll-margin-top`. These were causing too many other issues.
 
 ### Fixed
+
+- When exporting to Markdown, use CRLF for line breaks to support Windows.
+
 ### Removed
 
 ## [1.2.1] - 2022-04-23
