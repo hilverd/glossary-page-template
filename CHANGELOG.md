@@ -13,14 +13,18 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+### Fixed
+### Removed
+
+## [1.2.2] - 2022-04-24
+
+### Changed
 
 - Roll back v1.2.1's hacks to work around Webkit/Safari's lack of support for `scroll-margin-top`. These were causing too many other issues.
 
 ### Fixed
 
 - When exporting to Markdown, use CRLF for line breaks to support Windows.
-
-### Removed
 
 ## [1.2.1] - 2022-04-23
 
@@ -240,7 +244,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.2.2...HEAD
+[1.2.2]: https://github.com/hilverd/glossary-page-template/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/hilverd/glossary-page-template/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/hilverd/glossary-page-template/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/hilverd/glossary-page-template/compare/v1.1.0...v1.1.1
