@@ -54,7 +54,6 @@ init flags =
                 |> Maybe.andThen Url.fromString
                 |> Maybe.map .path
                 |> Maybe.andThen (String.split "/" >> List.reverse >> List.head)
-                |> Maybe.withDefault "glossary.html"
 
         title =
             flags

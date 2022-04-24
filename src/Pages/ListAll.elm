@@ -349,7 +349,7 @@ scrollToTopInElement id =
 -- VIEW
 
 
-viewMakingChangesHelp : String -> Bool -> Bool -> Html Msg
+viewMakingChangesHelp : Maybe String -> Bool -> Bool -> Html Msg
 viewMakingChangesHelp filename tabbable expanded =
     div
         [ class "mb-5 rounded-md overflow-x-auto bg-amber-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 print:hidden"
@@ -393,14 +393,18 @@ viewMakingChangesHelp filename tabbable expanded =
                     ]
                 , pre
                     [ class "mt-5" ]
-                    [ code []
+                    [ code [] <|
+                        let
+                            defaultFilename =
+                                "glossary.html"
+                        in
                         [ text "sed -n '/START OF editor.js$/,$p' "
-                        , text filename
-                        , if filename == "glossary.html" then
+                        , text <| Maybe.withDefault defaultFilename filename
+                        , if filename == Just defaultFilename then
                             text " | node"
 
                           else
-                            text <| " | FILE=" ++ filename ++ " node"
+                            text <| " | FILE=" ++ (filename |> Maybe.withDefault defaultFilename) ++ " node"
                         ]
                     ]
                 , p
