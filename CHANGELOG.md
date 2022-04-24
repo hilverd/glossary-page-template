@@ -13,6 +13,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+
+- Roll back v1.2.1's hacks to work around Webkit/Safari's lack of support for `scroll-margin-top`. These were causing too many other issues.
+
 ### Fixed
 ### Removed
 
