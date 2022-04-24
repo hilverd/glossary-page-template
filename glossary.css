@@ -3,18 +3,13 @@
 @tailwind utilities;
 @tailwind variants;
 
-/* Prevent FOUC */
-.no-js {
-  visibility: visible;
-}
-
 @layer components {
   html {
     @apply min-h-full;
   }
 
   body {
-    @apply invisible no-js antialiased bg-gray-100 dark:bg-gray-900 print:bg-white min-h-full;
+    @apply antialiased bg-gray-100 dark:bg-gray-900 print:bg-white min-h-full;
   }
 
   div#glossary-page-container {

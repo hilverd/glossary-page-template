@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- Improve mechanism for preventing FOUC.
+
 ### Removed
 
 ## [1.2.2] - 2022-04-24
