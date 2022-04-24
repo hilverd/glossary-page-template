@@ -623,7 +623,7 @@ viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
                     ++ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails glossaryItem.relatedTerms
                 )
             , div
-                [ class "print:hidden mt-3 flex flex-col flex-grow justify-end z-10" ]
+                [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
                 [ div
                     [ class "flex justify-between" ]
                     [ span
