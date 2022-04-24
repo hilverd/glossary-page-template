@@ -534,8 +534,8 @@ viewTermsIndex tabbable staticSidebar termIndex =
         )
 
 
-viewGlossaryTerm : GlossaryItem.Term -> Html Msg
-viewGlossaryTerm term =
+viewGlossaryTerm : Bool -> GlossaryItem.Term -> Html Msg
+viewGlossaryTerm tabbable term =
     Html.dt
         [ class "group" ]
         [ Html.dfn
@@ -547,10 +547,10 @@ viewGlossaryTerm term =
                 text term.body
             ]
         , span
-            [ class "silcrow invisible" ]
+            [ class "silcrow invisible group-hover:visible hover:visible" ]
             [ Html.a
                 [ "#" ++ term.id |> Html.Attributes.href
-                , Accessibility.Key.tabbable False
+                , Accessibility.Key.tabbable tabbable
                 ]
                 [ text "§" ]
             ]
@@ -618,7 +618,7 @@ viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
             ]
             [ div
                 []
-                (List.map viewGlossaryTerm glossaryItem.terms
+                (List.map (viewGlossaryTerm tabbable) glossaryItem.terms
                     ++ List.map viewGlossaryItemDetails glossaryItem.details
                     ++ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails glossaryItem.relatedTerms
                 )
@@ -667,7 +667,7 @@ viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
 
     else
         div []
-            (List.map viewGlossaryTerm glossaryItem.terms
+            (List.map (viewGlossaryTerm tabbable) glossaryItem.terms
                 ++ List.map viewGlossaryItemDetails glossaryItem.details
                 ++ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails glossaryItem.relatedTerms
             )
