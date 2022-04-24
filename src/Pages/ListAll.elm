@@ -1004,7 +1004,7 @@ viewStaticSidebarForDesktop tabbable termIndex =
 viewTopBar : GlossaryItems -> Components.DropdownMenu.Model -> Html Msg
 viewTopBar glossaryItems exportDropdownMenu =
     div
-        [ class "sticky top-0 z-20 shrink-0 flex justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
+        [ class "sticky top-0 z-10 shrink-0 flex justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
         [ div
             [ class "flex-1" ]
             [ button
@@ -1073,7 +1073,7 @@ viewOrderItemsBy model =
             , div
                 [ class "space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6" ]
                 [ div
-                    [ class "flex items-center z-10" ]
+                    [ class "flex items-center" ]
                     [ Components.Button.radio
                         "order-items-by"
                         "order-items-alphabetically"
@@ -1089,7 +1089,7 @@ viewOrderItemsBy model =
                         [ text "alphabetically" ]
                     ]
                 , div
-                    [ class "flex items-center z-10" ]
+                    [ class "flex items-center" ]
                     [ Components.Button.radio
                         "order-items-by"
                         "order-items-most-frequent-first"
