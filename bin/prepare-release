@@ -27,23 +27,26 @@ major=$(echo "$release_tag_without_v" | sed 's/^\([^\.]*\)\.\([^\.]*\)\.\(.*\)$/
 mv assets/glossary.*.js "glossary-$release_tag".min.js
 mv assets/glossary.*.css "glossary-$release_tag".min.css
 
-cat glossary.html | \
-  sed 's!/assets/glossary.[^\.]*.js!'"glossary-$release_tag"'.min.js!' | \
-  sed 's!/assets/glossary.[^\.]*.css!'"glossary-$release_tag"'.min.css!' \
-  >glossary-with-correct-file-names.html
+for template in glossary empty; do
+  cat $template.html | \
+    sed 's!/assets/glossary.[^\.]*.js!'"glossary-$release_tag"'.min.js!' | \
+    sed 's!/assets/glossary.[^\.]*.css!'"glossary-$release_tag"'.min.css!' \
+    >$template-with-correct-file-names.html
 
-cat glossary.html | \
-  sed 's!/assets/glossary.[^\.]*.js!'"https://glstatic.net/glossary-page-template@$major/glossary"'.min.js!' | \
-  sed 's!/assets/glossary.[^\.]*.css!'"https://glstatic.net/glossary-page-template@$major/glossary"'.min.css!' \
-  >glossary-with-cdn-links.html
+  cat $template.html | \
+    sed 's!/assets/glossary.[^\.]*.js!'"https://glstatic.net/glossary-page-template@$major/glossary"'.min.js!' | \
+    sed 's!/assets/glossary.[^\.]*.css!'"https://glstatic.net/glossary-page-template@$major/glossary"'.min.css!' \
+    >$template-with-cdn-links.html
 
-mv glossary-with-correct-file-names.html glossary.html
+  mv $template-with-correct-file-names.html $template.html
+done
 
 rmdir assets
 cd ..
 
 mkdir -p release
 mv dist/glossary-with-cdn-links.html release/glossary.html
+mv dist/empty-with-cdn-links.html release/empty.html
 
 package_without_cdn="glossary-page-template-$release_tag"
 mv dist "$package_without_cdn"

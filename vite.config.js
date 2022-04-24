@@ -7,7 +7,8 @@ export default defineConfig({
     build: {
         rollupOptions: {
             input: {
-                glossary: path.resolve(__dirname, 'glossary.html')
+                glossary: path.resolve(__dirname, 'glossary.html'),
+                empty: path.resolve(__dirname, 'empty.html')
             }
         }
     }
