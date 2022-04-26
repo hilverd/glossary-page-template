@@ -2,8 +2,9 @@ const defaultTheme = require('tailwindcss/defaultTheme')
 
 module.exports = {
   content: [
-    './src/**/*.elm',
-    './glossary.{css,html,js}'
+    './index.html',
+    './glossary.{css,html,js}',
+    './src/**/*.elm'
   ],
   plugins: [
     require('@tailwindcss/forms'),
