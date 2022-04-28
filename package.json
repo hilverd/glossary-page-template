@@ -1,13 +1,13 @@
 {
   "name": "glossary-page-template",
-  "version": "1.2.4",
+  "version": "1.3.0",
   "description": "Create a glossary as a single HTML page hosted anywhere.",
   "private": true,
   "author": "Hilverd Reker",
   "bugs": {
     "url": "https://github.com/hilverd/glossary-page-template/issues"
   },
-  "homepage": "https://github.com/hilverd/glossary-page-template",
+  "homepage": "https://glossary.page/template",
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
     "dev": "vite",
