@@ -1052,7 +1052,10 @@ viewExportButton glossaryItems exportDropdownMenu =
     Components.DropdownMenu.view
         (PageMsg.Internal << ExportDropdownMenuMsg)
         exportDropdownMenu
-        [ text "Export" ]
+        [ Icons.documentDownload
+            [ Svg.Attributes.class "h-5 w-5 mr-2" ]
+        , text "Export"
+        ]
         [ Components.DropdownMenu.choice
             [ text "Markdown" ]
             (PageMsg.Internal <| DownloadMarkdown glossaryItems)
