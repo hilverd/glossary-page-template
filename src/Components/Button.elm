@@ -3,7 +3,6 @@ module Components.Button exposing (emptyState, primary, radio, rounded, secondar
 import Accessibility exposing (Attribute)
 import Accessibility.Aria
 import Accessibility.Key
-import Extras.HtmlTree exposing (HtmlTree(..))
 import Html exposing (Html)
 import Html.Attributes exposing (class)
 
@@ -21,10 +20,17 @@ withAdditionalAttributes attributes additionalAttributes children =
         children
 
 
-primary : List (Attribute msg) -> List (Html msg) -> Html msg
-primary =
+primary : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
+primary enabled =
     withAdditionalAttributes
-        [ class "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300" ]
+        [ if enabled then
+            class "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+
+          else
+            class "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm font-medium rounded-md text-white dark:text-gray-400 bg-indigo-400 dark:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+        , Html.Attributes.disabled <| not enabled
+        , Accessibility.Key.tabbable enabled
+        ]
 
 
 secondary : List (Attribute msg) -> List (Html msg) -> Html msg
@@ -79,7 +85,7 @@ toggle on labelId additionalAttributes children =
         (class "flex items-center" :: additionalAttributes)
         [ Accessibility.button
             [ Html.Attributes.type_ "button"
-            , class "relative inline-flex shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+            , class "relative inline-flex shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer motion-reduce:transition-none transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
             , class <|
                 if on then
                     "bg-indigo-600 dark:bg-indigo-400"
@@ -92,7 +98,7 @@ toggle on labelId additionalAttributes children =
             ]
             [ Accessibility.span
                 [ Accessibility.Aria.hidden True
-                , class "pointer-events-none inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-700 shadow transform ring-0 transition ease-in-out duration-200"
+                , class "pointer-events-none inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-700 shadow transform motion-reduce:transform-none ring-0 transition ease-in-out duration-200"
                 , class <|
                     if on then
                         "translate-x-5"
@@ -119,7 +125,7 @@ radio name_ value_ checked_ tabbable additionalAttributes =
         name_
         value_
         checked_
-        ([ class "h-4 w-4 dark:bg-gray-200 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-500 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300 "
+        ([ class "h-4 w-4 dark:bg-gray-200 text-indigo-600 dark:text-amber-700 border-gray-300 dark:border-gray-500 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300 "
          , Accessibility.Key.tabbable tabbable
          ]
             ++ additionalAttributes

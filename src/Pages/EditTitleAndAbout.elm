@@ -476,7 +476,7 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
                     PageMsg.NavigateToListAll { common | loadedGlossaryItems = Ok glossaryItems }
                 ]
                 [ text "Cancel" ]
-            , Components.Button.primary
+            , Components.Button.primary True
                 [ class "ml-3"
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]

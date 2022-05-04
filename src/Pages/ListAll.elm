@@ -742,7 +742,7 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
                     ]
                 , div
                     [ class "mt-5 sm:mt-4 sm:flex sm:flex-row-reverse" ]
-                    [ Components.Button.primary
+                    [ Components.Button.primary True
                         [ class "w-full bg-red-600 dark:bg-red-400 hover:bg-red-700 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm dark:text-gray-800 "
                         , Extras.HtmlAttribute.showMaybe
                             (Html.Events.onClick << PageMsg.Internal << Delete)

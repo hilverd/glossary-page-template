@@ -1,4 +1,16 @@
-module Components.DropdownMenu exposing (Choice, Model, Msg, choice, hidden, id, init, subscriptions, update, view, visible)
+module Components.DropdownMenu exposing
+    ( Choice
+    , Model
+    , Msg
+    , choice
+    , hidden
+    , id
+    , init
+    , subscriptions
+    , update
+    , view
+    , visible
+    )
 
 import Accessibility exposing (..)
 import Accessibility.Aria
@@ -9,7 +21,6 @@ import Browser.Events as Events
 import Components.Button
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
-import Extras.HtmlTree exposing (HtmlTree(..))
 import Html
 import Html.Attributes exposing (attribute, class, href)
 import Html.Events
@@ -287,10 +298,10 @@ view toParentMsg model body_ choices =
             , class "origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-600 ring-opacity-5 divide-y divide-gray-100 focus:outline-none"
             , class "hidden" |> Extras.HtmlAttribute.showIf (model_.visibility == Invisible)
             , if model_.visibility == Visible then
-                class "transition ease-out duration-100 transform opacity-100 scale-100"
+                class "transition motion-reduce:transition-none ease-out duration-100 transform motion-reduce:transform-none opacity-100 scale-100"
 
               else
-                class "transition ease-in duration-75 transform opacity-0 scale-95"
+                class "transition motion-reduce:transition-none ease-in duration-75 transform motion-reduce:transform-none opacity-0 scale-95"
             , Accessibility.Role.menu
             , Accessibility.Key.tabbable False
             ]
