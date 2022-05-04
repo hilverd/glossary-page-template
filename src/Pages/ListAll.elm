@@ -112,7 +112,9 @@ init editorIsRunning commonModel =
             scrollGlossaryItemIntoView index
 
         Nothing ->
-            scrollToTop
+            commonModel.fragment
+                |> Maybe.map scrollElementIntoView
+                |> Maybe.withDefault Cmd.none
     )
 
 

@@ -47,13 +47,19 @@ type alias Model =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
-        filename =
+        maybeUrl =
             flags
                 |> Decode.decodeValue (Decode.field "windowLocationHref" Decode.string)
                 |> Result.toMaybe
                 |> Maybe.andThen Url.fromString
+
+        filename =
+            maybeUrl
                 |> Maybe.map .path
                 |> Maybe.andThen (String.split "/" >> List.reverse >> List.head)
+
+        fragment =
+            maybeUrl |> Maybe.andThen .fragment
 
         title =
             flags
@@ -96,6 +102,7 @@ init flags =
                     CommonModel.Alphabetically
                     loadedGlossaryItems
                     Nothing
+                    fragment
                 )
     in
     ( ListAll listAllModel

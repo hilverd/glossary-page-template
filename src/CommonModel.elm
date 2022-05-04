@@ -21,4 +21,5 @@ type alias CommonModel =
     , orderItemsBy : OrderItemsBy
     , loadedGlossaryItems : LoadedGlossaryItems
     , maybeIndex : Maybe GlossaryItemIndex
+    , fragment : Maybe String
     }
