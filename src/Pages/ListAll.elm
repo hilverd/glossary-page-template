@@ -72,6 +72,7 @@ type InternalMsg
     | ShowMenuForMobile
     | StartHidingMenuForMobile
     | CompleteHidingMenuForMobile
+    | BackToTop Bool
     | ExportDropdownMenuMsg Components.DropdownMenu.Msg
     | ConfirmDelete GlossaryItemIndex
     | CancelDelete
@@ -171,6 +172,24 @@ update msg model =
 
         CompleteHidingMenuForMobile ->
             ( { model | menuForMobileVisibility = Invisible }, Cmd.none )
+
+        BackToTop staticSidebar ->
+            let
+                idOfSidebarOrMenu =
+                    if staticSidebar then
+                        ElementIds.staticSidebarForDesktop
+
+                    else
+                        ElementIds.indexForMobile
+            in
+            ( { model | menuForMobileVisibility = Disappearing }
+            , Cmd.batch
+                [ scrollToTopInElement idOfSidebarOrMenu
+                , scrollToTop
+                , Process.sleep 100 |> Task.perform (always <| PageMsg.Internal CompleteHidingMenuForMobile)
+                , allowBackgroundScrolling ()
+                ]
+            )
 
         ExportDropdownMenuMsg msg_ ->
             Components.DropdownMenu.update
@@ -341,6 +360,10 @@ scrollElementIntoView id =
 
 scrollToTopInElement : String -> Cmd Msg
 scrollToTopInElement id =
+    let
+        _ =
+            Debug.log "scrollToTopInElement" "scrollToTopInElement"
+    in
     id
         |> Dom.getViewportOf
         |> Task.andThen (always <| Dom.setViewportOf id 0 0)
@@ -904,7 +927,8 @@ viewMenuForMobile model tabbable termIndex =
                 ]
                 [ nav
                     [ class "px-4 pt-1 pb-6" ]
-                    [ viewTermIndexFirstCharacterGrid False termIndex
+                    [ viewBackToTopLink False
+                    , viewTermIndexFirstCharacterGrid False termIndex
                     , viewTermsIndex tabbable False termIndex
                     ]
                 ]
@@ -912,6 +936,26 @@ viewMenuForMobile model tabbable termIndex =
         , div
             [ class "shrink-0 w-14", Accessibility.Aria.hidden True ]
             []
+        ]
+
+
+viewBackToTopLink : Bool -> Html Msg
+viewBackToTopLink staticSidebar =
+    div
+        [ class "bg-white dark:bg-slate-900 pb-3 pointer-events-auto text-right" ]
+        [ Html.a
+            [ href <| "#" ++ ElementIds.container
+            , Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <|
+                PageMsg.Internal <|
+                    BackToTop staticSidebar
+            ]
+            [ span
+                [ class "inline-flex" ]
+                [ text "Back to top"
+                , Icons.arrowUp
+                    [ Svg.Attributes.class "w-5 h-5 ml-2" ]
+                ]
+            ]
         ]
 
 
@@ -980,6 +1024,9 @@ viewQuickSearchButtonAndLetterGrid staticSidebar termIndex =
         [ div
             [ class "h-7 bg-white dark:bg-slate-900" ]
             []
+        , div
+            [ class "px-4" ]
+            [ viewBackToTopLink True ]
         , viewQuickSearchButton
         , div
             [ class "px-3 bg-white dark:bg-slate-900" ]

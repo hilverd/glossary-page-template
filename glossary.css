@@ -68,7 +68,7 @@
     @apply hover:underline text-indigo-600 dark:text-amber-300 print:text-black;
   }
 
-  :target {
+  dfn:target {
     @apply bg-amber-100 dark:bg-pink-900;
   }
 
