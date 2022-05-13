@@ -12,12 +12,15 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
-
-- Allow exporting as Anki deck (text file suitable for importing).
-
 ### Changed
 ### Fixed
 ### Removed
+
+## [1.5.0] - 2022-05-13
+
+### Added
+
+- Allow exporting as Anki deck (text file suitable for importing).
 
 ## [1.4.1] - 2022-05-13
 
@@ -282,7 +285,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.4.1...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/hilverd/glossary-page-template/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/hilverd/glossary-page-template/compare/v1.3.1...v1.4.1
 [1.3.1]: https://github.com/hilverd/glossary-page-template/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/hilverd/glossary-page-template/compare/v1.2.4...v1.3.0
