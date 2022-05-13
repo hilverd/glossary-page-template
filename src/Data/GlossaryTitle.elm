@@ -44,4 +44,4 @@ toFilename extension glossaryTitle =
                 else
                     result
            )
-        |> (\result -> result ++ "." ++ extension)
+        |> (\result -> result ++ extension)

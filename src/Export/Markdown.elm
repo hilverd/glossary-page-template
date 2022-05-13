@@ -94,7 +94,7 @@ download : GlossaryTitle -> String -> List AboutLink -> GlossaryItems -> Cmd msg
 download glossaryTitle aboutParagraph aboutLinks glossaryItems =
     let
         filename =
-            GlossaryTitle.toFilename "md" glossaryTitle
+            GlossaryTitle.toFilename ".md" glossaryTitle
 
         titleHeaderString =
             glossaryTitle |> GlossaryTitle.toString |> escape |> (++) "# "

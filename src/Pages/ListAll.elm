@@ -16,6 +16,7 @@ import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Dict exposing (Dict)
 import ElementIds
+import Export.Anki
 import Export.Markdown
 import Extras.Html
 import Extras.HtmlAttribute
@@ -81,6 +82,7 @@ type InternalMsg
     | JumpToTermIndexGroup Bool String
     | ChangeOrderItemsBy CommonModel.OrderItemsBy
     | DownloadMarkdown GlossaryItems
+    | DownloadAnki GlossaryItems
 
 
 type alias Msg =
@@ -298,6 +300,17 @@ update msg model =
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
             , Cmd.batch
                 [ Export.Markdown.download
+                    model.common.title
+                    model.common.aboutParagraph
+                    model.common.aboutLinks
+                    glossaryItems
+                ]
+            )
+
+        DownloadAnki glossaryItems ->
+            ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
+            , Cmd.batch
+                [ Export.Anki.download
                     model.common.title
                     model.common.aboutParagraph
                     model.common.aboutLinks
@@ -1101,6 +1114,9 @@ viewExportButton glossaryItems exportDropdownMenu =
         , text "Export"
         ]
         [ Components.DropdownMenu.choice
+            [ text "Anki deck" ]
+            (PageMsg.Internal <| DownloadAnki glossaryItems)
+        , Components.DropdownMenu.choice
             [ text "Markdown" ]
             (PageMsg.Internal <| DownloadMarkdown glossaryItems)
         ]
