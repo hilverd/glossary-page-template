@@ -6,7 +6,6 @@ import Accessibility.Key exposing (tabbable)
 import Accessibility.Role
 import Browser exposing (Document)
 import Browser.Dom as Dom
-import Browser.Events as Events
 import CommonModel exposing (CommonModel)
 import Components.Button
 import Components.DropdownMenu
@@ -945,7 +944,7 @@ viewBackToTopLink staticSidebar =
         [ class "bg-white dark:bg-slate-900 pb-3 pointer-events-auto text-right" ]
         [ Html.a
             [ href <| "#" ++ ElementIds.container
-            , Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <|
+            , Extras.HtmlEvents.onClickStopPropagation <|
                 PageMsg.Internal <|
                     BackToTop staticSidebar
             ]
