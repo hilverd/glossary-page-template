@@ -359,10 +359,6 @@ scrollElementIntoView id =
 
 scrollToTopInElement : String -> Cmd Msg
 scrollToTopInElement id =
-    let
-        _ =
-            Debug.log "scrollToTopInElement" "scrollToTopInElement"
-    in
     id
         |> Dom.getViewportOf
         |> Task.andThen (always <| Dom.setViewportOf id 0 0)
