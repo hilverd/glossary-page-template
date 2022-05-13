@@ -1025,7 +1025,7 @@ viewQuickSearchButtonAndLetterGrid staticSidebar termIndex =
             [ class "h-7 bg-white dark:bg-slate-900" ]
             []
         , div
-            [ class "px-4" ]
+            [ class "pr-4" ]
             [ viewBackToTopLink True ]
         , viewQuickSearchButton
         , div
