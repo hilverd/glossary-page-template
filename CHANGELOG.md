@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- Scroll to newly created items.
+
 ### Removed
 
 ## [1.6.0] - 2022-05-27

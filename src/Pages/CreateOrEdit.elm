@@ -259,15 +259,18 @@ update msg model =
                                             |> List.head
                                             |> Maybe.map Tuple.first
                                         )
-                        in
-                        ( { model
-                            | common =
-                                { common
-                                    | loadedGlossaryItems = Ok updatedGlossaryItems
-                                    , maybeIndex = maybeIndex
+
+                            model_ =
+                                { model
+                                    | common =
+                                        { common
+                                            | loadedGlossaryItems = Ok updatedGlossaryItems
+                                            , maybeIndex = maybeIndex
+                                        }
                                 }
-                          }
-                        , patchHtmlFile model.common updatedGlossaryItems
+                        in
+                        ( model_
+                        , patchHtmlFile model_.common updatedGlossaryItems
                         )
 
                 _ ->
