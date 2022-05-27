@@ -12,12 +12,15 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
-
-- Show "sandbox mode" message at top of main page if enabled.
-
 ### Changed
 ### Fixed
 ### Removed
+
+## [1.6.2] - 2022-05-27
+
+### Added
+
+- Show "sandbox mode" message at top of main page if enabled.
 
 ## [1.6.1] - 2022-05-27
 
@@ -300,7 +303,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.6.1...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.6.2...HEAD
+[1.6.2]: https://github.com/hilverd/glossary-page-template/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/hilverd/glossary-page-template/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/hilverd/glossary-page-template/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/hilverd/glossary-page-template/compare/v1.4.1...v1.5.0
