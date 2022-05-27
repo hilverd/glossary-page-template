@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- When exporting to Anki, handle empty definitions with related items better.
+
 ### Removed
 
 ## [1.6.2] - 2022-05-27

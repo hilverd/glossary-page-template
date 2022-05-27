@@ -44,7 +44,7 @@ paragraphs =
 
 
 itemToAnki : GlossaryItem -> String
-itemToAnki { terms, details } =
+itemToAnki { terms, details, relatedTerms } =
     let
         quote string =
             "\"" ++ string ++ "\""
@@ -56,10 +56,24 @@ itemToAnki { terms, details } =
                 |> quote
 
         back =
-            details
-                |> List.map escape
-                |> paragraphs
-                |> quote
+            if List.isEmpty details then
+                if List.isEmpty relatedTerms then
+                    ""
+
+                else
+                    ("See: "
+                        ++ (relatedTerms
+                                |> List.map .body
+                                |> String.join ", "
+                           )
+                    )
+                        |> quote
+
+            else
+                details
+                    |> List.map escape
+                    |> paragraphs
+                    |> quote
     in
     front ++ "\t" ++ back
 
