@@ -1255,18 +1255,25 @@ view model =
                             [ Html.Attributes.id ElementIds.container ]
                             [ header []
                                 [ div
-                                    [ class "flex flex-row justify-start lg:justify-end lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
-                                    [ Extras.Html.showIf editable <|
+                                    [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
+                                    [ div
+                                        [ class "flex flex-row justify-start lg:justify-end" ]
+                                        [ Extras.Html.showIf (model.common.enableSavingChangesInMemory && model.makingChanges /= ReadyForMakingChanges) <|
+                                            div
+                                                [ class "flex-none" ]
+                                                [ viewMakeChangesButton noModalDialogShown model.common ]
+                                        , Extras.Html.showIf editable <|
+                                            div
+                                                [ class "flex-none" ]
+                                                [ viewEditTitleAndAboutButton noModalDialogShown model.common ]
+                                        , div
+                                            [ class "hidden lg:block ml-auto pb-3" ]
+                                            [ viewExportButton glossaryItems model.exportDropdownMenu ]
+                                        ]
+                                    , Extras.Html.showIf (model.common.enableSavingChangesInMemory && model.makingChanges == ReadyForMakingChanges) <|
                                         div
-                                            [ class "flex-none" ]
-                                            [ viewEditTitleAndAboutButton noModalDialogShown model.common ]
-                                    , Extras.Html.showIf (model.common.enableSavingChangesInMemory && model.makingChanges /= ReadyForMakingChanges) <|
-                                        div
-                                            [ class "flex-none" ]
-                                            [ viewMakeChangesButton noModalDialogShown model.common ]
-                                    , div
-                                        [ class "hidden lg:block ml-auto pb-3" ]
-                                        [ viewExportButton glossaryItems model.exportDropdownMenu ]
+                                            [ class "mb-5 sm:mb-4 text-sm text-gray-500 dark:text-gray-400" ]
+                                            [ text Components.Copy.sandboxModeMessage ]
                                     ]
                                 , case ( model.common.enableSavingChangesInMemory, model.makingChanges ) of
                                     ( False, MakingChangesHelpCollapsed ) ->
