@@ -15,6 +15,7 @@ type OrderItemsBy
 type alias CommonModel =
     { filename : Maybe String
     , enableHelpForMakingChanges : Bool
+    , enableSavingChangesInMemory : Bool
     , title : GlossaryTitle
     , aboutParagraph : String
     , aboutLinks : List AboutLink

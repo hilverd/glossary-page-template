@@ -8,6 +8,7 @@ import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
 import Components.Button
+import Components.Copy
 import Components.DropdownMenu
 import Data.AboutLink as AboutLink
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
@@ -23,6 +24,7 @@ import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
+import Extras.Task
 import Html
 import Html.Attributes exposing (class, for, href, id, target)
 import Html.Events
@@ -68,6 +70,7 @@ type alias Model =
 
 type InternalMsg
     = NoOp
+    | MakeChanges
     | ToggleMakingChangesHelp
     | ShowMenuForMobile
     | StartHidingMenuForMobile
@@ -139,6 +142,9 @@ update msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
+
+        MakeChanges ->
+            ( { model | makingChanges = ReadyForMakingChanges }, Cmd.none )
 
         ToggleMakingChangesHelp ->
             let
@@ -321,32 +327,40 @@ update msg model =
 
 patchHtmlFile : CommonModel -> GlossaryItemIndex -> GlossaryItems -> Cmd Msg
 patchHtmlFile common indexOfItemBeingDeleted glossaryItems =
-    Http.request
-        { method = "PATCH"
-        , headers = []
-        , url = "/"
-        , body =
-            glossaryItems
-                |> GlossaryItems.toHtmlTree
-                    common.enableHelpForMakingChanges
-                    (GlossaryTitle.toString common.title)
-                    common.aboutParagraph
-                    common.aboutLinks
-                |> HtmlTree.toHtml
-                |> Http.stringBody "text/html"
-        , expect =
-            Http.expectWhatever
-                (\result ->
-                    case result of
-                        Ok _ ->
-                            PageMsg.Internal <| Deleted glossaryItems
+    let
+        msg =
+            PageMsg.Internal <| Deleted glossaryItems
+    in
+    if common.enableSavingChangesInMemory then
+        Extras.Task.messageToCommand msg
 
-                        Err error ->
-                            PageMsg.Internal <| FailedToDelete indexOfItemBeingDeleted error
-                )
-        , timeout = Nothing
-        , tracker = Nothing
-        }
+    else
+        Http.request
+            { method = "PATCH"
+            , headers = []
+            , url = "/"
+            , body =
+                glossaryItems
+                    |> GlossaryItems.toHtmlTree
+                        common.enableHelpForMakingChanges
+                        (GlossaryTitle.toString common.title)
+                        common.aboutParagraph
+                        common.aboutLinks
+                    |> HtmlTree.toHtml
+                    |> Http.stringBody "text/html"
+            , expect =
+                Http.expectWhatever
+                    (\result ->
+                        case result of
+                            Ok _ ->
+                                msg
+
+                            Err error ->
+                                PageMsg.Internal <| FailedToDelete indexOfItemBeingDeleted error
+                    )
+            , timeout = Nothing
+            , tracker = Nothing
+            }
 
 
 scrollToTop : Cmd Msg
@@ -710,8 +724,8 @@ viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
             )
 
 
-viewConfirmDeleteModal : Maybe GlossaryItemIndex -> Html Msg
-viewConfirmDeleteModal maybeIndexOfItemToDelete =
+viewConfirmDeleteModal : Bool -> Maybe GlossaryItemIndex -> Html Msg
+viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
     Html.div
         [ class "fixed z-10 inset-0 overflow-y-auto print:hidden"
         , Extras.HtmlAttribute.showIf (maybeIndexOfItemToDelete == Nothing) <| class "invisible"
@@ -771,10 +785,14 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
                             ]
                         ]
                     ]
+                , Extras.Html.showIf enableSavingChangesInMemory <|
+                    div
+                        [ class "mt-5 sm:mt-4 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
+                        [ text Components.Copy.sandboxModeMessage ]
                 , div
                     [ class "mt-5 sm:mt-4 sm:flex sm:flex-row-reverse" ]
                     [ Components.Button.primary True
-                        [ class "w-full bg-red-600 dark:bg-red-400 hover:bg-red-700 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm dark:text-gray-800 "
+                        [ class "w-full bg-red-600 dark:bg-red-400 hover:bg-red-700 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm dark:text-gray-800"
                         , Extras.HtmlAttribute.showMaybe
                             (Html.Events.onClick << PageMsg.Internal << Delete)
                             maybeIndexOfItemToDelete
@@ -788,6 +806,23 @@ viewConfirmDeleteModal maybeIndexOfItemToDelete =
                         [ text "Cancel" ]
                     ]
                 ]
+            ]
+        ]
+
+
+viewMakeChangesButton : Bool -> CommonModel -> Html Msg
+viewMakeChangesButton tabbable common =
+    div
+        [ class "pb-6 print:hidden" ]
+        [ Components.Button.white True
+            [ Html.Events.onClick <| PageMsg.Internal MakeChanges
+            , Accessibility.Key.tabbable tabbable
+            ]
+            [ Icons.pencil
+                [ Svg.Attributes.class "h-5 w-5" ]
+            , span
+                [ class "ml-2" ]
+                [ text "Make changes" ]
             ]
         ]
 
@@ -877,7 +912,7 @@ viewCards model editable tabbable indexedGlossaryItems =
                             glossaryItem
                     )
             )
-        , viewConfirmDeleteModal model.confirmDeleteIndex
+        , viewConfirmDeleteModal model.common.enableSavingChangesInMemory model.confirmDeleteIndex
         ]
 
 
@@ -1225,15 +1260,19 @@ view model =
                                         div
                                             [ class "flex-none" ]
                                             [ viewEditTitleAndAboutButton noModalDialogShown model.common ]
+                                    , Extras.Html.showIf (model.common.enableSavingChangesInMemory && model.makingChanges /= ReadyForMakingChanges) <|
+                                        div
+                                            [ class "flex-none" ]
+                                            [ viewMakeChangesButton noModalDialogShown model.common ]
                                     , div
                                         [ class "hidden lg:block ml-auto pb-3" ]
                                         [ viewExportButton glossaryItems model.exportDropdownMenu ]
                                     ]
-                                , case model.makingChanges of
-                                    MakingChangesHelpCollapsed ->
+                                , case ( model.common.enableSavingChangesInMemory, model.makingChanges ) of
+                                    ( False, MakingChangesHelpCollapsed ) ->
                                         viewMakingChangesHelp model.common.filename noModalDialogShown False
 
-                                    MakingChangesHelpExpanded ->
+                                    ( False, MakingChangesHelpExpanded ) ->
                                         viewMakingChangesHelp model.common.filename noModalDialogShown True
 
                                     _ ->

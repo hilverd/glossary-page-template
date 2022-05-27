@@ -7,6 +7,7 @@ import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel, OrderItemsBy(..))
 import Components.Button
+import Components.Copy
 import Components.Form
 import Components.SelectMenu
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
@@ -20,6 +21,7 @@ import Extras.Html
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
+import Extras.Task
 import GlossaryItemForm as Form exposing (GlossaryItemForm)
 import Html
 import Html.Attributes exposing (class, id, required)
@@ -279,32 +281,40 @@ update msg model =
 
 patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
 patchHtmlFile common glossaryItems =
-    Http.request
-        { method = "PATCH"
-        , headers = []
-        , url = "/"
-        , body =
-            glossaryItems
-                |> GlossaryItems.toHtmlTree
-                    common.enableHelpForMakingChanges
-                    (GlossaryTitle.toString common.title)
-                    common.aboutParagraph
-                    common.aboutLinks
-                |> HtmlTree.toHtml
-                |> Http.stringBody "text/html"
-        , expect =
-            Http.expectWhatever
-                (\result ->
-                    case result of
-                        Ok _ ->
-                            PageMsg.NavigateToListAll { common | loadedGlossaryItems = Ok glossaryItems }
+    let
+        msg =
+            PageMsg.NavigateToListAll { common | loadedGlossaryItems = Ok glossaryItems }
+    in
+    if common.enableSavingChangesInMemory then
+        Extras.Task.messageToCommand msg
 
-                        Err error ->
-                            PageMsg.Internal <| FailedToSave error
-                )
-        , timeout = Nothing
-        , tracker = Nothing
-        }
+    else
+        Http.request
+            { method = "PATCH"
+            , headers = []
+            , url = "/"
+            , body =
+                glossaryItems
+                    |> GlossaryItems.toHtmlTree
+                        common.enableHelpForMakingChanges
+                        (GlossaryTitle.toString common.title)
+                        common.aboutParagraph
+                        common.aboutLinks
+                    |> HtmlTree.toHtml
+                    |> Http.stringBody "text/html"
+            , expect =
+                Http.expectWhatever
+                    (\result ->
+                        case result of
+                            Ok _ ->
+                                msg
+
+                            Err error ->
+                                PageMsg.Internal <| FailedToSave error
+                    )
+            , timeout = Nothing
+            , tracker = Nothing
+            }
 
 
 
@@ -710,6 +720,10 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
             |> Extras.Html.showIf (showValidationErrors && Form.hasValidationErrors form)
         , errorMessageWhileSaving
             |> Extras.Html.showMaybe (\errorMessage -> errorDiv <| "Failed to save — " ++ errorMessage ++ ".")
+        , Extras.Html.showIf model.common.enableSavingChangesInMemory <|
+            div
+                [ class "mt-5 sm:mt-4 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
+                [ text Components.Copy.sandboxModeMessage ]
         , div
             [ class "flex justify-end" ]
             [ Components.Button.white True

@@ -13,10 +13,10 @@ const aboutUlElement = aboutElement.querySelector('ul');
 const aboutLiElements = Array.prototype.slice.apply(aboutUlElement.querySelectorAll('li'));
 const aboutLinks = aboutLiElements.map(aboutLinkFromLiElement);
 
-const runningInDevelopment = import.meta.env.DEV;
-const editorIsRunning = containerElement.getAttribute('data-editor-is-running') === 'true' || runningInDevelopment;
+const editorIsRunning = containerElement.getAttribute('data-editor-is-running') === 'true';
 
 const enableHelpForMakingChanges = containerElement.getAttribute('data-enable-help-for-making-changes') === 'true';
+const enableSavingChangesInMemory = containerElement.getAttribute('data-enable-saving-changes-in-memory') === 'true';
 const dlElement = glossaryElement.querySelector('dl');
 const glossaryItemDivElements = Array.prototype.slice.apply(dlElement.querySelectorAll('div'));
 const glossaryItems = glossaryItemDivElements.map(glossaryItemFromDivElement);
@@ -80,7 +80,8 @@ const app = Elm.ApplicationShell.init({
         aboutLinks: aboutLinks,
         glossaryItems: glossaryItems,
         editorIsRunning: editorIsRunning,
-        enableHelpForMakingChanges: enableHelpForMakingChanges
+        enableHelpForMakingChanges: enableHelpForMakingChanges,
+        enableSavingChangesInMemory: enableSavingChangesInMemory
     }
 });
 

@@ -12,6 +12,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- When `data-enable-saving-changes-in-memory="true"`, save in memory only. This allows running example glossaries in "sandbox mode" to see what the editor UI looks like.
+
 ### Changed
 ### Fixed
 ### Removed

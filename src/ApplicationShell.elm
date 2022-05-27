@@ -87,6 +87,11 @@ init flags =
                 |> Decode.decodeValue (Decode.field "enableHelpForMakingChanges" Decode.bool)
                 |> Result.withDefault False
 
+        enableSavingChangesInMemory =
+            flags
+                |> Decode.decodeValue (Decode.field "enableSavingChangesInMemory" Decode.bool)
+                |> Result.withDefault False
+
         loadedGlossaryItems =
             LoadedGlossaryItems.decodeFromFlags flags
 
@@ -96,6 +101,7 @@ init flags =
                 (CommonModel
                     filename
                     enableHelpForMakingChanges
+                    enableSavingChangesInMemory
                     title
                     aboutParagraph
                     aboutLinks
