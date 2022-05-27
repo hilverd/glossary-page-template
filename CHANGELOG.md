@@ -12,12 +12,15 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
-
-- When `data-enable-saving-changes-in-memory="true"`, save in memory only. This allows running example glossaries in "sandbox mode" to see what the editor UI looks like.
-
 ### Changed
 ### Fixed
 ### Removed
+
+## [1.6.0] - 2022-05-27
+
+### Added
+
+- When `data-enable-saving-changes-in-memory="true"`, save in memory only. This allows running example glossaries in "sandbox mode" to see what the editor UI looks like.
 
 ## [1.5.0] - 2022-05-13
 
@@ -288,7 +291,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/hilverd/glossary-page-template/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/hilverd/glossary-page-template/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/hilverd/glossary-page-template/compare/v1.3.1...v1.4.1
 [1.3.1]: https://github.com/hilverd/glossary-page-template/compare/v1.3.0...v1.3.1
