@@ -14,10 +14,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+### Removed
+
+## [1.6.1] - 2022-05-27
+
+### Fixed
 
 - Scroll to newly created items.
-
-### Removed
 
 ## [1.6.0] - 2022-05-27
 
@@ -294,7 +297,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.6.1...HEAD
+[1.6.1]: https://github.com/hilverd/glossary-page-template/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/hilverd/glossary-page-template/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/hilverd/glossary-page-template/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/hilverd/glossary-page-template/compare/v1.3.1...v1.4.1
