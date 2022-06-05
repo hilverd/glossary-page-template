@@ -1,16 +1,16 @@
 module Extras.HtmlEvents exposing
-    ( KeyValue
-    , controlKey
-    , downArrowKey
-    , enterKey
+    ( KeyDownEvent
+    , control
+    , downArrow
+    , enter
     , escapeKey
     , onClickPreventDefault
     , onClickPreventDefaultAndStopPropagation
     , onClickStopPropagation
-    , onEnterKey
-    , onEscapeKey
+    , onEnter
+    , onEscape
     , onKeydown
-    , upArrowKey
+    , upArrow
     )
 
 import Html exposing (Attribute)
@@ -23,6 +23,12 @@ type KeyValue
     | Control String
 
 
+type alias KeyDownEvent =
+    { keyValue : KeyValue
+    , controlKey : Bool
+    }
+
+
 toKeyValue : String -> KeyValue
 toKeyValue string =
     case String.uncons string of
@@ -33,11 +39,12 @@ toKeyValue string =
             Control string
 
 
-onKeydown : (KeyValue -> Maybe msg) -> Attribute msg
+onKeydown : (KeyDownEvent -> Maybe msg) -> Attribute msg
 onKeydown f =
     Html.Events.custom "keydown" <|
-        (Decode.field "key" Decode.string
-            |> Decode.map toKeyValue
+        (Decode.map2 KeyDownEvent
+            (Decode.field "key" <| Decode.map toKeyValue <| Decode.string)
+            (Decode.field "ctrlKey" <| Decode.bool)
             |> Decode.andThen
                 (\code ->
                     case f code of
@@ -50,36 +57,41 @@ onKeydown f =
         )
 
 
-upArrowKey : KeyValue
-upArrowKey =
-    Control "ArrowUp"
+withoutModifiers : KeyValue -> KeyDownEvent
+withoutModifiers keyValue =
+    { keyValue = keyValue, controlKey = False }
 
 
-downArrowKey : KeyValue
-downArrowKey =
-    Control "ArrowDown"
+upArrow : KeyDownEvent
+upArrow =
+    Control "ArrowUp" |> withoutModifiers
 
 
-enterKey : KeyValue
-enterKey =
-    Control "Enter"
+downArrow : KeyDownEvent
+downArrow =
+    Control "ArrowDown" |> withoutModifiers
 
 
-controlKey : KeyValue
-controlKey =
-    Control "Control"
+enter : KeyDownEvent
+enter =
+    Control "Enter" |> withoutModifiers
 
 
-escapeKey : KeyValue
+control : KeyDownEvent
+control =
+    Control "Control" |> withoutModifiers
+
+
+escapeKey : KeyDownEvent
 escapeKey =
-    Control "Escape"
+    Control "Escape" |> withoutModifiers
 
 
-onEnterKey : msg -> Attribute msg
-onEnterKey msg =
+onEnter : msg -> Attribute msg
+onEnter msg =
     onKeydown
-        (\code ->
-            if code == enterKey then
+        (\event ->
+            if event == enter then
                 Just msg
 
             else
@@ -87,11 +99,11 @@ onEnterKey msg =
         )
 
 
-onEscapeKey : msg -> Attribute msg
-onEscapeKey msg =
+onEscape : msg -> Attribute msg
+onEscape msg =
     onKeydown
-        (\key ->
-            if key == escapeKey then
+        (\event ->
+            if event == escapeKey then
                 Just msg
 
             else

@@ -232,7 +232,7 @@ viewEditTitle showValidationErrors titleField =
                                     , Accessibility.Aria.label "Title"
                                     , Accessibility.Aria.required True
                                     , Html.Events.onInput (PageMsg.Internal << UpdateTitle)
-                                    , Extras.HtmlEvents.onEnterKey <| PageMsg.Internal NoOp
+                                    , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                                     ]
                                 ]
                             ]
@@ -394,7 +394,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                         , Html.Attributes.autocomplete False
                         , Accessibility.Aria.required True
                         , Html.Events.onInput (PageMsg.Internal << UpdateAboutLinkHref index)
-                        , Extras.HtmlEvents.onEnterKey <| PageMsg.Internal NoOp
+                        , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                         ]
                     ]
                 , div
@@ -427,7 +427,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                                 , Accessibility.Aria.required True
                                 , Accessibility.Aria.invalid <| aboutLinkHref.validationError /= Nothing
                                 , Html.Events.onInput (PageMsg.Internal << UpdateAboutLinkBody index)
-                                , Extras.HtmlEvents.onEnterKey <| PageMsg.Internal NoOp
+                                , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                                 ]
                             ]
                         ]

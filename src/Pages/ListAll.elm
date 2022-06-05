@@ -62,6 +62,7 @@ type alias Model =
     { common : CommonModel
     , makingChanges : MakingChanges
     , menuForMobileVisibility : MenuForMobileVisibility
+    , searchString : Maybe String
     , exportDropdownMenu : Components.DropdownMenu.Model
     , confirmDeleteIndex : Maybe GlossaryItemIndex
     , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
@@ -77,8 +78,9 @@ type InternalMsg
     | CompleteHidingMenuForMobile
     | BackToTop Bool
     | ExportDropdownMenuMsg Components.DropdownMenu.Msg
+    | StartSearch
     | ConfirmDelete GlossaryItemIndex
-    | CancelDelete
+    | CancelSearchAndDelete
     | Delete GlossaryItemIndex
     | Deleted GlossaryItems
     | FailedToDelete GlossaryItemIndex Http.Error
@@ -106,6 +108,7 @@ init editorIsRunning commonModel =
                     NoHelpForMakingChanges
       , common = commonModel
       , menuForMobileVisibility = Invisible
+      , searchString = Nothing
       , exportDropdownMenu =
             Components.DropdownMenu.init
                 [ Components.DropdownMenu.id ElementIds.exportDropdownButton ]
@@ -205,12 +208,20 @@ update msg model =
                 msg_
                 model.exportDropdownMenu
 
+        StartSearch ->
+            ( { model | searchString = Just "" }, preventBackgroundScrolling () )
+
         ConfirmDelete index ->
             ( { model | confirmDeleteIndex = Just index }, preventBackgroundScrolling () )
 
-        CancelDelete ->
-            if model.confirmDeleteIndex /= Nothing then
-                ( { model | confirmDeleteIndex = Nothing }, allowBackgroundScrolling () )
+        CancelSearchAndDelete ->
+            if model.confirmDeleteIndex /= Nothing || model.searchString /= Nothing then
+                ( { model
+                    | searchString = Nothing
+                    , confirmDeleteIndex = Nothing
+                  }
+                , allowBackgroundScrolling ()
+                )
 
             else
                 ( model, Cmd.none )
@@ -724,13 +735,66 @@ viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
             )
 
 
+viewSearchModal : Maybe String -> Html Msg
+viewSearchModal maybeSearchString =
+    Html.div
+        [ class "fixed z-10 inset-0 overflow-y-auto print:hidden"
+        , Extras.HtmlAttribute.showIf (maybeSearchString == Nothing) <| class "invisible"
+        , Extras.HtmlEvents.onEscape <| PageMsg.Internal CancelSearchAndDelete
+        , Accessibility.Aria.labelledBy ElementIds.searchModalTitle
+        , Accessibility.Role.dialog
+        , Accessibility.Aria.modal True
+        ]
+        [ div
+            [ class "flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0" ]
+            [ Html.div
+                [ class "fixed inset-0 bg-gray-500 dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 transition-opacity"
+                , if maybeSearchString == Nothing then
+                    class "ease-in duration-200 opacity-0"
+
+                  else
+                    class "ease-out duration-300 opacity-100"
+                , Accessibility.Aria.hidden True
+                , Html.Events.onClick <| PageMsg.Internal CancelSearchAndDelete
+                ]
+                []
+            , span
+                [ class "hidden sm:inline-block sm:align-middle sm:h-screen"
+                , Accessibility.Aria.hidden True
+                ]
+                [ text "\u{200B}" ]
+            , div
+                [ class "inline-block align-bottom bg-white dark:bg-gray-700 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
+                , if maybeSearchString == Nothing then
+                    class "ease-in duration-200 opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+
+                  else
+                    class "ease-out duration-300 opacity-100 translate-y-0 sm:scale-100"
+                ]
+                [ div
+                    [ class "sm:flex sm:items-start" ]
+                    [ div
+                        [ class "mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left" ]
+                        [ h2
+                            [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100"
+                            , id ElementIds.confirmDeleteModalTitle
+                            ]
+                            [ text "Search"
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+
+
 viewConfirmDeleteModal : Bool -> Maybe GlossaryItemIndex -> Html Msg
 viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
     Html.div
         [ class "fixed z-10 inset-0 overflow-y-auto print:hidden"
         , Extras.HtmlAttribute.showIf (maybeIndexOfItemToDelete == Nothing) <| class "invisible"
-        , Extras.HtmlEvents.onEscapeKey <| PageMsg.Internal CancelDelete
-        , Accessibility.Aria.labelledBy ElementIds.modalTitle
+        , Extras.HtmlEvents.onEscape <| PageMsg.Internal CancelSearchAndDelete
+        , Accessibility.Aria.labelledBy ElementIds.confirmDeleteModalTitle
         , Accessibility.Role.dialog
         , Accessibility.Aria.modal True
         ]
@@ -744,7 +808,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
                   else
                     class "ease-out duration-300 opacity-100"
                 , Accessibility.Aria.hidden True
-                , Html.Events.onClick <| PageMsg.Internal CancelDelete
+                , Html.Events.onClick <| PageMsg.Internal CancelSearchAndDelete
                 ]
                 []
             , span
@@ -773,7 +837,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
                         [ class "mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left" ]
                         [ h2
                             [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100"
-                            , id ElementIds.modalTitle
+                            , id ElementIds.confirmDeleteModalTitle
                             ]
                             [ text "Delete item"
                             ]
@@ -800,8 +864,8 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
                         [ text "Delete" ]
                     , Components.Button.white True
                         [ class "mt-3 w-full sm:mt-0 sm:w-auto sm:text-sm"
-                        , Html.Events.onClick <| PageMsg.Internal CancelDelete
-                        , Extras.HtmlEvents.onEnterKey <| PageMsg.Internal CancelDelete
+                        , Html.Events.onClick <| PageMsg.Internal CancelSearchAndDelete
+                        , Extras.HtmlEvents.onEnter <| PageMsg.Internal CancelSearchAndDelete
                         ]
                         [ text "Cancel" ]
                     ]
@@ -912,6 +976,7 @@ viewCards model editable tabbable indexedGlossaryItems =
                             glossaryItem
                     )
             )
+        , viewSearchModal model.searchString
         , viewConfirmDeleteModal model.common.enableSavingChangesInMemory model.confirmDeleteIndex
         ]
 
@@ -1011,6 +1076,7 @@ viewQuickSearchButton =
             [ button
                 [ Html.Attributes.type_ "button"
                 , class "hidden w-full lg:flex items-center text-sm leading-6 text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-600 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800"
+                , Html.Events.onClick <| PageMsg.Internal StartSearch
                 , Accessibility.Aria.hidden True
                 ]
                 [ Icons.search
@@ -1122,6 +1188,7 @@ viewTopBar glossaryItems exportDropdownMenu =
             [ button
                 [ Html.Attributes.type_ "button"
                 , class "hidden ml-auto text-slate-500 w-8 h-8 -my-1 flex items-center justify-center hover:text-slate-600 lg:hidden dark:text-slate-400 dark:hover:text-slate-300"
+                , Html.Events.onClick <| PageMsg.Internal StartSearch
                 ]
                 [ span
                     [ class "sr-only" ]
@@ -1235,12 +1302,12 @@ view model =
                 [ Html.div
                     [ class "min-h-full"
                     , Extras.HtmlEvents.onKeydown
-                        (\code ->
-                            if code == Extras.HtmlEvents.enterKey then
+                        (\event ->
+                            if event == Extras.HtmlEvents.enter then
                                 Maybe.map (PageMsg.Internal << Delete) model.confirmDeleteIndex
 
-                            else if code == Extras.HtmlEvents.escapeKey then
-                                Just <| PageMsg.Internal CancelDelete
+                            else if event == Extras.HtmlEvents.escapeKey then
+                                Just <| PageMsg.Internal CancelSearchAndDelete
 
                             else
                                 Nothing

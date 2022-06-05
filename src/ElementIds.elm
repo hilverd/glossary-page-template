@@ -3,17 +3,18 @@ module ElementIds exposing
     , about
     , aboutLinkBody
     , aboutLinkHref
+    , confirmDeleteModalTitle
     , container
     , descriptionDetailsSingle
     , exportDropdownButton
     , glossaryItemDiv
     , indexForMobile
     , items
-    , modalTitle
     , orderItemsAlphabetically
     , orderItemsMostFrequentFirst
     , quickSearchButtonAndLetterGrid
     , reserved
+    , searchModalTitle
     , seeAlsoSelect
     , staticSidebarForDesktop
     , termIndexGroupLabel
@@ -74,9 +75,14 @@ orderItemsMostFrequentFirst =
     prefixed "order-items-most-frequent-first"
 
 
-modalTitle : String
-modalTitle =
-    prefixed "modal-title"
+searchModalTitle : String
+searchModalTitle =
+    prefixed "search-modal-title"
+
+
+confirmDeleteModalTitle : String
+confirmDeleteModalTitle =
+    prefixed "confirm-delete-modal-title"
 
 
 termInputField : TermIndex -> String
