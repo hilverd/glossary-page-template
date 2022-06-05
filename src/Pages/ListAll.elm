@@ -729,7 +729,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
     Html.div
         [ class "fixed z-10 inset-0 overflow-y-auto print:hidden"
         , Extras.HtmlAttribute.showIf (maybeIndexOfItemToDelete == Nothing) <| class "invisible"
-        , Extras.HtmlEvents.onEscape <| PageMsg.Internal CancelDelete
+        , Extras.HtmlEvents.onEscapeKey <| PageMsg.Internal CancelDelete
         , Accessibility.Aria.labelledBy ElementIds.modalTitle
         , Accessibility.Role.dialog
         , Accessibility.Aria.modal True
@@ -801,7 +801,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
                     , Components.Button.white True
                         [ class "mt-3 w-full sm:mt-0 sm:w-auto sm:text-sm"
                         , Html.Events.onClick <| PageMsg.Internal CancelDelete
-                        , Extras.HtmlEvents.onEnter <| PageMsg.Internal CancelDelete
+                        , Extras.HtmlEvents.onEnterKey <| PageMsg.Internal CancelDelete
                         ]
                         [ text "Cancel" ]
                     ]
@@ -1236,10 +1236,10 @@ view model =
                     [ class "min-h-full"
                     , Extras.HtmlEvents.onKeydown
                         (\code ->
-                            if code == Extras.HtmlEvents.enter then
+                            if code == Extras.HtmlEvents.enterKey then
                                 Maybe.map (PageMsg.Internal << Delete) model.confirmDeleteIndex
 
-                            else if code == Extras.HtmlEvents.escape then
+                            else if code == Extras.HtmlEvents.escapeKey then
                                 Just <| PageMsg.Internal CancelDelete
 
                             else

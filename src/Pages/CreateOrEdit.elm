@@ -381,7 +381,7 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                                 , Accessibility.Aria.label "Term"
                                 , Accessibility.Aria.required True
                                 , Html.Events.onInput (PageMsg.Internal << UpdateTerm termIndex)
-                                , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
+                                , Extras.HtmlEvents.onEnterKey <| PageMsg.Internal NoOp
                                 ]
                             ]
                         , div

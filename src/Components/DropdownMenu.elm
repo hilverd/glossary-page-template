@@ -213,7 +213,7 @@ view toParentMsg model body_ choices =
                                 Show
                 , Extras.HtmlEvents.onKeydown
                     (\code ->
-                        if code == Extras.HtmlEvents.enter then
+                        if code == Extras.HtmlEvents.enterKey then
                             Just <|
                                 case model_.visibility of
                                     Visible ->
@@ -239,10 +239,10 @@ view toParentMsg model body_ choices =
                                     Invisible ->
                                         toParentMsg Show
 
-                        else if code == Extras.HtmlEvents.escape then
+                        else if code == Extras.HtmlEvents.escapeKey then
                             Just <| toParentMsg StartHiding
 
-                        else if code == Extras.HtmlEvents.downArrow then
+                        else if code == Extras.HtmlEvents.downArrowKey then
                             let
                                 numberOfChoices =
                                     List.length choices
@@ -259,7 +259,7 @@ view toParentMsg model body_ choices =
                                         else
                                             toParentMsg NoOp
 
-                        else if code == Extras.HtmlEvents.upArrow then
+                        else if code == Extras.HtmlEvents.upArrowKey then
                             let
                                 numberOfChoices =
                                     List.length choices

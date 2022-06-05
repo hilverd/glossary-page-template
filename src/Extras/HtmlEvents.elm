@@ -1,61 +1,85 @@
 module Extras.HtmlEvents exposing
-    ( downArrow
-    , enter
-    , escape
+    ( KeyValue
+    , controlKey
+    , downArrowKey
+    , enterKey
+    , escapeKey
     , onClickPreventDefault
     , onClickPreventDefaultAndStopPropagation
     , onClickStopPropagation
-    , onEnter
-    , onEscape
+    , onEnterKey
+    , onEscapeKey
     , onKeydown
-    , upArrow
+    , upArrowKey
     )
 
 import Html exposing (Attribute)
-import Html.Events exposing (keyCode)
+import Html.Events
 import Json.Decode as Decode
 
 
-onKeydown : (Int -> Maybe msg) -> Attribute msg
+type KeyValue
+    = Character Char
+    | Control String
+
+
+toKeyValue : String -> KeyValue
+toKeyValue string =
+    case String.uncons string of
+        Just ( char, "" ) ->
+            Character char
+
+        _ ->
+            Control string
+
+
+onKeydown : (KeyValue -> Maybe msg) -> Attribute msg
 onKeydown f =
     Html.Events.custom "keydown" <|
-        Decode.andThen
-            (\code ->
-                case f code of
-                    Just msg ->
-                        Decode.succeed { message = msg, stopPropagation = True, preventDefault = True }
+        (Decode.field "key" Decode.string
+            |> Decode.map toKeyValue
+            |> Decode.andThen
+                (\code ->
+                    case f code of
+                        Just msg ->
+                            Decode.succeed { message = msg, stopPropagation = True, preventDefault = True }
 
-                    Nothing ->
-                        Decode.fail "no message for key"
-            )
-            keyCode
-
-
-upArrow : Int
-upArrow =
-    38
+                        Nothing ->
+                            Decode.fail "no message for key"
+                )
+        )
 
 
-downArrow : Int
-downArrow =
-    40
+upArrowKey : KeyValue
+upArrowKey =
+    Control "ArrowUp"
 
 
-enter : Int
-enter =
-    13
+downArrowKey : KeyValue
+downArrowKey =
+    Control "ArrowDown"
 
 
-escape : Int
-escape =
-    27
+enterKey : KeyValue
+enterKey =
+    Control "Enter"
 
 
-onEnter : msg -> Attribute msg
-onEnter msg =
+controlKey : KeyValue
+controlKey =
+    Control "Control"
+
+
+escapeKey : KeyValue
+escapeKey =
+    Control "Escape"
+
+
+onEnterKey : msg -> Attribute msg
+onEnterKey msg =
     onKeydown
         (\code ->
-            if code == enter then
+            if code == enterKey then
                 Just msg
 
             else
@@ -63,11 +87,11 @@ onEnter msg =
         )
 
 
-onEscape : msg -> Attribute msg
-onEscape msg =
+onEscapeKey : msg -> Attribute msg
+onEscapeKey msg =
     onKeydown
-        (\code ->
-            if code == escape then
+        (\key ->
+            if key == escapeKey then
                 Just msg
 
             else
