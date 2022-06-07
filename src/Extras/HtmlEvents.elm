@@ -1,6 +1,7 @@
 module Extras.HtmlEvents exposing
     ( KeyDownEvent
     , control
+    , controlK
     , downArrow
     , enter
     , escapeKey
@@ -10,6 +11,7 @@ module Extras.HtmlEvents exposing
     , onEnter
     , onEscape
     , onKeydown
+    , preventDefaultOnDecoder
     , upArrow
     )
 
@@ -39,22 +41,43 @@ toKeyValue string =
             Control string
 
 
-onKeydown : (KeyDownEvent -> Maybe msg) -> Attribute msg
-onKeydown f =
-    Html.Events.custom "keydown" <|
-        (Decode.map2 KeyDownEvent
-            (Decode.field "key" <| Decode.map toKeyValue <| Decode.string)
-            (Decode.field "ctrlKey" <| Decode.bool)
-            |> Decode.andThen
-                (\code ->
-                    case f code of
-                        Just msg ->
-                            Decode.succeed { message = msg, stopPropagation = True, preventDefault = True }
+preventDefaultOnDecoder : (KeyDownEvent -> Maybe ( msg, Bool )) -> Decode.Decoder ( msg, Bool )
+preventDefaultOnDecoder f =
+    Decode.map2 KeyDownEvent
+        (Decode.field "key" <| Decode.map toKeyValue <| Decode.string)
+        (Decode.field "ctrlKey" <| Decode.bool)
+        |> Decode.andThen
+            (\code ->
+                case f code of
+                    Just msgAndBool ->
+                        Decode.succeed msgAndBool
 
-                        Nothing ->
-                            Decode.fail "no message for key"
-                )
-        )
+                    Nothing ->
+                        Decode.fail "no message for key"
+            )
+
+
+detailedKeyDownEventDecoder :
+    (KeyDownEvent -> Maybe msg)
+    -> Decode.Decoder { message : msg, stopPropagation : Bool, preventDefault : Bool }
+detailedKeyDownEventDecoder f =
+    Decode.map2 KeyDownEvent
+        (Decode.field "key" <| Decode.map toKeyValue <| Decode.string)
+        (Decode.field "ctrlKey" <| Decode.bool)
+        |> Decode.andThen
+            (\code ->
+                case f code of
+                    Just msg ->
+                        Decode.succeed { message = msg, stopPropagation = True, preventDefault = True }
+
+                    Nothing ->
+                        Decode.fail "no message for key"
+            )
+
+
+onKeydown : (KeyDownEvent -> Maybe msg) -> Attribute msg
+onKeydown =
+    Html.Events.custom "keydown" << detailedKeyDownEventDecoder
 
 
 withoutModifiers : KeyValue -> KeyDownEvent
@@ -85,6 +108,11 @@ control =
 escapeKey : KeyDownEvent
 escapeKey =
     Control "Escape" |> withoutModifiers
+
+
+controlK : KeyDownEvent
+controlK =
+    { keyValue = Character 'k', controlKey = True }
 
 
 onEnter : msg -> Attribute msg

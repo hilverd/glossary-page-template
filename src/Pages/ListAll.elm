@@ -58,13 +58,18 @@ type MakingChanges
     | MakingChangesHelpExpanded
 
 
+type ModalDialog
+    = NoDialog
+    | SearchDialog String
+    | ConfirmDeleteDialog GlossaryItemIndex
+
+
 type alias Model =
     { common : CommonModel
     , makingChanges : MakingChanges
     , menuForMobileVisibility : MenuForMobileVisibility
-    , searchString : Maybe String
     , exportDropdownMenu : Components.DropdownMenu.Model
-    , confirmDeleteIndex : Maybe GlossaryItemIndex
+    , modalDialog : ModalDialog
     , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
     }
 
@@ -108,11 +113,10 @@ init editorIsRunning commonModel =
                     NoHelpForMakingChanges
       , common = commonModel
       , menuForMobileVisibility = Invisible
-      , searchString = Nothing
+      , modalDialog = NoDialog
       , exportDropdownMenu =
             Components.DropdownMenu.init
                 [ Components.DropdownMenu.id ElementIds.exportDropdownButton ]
-      , confirmDeleteIndex = Nothing
       , errorWhileDeleting = Nothing
       }
     , case commonModel.maybeIndex of
@@ -209,19 +213,14 @@ update msg model =
                 model.exportDropdownMenu
 
         StartSearch ->
-            ( { model | searchString = Just "" }, preventBackgroundScrolling () )
+            ( { model | modalDialog = SearchDialog "" }, preventBackgroundScrolling () )
 
         ConfirmDelete index ->
-            ( { model | confirmDeleteIndex = Just index }, preventBackgroundScrolling () )
+            ( { model | modalDialog = ConfirmDeleteDialog index }, preventBackgroundScrolling () )
 
         CancelSearchAndDelete ->
-            if model.confirmDeleteIndex /= Nothing || model.searchString /= Nothing then
-                ( { model
-                    | searchString = Nothing
-                    , confirmDeleteIndex = Nothing
-                  }
-                , allowBackgroundScrolling ()
-                )
+            if model.modalDialog /= NoDialog then
+                ( { model | modalDialog = NoDialog }, allowBackgroundScrolling () )
 
             else
                 ( model, Cmd.none )
@@ -233,10 +232,7 @@ update msg model =
                         updatedGlossaryItems =
                             GlossaryItems.remove index glossaryItems
                     in
-                    ( { model
-                        | confirmDeleteIndex = Nothing
-                        , errorWhileDeleting = Nothing
-                      }
+                    ( { model | modalDialog = NoDialog }
                     , Cmd.batch
                         [ patchHtmlFile model.common index updatedGlossaryItems
                         , allowBackgroundScrolling ()
@@ -976,8 +972,22 @@ viewCards model editable tabbable indexedGlossaryItems =
                             glossaryItem
                     )
             )
-        , viewSearchModal model.searchString
-        , viewConfirmDeleteModal model.common.enableSavingChangesInMemory model.confirmDeleteIndex
+        , viewSearchModal
+            (case model.modalDialog of
+                SearchDialog searchString ->
+                    Just searchString
+
+                _ ->
+                    Nothing
+            )
+        , viewConfirmDeleteModal model.common.enableSavingChangesInMemory
+            (case model.modalDialog of
+                ConfirmDeleteDialog indexOfItemToDelete ->
+                    Just indexOfItemToDelete
+
+                _ ->
+                    Nothing
+            )
         ]
 
 
@@ -1070,7 +1080,7 @@ viewBackToTopLink staticSidebar =
 viewQuickSearchButton : Html Msg
 viewQuickSearchButton =
     div
-        [ class "hidden px-3 pb-4 bg-white dark:bg-slate-900" ]
+        [ class "px-3 pb-4 bg-white dark:bg-slate-900" ]
         [ div
             [ class "bg-gray-50 dark:bg-slate-900 relative pointer-events-auto" ]
             [ button
@@ -1187,7 +1197,7 @@ viewTopBar glossaryItems exportDropdownMenu =
             [ class "pr-4" ]
             [ button
                 [ Html.Attributes.type_ "button"
-                , class "hidden ml-auto text-slate-500 w-8 h-8 -my-1 flex items-center justify-center hover:text-slate-600 lg:hidden dark:text-slate-400 dark:hover:text-slate-300"
+                , class "ml-auto text-slate-500 w-8 h-8 -my-1 flex items-center justify-center hover:text-slate-600 lg:hidden dark:text-slate-400 dark:hover:text-slate-300"
                 , Html.Events.onClick <| PageMsg.Internal StartSearch
                 ]
                 [ span
@@ -1228,7 +1238,7 @@ viewOrderItemsBy : Model -> Html Msg
 viewOrderItemsBy model =
     let
         tabbable =
-            model.confirmDeleteIndex == Nothing
+            model.modalDialog == NoDialog
     in
     div
         [ class "print:hidden pt-4 pb-6" ]
@@ -1291,8 +1301,8 @@ view model =
                 editable =
                     model.makingChanges == ReadyForMakingChanges
 
-                noModalDialogShown =
-                    model.confirmDeleteIndex == Nothing
+                noModalDialogShown_ =
+                    model.modalDialog == NoDialog
 
                 termIndex =
                     termIndexFromGlossaryItems glossaryItems
@@ -1300,21 +1310,41 @@ view model =
             { title = GlossaryTitle.toString model.common.title
             , body =
                 [ Html.div
-                    [ class "min-h-full"
-                    , Extras.HtmlEvents.onKeydown
-                        (\event ->
-                            if event == Extras.HtmlEvents.enter then
-                                Maybe.map (PageMsg.Internal << Delete) model.confirmDeleteIndex
+                    [ class "min-h-full focus:outline-none"
+                    , Html.Attributes.id ElementIds.outer
+                    , Accessibility.Key.tabbable True
+                    , Html.Events.preventDefaultOn "keydown"
+                        (Extras.HtmlEvents.preventDefaultOnDecoder
+                            (\event ->
+                                case model.modalDialog of
+                                    SearchDialog _ ->
+                                        if event == Extras.HtmlEvents.escapeKey || event == Extras.HtmlEvents.controlK then
+                                            Just <| ( PageMsg.Internal CancelSearchAndDelete, True )
 
-                            else if event == Extras.HtmlEvents.escapeKey then
-                                Just <| PageMsg.Internal CancelSearchAndDelete
+                                        else
+                                            Nothing
 
-                            else
-                                Nothing
+                                    ConfirmDeleteDialog index ->
+                                        if event == Extras.HtmlEvents.escapeKey then
+                                            Just <| ( PageMsg.Internal CancelSearchAndDelete, True )
+
+                                        else if event == Extras.HtmlEvents.enter then
+                                            Just <| ( PageMsg.Internal <| Delete index, True )
+
+                                        else
+                                            Nothing
+
+                                    NoDialog ->
+                                        if event == Extras.HtmlEvents.controlK then
+                                            Just <| ( PageMsg.Internal StartSearch, True )
+
+                                        else
+                                            Nothing
+                            )
                         )
                     ]
-                    [ viewMenuForMobile model noModalDialogShown termIndex
-                    , viewStaticSidebarForDesktop noModalDialogShown termIndex
+                    [ viewMenuForMobile model noModalDialogShown_ termIndex
+                    , viewStaticSidebarForDesktop noModalDialogShown_ termIndex
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar glossaryItems model.exportDropdownMenu
@@ -1328,11 +1358,11 @@ view model =
                                         [ Extras.Html.showIf (model.common.enableSavingChangesInMemory && model.makingChanges /= ReadyForMakingChanges) <|
                                             div
                                                 [ class "flex-none" ]
-                                                [ viewMakeChangesButton noModalDialogShown model.common ]
+                                                [ viewMakeChangesButton noModalDialogShown_ model.common ]
                                         , Extras.Html.showIf editable <|
                                             div
                                                 [ class "flex-none" ]
-                                                [ viewEditTitleAndAboutButton noModalDialogShown model.common ]
+                                                [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
                                         , div
                                             [ class "hidden lg:block ml-auto pb-3" ]
                                             [ viewExportButton glossaryItems model.exportDropdownMenu ]
@@ -1344,10 +1374,10 @@ view model =
                                     ]
                                 , case ( model.common.enableSavingChangesInMemory, model.makingChanges ) of
                                     ( False, MakingChangesHelpCollapsed ) ->
-                                        viewMakingChangesHelp model.common.filename noModalDialogShown False
+                                        viewMakingChangesHelp model.common.filename noModalDialogShown_ False
 
                                     ( False, MakingChangesHelpExpanded ) ->
-                                        viewMakingChangesHelp model.common.filename noModalDialogShown True
+                                        viewMakingChangesHelp model.common.filename noModalDialogShown_ True
 
                                     _ ->
                                         Extras.Html.nothing
@@ -1368,7 +1398,7 @@ view model =
                                                     [ a
                                                         [ target "_blank"
                                                         , href <| AboutLink.href aboutLink
-                                                        , Accessibility.Key.tabbable <| (model.confirmDeleteIndex == Nothing)
+                                                        , Accessibility.Key.tabbable noModalDialogShown_
                                                         ]
                                                         [ text <| AboutLink.body aboutLink ]
                                                     ]
@@ -1382,7 +1412,7 @@ view model =
                                         else
                                             GlossaryItems.orderedByFrequency
                                        )
-                                    |> viewCards model editable noModalDialogShown
+                                    |> viewCards model editable noModalDialogShown_
                                 ]
                             ]
                         ]

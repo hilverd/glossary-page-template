@@ -12,6 +12,7 @@ module ElementIds exposing
     , items
     , orderItemsAlphabetically
     , orderItemsMostFrequentFirst
+    , outer
     , quickSearchButtonAndLetterGrid
     , reserved
     , searchModalTitle
@@ -53,6 +54,11 @@ container =
 title : String
 title =
     prefixed "title"
+
+
+outer : String
+outer =
+    prefixed "outer"
 
 
 about : String

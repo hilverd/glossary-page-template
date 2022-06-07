@@ -101,4 +101,13 @@ function domReady(callback) {
 // Prevent FOUC
 domReady(() => {
     document.body.style.visibility = 'visible';
+
+    // Try to keep the focus on the element that receives overall keyboard shortcuts like Control-K
+    document.getElementById("glossary-page-outer")?.focus();
+
+    document.addEventListener("focusout", (e) => {
+        if (e.relatedTarget == null) {
+            document.getElementById("glossary-page-outer")?.focus();
+        }
+    })
 });
