@@ -15,6 +15,7 @@ module ElementIds exposing
     , outer
     , quickSearchButtonAndLetterGrid
     , reserved
+    , searchDialog
     , searchModalTitle
     , seeAlsoSelect
     , staticSidebarForDesktop
@@ -162,3 +163,8 @@ exportDropdownButton =
 abbreviationLabel : TermIndex -> String
 abbreviationLabel termIndex =
     prefixed <| "term-" ++ (termIndex |> TermIndex.toInt |> String.fromInt) ++ "-abbreviation"
+
+
+searchDialog : String
+searchDialog =
+    prefixed "search-dialog"

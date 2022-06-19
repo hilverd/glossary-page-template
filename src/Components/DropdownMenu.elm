@@ -180,10 +180,11 @@ configFromProperties =
 view :
     (Msg -> parentMsg)
     -> Model
+    -> Bool
     -> List (Html parentMsg)
     -> List (Choice parentMsg)
     -> Html parentMsg
-view toParentMsg model body_ choices =
+view toParentMsg model enabled body_ choices =
     let
         model_ =
             innerModel model
@@ -195,7 +196,7 @@ view toParentMsg model body_ choices =
         [ class "relative inline-block text-left" ]
         [ div
             []
-            [ Components.Button.white True
+            [ Components.Button.white enabled
                 [ class "w-full"
                 , Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
                 , Accessibility.Aria.expanded <| model_.visibility == Visible
@@ -239,7 +240,7 @@ view toParentMsg model body_ choices =
                                     Invisible ->
                                         toParentMsg Show
 
-                        else if event == Extras.HtmlEvents.escapeKey then
+                        else if event == Extras.HtmlEvents.escape then
                             Just <| toParentMsg StartHiding
 
                         else if event == Extras.HtmlEvents.downArrow then
@@ -333,6 +334,10 @@ view toParentMsg model body_ choices =
                 )
             ]
         ]
+
+
+
+-- SUBSCRIPTIONS
 
 
 subscriptions : Model -> Sub Msg

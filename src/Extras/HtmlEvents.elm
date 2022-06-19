@@ -3,8 +3,10 @@ module Extras.HtmlEvents exposing
     , control
     , controlK
     , downArrow
+    , end
     , enter
-    , escapeKey
+    , escape
+    , home
     , onClickPreventDefault
     , onClickPreventDefaultAndStopPropagation
     , onClickStopPropagation
@@ -105,9 +107,19 @@ control =
     Control "Control" |> withoutModifiers
 
 
-escapeKey : KeyDownEvent
-escapeKey =
+escape : KeyDownEvent
+escape =
     Control "Escape" |> withoutModifiers
+
+
+home : KeyDownEvent
+home =
+    Control "Home" |> withoutModifiers
+
+
+end : KeyDownEvent
+end =
+    Control "End" |> withoutModifiers
 
 
 controlK : KeyDownEvent
@@ -131,7 +143,7 @@ onEscape : msg -> Attribute msg
 onEscape msg =
     onKeydown
         (\event ->
-            if event == escapeKey then
+            if event == escape then
                 Just msg
 
             else
