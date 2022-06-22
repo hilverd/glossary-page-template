@@ -11,7 +11,8 @@ export default defineConfig({
                 glossary: path.resolve(__dirname, 'glossary.html'),
                 empty: path.resolve(__dirname, 'empty.html'),
                 "uk-parliament": path.resolve(__dirname, 'examples/uk-parliament.html'),
-                "open-glossary-of-edge-computing": path.resolve(__dirname, 'examples/open-glossary-of-edge-computing.html')
+                "open-glossary-of-edge-computing": path.resolve(__dirname, 'examples/open-glossary-of-edge-computing.html'),
+                "canadas-weather-and-meterology-glossary.html": path.resolve(__dirname, 'examples/canadas-weather-and-meterology-glossary.html')
             }
         }
     }
