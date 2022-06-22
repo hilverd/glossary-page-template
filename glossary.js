@@ -93,6 +93,10 @@ app.ports.preventBackgroundScrolling.subscribe(() => {
     document.querySelector('body').classList.toggle('overflow-hidden', true);
 });
 
+app.ports.scrollSearchResultIntoView.subscribe((elementId) => {
+    document.getElementById(elementId).scrollIntoView({ block: "nearest" });
+});
+
 function domReady(callback) {
     document.readyState === 'interactive' || document.readyState === 'complete' ?
         callback() : document.addEventListener('DOMContentLoaded', callback);

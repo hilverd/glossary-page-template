@@ -1,4 +1,4 @@
-module Components.SearchDialog exposing
+port module Components.SearchDialog exposing
     ( Model
     , Msg
     , SearchResult
@@ -97,6 +97,13 @@ innerModel model =
 
 
 
+-- PORTS
+
+
+port scrollSearchResultIntoView : String -> Cmd msg
+
+
+
 -- UPDATE
 
 
@@ -161,7 +168,9 @@ update updateParentModel toParentMsg msg model =
                     )
 
                 MakeSearchResultActive searchResultIndex ->
-                    ( { model_ | activeSearchResultIndex = Just searchResultIndex }, Cmd.none )
+                    ( { model_ | activeSearchResultIndex = Just searchResultIndex }
+                    , scrollSearchResultIntoView <| searchResultId searchResultIndex model_.idPrefix
+                    )
 
                 MakeSearchResultInactive searchResultIndex ->
                     ( { model_
@@ -205,7 +214,7 @@ update updateParentModel toParentMsg msg model =
                     in
                     ( { model_ | activeSearchResultIndex = activeSearchResultIndex_ }
                     , activeSearchResultIndex_
-                        |> Maybe.map (scrollSearchResultIntoView { idPrefix = model_.idPrefix })
+                        |> Maybe.map (\index -> scrollSearchResultIntoView <| searchResultId index model_.idPrefix)
                         |> Maybe.withDefault Cmd.none
                         |> Cmd.map toParentMsg
                     )
@@ -234,12 +243,6 @@ update updateParentModel toParentMsg msg model =
                         |> Maybe.withDefault ( model_, Cmd.none )
     in
     ( updateParentModel <| Model model1, cmd )
-
-
-scrollSearchResultIntoView : { idPrefix : String } -> SearchResultIndex -> Cmd Msg
-scrollSearchResultIntoView { idPrefix } searchResultIndex =
-    -- TODO
-    Cmd.none
 
 
 loadUrl :
