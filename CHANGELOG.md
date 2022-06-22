@@ -16,6 +16,12 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 ### Removed
 
+## [1.7.3] - 2022-06-22
+
+### Fixed
+
+- Add new example to Vite config so it gets compiled.
+
 ## [1.7.2] - 2022-06-22
 
 ### Added
@@ -327,7 +333,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.7.2...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.7.3...HEAD
+[1.7.3]: https://github.com/hilverd/glossary-page-template/compare/v1.7.2...v1.7.3
 [1.7.2]: https://github.com/hilverd/glossary-page-template/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/hilverd/glossary-page-template/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/hilverd/glossary-page-template/compare/v1.6.3...v1.7.0
