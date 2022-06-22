@@ -7,6 +7,7 @@ module Extras.HtmlEvents exposing
     , enter
     , escape
     , home
+    , n
     , onClickPreventDefault
     , onClickPreventDefaultAndStopPropagation
     , onClickStopPropagation
@@ -125,6 +126,11 @@ end =
 controlK : KeyDownEvent
 controlK =
     { keyValue = Character 'k', controlKey = True }
+
+
+n : KeyDownEvent
+n =
+    { keyValue = Character 'n', controlKey = False }
 
 
 onEnter : msg -> Attribute msg

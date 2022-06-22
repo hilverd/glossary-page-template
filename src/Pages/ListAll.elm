@@ -1361,6 +1361,13 @@ view model =
                                         if event == Extras.HtmlEvents.controlK then
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show, True )
 
+                                        else if model.makingChanges == ReadyForMakingChanges && event == Extras.HtmlEvents.n then
+                                            let
+                                                common_ =
+                                                    model.common
+                                            in
+                                            Just <| ( PageMsg.NavigateToCreateOrEdit { common_ | maybeIndex = Nothing }, True )
+
                                         else
                                             Nothing
                             )
