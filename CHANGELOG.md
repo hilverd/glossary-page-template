@@ -16,6 +16,12 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 ### Removed
 
+## [1.7.1] - 2022-06-22
+
+### Fixed
+
+- Improve arrow key behaviour for export dropdown menu.
+
 ## [1.7.0] - 2022-06-22
 
 ### Added
@@ -315,7 +321,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.7.1...HEAD
+[1.7.1]: https://github.com/hilverd/glossary-page-template/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/hilverd/glossary-page-template/compare/v1.6.3...v1.7.0
 [1.6.3]: https://github.com/hilverd/glossary-page-template/compare/v1.6.2...v1.6.3
 [1.6.2]: https://github.com/hilverd/glossary-page-template/compare/v1.6.1...v1.6.2
