@@ -212,10 +212,10 @@ view toParentMsg model enabled body_ choices =
 
                             Invisible ->
                                 Show
-                , Extras.HtmlEvents.onKeydown
-                    (\event ->
-                        if event == Extras.HtmlEvents.enter then
-                            Just <|
+                , Html.Events.preventDefaultOn "keydown"
+                    (Extras.HtmlEvents.preventDefaultOnDecoder
+                        (\event ->
+                            if event == Extras.HtmlEvents.enter then
                                 case model_.visibility of
                                     Visible ->
                                         case model_.activeChoice of
@@ -229,62 +229,55 @@ view toParentMsg model enabled body_ choices =
                                                                 Choice { onSelect } ->
                                                                     onSelect
                                                         )
-                                                    |> Maybe.withDefault (toParentMsg NoOp)
+                                                    |> Maybe.map (\x -> ( x, True ))
 
                                             Nothing ->
-                                                toParentMsg StartHiding
+                                                Just ( toParentMsg StartHiding, True )
 
                                     Disappearing ->
-                                        toParentMsg NoOp
+                                        Nothing
 
                                     Invisible ->
-                                        toParentMsg Show
+                                        Just ( toParentMsg Show, True )
 
-                        else if event == Extras.HtmlEvents.escape then
-                            Just <| toParentMsg StartHiding
+                            else if event == Extras.HtmlEvents.escape then
+                                Just ( toParentMsg StartHiding, True )
 
-                        else if event == Extras.HtmlEvents.downArrow then
-                            let
-                                numberOfChoices =
-                                    List.length choices
-                            in
-                            Just <|
+                            else if event == Extras.HtmlEvents.downArrow then
+                                let
+                                    numberOfChoices =
+                                        List.length choices
+                                in
                                 case model_.activeChoice of
                                     Just active ->
-                                        toParentMsg <| MakeChoiceActive <| remainderBy numberOfChoices (active + 1)
+                                        Just ( (active + 1) |> min (numberOfChoices - 1) |> max 0 |> MakeChoiceActive |> toParentMsg, True )
 
                                     Nothing ->
                                         if numberOfChoices > 0 then
-                                            toParentMsg <| MakeChoiceActive 0
+                                            Just ( toParentMsg <| MakeChoiceActive 0, True )
 
                                         else
-                                            toParentMsg NoOp
+                                            Nothing
 
-                        else if event == Extras.HtmlEvents.upArrow then
-                            let
-                                numberOfChoices =
-                                    List.length choices
-                            in
-                            Just <|
+                            else if event == Extras.HtmlEvents.upArrow then
+                                let
+                                    numberOfChoices =
+                                        List.length choices
+                                in
                                 case model_.activeChoice of
                                     Just active ->
-                                        toParentMsg <|
-                                            MakeChoiceActive <|
-                                                if active == 0 then
-                                                    numberOfChoices - 1
-
-                                                else
-                                                    active - 1
+                                        Just ( (active - 1) |> min (numberOfChoices - 1) |> max 0 |> MakeChoiceActive |> toParentMsg, True )
 
                                     Nothing ->
                                         if numberOfChoices > 0 then
-                                            toParentMsg <| MakeChoiceActive <| numberOfChoices - 1
+                                            Just ( toParentMsg <| MakeChoiceActive <| numberOfChoices - 1, True )
 
                                         else
-                                            toParentMsg <| NoOp
+                                            Nothing
 
-                        else
-                            Nothing
+                            else
+                                Nothing
+                        )
                     )
                 ]
                 (body_
