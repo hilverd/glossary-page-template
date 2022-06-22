@@ -379,7 +379,7 @@ view toParentMsg model searchTerm searchResults =
         , class "relative z-10"
         ]
         [ Html.div
-            [ class "fixed inset-0 bg-gray-500 dark:bg-gray-800 bg-opacity-25 dark:bg-opacity-75 transition-opacity motion-reduce:transition-none"
+            [ class "fixed inset-0 bg-gray-500 dark:bg-gray-800 bg-opacity-50 dark:bg-opacity-75 transition-opacity motion-reduce:transition-none"
             , class "invisible" |> Extras.HtmlAttribute.showIf (model_.visibility == Invisible)
             , if model_.visibility == Visible then
                 class "ease-out duration-300 opacity-100"
