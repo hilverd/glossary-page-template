@@ -18,6 +18,8 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ## [1.7.0] - 2022-06-22
 
+### Added
+
 - Add "Quick search" button.
 
 ## [1.6.3] - 2022-05-27
