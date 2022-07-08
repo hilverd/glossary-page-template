@@ -511,7 +511,15 @@ viewMakingChangesHelp filename tabbable expanded =
             div []
                 [ p
                     [ class "mt-3 max-w-xl" ]
-                    [ text "This page includes a web interface for making changes that are saved back to the HTML file itself. If you're on macOS or Linux and have "
+                    [ text "This page includes a web interface for making changes that are saved back to the HTML file itself."
+                    , text " This is meant to be used "
+                    , span [ class "font-semibold" ] [ text "locally" ]
+                    , text " by a "
+                    , span [ class "font-semibold" ] [ text "single user" ]
+                    , text " at a time and works best if the file is kept under version control."
+                    ]
+                , p []
+                    [ text "If you're on macOS or Linux and have "
                     , a
                         [ href "https://nodejs.org/"
                         , Html.Attributes.target "_blank"
@@ -536,9 +544,6 @@ viewMakingChangesHelp filename tabbable expanded =
                             text <| " | FILE=" ++ (filename |> Maybe.withDefault defaultFilename) ++ " node"
                         ]
                     ]
-                , p
-                    [ class "mt-5 max-w-xl" ]
-                    [ text "This works best if the file is under version control." ]
                 , p
                     [ class "mt-3 max-w-xl" ]
                     [ text "You can hide these instructions altogether by setting the "
