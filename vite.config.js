@@ -15,5 +15,8 @@ export default defineConfig({
                 "canadas-weather-and-meterology-glossary.html": path.resolve(__dirname, 'examples/canadas-weather-and-meterology-glossary.html')
             }
         }
+    },
+    server: {
+        port: 3000
     }
 })
