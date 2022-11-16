@@ -24,5 +24,11 @@
     "tailwindcss": "^3.2.4",
     "vite": "^3.2.4",
     "vite-plugin-elm": "^2.7.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "minimist@<1.2.6": ">=1.2.6",
+      "json-schema@<0.4.0": ">=0.4.0"
+    }
   }
 }

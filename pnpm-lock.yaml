@@ -1,5 +1,9 @@
 lockfileVersion: 5.4
 
+overrides:
+  minimist@<1.2.6: '>=1.2.6'
+  json-schema@<0.4.0: '>=0.4.0'
+
 specifiers:
   '@tailwindcss/forms': ^0.5.3
   autoprefixer: ^10.4.13
@@ -814,8 +818,8 @@ packages:
     resolution: {integrity: sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==}
     dev: true
 
-  /json-schema/0.2.3:
-    resolution: {integrity: sha1-tIDIkuWaLwWVTOcnvT8qTogvnhM=}
+  /json-schema/0.4.0:
+    resolution: {integrity: sha512-es94M3nTIfsEPisRafak+HDLfHXnKBhV3vU5eqPcS3flIWqcxJWgXHXiey3YrpaNsanY5ei1VoYEbOzijuq9BA==}
     dev: true
 
   /json-stringify-safe/5.0.1:
@@ -828,7 +832,7 @@ packages:
     dependencies:
       assert-plus: 1.0.0
       extsprintf: 1.3.0
-      json-schema: 0.2.3
+      json-schema: 0.4.0
       verror: 1.10.0
     dev: true
 
