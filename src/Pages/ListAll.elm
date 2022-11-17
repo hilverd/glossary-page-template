@@ -52,11 +52,8 @@ type alias MenuForMobileVisibility =
     GradualVisibility
 
 
-type MakingChanges
-    = NoHelpForMakingChanges
-    | ReadyForMakingChanges
-    | MakingChangesHelpCollapsed
-    | MakingChangesHelpExpanded
+type alias MakingChanges =
+    Bool
 
 
 type alias SearchDialog =
@@ -80,7 +77,6 @@ type alias Model =
 type InternalMsg
     = NoOp
     | MakeChanges
-    | ToggleMakingChangesHelp
     | ShowMenuForMobile
     | StartHidingMenuForMobile
     | CompleteHidingMenuForMobile
@@ -106,16 +102,7 @@ type alias Msg =
 
 init : Bool -> CommonModel -> ( Model, Cmd Msg )
 init editorIsRunning commonModel =
-    ( { makingChanges =
-            case ( editorIsRunning, commonModel.enableHelpForMakingChanges ) of
-                ( True, _ ) ->
-                    ReadyForMakingChanges
-
-                ( False, True ) ->
-                    MakingChangesHelpCollapsed
-
-                ( False, False ) ->
-                    NoHelpForMakingChanges
+    ( { makingChanges = editorIsRunning
       , common = commonModel
       , menuForMobileVisibility = Invisible
       , confirmDeleteIndex = Nothing
@@ -166,22 +153,7 @@ update msg model =
             ( model, Cmd.none )
 
         MakeChanges ->
-            ( { model | makingChanges = ReadyForMakingChanges }, Cmd.none )
-
-        ToggleMakingChangesHelp ->
-            let
-                makingChangesToggled =
-                    case model.makingChanges of
-                        MakingChangesHelpExpanded ->
-                            MakingChangesHelpCollapsed
-
-                        MakingChangesHelpCollapsed ->
-                            MakingChangesHelpExpanded
-
-                        _ ->
-                            model.makingChanges
-            in
-            ( { model | makingChanges = makingChangesToggled }, Cmd.none )
+            ( { model | makingChanges = True }, Cmd.none )
 
         ShowMenuForMobile ->
             ( { model | menuForMobileVisibility = Visible }
@@ -478,37 +450,22 @@ scrollToTopInElement id =
 -- VIEW
 
 
-viewMakingChangesHelp : Maybe String -> Bool -> Bool -> Html Msg
-viewMakingChangesHelp filename tabbable expanded =
+viewMakingChangesHelp : Maybe String -> Bool -> Html Msg
+viewMakingChangesHelp filename tabbable =
     div
         [ class "mb-5 rounded-md overflow-x-auto bg-amber-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 print:hidden"
-        , class <|
-            if expanded then
-                "p-4"
-
-            else
-                "pt-4 pr-4 pl-4 pb-2"
+        , class "pt-4 pr-4 pl-4 pb-2"
         ]
-        [ Html.h3
-            [ class "inline-flex text-lg leading-6 items-center font-medium text-gray-900 dark:text-gray-100 select-none"
-            , Html.Events.onClick <| PageMsg.Internal ToggleMakingChangesHelp
-            ]
-            [ span
-                [ class "text-gray-500 dark:text-gray-300" ]
-                [ if expanded then
-                    Icons.chevronDown
-                        [ Svg.Attributes.class "h-5 w-5 mb-0.5" ]
-
-                  else
-                    Icons.chevronRight
-                        [ Svg.Attributes.class "h-5 w-5 mb-0.5" ]
+        [ details
+            []
+            [ summary
+                [ class "mb-1 text-lg leading-6 items-center font-medium text-gray-900 dark:text-gray-100 select-none" ]
+                [ span
+                    [ class "ml-2" ]
+                    [ text "How to Make Changes" ]
                 ]
-            , span
-                [ class "ml-2" ]
-                [ text "How to Make Changes" ]
-            ]
-        , Extras.Html.showIf expanded <|
-            div []
+            , div
+                [ class "mb-1" ]
                 [ p
                     [ class "mt-3 max-w-xl" ]
                     [ text "This page includes a web interface for making changes that are saved back to the HTML file itself."
@@ -555,6 +512,7 @@ viewMakingChangesHelp filename tabbable expanded =
                     , text " element."
                     ]
                 ]
+            ]
         ]
 
 
@@ -1327,7 +1285,7 @@ view model =
         Ok glossaryItems ->
             let
                 editable =
-                    model.makingChanges == ReadyForMakingChanges
+                    model.makingChanges
 
                 noModalDialogShown_ =
                     noModalDialogShown model
@@ -1366,7 +1324,7 @@ view model =
                                         if event == Extras.HtmlEvents.controlK then
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show, True )
 
-                                        else if model.makingChanges == ReadyForMakingChanges && event == Extras.HtmlEvents.n then
+                                        else if model.makingChanges && event == Extras.HtmlEvents.n then
                                             let
                                                 common_ =
                                                     model.common
@@ -1390,7 +1348,7 @@ view model =
                                     [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
                                     [ div
                                         [ class "flex flex-row justify-start lg:justify-end" ]
-                                        [ Extras.Html.showIf (model.common.enableSavingChangesInMemory && model.makingChanges /= ReadyForMakingChanges) <|
+                                        [ Extras.Html.showIf (model.common.enableSavingChangesInMemory && not model.makingChanges) <|
                                             div
                                                 [ class "flex-none" ]
                                                 [ viewMakeChangesButton noModalDialogShown_ model.common ]
@@ -1402,20 +1360,13 @@ view model =
                                             [ class "hidden lg:block ml-auto pb-3" ]
                                             [ viewExportButton noModalDialogShown_ glossaryItems model.exportDropdownMenu ]
                                         ]
-                                    , Extras.Html.showIf (model.common.enableSavingChangesInMemory && model.makingChanges == ReadyForMakingChanges) <|
+                                    , Extras.Html.showIf (model.common.enableSavingChangesInMemory && model.makingChanges) <|
                                         div
                                             [ class "mb-5 sm:mb-4 text-sm text-gray-500 dark:text-gray-400" ]
                                             [ text Components.Copy.sandboxModeMessage ]
                                     ]
-                                , case ( model.common.enableSavingChangesInMemory, model.makingChanges ) of
-                                    ( False, MakingChangesHelpCollapsed ) ->
-                                        viewMakingChangesHelp model.common.filename noModalDialogShown_ False
-
-                                    ( False, MakingChangesHelpExpanded ) ->
-                                        viewMakingChangesHelp model.common.filename noModalDialogShown_ True
-
-                                    _ ->
-                                        Extras.Html.nothing
+                                , viewMakingChangesHelp model.common.filename noModalDialogShown_
+                                    |> Extras.Html.showIf (not model.common.enableSavingChangesInMemory)
                                 , h1
                                     [ id ElementIds.title ]
                                     [ text <| GlossaryTitle.toString model.common.title ]
