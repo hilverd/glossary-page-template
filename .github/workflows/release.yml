@@ -20,7 +20,8 @@ jobs:
           node-version: "16"
           cache: "pnpm"
       - run: pnpm install
-      - run: pnpm run build --if-present
+      - run: pnpx elm-test
+      - run: pnpm run build
       - name: Prepare release
         run: ./bin/prepare-release
       - name: Release
