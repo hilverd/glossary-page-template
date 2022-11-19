@@ -1,5 +1,14 @@
 module ApplicationShell exposing (main)
 
+{-| The application shell which shows different "pages" depending on the application state.
+
+
+# Definition
+
+@docs main
+
+-}
+
 import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
@@ -20,6 +29,8 @@ import Url
 -- MODEL
 
 
+{-| The main function for the application.
+-}
 main : Program Flags Model Msg
 main =
     Browser.document
