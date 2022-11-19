@@ -30,4 +30,24 @@ suite =
                         |> Extras.Array.delete 2
                         |> Expect.equal array
             ]
+        , describe "Array.update"
+            [ test "updates an element in an array" <|
+                \_ ->
+                    let
+                        array =
+                            Array.fromList [ 0, 1, 2, 3 ]
+                    in
+                    array
+                        |> Extras.Array.update ((*) 4) 1
+                        |> Expect.equal (Array.fromList [ 0, 4, 2, 3 ])
+            , test "does nothing if index is out of bounds" <|
+                \_ ->
+                    let
+                        array =
+                            Array.fromList [ "a", "b" ]
+                    in
+                    array
+                        |> Extras.Array.update (always "z") 2
+                        |> Expect.equal array
+            ]
         ]
