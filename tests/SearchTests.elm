@@ -1,4 +1,4 @@
-module Extras.SearchTests exposing (..)
+module SearchTests exposing (..)
 
 import Components.SearchDialog exposing (searchResult)
 import Data.GlossaryItem as GlossaryItem
