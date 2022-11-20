@@ -1,24 +1,69 @@
-module Extras.HtmlTree exposing (Attribute, HtmlTree(..), escape, toHtml)
+module Extras.HtmlTree exposing
+    ( Attribute, HtmlTree(..)
+    , toHtml, escape
+    )
+
+{-| An `HtmlTree` represents some HTML content that is to be written to a file.
+
+
+# Type and Constructors
+
+@docs Attribute, HtmlTree
+
+
+# Converting to a String
+
+@docs toHtml, escape
+
+-}
 
 import Http exposing (Response(..))
 
 
+{-| An `Attribute` is a `name` / `value` pair that represents a normal HTML attribute.
+-}
 type alias Attribute =
     { name : String
     , value : String
     }
 
 
+{-| An `HtmlTree` is either a `Leaf` node containing a text body without any children, or it is an inner `Node` with
+
+  - a tag name,
+  - a Boolean value indicating whether or not its children are to be formatted,
+  - zero or more attributes, and
+  - zero or more children.
+
+-}
 type HtmlTree
     = Leaf String
     | Node String Bool (List Attribute) (List HtmlTree)
 
 
+{-| Format the given `HtmlTree` as a string.
+
+    toHtml (Leaf "Foo") --> "    Foo"
+
+    toHtml (Node "p" False [ Attribute "class" "ml-2" ] [ Leaf "Hello" ]) --> """    <p class="ml-2">Hello</p>"""
+
+    toHtml (Node "p" True [ Attribute "class" "ml-2" ] [ Leaf "Hello" ]) --> """    <p class="ml-2">\n        Hello\n    </p>"""
+
+-}
 toHtml : HtmlTree -> String
 toHtml =
     toIndentedHtml 1 0 True
 
 
+{-| Perform HTML escaping on the given string, transforming special characters to HTML entities.
+
+    escape "Q&A" --> "Q&amp;A"
+
+    escape "<p>Hello 'world'</p>" --> "&lt;p&gt;Hello &#39;world&#39;&lt;/p&gt;"
+
+    escape "\"" --> "&quot;"
+
+-}
 escape : String -> String
 escape string =
     string

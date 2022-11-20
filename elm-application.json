@@ -4,6 +4,7 @@
     "version": "1.7.4",
     "exposed-modules": [
         "ApplicationShell",
-        "Extras.Array"
+        "Extras.Array",
+        "Extras.HtmlTree"
     ]
 }
