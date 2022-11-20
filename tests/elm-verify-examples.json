@@ -1,0 +1,7 @@
+{
+    "root": "../src",
+    "tests": [
+        "Extras.Array",
+        "./README.md"
+    ]
+}

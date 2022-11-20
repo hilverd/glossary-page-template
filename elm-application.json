@@ -3,6 +3,7 @@
     "summary": "Create a glossary as a single HTML page hosted anywhere.",
     "version": "1.7.4",
     "exposed-modules": [
-        "ApplicationShell"
+        "ApplicationShell",
+        "Extras.Array"
     ]
 }
