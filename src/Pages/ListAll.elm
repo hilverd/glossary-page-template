@@ -228,16 +228,8 @@ update msg model =
                 searchDialog0 =
                     model.searchDialog
 
-                terms : List GlossaryItem.Term
-                terms =
-                    model.common.loadedGlossaryItems
-                        |> Result.toMaybe
-                        |> Maybe.map GlossaryItems.orderedAlphabetically
-                        |> Maybe.withDefault []
-                        |> List.concatMap (Tuple.second >> .terms)
-
                 results =
-                    Search.search searchTerm terms
+                    Search.search searchTerm model.common.loadedGlossaryItems
               in
               { model
                 | searchDialog =
