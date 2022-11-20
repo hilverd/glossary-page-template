@@ -9,6 +9,7 @@ module Data.GlossaryItem exposing
     )
 
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
+import Extras.Url exposing (fragmentOnly)
 import Json.Decode as Decode exposing (Decoder)
 
 
@@ -151,9 +152,9 @@ toHtmlTree glossaryItem =
 
 hrefToTerm : Term -> HtmlTree.Attribute
 hrefToTerm term =
-    HtmlTree.Attribute "href" ("#" ++ term.id)
+    HtmlTree.Attribute "href" (fragmentOnly term.id)
 
 
 hrefFromRelatedTerm : RelatedTerm -> HtmlTree.Attribute
 hrefFromRelatedTerm relatedTerm =
-    HtmlTree.Attribute "href" ("#" ++ relatedTerm.idReference)
+    HtmlTree.Attribute "href" (fragmentOnly relatedTerm.idReference)

@@ -2,6 +2,7 @@
     "root": "../src",
     "tests": [
         "Extras.Array",
-        "Extras.HtmlTree"
+        "Extras.HtmlTree",
+        "Extras.Url"
     ]
 }

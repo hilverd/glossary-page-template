@@ -5,6 +5,7 @@
     "exposed-modules": [
         "ApplicationShell",
         "Extras.Array",
-        "Extras.HtmlTree"
+        "Extras.HtmlTree",
+        "Extras.Url"
     ]
 }

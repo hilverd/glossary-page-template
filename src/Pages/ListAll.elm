@@ -26,6 +26,7 @@ import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
 import Extras.Task
+import Extras.Url exposing (fragmentOnly)
 import Html
 import Html.Attributes exposing (class, for, href, id, target)
 import Html.Events
@@ -34,6 +35,7 @@ import Icons
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
 import Process
+import Search
 import Svg.Attributes exposing (fill, height, stroke, width)
 import Task
 
@@ -226,9 +228,6 @@ update msg model =
                 searchDialog0 =
                     model.searchDialog
 
-                searchTermNormalised =
-                    searchTerm |> String.trim |> String.toLower
-
                 terms : List GlossaryItem.Term
                 terms =
                     model.common.loadedGlossaryItems
@@ -238,19 +237,7 @@ update msg model =
                         |> List.concatMap (Tuple.second >> .terms)
 
                 results =
-                    if String.isEmpty searchTermNormalised then
-                        []
-
-                    else
-                        terms
-                            |> List.filterMap
-                                (\term ->
-                                    if String.contains searchTermNormalised (String.toLower term.body) then
-                                        Just <| Components.SearchDialog.searchResult ("#" ++ term.id) term.body
-
-                                    else
-                                        Nothing
-                                )
+                    Search.search searchTerm terms
               in
               { model
                 | searchDialog =
@@ -521,7 +508,7 @@ viewTermIndexItem tabbable term =
     li []
         [ Html.a
             [ class "block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
-            , Html.Attributes.href <| "#" ++ term.id
+            , Html.Attributes.href <| fragmentOnly term.id
             , Accessibility.Key.tabbable tabbable
             , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
             ]
@@ -645,7 +632,7 @@ viewGlossaryTerm tabbable term =
         , span
             [ class "silcrow invisible group-hover:visible hover:visible" ]
             [ Html.a
-                [ "#" ++ term.id |> Html.Attributes.href
+                [ fragmentOnly term.id |> Html.Attributes.href
                 , Accessibility.Key.tabbable tabbable
                 ]
                 [ text "§" ]
@@ -679,7 +666,7 @@ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails relatedTerms =
                         |> List.map
                             (\relatedTerm ->
                                 Html.a
-                                    [ "#" ++ relatedTerm.idReference |> Html.Attributes.href
+                                    [ fragmentOnly relatedTerm.idReference |> Html.Attributes.href
                                     , Accessibility.Key.tabbable tabbable
                                     ]
                                     [ text relatedTerm.body ]
@@ -1039,7 +1026,7 @@ viewBackToTopLink staticSidebar tabbable =
     div
         [ class "bg-white dark:bg-slate-900 pb-3 pointer-events-auto text-right" ]
         [ Html.a
-            [ href <| "#" ++ ElementIds.container
+            [ href <| fragmentOnly ElementIds.container
             , Extras.HtmlEvents.onClickStopPropagation <|
                 PageMsg.Internal <|
                     BackToTop staticSidebar

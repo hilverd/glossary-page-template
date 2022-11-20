@@ -21,6 +21,7 @@ import Browser.Events as Events
 import Components.Button
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
+import Extras.Url exposing (fragmentOnly)
 import Html
 import Html.Attributes exposing (attribute, class, href)
 import Html.Events
