@@ -2,23 +2,21 @@ module Search exposing (..)
 
 import Components.SearchDialog as SearchDialog
 import Data.GlossaryItem as GlossaryItem
-import Data.GlossaryItems as GlossaryItems
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Extras.Url
 
 
-search : String -> LoadedGlossaryItems -> List SearchDialog.SearchResult
-search searchTerm loadedGlossaryItems =
+search : String -> GlossaryItems -> List SearchDialog.SearchResult
+search searchTerm glossaryItems =
     let
         searchTermNormalised =
             searchTerm |> String.trim |> String.toLower
 
         terms : List GlossaryItem.Term
         terms =
-            loadedGlossaryItems
-                |> Result.toMaybe
-                |> Maybe.map GlossaryItems.orderedAlphabetically
-                |> Maybe.withDefault []
+            glossaryItems
+                |> GlossaryItems.orderedByFrequency
                 |> List.concatMap (Tuple.second >> .terms)
     in
     if String.isEmpty searchTermNormalised then

@@ -229,7 +229,10 @@ update msg model =
                     model.searchDialog
 
                 results =
-                    Search.search searchTerm model.common.loadedGlossaryItems
+                    model.common.loadedGlossaryItems
+                        |> Result.toMaybe
+                        |> Maybe.withDefault (GlossaryItems.fromList [])
+                        |> Search.search searchTerm
               in
               { model
                 | searchDialog =

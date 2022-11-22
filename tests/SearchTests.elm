@@ -2,8 +2,7 @@ module SearchTests exposing (..)
 
 import Components.SearchDialog exposing (searchResult)
 import Data.GlossaryItem as GlossaryItem
-import Data.GlossaryItems as GlossaryItems
-import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Expect
 import Search
 import Test exposing (..)
@@ -17,17 +16,28 @@ termFromBody body =
     }
 
 
-loadedGlossaryItems : LoadedGlossaryItems
+loadedGlossaryItems : GlossaryItems
 loadedGlossaryItems =
     let
-        actOfParliament =
-            { terms = [ termFromBody "Acts of Parliament" ]
-            , details = [ "An Act of Parliament (also called a statute) is a law made by the UK Parliament. All Acts start as bills introduced in either the Commons or the Lords. When a bill has been agreed by both Houses of Parliament and has been given Royal Assent by the Monarch, it becomes an Act. Acts are known as ‘primary legislation’ because they do not depend on other legislative authority." ]
+        one =
+            { terms = [ termFromBody "One" ]
+            , details = [ "One" ]
+            , relatedTerms = [ { idReference = "#Two", body = "Two" } ]
+            }
+
+        two =
+            { terms = [ termFromBody "Two" ]
+            , details = [ "Two" ]
             , relatedTerms = []
             }
+
+        three =
+            { terms = [ termFromBody "Three" ]
+            , details = [ "Three" ]
+            , relatedTerms = [ { idReference = "#Two", body = "Two" } ]
+            }
     in
-    GlossaryItems.fromList [ actOfParliament ]
-        |> Result.Ok
+    GlossaryItems.fromList [ one, two, three ]
 
 
 suite : Test
@@ -37,7 +47,8 @@ suite =
             [ test "returns search results sorted by relevance for a given search term" <|
                 \_ ->
                     loadedGlossaryItems
-                        |> Search.search "par"
-                        |> Expect.equal [ searchResult "#Acts_of_Parliament" "Acts of Parliament" ]
+                        |> Search.search "Two"
+                        |> Expect.equal
+                            [ searchResult "#Two" "Two" ]
             ]
         ]
