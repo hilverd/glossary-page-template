@@ -837,8 +837,8 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
         ]
 
 
-viewMakeChangesButton : Bool -> CommonModel -> Html Msg
-viewMakeChangesButton tabbable common =
+viewMakeChangesButton : Bool -> Html Msg
+viewMakeChangesButton tabbable =
     div
         [ class "pb-6 print:hidden" ]
         [ Components.Button.white True
@@ -1333,7 +1333,7 @@ view model =
                                         [ Extras.Html.showIf (model.common.enableSavingChangesInMemory && not model.makingChanges) <|
                                             div
                                                 [ class "flex-none" ]
-                                                [ viewMakeChangesButton noModalDialogShown_ model.common ]
+                                                [ viewMakeChangesButton noModalDialogShown_ ]
                                         , Extras.Html.showIf editable <|
                                             div
                                                 [ class "flex-none" ]

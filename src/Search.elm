@@ -3,7 +3,6 @@ module Search exposing (..)
 import Components.SearchDialog as SearchDialog
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
-import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Extras.Url
 
 
