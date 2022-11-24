@@ -12,13 +12,15 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [1.8.4] - 2022-11-24
 
 ### Changed
 
 - Order search results based on frequency.
-
-### Fixed
-### Removed
 
 ## [1.7.4] - 2022-07-08
 
@@ -343,7 +345,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.7.4...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.8.4...HEAD
+[1.8.4]: https://github.com/hilverd/glossary-page-template/compare/v1.7.4...v1.8.4
 [1.7.4]: https://github.com/hilverd/glossary-page-template/compare/v1.7.3...v1.7.4
 [1.7.3]: https://github.com/hilverd/glossary-page-template/compare/v1.7.2...v1.7.3
 [1.7.2]: https://github.com/hilverd/glossary-page-template/compare/v1.7.1...v1.7.2
