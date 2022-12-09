@@ -20,8 +20,8 @@ jobs:
           node-version: "16"
           cache: "pnpm"
       - run: pnpm install
-      - run: pnpx elm-verify-examples
-      - run: pnpx elm-test
+      - run: pnpm exec elm-verify-examples
+      - run: pnpm exec elm-test
       - run: pnpm run build
       - name: Prepare release
         run: ./bin/prepare-release
