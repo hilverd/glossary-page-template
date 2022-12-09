@@ -12,6 +12,7 @@ import Components.Copy
 import Components.DropdownMenu
 import Components.SearchDialog
 import Data.AboutLink as AboutLink
+import Data.AboutParagraph as AboutParagraph
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -1358,7 +1359,7 @@ view model =
                                 [ div
                                     [ id ElementIds.about ]
                                     [ p []
-                                        [ text model.common.aboutParagraph ]
+                                        [ text <| AboutParagraph.toString model.common.aboutParagraph ]
                                     , ul [] <|
                                         List.map
                                             (\aboutLink ->

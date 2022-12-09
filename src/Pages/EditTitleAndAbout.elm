@@ -11,6 +11,7 @@ import Components.Copy
 import Components.Form
 import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
+import Data.AboutParagraph as AboutParagraph
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import ElementIds
@@ -129,7 +130,7 @@ update msg model =
                             common1 =
                                 { common0
                                     | title = model.form |> Form.titleField |> .body |> GlossaryTitle.fromString
-                                    , aboutParagraph = model.form |> Form.aboutParagraphField |> .body
+                                    , aboutParagraph = model.form |> Form.aboutParagraphField |> .body |> AboutParagraph.fromString
                                     , aboutLinks =
                                         model.form
                                             |> Form.aboutLinkFields

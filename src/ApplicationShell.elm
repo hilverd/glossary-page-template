@@ -13,6 +13,7 @@ import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
 import Data.AboutLink as AboutLink
+import Data.AboutParagraph as AboutParagraph
 import Data.GlossaryTitle as GlossaryTitle
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
 import Html
@@ -82,6 +83,7 @@ init flags =
             flags
                 |> Decode.decodeValue (Decode.field "aboutParagraph" Decode.string)
                 |> Result.withDefault "Element not found"
+                |> AboutParagraph.fromString
 
         aboutLinks =
             flags

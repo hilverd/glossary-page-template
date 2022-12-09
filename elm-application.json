@@ -5,6 +5,7 @@
     "exposed-modules": [
         "ApplicationShell",
         "Data.AboutLink",
+        "Data.AboutParagraph",
         "Data.GlossaryItem",
         "Data.GlossaryItemIndex",
         "Data.GlossaryItems",

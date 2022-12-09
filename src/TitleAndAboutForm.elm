@@ -21,6 +21,7 @@ module TitleAndAboutForm exposing
 import Array exposing (Array)
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
+import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Extras.Array
 
@@ -110,7 +111,12 @@ validate form =
         validatedAboutParagraphField =
             { aboutParagraphField0
                 | validationError =
-                    if aboutParagraphField0 |> .body |> String.trim |> String.isEmpty then
+                    if
+                        aboutParagraphField0
+                            |> .body
+                            |> String.trim
+                            |> String.isEmpty
+                    then
                         Just cannotBeEmptyMessage
 
                     else
@@ -147,11 +153,11 @@ validate form =
         }
 
 
-create : GlossaryTitle -> String -> List AboutLink -> TitleAndAboutForm
+create : GlossaryTitle -> AboutParagraph -> List AboutLink -> TitleAndAboutForm
 create title aboutParagraph aboutLinks =
     TitleAndAboutForm
         { titleField = { body = GlossaryTitle.toString title, validationError = Nothing }
-        , aboutParagraphField = { body = aboutParagraph, validationError = Nothing }
+        , aboutParagraphField = { body = AboutParagraph.toString aboutParagraph, validationError = Nothing }
         , aboutLinkFields =
             aboutLinks
                 |> List.map
@@ -200,7 +206,11 @@ updateAboutParagraph body titleAndAboutForm =
                 aboutParagraphField0 =
                     form.aboutParagraphField
             in
-            TitleAndAboutForm { form | aboutParagraphField = { aboutParagraphField0 | body = body } }
+            TitleAndAboutForm
+                { form
+                    | aboutParagraphField =
+                        { aboutParagraphField0 | body = body }
+                }
                 |> validate
 
 
