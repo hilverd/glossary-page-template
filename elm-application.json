@@ -5,6 +5,7 @@
     "exposed-modules": [
         "ApplicationShell",
         "Data.GlossaryItem",
+        "Data.GlossaryItems",
         "Extras.Array",
         "Extras.HtmlTree",
         "Extras.Url"

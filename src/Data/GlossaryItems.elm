@@ -1,16 +1,21 @@
 module Data.GlossaryItems exposing
-    ( GlossaryItems
-    , fromList
-    , get
-    , insert
-    , orderedAlphabetically
-    , orderedByFrequency
-    , primaryTerms
-    , remove
-    , terms
+    ( GlossaryItems, fromList, orderedAlphabetically, orderedByFrequency, get, insert, update, remove, terms, primaryTerms
     , toHtmlTree
-    , update
     )
+
+{-| A set of glossary items that make up a glossary.
+
+
+# Glossary Items
+
+@docs GlossaryItems, fromList, orderedAlphabetically, orderedByFrequency, get, insert, update, remove, terms, primaryTerms
+
+
+# Converting to HTML
+
+@docs toHtmlTree
+
+-}
 
 import Array
 import Data.AboutLink as AboutLink exposing (AboutLink)
@@ -24,6 +29,9 @@ import Regex
 import Set
 
 
+{-| Glossary items constructed by the functions below.
+This is done using an opaque type that supports efficiently retrieving the items ordered alphabetically or by frequency.
+-}
 type GlossaryItems
     = GlossaryItems
         { orderedAlphabetically : List ( GlossaryItemIndex, GlossaryItem )
@@ -31,6 +39,8 @@ type GlossaryItems
         }
 
 
+{-| Build glossary items from a list.
+-}
 fromList : List GlossaryItem -> GlossaryItems
 fromList glossaryItems =
     let
@@ -171,6 +181,8 @@ zipListWithIndexes =
         >> List.map (Tuple.mapFirst GlossaryItemIndex.fromInt)
 
 
+{-| Retrieve the glossary item at the specified index, assuming alphabetical order.
+-}
 get : GlossaryItemIndex -> GlossaryItems -> Maybe GlossaryItem
 get indexWhenOrderedAlphabetically glossaryItems =
     glossaryItems
@@ -180,6 +192,8 @@ get indexWhenOrderedAlphabetically glossaryItems =
         |> Array.get (GlossaryItemIndex.toInt indexWhenOrderedAlphabetically)
 
 
+{-| Add a glossary item to the set.
+-}
 insert : GlossaryItem -> GlossaryItems -> GlossaryItems
 insert glossaryItem glossaryItems =
     let
@@ -191,6 +205,8 @@ insert glossaryItem glossaryItems =
     glossaryItem :: itemsList |> fromList
 
 
+{-| Replace the glossary item at the given index, assuming alphabetical order.
+-}
 update : GlossaryItemIndex -> GlossaryItem -> GlossaryItems -> GlossaryItems
 update indexWhenOrderedAlphabetically glossaryItem glossaryItems =
     glossaryItems
@@ -206,6 +222,8 @@ update indexWhenOrderedAlphabetically glossaryItem glossaryItems =
         |> fromList
 
 
+{-| Remove the glossary item at the given index, assuming alphabetical order.
+-}
 remove : GlossaryItemIndex -> GlossaryItems -> GlossaryItems
 remove indexWhenOrderedAlphabetically glossaryItems =
     glossaryItems
@@ -221,6 +239,8 @@ remove indexWhenOrderedAlphabetically glossaryItems =
         |> fromList
 
 
+{-| Retrieve the glossary items ordered alphabetically.
+-}
 orderedAlphabetically : GlossaryItems -> List ( GlossaryItemIndex, GlossaryItem )
 orderedAlphabetically glossaryItems =
     case glossaryItems of
@@ -228,6 +248,8 @@ orderedAlphabetically glossaryItems =
             items.orderedAlphabetically
 
 
+{-| Retrieve the glossary items ordered by frequency.
+-}
 orderedByFrequency : GlossaryItems -> List ( GlossaryItemIndex, GlossaryItem )
 orderedByFrequency glossaryItems =
     case glossaryItems of
@@ -235,6 +257,8 @@ orderedByFrequency glossaryItems =
             items.orderedByFrequency
 
 
+{-| Retrieve the list of all terms in the glossary.
+-}
 terms : GlossaryItems -> List GlossaryItem.Term
 terms =
     orderedAlphabetically
@@ -242,6 +266,11 @@ terms =
         >> List.concat
 
 
+{-| Retrieve the list of all primary terms in the glossary.
+A _primary term_ is a term that occurs as the first (and possibly only) one in a glossary item.
+When adding related terms in the UI, only primary terms are available.
+This is to encourage standardizing on one "primary" term for a concept, instead of several synonyms with no clear preferred one.
+-}
 primaryTerms : GlossaryItems -> List GlossaryItem.Term
 primaryTerms =
     orderedAlphabetically
@@ -249,6 +278,8 @@ primaryTerms =
         >> List.concat
 
 
+{-| Represent these glossary items as an HTML tree, ready for writing back to the glossary's HTML file.
+-}
 toHtmlTree : Bool -> String -> String -> List AboutLink -> GlossaryItems -> HtmlTree
 toHtmlTree enableHelpForMakingChanges title aboutParagraph aboutLinks glossaryItems =
     HtmlTree.Node "div"

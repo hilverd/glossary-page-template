@@ -43,11 +43,14 @@ type HtmlTree
 
 {-| Format the given `HtmlTree` as a string.
 
-    toHtml (Leaf "Foo") --> "    Foo"
+    toHtml (Leaf "Foo")
+    --> "    Foo"
 
-    toHtml (Node "p" False [ Attribute "class" "ml-2" ] [ Leaf "Hello" ]) --> """    <p class="ml-2">Hello</p>"""
+    toHtml (Node "p" False [ Attribute "class" "ml-2" ] [ Leaf "Hello" ])
+    --> """    <p class="ml-2">Hello</p>"""
 
-    toHtml (Node "p" True [ Attribute "class" "ml-2" ] [ Leaf "Hello" ]) --> """    <p class="ml-2">\n        Hello\n    </p>"""
+    toHtml (Node "p" True [ Attribute "class" "ml-2" ] [ Leaf "Hello" ])
+    --> """    <p class="ml-2">\n        Hello\n    </p>"""
 
 -}
 toHtml : HtmlTree -> String
@@ -57,11 +60,14 @@ toHtml =
 
 {-| Perform HTML escaping on the given string, transforming special characters to HTML entities.
 
-    escape "Q&A" --> "Q&amp;A"
+    escape "Q&A" -->
+    "Q&amp;A"
 
-    escape "<p>Hello 'world'</p>" --> "&lt;p&gt;Hello &#39;world&#39;&lt;/p&gt;"
+    escape "<p>Hello 'world'</p>"
+    --> "&lt;p&gt;Hello &#39;world&#39;&lt;/p&gt;"
 
-    escape "\"" --> "&quot;"
+    escape "\""
+    --> "&quot;"
 
 -}
 escape : String -> String
