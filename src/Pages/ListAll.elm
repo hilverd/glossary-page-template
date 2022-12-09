@@ -13,6 +13,7 @@ import Components.DropdownMenu
 import Components.SearchDialog
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
+import Data.Glossary as Glossary
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -21,6 +22,7 @@ import Dict exposing (Dict)
 import ElementIds
 import Export.Anki
 import Export.Markdown
+import Extras.BrowserDom
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
@@ -130,7 +132,7 @@ init editorIsRunning commonModel =
 
         Nothing ->
             commonModel.fragment
-                |> Maybe.map scrollElementIntoView
+                |> Maybe.map (Extras.BrowserDom.scrollElementIntoView <| PageMsg.Internal NoOp)
                 |> Maybe.withDefault Cmd.none
     )
 
@@ -162,7 +164,7 @@ update msg model =
             ( { model | menuForMobileVisibility = Visible }
             , Cmd.batch
                 [ preventBackgroundScrolling ()
-                , scrollToTopInElement ElementIds.indexForMobile
+                , Extras.BrowserDom.scrollToTopInElement (PageMsg.Internal NoOp) ElementIds.indexForMobile
                 ]
             )
 
@@ -188,8 +190,8 @@ update msg model =
             in
             ( { model | menuForMobileVisibility = Disappearing }
             , Cmd.batch
-                [ scrollToTopInElement idOfSidebarOrMenu
-                , scrollToTop
+                [ Extras.BrowserDom.scrollToTopInElement (PageMsg.Internal NoOp) idOfSidebarOrMenu
+                , Extras.BrowserDom.scrollToTop <| PageMsg.Internal NoOp
                 , Process.sleep 100 |> Task.perform (always <| PageMsg.Internal CompleteHidingMenuForMobile)
                 , allowBackgroundScrolling ()
                 ]
@@ -372,17 +374,22 @@ patchHtmlFile common indexOfItemBeingDeleted glossaryItems =
         Extras.Task.messageToCommand msg
 
     else
+        let
+            glossary =
+                { enableHelpForMakingChanges = common.enableHelpForMakingChanges
+                , title = common.title
+                , aboutParagraph = common.aboutParagraph
+                , aboutLinks = common.aboutLinks
+                , items = glossaryItems
+                }
+        in
         Http.request
             { method = "PATCH"
             , headers = []
             , url = "/"
             , body =
-                glossaryItems
-                    |> GlossaryItems.toHtmlTree
-                        common.enableHelpForMakingChanges
-                        common.title
-                        common.aboutParagraph
-                        common.aboutLinks
+                glossary
+                    |> Glossary.toHtmlTree
                     |> HtmlTree.toHtml
                     |> Http.stringBody "text/html"
             , expect =
@@ -400,33 +407,9 @@ patchHtmlFile common indexOfItemBeingDeleted glossaryItems =
             }
 
 
-scrollToTop : Cmd Msg
-scrollToTop =
-    Dom.setViewport 0 0
-        |> Task.onError (always <| Task.succeed ())
-        |> Task.attempt (always <| PageMsg.Internal NoOp)
-
-
 scrollGlossaryItemIntoView : GlossaryItemIndex -> Cmd Msg
 scrollGlossaryItemIntoView =
-    ElementIds.glossaryItemDiv >> scrollElementIntoView
-
-
-scrollElementIntoView : String -> Cmd Msg
-scrollElementIntoView id =
-    id
-        |> Dom.getElement
-        |> Task.andThen (\element -> Dom.setViewport 0 <| element.element.y - 96)
-        |> Task.onError (always <| Task.succeed ())
-        |> Task.attempt (always <| PageMsg.Internal NoOp)
-
-
-scrollToTopInElement : String -> Cmd Msg
-scrollToTopInElement id =
-    id
-        |> Dom.getViewportOf
-        |> Task.andThen (always <| Dom.setViewportOf id 0 0)
-        |> Task.attempt (always <| PageMsg.Internal NoOp)
+    ElementIds.glossaryItemDiv >> (Extras.BrowserDom.scrollElementIntoView <| PageMsg.Internal NoOp)
 
 
 

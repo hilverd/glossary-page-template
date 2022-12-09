@@ -12,7 +12,8 @@ import Components.Form
 import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.AboutParagraph as AboutParagraph
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.Glossary as Glossary
+import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import ElementIds
 import Extras.Html
@@ -167,17 +168,22 @@ patchHtmlFile common glossaryItems =
         Extras.Task.messageToCommand msg
 
     else
+        let
+            glossary =
+                { enableHelpForMakingChanges = common.enableHelpForMakingChanges
+                , title = common.title
+                , aboutParagraph = common.aboutParagraph
+                , aboutLinks = common.aboutLinks
+                , items = glossaryItems
+                }
+        in
         Http.request
             { method = "PATCH"
             , headers = []
             , url = "/"
             , body =
-                glossaryItems
-                    |> GlossaryItems.toHtmlTree
-                        common.enableHelpForMakingChanges
-                        common.title
-                        common.aboutParagraph
-                        common.aboutLinks
+                glossary
+                    |> Glossary.toHtmlTree
                     |> HtmlTree.toHtml
                     |> Http.stringBody "text/html"
             , expect =
