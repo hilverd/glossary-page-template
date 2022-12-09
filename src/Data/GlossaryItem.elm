@@ -1,18 +1,32 @@
 module Data.GlossaryItem exposing
-    ( GlossaryItem
-    , RelatedTerm
-    , Term
-    , decode
-    , empty
-    , hasSomeDetails
+    ( Term, RelatedTerm, GlossaryItem, empty, decode, hasSomeDetails
     , toHtmlTree
     )
+
+{-| An item in a glossary.
+
+
+# Glossary Items
+
+@docs Term, RelatedTerm, GlossaryItem, empty, decode, hasSomeDetails
+
+
+# Converting to HTML
+
+@docs toHtmlTree
+
+-}
 
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Extras.Url exposing (fragmentOnly)
 import Json.Decode as Decode exposing (Decoder)
 
 
+{-| A term in a glossary item.
+The `id` is used to be able to refer to this term (as a related one) from other glossary items.
+A term might be an abbreviation such as "Etc." or "TBD" (an acronym).
+The `body` is the actual term.
+-}
 type alias Term =
     { id : String
     , isAbbreviation : Bool
@@ -20,12 +34,19 @@ type alias Term =
     }
 
 
+{-| A related term identified by pointing to the `id` of another term, also mentioning the related term's `body`.
+The body could be looked up via the `id` instead of duplicating it -- I can't quite remember why I implemented it this way.
+-}
 type alias RelatedTerm =
     { idReference : String
     , body : String
     }
 
 
+{-| An item in a glossary, consisting of a list of terms (synonyms) being defined, a list of (alternative) definitions for those terms, and a list of related terms.
+It's probably unusual to have multiple definitions for a term (e.g. "Apple" being a fruit as well as a company) because a glossary would typically be focused on a single domain.
+However, this is allowed in the `<dl>` element so it's also allowed here.
+-}
 type alias GlossaryItem =
     { terms : List Term
     , details : List String
@@ -33,6 +54,8 @@ type alias GlossaryItem =
     }
 
 
+{-| An empty glossary item, used as a starting point when creating a new one from a form.
+-}
 empty : GlossaryItem
 empty =
     { terms = [ Term "" False "" ]
@@ -56,6 +79,39 @@ decodeRelatedTerms =
         (Decode.field "body" Decode.string)
 
 
+{-| Decode a glossary item from its JSON representation.
+
+    import Json.Decode as Decode exposing (Decoder)
+    import Json.Encode as Encode
+
+    rain : Encode.Value
+    rain =
+        Encode.object
+            [ ( "terms"
+            , Encode.list Encode.object
+                    [ [ ( "id", Encode.string "Rain" )
+                      , ( "isAbbreviation", Encode.bool False )
+                      , ( "body", Encode.string "Rain" )
+                    ]
+                    ]
+            )
+            , ( "details", Encode.list Encode.string [ "Condensed moisture." ] )
+            , ( "relatedTerms", Encode.list Encode.object [] )
+            ]
+
+    Decode.decodeValue decode rain
+    --> Ok
+    -->     { terms =
+    -->         [ { id = "Rain"
+    -->           , isAbbreviation = False
+    -->           , body = "Rain"
+    -->           }
+    -->         ]
+    -->     , details = [ "Condensed moisture." ]
+    -->     , relatedTerms = []
+    -->     }
+
+-}
 decode : Decoder GlossaryItem
 decode =
     Decode.map3 GlossaryItem
@@ -64,6 +120,12 @@ decode =
         (Decode.field "relatedTerms" <| Decode.list <| decodeRelatedTerms)
 
 
+{-| Whether or not the glossary item has any details.
+Some items may not contain any details and instead point to a related item that is preferred.
+
+    hasSomeDetails empty --> False
+
+-}
 hasSomeDetails : GlossaryItem -> Bool
 hasSomeDetails glossaryItem =
     not <| List.isEmpty glossaryItem.details
@@ -131,6 +193,8 @@ nonemptyRelatedTermsToHtmlTree itemHasSomeDetails relatedTerms =
         )
 
 
+{-| Represent this glossary item as an HTML tree, ready for writing back to the glossary's HTML file.
+-}
 toHtmlTree : GlossaryItem -> HtmlTree
 toHtmlTree glossaryItem =
     HtmlTree.Node "div"
@@ -152,9 +216,9 @@ toHtmlTree glossaryItem =
 
 hrefToTerm : Term -> HtmlTree.Attribute
 hrefToTerm term =
-    HtmlTree.Attribute "href" (fragmentOnly term.id)
+    HtmlTree.Attribute "href" <| fragmentOnly term.id
 
 
 hrefFromRelatedTerm : RelatedTerm -> HtmlTree.Attribute
 hrefFromRelatedTerm relatedTerm =
-    HtmlTree.Attribute "href" (fragmentOnly relatedTerm.idReference)
+    HtmlTree.Attribute "href" <| fragmentOnly relatedTerm.idReference

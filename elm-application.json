@@ -4,6 +4,7 @@
     "version": "1.8.4",
     "exposed-modules": [
         "ApplicationShell",
+        "Data.GlossaryItem",
         "Extras.Array",
         "Extras.HtmlTree",
         "Extras.Url"
