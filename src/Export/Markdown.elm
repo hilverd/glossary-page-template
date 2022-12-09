@@ -1,5 +1,11 @@
 module Export.Markdown exposing (download)
 
+{-| Functionality for exporting as Markdown.
+
+@docs download
+
+-}
+
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -90,6 +96,9 @@ itemToMarkdown { terms, details, relatedTerms } =
         |> paragraphs
 
 
+{-| Export a glossary with the given title, "about" paragraph, and "about" links to a Markdown file.
+This is achieved by producing a [command for downloading](https://package.elm-lang.org/packages/elm/file/latest/File.Download) this file.
+-}
 download : GlossaryTitle -> String -> List AboutLink -> GlossaryItems -> Cmd msg
 download glossaryTitle aboutParagraph aboutLinks glossaryItems =
     let

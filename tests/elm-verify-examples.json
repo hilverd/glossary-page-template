@@ -1,8 +1,13 @@
 {
     "root": "../src",
     "tests": [
+        "Data.AboutLink",
         "Data.GlossaryItem",
+        "Data.GlossaryItemIndex",
         "Data.GlossaryItems",
+        "Data.GlossaryTitle",
+        "Export.Anki",
+        "Export.Markdown",
         "Extras.Array",
         "Extras.HtmlTree",
         "Extras.Url"

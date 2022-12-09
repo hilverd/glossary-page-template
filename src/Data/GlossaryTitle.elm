@@ -1,17 +1,32 @@
-module Data.GlossaryTitle exposing (GlossaryTitle, fromString, toFilename, toString)
+module Data.GlossaryTitle exposing (GlossaryTitle, fromString, toString, toFilename)
+
+{-| The title of a glossary.
+
+
+# Glossary Titles
+
+@docs GlossaryTitle, fromString, toString, toFilename
+
+-}
 
 import Regex
 
 
+{-| An opaque type for a glossary title which is just a wrapper around a string.
+-}
 type GlossaryTitle
     = GlossaryTitle String
 
 
+{-| Construct a glossary title from a string.
+-}
 fromString : String -> GlossaryTitle
 fromString =
     GlossaryTitle
 
 
+{-| Get the string representation of a glossary title.
+-}
 toString : GlossaryTitle -> String
 toString glossaryTitle =
     case glossaryTitle of
@@ -19,6 +34,16 @@ toString glossaryTitle =
             title
 
 
+{-| Convert a glossary title to a filename with the given extension.
+Spaces are replaced by underscores.
+Any other characters which are not generally safe for filenames are omitted.
+
+    "Weather Terms: A Complete Guide"
+    |> fromString
+    |> toFilename ".html"
+    --> "Weather_Terms_A_Complete_Guide.html"
+
+-}
 toFilename : String -> GlossaryTitle -> String
 toFilename extension glossaryTitle =
     let

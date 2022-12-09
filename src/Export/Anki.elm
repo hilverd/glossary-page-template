@@ -1,5 +1,11 @@
 module Export.Anki exposing (download)
 
+{-| Functionality for exporting to a format that [Anki](https://apps.ankiweb.net/index.html) can import to a flash card deck.
+
+@docs download
+
+-}
+
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -78,6 +84,9 @@ itemToAnki { terms, details, relatedTerms } =
     front ++ "\t" ++ back
 
 
+{-| Export a glossary with the given title, "about" paragraph, and "about" links to a [text file suitable for Anki](https://docs.ankiweb.net/importing.html#text-files).
+This is achieved by producing a [command for downloading](https://package.elm-lang.org/packages/elm/file/latest/File.Download) this file.
+-}
 download : GlossaryTitle -> String -> List AboutLink -> GlossaryItems -> Cmd msg
 download glossaryTitle aboutParagraph aboutLinks glossaryItems =
     let
