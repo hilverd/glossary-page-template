@@ -300,7 +300,7 @@ patchHtmlFile common glossaryItems =
                 glossaryItems
                     |> GlossaryItems.toHtmlTree
                         common.enableHelpForMakingChanges
-                        (GlossaryTitle.toString common.title)
+                        common.title
                         common.aboutParagraph
                         common.aboutLinks
                     |> HtmlTree.toHtml

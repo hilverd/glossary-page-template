@@ -21,6 +21,7 @@ import Array
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
+import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Dict exposing (Dict)
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
@@ -280,7 +281,7 @@ primaryTerms =
 
 {-| Represent these glossary items as an HTML tree, ready for writing back to the glossary's HTML file.
 -}
-toHtmlTree : Bool -> String -> String -> List AboutLink -> GlossaryItems -> HtmlTree
+toHtmlTree : Bool -> GlossaryTitle -> String -> List AboutLink -> GlossaryItems -> HtmlTree
 toHtmlTree enableHelpForMakingChanges title aboutParagraph aboutLinks glossaryItems =
     HtmlTree.Node "div"
         True
@@ -299,7 +300,7 @@ toHtmlTree enableHelpForMakingChanges title aboutParagraph aboutLinks glossaryIt
             [ HtmlTree.Node "h1"
                 True
                 [ HtmlTree.Attribute "id" ElementIds.title ]
-                [ HtmlTree.Leaf title ]
+                [ HtmlTree.Leaf <| GlossaryTitle.toString title ]
             ]
         , HtmlTree.Node "main"
             True
