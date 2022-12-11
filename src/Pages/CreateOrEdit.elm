@@ -297,6 +297,7 @@ patchHtmlFile common glossaryItems =
         let
             glossary =
                 { enableHelpForMakingChanges = common.enableHelpForMakingChanges
+                , enableMarkdownBasedSyntax = common.enableMarkdownBasedSyntax
                 , title = common.title
                 , aboutSection = common.aboutSection
                 , items = glossaryItems

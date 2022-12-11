@@ -17,6 +17,7 @@ const editorIsRunning = containerElement.getAttribute('data-editor-is-running') 
 
 const enableHelpForMakingChanges = containerElement.getAttribute('data-enable-help-for-making-changes') === 'true';
 const enableSavingChangesInMemory = containerElement.getAttribute('data-enable-saving-changes-in-memory') === 'true';
+const enableMarkdownBasedSyntax = containerElement.getAttribute('data-enable-markdown-based-syntax') === 'true';
 const dlElement = glossaryElement.querySelector('dl');
 const glossaryItemDivElements = Array.prototype.slice.apply(dlElement.querySelectorAll('div'));
 const glossaryItems = glossaryItemDivElements.map(glossaryItemFromDivElement);
@@ -81,7 +82,8 @@ const app = Elm.ApplicationShell.init({
         glossaryItems: glossaryItems,
         editorIsRunning: editorIsRunning,
         enableHelpForMakingChanges: enableHelpForMakingChanges,
-        enableSavingChangesInMemory: enableSavingChangesInMemory
+        enableSavingChangesInMemory: enableSavingChangesInMemory,
+        enableMarkdownBasedSyntax: enableMarkdownBasedSyntax,
     }
 });
 

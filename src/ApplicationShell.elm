@@ -104,6 +104,11 @@ init flags =
                 |> Decode.decodeValue (Decode.field "enableHelpForMakingChanges" Decode.bool)
                 |> Result.withDefault False
 
+        enableMarkdownBasedSyntax =
+            flags
+                |> Decode.decodeValue (Decode.field "enableMarkdownBasedSyntax" Decode.bool)
+                |> Result.withDefault False
+
         enableSavingChangesInMemory =
             flags
                 |> Decode.decodeValue (Decode.field "enableSavingChangesInMemory" Decode.bool)
@@ -119,6 +124,7 @@ init flags =
                     filename
                     enableHelpForMakingChanges
                     enableSavingChangesInMemory
+                    enableMarkdownBasedSyntax
                     title
                     aboutSection
                     CommonModel.Alphabetically

@@ -16,6 +16,7 @@ type alias CommonModel =
     { filename : Maybe String
     , enableHelpForMakingChanges : Bool
     , enableSavingChangesInMemory : Bool
+    , enableMarkdownBasedSyntax : Bool
     , title : GlossaryTitle
     , aboutSection : AboutSection
     , orderItemsBy : OrderItemsBy

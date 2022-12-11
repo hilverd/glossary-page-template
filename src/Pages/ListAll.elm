@@ -376,6 +376,7 @@ patchHtmlFile common indexOfItemBeingDeleted glossaryItems =
         let
             glossary =
                 { enableHelpForMakingChanges = common.enableHelpForMakingChanges
+                , enableMarkdownBasedSyntax = common.enableMarkdownBasedSyntax
                 , title = common.title
                 , aboutSection = common.aboutSection
                 , items = glossaryItems
@@ -1311,7 +1312,14 @@ view model =
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar noModalDialogShown_ glossaryItems model.exportDropdownMenu
                         , div
-                            [ Html.Attributes.id ElementIds.container ]
+                            [ Html.Attributes.id ElementIds.container
+                            , Html.Attributes.attribute "data-enable-markdown-based-syntax" <|
+                                if model.common.enableMarkdownBasedSyntax then
+                                    "true"
+
+                                else
+                                    "false"
+                            ]
                             [ header []
                                 [ div
                                     [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
