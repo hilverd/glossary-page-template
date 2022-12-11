@@ -36,6 +36,10 @@
     @apply pt-4 ml-1 list-disc list-inside;
   }
 
+  div#glossary-page-container[data-enable-markdown-based-syntax="true"] div#glossary-page-about:not([data-markdown-rendered="true"]) {
+    @apply font-mono whitespace-pre-wrap;
+  }
+
   article#glossary-page-items dl {
     @apply grid print:block print:space-y-5 gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4;
   }
