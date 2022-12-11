@@ -1,4 +1,4 @@
-module Search exposing (..)
+module Search exposing (search)
 
 import Components.SearchDialog as SearchDialog
 import Data.GlossaryItem as GlossaryItem

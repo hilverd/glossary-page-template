@@ -6,8 +6,8 @@ module Export.Anki exposing (download)
 
 -}
 
-import Data.AboutLink as AboutLink exposing (AboutLink)
-import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
+import Data.AboutLink as AboutLink
+import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection(..))
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)

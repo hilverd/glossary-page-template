@@ -19,9 +19,9 @@ module TitleAndAboutForm exposing
     )
 
 import Array exposing (Array)
-import Data.AboutLink as AboutLink exposing (AboutLink)
+import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
-import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
+import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection(..))
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Extras.Array

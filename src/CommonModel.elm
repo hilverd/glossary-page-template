@@ -1,7 +1,5 @@
 module CommonModel exposing (CommonModel, OrderItemsBy(..))
 
-import Data.AboutLink exposing (AboutLink)
-import Data.AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryTitle exposing (GlossaryTitle)

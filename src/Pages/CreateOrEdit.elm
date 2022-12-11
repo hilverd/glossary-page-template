@@ -10,7 +10,7 @@ import Components.Button
 import Components.Copy
 import Components.Form
 import Components.SelectMenu
-import Data.AboutSection as AboutSection exposing (AboutSection(..))
+import Data.AboutSection exposing (AboutSection(..))
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.Glossary as Glossary
 import Data.GlossaryItem as GlossaryItem
