@@ -10,6 +10,7 @@ import Components.Button
 import Components.Copy
 import Components.Form
 import Components.SelectMenu
+import Data.AboutSection as AboutSection exposing (AboutSection(..))
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.Glossary as Glossary
 import Data.GlossaryItem as GlossaryItem
@@ -297,8 +298,7 @@ patchHtmlFile common glossaryItems =
             glossary =
                 { enableHelpForMakingChanges = common.enableHelpForMakingChanges
                 , title = common.title
-                , aboutParagraph = common.aboutParagraph
-                , aboutLinks = common.aboutLinks
+                , aboutSection = common.aboutSection
                 , items = glossaryItems
                 }
         in

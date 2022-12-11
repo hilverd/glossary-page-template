@@ -5,6 +5,7 @@ module Data.Glossary exposing (Glossary, toHtmlTree)
 
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
+import Data.AboutSection exposing (AboutSection(..))
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
@@ -15,8 +16,7 @@ import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 type alias Glossary =
     { enableHelpForMakingChanges : Bool
     , title : GlossaryTitle
-    , aboutParagraph : AboutParagraph
-    , aboutLinks : List AboutLink
+    , aboutSection : AboutSection
     , items : GlossaryItems
     }
 
@@ -24,7 +24,13 @@ type alias Glossary =
 {-| Represent these glossary items as an HTML tree, ready for writing back to the glossary's HTML file.
 -}
 toHtmlTree : Glossary -> HtmlTree
-toHtmlTree { enableHelpForMakingChanges, title, aboutParagraph, aboutLinks, items } =
+toHtmlTree { enableHelpForMakingChanges, title, aboutSection, items } =
+    let
+        ( aboutParagraph, aboutLinks ) =
+            case aboutSection of
+                PlaintextAboutSection { paragraph, links } ->
+                    ( paragraph, links )
+    in
     HtmlTree.Node "div"
         True
         [ HtmlTree.Attribute "id" ElementIds.container

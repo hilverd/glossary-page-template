@@ -8,6 +8,7 @@ module Export.Markdown exposing (download)
 
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
+import Data.AboutSection exposing (AboutSection(..))
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
@@ -100,14 +101,19 @@ itemToMarkdown { terms, details, relatedTerms } =
 {-| Export a glossary with the given title, "about" paragraph, and "about" links to a Markdown file.
 This is achieved by producing a [command for downloading](https://package.elm-lang.org/packages/elm/file/latest/File.Download) this file.
 -}
-download : GlossaryTitle -> AboutParagraph -> List AboutLink -> GlossaryItems -> Cmd msg
-download glossaryTitle aboutParagraph aboutLinks glossaryItems =
+download : GlossaryTitle -> AboutSection -> GlossaryItems -> Cmd msg
+download glossaryTitle aboutSection glossaryItems =
     let
         filename =
             GlossaryTitle.toFilename ".md" glossaryTitle
 
         titleHeaderString =
             glossaryTitle |> GlossaryTitle.toString |> escape |> (++) "# "
+
+        ( aboutParagraph, aboutLinks ) =
+            case aboutSection of
+                PlaintextAboutSection { paragraph, links } ->
+                    ( paragraph, links )
 
         aboutParagraphString =
             aboutParagraph |> AboutParagraph.toString |> escape

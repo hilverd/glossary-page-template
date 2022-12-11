@@ -8,6 +8,7 @@ module Export.Anki exposing (download)
 
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
+import Data.AboutSection exposing (AboutSection(..))
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
@@ -88,8 +89,8 @@ itemToAnki { terms, details, relatedTerms } =
 {-| Export a glossary with the given title, "about" paragraph, and "about" links to a [text file suitable for Anki](https://docs.ankiweb.net/importing.html#text-files).
 This is achieved by producing a [command for downloading](https://package.elm-lang.org/packages/elm/file/latest/File.Download) this file.
 -}
-download : GlossaryTitle -> AboutParagraph -> List AboutLink -> GlossaryItems -> Cmd msg
-download glossaryTitle aboutParagraph aboutLinks glossaryItems =
+download : GlossaryTitle -> AboutSection -> GlossaryItems -> Cmd msg
+download glossaryTitle aboutSection glossaryItems =
     let
         filename =
             GlossaryTitle.toFilename "-Anki_deck.txt" glossaryTitle
@@ -99,6 +100,11 @@ download glossaryTitle aboutParagraph aboutLinks glossaryItems =
 
         titleComment =
             glossaryTitle |> GlossaryTitle.toString |> comment
+
+        ( aboutParagraph, aboutLinks ) =
+            case aboutSection of
+                PlaintextAboutSection { paragraph, links } ->
+                    ( paragraph, links )
 
         aboutLinksComment =
             aboutLinks

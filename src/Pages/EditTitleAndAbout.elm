@@ -12,6 +12,7 @@ import Components.Form
 import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.AboutParagraph as AboutParagraph
+import Data.AboutSection exposing (AboutSection(..))
 import Data.Glossary as Glossary
 import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -63,7 +64,7 @@ type alias Msg =
 init : CommonModel -> ( Model, Cmd Msg )
 init common =
     ( { common = common
-      , form = Form.create common.title common.aboutParagraph common.aboutLinks
+      , form = Form.create common.title common.aboutSection
       , triedToSaveWhenFormInvalid = False
       , errorMessageWhileSaving = Nothing
       }
@@ -131,15 +132,18 @@ update msg model =
                             common1 =
                                 { common0
                                     | title = model.form |> Form.titleField |> .body |> GlossaryTitle.fromString
-                                    , aboutParagraph = model.form |> Form.aboutParagraphField |> .body |> AboutParagraph.fromString
-                                    , aboutLinks =
-                                        model.form
-                                            |> Form.aboutLinkFields
-                                            |> Array.toList
-                                            |> List.map
-                                                (\( href, body ) ->
-                                                    AboutLink.create href.href body.body
-                                                )
+                                    , aboutSection =
+                                        PlaintextAboutSection
+                                            { paragraph = model.form |> Form.aboutParagraphField |> .body |> AboutParagraph.fromString
+                                            , links =
+                                                model.form
+                                                    |> Form.aboutLinkFields
+                                                    |> Array.toList
+                                                    |> List.map
+                                                        (\( href, body ) ->
+                                                            AboutLink.create href.href body.body
+                                                        )
+                                            }
                                 }
 
                             model1 =
@@ -172,8 +176,7 @@ patchHtmlFile common glossaryItems =
             glossary =
                 { enableHelpForMakingChanges = common.enableHelpForMakingChanges
                 , title = common.title
-                , aboutParagraph = common.aboutParagraph
-                , aboutLinks = common.aboutLinks
+                , aboutSection = common.aboutSection
                 , items = glossaryItems
                 }
         in

@@ -13,6 +13,7 @@ import Components.DropdownMenu
 import Components.SearchDialog
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
+import Data.AboutSection exposing (AboutSection(..))
 import Data.Glossary as Glossary
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
@@ -346,8 +347,7 @@ update msg model =
             , Cmd.batch
                 [ Export.Markdown.download
                     model.common.title
-                    model.common.aboutParagraph
-                    model.common.aboutLinks
+                    model.common.aboutSection
                     glossaryItems
                 ]
             )
@@ -357,8 +357,7 @@ update msg model =
             , Cmd.batch
                 [ Export.Anki.download
                     model.common.title
-                    model.common.aboutParagraph
-                    model.common.aboutLinks
+                    model.common.aboutSection
                     glossaryItems
                 ]
             )
@@ -378,8 +377,7 @@ patchHtmlFile common indexOfItemBeingDeleted glossaryItems =
             glossary =
                 { enableHelpForMakingChanges = common.enableHelpForMakingChanges
                 , title = common.title
-                , aboutParagraph = common.aboutParagraph
-                , aboutLinks = common.aboutLinks
+                , aboutSection = common.aboutSection
                 , items = glossaryItems
                 }
         in
@@ -1258,6 +1256,11 @@ view model =
 
                 termIndex =
                     termIndexFromGlossaryItems glossaryItems
+
+                ( aboutParagraph, aboutLinks ) =
+                    case model.common.aboutSection of
+                        PlaintextAboutSection { paragraph, links } ->
+                            ( paragraph, links )
             in
             { title = GlossaryTitle.toString model.common.title
             , body =
@@ -1342,7 +1345,7 @@ view model =
                                 [ div
                                     [ id ElementIds.about ]
                                     [ p []
-                                        [ text <| AboutParagraph.toString model.common.aboutParagraph ]
+                                        [ text <| AboutParagraph.toString aboutParagraph ]
                                     , ul [] <|
                                         List.map
                                             (\aboutLink ->
@@ -1355,7 +1358,7 @@ view model =
                                                         [ text <| AboutLink.body aboutLink ]
                                                     ]
                                             )
-                                            model.common.aboutLinks
+                                            aboutLinks
                                     ]
                                 , glossaryItems
                                     |> (if model.common.orderItemsBy == CommonModel.Alphabetically then

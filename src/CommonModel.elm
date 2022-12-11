@@ -2,6 +2,7 @@ module CommonModel exposing (CommonModel, OrderItemsBy(..))
 
 import Data.AboutLink exposing (AboutLink)
 import Data.AboutParagraph exposing (AboutParagraph)
+import Data.AboutSection exposing (AboutSection)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryTitle exposing (GlossaryTitle)
 import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
@@ -18,8 +19,7 @@ type alias CommonModel =
     , enableHelpForMakingChanges : Bool
     , enableSavingChangesInMemory : Bool
     , title : GlossaryTitle
-    , aboutParagraph : AboutParagraph
-    , aboutLinks : List AboutLink
+    , aboutSection : AboutSection
     , orderItemsBy : OrderItemsBy
     , loadedGlossaryItems : LoadedGlossaryItems
     , maybeIndex : Maybe GlossaryItemIndex

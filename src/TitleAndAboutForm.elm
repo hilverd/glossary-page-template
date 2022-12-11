@@ -22,6 +22,7 @@ import Array exposing (Array)
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
+import Data.AboutSection exposing (AboutSection(..))
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Extras.Array
 
@@ -153,8 +154,14 @@ validate form =
         }
 
 
-create : GlossaryTitle -> AboutParagraph -> List AboutLink -> TitleAndAboutForm
-create title aboutParagraph aboutLinks =
+create : GlossaryTitle -> AboutSection -> TitleAndAboutForm
+create title aboutSection =
+    let
+        ( aboutParagraph, aboutLinks ) =
+            case aboutSection of
+                PlaintextAboutSection { paragraph, links } ->
+                    ( paragraph, links )
+    in
     TitleAndAboutForm
         { titleField = { body = GlossaryTitle.toString title, validationError = Nothing }
         , aboutParagraphField = { body = AboutParagraph.toString aboutParagraph, validationError = Nothing }
