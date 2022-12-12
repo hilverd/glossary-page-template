@@ -13,7 +13,7 @@ import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection(..))
-import Data.Glossary as Glossary
+import Data.Glossary as Glossary exposing (Glossary(..))
 import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import ElementIds
@@ -64,9 +64,24 @@ type alias Msg =
 init : CommonModel -> ( Model, Cmd Msg )
 init common =
     case common.glossary of
-        Ok { title, aboutSection } ->
+        Ok (PlaintextGlossary { title, aboutSection }) ->
             ( { common = common
               , form = Form.create title aboutSection
+              , triedToSaveWhenFormInvalid = False
+              , errorMessageWhileSaving = Nothing
+              }
+            , Cmd.none
+            )
+
+        Ok MarkdownGlossary ->
+            ( { common = common
+              , form =
+                    Form.create (GlossaryTitle.fromString "")
+                        (PlaintextAboutSection
+                            { paragraph = AboutParagraph.fromString ""
+                            , links = []
+                            }
+                        )
               , triedToSaveWhenFormInvalid = False
               , errorMessageWhileSaving = Nothing
               }
@@ -132,7 +147,7 @@ update msg model =
 
         Save ->
             case model.common.glossary of
-                Ok glossary0 ->
+                Ok (PlaintextGlossary glossary0) ->
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
@@ -149,22 +164,23 @@ update msg model =
                             common1 =
                                 { common0
                                     | glossary =
-                                        Ok
-                                            { glossary0
-                                                | title = model.form |> Form.titleField |> .body |> GlossaryTitle.fromString
-                                                , aboutSection =
-                                                    PlaintextAboutSection
-                                                        { paragraph = model.form |> Form.aboutParagraphField |> .body |> AboutParagraph.fromString
-                                                        , links =
-                                                            model.form
-                                                                |> Form.aboutLinkFields
-                                                                |> Array.toList
-                                                                |> List.map
-                                                                    (\( href, body ) ->
-                                                                        AboutLink.create href.href body.body
-                                                                    )
-                                                        }
-                                            }
+                                        Ok <|
+                                            PlaintextGlossary
+                                                { glossary0
+                                                    | title = model.form |> Form.titleField |> .body |> GlossaryTitle.fromString
+                                                    , aboutSection =
+                                                        PlaintextAboutSection
+                                                            { paragraph = model.form |> Form.aboutParagraphField |> .body |> AboutParagraph.fromString
+                                                            , links =
+                                                                model.form
+                                                                    |> Form.aboutLinkFields
+                                                                    |> Array.toList
+                                                                    |> List.map
+                                                                        (\( href, body ) ->
+                                                                            AboutLink.create href.href body.body
+                                                                        )
+                                                            }
+                                                }
                                 }
 
                             model1 =
@@ -194,10 +210,10 @@ patchHtmlFile common glossaryItems =
 
     else
         case common.glossary of
-            Ok glossary0 ->
+            Ok (PlaintextGlossary glossary0) ->
                 let
                     glossary =
-                        { glossary0 | items = glossaryItems }
+                        PlaintextGlossary { glossary0 | items = glossaryItems }
                 in
                 Http.request
                     { method = "PATCH"
@@ -506,8 +522,15 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
             model.common
 
         updatedGlossary =
-            common.glossary
-                |> Result.map (\r -> { r | items = glossaryItems })
+            case common.glossary of
+                Ok (PlaintextGlossary glossary) ->
+                    Ok <| PlaintextGlossary { glossary | items = glossaryItems }
+
+                Ok MarkdownGlossary ->
+                    Ok MarkdownGlossary
+
+                error ->
+                    error
     in
     div
         [ class "pt-5 border-t dark:border-gray-700" ]
@@ -538,7 +561,7 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
-        Ok { title, items } ->
+        Ok (PlaintextGlossary { title, items }) ->
             { title = GlossaryTitle.toString title
             , body =
                 [ div
@@ -562,6 +585,11 @@ view model =
                         ]
                     ]
                 ]
+            }
+
+        Ok MarkdownGlossary ->
+            { title = "Not supported yet."
+            , body = [ text "Not supported yet." ]
             }
 
         Err _ ->

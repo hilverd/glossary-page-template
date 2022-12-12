@@ -14,7 +14,7 @@ import Components.SearchDialog
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection(..))
-import Data.Glossary as Glossary
+import Data.Glossary as Glossary exposing (Glossary(..))
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -233,11 +233,16 @@ update msg model =
                     model.searchDialog
 
                 results =
-                    model.common.glossary
-                        |> Result.toMaybe
-                        |> Maybe.map .items
-                        |> Maybe.withDefault (GlossaryItems.fromList [])
-                        |> Search.search searchTerm
+                    Search.search searchTerm <|
+                        case model.common.glossary of
+                            Ok (PlaintextGlossary { items }) ->
+                                items
+
+                            Ok MarkdownGlossary ->
+                                GlossaryItems.fromList []
+
+                            Err _ ->
+                                GlossaryItems.fromList []
               in
               { model
                 | searchDialog =
@@ -261,7 +266,7 @@ update msg model =
 
         Delete index ->
             case model.common.glossary of
-                Ok { items } ->
+                Ok (PlaintextGlossary { items }) ->
                     let
                         updatedGlossaryItems =
                             GlossaryItems.remove index items
@@ -273,6 +278,9 @@ update msg model =
                         ]
                     )
 
+                Ok MarkdownGlossary ->
+                    ( model, Cmd.none )
+
                 _ ->
                     ( model, Cmd.none )
 
@@ -280,13 +288,18 @@ update msg model =
             let
                 common =
                     model.common
-
-                glossary0 =
-                    common.glossary
             in
-            ( { model | common = { common | glossary = glossary0 |> Result.map (\r -> { r | items = updatedGlossaryItems }) } }
-            , Cmd.none
-            )
+            case common.glossary of
+                Ok (PlaintextGlossary glossary) ->
+                    ( { model | common = { common | glossary = Ok <| PlaintextGlossary { glossary | items = updatedGlossaryItems } } }
+                    , Cmd.none
+                    )
+
+                Ok MarkdownGlossary ->
+                    ( model, Cmd.none )
+
+                Err _ ->
+                    ( model, Cmd.none )
 
         FailedToDelete indexOfItemBeingDeleted error ->
             ( { model
@@ -349,8 +362,11 @@ update msg model =
         DownloadMarkdown ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
             , case model.common.glossary of
-                Ok { title, aboutSection, items } ->
+                Ok (PlaintextGlossary { title, aboutSection, items }) ->
                     Export.Markdown.download title aboutSection items
+
+                Ok MarkdownGlossary ->
+                    Cmd.none
 
                 _ ->
                     Cmd.none
@@ -359,8 +375,11 @@ update msg model =
         DownloadAnki ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
             , case model.common.glossary of
-                Ok { title, aboutSection, items } ->
+                Ok (PlaintextGlossary { title, aboutSection, items }) ->
                     Export.Anki.download title aboutSection items
+
+                Ok MarkdownGlossary ->
+                    Cmd.none
 
                 _ ->
                     Cmd.none
@@ -378,10 +397,10 @@ patchHtmlFile common indexOfItemBeingDeleted glossaryItems =
 
     else
         case common.glossary of
-            Ok glossary0 ->
+            Ok (PlaintextGlossary glossary0) ->
                 let
                     glossary =
-                        { glossary0 | items = glossaryItems }
+                        PlaintextGlossary { glossary0 | items = glossaryItems }
                 in
                 Http.request
                     { method = "PATCH"
@@ -1251,7 +1270,7 @@ view model =
             , body = [ pre [] [ text <| Decode.errorToString error ] ]
             }
 
-        Ok { enableMarkdownBasedSyntax, title, aboutSection, items } ->
+        Ok (PlaintextGlossary { title, aboutSection, items }) ->
             let
                 editable =
                     model.makingChanges
@@ -1317,12 +1336,7 @@ view model =
                         [ viewTopBar noModalDialogShown_ model.exportDropdownMenu
                         , div
                             [ Html.Attributes.id ElementIds.container
-                            , Html.Attributes.attribute "data-enable-markdown-based-syntax" <|
-                                if enableMarkdownBasedSyntax then
-                                    "true"
-
-                                else
-                                    "false"
+                            , Html.Attributes.attribute "data-enable-markdown-based-syntax" "false"
                             ]
                             [ header []
                                 [ div
@@ -1385,6 +1399,11 @@ view model =
                         ]
                     ]
                 ]
+            }
+
+        Ok MarkdownGlossary ->
+            { title = "Not supported yet." -- TODO
+            , body = [ Html.text "Not supported yet." ]
             }
 
 

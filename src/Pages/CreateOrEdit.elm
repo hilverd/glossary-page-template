@@ -12,7 +12,7 @@ import Components.Form
 import Components.SelectMenu
 import Data.AboutSection exposing (AboutSection(..))
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
-import Data.Glossary as Glossary
+import Data.Glossary as Glossary exposing (Glossary(..))
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -71,7 +71,7 @@ type alias Msg =
 init : CommonModel -> ( Model, Cmd Msg )
 init commonModel =
     case commonModel.glossary of
-        Ok { items } ->
+        Ok (PlaintextGlossary { items }) ->
             let
                 existingTerms =
                     GlossaryItems.terms items
@@ -129,6 +129,15 @@ init commonModel =
 
               else
                 Cmd.none
+            )
+
+        Ok MarkdownGlossary ->
+            ( { common = commonModel
+              , form = Form.empty [] [] []
+              , triedToSaveWhenFormInvalid = False
+              , errorMessageWhileSaving = Nothing
+              }
+            , Cmd.none
             )
 
         Err _ ->
@@ -218,7 +227,7 @@ update msg model =
 
         Save ->
             case model.common.glossary of
-                Ok { items } ->
+                Ok (PlaintextGlossary plaintextGlossary) ->
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
@@ -230,7 +239,7 @@ update msg model =
                     else
                         let
                             newOrUpdatedGlossaryItem =
-                                Form.toGlossaryItem items model.form
+                                Form.toGlossaryItem plaintextGlossary.items model.form
 
                             common =
                                 model.common
@@ -241,14 +250,14 @@ update msg model =
                             ( updatedGlossaryItems, maybeIndex ) =
                                 case common.maybeIndex of
                                     Just index ->
-                                        ( GlossaryItems.update index newOrUpdatedGlossaryItem items
+                                        ( GlossaryItems.update index newOrUpdatedGlossaryItem plaintextGlossary.items
                                         , Just index
                                         )
 
                                     Nothing ->
                                         let
                                             updated =
-                                                GlossaryItems.insert newOrUpdatedGlossaryItem items
+                                                GlossaryItems.insert newOrUpdatedGlossaryItem plaintextGlossary.items
                                         in
                                         ( updated
                                         , -- Find index of newly inserted item
@@ -269,7 +278,7 @@ update msg model =
                                 { model
                                     | common =
                                         { common
-                                            | glossary = Result.map (\r -> { r | items = updatedGlossaryItems }) glossary0
+                                            | glossary = Ok <| PlaintextGlossary { plaintextGlossary | items = updatedGlossaryItems }
                                             , maybeIndex = maybeIndex
                                         }
                                 }
@@ -277,6 +286,9 @@ update msg model =
                         ( model_
                         , patchHtmlFile model_.common updatedGlossaryItems
                         )
+
+                Ok MarkdownGlossary ->
+                    ( model, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -290,10 +302,10 @@ update msg model =
 patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
 patchHtmlFile common glossaryItems =
     case common.glossary of
-        Ok glossary0 ->
+        Ok (PlaintextGlossary plaintextGlossary) ->
             let
                 msg =
-                    PageMsg.NavigateToListAll { common | glossary = Ok { glossary0 | items = glossaryItems } }
+                    PageMsg.NavigateToListAll { common | glossary = Ok <| PlaintextGlossary { plaintextGlossary | items = glossaryItems } }
             in
             if common.enableSavingChangesInMemory then
                 Extras.Task.messageToCommand msg
@@ -301,12 +313,12 @@ patchHtmlFile common glossaryItems =
             else
                 let
                     glossary =
-                        { enableHelpForMakingChanges = glossary0.enableHelpForMakingChanges
-                        , enableMarkdownBasedSyntax = glossary0.enableMarkdownBasedSyntax
-                        , title = glossary0.title
-                        , aboutSection = glossary0.aboutSection
-                        , items = glossaryItems
-                        }
+                        PlaintextGlossary
+                            { enableHelpForMakingChanges = plaintextGlossary.enableHelpForMakingChanges
+                            , title = plaintextGlossary.title
+                            , aboutSection = plaintextGlossary.aboutSection
+                            , items = glossaryItems
+                            }
                 in
                 Http.request
                     { method = "PATCH"
@@ -718,8 +730,8 @@ viewAddSuggestedSeeAlso suggestedRelatedTerms =
         ]
 
 
-viewCreateFormFooter : Model -> Bool -> Maybe String -> GlossaryItems -> GlossaryItemForm -> Html Msg
-viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossaryItems form =
+viewCreateFormFooter : Model -> Html Msg
+viewCreateFormFooter model =
     let
         errorDiv message =
             div
@@ -731,18 +743,14 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
 
         common =
             model.common
-
-        updatedGlossary =
-            common.glossary
-                |> Result.map (\r -> { r | items = glossaryItems })
     in
     div
         [ class "pt-5" ]
         [ errorDiv "There are errors on this form — see above."
-            |> Extras.Html.showIf (showValidationErrors && Form.hasValidationErrors form)
-        , errorMessageWhileSaving
+            |> Extras.Html.showIf (model.triedToSaveWhenFormInvalid && Form.hasValidationErrors model.form)
+        , model.errorMessageWhileSaving
             |> Extras.Html.showMaybe (\errorMessage -> errorDiv <| "Failed to save — " ++ errorMessage ++ ".")
-        , Extras.Html.showIf model.common.enableSavingChangesInMemory <|
+        , Extras.Html.showIf common.enableSavingChangesInMemory <|
             div
                 [ class "mt-5 sm:mt-4 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                 [ text Components.Copy.sandboxModeMessage ]
@@ -750,7 +758,7 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
             [ class "flex justify-end" ]
             [ Components.Button.white True
                 [ Html.Events.onClick <|
-                    PageMsg.NavigateToListAll { common | glossary = updatedGlossary }
+                    PageMsg.NavigateToListAll common
                 ]
                 [ text "Cancel" ]
             , Components.Button.primary True
@@ -765,7 +773,7 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
-        Ok { title, items } ->
+        Ok (PlaintextGlossary { title, items }) ->
             let
                 terms =
                     Form.termFields model.form
@@ -801,12 +809,17 @@ view model =
                                 [ viewCreateDescriptionTerms model.triedToSaveWhenFormInvalid terms
                                 , viewCreateDescriptionDetails model.triedToSaveWhenFormInvalid detailsArray
                                 , viewCreateSeeAlso model.triedToSaveWhenFormInvalid items terms relatedTerms suggestedRelatedTerms
-                                , viewCreateFormFooter model model.triedToSaveWhenFormInvalid model.errorMessageWhileSaving items model.form
+                                , viewCreateFormFooter model
                                 ]
                             ]
                         ]
                     ]
                 ]
+            }
+
+        Ok MarkdownGlossary ->
+            { title = "Not supported yet."
+            , body = [ text "Not supported yet.." ]
             }
 
         Err _ ->
