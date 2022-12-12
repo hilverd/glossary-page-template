@@ -63,13 +63,30 @@ type alias Msg =
 
 init : CommonModel -> ( Model, Cmd Msg )
 init common =
-    ( { common = common
-      , form = Form.create common.title common.aboutSection
-      , triedToSaveWhenFormInvalid = False
-      , errorMessageWhileSaving = Nothing
-      }
-    , Cmd.none
-    )
+    case common.glossary of
+        Ok { title, aboutSection } ->
+            ( { common = common
+              , form = Form.create title aboutSection
+              , triedToSaveWhenFormInvalid = False
+              , errorMessageWhileSaving = Nothing
+              }
+            , Cmd.none
+            )
+
+        _ ->
+            ( { common = common
+              , form =
+                    Form.create (GlossaryTitle.fromString "")
+                        (PlaintextAboutSection
+                            { paragraph = AboutParagraph.fromString ""
+                            , links = []
+                            }
+                        )
+              , triedToSaveWhenFormInvalid = False
+              , errorMessageWhileSaving = Nothing
+              }
+            , Cmd.none
+            )
 
 
 
@@ -114,8 +131,8 @@ update msg model =
             ( { model | form = Form.deleteAboutLink aboutLinkIndex model.form }, Cmd.none )
 
         Save ->
-            case model.common.loadedGlossaryItems of
-                Ok glossaryItems ->
+            case model.common.glossary of
+                Ok glossary0 ->
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
@@ -131,18 +148,22 @@ update msg model =
 
                             common1 =
                                 { common0
-                                    | title = model.form |> Form.titleField |> .body |> GlossaryTitle.fromString
-                                    , aboutSection =
-                                        PlaintextAboutSection
-                                            { paragraph = model.form |> Form.aboutParagraphField |> .body |> AboutParagraph.fromString
-                                            , links =
-                                                model.form
-                                                    |> Form.aboutLinkFields
-                                                    |> Array.toList
-                                                    |> List.map
-                                                        (\( href, body ) ->
-                                                            AboutLink.create href.href body.body
-                                                        )
+                                    | glossary =
+                                        Ok
+                                            { glossary0
+                                                | title = model.form |> Form.titleField |> .body |> GlossaryTitle.fromString
+                                                , aboutSection =
+                                                    PlaintextAboutSection
+                                                        { paragraph = model.form |> Form.aboutParagraphField |> .body |> AboutParagraph.fromString
+                                                        , links =
+                                                            model.form
+                                                                |> Form.aboutLinkFields
+                                                                |> Array.toList
+                                                                |> List.map
+                                                                    (\( href, body ) ->
+                                                                        AboutLink.create href.href body.body
+                                                                    )
+                                                        }
                                             }
                                 }
 
@@ -150,7 +171,7 @@ update msg model =
                                 { model | common = common1 }
                         in
                         ( model1
-                        , patchHtmlFile model1.common glossaryItems
+                        , patchHtmlFile model1.common glossary0.items
                         )
 
                 _ ->
@@ -172,37 +193,37 @@ patchHtmlFile common glossaryItems =
         Extras.Task.messageToCommand msg
 
     else
-        let
-            glossary =
-                { enableHelpForMakingChanges = common.enableHelpForMakingChanges
-                , enableMarkdownBasedSyntax = common.enableMarkdownBasedSyntax
-                , title = common.title
-                , aboutSection = common.aboutSection
-                , items = glossaryItems
-                }
-        in
-        Http.request
-            { method = "PATCH"
-            , headers = []
-            , url = "/"
-            , body =
-                glossary
-                    |> Glossary.toHtmlTree
-                    |> HtmlTree.toHtml
-                    |> Http.stringBody "text/html"
-            , expect =
-                Http.expectWhatever
-                    (\result ->
-                        case result of
-                            Ok _ ->
-                                msg
+        case common.glossary of
+            Ok glossary0 ->
+                let
+                    glossary =
+                        { glossary0 | items = glossaryItems }
+                in
+                Http.request
+                    { method = "PATCH"
+                    , headers = []
+                    , url = "/"
+                    , body =
+                        glossary
+                            |> Glossary.toHtmlTree
+                            |> HtmlTree.toHtml
+                            |> Http.stringBody "text/html"
+                    , expect =
+                        Http.expectWhatever
+                            (\result ->
+                                case result of
+                                    Ok _ ->
+                                        msg
 
-                            Err error ->
-                                PageMsg.Internal <| FailedToSave error
-                    )
-            , timeout = Nothing
-            , tracker = Nothing
-            }
+                                    Err error ->
+                                        PageMsg.Internal <| FailedToSave error
+                            )
+                    , timeout = Nothing
+                    , tracker = Nothing
+                    }
+
+            _ ->
+                Cmd.none
 
 
 
@@ -483,6 +504,10 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
 
         common =
             model.common
+
+        updatedGlossary =
+            common.glossary
+                |> Result.map (\r -> { r | items = glossaryItems })
     in
     div
         [ class "pt-5 border-t dark:border-gray-700" ]
@@ -498,7 +523,7 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
             [ class "flex justify-end" ]
             [ Components.Button.white True
                 [ Html.Events.onClick <|
-                    PageMsg.NavigateToListAll { common | loadedGlossaryItems = Ok glossaryItems }
+                    PageMsg.NavigateToListAll { common | glossary = updatedGlossary }
                 ]
                 [ text "Cancel" ]
             , Components.Button.primary True
@@ -512,9 +537,9 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
 
 view : Model -> Document Msg
 view model =
-    case model.common.loadedGlossaryItems of
-        Ok glossaryItems ->
-            { title = GlossaryTitle.toString model.common.title
+    case model.common.glossary of
+        Ok { title, items } ->
+            { title = GlossaryTitle.toString title
             , body =
                 [ div
                     [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl" ]
@@ -531,7 +556,7 @@ view model =
                                 [ viewEditTitle model.triedToSaveWhenFormInvalid <| Form.titleField model.form
                                 , viewEditAboutParagraph model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
                                 , viewEditAboutLinks model.triedToSaveWhenFormInvalid <| Form.aboutLinkFields model.form
-                                , viewCreateFormFooter model model.triedToSaveWhenFormInvalid model.errorMessageWhileSaving glossaryItems model.form
+                                , viewCreateFormFooter model model.triedToSaveWhenFormInvalid model.errorMessageWhileSaving items model.form
                                 ]
                             ]
                         ]

@@ -1,10 +1,9 @@
 module CommonModel exposing (CommonModel, OrderItemsBy(..))
 
-import Data.AboutSection exposing (AboutSection)
+import Data.Glossary exposing (Glossary)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
-import Data.GlossaryTitle exposing (GlossaryTitle)
-import Data.LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Extras.HtmlTree exposing (HtmlTree(..))
+import Json.Decode as Decode
 
 
 type OrderItemsBy
@@ -14,13 +13,9 @@ type OrderItemsBy
 
 type alias CommonModel =
     { filename : Maybe String
-    , enableHelpForMakingChanges : Bool
     , enableSavingChangesInMemory : Bool
-    , enableMarkdownBasedSyntax : Bool
-    , title : GlossaryTitle
-    , aboutSection : AboutSection
     , orderItemsBy : OrderItemsBy
-    , loadedGlossaryItems : LoadedGlossaryItems
     , maybeIndex : Maybe GlossaryItemIndex
     , fragment : Maybe String
+    , glossary : Result Decode.Error Glossary
     }

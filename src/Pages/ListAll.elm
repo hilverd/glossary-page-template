@@ -98,8 +98,8 @@ type InternalMsg
     | FailedToDelete GlossaryItemIndex Http.Error
     | JumpToTermIndexGroup Bool String
     | ChangeOrderItemsBy CommonModel.OrderItemsBy
-    | DownloadMarkdown GlossaryItems
-    | DownloadAnki GlossaryItems
+    | DownloadMarkdown
+    | DownloadAnki
 
 
 type alias Msg =
@@ -233,8 +233,9 @@ update msg model =
                     model.searchDialog
 
                 results =
-                    model.common.loadedGlossaryItems
+                    model.common.glossary
                         |> Result.toMaybe
+                        |> Maybe.map .items
                         |> Maybe.withDefault (GlossaryItems.fromList [])
                         |> Search.search searchTerm
               in
@@ -259,11 +260,11 @@ update msg model =
                 ( model, Cmd.none )
 
         Delete index ->
-            case model.common.loadedGlossaryItems of
-                Ok glossaryItems ->
+            case model.common.glossary of
+                Ok { items } ->
                     let
                         updatedGlossaryItems =
-                            GlossaryItems.remove index glossaryItems
+                            GlossaryItems.remove index items
                     in
                     ( { model | confirmDeleteIndex = Nothing }
                     , Cmd.batch
@@ -279,8 +280,11 @@ update msg model =
             let
                 common =
                     model.common
+
+                glossary0 =
+                    common.glossary
             in
-            ( { model | common = { common | loadedGlossaryItems = Ok updatedGlossaryItems } }
+            ( { model | common = { common | glossary = glossary0 |> Result.map (\r -> { r | items = updatedGlossaryItems }) } }
             , Cmd.none
             )
 
@@ -342,24 +346,24 @@ update msg model =
             , Cmd.none
             )
 
-        DownloadMarkdown glossaryItems ->
+        DownloadMarkdown ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
-            , Cmd.batch
-                [ Export.Markdown.download
-                    model.common.title
-                    model.common.aboutSection
-                    glossaryItems
-                ]
+            , case model.common.glossary of
+                Ok { title, aboutSection, items } ->
+                    Export.Markdown.download title aboutSection items
+
+                _ ->
+                    Cmd.none
             )
 
-        DownloadAnki glossaryItems ->
+        DownloadAnki ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
-            , Cmd.batch
-                [ Export.Anki.download
-                    model.common.title
-                    model.common.aboutSection
-                    glossaryItems
-                ]
+            , case model.common.glossary of
+                Ok { title, aboutSection, items } ->
+                    Export.Anki.download title aboutSection items
+
+                _ ->
+                    Cmd.none
             )
 
 
@@ -373,37 +377,37 @@ patchHtmlFile common indexOfItemBeingDeleted glossaryItems =
         Extras.Task.messageToCommand msg
 
     else
-        let
-            glossary =
-                { enableHelpForMakingChanges = common.enableHelpForMakingChanges
-                , enableMarkdownBasedSyntax = common.enableMarkdownBasedSyntax
-                , title = common.title
-                , aboutSection = common.aboutSection
-                , items = glossaryItems
-                }
-        in
-        Http.request
-            { method = "PATCH"
-            , headers = []
-            , url = "/"
-            , body =
-                glossary
-                    |> Glossary.toHtmlTree
-                    |> HtmlTree.toHtml
-                    |> Http.stringBody "text/html"
-            , expect =
-                Http.expectWhatever
-                    (\result ->
-                        case result of
-                            Ok _ ->
-                                msg
+        case common.glossary of
+            Ok glossary0 ->
+                let
+                    glossary =
+                        { glossary0 | items = glossaryItems }
+                in
+                Http.request
+                    { method = "PATCH"
+                    , headers = []
+                    , url = "/"
+                    , body =
+                        glossary
+                            |> Glossary.toHtmlTree
+                            |> HtmlTree.toHtml
+                            |> Http.stringBody "text/html"
+                    , expect =
+                        Http.expectWhatever
+                            (\result ->
+                                case result of
+                                    Ok _ ->
+                                        msg
 
-                            Err error ->
-                                PageMsg.Internal <| FailedToDelete indexOfItemBeingDeleted error
-                    )
-            , timeout = Nothing
-            , tracker = Nothing
-            }
+                                    Err error ->
+                                        PageMsg.Internal <| FailedToDelete indexOfItemBeingDeleted error
+                            )
+                    , timeout = Nothing
+                    , tracker = Nothing
+                    }
+
+            _ ->
+                Cmd.none
 
 
 scrollGlossaryItemIntoView : GlossaryItemIndex -> Cmd Msg
@@ -1118,8 +1122,8 @@ viewStaticSidebarForDesktop tabbable termIndex =
         ]
 
 
-viewTopBar : Bool -> GlossaryItems -> Components.DropdownMenu.Model -> Html Msg
-viewTopBar tabbable glossaryItems exportDropdownMenu =
+viewTopBar : Bool -> Components.DropdownMenu.Model -> Html Msg
+viewTopBar tabbable exportDropdownMenu =
     div
         [ class "sticky top-0 z-10 shrink-0 flex justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
         [ div
@@ -1157,12 +1161,12 @@ viewTopBar tabbable glossaryItems exportDropdownMenu =
             ]
         , div
             [ class "flex pr-4" ]
-            [ viewExportButton tabbable glossaryItems exportDropdownMenu ]
+            [ viewExportButton tabbable exportDropdownMenu ]
         ]
 
 
-viewExportButton : Bool -> GlossaryItems -> Components.DropdownMenu.Model -> Html Msg
-viewExportButton enabled glossaryItems exportDropdownMenu =
+viewExportButton : Bool -> Components.DropdownMenu.Model -> Html Msg
+viewExportButton enabled exportDropdownMenu =
     Components.DropdownMenu.view
         (PageMsg.Internal << ExportDropdownMenuMsg)
         exportDropdownMenu
@@ -1173,10 +1177,10 @@ viewExportButton enabled glossaryItems exportDropdownMenu =
         ]
         [ Components.DropdownMenu.choice
             [ text "Anki deck" ]
-            (PageMsg.Internal <| DownloadAnki glossaryItems)
+            (PageMsg.Internal <| DownloadAnki)
         , Components.DropdownMenu.choice
             [ text "Markdown" ]
-            (PageMsg.Internal <| DownloadMarkdown glossaryItems)
+            (PageMsg.Internal <| DownloadMarkdown)
         ]
 
 
@@ -1241,13 +1245,13 @@ noModalDialogShown model =
 
 view : Model -> Document Msg
 view model =
-    case model.common.loadedGlossaryItems of
+    case model.common.glossary of
         Err error ->
             { title = "Glossary"
             , body = [ pre [] [ text <| Decode.errorToString error ] ]
             }
 
-        Ok glossaryItems ->
+        Ok { enableMarkdownBasedSyntax, title, aboutSection, items } ->
             let
                 editable =
                     model.makingChanges
@@ -1256,14 +1260,14 @@ view model =
                     noModalDialogShown model
 
                 termIndex =
-                    termIndexFromGlossaryItems glossaryItems
+                    termIndexFromGlossaryItems items
 
                 ( aboutParagraph, aboutLinks ) =
-                    case model.common.aboutSection of
+                    case aboutSection of
                         PlaintextAboutSection { paragraph, links } ->
                             ( paragraph, links )
             in
-            { title = GlossaryTitle.toString model.common.title
+            { title = GlossaryTitle.toString title
             , body =
                 [ Html.div
                     [ class "min-h-full focus:outline-none"
@@ -1310,11 +1314,11 @@ view model =
                     , viewStaticSidebarForDesktop noModalDialogShown_ termIndex
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
-                        [ viewTopBar noModalDialogShown_ glossaryItems model.exportDropdownMenu
+                        [ viewTopBar noModalDialogShown_ model.exportDropdownMenu
                         , div
                             [ Html.Attributes.id ElementIds.container
                             , Html.Attributes.attribute "data-enable-markdown-based-syntax" <|
-                                if model.common.enableMarkdownBasedSyntax then
+                                if enableMarkdownBasedSyntax then
                                     "true"
 
                                 else
@@ -1335,7 +1339,7 @@ view model =
                                                 [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
                                         , div
                                             [ class "hidden lg:block ml-auto pb-3" ]
-                                            [ viewExportButton noModalDialogShown_ glossaryItems model.exportDropdownMenu ]
+                                            [ viewExportButton noModalDialogShown_ model.exportDropdownMenu ]
                                         ]
                                     , Extras.Html.showIf (model.common.enableSavingChangesInMemory && model.makingChanges) <|
                                         div
@@ -1346,7 +1350,7 @@ view model =
                                     |> Extras.Html.showIf (not model.common.enableSavingChangesInMemory)
                                 , h1
                                     [ id ElementIds.title ]
-                                    [ text <| GlossaryTitle.toString model.common.title ]
+                                    [ text <| GlossaryTitle.toString title ]
                                 ]
                             , Html.main_
                                 []
@@ -1368,7 +1372,7 @@ view model =
                                             )
                                             aboutLinks
                                     ]
-                                , glossaryItems
+                                , items
                                     |> (if model.common.orderItemsBy == CommonModel.Alphabetically then
                                             GlossaryItems.orderedAlphabetically
 

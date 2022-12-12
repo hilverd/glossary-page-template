@@ -117,20 +117,28 @@ init flags =
         loadedGlossaryItems =
             LoadedGlossaryItems.decodeFromFlags flags
 
+        glossary =
+            loadedGlossaryItems
+                |> Result.map
+                    (\items ->
+                        { enableHelpForMakingChanges = enableHelpForMakingChanges
+                        , enableMarkdownBasedSyntax = enableMarkdownBasedSyntax
+                        , title = title
+                        , aboutSection = aboutSection
+                        , items = items
+                        }
+                    )
+
         ( listAllModel, listAllCmd ) =
             Pages.ListAll.init
                 editorIsRunning
                 (CommonModel
                     filename
-                    enableHelpForMakingChanges
                     enableSavingChangesInMemory
-                    enableMarkdownBasedSyntax
-                    title
-                    aboutSection
                     CommonModel.Alphabetically
-                    loadedGlossaryItems
                     Nothing
                     fragment
+                    glossary
                 )
     in
     ( ListAll listAllModel
