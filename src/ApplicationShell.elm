@@ -124,6 +124,7 @@ init flags =
                     (\items ->
                         if enableMarkdownBasedSyntax then
                             MarkdownGlossary
+                                { enableHelpForMakingChanges = enableHelpForMakingChanges }
 
                         else
                             PlaintextGlossary

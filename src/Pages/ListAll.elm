@@ -238,7 +238,7 @@ update msg model =
                             Ok (PlaintextGlossary { items }) ->
                                 items
 
-                            Ok MarkdownGlossary ->
+                            Ok (MarkdownGlossary _) ->
                                 GlossaryItems.fromList []
 
                             Err _ ->
@@ -278,7 +278,7 @@ update msg model =
                         ]
                     )
 
-                Ok MarkdownGlossary ->
+                Ok (MarkdownGlossary _) ->
                     ( model, Cmd.none )
 
                 _ ->
@@ -295,7 +295,7 @@ update msg model =
                     , Cmd.none
                     )
 
-                Ok MarkdownGlossary ->
+                Ok (MarkdownGlossary _) ->
                     ( model, Cmd.none )
 
                 Err _ ->
@@ -365,7 +365,7 @@ update msg model =
                 Ok (PlaintextGlossary { title, aboutSection, items }) ->
                     Export.Markdown.download title aboutSection items
 
-                Ok MarkdownGlossary ->
+                Ok (MarkdownGlossary _) ->
                     Cmd.none
 
                 _ ->
@@ -378,7 +378,7 @@ update msg model =
                 Ok (PlaintextGlossary { title, aboutSection, items }) ->
                     Export.Anki.download title aboutSection items
 
-                Ok MarkdownGlossary ->
+                Ok (MarkdownGlossary _) ->
                     Cmd.none
 
                 _ ->
@@ -1401,7 +1401,7 @@ view model =
                 ]
             }
 
-        Ok MarkdownGlossary ->
+        Ok (MarkdownGlossary _) ->
             { title = "Not supported yet." -- TODO
             , body = [ Html.text "Not supported yet." ]
             }

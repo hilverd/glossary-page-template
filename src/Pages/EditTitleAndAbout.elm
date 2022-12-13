@@ -73,7 +73,7 @@ init common =
             , Cmd.none
             )
 
-        Ok MarkdownGlossary ->
+        Ok (MarkdownGlossary _) ->
             ( { common = common
               , form =
                     Form.create (GlossaryTitle.fromString "")
@@ -526,8 +526,8 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
                 Ok (PlaintextGlossary glossary) ->
                     Ok <| PlaintextGlossary { glossary | items = glossaryItems }
 
-                Ok MarkdownGlossary ->
-                    Ok MarkdownGlossary
+                Ok (MarkdownGlossary glossary) ->
+                    Ok <| MarkdownGlossary glossary
 
                 error ->
                     error
@@ -587,7 +587,7 @@ view model =
                 ]
             }
 
-        Ok MarkdownGlossary ->
+        Ok (MarkdownGlossary _) ->
             { title = "Not supported yet."
             , body = [ text "Not supported yet." ]
             }

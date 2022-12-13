@@ -131,7 +131,7 @@ init commonModel =
                 Cmd.none
             )
 
-        Ok MarkdownGlossary ->
+        Ok (MarkdownGlossary _) ->
             ( { common = commonModel
               , form = Form.empty [] [] []
               , triedToSaveWhenFormInvalid = False
@@ -287,7 +287,7 @@ update msg model =
                         , patchHtmlFile model_.common updatedGlossaryItems
                         )
 
-                Ok MarkdownGlossary ->
+                Ok (MarkdownGlossary _) ->
                     ( model, Cmd.none )
 
                 _ ->
@@ -817,7 +817,7 @@ view model =
                 ]
             }
 
-        Ok MarkdownGlossary ->
+        Ok (MarkdownGlossary _) ->
             { title = "Not supported yet."
             , body = [ text "Not supported yet.." ]
             }

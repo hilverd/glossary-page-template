@@ -18,6 +18,8 @@ type Glossary
         , items : GlossaryItems
         }
     | MarkdownGlossary
+        { enableHelpForMakingChanges : Bool
+        }
 
 
 {-| Represent these glossary items as an HTML tree, ready for writing back to the glossary's HTML file.
@@ -95,5 +97,5 @@ toHtmlTree glossary =
                     ]
                 ]
 
-        MarkdownGlossary ->
+        MarkdownGlossary _ ->
             HtmlTree.Leaf "Not supported yet."
