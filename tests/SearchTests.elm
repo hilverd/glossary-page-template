@@ -2,6 +2,7 @@ module SearchTests exposing (..)
 
 import Components.SearchDialog exposing (searchResult)
 import Data.GlossaryItem as GlossaryItem
+import Data.GlossaryItem.Details as Details exposing (Details)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Expect
 import Search
@@ -21,19 +22,19 @@ loadedGlossaryItems =
     let
         one =
             { terms = [ termFromBody "One" ]
-            , details = [ "One" ]
+            , details = [ Details.fromPlaintext "One" ]
             , relatedTerms = [ { idReference = "#Two", body = "Two" } ]
             }
 
         two =
             { terms = [ termFromBody "Two" ]
-            , details = [ "Two" ]
+            , details = [ Details.fromPlaintext "Two" ]
             , relatedTerms = []
             }
 
         three =
             { terms = [ termFromBody "Three" ]
-            , details = [ "Three" ]
+            , details = [ Details.fromPlaintext "Three" ]
             , relatedTerms = [ { idReference = "#Two", body = "Two" } ]
             }
     in

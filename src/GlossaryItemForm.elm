@@ -25,6 +25,7 @@ module GlossaryItemForm exposing
 import Array exposing (Array)
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem.Details as Details exposing (Details)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
@@ -254,7 +255,13 @@ fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRe
                 existingPrimaryTerms
 
         detailsFieldsList =
-            List.map (\detailsElem -> DetailsField.fromPlaintext detailsElem) item.details
+            List.map
+                (\detailsElem ->
+                    detailsElem
+                        |> Details.raw
+                        |> DetailsField.fromPlaintext
+                )
+                item.details
     in
     GlossaryItemForm
         { termFields = Array.fromList termFieldsForItem
@@ -310,7 +317,7 @@ toGlossaryItem glossaryItems form =
         form
             |> detailsFields
             |> Array.toList
-            |> List.map (DetailsField.raw >> String.trim)
+            |> List.map (DetailsField.raw >> String.trim >> Details.fromPlaintext)
     , relatedTerms =
         form
             |> relatedTermFields

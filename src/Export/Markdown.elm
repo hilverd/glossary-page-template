@@ -10,6 +10,7 @@ import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection(..))
 import Data.GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem.Details as Details exposing (Details)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Extras.HtmlTree
@@ -75,7 +76,7 @@ itemToMarkdown { terms, details, relatedTerms } =
 
         detailsString =
             details
-                |> List.map escape
+                |> List.map (Details.raw >> escape)
                 |> paragraphs
 
         relatedTermsPrefix =

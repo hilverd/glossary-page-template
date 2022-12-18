@@ -17,6 +17,7 @@ module Data.GlossaryItem exposing
 
 -}
 
+import Data.GlossaryItem.Details as Details exposing (Details)
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Extras.Url exposing (fragmentOnly)
 import Json.Decode as Decode exposing (Decoder)
@@ -49,7 +50,7 @@ However, this is allowed in the `<dl>` element so it's also allowed here.
 -}
 type alias GlossaryItem =
     { terms : List Term
-    , details : List String
+    , details : List Details
     , relatedTerms : List RelatedTerm
     }
 
@@ -83,6 +84,7 @@ decodeRelatedTerms =
 
     import Json.Decode as Decode exposing (Decoder)
     import Json.Encode as Encode
+    import Data.GlossaryItem.Details as Details
 
     rain : Encode.Value
     rain =
@@ -107,7 +109,7 @@ decodeRelatedTerms =
     -->           , body = "Rain"
     -->           }
     -->         ]
-    -->     , details = [ "Condensed moisture." ]
+    -->     , details = [ Details.fromPlaintext "Condensed moisture." ]
     -->     , relatedTerms = []
     -->     }
 
@@ -116,7 +118,7 @@ decode : Decoder GlossaryItem
 decode =
     Decode.map3 GlossaryItem
         (Decode.field "terms" <| Decode.list <| decodeTerm)
-        (Decode.field "details" <| Decode.list <| Decode.string)
+        (Decode.field "details" <| Decode.list <| Decode.map Details.fromPlaintext <| Decode.string)
         (Decode.field "relatedTerms" <| Decode.list <| decodeRelatedTerms)
 
 
@@ -201,7 +203,7 @@ toHtmlTree glossaryItem =
         True
         []
         (List.map termToHtmlTree glossaryItem.terms
-            ++ List.map detailsToHtmlTree glossaryItem.details
+            ++ List.map (Details.raw >> detailsToHtmlTree) glossaryItem.details
             ++ (if List.isEmpty glossaryItem.relatedTerms then
                     []
 

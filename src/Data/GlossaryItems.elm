@@ -11,6 +11,7 @@ module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetical
 
 import Array
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem.Details as Details exposing (Details)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Dict exposing (Dict)
 import Extras.HtmlTree exposing (HtmlTree(..))
@@ -71,7 +72,7 @@ orderListByFrequency indexedGlossaryItems =
 
                 score =
                     (glossaryItem.terms |> List.map .body |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
-                        + (glossaryItem.details |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
+                        + (glossaryItem.details |> List.map (Details.raw >> Regex.find termAsWord >> List.length) |> List.sum)
                         + (glossaryItem.relatedTerms |> List.map .body |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
             in
             if score > 0 then

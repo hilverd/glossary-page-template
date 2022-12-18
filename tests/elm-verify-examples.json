@@ -3,6 +3,8 @@
     "tests": [
         "Data.AboutLink",
         "Data.AboutParagraph",
+        "Data.GlossaryItem.Details",
+        "Data.GlossaryItem.Term",
         "Data.GlossaryItem",
         "Data.GlossaryItemIndex",
         "Data.GlossaryItems",

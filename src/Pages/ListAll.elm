@@ -16,6 +16,7 @@ import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection(..))
 import Data.Glossary as Glossary exposing (Glossary(..))
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem.Details as Details exposing (Details)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -703,7 +704,7 @@ viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
             [ div
                 []
                 (List.map (viewGlossaryTerm tabbable) glossaryItem.terms
-                    ++ List.map viewGlossaryItemDetails glossaryItem.details
+                    ++ List.map (Details.raw >> viewGlossaryItemDetails) glossaryItem.details
                     ++ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails glossaryItem.relatedTerms
                 )
             , div
@@ -752,7 +753,7 @@ viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
     else
         div []
             (List.map (viewGlossaryTerm tabbable) glossaryItem.terms
-                ++ List.map viewGlossaryItemDetails glossaryItem.details
+                ++ List.map (Details.raw >> viewGlossaryItemDetails) glossaryItem.details
                 ++ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails glossaryItem.relatedTerms
             )
 
