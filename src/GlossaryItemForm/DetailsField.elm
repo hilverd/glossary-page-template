@@ -22,9 +22,9 @@ type DetailsField
 
 {-| Construct an empty plain text details field.
 
-    empty |> raw --> ""
+    emptyPlaintext |> raw --> ""
 
-    empty |> validationError --> Nothing
+    emptyPlaintext |> validationError --> Nothing
 
 -}
 emptyPlaintext : DetailsField
@@ -43,7 +43,7 @@ emptyPlaintext =
 fromPlaintext : String -> DetailsField
 fromPlaintext body0 =
     PlaintextDetailsField
-        { body = String.trim body0, validationError = Nothing }
+        { body = body0, validationError = Nothing }
 
 
 {-| Retrieve the raw body of a details field.
@@ -66,7 +66,7 @@ validationError detailsField =
 
 {-| Set the validation error on a details field.
 
-    empty
+    emptyPlaintext
     |> setValidationError (Just "Can't be empty")
     |> validationError
     --> Just "Can't be empty"

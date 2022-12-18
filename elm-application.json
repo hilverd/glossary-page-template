@@ -16,6 +16,7 @@
         "Extras.Array",
         "Extras.HtmlTree",
         "Extras.Url",
-        "GlossaryItemForm.DetailsField"
+        "GlossaryItemForm.DetailsField",
+        "GlossaryItemForm.TermField"
     ]
 }

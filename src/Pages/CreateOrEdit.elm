@@ -26,6 +26,7 @@ import Extras.Http
 import Extras.Task
 import GlossaryItemForm as Form exposing (GlossaryItemForm)
 import GlossaryItemForm.DetailsField as DetailsField exposing (DetailsField)
+import GlossaryItemForm.TermField as TermField exposing (TermField)
 import Html
 import Html.Attributes exposing (class, id, required)
 import Html.Events
@@ -364,13 +365,13 @@ giveFocusToSeeAlsoSelect index =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.seeAlsoSelect index)
 
 
-viewCreateDescriptionTerm : Bool -> Bool -> Int -> Form.TermField -> Html Msg
+viewCreateDescriptionTerm : Bool -> Bool -> Int -> TermField -> Html Msg
 viewCreateDescriptionTerm showValidationErrors canBeDeleted index term =
     viewCreateDescriptionTermInternal showValidationErrors canBeDeleted (TermIndex.fromInt index) term
 
 
-viewCreateDescriptionTermInternal : Bool -> Bool -> TermIndex -> Form.TermField -> Html Msg
-viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex term =
+viewCreateDescriptionTermInternal : Bool -> Bool -> TermIndex -> TermField -> Html Msg
+viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex termField =
     let
         abbreviationLabelId =
             ElementIds.abbreviationLabel termIndex
@@ -397,9 +398,9 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                         [ Html.div
                             [ class "relative block w-full min-w-0" ]
                             [ Components.Form.inputText
-                                term.body
+                                (TermField.raw termField)
                                 showValidationErrors
-                                term.validationError
+                                (TermField.validationError termField)
                                 [ id <| ElementIds.termInputField termIndex
                                 , required True
                                 , Html.Attributes.autocomplete False
@@ -414,7 +415,7 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                             [ div
                                 [ class "sm:ml-5" ]
                                 [ Components.Button.toggle
-                                    term.isAbbreviation
+                                    (TermField.isAbbreviation termField)
                                     abbreviationLabelId
                                     [ Html.Events.onClick <| PageMsg.Internal <| ToggleAbbreviation termIndex ]
                                     [ span
@@ -434,7 +435,7 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                     [ text validationError ]
             )
             (if showValidationErrors then
-                term.validationError
+                TermField.validationError termField
 
              else
                 Nothing
@@ -442,7 +443,7 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
         ]
 
 
-viewCreateDescriptionTerms : Bool -> Array Form.TermField -> Html Msg
+viewCreateDescriptionTerms : Bool -> Array TermField -> Html Msg
 viewCreateDescriptionTerms showValidationErrors termsArray =
     let
         terms =
@@ -654,14 +655,14 @@ viewAddRelatedTermButtonForEmptyState =
 viewCreateSeeAlso :
     Bool
     -> GlossaryItems
-    -> Array Form.TermField
+    -> Array TermField
     -> Array Form.RelatedTermField
     -> List GlossaryItem.Term
     -> Html Msg
 viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray suggestedRelatedTerms =
     let
         termIdsSet =
-            terms |> Array.toList |> List.map (.body >> Form.termBodyToId) |> Set.fromList
+            terms |> Array.toList |> List.map (TermField.raw >> Form.termBodyToId) |> Set.fromList
 
         relatedTermsList =
             Array.toList relatedTermsArray

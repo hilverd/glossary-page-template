@@ -1,7 +1,6 @@
 module GlossaryItemForm exposing
     ( GlossaryItemForm
     , RelatedTermField
-    , TermField
     , addDetails
     , addRelatedTerm
     , addTerm
@@ -34,16 +33,9 @@ import ElementIds
 import Extras.Array
 import Extras.Regex
 import GlossaryItemForm.DetailsField as DetailsField exposing (DetailsField)
+import GlossaryItemForm.TermField as TermField exposing (TermField)
 import Regex
 import Set exposing (Set)
-
-
-type alias TermField =
-    { body : String
-    , isAbbreviation : Bool
-    , isAbbreviationManuallyOverridden : Bool
-    , validationError : Maybe String
-    }
 
 
 type alias RelatedTermField =
@@ -118,7 +110,7 @@ validate form =
         termIdsInsideForm =
             form
                 |> termFields
-                |> Array.map (.body >> termBodyToId)
+                |> Array.map (TermField.raw >> termBodyToId)
                 |> Array.foldl
                     (\termId ->
                         Dict.update
@@ -134,28 +126,28 @@ validate form =
                     (\termField ->
                         let
                             body =
-                                String.trim termField.body
+                                TermField.raw termField
 
                             termId =
                                 termBodyToId body
                         in
-                        { termField
-                            | validationError =
-                                if String.isEmpty body then
+                        termField
+                            |> TermField.setValidationError
+                                (if String.isEmpty body then
                                     Just cannotBeEmptyMessage
 
-                                else if Set.member termId termIdsOutsideSet then
+                                 else if Set.member termId termIdsOutsideSet then
                                     Just "This term already exists elsewhere"
 
-                                else if (Dict.get termId termIdsInsideForm |> Maybe.withDefault 0) > 1 then
+                                 else if (Dict.get termId termIdsInsideForm |> Maybe.withDefault 0) > 1 then
                                     Just "This term occurs multiple times"
 
-                                else if ElementIds.reserved termId then
+                                 else if ElementIds.reserved termId then
                                     Just "This term is reserved"
 
-                                else
+                                 else
                                     Nothing
-                        }
+                                )
                     )
 
         validatedDetailsFields =
@@ -208,7 +200,7 @@ hasValidationErrors form =
         hasErrors =
             Array.toList >> List.any (.validationError >> (/=) Nothing)
     in
-    (form |> termFields |> hasErrors)
+    (form |> termFields |> Array.toList |> List.any (TermField.validationError >> (/=) Nothing))
         || (form |> detailsFields |> Array.toList |> List.any (DetailsField.validationError >> (/=) Nothing))
         || (form |> relatedTermFields |> hasErrors)
 
@@ -216,7 +208,7 @@ hasValidationErrors form =
 empty : List GlossaryItem.Term -> List GlossaryItem.Term -> List GlossaryItem -> GlossaryItemForm
 empty withTermsOutside withPrimaryTermsOutside withItemsListingThisTermAsRelated =
     GlossaryItemForm
-        { termFields = Array.fromList [ emptyTermField ]
+        { termFields = Array.fromList [ TermField.emptyPlaintext ]
         , detailsFields = Array.empty
         , relatedTermFields = Array.empty
         , termsOutside = withTermsOutside
@@ -224,15 +216,6 @@ empty withTermsOutside withPrimaryTermsOutside withItemsListingThisTermAsRelated
         , itemsListingThisItemAsRelated = withItemsListingThisTermAsRelated
         }
         |> validate
-
-
-emptyTermField : TermField
-emptyTermField =
-    { body = ""
-    , isAbbreviation = False
-    , isAbbreviationManuallyOverridden = False
-    , validationError = Nothing
-    }
 
 
 emptyRelatedTermField : RelatedTermField
@@ -246,12 +229,12 @@ fromGlossaryItem : List GlossaryItem.Term -> List GlossaryItem.Term -> List Glos
 fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRelated item =
     let
         termFieldsForItem =
-            List.map (\term -> TermField term.body term.isAbbreviation True Nothing) item.terms
+            List.map (\term -> TermField.fromPlaintext term.body term.isAbbreviation) item.terms
 
         termIdsForItem : Set String
         termIdsForItem =
             termFieldsForItem
-                |> List.map (.body >> termBodyToId)
+                |> List.map (TermField.raw >> termBodyToId)
                 |> Set.fromList
 
         termsOutside1 : List GlossaryItem.Term
@@ -314,9 +297,13 @@ toGlossaryItem glossaryItems form =
             |> Array.toList
             |> List.map
                 (\termField ->
-                    { id = termBodyToId termField.body
-                    , isAbbreviation = termField.isAbbreviation
-                    , body = termField.body |> String.trim
+                    let
+                        raw =
+                            termField |> TermField.raw |> String.trim
+                    in
+                    { id = termBodyToId raw
+                    , isAbbreviation = TermField.isAbbreviation termField
+                    , body = raw
                     }
                 )
     , details =
@@ -345,7 +332,7 @@ addTerm glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
-                { form | termFields = Array.push emptyTermField form.termFields }
+                { form | termFields = Array.push TermField.emptyPlaintext form.termFields }
                 |> validate
 
 
@@ -357,18 +344,7 @@ updateTerm termIndex glossaryItemForm body =
                 { form
                     | termFields =
                         Extras.Array.update
-                            (\termField ->
-                                if not termField.isAbbreviationManuallyOverridden then
-                                    { termField
-                                        | body = body
-                                        , isAbbreviation = termBodyLooksLikeAnAbbreviation body
-                                    }
-
-                                else
-                                    { termField
-                                        | body = body
-                                    }
-                            )
+                            (TermField.setBody body)
                             (TermIndex.toInt termIndex)
                             form.termFields
                 }
@@ -393,10 +369,9 @@ toggleAbbreviation termIndex glossaryItemForm =
                     | termFields =
                         Extras.Array.update
                             (\termField ->
-                                { termField
-                                    | isAbbreviation = not termField.isAbbreviation
-                                    , isAbbreviationManuallyOverridden = True
-                                }
+                                termField
+                                    |> TermField.setIsAbbreviation (not <| TermField.isAbbreviation termField)
+                                    |> TermField.setIsAbbreviationManuallyOverridden True
                             )
                             (TermIndex.toInt termIndex)
                             form.termFields
@@ -474,15 +449,6 @@ deleteRelatedTerm index glossaryItemForm =
             GlossaryItemForm
                 { form | relatedTermFields = Extras.Array.delete (RelatedTermIndex.toInt index) form.relatedTermFields }
                 |> validate
-
-
-termBodyLooksLikeAnAbbreviation : String -> Bool
-termBodyLooksLikeAnAbbreviation bodyRaw =
-    let
-        body =
-            String.trim bodyRaw
-    in
-    (not <| String.isEmpty body) && body == String.toUpper body
 
 
 suggestRelatedTerms : GlossaryItemForm -> List GlossaryItem.Term
