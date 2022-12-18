@@ -25,6 +25,7 @@ import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Extras.Http
 import Extras.Task
 import GlossaryItemForm as Form exposing (GlossaryItemForm)
+import GlossaryItemForm.DetailsField as DetailsField exposing (DetailsField)
 import Html
 import Html.Attributes exposing (class, id, required)
 import Html.Events
@@ -243,9 +244,6 @@ update msg model =
 
                             common =
                                 model.common
-
-                            glossary0 =
-                                common.glossary
 
                             ( updatedGlossaryItems, maybeIndex ) =
                                 case common.maybeIndex of
@@ -474,13 +472,20 @@ viewCreateDescriptionTerms showValidationErrors termsArray =
         ]
 
 
-viewCreateDescriptionDetailsSingle : Bool -> Int -> Form.DetailsField -> Html Msg
+viewCreateDescriptionDetailsSingle : Bool -> Int -> DetailsField -> Html Msg
 viewCreateDescriptionDetailsSingle showValidationErrors index detailsSingle =
     viewCreateDescriptionDetailsSingle1 showValidationErrors (DetailsIndex.fromInt index) detailsSingle
 
 
-viewCreateDescriptionDetailsSingle1 : Bool -> DetailsIndex -> Form.DetailsField -> Html Msg
+viewCreateDescriptionDetailsSingle1 : Bool -> DetailsIndex -> DetailsField -> Html Msg
 viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
+    let
+        raw =
+            DetailsField.raw detailsSingle
+
+        validationError =
+            DetailsField.validationError detailsSingle
+    in
     div []
         [ div
             [ class "flex-auto max-w-2xl flex" ]
@@ -496,9 +501,9 @@ viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
             , div
                 [ class "relative block min-w-0 w-full" ]
                 [ Components.Form.textarea
-                    detailsSingle.body
+                    raw
                     showValidationErrors
-                    detailsSingle.validationError
+                    validationError
                     [ required True
                     , Accessibility.Aria.label "Details"
                     , Accessibility.Aria.required True
@@ -508,18 +513,18 @@ viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
                 ]
             ]
         , Extras.Html.showMaybe
-            (\validationError ->
+            (\validationError0 ->
                 p
                     [ class "mt-2 text-red-600 dark:text-red-400" ]
-                    [ text validationError ]
+                    [ text validationError0 ]
             )
             (if showValidationErrors then
-                detailsSingle.validationError
+                validationError
 
              else
                 Nothing
             )
-        , Extras.Html.showIf (String.trim detailsSingle.body |> String.contains "\n") <|
+        , Extras.Html.showIf (raw |> String.contains "\n") <|
             p
                 [ class "mt-2 text-red-800 dark:text-red-200" ]
                 [ text "This will be turned into a single paragraph — line breaks are automatically converted to spaces" ]
@@ -548,7 +553,7 @@ viewAddDetailsButtonForEmptyState =
         ]
 
 
-viewCreateDescriptionDetails : Bool -> Array Form.DetailsField -> Html Msg
+viewCreateDescriptionDetails : Bool -> Array DetailsField -> Html Msg
 viewCreateDescriptionDetails showValidationErrors detailsArray =
     let
         details =

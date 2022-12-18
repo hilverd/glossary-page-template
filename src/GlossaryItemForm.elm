@@ -1,6 +1,5 @@
 module GlossaryItemForm exposing
-    ( DetailsField
-    , GlossaryItemForm
+    ( GlossaryItemForm
     , RelatedTermField
     , TermField
     , addDetails
@@ -34,6 +33,7 @@ import Dict exposing (Dict)
 import ElementIds
 import Extras.Array
 import Extras.Regex
+import GlossaryItemForm.DetailsField as DetailsField exposing (DetailsField)
 import Regex
 import Set exposing (Set)
 
@@ -42,12 +42,6 @@ type alias TermField =
     { body : String
     , isAbbreviation : Bool
     , isAbbreviationManuallyOverridden : Bool
-    , validationError : Maybe String
-    }
-
-
-type alias DetailsField =
-    { body : String
     , validationError : Maybe String
     }
 
@@ -170,17 +164,17 @@ validate form =
                 |> Array.map
                     (\detailsField ->
                         let
-                            body =
-                                String.trim detailsField.body
+                            raw =
+                                DetailsField.raw detailsField
                         in
-                        { detailsField
-                            | validationError =
-                                if String.isEmpty body then
+                        detailsField
+                            |> DetailsField.setValidationError
+                                (if String.isEmpty raw then
                                     Just cannotBeEmptyMessage
 
-                                else
+                                 else
                                     Nothing
-                        }
+                                )
                     )
 
         validatedRelatedTermFields =
@@ -215,7 +209,7 @@ hasValidationErrors form =
             Array.toList >> List.any (.validationError >> (/=) Nothing)
     in
     (form |> termFields |> hasErrors)
-        || (form |> detailsFields |> hasErrors)
+        || (form |> detailsFields |> Array.toList |> List.any (DetailsField.validationError >> (/=) Nothing))
         || (form |> relatedTermFields |> hasErrors)
 
 
@@ -237,13 +231,6 @@ emptyTermField =
     { body = ""
     , isAbbreviation = False
     , isAbbreviationManuallyOverridden = False
-    , validationError = Nothing
-    }
-
-
-emptyDetailsField : DetailsField
-emptyDetailsField =
-    { body = ""
     , validationError = Nothing
     }
 
@@ -284,7 +271,7 @@ fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRe
                 existingPrimaryTerms
 
         detailsFieldsList =
-            List.map (\detailsElem -> DetailsField detailsElem Nothing) item.details
+            List.map (\detailsElem -> DetailsField.fromPlaintext detailsElem) item.details
     in
     GlossaryItemForm
         { termFields = Array.fromList termFieldsForItem
@@ -336,7 +323,7 @@ toGlossaryItem glossaryItems form =
         form
             |> detailsFields
             |> Array.toList
-            |> List.map (.body >> String.trim)
+            |> List.map (DetailsField.raw >> String.trim)
     , relatedTerms =
         form
             |> relatedTermFields
@@ -422,7 +409,7 @@ addDetails glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
-                { form | detailsFields = form.detailsFields |> Array.push emptyDetailsField }
+                { form | detailsFields = form.detailsFields |> Array.push DetailsField.emptyPlaintext }
                 |> validate
 
 
@@ -434,7 +421,7 @@ updateDetails detailsIndex glossaryItemForm body =
                 { form
                     | detailsFields =
                         Extras.Array.update
-                            (\detailsField -> { detailsField | body = body })
+                            (always <| DetailsField.fromPlaintext body)
                             (DetailsIndex.toInt detailsIndex)
                             form.detailsFields
                 }
@@ -524,7 +511,7 @@ suggestRelatedTerms glossaryItemForm =
             glossaryItemForm
                 |> detailsFields
                 |> Array.toList
-                |> List.map (.body >> String.toLower)
+                |> List.map (DetailsField.raw >> String.toLower)
 
         primaryTermIdsOfItemsListingThisItemAsRelated =
             glossaryItemForm
