@@ -197,12 +197,12 @@ validate form =
 hasValidationErrors : GlossaryItemForm -> Bool
 hasValidationErrors form =
     let
-        hasErrors =
-            Array.toList >> List.any (.validationError >> (/=) Nothing)
+        hasErrors f =
+            Array.toList >> List.any (f >> (/=) Nothing)
     in
-    (form |> termFields |> Array.toList |> List.any (TermField.validationError >> (/=) Nothing))
-        || (form |> detailsFields |> Array.toList |> List.any (DetailsField.validationError >> (/=) Nothing))
-        || (form |> relatedTermFields |> hasErrors)
+    (form |> termFields |> hasErrors TermField.validationError)
+        || (form |> detailsFields |> hasErrors DetailsField.validationError)
+        || (form |> relatedTermFields |> hasErrors .validationError)
 
 
 empty : List GlossaryItem.Term -> List GlossaryItem.Term -> List GlossaryItem -> GlossaryItemForm
