@@ -10,7 +10,8 @@ import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection(..))
 import Data.GlossaryItem exposing (GlossaryItem)
-import Data.GlossaryItem.Details as Details exposing (Details)
+import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.Term as Term
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Extras.HtmlTree
@@ -71,7 +72,7 @@ itemToMarkdown { terms, details, relatedTerms } =
     let
         termsString =
             terms
-                |> List.map (.body >> bold)
+                |> List.map (Term.raw >> bold)
                 |> lines
 
         detailsString =

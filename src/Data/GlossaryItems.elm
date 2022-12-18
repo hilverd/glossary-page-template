@@ -10,8 +10,9 @@ module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetical
 -}
 
 import Array
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
-import Data.GlossaryItem.Details as Details exposing (Details)
+import Data.GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Dict exposing (Dict)
 import Extras.HtmlTree exposing (HtmlTree(..))
@@ -40,7 +41,7 @@ fromList glossaryItems =
 
         alphabetically =
             sanitised
-                |> List.sortBy (.terms >> List.head >> Maybe.map .body >> Maybe.withDefault "" >> String.toLower)
+                |> List.sortBy (.terms >> List.head >> Maybe.map Term.raw >> Maybe.withDefault "" >> String.toLower)
                 |> zipListWithIndexes
 
         byFrequency =
@@ -62,16 +63,16 @@ orderListByFrequency indexedGlossaryItems =
         -- Maps a term to a score based on whether or not it occurs in glossaryItem.
         -- This is done in a primitive way. A more sophisticated solution could use stemming
         -- or other techniques.
-        termScoreInItem : GlossaryItem.Term -> GlossaryItem -> Int
+        termScoreInItem : Term -> GlossaryItem -> Int
         termScoreInItem term glossaryItem =
             let
                 termAsWord =
-                    ("\\b" ++ Extras.Regex.escapeStringForUseInRegex term.body ++ "\\b")
+                    ("\\b" ++ Extras.Regex.escapeStringForUseInRegex (Term.raw term) ++ "\\b")
                         |> Regex.fromString
                         |> Maybe.withDefault Regex.never
 
                 score =
-                    (glossaryItem.terms |> List.map .body |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
+                    (glossaryItem.terms |> List.map (Term.raw >> Regex.find termAsWord >> List.length) |> List.sum)
                         + (glossaryItem.details |> List.map (Details.raw >> Regex.find termAsWord >> List.length) |> List.sum)
                         + (glossaryItem.relatedTerms |> List.map .body |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
             in
@@ -82,7 +83,7 @@ orderListByFrequency indexedGlossaryItems =
                 0
 
         -- Maps a term to a score based on how often it occurs in glossaryItems.
-        termScore : GlossaryItem.Term -> Int -> Int
+        termScore : Term -> Int -> Int
         termScore term exceptIndex =
             indexed
                 |> List.foldl
@@ -108,7 +109,7 @@ orderListByFrequency indexedGlossaryItems =
                 |> List.foldl
                     (\( glossaryItemIndex, term ) result ->
                         Dict.insert
-                            term.body
+                            (Term.raw term)
                             (termScore term glossaryItemIndex)
                             result
                     )
@@ -123,7 +124,7 @@ orderListByFrequency indexedGlossaryItems =
                             >> List.map
                                 (\term ->
                                     termBodyScores
-                                        |> Dict.get term.body
+                                        |> Dict.get (Term.raw term)
                                         |> Maybe.withDefault 0
                                 )
                             >> List.sum
@@ -134,8 +135,8 @@ orderListByFrequency indexedGlossaryItems =
 
                     EQ ->
                         compare
-                            (item1.terms |> List.head |> Maybe.map .body |> Maybe.withDefault "" |> String.toLower)
-                            (item2.terms |> List.head |> Maybe.map .body |> Maybe.withDefault "" |> String.toLower)
+                            (item1.terms |> List.head |> Maybe.map Term.raw |> Maybe.withDefault "" |> String.toLower)
+                            (item2.terms |> List.head |> Maybe.map Term.raw |> Maybe.withDefault "" |> String.toLower)
 
                     GT ->
                         LT
@@ -149,7 +150,7 @@ sanitiseList glossaryItems =
             glossaryItems
                 |> List.map (.terms >> List.take 1)
                 |> List.concat
-                |> List.map .id
+                |> List.map Term.id
                 |> Set.fromList
     in
     glossaryItems
@@ -250,7 +251,7 @@ orderedByFrequency glossaryItems =
 
 {-| Retrieve the list of all terms in the glossary.
 -}
-terms : GlossaryItems -> List GlossaryItem.Term
+terms : GlossaryItems -> List Term
 terms =
     orderedAlphabetically
         >> List.map (Tuple.second >> .terms)
@@ -262,7 +263,7 @@ A _primary term_ is a term that occurs as the first (and possibly only) one in a
 When adding related terms in the UI, only primary terms are available.
 This is to encourage standardizing on one "primary" term for a concept, instead of several synonyms with no clear preferred one.
 -}
-primaryTerms : GlossaryItems -> List GlossaryItem.Term
+primaryTerms : GlossaryItems -> List Term
 primaryTerms =
     orderedAlphabetically
         >> List.map (Tuple.second >> .terms >> List.take 1)

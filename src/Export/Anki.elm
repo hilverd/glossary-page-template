@@ -10,7 +10,8 @@ import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection(..))
 import Data.GlossaryItem exposing (GlossaryItem)
-import Data.GlossaryItem.Details as Details exposing (Details)
+import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.Term as Term
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import File.Download as Download
@@ -60,7 +61,7 @@ itemToAnki { terms, details, relatedTerms } =
 
         front =
             terms
-                |> List.map (.body >> escape)
+                |> List.map (Term.raw >> escape)
                 |> lines
                 |> quote
 

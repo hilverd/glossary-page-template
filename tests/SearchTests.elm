@@ -1,20 +1,17 @@
 module SearchTests exposing (..)
 
 import Components.SearchDialog exposing (searchResult)
-import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Details as Details exposing (Details)
+import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Expect
 import Search
 import Test exposing (..)
 
 
-termFromBody : String -> GlossaryItem.Term
+termFromBody : String -> Term
 termFromBody body =
-    { id = String.replace " " "_" body
-    , isAbbreviation = False
-    , body = body
-    }
+    Term.fromPlaintext body False
 
 
 loadedGlossaryItems : GlossaryItems

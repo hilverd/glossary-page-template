@@ -16,7 +16,8 @@ import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection(..))
 import Data.Glossary as Glossary exposing (Glossary(..))
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
-import Data.GlossaryItem.Details as Details exposing (Details)
+import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -505,16 +506,16 @@ viewMakingChangesHelp filename tabbable =
         ]
 
 
-viewTermIndexItem : Bool -> GlossaryItem.Term -> Html Msg
+viewTermIndexItem : Bool -> Term -> Html Msg
 viewTermIndexItem tabbable term =
     li []
         [ Html.a
             [ class "block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
-            , Html.Attributes.href <| fragmentOnly term.id
+            , Html.Attributes.href <| fragmentOnly <| Term.id term
             , Accessibility.Key.tabbable tabbable
             , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
             ]
-            [ text term.body ]
+            [ text <| Term.raw term ]
         ]
 
 
@@ -535,7 +536,7 @@ viewTermIndexGroup tabbable staticSidebar { label, terms } =
 
 type alias TermIndexGroup =
     { label : String
-    , terms : List GlossaryItem.Term
+    , terms : List Term
     }
 
 
@@ -546,7 +547,7 @@ type alias TermIndex =
 termIndexFromGlossaryItems : GlossaryItems -> TermIndex
 termIndexFromGlossaryItems glossaryItems =
     let
-        termListsByFirstCharacter : Dict String (List GlossaryItem.Term)
+        termListsByFirstCharacter : Dict String (List Term)
         termListsByFirstCharacter =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
@@ -555,7 +556,7 @@ termIndexFromGlossaryItems glossaryItems =
                     (\term result ->
                         let
                             firstCharacterUpper =
-                                term.body |> String.toUpper |> String.left 1
+                                term |> Term.raw |> String.toUpper |> String.left 1
                         in
                         Dict.update
                             firstCharacterUpper
@@ -574,7 +575,7 @@ termIndexFromGlossaryItems glossaryItems =
             List.range (Char.toCode 'A') (Char.toCode 'Z')
                 |> List.map (Char.fromCode >> String.fromChar)
 
-        termListsByFirstCharacterIncludingAlphabet : Dict String (List GlossaryItem.Term)
+        termListsByFirstCharacterIncludingAlphabet : Dict String (List Term)
         termListsByFirstCharacterIncludingAlphabet =
             List.foldl
                 (\letter result ->
@@ -595,7 +596,7 @@ termIndexFromGlossaryItems glossaryItems =
         termIndex =
             termListsByFirstCharacterIncludingAlphabet
                 |> Dict.toList
-                |> List.map (Tuple.mapSecond <| List.sortBy <| .body >> String.toLower)
+                |> List.map (Tuple.mapSecond <| List.sortBy <| Term.raw >> String.toLower)
                 |> List.map (\( label, terms ) -> TermIndexGroup label terms)
     in
     termIndex
@@ -619,22 +620,22 @@ viewTermsIndex tabbable staticSidebar termIndex =
         )
 
 
-viewGlossaryTerm : Bool -> GlossaryItem.Term -> Html Msg
+viewGlossaryTerm : Bool -> Term -> Html Msg
 viewGlossaryTerm tabbable term =
     Html.dt
         [ class "group" ]
         [ Html.dfn
-            [ Html.Attributes.id term.id ]
-            [ if term.isAbbreviation then
-                Html.abbr [] [ text term.body ]
+            [ Html.Attributes.id <| Term.id term ]
+            [ if Term.isAbbreviation term then
+                Html.abbr [] [ text <| Term.raw term ]
 
               else
-                text term.body
+                text <| Term.raw term
             ]
         , span
             [ class "silcrow invisible group-hover:visible hover:visible" ]
             [ Html.a
-                [ fragmentOnly term.id |> Html.Attributes.href
+                [ term |> Term.id |> fragmentOnly |> Html.Attributes.href
                 , Accessibility.Key.tabbable tabbable
                 ]
                 [ text "§" ]

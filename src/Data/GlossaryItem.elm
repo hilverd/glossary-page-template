@@ -1,5 +1,5 @@
 module Data.GlossaryItem exposing
-    ( Term, RelatedTerm, GlossaryItem, empty, decode, hasSomeDetails
+    ( RelatedTerm, GlossaryItem, empty, decode, hasSomeDetails
     , toHtmlTree
     )
 
@@ -8,7 +8,7 @@ module Data.GlossaryItem exposing
 
 # Glossary Items
 
-@docs Term, RelatedTerm, GlossaryItem, empty, decode, hasSomeDetails
+@docs RelatedTerm, GlossaryItem, empty, decode, hasSomeDetails
 
 
 # Converting to HTML
@@ -18,21 +18,10 @@ module Data.GlossaryItem exposing
 -}
 
 import Data.GlossaryItem.Details as Details exposing (Details)
+import Data.GlossaryItem.Term as Term exposing (Term)
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Extras.Url exposing (fragmentOnly)
 import Json.Decode as Decode exposing (Decoder)
-
-
-{-| A term in a glossary item.
-The `id` is used to be able to refer to this term (as a related one) from other glossary items.
-A term might be an abbreviation such as "Etc." or "TBD" (an acronym).
-The `body` is the actual term.
--}
-type alias Term =
-    { id : String
-    , isAbbreviation : Bool
-    , body : String
-    }
 
 
 {-| A related term identified by pointing to the `id` of another term, also mentioning the related term's `body`.
@@ -59,7 +48,7 @@ type alias GlossaryItem =
 -}
 empty : GlossaryItem
 empty =
-    { terms = [ Term "" False "" ]
+    { terms = [ Term.emptyPlaintext ]
     , details = []
     , relatedTerms = []
     }
@@ -67,10 +56,10 @@ empty =
 
 decodeTerm : Decoder Term
 decodeTerm =
-    Decode.map3 Term
+    Decode.map3 Term.fromPlaintextWithId
+        (Decode.field "body" Decode.string)
         (Decode.field "id" <| Decode.string)
         (Decode.field "isAbbreviation" Decode.bool)
-        (Decode.field "body" Decode.string)
 
 
 decodeRelatedTerms : Decoder RelatedTerm
@@ -85,6 +74,7 @@ decodeRelatedTerms =
     import Json.Decode as Decode exposing (Decoder)
     import Json.Encode as Encode
     import Data.GlossaryItem.Details as Details
+    import Data.GlossaryItem.Term as Term
 
     rain : Encode.Value
     rain =
@@ -104,11 +94,7 @@ decodeRelatedTerms =
     Decode.decodeValue decode rain
     --> Ok
     -->     { terms =
-    -->         [ { id = "Rain"
-    -->           , isAbbreviation = False
-    -->           , body = "Rain"
-    -->           }
-    -->         ]
+    -->         [ Term.fromPlaintext "Rain" False ]
     -->     , details = [ Details.fromPlaintext "Condensed moisture." ]
     -->     , relatedTerms = []
     -->     }
@@ -140,8 +126,8 @@ termToHtmlTree term =
         []
         [ HtmlTree.Node "dfn"
             True
-            [ HtmlTree.Attribute "id" term.id ]
-            [ HtmlTree.Leaf term.body
+            [ HtmlTree.Attribute "id" <| Term.id term ]
+            [ HtmlTree.Leaf (Term.raw term)
                 |> (\inner ->
                         let
                             linkedTerm =
@@ -150,7 +136,7 @@ termToHtmlTree term =
                                     [ hrefToTerm term ]
                                     [ inner ]
                         in
-                        if term.isAbbreviation then
+                        if Term.isAbbreviation term then
                             HtmlTree.Node "abbr" True [] [ linkedTerm ]
 
                         else
@@ -218,7 +204,7 @@ toHtmlTree glossaryItem =
 
 hrefToTerm : Term -> HtmlTree.Attribute
 hrefToTerm term =
-    HtmlTree.Attribute "href" <| fragmentOnly term.id
+    HtmlTree.Attribute "href" <| fragmentOnly <| Term.id term
 
 
 hrefFromRelatedTerm : RelatedTerm -> HtmlTree.Attribute

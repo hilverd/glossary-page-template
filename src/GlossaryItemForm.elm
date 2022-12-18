@@ -25,7 +25,8 @@ module GlossaryItemForm exposing
 import Array exposing (Array)
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
-import Data.GlossaryItem.Details as Details exposing (Details)
+import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
@@ -50,8 +51,8 @@ type GlossaryItemForm
         { termFields : Array TermField
         , detailsFields : Array DetailsField
         , relatedTermFields : Array RelatedTermField
-        , termsOutside : List GlossaryItem.Term
-        , primaryTermsOutside : List GlossaryItem.Term
+        , termsOutside : List Term
+        , primaryTermsOutside : List Term
         , itemsListingThisItemAsRelated : List GlossaryItem
         }
 
@@ -77,14 +78,14 @@ relatedTermFields glossaryItemForm =
             form.relatedTermFields
 
 
-termsOutside : GlossaryItemForm -> List GlossaryItem.Term
+termsOutside : GlossaryItemForm -> List Term
 termsOutside glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             form.termsOutside
 
 
-primaryTermsOutside : GlossaryItemForm -> List GlossaryItem.Term
+primaryTermsOutside : GlossaryItemForm -> List Term
 primaryTermsOutside glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
@@ -105,7 +106,7 @@ validate form =
             "This field can't be empty"
 
         termIdsOutsideSet =
-            form |> termsOutside |> List.map .id |> Set.fromList
+            form |> termsOutside |> List.map Term.id |> Set.fromList
 
         termIdsInsideForm : Dict String Int
         termIdsInsideForm =
@@ -206,7 +207,7 @@ hasValidationErrors form =
         || (form |> relatedTermFields |> hasErrors .validationError)
 
 
-empty : List GlossaryItem.Term -> List GlossaryItem.Term -> List GlossaryItem -> GlossaryItemForm
+empty : List Term -> List Term -> List GlossaryItem -> GlossaryItemForm
 empty withTermsOutside withPrimaryTermsOutside withItemsListingThisTermAsRelated =
     GlossaryItemForm
         { termFields = Array.fromList [ TermField.emptyPlaintext ]
@@ -226,11 +227,15 @@ emptyRelatedTermField =
     }
 
 
-fromGlossaryItem : List GlossaryItem.Term -> List GlossaryItem.Term -> List GlossaryItem -> GlossaryItem -> GlossaryItemForm
+fromGlossaryItem : List Term -> List Term -> List GlossaryItem -> GlossaryItem -> GlossaryItemForm
 fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRelated item =
     let
         termFieldsForItem =
-            List.map (\term -> TermField.fromPlaintext term.body term.isAbbreviation) item.terms
+            List.map
+                (\term ->
+                    TermField.fromPlaintext (Term.raw term) (Term.isAbbreviation term)
+                )
+                item.terms
 
         termIdsForItem : Set String
         termIdsForItem =
@@ -238,19 +243,19 @@ fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRe
                 |> List.map (TermField.raw >> termBodyToId)
                 |> Set.fromList
 
-        termsOutside1 : List GlossaryItem.Term
+        termsOutside1 : List Term
         termsOutside1 =
             List.filter
                 (\existingTerm ->
-                    not <| Set.member existingTerm.id termIdsForItem
+                    not <| Set.member (Term.id existingTerm) termIdsForItem
                 )
                 existingTerms
 
-        primaryTermsOutside1 : List GlossaryItem.Term
+        primaryTermsOutside1 : List Term
         primaryTermsOutside1 =
             List.filter
                 (\existingTerm ->
-                    not <| Set.member existingTerm.id termIdsForItem
+                    not <| Set.member (Term.id existingTerm) termIdsForItem
                 )
                 existingPrimaryTerms
 
@@ -292,7 +297,7 @@ toGlossaryItem glossaryItems form =
                 |> List.foldl
                     (\( _, glossaryItem ) result ->
                         List.foldl
-                            (\term -> Dict.update term.id (always <| Just term.body))
+                            (\term -> Dict.update (Term.id term) (always <| Just <| Term.raw term))
                             result
                             glossaryItem.terms
                     )
@@ -308,10 +313,7 @@ toGlossaryItem glossaryItems form =
                         raw =
                             termField |> TermField.raw |> String.trim
                     in
-                    { id = termBodyToId raw
-                    , isAbbreviation = TermField.isAbbreviation termField
-                    , body = raw
-                    }
+                    Term.fromPlaintext raw <| TermField.isAbbreviation termField
                 )
     , details =
         form
@@ -458,7 +460,7 @@ deleteRelatedTerm index glossaryItemForm =
                 |> validate
 
 
-suggestRelatedTerms : GlossaryItemForm -> List GlossaryItem.Term
+suggestRelatedTerms : GlossaryItemForm -> List Term
 suggestRelatedTerms glossaryItemForm =
     let
         relatedTermIdsAlreadyInForm : Set String
@@ -473,12 +475,12 @@ suggestRelatedTerms glossaryItemForm =
                     )
                     Set.empty
 
-        candidateTerms : List GlossaryItem.Term
+        candidateTerms : List Term
         candidateTerms =
             glossaryItemForm
                 |> primaryTermsOutside
                 |> List.filter
-                    (\term -> not <| Set.member term.id relatedTermIdsAlreadyInForm)
+                    (\term -> not <| Set.member (Term.id term) relatedTermIdsAlreadyInForm)
 
         detailsFieldBodies =
             glossaryItemForm
@@ -491,21 +493,21 @@ suggestRelatedTerms glossaryItemForm =
                 |> itemsListingThisTermAsRelated
                 |> List.map (.terms >> List.head)
                 |> List.filterMap identity
-                |> List.map .id
+                |> List.map Term.id
                 |> Set.fromList
 
-        relevantCandidateTerms : List GlossaryItem.Term
+        relevantCandidateTerms : List Term
         relevantCandidateTerms =
             candidateTerms
                 |> List.filter
                     (\candidateTerm ->
                         let
                             candidateTermAsWord =
-                                ("\\b" ++ Extras.Regex.escapeStringForUseInRegex (String.toLower candidateTerm.body) ++ "\\b")
+                                ("\\b" ++ Extras.Regex.escapeStringForUseInRegex (String.toLower (Term.raw candidateTerm)) ++ "\\b")
                                     |> Regex.fromString
                                     |> Maybe.withDefault Regex.never
                         in
-                        Set.member candidateTerm.id primaryTermIdsOfItemsListingThisItemAsRelated
+                        Set.member (Term.id candidateTerm) primaryTermIdsOfItemsListingThisItemAsRelated
                             || List.any
                                 (\detailsFieldBody ->
                                     Regex.contains candidateTermAsWord detailsFieldBody

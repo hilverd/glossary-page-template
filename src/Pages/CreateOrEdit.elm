@@ -13,7 +13,7 @@ import Components.SelectMenu
 import Data.AboutSection exposing (AboutSection(..))
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.Glossary as Glossary exposing (Glossary(..))
-import Data.GlossaryItem as GlossaryItem
+import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
@@ -97,7 +97,7 @@ init commonModel =
                                                             |> List.any
                                                                 (\relatedTerm ->
                                                                     currentItem.terms
-                                                                        |> List.any (\term -> term.id == relatedTerm.idReference)
+                                                                        |> List.any (\term -> Term.id term == relatedTerm.idReference)
                                                                 )
                                                     )
                                         )
@@ -583,12 +583,12 @@ viewCreateDescriptionDetails showValidationErrors detailsArray =
         ]
 
 
-viewCreateSeeAlsoSingle : Bool -> Set String -> List GlossaryItem.Term -> Int -> Form.RelatedTermField -> Html Msg
+viewCreateSeeAlsoSingle : Bool -> Set String -> List Term -> Int -> Form.RelatedTermField -> Html Msg
 viewCreateSeeAlsoSingle showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
     viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms (RelatedTermIndex.fromInt index) relatedTerm
 
 
-viewCreateSeeAlsoSingle1 : Bool -> Set String -> List GlossaryItem.Term -> RelatedTermIndex -> Form.RelatedTermField -> Html Msg
+viewCreateSeeAlsoSingle1 : Bool -> Set String -> List Term -> RelatedTermIndex -> Form.RelatedTermField -> Html Msg
 viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
     div
         []
@@ -616,15 +616,15 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms 
                     (allTerms
                         |> List.filter
                             (\term ->
-                                (not <| Set.member term.id relatedTermsIdReferences)
-                                    || (Just term.id == relatedTerm.idReference)
+                                (not <| Set.member (Term.id term) relatedTermsIdReferences)
+                                    || (Just (Term.id term) == relatedTerm.idReference)
                             )
                         |> List.map
                             (\term ->
                                 Components.SelectMenu.Choice
-                                    term.id
-                                    term.body
-                                    (Just term.id == relatedTerm.idReference)
+                                    (Term.id term)
+                                    (Term.raw term)
+                                    (Just (Term.id term) == relatedTerm.idReference)
                             )
                     )
                 ]
@@ -657,7 +657,7 @@ viewCreateSeeAlso :
     -> GlossaryItems
     -> Array TermField
     -> Array Form.RelatedTermField
-    -> List GlossaryItem.Term
+    -> List Term
     -> Html Msg
 viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray suggestedRelatedTerms =
     let
@@ -667,7 +667,7 @@ viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray sug
         relatedTermsList =
             Array.toList relatedTermsArray
 
-        allTerms : List GlossaryItem.Term
+        allTerms : List Term
         allTerms =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
@@ -692,7 +692,7 @@ viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray sug
                         |> List.filterMap .idReference
                         |> Set.fromList
                     )
-                    (List.filter (\term -> not <| Set.member term.id termIdsSet) allTerms)
+                    (List.filter (\term -> not <| Set.member (Term.id term) termIdsSet) allTerms)
                 )
                 relatedTermsList
             )
@@ -708,7 +708,7 @@ viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray sug
         ]
 
 
-viewAddSuggestedSeeAlso : List GlossaryItem.Term -> Html Msg
+viewAddSuggestedSeeAlso : List Term -> Html Msg
 viewAddSuggestedSeeAlso suggestedRelatedTerms =
     div
         []
@@ -724,11 +724,11 @@ viewAddSuggestedSeeAlso suggestedRelatedTerms =
                         (\suggestedRelatedTerm ->
                             Components.Button.white True
                                 [ class "m-1 text-sm"
-                                , Html.Events.onClick <| PageMsg.Internal (AddRelatedTerm <| Just suggestedRelatedTerm.id)
+                                , Html.Events.onClick <| PageMsg.Internal (AddRelatedTerm <| Just <| Term.id suggestedRelatedTerm)
                                 ]
                                 [ Icons.plus
                                     [ Svg.Attributes.class "-ml-1 mr-2 h-4 w-4" ]
-                                , text suggestedRelatedTerm.body
+                                , text <| Term.raw suggestedRelatedTerm
                                 ]
                         )
                 )

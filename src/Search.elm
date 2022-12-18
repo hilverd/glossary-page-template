@@ -1,7 +1,7 @@
 module Search exposing (search)
 
 import Components.SearchDialog as SearchDialog
-import Data.GlossaryItem as GlossaryItem
+import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Extras.Url
 
@@ -12,7 +12,7 @@ search searchTerm glossaryItems =
         searchTermNormalised =
             searchTerm |> String.trim |> String.toLower
 
-        terms : List GlossaryItem.Term
+        terms : List Term
         terms =
             glossaryItems
                 |> GlossaryItems.orderedByFrequency
@@ -25,8 +25,8 @@ search searchTerm glossaryItems =
         terms
             |> List.filterMap
                 (\term ->
-                    if String.contains searchTermNormalised (String.toLower term.body) then
-                        Just <| SearchDialog.searchResult (Extras.Url.fragmentOnly term.id) term.body
+                    if String.contains searchTermNormalised (String.toLower (Term.raw term)) then
+                        Just <| SearchDialog.searchResult (Extras.Url.fragmentOnly <| Term.id term) (Term.raw term)
 
                     else
                         Nothing

@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, fromPlaintext, id, isAbbreviation, raw)
+module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromPlaintextWithId, id, isAbbreviation, raw)
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -9,7 +9,7 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, fromPlaintext, id, isAbbreviation, raw
+@docs Term, emptyPlaintext, fromPlaintext, fromPlaintextWithId, id, isAbbreviation, raw
 
 -}
 
@@ -24,6 +24,13 @@ type Term
         }
 
 
+{-| Convenience function for constructing an empty plain text term.
+-}
+emptyPlaintext : Term
+emptyPlaintext =
+    fromPlaintext "" False
+
+
 {-| Construct a term from a plain text string and a Boolean indicating whether the term is an abbreviation.
 
     fromPlaintext "NA" True |> raw --> "NA"
@@ -33,6 +40,22 @@ fromPlaintext : String -> Bool -> Term
 fromPlaintext body isAbbreviation0 =
     PlaintextTerm
         { id = String.replace " " "_" body
+        , isAbbreviation = isAbbreviation0
+        , body = body
+        }
+
+
+{-| Construct a term from a plain text string, an ID and a Boolean indicating whether the term is an abbreviation.
+
+    fromPlaintextWithId "Hello" "id1" False
+    |> id
+    --> "id1"
+
+-}
+fromPlaintextWithId : String -> String -> Bool -> Term
+fromPlaintextWithId body id0 isAbbreviation0 =
+    PlaintextTerm
+        { id = id0
         , isAbbreviation = isAbbreviation0
         , body = body
         }
@@ -69,8 +92,3 @@ raw term =
     case term of
         PlaintextTerm t ->
             t.body
-
-
-termBodyToId : String -> String
-termBodyToId =
-    String.replace " " "_"
