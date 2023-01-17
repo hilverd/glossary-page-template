@@ -13,6 +13,7 @@ type OrderItemsBy
 
 type alias CommonModel =
     { filename : Maybe String
+    , enableHelpForMakingChanges : Bool
     , enableSavingChangesInMemory : Bool
     , orderItemsBy : OrderItemsBy
     , maybeIndex : Maybe GlossaryItemIndex

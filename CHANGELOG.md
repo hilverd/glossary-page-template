@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- Fix bug: do not ignore the `data-enable-help-for-making-changes` attribute.
+
 ### Removed
 
 ## [1.8.4] - 2022-11-24

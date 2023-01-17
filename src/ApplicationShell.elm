@@ -140,6 +140,7 @@ init flags =
                 editorIsRunning
                 (CommonModel
                     filename
+                    enableHelpForMakingChanges
                     enableSavingChangesInMemory
                     CommonModel.Alphabetically
                     Nothing
