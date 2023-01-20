@@ -12,15 +12,19 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [1.8.5] - 2023-01-20
+
+### Added
 
 - Add `crossorigin` attribute to `link` element for CSS asset. This prepares it for having an `integrity` attribute added if people want to use [SRI](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity).
 
-### Changed
 ### Fixed
 
 - Fix bug: do not ignore the `data-enable-help-for-making-changes` attribute.
-
-### Removed
 
 ## [1.8.4] - 2022-11-24
 
@@ -351,7 +355,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.8.4...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.8.5...HEAD
+[1.8.5]: https://github.com/hilverd/glossary-page-template/compare/v1.8.4...v1.8.5
 [1.8.4]: https://github.com/hilverd/glossary-page-template/compare/v1.7.4...v1.8.4
 [1.7.4]: https://github.com/hilverd/glossary-page-template/compare/v1.7.3...v1.7.4
 [1.7.3]: https://github.com/hilverd/glossary-page-template/compare/v1.7.2...v1.7.3
