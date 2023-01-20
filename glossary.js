@@ -82,7 +82,7 @@ const app = Elm.ApplicationShell.init({
         glossaryItems: glossaryItems,
         editorIsRunning: editorIsRunning,
         enableHelpForMakingChanges: enableHelpForMakingChanges,
-        enableSavingChangesInMemory: true || enableSavingChangesInMemory,
+        enableSavingChangesInMemory: enableSavingChangesInMemory,
         enableMarkdownBasedSyntax: enableMarkdownBasedSyntax,
     }
 });
