@@ -36,7 +36,8 @@ for template in glossary empty; do
 
   cat $template.html | \
     sed 's!/assets/glossary.[^\.]*.js!'"https://glstatic.net/glossary-page-template@$major/glossary"'.min.js!' | \
-    sed 's!/assets/glossary.[^\.]*.css!'"https://glstatic.net/glossary-page-template@$major/glossary"'.min.css!' \
+    sed 's!/assets/glossary.[^\.]*.css!'"https://glstatic.net/glossary-page-template@$major/glossary"'.min.css!' | \
+    sed 's!link rel="stylesheet" href!link rel="stylesheet" crossorigin href!' \
     >$template-with-cdn-links.html
 
   mv $template-with-correct-file-names.html $template.html

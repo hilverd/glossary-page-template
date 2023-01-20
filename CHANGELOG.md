@@ -12,6 +12,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Add `crossorigin` attribute to `link` element for CSS asset. This prepares it for having an `integrity` attribute added if people want to use [SRI](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity).
+
 ### Changed
 ### Fixed
 
