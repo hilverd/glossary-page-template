@@ -12,6 +12,7 @@ module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetical
 import Array
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Dict exposing (Dict)
@@ -74,7 +75,7 @@ orderListByFrequency indexedGlossaryItems =
                 score =
                     (glossaryItem.terms |> List.map (Term.raw >> Regex.find termAsWord >> List.length) |> List.sum)
                         + (glossaryItem.details |> List.map (Details.raw >> Regex.find termAsWord >> List.length) |> List.sum)
-                        + (glossaryItem.relatedTerms |> List.map .body |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
+                        + (glossaryItem.relatedTerms |> List.map RelatedTerm.raw |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
             in
             if score > 0 then
                 1
@@ -161,7 +162,7 @@ sanitiseList glossaryItems =
                         glossaryItem.relatedTerms
                             |> List.filter
                                 (\relatedTerm ->
-                                    Set.member relatedTerm.idReference primaryTermIdsSet
+                                    Set.member (RelatedTerm.idReference relatedTerm) primaryTermIdsSet
                                 )
                 }
             )

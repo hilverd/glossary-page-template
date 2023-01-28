@@ -26,6 +26,7 @@ import Array exposing (Array)
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
@@ -273,7 +274,7 @@ fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRe
         , detailsFields = Array.fromList detailsFieldsList
         , relatedTermFields =
             item.relatedTerms
-                |> List.map (\term -> RelatedTermField (Just term.idReference) Nothing)
+                |> List.map (\term -> RelatedTermField (Just <| RelatedTerm.idReference term) Nothing)
                 |> Array.fromList
         , termsOutside = termsOutside1
         , primaryTermsOutside = primaryTermsOutside1
@@ -330,7 +331,7 @@ toGlossaryItem glossaryItems form =
                         |> Maybe.andThen
                             (\ref ->
                                 Dict.get ref bodyByIdReference
-                                    |> Maybe.map (GlossaryItem.RelatedTerm ref)
+                                    |> Maybe.map (RelatedTerm.fromPlaintext ref)
                             )
                 )
     }

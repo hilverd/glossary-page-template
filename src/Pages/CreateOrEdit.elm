@@ -13,6 +13,7 @@ import Components.SelectMenu
 import Data.AboutSection exposing (AboutSection(..))
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.Glossary as Glossary exposing (Glossary(..))
+import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -97,7 +98,7 @@ init commonModel =
                                                             |> List.any
                                                                 (\relatedTerm ->
                                                                     currentItem.terms
-                                                                        |> List.any (\term -> Term.id term == relatedTerm.idReference)
+                                                                        |> List.any (\term -> Term.id term == RelatedTerm.idReference relatedTerm)
                                                                 )
                                                     )
                                         )

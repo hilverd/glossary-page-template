@@ -17,6 +17,7 @@ import Data.AboutSection exposing (AboutSection(..))
 import Data.Glossary as Glossary exposing (Glossary(..))
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -650,7 +651,7 @@ viewGlossaryItemDetails details =
         [ text details ]
 
 
-viewGlossaryItemRelatedTerms : Bool -> Bool -> List GlossaryItem.RelatedTerm -> List (Html Msg)
+viewGlossaryItemRelatedTerms : Bool -> Bool -> List RelatedTerm -> List (Html Msg)
 viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails relatedTerms =
     if List.isEmpty relatedTerms then
         []
@@ -669,10 +670,10 @@ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails relatedTerms =
                         |> List.map
                             (\relatedTerm ->
                                 Html.a
-                                    [ fragmentOnly relatedTerm.idReference |> Html.Attributes.href
+                                    [ fragmentOnly (RelatedTerm.idReference relatedTerm) |> Html.Attributes.href
                                     , Accessibility.Key.tabbable tabbable
                                     ]
-                                    [ text relatedTerm.body ]
+                                    [ text <| RelatedTerm.raw relatedTerm ]
                             )
                         |> List.intersperse (text ", ")
                    )

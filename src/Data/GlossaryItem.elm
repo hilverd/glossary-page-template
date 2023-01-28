@@ -1,5 +1,5 @@
 module Data.GlossaryItem exposing
-    ( RelatedTerm, GlossaryItem, empty, decode, hasSomeDetails
+    ( GlossaryItem, empty, decode, hasSomeDetails
     , toHtmlTree
     )
 
@@ -8,7 +8,7 @@ module Data.GlossaryItem exposing
 
 # Glossary Items
 
-@docs RelatedTerm, GlossaryItem, empty, decode, hasSomeDetails
+@docs GlossaryItem, empty, decode, hasSomeDetails
 
 
 # Converting to HTML
@@ -18,19 +18,11 @@ module Data.GlossaryItem exposing
 -}
 
 import Data.GlossaryItem.Details as Details exposing (Details)
+import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Extras.Url exposing (fragmentOnly)
 import Json.Decode as Decode exposing (Decoder)
-
-
-{-| A related term identified by pointing to the `id` of another term, also mentioning the related term's `body`.
-The body could be looked up via the `id` instead of duplicating it -- I can't quite remember why I implemented it this way.
--}
-type alias RelatedTerm =
-    { idReference : String
-    , body : String
-    }
 
 
 {-| An item in a glossary, consisting of a list of terms (synonyms) being defined, a list of (alternative) definitions for those terms, and a list of related terms.
@@ -60,13 +52,6 @@ decodeTerm =
         (Decode.field "body" Decode.string)
         (Decode.field "id" <| Decode.string)
         (Decode.field "isAbbreviation" Decode.bool)
-
-
-decodeRelatedTerms : Decoder RelatedTerm
-decodeRelatedTerms =
-    Decode.map2 RelatedTerm
-        (Decode.field "idReference" Decode.string)
-        (Decode.field "body" Decode.string)
 
 
 {-| Decode a glossary item from its JSON representation.
@@ -104,7 +89,7 @@ decode =
     Decode.map3 GlossaryItem
         (Decode.field "terms" <| Decode.list <| decodeTerm)
         (Decode.field "details" <| Decode.list <| Decode.map Details.fromPlaintext <| Decode.string)
-        (Decode.field "relatedTerms" <| Decode.list <| decodeRelatedTerms)
+        (Decode.field "relatedTerms" <| Decode.list <| RelatedTerm.decode)
 
 
 {-| Whether or not the glossary item has any details.
@@ -158,7 +143,7 @@ relatedTermToHtmlTree relatedTerm =
     HtmlTree.Node "a"
         True
         [ hrefFromRelatedTerm relatedTerm ]
-        [ HtmlTree.Leaf relatedTerm.body ]
+        [ HtmlTree.Leaf <| RelatedTerm.raw relatedTerm ]
 
 
 nonemptyRelatedTermsToHtmlTree : Bool -> List RelatedTerm -> HtmlTree
@@ -208,4 +193,4 @@ hrefToTerm term =
 
 hrefFromRelatedTerm : RelatedTerm -> HtmlTree.Attribute
 hrefFromRelatedTerm relatedTerm =
-    HtmlTree.Attribute "href" <| fragmentOnly relatedTerm.idReference
+    HtmlTree.Attribute "href" <| fragmentOnly <| RelatedTerm.idReference relatedTerm
