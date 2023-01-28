@@ -12,16 +12,19 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [1.8.6] - 2023-01-28
+
+### Added
 
 - Add a README to `.tar.gz` package in a release with instructions on how to run the server for editing.
-
-### Changed
 
 ### Fixed
 
 - Don't show "How to Make Changes" instructions if editor is already running.
-
-### Removed
 
 ## [1.8.5] - 2023-01-20
 
@@ -362,7 +365,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.8.5...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.8.6...HEAD
+[1.8.6]: https://github.com/hilverd/glossary-page-template/compare/v1.8.5...v1.8.6
 [1.8.5]: https://github.com/hilverd/glossary-page-template/compare/v1.8.4...v1.8.5
 [1.8.4]: https://github.com/hilverd/glossary-page-template/compare/v1.7.4...v1.8.4
 [1.7.4]: https://github.com/hilverd/glossary-page-template/compare/v1.7.3...v1.7.4
