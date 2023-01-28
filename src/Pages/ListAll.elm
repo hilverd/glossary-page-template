@@ -1363,7 +1363,7 @@ view model =
                                             [ text Components.Copy.sandboxModeMessage ]
                                     ]
                                 , viewMakingChangesHelp model.common.filename noModalDialogShown_
-                                    |> Extras.Html.showIf (model.common.enableHelpForMakingChanges && not model.common.enableSavingChangesInMemory)
+                                    |> Extras.Html.showIf (model.common.enableHelpForMakingChanges && not model.common.enableSavingChangesInMemory && not editable)
                                 , h1
                                     [ id ElementIds.title ]
                                     [ text <| GlossaryTitle.toString title ]

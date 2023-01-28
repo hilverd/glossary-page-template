@@ -93,8 +93,7 @@ decodeRelatedTerms =
 
     Decode.decodeValue decode rain
     --> Ok
-    -->     { terms =
-    -->         [ Term.fromPlaintext "Rain" False ]
+    -->     { terms = [ Term.fromPlaintext "Rain" False ]
     -->     , details = [ Details.fromPlaintext "Condensed moisture." ]
     -->     , relatedTerms = []
     -->     }

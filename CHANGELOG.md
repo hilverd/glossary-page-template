@@ -16,7 +16,11 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Add a README to `.tar.gz` package in a release with instructions on how to run the server for editing.
 
 ### Changed
+
 ### Fixed
+
+- Don't show "How to Make Changes" instructions if editor is already running.
+
 ### Removed
 
 ## [1.8.5] - 2023-01-20
