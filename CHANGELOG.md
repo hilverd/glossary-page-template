@@ -12,6 +12,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Add a README to `.tar.gz` package in a release with instructions on how to run the server for editing.
+
 ### Changed
 ### Fixed
 ### Removed

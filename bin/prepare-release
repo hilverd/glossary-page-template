@@ -47,6 +47,19 @@ rmdir assets
 cd ..
 
 mkdir -p release
+
+cat > dist/README.md <<EOF
+# Glossary Page Template
+
+This page includes a web interface for making changes that are saved back to the HTML file itself. This is meant to be used _locally_ by a _single user_ at a time and works best if the file is kept under version control.
+
+If you're on macOS or Linux and have Node.js installed, then just run
+
+sed -n '/START OF editor.js\$/,\$p' glossary.html | node
+
+You can hide these instructions altogether by setting the \`data-enable-help-for-making-changes\` attribute to \`false\` on the <div id="glossary-page-container"> element.
+EOF
+
 mv dist/glossary-with-cdn-links.html release/glossary.html
 mv dist/empty-with-cdn-links.html release/empty.html
 
