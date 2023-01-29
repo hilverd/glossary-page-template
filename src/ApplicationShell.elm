@@ -15,7 +15,7 @@ import CommonModel exposing (CommonModel)
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection(..))
-import Data.Glossary exposing (Glossary(..))
+import Data.Glossary exposing (Glossary)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
 import Html
@@ -122,17 +122,12 @@ init flags =
             loadedGlossaryItems
                 |> Result.map
                     (\items ->
-                        if enableMarkdownBasedSyntax then
-                            MarkdownGlossary
-                                { enableHelpForMakingChanges = enableHelpForMakingChanges }
-
-                        else
-                            PlaintextGlossary
-                                { enableHelpForMakingChanges = enableHelpForMakingChanges
-                                , title = title
-                                , aboutSection = aboutSection
-                                , items = items
-                                }
+                        { enableMarkdownBasedSyntax = enableMarkdownBasedSyntax
+                        , enableHelpForMakingChanges = enableHelpForMakingChanges
+                        , title = title
+                        , aboutSection = aboutSection
+                        , items = items
+                        }
                     )
 
         ( listAllModel, listAllCmd ) =
