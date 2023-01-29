@@ -46,14 +46,6 @@ empty =
     }
 
 
-decodeTerm : Decoder Term
-decodeTerm =
-    Decode.map3 Term.fromPlaintextWithId
-        (Decode.field "body" Decode.string)
-        (Decode.field "id" <| Decode.string)
-        (Decode.field "isAbbreviation" Decode.bool)
-
-
 {-| Decode a glossary item from its JSON representation.
 
     import Json.Decode as Decode exposing (Decoder)
@@ -87,7 +79,7 @@ decodeTerm =
 decode : Decoder GlossaryItem
 decode =
     Decode.map3 GlossaryItem
-        (Decode.field "terms" <| Decode.list <| decodeTerm)
+        (Decode.field "terms" <| Decode.list <| Term.decode)
         (Decode.field "details" <| Decode.list <| Decode.map Details.fromPlaintext <| Decode.string)
         (Decode.field "relatedTerms" <| Decode.list <| RelatedTerm.decode)
 

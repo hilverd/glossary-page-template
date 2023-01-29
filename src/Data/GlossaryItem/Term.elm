@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromPlaintextWithId, id, isAbbreviation, raw)
+module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromPlaintextWithId, decode, id, isAbbreviation, raw)
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -9,9 +9,11 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, emptyPlaintext, fromPlaintext, fromPlaintextWithId, id, isAbbreviation, raw
+@docs Term, emptyPlaintext, fromPlaintext, fromPlaintextWithId, decode, id, isAbbreviation, raw
 
 -}
+
+import Json.Decode as Decode exposing (Decoder)
 
 
 {-| A term.
@@ -59,6 +61,16 @@ fromPlaintextWithId body id0 isAbbreviation0 =
         , isAbbreviation = isAbbreviation0
         , body = body
         }
+
+
+{-| Decode a term from its JSON representation.
+-}
+decode : Decoder Term
+decode =
+    Decode.map3 fromPlaintextWithId
+        (Decode.field "body" Decode.string)
+        (Decode.field "id" <| Decode.string)
+        (Decode.field "isAbbreviation" Decode.bool)
 
 
 {-| Retrieve the ID of a term.
