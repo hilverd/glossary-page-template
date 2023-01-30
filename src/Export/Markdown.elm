@@ -110,7 +110,7 @@ download glossaryTitle aboutSection glossaryItems =
         filename =
             GlossaryTitle.toFilename ".md" glossaryTitle
 
-        titleHeaderString =
+        titleHeadingString =
             glossaryTitle |> GlossaryTitle.toString |> escape |> (++) "# "
 
         ( aboutParagraph, aboutLinks ) =
@@ -133,7 +133,7 @@ download glossaryTitle aboutSection glossaryItems =
                 |> paragraphs
 
         content =
-            [ titleHeaderString
+            [ titleHeadingString
             , aboutParagraphString
             , aboutLinksString
             , horizontalRule
