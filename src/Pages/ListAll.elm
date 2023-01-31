@@ -14,7 +14,7 @@ import Components.SearchDialog
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection(..))
-import Data.Glossary as Glossary exposing (Glossary)
+import Data.Glossary as Glossary
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Details as Details
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)

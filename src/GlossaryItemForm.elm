@@ -24,9 +24,9 @@ module GlossaryItemForm exposing
 
 import Array exposing (Array)
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Details as Details
-import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
+import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)

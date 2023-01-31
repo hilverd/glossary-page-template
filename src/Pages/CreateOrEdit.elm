@@ -12,8 +12,8 @@ import Components.Form
 import Components.SelectMenu
 import Data.AboutSection exposing (AboutSection(..))
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
-import Data.Glossary as Glossary exposing (Glossary)
-import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
+import Data.Glossary as Glossary
+import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle

@@ -1,8 +1,8 @@
 module SearchTests exposing (..)
 
 import Components.SearchDialog exposing (searchResult)
-import Data.GlossaryItem.Details as Details exposing (Details)
-import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
+import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Expect

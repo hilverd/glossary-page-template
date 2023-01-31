@@ -15,7 +15,6 @@ import CommonModel exposing (CommonModel)
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection(..))
-import Data.Glossary exposing (Glossary)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
 import Html
