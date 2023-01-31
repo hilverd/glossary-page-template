@@ -6,6 +6,7 @@ import Array exposing (Array)
 import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel, OrderItemsBy(..))
+import Components.AboutSection
 import Components.Button
 import Components.Copy
 import Components.Form
@@ -151,19 +152,8 @@ update msg model =
                                     | glossary =
                                         Ok
                                             { glossary0
-                                                | title = model.form |> Form.titleField |> .body |> GlossaryTitle.fromString
-                                                , aboutSection =
-                                                    PlaintextAboutSection
-                                                        { paragraph = model.form |> Form.aboutParagraphField |> .body |> AboutParagraph.fromString
-                                                        , links =
-                                                            model.form
-                                                                |> Form.aboutLinkFields
-                                                                |> Array.toList
-                                                                |> List.map
-                                                                    (\( href, body ) ->
-                                                                        AboutLink.create href.href body.body
-                                                                    )
-                                                        }
+                                                | title = titleFromForm model.form
+                                                , aboutSection = aboutSectionFromForm model.form
                                             }
                                 }
 
@@ -181,6 +171,26 @@ update msg model =
             ( { model | errorMessageWhileSaving = error |> Extras.Http.errorToHumanReadable |> Just }
             , Cmd.none
             )
+
+
+titleFromForm : Form.TitleAndAboutForm -> GlossaryTitle.GlossaryTitle
+titleFromForm =
+    Form.titleField >> .body >> GlossaryTitle.fromString
+
+
+aboutSectionFromForm : Form.TitleAndAboutForm -> AboutSection
+aboutSectionFromForm form =
+    PlaintextAboutSection
+        { paragraph = form |> Form.aboutParagraphField |> .body |> AboutParagraph.fromString
+        , links =
+            form
+                |> Form.aboutLinkFields
+                |> Array.toList
+                |> List.map
+                    (\( href, body ) ->
+                        AboutLink.create href.href body.body
+                    )
+        }
 
 
 patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
@@ -514,14 +524,14 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
                     error
     in
     div
-        [ class "pt-5 border-t dark:border-gray-700" ]
+        [ class "pt-5 lg:border-t dark:border-gray-700" ]
         [ errorDiv "There are errors on this form — see above."
             |> Extras.Html.showIf (showValidationErrors && Form.hasValidationErrors form)
         , errorMessageWhileSaving
             |> Extras.Html.showMaybe (\errorMessage -> errorDiv <| "Failed to save — " ++ errorMessage ++ ".")
         , Extras.Html.showIf model.common.enableSavingChangesInMemory <|
             div
-                [ class "mt-5 sm:mt-4 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
+                [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                 [ text Components.Copy.sandboxModeMessage ]
         , div
             [ class "flex justify-end" ]
@@ -543,10 +553,17 @@ view : Model -> Document Msg
 view model =
     case model.common.glossary of
         Ok { title, items } ->
-            { title = GlossaryTitle.toString title
+            let
+                title1 =
+                    titleFromForm model.form
+
+                aboutSection =
+                    aboutSectionFromForm model.form
+            in
+            { title = GlossaryTitle.toString title1
             , body =
                 [ div
-                    [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl" ]
+                    [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
                     [ main_
                         []
                         [ h1
@@ -556,12 +573,30 @@ view model =
                         , form
                             [ class "pt-7" ]
                             [ div
-                                [ class "space-y-7 sm:space-y-8" ]
-                                [ viewEditTitle model.triedToSaveWhenFormInvalid <| Form.titleField model.form
-                                , viewEditAboutParagraph model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
-                                , viewEditAboutLinks model.triedToSaveWhenFormInvalid <| Form.aboutLinkFields model.form
-                                , viewCreateFormFooter model model.triedToSaveWhenFormInvalid model.errorMessageWhileSaving items model.form
+                                [ class "lg:flex lg:space-x-4" ]
+                                [ div
+                                    [ class "lg:w-1/2 space-y-7 lg:space-y-8" ]
+                                    [ viewEditTitle model.triedToSaveWhenFormInvalid <| Form.titleField model.form
+                                    , viewEditAboutParagraph model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
+                                    , viewEditAboutLinks model.triedToSaveWhenFormInvalid <| Form.aboutLinkFields model.form
+                                    ]
+                                , div
+                                    [ class "mt-8 lg:w-1/2 lg:mt-0 text-gray-900 dark:text-gray-100" ]
+                                    [ Html.fieldset
+                                        [ class "border border-solid border-gray-300 p-4" ]
+                                        [ Html.legend
+                                            [ class "text-xl text-center text-gray-800 dark:text-gray-300 px-1 select-none" ]
+                                            [ text "Preview" ]
+                                        , h2
+                                            [ class "pb-4 text-xl font-bold leading-tight text-gray-900 dark:text-gray-100" ]
+                                            [ text <| GlossaryTitle.toString title1 ]
+                                        , Components.AboutSection.view False aboutSection
+                                        ]
+                                    ]
                                 ]
+                            , div
+                                [ class "mt-4 lg:mt-8" ]
+                                [ viewCreateFormFooter model model.triedToSaveWhenFormInvalid model.errorMessageWhileSaving items model.form ]
                             ]
                         ]
                     ]

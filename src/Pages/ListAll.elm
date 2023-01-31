@@ -7,12 +7,11 @@ import Accessibility.Role
 import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
+import Components.AboutSection
 import Components.Button
 import Components.Copy
 import Components.DropdownMenu
 import Components.SearchDialog
-import Data.AboutLink as AboutLink
-import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection(..))
 import Data.Glossary as Glossary
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
@@ -35,7 +34,7 @@ import Extras.Http
 import Extras.Task
 import Extras.Url exposing (fragmentOnly)
 import Html
-import Html.Attributes exposing (class, for, href, id, target)
+import Html.Attributes exposing (class, for, href, id)
 import Html.Events
 import Http
 import Icons
@@ -1268,11 +1267,6 @@ view model =
 
                 termIndex =
                     termIndexFromGlossaryItems items
-
-                ( aboutParagraph, aboutLinks ) =
-                    case aboutSection of
-                        PlaintextAboutSection { paragraph, links } ->
-                            ( paragraph, links )
             in
             { title = GlossaryTitle.toString title
             , body =
@@ -1356,24 +1350,7 @@ view model =
                                 ]
                             , Html.main_
                                 []
-                                [ div
-                                    [ id ElementIds.about ]
-                                    [ p []
-                                        [ text <| AboutParagraph.toString aboutParagraph ]
-                                    , ul [] <|
-                                        List.map
-                                            (\aboutLink ->
-                                                li []
-                                                    [ a
-                                                        [ target "_blank"
-                                                        , href <| AboutLink.href aboutLink
-                                                        , Accessibility.Key.tabbable noModalDialogShown_
-                                                        ]
-                                                        [ text <| AboutLink.body aboutLink ]
-                                                    ]
-                                            )
-                                            aboutLinks
-                                    ]
+                                [ Components.AboutSection.view (not noModalDialogShown_) aboutSection
                                 , items
                                     |> (if model.common.orderItemsBy == CommonModel.Alphabetically then
                                             GlossaryItems.orderedAlphabetically

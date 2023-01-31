@@ -12,6 +12,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Show a preview on the "Edit Title and About Section" page.
+
 ### Changed
 ### Fixed
 ### Removed
