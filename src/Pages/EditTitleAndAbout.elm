@@ -588,7 +588,7 @@ view model =
                                             [ class "text-xl text-center text-gray-800 dark:text-gray-300 px-1 select-none" ]
                                             [ text "Preview" ]
                                         , h2
-                                            [ class "pb-4 text-xl font-bold leading-tight text-gray-900 dark:text-gray-100" ]
+                                            [ class "pb-4 text-xl font-bold leading-tight text-gray-700 dark:text-gray-300" ]
                                             [ text <| GlossaryTitle.toString title1 ]
                                         , Components.AboutSection.view False aboutSection
                                         ]
