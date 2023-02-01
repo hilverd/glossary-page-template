@@ -12,16 +12,20 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [1.9.0] - 2023-02-01
+
+### Added
 
 - Show a preview on the "Edit Title and About Section" page.
 - Show a preview on the edit/create item page.
 
-### Changed
 ### Fixed
 
 - After deleting an item, focus should not be on another Delete button.
-
-### Removed
 
 ## [1.8.6] - 2023-01-28
 
@@ -372,7 +376,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.8.6...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.9.0...HEAD
+[1.9.0]: https://github.com/hilverd/glossary-page-template/compare/v1.8.6...v1.9.0
 [1.8.6]: https://github.com/hilverd/glossary-page-template/compare/v1.8.5...v1.8.6
 [1.8.5]: https://github.com/hilverd/glossary-page-template/compare/v1.8.4...v1.8.5
 [1.8.4]: https://github.com/hilverd/glossary-page-template/compare/v1.7.4...v1.8.4
