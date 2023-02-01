@@ -18,6 +18,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Changed
 ### Fixed
+
+- After deleting an item, focus should not be on another Delete button.
+
 ### Removed
 
 ## [1.8.6] - 2023-01-28

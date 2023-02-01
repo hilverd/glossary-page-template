@@ -273,6 +273,7 @@ update msg model =
                     , Cmd.batch
                         [ patchHtmlFile model.common index updatedGlossaryItems
                         , allowBackgroundScrolling ()
+                        , giveFocusToOuter
                         ]
                     )
 
@@ -370,6 +371,11 @@ update msg model =
                 _ ->
                     Cmd.none
             )
+
+
+giveFocusToOuter : Cmd Msg
+giveFocusToOuter =
+    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.outer)
 
 
 patchHtmlFile : CommonModel -> GlossaryItemIndex -> GlossaryItems -> Cmd Msg
