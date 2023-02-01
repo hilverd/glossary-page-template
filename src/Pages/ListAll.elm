@@ -11,12 +11,11 @@ import Components.AboutSection
 import Components.Button
 import Components.Copy
 import Components.DropdownMenu
+import Components.GlossaryItemCard
 import Components.SearchDialog
 import Data.AboutSection exposing (AboutSection(..))
 import Data.Glossary as Glossary
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
-import Data.GlossaryItem.Details as Details
-import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
+import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -605,143 +604,23 @@ viewTermsIndex tabbable staticSidebar termIndex =
         )
 
 
-viewGlossaryTerm : Bool -> Term -> Html Msg
-viewGlossaryTerm tabbable term =
-    Html.dt
-        [ class "group" ]
-        [ Html.dfn
-            [ Html.Attributes.id <| Term.id term ]
-            [ if Term.isAbbreviation term then
-                Html.abbr [] [ text <| Term.raw term ]
-
-              else
-                text <| Term.raw term
-            ]
-        , span
-            [ class "silcrow invisible group-hover:visible hover:visible" ]
-            [ Html.a
-                [ term |> Term.id |> fragmentOnly |> Html.Attributes.href
-                , Accessibility.Key.tabbable tabbable
-                ]
-                [ text "§" ]
-            ]
-        ]
-
-
-viewGlossaryItemDetails : String -> Html Msg
-viewGlossaryItemDetails details =
-    Html.dd
-        []
-        [ text details ]
-
-
-viewGlossaryItemRelatedTerms : Bool -> Bool -> List RelatedTerm -> List (Html Msg)
-viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails relatedTerms =
-    if List.isEmpty relatedTerms then
-        []
-
-    else
-        [ Html.dd
-            [ class "related-terms" ]
-            (text
-                (if itemHasSomeDetails then
-                    "See also: "
-
-                 else
-                    "See: "
-                )
-                :: (relatedTerms
-                        |> List.map
-                            (\relatedTerm ->
-                                Html.a
-                                    [ fragmentOnly (RelatedTerm.idReference relatedTerm) |> Html.Attributes.href
-                                    , Accessibility.Key.tabbable tabbable
-                                    ]
-                                    [ text <| RelatedTerm.raw relatedTerm ]
-                            )
-                        |> List.intersperse (text ", ")
-                   )
-            )
-        ]
-
-
 viewGlossaryItem : GlossaryItemIndex -> Bool -> Model -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
 viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
     let
-        errorDiv message =
-            div
-                [ class "flex justify-end mt-2" ]
-                [ p
-                    [ class "text-red-600" ]
-                    [ text message ]
-                ]
-
-        itemHasSomeDetails =
-            GlossaryItem.hasSomeDetails glossaryItem
-
         common =
             model.common
     in
-    if editable then
-        div
-            [ class "flex flex-col justify-items-end"
-            , id <| ElementIds.glossaryItemDiv index
-            ]
-            [ div
-                []
-                (List.map (viewGlossaryTerm tabbable) glossaryItem.terms
-                    ++ List.map (Details.raw >> viewGlossaryItemDetails) glossaryItem.details
-                    ++ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails glossaryItem.relatedTerms
-                )
-            , div
-                [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
-                [ div
-                    [ class "flex justify-between" ]
-                    [ span
-                        [ class "inline-flex items-center" ]
-                        [ Components.Button.text
-                            [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
-                            , Accessibility.Key.tabbable tabbable
-                            ]
-                            [ Icons.pencil
-                                [ Svg.Attributes.class "h-5 w-5" ]
-                            , span
-                                [ class "font-medium text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-400" ]
-                                [ text "Edit" ]
-                            ]
-                        ]
-                    , span
-                        [ class "ml-3 inline-flex items-center" ]
-                        [ Components.Button.text
-                            [ Html.Events.onClick <| PageMsg.Internal <| ConfirmDelete index
-                            , Accessibility.Key.tabbable tabbable
-                            ]
-                            [ Icons.trash
-                                [ Svg.Attributes.class "h-5 w-5" ]
-                            , span
-                                [ class "font-medium text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-400" ]
-                                [ text "Delete" ]
-                            ]
-                        ]
-                    ]
-                , errorWhileDeleting
-                    |> Extras.Html.showMaybe
-                        (\( indexOfItemBeingDeleted, errorMessage ) ->
-                            if index == indexOfItemBeingDeleted then
-                                errorDiv <| "Failed to save — " ++ errorMessage ++ "."
-
-                            else
-                                Extras.Html.nothing
-                        )
-                ]
-            ]
-
-    else
-        div []
-            (List.map (viewGlossaryTerm tabbable) glossaryItem.terms
-                ++ List.map (Details.raw >> viewGlossaryItemDetails) glossaryItem.details
-                ++ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails glossaryItem.relatedTerms
-            )
+    Components.GlossaryItemCard.view
+        (Components.GlossaryItemCard.Normal
+            { index = index
+            , tabbable = tabbable
+            , onClickEdit = PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
+            , onClickDelete = PageMsg.Internal <| ConfirmDelete index
+            , editable = editable
+            , errorWhileDeleting = errorWhileDeleting
+            }
+        )
+        glossaryItem
 
 
 viewConfirmDeleteModal : Bool -> Maybe GlossaryItemIndex -> Html Msg
