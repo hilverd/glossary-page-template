@@ -44,9 +44,9 @@ view style glossaryItem =
                     True
             in
             div []
-                (List.map (viewGlossaryTerm tabbable) glossaryItem.terms
+                (List.map (viewGlossaryTerm True tabbable) glossaryItem.terms
                     ++ List.map (Details.raw >> viewGlossaryItemDetails) glossaryItem.details
-                    ++ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails glossaryItem.relatedTerms
+                    ++ viewGlossaryItemRelatedTerms True tabbable itemHasSomeDetails glossaryItem.relatedTerms
                 )
 
         Normal { index, tabbable, onClickEdit, onClickDelete, editable, errorWhileDeleting } ->
@@ -69,9 +69,9 @@ view style glossaryItem =
                     ]
                     [ div
                         []
-                        (List.map (viewGlossaryTerm tabbable) glossaryItem.terms
+                        (List.map (viewGlossaryTerm False tabbable) glossaryItem.terms
                             ++ List.map (Details.raw >> viewGlossaryItemDetails) glossaryItem.details
-                            ++ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails glossaryItem.relatedTerms
+                            ++ viewGlossaryItemRelatedTerms False tabbable itemHasSomeDetails glossaryItem.relatedTerms
                         )
                     , div
                         [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
@@ -118,14 +118,14 @@ view style glossaryItem =
 
             else
                 div []
-                    (List.map (viewGlossaryTerm tabbable) glossaryItem.terms
+                    (List.map (viewGlossaryTerm False tabbable) glossaryItem.terms
                         ++ List.map (Details.raw >> viewGlossaryItemDetails) glossaryItem.details
-                        ++ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails glossaryItem.relatedTerms
+                        ++ viewGlossaryItemRelatedTerms False tabbable itemHasSomeDetails glossaryItem.relatedTerms
                     )
 
 
-viewGlossaryTerm : Bool -> Term -> Html msg
-viewGlossaryTerm tabbable term =
+viewGlossaryTerm : Bool -> Bool -> Term -> Html msg
+viewGlossaryTerm preview tabbable term =
     Html.dt
         [ class "group" ]
         [ Html.dfn
@@ -139,7 +139,13 @@ viewGlossaryTerm tabbable term =
         , span
             [ class "silcrow invisible group-hover:visible hover:visible" ]
             [ Html.a
-                [ term |> Term.id |> fragmentOnly |> Html.Attributes.href
+                [ (if preview then
+                    "#"
+
+                   else
+                    term |> Term.id |> fragmentOnly
+                  )
+                    |> Html.Attributes.href
                 , Accessibility.Key.tabbable tabbable
                 ]
                 [ text "§" ]
@@ -154,8 +160,8 @@ viewGlossaryItemDetails details =
         [ text details ]
 
 
-viewGlossaryItemRelatedTerms : Bool -> Bool -> List RelatedTerm -> List (Html msg)
-viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails relatedTerms =
+viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> List RelatedTerm -> List (Html msg)
+viewGlossaryItemRelatedTerms preview tabbable itemHasSomeDetails relatedTerms =
     if List.isEmpty relatedTerms then
         []
 
@@ -173,7 +179,13 @@ viewGlossaryItemRelatedTerms tabbable itemHasSomeDetails relatedTerms =
                         |> List.map
                             (\relatedTerm ->
                                 Html.a
-                                    [ fragmentOnly (RelatedTerm.idReference relatedTerm) |> Html.Attributes.href
+                                    [ (if preview then
+                                        "#"
+
+                                       else
+                                        fragmentOnly (RelatedTerm.idReference relatedTerm)
+                                      )
+                                        |> Html.Attributes.href
                                     , Accessibility.Key.tabbable tabbable
                                     ]
                                     [ text <| RelatedTerm.raw relatedTerm ]

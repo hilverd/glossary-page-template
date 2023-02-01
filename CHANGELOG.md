@@ -14,6 +14,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 
 - Show a preview on the "Edit Title and About Section" page.
+- Show a preview on the edit/create item page.
 
 ### Changed
 ### Fixed

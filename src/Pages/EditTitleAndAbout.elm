@@ -552,7 +552,7 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
-        Ok { title, items } ->
+        Ok { items } ->
             let
                 title1 =
                     titleFromForm model.form
@@ -573,7 +573,7 @@ view model =
                         , form
                             [ class "pt-7" ]
                             [ div
-                                [ class "lg:flex lg:space-x-4" ]
+                                [ class "lg:flex lg:space-x-8" ]
                                 [ div
                                     [ class "lg:w-1/2 space-y-7 lg:space-y-8" ]
                                     [ viewEditTitle model.triedToSaveWhenFormInvalid <| Form.titleField model.form

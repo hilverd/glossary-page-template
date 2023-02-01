@@ -9,6 +9,7 @@ import CommonModel exposing (CommonModel, OrderItemsBy(..))
 import Components.Button
 import Components.Copy
 import Components.Form
+import Components.GlossaryItemCard
 import Components.SelectMenu
 import Data.AboutSection exposing (AboutSection(..))
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
@@ -29,7 +30,7 @@ import GlossaryItemForm as Form exposing (GlossaryItemForm)
 import GlossaryItemForm.DetailsField as DetailsField exposing (DetailsField)
 import GlossaryItemForm.TermField as TermField exposing (TermField)
 import Html
-import Html.Attributes exposing (class, id, required)
+import Html.Attributes exposing (class, id, required, style)
 import Html.Events
 import Http
 import Icons
@@ -731,14 +732,14 @@ viewCreateFormFooter model =
             model.common
     in
     div
-        [ class "pt-5" ]
+        [ class "pt-5 lg:border-t dark:border-gray-700" ]
         [ errorDiv "There are errors on this form — see above."
             |> Extras.Html.showIf (model.triedToSaveWhenFormInvalid && Form.hasValidationErrors model.form)
         , model.errorMessageWhileSaving
             |> Extras.Html.showMaybe (\errorMessage -> errorDiv <| "Failed to save — " ++ errorMessage ++ ".")
         , Extras.Html.showIf common.enableSavingChangesInMemory <|
             div
-                [ class "mt-5 sm:mt-4 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
+                [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                 [ text Components.Copy.sandboxModeMessage ]
         , div
             [ class "flex justify-end" ]
@@ -759,7 +760,7 @@ viewCreateFormFooter model =
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
-        Ok { title, items } ->
+        Ok glossary ->
             let
                 terms =
                     Form.termFields model.form
@@ -772,11 +773,14 @@ view model =
 
                 suggestedRelatedTerms =
                     Form.suggestRelatedTerms model.form
+
+                newOrUpdatedGlossaryItem =
+                    Form.toGlossaryItem glossary.items model.form
             in
-            { title = GlossaryTitle.toString title
+            { title = GlossaryTitle.toString glossary.title
             , body =
                 [ div
-                    [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl" ]
+                    [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
                     [ Html.main_
                         []
                         [ h1
@@ -791,12 +795,35 @@ view model =
                         , form
                             [ class "pt-7" ]
                             [ div
-                                [ class "space-y-8 divide-y divide-gray-200 dark:divide-gray-800 sm:space-y-5" ]
-                                [ viewCreateDescriptionTerms model.triedToSaveWhenFormInvalid terms
-                                , viewCreateDescriptionDetails model.triedToSaveWhenFormInvalid detailsArray
-                                , viewCreateSeeAlso model.triedToSaveWhenFormInvalid items terms relatedTerms suggestedRelatedTerms
-                                , viewCreateFormFooter model
+                                [ class "lg:flex lg:space-x-8" ]
+                                [ div
+                                    [ class "lg:w-1/2 space-y-8 divide-y divide-gray-200 dark:divide-gray-800 sm:space-y-5" ]
+                                    [ viewCreateDescriptionTerms model.triedToSaveWhenFormInvalid terms
+                                    , viewCreateDescriptionDetails model.triedToSaveWhenFormInvalid detailsArray
+                                    , viewCreateSeeAlso model.triedToSaveWhenFormInvalid glossary.items terms relatedTerms suggestedRelatedTerms
+                                    ]
+                                , div
+                                    [ class "mt-8 lg:w-1/2 lg:mt-0 text-gray-900 dark:text-gray-100" ]
+                                    [ Html.fieldset
+                                        [ class "pt-4" ]
+                                        [ Html.legend
+                                            [ class "text-xl text-center text-gray-800 dark:text-gray-300 px-1 select-none" ]
+                                            [ text "Preview" ]
+                                        , article
+                                            [ id ElementIds.items ]
+                                            [ dl
+                                                [ style "display" "block" ]
+                                                [ Components.GlossaryItemCard.view
+                                                    Components.GlossaryItemCard.Preview
+                                                    newOrUpdatedGlossaryItem
+                                                ]
+                                            ]
+                                        ]
+                                    ]
                                 ]
+                            , div
+                                [ class "mt-4 lg:mt-8" ]
+                                [ viewCreateFormFooter model ]
                             ]
                         ]
                     ]
