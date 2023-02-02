@@ -115,7 +115,7 @@ init flags =
                 |> Result.withDefault False
 
         loadedGlossaryItems =
-            LoadedGlossaryItems.decodeFromFlags flags
+            LoadedGlossaryItems.decodeFromFlags enableMarkdownBasedSyntax flags
 
         glossary =
             loadedGlossaryItems

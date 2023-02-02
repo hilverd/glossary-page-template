@@ -36,10 +36,6 @@
     @apply pt-4 ml-1 list-disc list-inside;
   }
 
-  div#glossary-page-container[data-enable-markdown-based-syntax="true"] div#glossary-page-about:not([data-markdown-rendered="true"]) {
-    @apply font-mono whitespace-pre-wrap;
-  }
-
   article#glossary-page-items dl {
     @apply grid print:block print:space-y-5 gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4;
   }
@@ -58,6 +54,10 @@
 
   article#glossary-page-items dl dd {
     @apply mt-1 print:mt-0 py-2 print:py-0 text-gray-600 dark:text-gray-300 print:text-black;
+  }
+
+  div#glossary-page-container[data-enable-markdown-based-syntax="true"] article#glossary-page-items dl dd:not([data-markdown-rendered="true"]) {
+    @apply font-mono whitespace-pre-wrap;
   }
 
   article#glossary-page-items dl dd a {

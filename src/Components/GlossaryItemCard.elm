@@ -45,7 +45,7 @@ view style glossaryItem =
             in
             div []
                 (List.map (viewGlossaryTerm True tabbable) glossaryItem.terms
-                    ++ List.map (Details.raw >> viewGlossaryItemDetails) glossaryItem.details
+                    ++ List.map viewGlossaryItemDetails glossaryItem.details
                     ++ viewGlossaryItemRelatedTerms True tabbable itemHasSomeDetails glossaryItem.relatedTerms
                 )
 
@@ -70,7 +70,7 @@ view style glossaryItem =
                     [ div
                         []
                         (List.map (viewGlossaryTerm False tabbable) glossaryItem.terms
-                            ++ List.map (Details.raw >> viewGlossaryItemDetails) glossaryItem.details
+                            ++ List.map viewGlossaryItemDetails glossaryItem.details
                             ++ viewGlossaryItemRelatedTerms False tabbable itemHasSomeDetails glossaryItem.relatedTerms
                         )
                     , div
@@ -119,7 +119,7 @@ view style glossaryItem =
             else
                 div []
                     (List.map (viewGlossaryTerm False tabbable) glossaryItem.terms
-                        ++ List.map (Details.raw >> viewGlossaryItemDetails) glossaryItem.details
+                        ++ List.map viewGlossaryItemDetails glossaryItem.details
                         ++ viewGlossaryItemRelatedTerms False tabbable itemHasSomeDetails glossaryItem.relatedTerms
                     )
 
@@ -153,11 +153,11 @@ viewGlossaryTerm preview tabbable term =
         ]
 
 
-viewGlossaryItemDetails : String -> Html msg
+viewGlossaryItemDetails : Details.Details -> Html msg
 viewGlossaryItemDetails details =
     Html.dd
         []
-        [ text details ]
+        [ Details.view details ]
 
 
 viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> List RelatedTerm -> List (Html msg)

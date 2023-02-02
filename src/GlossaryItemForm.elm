@@ -288,8 +288,8 @@ termBodyToId body =
     String.replace " " "_" body
 
 
-toGlossaryItem : GlossaryItems -> GlossaryItemForm -> GlossaryItem
-toGlossaryItem glossaryItems form =
+toGlossaryItem : Bool -> GlossaryItems -> GlossaryItemForm -> GlossaryItem
+toGlossaryItem enableMarkdownBasedSyntax glossaryItems form =
     let
         bodyByIdReference : Dict String String
         bodyByIdReference =
@@ -320,7 +320,16 @@ toGlossaryItem glossaryItems form =
         form
             |> detailsFields
             |> Array.toList
-            |> List.map (DetailsField.raw >> String.trim >> Details.fromPlaintext)
+            |> List.map
+                (DetailsField.raw
+                    >> String.trim
+                    >> (if enableMarkdownBasedSyntax then
+                            Details.fromMarkdown
+
+                        else
+                            Details.fromPlaintext
+                       )
+                )
     , relatedTerms =
         form
             |> relatedTermFields

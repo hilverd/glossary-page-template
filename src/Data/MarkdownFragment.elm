@@ -1,15 +1,15 @@
-module Data.MarkdownFragment exposing (MarkdownFragment, fromString, raw)
+module Data.MarkdownFragment exposing (MarkdownFragment, fromString, raw, parsed)
 
 {-| A Markdown fragment is a string that has been parsed as Markdown.
 
 
 # Markdown Fragments
 
-@docs MarkdownFragment, fromString, raw
+@docs MarkdownFragment, fromString, raw, parsed
 
 -}
 
-import Markdown.Block
+import Markdown.Block exposing (Block)
 import Markdown.Parser
 
 
@@ -18,7 +18,7 @@ import Markdown.Parser
 type MarkdownFragment
     = MarkdownFragment
         { raw : String
-        , parsed : Result String (List Markdown.Block.Block)
+        , parsed : Result String (List Block)
         }
 
 
@@ -45,3 +45,26 @@ raw markdownFragment =
     case markdownFragment of
         MarkdownFragment fragment ->
             fragment.raw
+
+
+{-| Retrieve the raw string that was used to construct this Markdown fragment.
+
+    import Markdown.Block as Block exposing (Block)
+
+    expected : Result String (List Block)
+    expected =
+        Ok
+            [ Block.Paragraph
+                [ Block.Emphasis
+                    [ Block.Text "Hello" ]
+                ]
+            ]
+
+    "*Hello*" |> fromString |> parsed --> expected
+
+-}
+parsed : MarkdownFragment -> Result String (List Block)
+parsed markdownFragment =
+    case markdownFragment of
+        MarkdownFragment fragment ->
+            fragment.parsed

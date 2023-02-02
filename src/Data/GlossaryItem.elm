@@ -68,7 +68,7 @@ empty =
             , ( "relatedTerms", Encode.list Encode.object [] )
             ]
 
-    Decode.decodeValue decode rain
+    Decode.decodeValue (decode False) rain
     --> Ok
     -->     { terms = [ Term.fromPlaintext "Rain" False ]
     -->     , details = [ Details.fromPlaintext "Condensed moisture." ]
@@ -76,11 +76,22 @@ empty =
     -->     }
 
 -}
-decode : Decoder GlossaryItem
-decode =
+decode : Bool -> Decoder GlossaryItem
+decode enableMarkdownBasedSyntax =
     Decode.map3 GlossaryItem
         (Decode.field "terms" <| Decode.list <| Term.decode)
-        (Decode.field "details" <| Decode.list <| Decode.map Details.fromPlaintext <| Decode.string)
+        (Decode.field "details" <|
+            Decode.list <|
+                Decode.map
+                    (if enableMarkdownBasedSyntax then
+                        Details.fromMarkdown
+
+                     else
+                        Details.fromPlaintext
+                    )
+                <|
+                    Decode.string
+        )
         (Decode.field "relatedTerms" <| Decode.list <| RelatedTerm.decode)
 
 

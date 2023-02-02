@@ -234,7 +234,7 @@ update msg model =
                     else
                         let
                             newOrUpdatedGlossaryItem =
-                                Form.toGlossaryItem glossary.items model.form
+                                Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form
 
                             common =
                                 model.common
@@ -775,7 +775,7 @@ view model =
                     Form.suggestRelatedTerms model.form
 
                 newOrUpdatedGlossaryItem =
-                    Form.toGlossaryItem glossary.items model.form
+                    Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form
             in
             { title = GlossaryTitle.toString glossary.title
             , body =

@@ -10,7 +10,10 @@ type alias LoadedGlossaryItems =
     Result Decode.Error GlossaryItems
 
 
-decodeFromFlags : Decode.Value -> LoadedGlossaryItems
-decodeFromFlags =
-    Decode.decodeValue (Decode.field "glossaryItems" <| Decode.list GlossaryItem.decode)
+decodeFromFlags : Bool -> Decode.Value -> LoadedGlossaryItems
+decodeFromFlags enableMarkdownBasedSyntax =
+    Decode.decodeValue
+        (Decode.field "glossaryItems" <|
+            Decode.list (GlossaryItem.decode enableMarkdownBasedSyntax)
+        )
         >> Result.map GlossaryItems.fromList
