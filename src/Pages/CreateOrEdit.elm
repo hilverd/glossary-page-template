@@ -810,7 +810,7 @@ view model =
                                         suggestedRelatedTerms
                                     ]
                                 , div
-                                    [ class "mt-8 lg:w-1/2 lg:mt-0 max-w-prose text-gray-900 dark:text-gray-100" ]
+                                    [ class "mt-8 lg:w-1/2 lg:mt-0 max-w-4xl text-gray-900 dark:text-gray-100" ]
                                     [ Html.fieldset
                                         [ class "pt-4" ]
                                         [ Html.legend

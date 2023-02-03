@@ -29,7 +29,11 @@
   }
 
   div#glossary-page-about {
-    @apply pb-3 max-w-prose;
+    @apply pb-3;
+  }
+
+  div#glossary-page-about p {
+    @apply max-w-prose;
   }
 
   div#glossary-page-about ul {
@@ -41,7 +45,7 @@
   }
 
   article#glossary-page-items dl > div {
-    @apply bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0 max-h-96 overflow-auto;
+    @apply bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0 max-h-96 print:max-h-full overflow-auto max-w-4xl;
   }
 
   article#glossary-page-items dl dt {
@@ -53,7 +57,7 @@
   }
 
   article#glossary-page-items dl dd {
-    @apply mt-1 print:mt-0 py-2 print:py-0 text-gray-600 dark:text-gray-300 print:text-black;
+    @apply mt-1 print:mt-0 py-2 print:py-0 text-gray-600 dark:text-gray-300 print:text-black max-w-prose print:max-w-full;
   }
 
   div#glossary-page-container[data-enable-markdown-based-syntax="true"]:not([data-markdown-rendered="true"]) article#glossary-page-items dl dd:not(.related-terms) {

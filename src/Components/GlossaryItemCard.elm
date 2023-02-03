@@ -43,7 +43,8 @@ view style glossaryItem =
                 tabbable =
                     True
             in
-            div []
+            div
+                [ Html.Attributes.style "max-height" "100%" ]
                 (List.map (viewGlossaryTerm True tabbable) glossaryItem.terms
                     ++ List.map viewGlossaryItemDetails glossaryItem.details
                     ++ viewGlossaryItemRelatedTerms True tabbable itemHasSomeDetails glossaryItem.relatedTerms

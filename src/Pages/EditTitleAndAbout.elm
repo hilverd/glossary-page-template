@@ -581,7 +581,7 @@ view model =
                                     , viewEditAboutLinks model.triedToSaveWhenFormInvalid <| Form.aboutLinkFields model.form
                                     ]
                                 , div
-                                    [ class "mt-8 lg:w-1/2 lg:mt-0 max-w-prose text-gray-900 dark:text-gray-100" ]
+                                    [ class "mt-8 lg:w-1/2 lg:mt-0 text-gray-900 dark:text-gray-100" ]
                                     [ Html.fieldset
                                         [ class "border border-solid border-gray-300 p-4" ]
                                         [ Html.legend
