@@ -17,7 +17,7 @@ module.exports = {
         'print': { 'raw': 'print' },
       },
       fontFamily: {
-        sans: ['Overpass', ...defaultTheme.fontFamily.sans],
+        sans: ['"Source Sans 3"', ...defaultTheme.fontFamily.sans],
       },
     },
   },
