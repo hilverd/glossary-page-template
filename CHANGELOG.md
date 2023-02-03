@@ -12,10 +12,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Allow adjusting how "compact" the overall layout is using a `data-card-width` attribute which can be `compact` (default), `intermediate`, or `wide`.
+
 ### Changed
 
 - Switch to Source Sans 3 font. The Overpass font has [undesired behaviour for backticks](https://github.com/RedHatOfficial/Overpass/issues/95).
-- Restrict item height and show a scrollbar for longer items.
+- Restrict item height and show a scrollbar for longer items, depending on overall layout determined by `data-card-width`.
 
 ### Fixed
 ### Removed

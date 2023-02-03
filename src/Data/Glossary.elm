@@ -13,6 +13,7 @@ import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 type alias Glossary =
     { enableMarkdownBasedSyntax : Bool
     , enableHelpForMakingChanges : Bool
+    , cardWidth : String
     , title : GlossaryTitle
     , aboutSection : AboutSection
     , items : GlossaryItems
@@ -22,7 +23,7 @@ type alias Glossary =
 {-| Represent these glossary items as an HTML tree, ready for writing back to the glossary's HTML file.
 -}
 toHtmlTree : Glossary -> HtmlTree
-toHtmlTree { enableMarkdownBasedSyntax, enableHelpForMakingChanges, title, aboutSection, items } =
+toHtmlTree { enableMarkdownBasedSyntax, enableHelpForMakingChanges, cardWidth, title, aboutSection, items } =
     let
         ( aboutParagraph, aboutLinks ) =
             case aboutSection of
@@ -34,6 +35,7 @@ toHtmlTree { enableMarkdownBasedSyntax, enableHelpForMakingChanges, title, about
         [ HtmlTree.Attribute "id" ElementIds.container
         , HtmlTree.boolAttribute "data-enable-help-for-making-changes" enableHelpForMakingChanges
         , HtmlTree.boolAttribute "data-enable-markdown-based-syntax" enableMarkdownBasedSyntax
+        , HtmlTree.Attribute "data-card-width" cardWidth
         ]
         [ HtmlTree.Node "header"
             True

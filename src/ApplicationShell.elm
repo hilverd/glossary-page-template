@@ -109,6 +109,11 @@ init flags =
                 |> Decode.decodeValue (Decode.field "enableMarkdownBasedSyntax" Decode.bool)
                 |> Result.withDefault False
 
+        cardWidth =
+            flags
+                |> Decode.decodeValue (Decode.field "cardWidth" Decode.string)
+                |> Result.withDefault "compact"
+
         enableSavingChangesInMemory =
             flags
                 |> Decode.decodeValue (Decode.field "enableSavingChangesInMemory" Decode.bool)
@@ -123,6 +128,7 @@ init flags =
                     (\items ->
                         { enableMarkdownBasedSyntax = enableMarkdownBasedSyntax
                         , enableHelpForMakingChanges = enableHelpForMakingChanges
+                        , cardWidth = cardWidth
                         , title = title
                         , aboutSection = aboutSection
                         , items = items

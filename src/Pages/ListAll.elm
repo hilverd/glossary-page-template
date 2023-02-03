@@ -1142,7 +1142,7 @@ view model =
             , body = [ pre [] [ text <| Decode.errorToString error ] ]
             }
 
-        Ok { enableMarkdownBasedSyntax, title, aboutSection, items } ->
+        Ok { enableMarkdownBasedSyntax, cardWidth, title, aboutSection, items } ->
             let
                 editable =
                     model.makingChanges
@@ -1205,6 +1205,7 @@ view model =
                             [ Html.Attributes.id ElementIds.container
                             , Extras.HtmlAttribute.fromBool "data-enable-markdown-based-syntax" enableMarkdownBasedSyntax
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
+                            , Html.Attributes.attribute "data-card-width" cardWidth
                             ]
                             [ header []
                                 [ div

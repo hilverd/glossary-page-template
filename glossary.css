@@ -41,11 +41,28 @@
   }
 
   article#glossary-page-items dl {
-    @apply grid print:block print:space-y-5 gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4;
+    @apply grid print:block print:space-y-5 gap-5;
+  }
+
+  div#glossary-page-container:not([data-card-width]) article#glossary-page-items dl,
+  div#glossary-page-container[data-card-width="compact"] article#glossary-page-items dl {
+    @apply grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4;
+  }
+
+  div#glossary-page-container[data-card-width="intermediate"] article#glossary-page-items dl {
+    @apply grid-cols-1 2xl:grid-cols-2;
+  }
+
+  div#glossary-page-container[data-card-width="wide"] article#glossary-page-items dl {
+    @apply grid-cols-1;
   }
 
   article#glossary-page-items dl > div {
-    @apply bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0 max-h-96 print:max-h-full overflow-auto max-w-4xl;
+    @apply bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0 max-w-4xl;
+  }
+
+  div#glossary-page-container:not([data-card-width="wide"]) article#glossary-page-items dl > div {
+    @apply max-h-96 print:max-h-full overflow-auto;
   }
 
   article#glossary-page-items dl dt {
