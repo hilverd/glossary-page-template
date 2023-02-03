@@ -1,5 +1,5 @@
 module Extras.HtmlTree exposing
-    ( Attribute, HtmlTree(..)
+    ( Attribute, boolAttribute, HtmlTree(..)
     , toHtml, escape
     )
 
@@ -8,7 +8,7 @@ module Extras.HtmlTree exposing
 
 # Type and Constructors
 
-@docs Attribute, HtmlTree
+@docs Attribute, boolAttribute, HtmlTree
 
 
 # Converting to a String
@@ -25,6 +25,24 @@ import Http exposing (Response(..))
 type alias Attribute =
     { name : String
     , value : String
+    }
+
+
+{-| Create an attribute from a Boolean value.
+
+    boolAttribute "enabled" True
+    --> Attribute "enabled" "true"
+
+-}
+boolAttribute : String -> Bool -> Attribute
+boolAttribute name bool =
+    { name = name
+    , value =
+        if bool then
+            "true"
+
+        else
+            "false"
     }
 
 

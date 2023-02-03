@@ -32,20 +32,8 @@ toHtmlTree { enableMarkdownBasedSyntax, enableHelpForMakingChanges, title, about
     HtmlTree.Node "div"
         True
         [ HtmlTree.Attribute "id" ElementIds.container
-        , HtmlTree.Attribute "data-enable-help-for-making-changes"
-            (if enableHelpForMakingChanges then
-                "true"
-
-             else
-                "false"
-            )
-        , HtmlTree.Attribute "data-enable-markdown-based-syntax"
-            (if enableMarkdownBasedSyntax then
-                "true"
-
-             else
-                "false"
-            )
+        , HtmlTree.boolAttribute "data-enable-help-for-making-changes" enableHelpForMakingChanges
+        , HtmlTree.boolAttribute "data-enable-markdown-based-syntax" enableMarkdownBasedSyntax
         ]
         [ HtmlTree.Node "header"
             True

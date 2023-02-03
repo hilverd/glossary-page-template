@@ -1142,7 +1142,7 @@ view model =
             , body = [ pre [] [ text <| Decode.errorToString error ] ]
             }
 
-        Ok { title, aboutSection, items } ->
+        Ok { enableMarkdownBasedSyntax, title, aboutSection, items } ->
             let
                 editable =
                     model.makingChanges
@@ -1203,7 +1203,7 @@ view model =
                         [ viewTopBar noModalDialogShown_ model.exportDropdownMenu
                         , div
                             [ Html.Attributes.id ElementIds.container
-                            , Html.Attributes.attribute "data-enable-markdown-based-syntax" "false"
+                            , Extras.HtmlAttribute.fromBool "data-enable-markdown-based-syntax" enableMarkdownBasedSyntax
                             ]
                             [ header []
                                 [ div
