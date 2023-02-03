@@ -13,7 +13,7 @@ This can be in either plain text or Markdown.
 import Components.DropdownMenu exposing (Msg)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Html exposing (Html, text)
-import Html.Attributes as Attr
+import Html.Attributes as Attr exposing (class)
 import Markdown.Block as Block exposing (Block)
 import Markdown.Html
 import Markdown.Renderer as Renderer exposing (Renderer)
@@ -97,7 +97,9 @@ view details =
                 Ok blocks ->
                     case Renderer.render htmlRenderer blocks of
                         Ok rendered ->
-                            Html.div [] rendered
+                            Html.div
+                                [ class "prose print:prose-neutral dark:prose-invert leading-normal" ]
+                                rendered
 
                         Err renderingError ->
                             text <| "Failed to render Markdown: " ++ renderingError

@@ -9,6 +9,7 @@ overrides:
 
 specifiers:
   '@tailwindcss/forms': ^0.5.3
+  '@tailwindcss/typography': ^0.5.9
   autoprefixer: ^10.4.13
   elm: ^0.19.1-5
   elm-analyse: ^0.16.5
@@ -24,6 +25,7 @@ specifiers:
 
 devDependencies:
   '@tailwindcss/forms': 0.5.3_tailwindcss@3.2.4
+  '@tailwindcss/typography': 0.5.9_tailwindcss@3.2.4
   autoprefixer: 10.4.13_postcss@8.4.21
   elm: 0.19.1-5
   elm-analyse: 0.16.5
@@ -96,6 +98,18 @@ packages:
       tailwindcss: '>=3.0.0 || >= 3.0.0-alpha.1'
     dependencies:
       mini-svg-data-uri: 1.4.4
+      tailwindcss: 3.2.4_postcss@8.4.21
+    dev: true
+
+  /@tailwindcss/typography/0.5.9_tailwindcss@3.2.4:
+    resolution: {integrity: sha512-t8Sg3DyynFysV9f4JDOVISGsjazNb48AeIYQwcL+Bsq5uf4RYL75C1giZ43KISjeDGBaTN3Kxh7Xj/vRSMJUUg==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0 || insiders'
+    dependencies:
+      lodash.castarray: 4.4.0
+      lodash.isplainobject: 4.0.6
+      lodash.merge: 4.6.2
+      postcss-selector-parser: 6.0.10
       tailwindcss: 3.2.4_postcss@8.4.21
     dev: true
 
@@ -1712,6 +1726,18 @@ packages:
 
   /lodash.camelcase/4.3.0:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
+    dev: true
+
+  /lodash.castarray/4.4.0:
+    resolution: {integrity: sha512-aVx8ztPv7/2ULbArGJ2Y42bG1mEQ5mGjpdvrbJcJFU3TbYybe+QlLS4pst9zV52ymy2in1KpFPiZnAOATxD4+Q==}
+    dev: true
+
+  /lodash.isplainobject/4.0.6:
+    resolution: {integrity: sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA==}
+    dev: true
+
+  /lodash.merge/4.6.2:
+    resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
     dev: true
 
   /lodash/4.17.21:
