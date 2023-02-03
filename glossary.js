@@ -44,7 +44,7 @@ function glossaryItemFromDivElement(glossaryItemDivElement) {
         terms: dtElements.map(glossaryItemTermFromDtElement),
         details: ddElements
             .filter(ddElement => ddElement.getAttribute('class') !== 'related-terms')
-            .map(ddElement => normaliseWhitespace(ddElement.textContent)),
+            .map(ddElement => ddElement.textContent.trim()),
         relatedTerms: relatedTerms
     }
 }

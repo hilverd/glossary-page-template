@@ -136,7 +136,7 @@ termToHtmlTree term =
 detailsToHtmlTree : String -> HtmlTree
 detailsToHtmlTree details =
     HtmlTree.Node "dd"
-        True
+        False
         []
         [ HtmlTree.Leaf details ]
 
