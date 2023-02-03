@@ -1204,6 +1204,7 @@ view model =
                         , div
                             [ Html.Attributes.id ElementIds.container
                             , Extras.HtmlAttribute.fromBool "data-enable-markdown-based-syntax" enableMarkdownBasedSyntax
+                            , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
                             ]
                             [ header []
                                 [ div
