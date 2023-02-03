@@ -454,13 +454,13 @@ viewCreateDescriptionTerms showValidationErrors termsArray =
         ]
 
 
-viewCreateDescriptionDetailsSingle : Bool -> Int -> DetailsField -> Html Msg
-viewCreateDescriptionDetailsSingle showValidationErrors index detailsSingle =
-    viewCreateDescriptionDetailsSingle1 showValidationErrors (DetailsIndex.fromInt index) detailsSingle
+viewCreateDescriptionDetailsSingle : Bool -> Bool -> Int -> DetailsField -> Html Msg
+viewCreateDescriptionDetailsSingle showNewlineWarnings showValidationErrors index detailsSingle =
+    viewCreateDescriptionDetailsSingle1 showNewlineWarnings showValidationErrors (DetailsIndex.fromInt index) detailsSingle
 
 
-viewCreateDescriptionDetailsSingle1 : Bool -> DetailsIndex -> DetailsField -> Html Msg
-viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
+viewCreateDescriptionDetailsSingle1 : Bool -> Bool -> DetailsIndex -> DetailsField -> Html Msg
+viewCreateDescriptionDetailsSingle1 showNewlineWarnings showValidationErrors index detailsSingle =
     let
         raw =
             DetailsField.raw detailsSingle
@@ -506,7 +506,7 @@ viewCreateDescriptionDetailsSingle1 showValidationErrors index detailsSingle =
              else
                 Nothing
             )
-        , Extras.Html.showIf (raw |> String.contains "\n") <|
+        , Extras.Html.showIf (showNewlineWarnings && (raw |> String.contains "\n")) <|
             p
                 [ class "mt-2 text-red-800 dark:text-red-200" ]
                 [ text "This will be turned into a single paragraph — line breaks are automatically converted to spaces" ]
@@ -535,8 +535,8 @@ viewAddDetailsButtonForEmptyState =
         ]
 
 
-viewCreateDescriptionDetails : Bool -> Array DetailsField -> Html Msg
-viewCreateDescriptionDetails showValidationErrors detailsArray =
+viewCreateDescriptionDetails : Bool -> Bool -> Array DetailsField -> Html Msg
+viewCreateDescriptionDetails showNewlineWarnings showValidationErrors detailsArray =
     let
         details =
             Array.toList detailsArray
@@ -553,7 +553,7 @@ viewCreateDescriptionDetails showValidationErrors detailsArray =
             ]
         , div
             [ class "space-y-6 sm:space-y-5" ]
-            (List.indexedMap (viewCreateDescriptionDetailsSingle showValidationErrors) details
+            (List.indexedMap (viewCreateDescriptionDetailsSingle showNewlineWarnings showValidationErrors) details
                 ++ [ if List.isEmpty details then
                         viewAddDetailsButtonForEmptyState
 
@@ -799,8 +799,15 @@ view model =
                                 [ div
                                     [ class "lg:w-1/2 space-y-8 divide-y divide-gray-200 dark:divide-gray-800 sm:space-y-5" ]
                                     [ viewCreateDescriptionTerms model.triedToSaveWhenFormInvalid terms
-                                    , viewCreateDescriptionDetails model.triedToSaveWhenFormInvalid detailsArray
-                                    , viewCreateSeeAlso model.triedToSaveWhenFormInvalid glossary.items terms relatedTerms suggestedRelatedTerms
+                                    , viewCreateDescriptionDetails
+                                        (not glossary.enableMarkdownBasedSyntax)
+                                        model.triedToSaveWhenFormInvalid
+                                        detailsArray
+                                    , viewCreateSeeAlso model.triedToSaveWhenFormInvalid
+                                        glossary.items
+                                        terms
+                                        relatedTerms
+                                        suggestedRelatedTerms
                                     ]
                                 , div
                                     [ class "mt-8 lg:w-1/2 lg:mt-0 text-gray-900 dark:text-gray-100" ]
