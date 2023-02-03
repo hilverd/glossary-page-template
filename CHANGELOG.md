@@ -15,6 +15,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Changed
 
 - Switch to Source Sans 3 font. The Overpass font has [undesired behaviour for backticks](https://github.com/RedHatOfficial/Overpass/issues/95).
+- Restrict item height and show a scrollbar for longer items.
 
 ### Fixed
 ### Removed
