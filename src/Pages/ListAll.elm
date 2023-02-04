@@ -715,10 +715,10 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
         ]
 
 
-viewMakeChangesButton : Bool -> Html Msg
-viewMakeChangesButton tabbable =
+viewMakeChangesButton : Bool -> Bool -> Html Msg
+viewMakeChangesButton showSandboxModeMessage tabbable =
     div
-        [ class "pb-6 print:hidden" ]
+        [ class "print:hidden" ]
         [ Components.Button.white True
             [ Html.Events.onClick <| PageMsg.Internal MakeChanges
             , Accessibility.Key.tabbable tabbable
@@ -729,19 +729,23 @@ viewMakeChangesButton tabbable =
                 [ class "ml-2" ]
                 [ text "Make changes" ]
             ]
+        , Extras.Html.showIf showSandboxModeMessage <|
+            div
+                [ class "mt-4 mb-5 sm:mb-4 text-sm text-gray-500 dark:text-gray-400" ]
+                [ text Components.Copy.sandboxModeMessage ]
         ]
 
 
 viewEditTitleAndAboutButton : Bool -> CommonModel -> Html Msg
 viewEditTitleAndAboutButton tabbable common =
     div
-        [ class "pb-6 print:hidden" ]
-        [ Components.Button.white True
+        [ class "pb-3 print:hidden" ]
+        [ Components.Button.text
             [ Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout { common | maybeIndex = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.pencil
-                [ Svg.Attributes.class "h-5 w-5" ]
+                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
             , span
                 [ class "ml-2" ]
                 [ text "Edit title and about section" ]
@@ -1215,19 +1219,12 @@ view model =
                                         [ Extras.Html.showIf (model.common.enableSavingChangesInMemory && not model.makingChanges) <|
                                             div
                                                 [ class "flex-none" ]
-                                                [ viewMakeChangesButton noModalDialogShown_ ]
-                                        , Extras.Html.showIf editable <|
-                                            div
-                                                [ class "flex-none" ]
-                                                [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
+                                                [ viewMakeChangesButton model.common.enableSavingChangesInMemory noModalDialogShown_
+                                                ]
                                         , div
                                             [ class "hidden lg:block ml-auto pb-3" ]
                                             [ viewExportButton noModalDialogShown_ model.exportDropdownMenu ]
                                         ]
-                                    , Extras.Html.showIf (model.common.enableSavingChangesInMemory && model.makingChanges) <|
-                                        div
-                                            [ class "mb-5 sm:mb-4 text-sm text-gray-500 dark:text-gray-400" ]
-                                            [ text Components.Copy.sandboxModeMessage ]
                                     ]
                                 , viewMakingChangesHelp model.common.filename noModalDialogShown_
                                     |> Extras.Html.showIf (model.common.enableHelpForMakingChanges && not model.common.enableSavingChangesInMemory && not editable)
@@ -1238,6 +1235,10 @@ view model =
                             , Html.main_
                                 []
                                 [ Components.AboutSection.view (not noModalDialogShown_) aboutSection
+                                , Extras.Html.showIf editable <|
+                                    div
+                                        [ class "flex-none mt-2" ]
+                                        [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
                                 , items
                                     |> (if model.common.orderItemsBy == CommonModel.Alphabetically then
                                             GlossaryItems.orderedAlphabetically

@@ -85,7 +85,7 @@ view style glossaryItem =
                                     , Accessibility.Key.tabbable tabbable
                                     ]
                                     [ Icons.pencil
-                                        [ Svg.Attributes.class "h-5 w-5" ]
+                                        [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
                                     , span
                                         [ class "font-medium text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-400" ]
                                         [ text "Edit" ]
@@ -98,7 +98,7 @@ view style glossaryItem =
                                     , Accessibility.Key.tabbable tabbable
                                     ]
                                     [ Icons.trash
-                                        [ Svg.Attributes.class "h-5 w-5" ]
+                                        [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
                                     , span
                                         [ class "font-medium text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-400" ]
                                         [ text "Delete" ]

@@ -56,7 +56,7 @@ white enabled =
 text : List (Attribute msg) -> List (Html msg) -> Html msg
 text =
     withAdditionalAttributes
-        [ class "inline-flex space-x-2 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
+        [ class "inline-flex space-x-2 font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-400" ]
 
 
 emptyState : List (Attribute msg) -> List (Html msg) -> Html msg
