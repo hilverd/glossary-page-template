@@ -10,7 +10,6 @@ This can be in either plain text or Markdown.
 
 -}
 
-import Components.DropdownMenu exposing (Msg)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Html exposing (Html, text)
 import Html.Attributes as Attr exposing (class)

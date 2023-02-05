@@ -15,6 +15,7 @@ import CommonModel exposing (CommonModel)
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection(..))
+import Data.CardWidth as CardWidth
 import Data.GlossaryTitle as GlossaryTitle
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
 import Html
@@ -111,8 +112,8 @@ init flags =
 
         cardWidth =
             flags
-                |> Decode.decodeValue (Decode.field "cardWidth" Decode.string)
-                |> Result.withDefault "compact"
+                |> Decode.decodeValue CardWidth.decode
+                |> Result.withDefault CardWidth.Compact
 
         enableSavingChangesInMemory =
             flags

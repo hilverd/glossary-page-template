@@ -14,6 +14,7 @@ import Components.DropdownMenu
 import Components.GlossaryItemCard
 import Components.SearchDialog
 import Data.AboutSection exposing (AboutSection(..))
+import Data.CardWidth as CardWidth
 import Data.Glossary as Glossary
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Term as Term exposing (Term)
@@ -1209,7 +1210,7 @@ view model =
                             [ Html.Attributes.id ElementIds.container
                             , Extras.HtmlAttribute.fromBool "data-enable-markdown-based-syntax" enableMarkdownBasedSyntax
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
-                            , Html.Attributes.attribute "data-card-width" cardWidth
+                            , cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
                             ]
                             [ header []
                                 [ div

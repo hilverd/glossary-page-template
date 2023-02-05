@@ -1,7 +1,7 @@
 module Components.GlossaryItemCard exposing (Style(..), view)
 
 import Accessibility exposing (..)
-import Accessibility.Key exposing (tabbable)
+import Accessibility.Key
 import Components.Button
 import Data.AboutSection exposing (AboutSection(..))
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)

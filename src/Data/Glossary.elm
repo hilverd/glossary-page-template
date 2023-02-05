@@ -3,6 +3,7 @@ module Data.Glossary exposing (Glossary, toHtmlTree)
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection(..))
+import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
@@ -13,7 +14,7 @@ import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 type alias Glossary =
     { enableMarkdownBasedSyntax : Bool
     , enableHelpForMakingChanges : Bool
-    , cardWidth : String
+    , cardWidth : CardWidth
     , title : GlossaryTitle
     , aboutSection : AboutSection
     , items : GlossaryItems
@@ -35,7 +36,7 @@ toHtmlTree { enableMarkdownBasedSyntax, enableHelpForMakingChanges, cardWidth, t
         [ HtmlTree.Attribute "id" ElementIds.container
         , HtmlTree.boolAttribute "data-enable-help-for-making-changes" enableHelpForMakingChanges
         , HtmlTree.boolAttribute "data-enable-markdown-based-syntax" enableMarkdownBasedSyntax
-        , HtmlTree.Attribute "data-card-width" cardWidth
+        , cardWidth |> CardWidth.toHtmlTreeAttribute
         ]
         [ HtmlTree.Node "header"
             True
