@@ -128,7 +128,6 @@ init flags =
                 |> Result.map
                     (\items ->
                         { enableMarkdownBasedSyntax = enableMarkdownBasedSyntax
-                        , enableHelpForMakingChanges = enableHelpForMakingChanges
                         , cardWidth = cardWidth
                         , title = title
                         , aboutSection = aboutSection

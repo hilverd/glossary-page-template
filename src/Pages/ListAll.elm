@@ -401,7 +401,7 @@ patchHtmlFile common indexOfItemBeingDeleted glossaryItems =
                     , url = "/"
                     , body =
                         glossary
-                            |> Glossary.toHtmlTree
+                            |> Glossary.toHtmlTree common.enableHelpForMakingChanges
                             |> HtmlTree.toHtml
                             |> Http.stringBody "text/html"
                     , expect =
