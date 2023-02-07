@@ -61,12 +61,12 @@
     @apply bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0 max-w-4xl;
   }
 
-  div#glossary-page-container:not([data-card-width]) article#glossary-page-items dl div,
-  div#glossary-page-container[data-card-width="compact"] article#glossary-page-items dl div {
+  div#glossary-page-container:not([data-card-width]) article#glossary-page-items dl > div,
+  div#glossary-page-container[data-card-width="compact"] article#glossary-page-items dl > div {
     @apply grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 sm:max-h-96 sm:overflow-auto print:max-h-full;
   }
 
-  div#glossary-page-container[data-card-width="intermediate"] article#glossary-page-items dl div {
+  div#glossary-page-container[data-card-width="intermediate"] article#glossary-page-items dl > div {
     @apply 2xl:max-h-96 2xl:overflow-auto print:max-h-full;
   }
 
