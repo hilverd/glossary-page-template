@@ -6,6 +6,7 @@ import Accessibility.Key exposing (tabbable)
 import Accessibility.Role
 import Browser exposing (Document)
 import Browser.Dom as Dom
+import Browser.Navigation as Navigation
 import CommonModel exposing (CommonModel)
 import Components.AboutSection
 import Components.Button
@@ -14,8 +15,8 @@ import Components.DropdownMenu
 import Components.GlossaryItemCard
 import Components.SearchDialog
 import Data.AboutSection exposing (AboutSection(..))
-import Data.CardWidth as CardWidth
-import Data.Glossary as Glossary
+import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
@@ -79,6 +80,7 @@ type alias Model =
     , searchDialog : SearchDialog
     , confirmDeleteIndex : Maybe GlossaryItemIndex
     , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
+    , errorWhileChangingSettings : Maybe String
     }
 
 
@@ -100,6 +102,10 @@ type InternalMsg
     | FailedToDelete GlossaryItemIndex Http.Error
     | JumpToTermIndexGroup Bool String
     | ChangeOrderItemsBy CommonModel.OrderItemsBy
+    | ToggleMarkdownBasedSyntax
+    | ChangeCardWidth CardWidth
+    | ChangedSettings Glossary
+    | FailedToChangeSettings Http.Error
     | DownloadMarkdown
     | DownloadAnki
 
@@ -128,6 +134,7 @@ init editorIsRunning commonModel =
                     ]
             }
       , errorWhileDeleting = Nothing
+      , errorWhileChangingSettings = Nothing
       }
     , case commonModel.maybeIndex of
         Just index ->
@@ -270,9 +277,12 @@ update msg model =
                         updatedGlossaryItems =
                             GlossaryItems.remove index items
                     in
-                    ( { model | confirmDeleteIndex = Nothing }
+                    ( { model
+                        | confirmDeleteIndex = Nothing
+                        , errorWhileDeleting = Nothing
+                      }
                     , Cmd.batch
-                        [ patchHtmlFile model.common index updatedGlossaryItems
+                        [ patchHtmlFileAfterDeletingItem model.common index updatedGlossaryItems
                         , allowBackgroundScrolling ()
                         , giveFocusToOuter
                         ]
@@ -353,6 +363,59 @@ update msg model =
             , Cmd.none
             )
 
+        ToggleMarkdownBasedSyntax ->
+            case model.common.glossary of
+                Ok glossary ->
+                    let
+                        updatedGlossary =
+                            { glossary | enableMarkdownBasedSyntax = not glossary.enableMarkdownBasedSyntax }
+                    in
+                    ( { model
+                        | confirmDeleteIndex = Nothing
+                        , errorWhileDeleting = Nothing
+                      }
+                    , patchHtmlFileAfterChangingSettings model.common updatedGlossary
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        ChangeCardWidth cardWidth ->
+            case model.common.glossary of
+                Ok glossary ->
+                    let
+                        updatedGlossary =
+                            { glossary | cardWidth = cardWidth }
+                    in
+                    ( { model
+                        | confirmDeleteIndex = Nothing
+                        , errorWhileDeleting = Nothing
+                      }
+                    , patchHtmlFileAfterChangingSettings model.common updatedGlossary
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        ChangedSettings glossary ->
+            if model.common.enableSavingChangesInMemory then
+                let
+                    common =
+                        model.common
+                in
+                ( { model | common = { common | glossary = Ok glossary } }, Cmd.none )
+
+            else
+                ( model, Navigation.reload )
+
+        FailedToChangeSettings error ->
+            ( { model
+                | errorWhileChangingSettings =
+                    Just <| Extras.Http.errorToHumanReadable error
+              }
+            , Cmd.none
+            )
+
         DownloadMarkdown ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
             , case model.common.glossary of
@@ -379,8 +442,42 @@ giveFocusToOuter =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.outer)
 
 
-patchHtmlFile : CommonModel -> GlossaryItemIndex -> GlossaryItems -> Cmd Msg
-patchHtmlFile common indexOfItemBeingDeleted glossaryItems =
+patchHtmlFileAfterChangingSettings : CommonModel -> Glossary -> Cmd Msg
+patchHtmlFileAfterChangingSettings common glossary =
+    let
+        msg =
+            PageMsg.Internal <| ChangedSettings glossary
+    in
+    if common.enableSavingChangesInMemory then
+        Extras.Task.messageToCommand msg
+
+    else
+        Http.request
+            { method = "PATCH"
+            , headers = []
+            , url = "/"
+            , body =
+                glossary
+                    |> Glossary.toHtmlTree common.enableHelpForMakingChanges
+                    |> HtmlTree.toHtml
+                    |> Http.stringBody "text/html"
+            , expect =
+                Http.expectWhatever
+                    (\result ->
+                        case result of
+                            Ok _ ->
+                                msg
+
+                            Err error ->
+                                PageMsg.Internal <| FailedToChangeSettings error
+                    )
+            , timeout = Nothing
+            , tracker = Nothing
+            }
+
+
+patchHtmlFileAfterDeletingItem : CommonModel -> GlossaryItemIndex -> GlossaryItems -> Cmd Msg
+patchHtmlFileAfterDeletingItem common indexOfItemBeingDeleted glossaryItems =
     let
         msg =
             PageMsg.Internal <| Deleted glossaryItems
@@ -438,7 +535,7 @@ viewMakingChangesHelp filename tabbable =
         , class "pt-4 pr-4 pl-4 pb-2"
         ]
         [ details
-            []
+            [ Accessibility.Key.tabbable tabbable ]
             [ summary
                 [ class "mb-1 text-lg leading-6 items-center font-medium text-gray-900 dark:text-gray-100 select-none" ]
                 [ span
@@ -493,6 +590,55 @@ viewMakingChangesHelp filename tabbable =
                     , text " element."
                     ]
                 ]
+            ]
+        ]
+
+
+viewSettings : Glossary -> Model -> Html Msg
+viewSettings glossary model =
+    let
+        errorDiv message =
+            div
+                [ class "mt-2" ]
+                [ p
+                    [ class "text-red-600" ]
+                    [ text message ]
+                ]
+    in
+    div
+        [ class "mb-5 rounded-md overflow-x-auto bg-amber-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 print:hidden"
+        , class "pt-4 pr-4 pl-4 pb-2"
+        ]
+        [ details
+            [ Accessibility.Key.tabbable <| noModalDialogShown model ]
+            [ summary
+                [ class "mb-1 text-lg leading-6 items-center font-medium text-gray-900 dark:text-gray-100 select-none" ]
+                [ span
+                    [ class "ml-2" ]
+                    [ text "Settings" ]
+                ]
+            , Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
+                div
+                    [ class "mt-4" ]
+                    [ p
+                        [ class "mt-3 max-w-xl" ]
+                        [ text "These settings are updated in the HTML file when you change them, and the page will reload."
+                        ]
+                    ]
+            , Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
+                div
+                    [ class "mt-4 pb-2" ]
+                    [ viewSelectInputSyntax glossary model
+                    ]
+            , div
+                [ class "mt-4 pb-2" ]
+                [ viewSelectCardWidth glossary model
+                ]
+            , model.errorWhileChangingSettings
+                |> Extras.Html.showMaybe
+                    (\errorMessage ->
+                        errorDiv <| "Failed to save — " ++ errorMessage ++ "."
+                    )
             ]
         ]
 
@@ -1080,6 +1226,130 @@ viewExportButton enabled exportDropdownMenu =
         ]
 
 
+viewSelectInputSyntax : Glossary -> Model -> Html Msg
+viewSelectInputSyntax glossary model =
+    let
+        tabbable =
+            noModalDialogShown model
+    in
+    div
+        []
+        [ label
+            [ class "font-medium text-gray-900 dark:text-gray-100" ]
+            [ text "Input syntax" ]
+        , fieldset [ class "mt-4" ]
+            [ legend
+                [ class "sr-only" ]
+                [ text "Input syntax" ]
+            , div
+                [ class "space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6" ]
+                [ div
+                    [ class "flex items-center" ]
+                    [ Components.Button.radio
+                        "input-syntax"
+                        "input-syntax-plain-text"
+                        (not glossary.enableMarkdownBasedSyntax)
+                        tabbable
+                        [ id ElementIds.inputSyntaxPlainText
+                        , Html.Events.onClick <| PageMsg.Internal ToggleMarkdownBasedSyntax
+                        ]
+                    , label
+                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
+                        , for ElementIds.inputSyntaxPlainText
+                        ]
+                        [ text "Plain text" ]
+                    ]
+                , div
+                    [ class "flex items-center" ]
+                    [ Components.Button.radio
+                        "input-syntax"
+                        "input-syntax-markdown-based"
+                        glossary.enableMarkdownBasedSyntax
+                        tabbable
+                        [ id ElementIds.inputSyntaxMarkdownBased
+                        , Html.Events.onClick <| PageMsg.Internal ToggleMarkdownBasedSyntax
+                        ]
+                    , label
+                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
+                        , for ElementIds.inputSyntaxMarkdownBased
+                        ]
+                        [ text "Markdown-based" ]
+                    ]
+                ]
+            ]
+        ]
+
+
+viewSelectCardWidth : Glossary -> Model -> Html Msg
+viewSelectCardWidth glossary model =
+    let
+        tabbable =
+            noModalDialogShown model
+    in
+    div
+        []
+        [ label
+            [ class "font-medium text-gray-900 dark:text-gray-100" ]
+            [ text "Card width" ]
+        , fieldset [ class "mt-4" ]
+            [ legend
+                [ class "sr-only" ]
+                [ text "Card width" ]
+            , div
+                [ class "space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6" ]
+                [ div
+                    [ class "flex items-center" ]
+                    [ Components.Button.radio
+                        "card-width"
+                        "card-width-compact"
+                        (glossary.cardWidth == CardWidth.Compact)
+                        tabbable
+                        [ id ElementIds.cardWidthCompact
+                        , Html.Events.onClick <| PageMsg.Internal <| ChangeCardWidth CardWidth.Compact
+                        ]
+                    , label
+                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
+                        , for ElementIds.cardWidthCompact
+                        ]
+                        [ text "Compact" ]
+                    ]
+                , div
+                    [ class "flex items-center" ]
+                    [ Components.Button.radio
+                        "card-width"
+                        "card-width-intermediate"
+                        (glossary.cardWidth == CardWidth.Intermediate)
+                        tabbable
+                        [ id ElementIds.cardWidthIntermediate
+                        , Html.Events.onClick <| PageMsg.Internal <| ChangeCardWidth CardWidth.Intermediate
+                        ]
+                    , label
+                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
+                        , for ElementIds.cardWidthIntermediate
+                        ]
+                        [ text "Intermediate" ]
+                    ]
+                , div
+                    [ class "flex items-center" ]
+                    [ Components.Button.radio
+                        "card-width"
+                        "card-width-wide"
+                        (glossary.cardWidth == CardWidth.Wide)
+                        tabbable
+                        [ id ElementIds.cardWidthWide
+                        , Html.Events.onClick <| PageMsg.Internal <| ChangeCardWidth CardWidth.Wide
+                        ]
+                    , label
+                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
+                        , for ElementIds.cardWidthWide
+                        ]
+                        [ text "Wide" ]
+                    ]
+                ]
+            ]
+        ]
+
+
 viewOrderItemsBy : Model -> Html Msg
 viewOrderItemsBy model =
     let
@@ -1147,7 +1417,7 @@ view model =
             , body = [ pre [] [ text <| Decode.errorToString error ] ]
             }
 
-        Ok { enableMarkdownBasedSyntax, cardWidth, title, aboutSection, items } ->
+        Ok glossary ->
             let
                 editable =
                     model.makingChanges
@@ -1156,9 +1426,9 @@ view model =
                     noModalDialogShown model
 
                 termIndex =
-                    termIndexFromGlossaryItems items
+                    termIndexFromGlossaryItems glossary.items
             in
-            { title = GlossaryTitle.toString title
+            { title = GlossaryTitle.toString glossary.title
             , body =
                 [ Html.div
                     [ class "min-h-full focus:outline-none"
@@ -1208,9 +1478,9 @@ view model =
                         [ viewTopBar noModalDialogShown_ model.exportDropdownMenu
                         , div
                             [ Html.Attributes.id ElementIds.container
-                            , Extras.HtmlAttribute.fromBool "data-enable-markdown-based-syntax" enableMarkdownBasedSyntax
+                            , Extras.HtmlAttribute.fromBool "data-enable-markdown-based-syntax" glossary.enableMarkdownBasedSyntax
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
-                            , cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
+                            , glossary.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
                             ]
                             [ header []
                                 [ div
@@ -1229,18 +1499,19 @@ view model =
                                     ]
                                 , viewMakingChangesHelp model.common.filename noModalDialogShown_
                                     |> Extras.Html.showIf (model.common.enableHelpForMakingChanges && not model.common.enableSavingChangesInMemory && not editable)
+                                , Extras.Html.showIf editable <| viewSettings glossary model
                                 , h1
                                     [ id ElementIds.title ]
-                                    [ text <| GlossaryTitle.toString title ]
+                                    [ text <| GlossaryTitle.toString glossary.title ]
                                 ]
                             , Html.main_
                                 []
-                                [ Components.AboutSection.view (not noModalDialogShown_) aboutSection
+                                [ Components.AboutSection.view (not noModalDialogShown_) glossary.aboutSection
                                 , Extras.Html.showIf editable <|
                                     div
                                         [ class "flex-none mt-2" ]
                                         [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
-                                , items
+                                , glossary.items
                                     |> (if model.common.orderItemsBy == CommonModel.Alphabetically then
                                             GlossaryItems.orderedAlphabetically
 

@@ -3,12 +3,17 @@ module ElementIds exposing
     , about
     , aboutLinkBody
     , aboutLinkHref
+    , cardWidthCompact
+    , cardWidthIntermediate
+    , cardWidthWide
     , confirmDeleteModalTitle
     , container
     , descriptionDetailsSingle
     , exportDropdownButton
     , glossaryItemDiv
     , indexForMobile
+    , inputSyntaxMarkdownBased
+    , inputSyntaxPlainText
     , items
     , orderItemsAlphabetically
     , orderItemsMostFrequentFirst
@@ -70,6 +75,31 @@ about =
 items : String
 items =
     prefixed "items"
+
+
+inputSyntaxPlainText : String
+inputSyntaxPlainText =
+    prefixed "input-syntax-plain-text"
+
+
+inputSyntaxMarkdownBased : String
+inputSyntaxMarkdownBased =
+    prefixed "input-syntax-markdown-based"
+
+
+cardWidthCompact : String
+cardWidthCompact =
+    prefixed "card-width-compact"
+
+
+cardWidthIntermediate : String
+cardWidthIntermediate =
+    prefixed "card-width-intermediate"
+
+
+cardWidthWide : String
+cardWidthWide =
+    prefixed "card-width-wide"
 
 
 orderItemsAlphabetically : String
