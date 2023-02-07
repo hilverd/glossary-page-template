@@ -8,7 +8,7 @@ module Export.Anki exposing (download)
 
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
-import Data.AboutSection exposing (AboutSection(..))
+import Data.AboutSection exposing (AboutSection)
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Details as Details
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
@@ -104,13 +104,8 @@ download glossaryTitle aboutSection glossaryItems =
         titleComment =
             glossaryTitle |> GlossaryTitle.toString |> comment
 
-        ( aboutParagraph, aboutLinks ) =
-            case aboutSection of
-                PlaintextAboutSection { paragraph, links } ->
-                    ( paragraph, links )
-
         aboutLinksComment =
-            aboutLinks
+            aboutSection.links
                 |> List.map
                     (\aboutLink ->
                         "* " ++ AboutLink.body aboutLink ++ " - " ++ AboutLink.href aboutLink
@@ -129,7 +124,7 @@ download glossaryTitle aboutSection glossaryItems =
             , comment ""
             , titleComment
             , comment ""
-            , comment <| AboutParagraph.toString aboutParagraph
+            , comment <| AboutParagraph.toString aboutSection.paragraph
             , comment ""
             , aboutLinksComment
             , itemsString

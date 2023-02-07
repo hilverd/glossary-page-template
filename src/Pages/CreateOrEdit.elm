@@ -11,7 +11,6 @@ import Components.Copy
 import Components.Form
 import Components.GlossaryItemCard
 import Components.SelectMenu
-import Data.AboutSection exposing (AboutSection(..))
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.Glossary as Glossary
 import Data.GlossaryItem.RelatedTerm as RelatedTerm

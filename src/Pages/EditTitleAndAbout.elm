@@ -13,7 +13,7 @@ import Components.Form
 import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.AboutParagraph as AboutParagraph
-import Data.AboutSection exposing (AboutSection(..))
+import Data.AboutSection exposing (AboutSection)
 import Data.Glossary as Glossary
 import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -78,11 +78,9 @@ init common =
             ( { common = common
               , form =
                     Form.create (GlossaryTitle.fromString "")
-                        (PlaintextAboutSection
-                            { paragraph = AboutParagraph.fromString ""
-                            , links = []
-                            }
-                        )
+                        { paragraph = AboutParagraph.fromString ""
+                        , links = []
+                        }
               , triedToSaveWhenFormInvalid = False
               , errorMessageWhileSaving = Nothing
               }
@@ -180,17 +178,16 @@ titleFromForm =
 
 aboutSectionFromForm : Form.TitleAndAboutForm -> AboutSection
 aboutSectionFromForm form =
-    PlaintextAboutSection
-        { paragraph = form |> Form.aboutParagraphField |> .body |> AboutParagraph.fromString
-        , links =
-            form
-                |> Form.aboutLinkFields
-                |> Array.toList
-                |> List.map
-                    (\( href, body ) ->
-                        AboutLink.create href.href body.body
-                    )
-        }
+    { paragraph = form |> Form.aboutParagraphField |> .body |> AboutParagraph.fromString
+    , links =
+        form
+            |> Form.aboutLinkFields
+            |> Array.toList
+            |> List.map
+                (\( href, body ) ->
+                    AboutLink.create href.href body.body
+                )
+    }
 
 
 patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg

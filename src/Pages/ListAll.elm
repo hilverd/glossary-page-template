@@ -14,7 +14,6 @@ import Components.Copy
 import Components.DropdownMenu
 import Components.GlossaryItemCard
 import Components.SearchDialog
-import Data.AboutSection exposing (AboutSection(..))
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem exposing (GlossaryItem)

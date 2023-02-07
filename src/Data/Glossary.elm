@@ -2,7 +2,7 @@ module Data.Glossary exposing (Glossary, toHtmlTree)
 
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
-import Data.AboutSection exposing (AboutSection(..))
+import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -24,12 +24,6 @@ type alias Glossary =
 -}
 toHtmlTree : Bool -> Glossary -> HtmlTree
 toHtmlTree enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, title, aboutSection, items } =
-    let
-        ( aboutParagraph, aboutLinks ) =
-            case aboutSection of
-                PlaintextAboutSection { paragraph, links } ->
-                    ( paragraph, links )
-    in
     HtmlTree.Node "div"
         True
         [ HtmlTree.Attribute "id" ElementIds.container
@@ -54,7 +48,7 @@ toHtmlTree enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, ti
                 [ HtmlTree.Node "p"
                     True
                     []
-                    [ HtmlTree.Leaf <| AboutParagraph.toString aboutParagraph ]
+                    [ HtmlTree.Leaf <| AboutParagraph.toString aboutSection.paragraph ]
                 , HtmlTree.Node "ul"
                     True
                     []
@@ -71,7 +65,7 @@ toHtmlTree enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, ti
                                     [ HtmlTree.Leaf <| AboutLink.body aboutLink ]
                                 ]
                         )
-                        aboutLinks
+                        aboutSection.links
                     )
                 ]
             , HtmlTree.Node "article"

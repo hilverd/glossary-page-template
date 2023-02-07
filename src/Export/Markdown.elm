@@ -8,7 +8,7 @@ module Export.Markdown exposing (download)
 
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
-import Data.AboutSection exposing (AboutSection(..))
+import Data.AboutSection exposing (AboutSection)
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Details as Details
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
@@ -113,16 +113,11 @@ download glossaryTitle aboutSection glossaryItems =
         titleHeadingString =
             glossaryTitle |> GlossaryTitle.toString |> escape |> (++) "# "
 
-        ( aboutParagraph, aboutLinks ) =
-            case aboutSection of
-                PlaintextAboutSection { paragraph, links } ->
-                    ( paragraph, links )
-
         aboutParagraphString =
-            aboutParagraph |> AboutParagraph.toString |> escape
+            aboutSection.paragraph |> AboutParagraph.toString |> escape
 
         aboutLinksString =
-            aboutLinks
+            aboutSection.links
                 |> List.map (link >> (++) "* ")
                 |> lines
 

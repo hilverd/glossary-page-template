@@ -10,24 +10,22 @@ import Html.Attributes exposing (href, id, target)
 
 
 view : Bool -> Data.AboutSection.AboutSection -> Html msg
-view modalDialogShown aboutSection =
-    case aboutSection of
-        Data.AboutSection.PlaintextAboutSection { paragraph, links } ->
-            div
-                [ id ElementIds.about ]
-                [ p []
-                    [ text <| AboutParagraph.toString paragraph ]
-                , ul [] <|
-                    List.map
-                        (\aboutLink ->
-                            li []
-                                [ a
-                                    [ target "_blank"
-                                    , href <| AboutLink.href aboutLink
-                                    , Accessibility.Key.tabbable <| not modalDialogShown
-                                    ]
-                                    [ text <| AboutLink.body aboutLink ]
-                                ]
-                        )
-                        links
-                ]
+view modalDialogShown { paragraph, links } =
+    div
+        [ id ElementIds.about ]
+        [ p []
+            [ text <| AboutParagraph.toString paragraph ]
+        , ul [] <|
+            List.map
+                (\aboutLink ->
+                    li []
+                        [ a
+                            [ target "_blank"
+                            , href <| AboutLink.href aboutLink
+                            , Accessibility.Key.tabbable <| not modalDialogShown
+                            ]
+                            [ text <| AboutLink.body aboutLink ]
+                        ]
+                )
+                links
+        ]

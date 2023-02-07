@@ -22,7 +22,7 @@ import Array exposing (Array)
 import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.AboutParagraph as AboutParagraph
-import Data.AboutSection exposing (AboutSection(..))
+import Data.AboutSection exposing (AboutSection)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Extras.Array
 
@@ -156,17 +156,11 @@ validate form =
 
 create : GlossaryTitle -> AboutSection -> TitleAndAboutForm
 create title aboutSection =
-    let
-        ( aboutParagraph, aboutLinks ) =
-            case aboutSection of
-                PlaintextAboutSection { paragraph, links } ->
-                    ( paragraph, links )
-    in
     TitleAndAboutForm
         { titleField = { body = GlossaryTitle.toString title, validationError = Nothing }
-        , aboutParagraphField = { body = AboutParagraph.toString aboutParagraph, validationError = Nothing }
+        , aboutParagraphField = { body = AboutParagraph.toString aboutSection.paragraph, validationError = Nothing }
         , aboutLinkFields =
-            aboutLinks
+            aboutSection.links
                 |> List.map
                     (\aboutLink ->
                         ( { href = AboutLink.href aboutLink, validationError = Nothing }
