@@ -1,6 +1,6 @@
 module Data.AboutParagraph exposing (AboutParagraph, fromPlaintext, fromMarkdown, raw, view)
 
-{-| The "about" paragraph shown at the top of a glossary.
+{-| The "about" paragraph(s) shown at the top of a glossary.
 This can be in either plain text or Markdown.
 
 
