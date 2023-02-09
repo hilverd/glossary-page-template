@@ -45,7 +45,12 @@ fromPlaintext body =
 -}
 fromMarkdown : String -> Details
 fromMarkdown raw0 =
-    MarkdownDetails { fragment = MarkdownFragment.fromString raw0 }
+    MarkdownDetails
+        { fragment =
+            raw0
+                |> MarkdownFragment.fromString
+                |> sanitiseMarkdownFragment
+        }
 
 
 {-| Retrieve the raw body of details.
@@ -105,3 +110,31 @@ view details =
 
                 Err parsingError ->
                     text <| "Failed to parse Markdown: " ++ parsingError
+
+
+sanitiseMarkdownFragment : MarkdownFragment -> MarkdownFragment
+sanitiseMarkdownFragment fragment =
+    MarkdownFragment.transform
+        (\block ->
+            case block of
+                Block.Heading level children ->
+                    Block.Heading
+                        (case level of
+                            Block.H1 ->
+                                Block.H4
+
+                            Block.H2 ->
+                                Block.H4
+
+                            Block.H3 ->
+                                Block.H4
+
+                            _ ->
+                                level
+                        )
+                        children
+
+                _ ->
+                    block
+        )
+        fragment
