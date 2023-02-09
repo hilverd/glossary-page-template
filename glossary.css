@@ -32,8 +32,12 @@
     @apply pb-3;
   }
 
-  div#glossary-page-about > p {
+  div#glossary-page-about:not([data-enable-markdown-based-syntax="true"]) div#glossary-page-about > p {
     @apply max-w-prose;
+  }
+
+  div#glossary-page-container[data-enable-markdown-based-syntax="true"]:not([data-markdown-rendered="true"]) div#glossary-page-about > p {
+    @apply font-mono whitespace-pre-wrap;
   }
 
   div#glossary-page-about > ul {

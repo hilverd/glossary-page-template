@@ -2,12 +2,18 @@ import './glossary.css';
 import { Elm } from './src/ApplicationShell.elm';
 
 const containerElement = document.getElementById('glossary-page-container');
+
+const enableHelpForMakingChanges = containerElement.getAttribute('data-enable-help-for-making-changes') === 'true';
+const enableSavingChangesInMemory = containerElement.getAttribute('data-enable-saving-changes-in-memory') === 'true';
+const enableMarkdownBasedSyntax = containerElement.getAttribute('data-enable-markdown-based-syntax') === 'true';
+const cardWidth = containerElement.getAttribute('data-card-width');
+
 const titleElement = document.getElementById('glossary-page-title');
 const aboutElement = document.getElementById('glossary-page-about');
 
 const glossaryElement = document.getElementById('glossary-page-items');
 
-const aboutParagraph = normaliseWhitespace(aboutElement.querySelector('p').textContent);
+const aboutParagraph = aboutElement.querySelector('p').textContent.trim();
 
 const aboutUlElement = aboutElement.querySelector('ul');
 const aboutLiElements = Array.prototype.slice.apply(aboutUlElement.querySelectorAll('li'));
@@ -15,10 +21,6 @@ const aboutLinks = aboutLiElements.map(aboutLinkFromLiElement);
 
 const editorIsRunning = containerElement.getAttribute('data-editor-is-running') === 'true';
 
-const enableHelpForMakingChanges = containerElement.getAttribute('data-enable-help-for-making-changes') === 'true';
-const enableSavingChangesInMemory = containerElement.getAttribute('data-enable-saving-changes-in-memory') === 'true';
-const enableMarkdownBasedSyntax = containerElement.getAttribute('data-enable-markdown-based-syntax') === 'true';
-const cardWidth = containerElement.getAttribute('data-card-width');
 const dlElement = glossaryElement.querySelector('dl');
 const glossaryItemDivElements = Array.prototype.slice.apply(dlElement.querySelectorAll('div'));
 const glossaryItems = glossaryItemDivElements.map(glossaryItemFromDivElement);
