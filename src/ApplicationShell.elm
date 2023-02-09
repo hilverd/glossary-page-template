@@ -74,6 +74,11 @@ init flags =
         fragment =
             maybeUrl |> Maybe.andThen .fragment
 
+        enableMarkdownBasedSyntax =
+            flags
+                |> Decode.decodeValue (Decode.field "enableMarkdownBasedSyntax" Decode.bool)
+                |> Result.withDefault False
+
         title =
             flags
                 |> Decode.decodeValue (Decode.field "titleString" Decode.string)
@@ -84,7 +89,12 @@ init flags =
             flags
                 |> Decode.decodeValue (Decode.field "aboutParagraph" Decode.string)
                 |> Result.withDefault "Element not found"
-                |> AboutParagraph.fromString
+                |> (if enableMarkdownBasedSyntax then
+                        AboutParagraph.fromMarkdown
+
+                    else
+                        AboutParagraph.fromPlaintext
+                   )
 
         aboutLinks =
             flags
@@ -102,11 +112,6 @@ init flags =
         enableHelpForMakingChanges =
             flags
                 |> Decode.decodeValue (Decode.field "enableHelpForMakingChanges" Decode.bool)
-                |> Result.withDefault False
-
-        enableMarkdownBasedSyntax =
-            flags
-                |> Decode.decodeValue (Decode.field "enableMarkdownBasedSyntax" Decode.bool)
                 |> Result.withDefault False
 
         cardWidth =

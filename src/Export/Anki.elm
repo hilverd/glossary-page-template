@@ -124,7 +124,7 @@ download glossaryTitle aboutSection glossaryItems =
             , comment ""
             , titleComment
             , comment ""
-            , comment <| AboutParagraph.toString aboutSection.paragraph
+            , comment <| AboutParagraph.raw aboutSection.paragraph
             , comment ""
             , aboutLinksComment
             , itemsString

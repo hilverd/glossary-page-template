@@ -48,7 +48,7 @@ toHtmlTree enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, ti
                 [ HtmlTree.Node "p"
                     True
                     []
-                    [ HtmlTree.Leaf <| AboutParagraph.toString aboutSection.paragraph ]
+                    [ HtmlTree.Leaf <| AboutParagraph.raw aboutSection.paragraph ]
                 , HtmlTree.Node "ul"
                     True
                     []

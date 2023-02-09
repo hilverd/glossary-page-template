@@ -32,11 +32,11 @@
     @apply pb-3;
   }
 
-  div#glossary-page-about p {
+  div#glossary-page-about > p {
     @apply max-w-prose;
   }
 
-  div#glossary-page-about ul {
+  div#glossary-page-about > ul {
     @apply pt-4 ml-1 list-disc list-inside;
   }
 

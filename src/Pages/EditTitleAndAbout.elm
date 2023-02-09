@@ -78,7 +78,7 @@ init common =
             ( { common = common
               , form =
                     Form.create (GlossaryTitle.fromString "")
-                        { paragraph = AboutParagraph.fromString ""
+                        { paragraph = AboutParagraph.fromPlaintext ""
                         , links = []
                         }
               , triedToSaveWhenFormInvalid = False
@@ -151,7 +151,7 @@ update msg model =
                                         Ok
                                             { glossary0
                                                 | title = titleFromForm model.form
-                                                , aboutSection = aboutSectionFromForm model.form
+                                                , aboutSection = aboutSectionFromForm glossary0.enableMarkdownBasedSyntax model.form
                                             }
                                 }
 
@@ -176,9 +176,18 @@ titleFromForm =
     Form.titleField >> .body >> GlossaryTitle.fromString
 
 
-aboutSectionFromForm : Form.TitleAndAboutForm -> AboutSection
-aboutSectionFromForm form =
-    { paragraph = form |> Form.aboutParagraphField |> .body |> AboutParagraph.fromString
+aboutSectionFromForm : Bool -> Form.TitleAndAboutForm -> AboutSection
+aboutSectionFromForm enableMarkdownBasedSyntax form =
+    { paragraph =
+        form
+            |> Form.aboutParagraphField
+            |> .body
+            |> (if enableMarkdownBasedSyntax then
+                    AboutParagraph.fromMarkdown
+
+                else
+                    AboutParagraph.fromPlaintext
+               )
     , links =
         form
             |> Form.aboutLinkFields
@@ -294,8 +303,8 @@ viewEditTitle showValidationErrors titleField =
         ]
 
 
-viewEditAboutParagraph : Bool -> Form.AboutParagraphField -> Html Msg
-viewEditAboutParagraph showValidationErrors aboutParagraphField =
+viewEditAboutParagraph : Bool -> Bool -> Form.AboutParagraphField -> Html Msg
+viewEditAboutParagraph showNewlineWarnings showValidationErrors aboutParagraphField =
     div []
         [ div []
             [ h2
@@ -331,7 +340,7 @@ viewEditAboutParagraph showValidationErrors aboutParagraphField =
                  else
                     Nothing
                 )
-            , Extras.Html.showIf (String.trim aboutParagraphField.body |> String.contains "\n") <|
+            , Extras.Html.showIf (showNewlineWarnings && (String.trim aboutParagraphField.body |> String.contains "\n")) <|
                 p
                     [ class "mt-2 text-red-800 dark:text-red-200" ]
                     [ text "This will be turned into a single paragraph — line breaks are automatically converted to spaces" ]
@@ -549,13 +558,13 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
-        Ok { items } ->
+        Ok { enableMarkdownBasedSyntax, items } ->
             let
                 title1 =
                     titleFromForm model.form
 
                 aboutSection =
-                    aboutSectionFromForm model.form
+                    aboutSectionFromForm enableMarkdownBasedSyntax model.form
             in
             { title = GlossaryTitle.toString title1
             , body =
@@ -574,7 +583,7 @@ view model =
                                 [ div
                                     [ class "lg:w-1/2 space-y-7 lg:space-y-8" ]
                                     [ viewEditTitle model.triedToSaveWhenFormInvalid <| Form.titleField model.form
-                                    , viewEditAboutParagraph model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
+                                    , viewEditAboutParagraph (not enableMarkdownBasedSyntax) model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
                                     , viewEditAboutLinks model.triedToSaveWhenFormInvalid <| Form.aboutLinkFields model.form
                                     ]
                                 , div

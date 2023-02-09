@@ -114,7 +114,7 @@ download glossaryTitle aboutSection glossaryItems =
             glossaryTitle |> GlossaryTitle.toString |> escape |> (++) "# "
 
         aboutParagraphString =
-            aboutSection.paragraph |> AboutParagraph.toString |> escape
+            aboutSection.paragraph |> AboutParagraph.raw |> escape
 
         aboutLinksString =
             aboutSection.links

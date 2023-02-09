@@ -13,8 +13,8 @@ view : Bool -> Data.AboutSection.AboutSection -> Html msg
 view modalDialogShown { paragraph, links } =
     div
         [ id ElementIds.about ]
-        [ p []
-            [ text <| AboutParagraph.toString paragraph ]
+        [ div []
+            [ AboutParagraph.view paragraph ]
         , ul [] <|
             List.map
                 (\aboutLink ->

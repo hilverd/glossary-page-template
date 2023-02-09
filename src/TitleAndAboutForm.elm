@@ -158,7 +158,7 @@ create : GlossaryTitle -> AboutSection -> TitleAndAboutForm
 create title aboutSection =
     TitleAndAboutForm
         { titleField = { body = GlossaryTitle.toString title, validationError = Nothing }
-        , aboutParagraphField = { body = AboutParagraph.toString aboutSection.paragraph, validationError = Nothing }
+        , aboutParagraphField = { body = AboutParagraph.raw aboutSection.paragraph, validationError = Nothing }
         , aboutLinkFields =
             aboutSection.links
                 |> List.map
