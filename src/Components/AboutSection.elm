@@ -6,6 +6,7 @@ import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection
 import ElementIds
+import Extras.Html
 import Html.Attributes exposing (href, id, target)
 
 
@@ -15,17 +16,18 @@ view modalDialogShown { paragraph, links } =
         [ id ElementIds.about ]
         [ div []
             [ AboutParagraph.view paragraph ]
-        , ul [] <|
-            List.map
-                (\aboutLink ->
-                    li []
-                        [ a
-                            [ target "_blank"
-                            , href <| AboutLink.href aboutLink
-                            , Accessibility.Key.tabbable <| not modalDialogShown
+        , Extras.Html.showIf (not <| List.isEmpty links) <|
+            ul [] <|
+                List.map
+                    (\aboutLink ->
+                        li []
+                            [ a
+                                [ target "_blank"
+                                , href <| AboutLink.href aboutLink
+                                , Accessibility.Key.tabbable <| not modalDialogShown
+                                ]
+                                [ text <| AboutLink.body aboutLink ]
                             ]
-                            [ text <| AboutLink.body aboutLink ]
-                        ]
-                )
-                links
+                    )
+                    links
         ]
