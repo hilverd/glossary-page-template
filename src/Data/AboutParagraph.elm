@@ -45,7 +45,7 @@ fromPlaintext =
 -}
 fromMarkdown : String -> AboutParagraph
 fromMarkdown =
-    MarkdownAboutParagraph << MarkdownFragment.fromString
+    MarkdownAboutParagraph << sanitiseMarkdownFragment << MarkdownFragment.fromString
 
 
 {-| Retrieve the raw body of an "about" paragraph.
@@ -105,3 +105,28 @@ view aboutParagraph =
 
                 Err parsingError ->
                     text <| "Failed to parse Markdown: " ++ parsingError
+
+
+sanitiseMarkdownFragment : MarkdownFragment -> MarkdownFragment
+sanitiseMarkdownFragment fragment =
+    MarkdownFragment.transform
+        (\block ->
+            case block of
+                Block.Heading level children ->
+                    Block.Heading
+                        (case level of
+                            Block.H1 ->
+                                Block.H3
+
+                            Block.H2 ->
+                                Block.H3
+
+                            _ ->
+                                level
+                        )
+                        children
+
+                _ ->
+                    block
+        )
+        fragment
