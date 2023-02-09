@@ -54,11 +54,11 @@
   }
 
   div#glossary-page-container[data-card-width="intermediate"] article#glossary-page-items dl {
-    @apply grid-cols-1 2xl:grid-cols-2;
+    @apply grid-cols-1 xl:grid-cols-2 3xl:grid-cols-3;
   }
 
   div#glossary-page-container[data-card-width="wide"] article#glossary-page-items dl {
-    @apply grid-cols-1;
+    @apply grid-cols-1 2xl:grid-cols-2;
   }
 
   article#glossary-page-items dl > div {
@@ -71,6 +71,10 @@
   }
 
   div#glossary-page-container[data-card-width="intermediate"] article#glossary-page-items dl > div {
+    @apply xl:max-h-96 xl:overflow-auto print:max-h-full;
+  }
+
+  div#glossary-page-container[data-card-width="wide"] article#glossary-page-items dl > div {
     @apply 2xl:max-h-96 2xl:overflow-auto print:max-h-full;
   }
 
