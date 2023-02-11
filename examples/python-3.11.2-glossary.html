@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Glossary</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content="https://glossary.page/template" />
+    <link rel="preconnect" href="https://glstatic.net" crossorigin>
+    <link rel="apple-touch-icon" sizes="180x180" href="https://glstatic.net/glossary-page-template-favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://glstatic.net/glossary-page-template-favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://glstatic.net/glossary-page-template-favicons/favicon-16x16.png">
+    <link rel="manifest" href="https://glstatic.net/glossary-page-template-favicons/site.webmanifest">
+    <link rel="mask-icon" href="https://glstatic.net/glossary-page-template-favicons/safari-pinned-tab.svg" color="#5bbad5">
+    <link rel="shortcut icon" href="https://glstatic.net/glossary-page-template-favicons/favicon.ico">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="msapplication-config" content="https://glstatic.net/glossary-page-template-favicons/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+    <script type="text/javascript">
+        // Prevent FOUC
+        document.documentElement.className = 'invisible';
+    </script>
+    <script type="module" src="../glossary.js"></script>
+</head>
+
+<body>
+    <div id="glossary-page-container" data-enable-help-for-making-changes="true" data-enable-markdown-based-syntax="true" data-card-width="intermediate">
+        <header>
+            <h1 id="glossary-page-title">
+                Python 3.11.2 Glossary
+            </h1>
+        </header>
+        <main>
+            <div id="glossary-page-about">
+                <p>This example glossary was adapted in February 2023 from the [Python 3.11.2 Glossary](https://docs.python.org/3/glossary.html)
+
+* Original licence: [Python Software Foundation License 2.0](https://spdx.org/licenses/PSF-2.0.html) -- Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006 Python Software Foundation; All Rights Reserved.</p>
+                <ul>
+
+                </ul>
+            </div>
+            <article id="glossary-page-items">
+                <dl>
+                    <div>
+                        <dt>
+                            <dfn id="2to3">
+                                <a href="#2to3">
+                                    2to3
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A tool that tries to convert Python 2.x code to Python 3.x code by handling most of the incompatibilities which can be detected by parsing the source and traversing the parse tree.
+
+2to3 is available in the standard library as [`lib2to3`](https://docs.python.org/3/library/2to3.html#module-lib2to3 &quot;lib2to3: The 2to3 library&quot;); a standalone entry point is provided as `Tools/scripts/2to3`. See [2to3 — Automated Python 2 to 3 code translation](https://docs.python.org/3/library/2to3.html#to3-reference).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Abstract_base_class">
+                                <a href="#Abstract_base_class">
+                                    Abstract base class
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>Abstract base classes complement duck-typing by providing a way to define interfaces when other techniques like [`hasattr()`](https://docs.python.org/3/library/functions.html#hasattr &quot;hasattr&quot;) would be clumsy or subtly wrong (for example with [magic methods](https://docs.python.org/3/reference/datamodel.html#special-lookup)). ABCs introduce virtual subclasses, which are classes that don’t inherit from a class but are still recognized by [`isinstance()`](https://docs.python.org/3/library/functions.html#isinstance &quot;isinstance&quot;) and [`issubclass()`](https://docs.python.org/3/library/functions.html#issubclass &quot;issubclass&quot;); see the [`abc`](https://docs.python.org/3/library/abc.html#module-abc &quot;abc: Abstract base classes according to :pep:`3119`.&quot;) module documentation. Python comes with many built-in ABCs for data structures (in the [`collections.abc`](https://docs.python.org/3/library/collections.abc.html#module-collections.abc &quot;collections.abc: Abstract base classes for containers&quot;) module), numbers (in the [`numbers`](https://docs.python.org/3/library/numbers.html#module-numbers &quot;numbers: Numeric abstract base classes \(Complex, Real, Integral, etc.\).&quot;) module), streams (in the [`io`](https://docs.python.org/3/library/io.html#module-io &quot;io: Core tools for working with streams.&quot;) module), import finders and loaders (in the [`importlib.abc`](https://docs.python.org/3/library/importlib.html#module-importlib.abc &quot;importlib.abc: Abstract base classes related to import&quot;) module). You can create your own ABCs with the [`abc`](https://docs.python.org/3/library/abc.html#module-abc &quot;abc: Abstract base classes according to :pep:`3119`.&quot;) module.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Annotation">
+                                <a href="#Annotation">
+                                    Annotation
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A label associated with a variable, a class attribute or a function parameter or return value, used by convention as a type hint.
+
+Annotations of local variables cannot be accessed at runtime, but annotations of global variables, class attributes, and functions are stored in the `__annotations__` special attribute of modules, classes, and functions, respectively.
+
+See variable annotation, function annotation, [**PEP 484**](https://peps.python.org/pep-0484/) and [**PEP 526**](https://peps.python.org/pep-0526/), which describe this functionality. Also see [Annotations Best Practices](https://docs.python.org/3/howto/annotations.html#annotations-howto) for best practices on working with annotations.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Argument">
+                                <a href="#Argument">
+                                    Argument
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A value passed to a function (or method) when calling the function. There are two kinds of argument:
+
+* _keyword argument_ : an argument preceded by an identifier (e.g. `name=`) in a function call or passed as a value in a dictionary preceded by `**`. For example, `3` and `5` are both keyword arguments in the following calls to [`complex()`](https://docs.python.org/3/library/functions.html#complex &quot;complex&quot;):
+
+      complex(real=3, imag=5)
+      complex(**{&#39;real&#39;: 3, &#39;imag&#39;: 5})
+
+* _positional argument_ : an argument that is not a keyword argument. Positional arguments can appear at the beginning of an argument list and/or be passed as elements of an iterable preceded by `*`. For example, `3` and `5` are both positional arguments in the following calls:
+    
+      complex(3, 5)
+      complex(*(3, 5))
+    
+Arguments are assigned to the named local variables in a function body. See the [Calls](https://docs.python.org/3/reference/expressions.html#calls) section for the rules governing this assignment. Syntactically, any expression can be used to represent an argument; the evaluated value is assigned to the local variable.
+
+See also the parameter glossary entry, the FAQ question on [the difference between arguments and parameters](https://docs.python.org/3/faq/programming.html#faq-argument-vs-parameter), and [**PEP 362**](https://peps.python.org/pep-0362/).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Asynchronous_context_manager">
+                                <a href="#Asynchronous_context_manager">
+                                    Asynchronous context manager
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>An object which controls the environment seen in an [`async with`](https://docs.python.org/3/reference/compound_stmts.html#async-with) statement by defining `__aenter__()` and `__aexit__()` methods. Introduced by [**PEP 492**](https://peps.python.org/pep-0492/).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Asynchronous_generator">
+                                <a href="#Asynchronous_generator">
+                                    Asynchronous generator
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A function which returns an asynchronous generator iterator. It looks like a coroutine function defined with [`async def`](https://docs.python.org/3/reference/compound_stmts.html#async-def) except that it contains [`yield`](https://docs.python.org/3/reference/simple_stmts.html#yield) expressions for producing a series of values usable in an [`async for`](https://docs.python.org/3/reference/compound_stmts.html#async-for) loop.
+
+Usually refers to an asynchronous generator function, but may refer to an _asynchronous generator iterator_ in some contexts. In cases where the intended meaning isn’t clear, using the full terms avoids ambiguity.
+
+An asynchronous generator function may contain [`await`](https://docs.python.org/3/reference/expressions.html#await) expressions as well as [`async for`](https://docs.python.org/3/reference/compound_stmts.html#async-for), and [`async with`](https://docs.python.org/3/reference/compound_stmts.html#async-with) statements.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Asynchronous_generator_iterator">
+                                <a href="#Asynchronous_generator_iterator">
+                                    Asynchronous generator iterator
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>An object created by a asynchronous generator function.
+
+This is an asynchronous iterator which when called using the `__anext__()` method returns an awaitable object which will execute the body of the asynchronous generator function until the next [`yield`](https://docs.python.org/3/reference/simple_stmts.html#yield) expression.
+
+Each [`yield`](https://docs.python.org/3/reference/simple_stmts.html#yield) temporarily suspends processing, remembering the location execution state (including local variables and pending try-statements). When the _asynchronous generator iterator_ effectively resumes with another awaitable returned by `__anext__()`, it picks up where it left off. See [**PEP 492**](https://peps.python.org/pep-0492/) and [**PEP 525**](https://peps.python.org/pep-0525/).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Asynchronous_iterable">
+                                <a href="#Asynchronous_iterable">
+                                    Asynchronous iterable
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>An object, that can be used in an [`async for`](https://docs.python.org/3/reference/compound_stmts.html#async-for) statement. Must return an asynchronous iterator from its `__aiter__()` method. Introduced by [**PEP 492**](https://peps.python.org/pep-0492/).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Asynchronous_iterator">
+                                <a href="#Asynchronous_iterator">
+                                    Asynchronous iterator
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>An object that implements the `__aiter__()` and `__anext__()` methods. `__anext__` must return an awaitable object. [`async for`](https://docs.python.org/3/reference/compound_stmts.html#async-for) resolves the awaitables returned by an asynchronous iterator’s `__anext__()` method until it raises a [`StopAsyncIteration`](https://docs.python.org/3/library/exceptions.html#StopAsyncIteration &quot;StopAsyncIteration&quot;) exception. Introduced by [**PEP 492**](https://peps.python.org/pep-0492/).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Attribute">
+                                <a href="#Attribute">
+                                    Attribute
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A value associated with an object which is usually referenced by name using dotted expressions. For example, if an object _o_ has an attribute _a_ it would be referenced as _o.a_.
+
+It is possible to give an object an attribute whose name is not an identifier as defined by [Identifiers and keywords](https://docs.python.org/3/reference/lexical_analysis.html#identifiers), for example using [`setattr()`](https://docs.python.org/3/library/functions.html#setattr &quot;setattr&quot;), if the object allows it. Such an attribute will not be accessible using a dotted expression, and would instead need to be retrieved with [`getattr()`](https://docs.python.org/3/library/functions.html#getattr &quot;getattr&quot;).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Awaitable">
+                                <a href="#Awaitable">
+                                    Awaitable
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>An object that can be used in an [`await`](https://docs.python.org/3/reference/expressions.html#await) expression. Can be a coroutine or an object with an `__await__()` method. See also [**PEP 492**](https://peps.python.org/pep-0492/).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="BDFL">
+                                <abbr>
+                                    <a href="#BDFL">
+                                        BDFL
+                                    </a>
+                                </abbr>
+                            </dfn>
+                        </dt>
+                        <dd>Benevolent Dictator For Life, a.k.a. [Guido van Rossum](https://gvanrossum.github.io/), Python’s creator.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Binary_file">
+                                <a href="#Binary_file">
+                                    Binary file
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A file object able to read and write bytes-like objects. Examples of binary files are files opened in binary mode (`&#39;rb&#39;`, `&#39;wb&#39;` or `&#39;rb+&#39;`), `sys.stdin.buffer`, `sys.stdout.buffer`, and instances of [`io.BytesIO`](https://docs.python.org/3/library/io.html#io.BytesIO &quot;io.BytesIO&quot;) and [`gzip.GzipFile`](https://docs.python.org/3/library/gzip.html#gzip.GzipFile &quot;gzip.GzipFile&quot;).
+
+See also text file for a file object able to read and write [`str`](https://docs.python.org/3/library/stdtypes.html#str &quot;str&quot;) objects.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Borrowed_reference">
+                                <a href="#Borrowed_reference">
+                                    Borrowed reference
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>In Python’s C API, a borrowed reference is a reference to an object. It does not modify the object reference count. It becomes a dangling pointer if the object is destroyed. For example, a garbage collection can remove the last strong reference to the object and so destroy it.
+
+Calling [`Py_INCREF()`](https://docs.python.org/3/c-api/refcounting.html#c.Py_INCREF &quot;Py_INCREF&quot;) on the borrowed reference is recommended to convert it to a strong reference in-place, except when the object cannot be destroyed before the last usage of the borrowed reference. The [`Py_NewRef()`](https://docs.python.org/3/c-api/refcounting.html#c.Py_NewRef &quot;Py_NewRef&quot;) function can be used to create a new strong reference.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Bytecode">
+                                <a href="#Bytecode">
+                                    Bytecode
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>Python source code is compiled into bytecode, the internal representation of a Python program in the CPython interpreter. The bytecode is also cached in `.pyc` files so that executing the same file is faster the second time (recompilation from source to bytecode can be avoided). This “intermediate language” is said to run on a virtual machine that executes the machine code corresponding to each bytecode. Do note that bytecodes are not expected to work between different Python virtual machines, nor to be stable between Python releases.
+
+A list of bytecode instructions can be found in the documentation for [the dis module](https://docs.python.org/3/library/dis.html#bytecodes).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Bytes-like_object">
+                                <a href="#Bytes-like_object">
+                                    Bytes-like object
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>An object that supports the [Buffer Protocol](https://docs.python.org/3/c-api/buffer.html#bufferobjects) and can export a C-contiguous buffer. This includes all [`bytes`](https://docs.python.org/3/library/stdtypes.html#bytes &quot;bytes&quot;), [`bytearray`](https://docs.python.org/3/library/stdtypes.html#bytearray &quot;bytearray&quot;), and [`array.array`](https://docs.python.org/3/library/array.html#array.array &quot;array.array&quot;) objects, as well as many common [`memoryview`](https://docs.python.org/3/library/stdtypes.html#memoryview &quot;memoryview&quot;) objects. Bytes-like objects can be used for various operations that work with binary data; these include compression, saving to a binary file, and sending over a socket.
+
+Some operations need the binary data to be mutable. The documentation often refers to these as “read-write bytes-like objects”. Example mutable buffer objects include [`bytearray`](https://docs.python.org/3/library/stdtypes.html#bytearray &quot;bytearray&quot;) and a [`memoryview`](https://docs.python.org/3/library/stdtypes.html#memoryview &quot;memoryview&quot;) of a [`bytearray`](https://docs.python.org/3/library/stdtypes.html#bytearray &quot;bytearray&quot;). Other operations require the binary data to be stored in immutable objects (“read-only bytes-like objects”); examples of these include [`bytes`](https://docs.python.org/3/library/stdtypes.html#bytes &quot;bytes&quot;) and a [`memoryview`](https://docs.python.org/3/library/stdtypes.html#memoryview &quot;memoryview&quot;) of a [`bytes`](https://docs.python.org/3/library/stdtypes.html#bytes &quot;bytes&quot;) object.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Callable">
+                                <a href="#Callable">
+                                    Callable
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A callable is an object that can be called, possibly with a set of arguments (see argument), with the following syntax:
+
+```
+callable(argument1, argument2, ...)
+```
+
+A function, and by extension a method, is a callable. An instance of a class that implements the [`__call__()`](https://docs.python.org/3/reference/datamodel.html#object.__call__ &quot;object.__call__&quot;) method is also a callable.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Callback">
+                                <a href="#Callback">
+                                    Callback
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A subroutine function which is passed as an argument to be executed at some point in the future.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Class">
+                                <a href="#Class">
+                                    Class
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A template for creating user-defined objects. Class definitions normally contain method definitions which operate on instances of the class.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Class_variable">
+                                <a href="#Class_variable">
+                                    Class variable
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A variable defined in a class and intended to be modified only at class level (i.e., not in an instance of the class).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Complex_number">
+                                <a href="#Complex_number">
+                                    Complex number
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>An extension of the familiar real number system in which all numbers are expressed as a sum of a real part and an imaginary part. Imaginary numbers are real multiples of the imaginary unit (the square root of `-1`), often written `i` in mathematics or `j` in engineering. Python has built-in support for complex numbers, which are written with this latter notation; the imaginary part is written with a `j` suffix, e.g., `3+1j`. To get access to complex equivalents of the [`math`](https://docs.python.org/3/library/math.html#module-math &quot;math: Mathematical functions \(sin\(\) etc.\).&quot;) module, use [`cmath`](https://docs.python.org/3/library/cmath.html#module-cmath &quot;cmath: Mathematical functions for complex numbers.&quot;). Use of complex numbers is a fairly advanced mathematical feature. If you’re not aware of a need for them, it’s almost certain you can safely ignore them.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Context_manager">
+                                <a href="#Context_manager">
+                                    Context manager
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>An object which controls the environment seen in a [`with`](https://docs.python.org/3/reference/compound_stmts.html#with) statement by defining `__enter__()` and `__exit__()` methods. See [**PEP 343**](https://peps.python.org/pep-0343/).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Context_variable">
+                                <a href="#Context_variable">
+                                    Context variable
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A variable which can have different values depending on its context. This is similar to Thread-Local Storage in which each execution thread may have a different value for a variable. However, with context variables, there may be several contexts in one execution thread and the main usage for context variables is to keep track of variables in concurrent asynchronous tasks. See [`contextvars`](https://docs.python.org/3/library/contextvars.html#module-contextvars &quot;contextvars: Context Variables&quot;).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Contiguous">
+                                <a href="#Contiguous">
+                                    Contiguous
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A buffer is considered contiguous exactly if it is either _C-contiguous_ or _Fortran contiguous_. Zero-dimensional buffers are C and Fortran contiguous. In one-dimensional arrays, the items must be laid out in memory next to each other, in order of increasing indexes starting from zero. In multidimensional C-contiguous arrays, the last index varies the fastest when visiting items in order of memory address. However, in Fortran contiguous arrays, the first index varies the fastest.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Coroutine">
+                                <a href="#Coroutine">
+                                    Coroutine
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>Coroutines are a more generalized form of subroutines. Subroutines are entered at one point and exited at another point. Coroutines can be entered, exited, and resumed at many different points. They can be implemented with the [`async def`](https://docs.python.org/3/reference/compound_stmts.html#async-def) statement. See also [**PEP 492**](https://peps.python.org/pep-0492/).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Coroutine_function">
+                                <a href="#Coroutine_function">
+                                    Coroutine function
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A function which returns a coroutine object. A coroutine function may be defined with the [`async def`](https://docs.python.org/3/reference/compound_stmts.html#async-def) statement, and may contain [`await`](https://docs.python.org/3/reference/expressions.html#await), [`async for`](https://docs.python.org/3/reference/compound_stmts.html#async-for), and [`async with`](https://docs.python.org/3/reference/compound_stmts.html#async-with) keywords. These were introduced by [**PEP 492**](https://peps.python.org/pep-0492/).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="CPython">
+                                <a href="#CPython">
+                                    CPython
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>The canonical implementation of the Python programming language, as distributed on [python.org](https://www.python.org). The term “CPython” is used when necessary to distinguish this implementation from others such as Jython or IronPython.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Decorator">
+                                <a href="#Decorator">
+                                    Decorator
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A function returning another function, usually applied as a function transformation using the `@wrapper` syntax. Common examples for decorators are [`classmethod()`](https://docs.python.org/3/library/functions.html#classmethod &quot;classmethod&quot;) and [`staticmethod()`](https://docs.python.org/3/library/functions.html#staticmethod &quot;staticmethod&quot;).
+
+The decorator syntax is merely syntactic sugar, the following two function definitions are semantically equivalent:
+
+```
+def f(arg):
+    ...
+f = staticmethod(f)
+
+@staticmethod
+def f(arg):
+    ...
+```
+
+The same concept exists for classes, but is less commonly used there. See the documentation for [function definitions](https://docs.python.org/3/reference/compound_stmts.html#function) and [class definitions](https://docs.python.org/3/reference/compound_stmts.html#class) for more about decorators.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Descriptor">
+                                <a href="#Descriptor">
+                                    Descriptor
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>Any object which defines the methods `__get__()`, `__set__()`, or `__delete__()`. When a class attribute is a descriptor, its special binding behavior is triggered upon attribute lookup. Normally, using _a.b_ to get, set or delete an attribute looks up the object named _b_ in the class dictionary for _a_ , but if _b_ is a descriptor, the respective descriptor method gets called. Understanding descriptors is a key to a deep understanding of Python because they are the basis for many features including functions, methods, properties, class methods, static methods, and reference to super classes.
+
+For more information about descriptors’ methods, see [Implementing Descriptors](https://docs.python.org/3/reference/datamodel.html#descriptors) or the [Descriptor How To Guide](https://docs.python.org/3/howto/descriptor.html#descriptorhowto).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Dictionary">
+                                <a href="#Dictionary">
+                                    Dictionary
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>An associative array, where arbitrary keys are mapped to values. The keys can be any object with `__hash__()` and `__eq__()` methods. Called a hash in Perl.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Dictionary_comprehension">
+                                <a href="#Dictionary_comprehension">
+                                    Dictionary comprehension
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A compact way to process all or part of the elements in an iterable and return a dictionary with the results. `results = {n: n ** 2 for n in range(10)}` generates a dictionary containing key `n` mapped to value `n ** 2`. See [Displays for lists, sets and dictionaries](https://docs.python.org/3/reference/expressions.html#comprehensions).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Dictionary_view">
+                                <a href="#Dictionary_view">
+                                    Dictionary view
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>The objects returned from [`dict.keys()`](https://docs.python.org/3/library/stdtypes.html#dict.keys &quot;dict.keys&quot;), [`dict.values()`](https://docs.python.org/3/library/stdtypes.html#dict.values &quot;dict.values&quot;), and [`dict.items()`](https://docs.python.org/3/library/stdtypes.html#dict.items &quot;dict.items&quot;) are called dictionary views. They provide a dynamic view on the dictionary’s entries, which means that when the dictionary changes, the view reflects these changes. To force the dictionary view to become a full list use `list(dictview)`. See [Dictionary view objects](https://docs.python.org/3/library/stdtypes.html#dict-views).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Docstring">
+                                <a href="#Docstring">
+                                    Docstring
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A string literal which appears as the first expression in a class, function or module. While ignored when the suite is executed, it is recognized by the compiler and put into the `__doc__` attribute of the enclosing class, function or module. Since it is available via introspection, it is the canonical place for documentation of the object.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Duck-typing">
+                                <a href="#Duck-typing">
+                                    Duck-typing
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A programming style which does not look at an object’s type to determine if it has the right interface; instead, the method or attribute is simply called or used (“If it looks like a duck and quacks like a duck, it must be a duck.”) By emphasizing interfaces rather than specific types, well-designed code improves its flexibility by allowing polymorphic substitution. Duck-typing avoids tests using [`type()`](https://docs.python.org/3/library/functions.html#type &quot;type&quot;) or [`isinstance()`](https://docs.python.org/3/library/functions.html#isinstance &quot;isinstance&quot;). (Note, however, that duck-typing can be complemented with abstract base classes.) Instead, it typically employs [`hasattr()`](https://docs.python.org/3/library/functions.html#hasattr &quot;hasattr&quot;) tests or EAFP programming.</dd>
+                    </div>
+                </dl>
+            </article>
+        </main>
+    </div>
+</body>
+
+</html>
+
+<!--
+
+#!/usr/bin/env node
+
+/* START OF editor.js
+
+This script starts a simple server listening on localhost.
+
+* GET requests are served by local HTML/JS/CSS files.
+* PATCH requests to / expect to receive an HTML fragment string in the body.
+  This string is used to update the glossary file, replacing
+    <article id="glossary-page-items"
+      ...
+    </article>.
+
+This allows the editor to save any updates made in the UI.
+
+*/
+
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const HOST = process.env['HOST'] || 'localhost';
+const PORT = process.env['PORT'] || 3003;
+const FILE = process.env['FILE'] || './glossary.html';
+
+const mimeTypes = {
+    '.html': 'text/html',
+    '.js': 'text/javascript',
+    '.css': 'text/css'
+};
+
+const server = http.createServer(async (req, res) => {
+    if (req.url === '/' && req.method === 'PATCH') {
+        const buffers = [];
+        for await (const chunk of req) {
+            buffers.push(chunk);
+        }
+        const body = Buffer.concat(buffers).toString();
+        replaceGlossaryElementInFile(body);
+        res.writeHead(204).end();
+    } else {
+        serveLocalFile(req, res);
+    }
+});
+
+server.listen(PORT, HOST, () => {
+    console.log(`Server started at http://${HOST}:${PORT}`);
+});
+
+function serveLocalFile(req, res) {
+    var filePath = '.' + req.url;
+    if (filePath === './') filePath = FILE;
+
+    const extname = String(path.extname(filePath)).toLowerCase();
+    const contentType = mimeTypes[extname] || 'application/octet-stream';
+
+    fs.readFile(filePath, 'utf-8', (err, fileContents) => {
+        if (err) {
+            serveErrorPage(err, res);
+        } else {
+            if (filePath === FILE)
+                fileContents = fileContents.replace(
+                    /<div id="glossary-page-container"/,
+                    `<div id="glossary-page-container" data-editor-is-running="true"`
+                );
+
+            res.writeHead(200, { 'Content-Type': contentType });
+            res.end(fileContents, 'utf-8');
+        }
+    });
+}
+
+function serveErrorPage(err, res) {
+    if (err.code == 'ENOENT') {
+        res.writeHead(404, { 'Content-Type': 'text/html' });
+        res.end('<html><body>Page not found</body></html>');
+    } else {
+        res.writeHead(500, { 'Content-Type': 'text/html' });
+        res.end('<html><body>Internal server error</body></html>');
+    }
+}
+
+function replaceGlossaryElementInFile(newElementString) {
+    fs.readFile(FILE, 'utf8', (err, fileContents) => {
+        if (err) return console.log(err);
+
+        const regex = /\n[ \t]*<div id="glossary-page-container".*<\/div>\n/s;
+
+        if (!fileContents.replace(regex, 'replacing-worked').includes('replacing-worked')) {
+            return console.log(`Unable to save changes using the regex ${regex}`);
+        }
+
+        const updatedFileContents = fileContents.replace(regex, "\n" + newElementString + "\n");
+
+        fs.writeFile(FILE, updatedFileContents, 'utf8', (err) => {
+            if (err) return console.log(err);
+        });
+    });
+}
+
+// -->
