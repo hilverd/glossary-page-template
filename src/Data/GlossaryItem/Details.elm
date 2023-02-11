@@ -102,7 +102,7 @@ view details =
                     case Renderer.render Renderer.defaultHtmlRenderer blocks of
                         Ok rendered ->
                             Html.div
-                                [ class "prose prose-pre:bg-inherit prose-pre:text-gray-700 prose-pre:border print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 leading-normal" ]
+                                [ class "prose prose-pre:bg-inherit prose-pre:text-gray-700 prose-pre:border print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]
                                 rendered
 
                         Err renderingError ->
