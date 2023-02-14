@@ -457,7 +457,7 @@ patchHtmlFileAfterChangingSettings common glossary =
             , url = "/"
             , body =
                 glossary
-                    |> Glossary.toHtmlTree common.enableHelpForMakingChanges
+                    |> Glossary.toHtmlTree common.enableExportMenu common.enableHelpForMakingChanges
                     |> HtmlTree.toHtml
                     |> Http.stringBody "text/html"
             , expect =
@@ -497,7 +497,7 @@ patchHtmlFileAfterDeletingItem common indexOfItemBeingDeleted glossaryItems =
                     , url = "/"
                     , body =
                         glossary
-                            |> Glossary.toHtmlTree common.enableHelpForMakingChanges
+                            |> Glossary.toHtmlTree common.enableExportMenu common.enableHelpForMakingChanges
                             |> HtmlTree.toHtml
                             |> Http.stringBody "text/html"
                     , expect =
@@ -1163,8 +1163,8 @@ viewStaticSidebarForDesktop tabbable termIndex =
         ]
 
 
-viewTopBar : Bool -> Components.DropdownMenu.Model -> Html Msg
-viewTopBar tabbable exportDropdownMenu =
+viewTopBar : Bool -> Maybe Components.DropdownMenu.Model -> Html Msg
+viewTopBar tabbable maybeExportDropdownMenu =
     div
         [ class "sticky top-0 z-10 shrink-0 flex justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
         [ div
@@ -1200,9 +1200,13 @@ viewTopBar tabbable exportDropdownMenu =
                     ]
                 ]
             ]
-        , div
-            [ class "flex pr-4" ]
-            [ viewExportButton tabbable exportDropdownMenu ]
+        , Extras.Html.showMaybe
+            (\exportDropdownMenu ->
+                div
+                    [ class "flex pr-4" ]
+                    [ viewExportButton tabbable exportDropdownMenu ]
+            )
+            maybeExportDropdownMenu
         ]
 
 
@@ -1474,30 +1478,49 @@ view model =
                     , viewStaticSidebarForDesktop noModalDialogShown_ termIndex
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
-                        [ viewTopBar noModalDialogShown_ model.exportDropdownMenu
+                        [ viewTopBar noModalDialogShown_
+                            (if model.common.enableExportMenu then
+                                Just model.exportDropdownMenu
+
+                             else
+                                Nothing
+                            )
                         , div
                             [ Html.Attributes.id ElementIds.container
                             , Extras.HtmlAttribute.fromBool "data-enable-markdown-based-syntax" glossary.enableMarkdownBasedSyntax
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
                             , glossary.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
                             ]
-                            [ header []
-                                [ div
-                                    [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
-                                    [ div
-                                        [ class "flex flex-row justify-start lg:justify-end" ]
-                                        [ Extras.Html.showIf (model.common.enableSavingChangesInMemory && not model.makingChanges) <|
-                                            div
-                                                [ class "flex-none" ]
-                                                [ viewMakeChangesButton model.common.enableSavingChangesInMemory noModalDialogShown_
+                            [ header [] <|
+                                let
+                                    showMakingChangesHelp =
+                                        model.common.enableHelpForMakingChanges && not model.common.enableSavingChangesInMemory && not editable
+
+                                    showMakeChangesButton =
+                                        model.common.enableSavingChangesInMemory && not model.makingChanges
+
+                                    showExportButton =
+                                        model.common.enableExportMenu
+                                in
+                                [ Extras.Html.showIf (showMakeChangesButton || showExportButton) <|
+                                    div
+                                        [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
+                                        [ div
+                                            [ class "flex flex-row justify-start lg:justify-end" ]
+                                            [ Extras.Html.showIf showMakeChangesButton <|
+                                                div
+                                                    [ class "flex-none" ]
+                                                    [ viewMakeChangesButton model.common.enableSavingChangesInMemory noModalDialogShown_
+                                                    ]
+                                            , div
+                                                [ class "hidden lg:block ml-auto pb-3" ]
+                                                [ Extras.Html.showIf showExportButton <|
+                                                    viewExportButton noModalDialogShown_ model.exportDropdownMenu
                                                 ]
-                                        , div
-                                            [ class "hidden lg:block ml-auto pb-3" ]
-                                            [ viewExportButton noModalDialogShown_ model.exportDropdownMenu ]
+                                            ]
                                         ]
-                                    ]
                                 , viewMakingChangesHelp model.common.filename noModalDialogShown_
-                                    |> Extras.Html.showIf (model.common.enableHelpForMakingChanges && not model.common.enableSavingChangesInMemory && not editable)
+                                    |> Extras.Html.showIf showMakingChangesHelp
                                 , Extras.Html.showIf editable <| viewSettings glossary model
                                 , h1
                                     [ id ElementIds.title ]

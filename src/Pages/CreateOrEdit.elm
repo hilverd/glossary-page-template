@@ -305,7 +305,7 @@ patchHtmlFile common glossaryItems =
                     , url = "/"
                     , body =
                         { glossary | items = glossaryItems }
-                            |> Glossary.toHtmlTree common.enableHelpForMakingChanges
+                            |> Glossary.toHtmlTree common.enableExportMenu common.enableHelpForMakingChanges
                             |> HtmlTree.toHtml
                             |> Http.stringBody "text/html"
                     , expect =

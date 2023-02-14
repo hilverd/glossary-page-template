@@ -6,7 +6,9 @@ const containerElement = document.getElementById('glossary-page-container');
 const enableHelpForMakingChanges = containerElement.getAttribute('data-enable-help-for-making-changes') === 'true';
 const enableSavingChangesInMemory = containerElement.getAttribute('data-enable-saving-changes-in-memory') === 'true';
 const enableMarkdownBasedSyntax = containerElement.getAttribute('data-enable-markdown-based-syntax') === 'true';
+const enableExportMenu = containerElement.getAttribute('data-enable-export-menu') !== 'false';
 const cardWidth = containerElement.getAttribute('data-card-width');
+const editorIsRunning = containerElement.getAttribute('data-editor-is-running') === 'true';
 
 const titleElement = document.getElementById('glossary-page-title');
 const aboutElement = document.getElementById('glossary-page-about');
@@ -18,8 +20,6 @@ const aboutParagraph = aboutElement.querySelector('p').textContent.trim();
 const aboutUlElement = aboutElement.querySelector('ul');
 const aboutLiElements = Array.prototype.slice.apply(aboutUlElement.querySelectorAll('li'));
 const aboutLinks = aboutLiElements.map(aboutLinkFromLiElement);
-
-const editorIsRunning = containerElement.getAttribute('data-editor-is-running') === 'true';
 
 const dlElement = glossaryElement.querySelector('dl');
 const glossaryItemDivElements = Array.prototype.slice.apply(dlElement.querySelectorAll('div'));
@@ -86,6 +86,7 @@ const app = Elm.ApplicationShell.init({
         editorIsRunning: editorIsRunning,
         enableHelpForMakingChanges: enableHelpForMakingChanges,
         enableSavingChangesInMemory: enableSavingChangesInMemory,
+        enableExportMenu: enableExportMenu,
         enableMarkdownBasedSyntax: enableMarkdownBasedSyntax,
         cardWidth: cardWidth
     }

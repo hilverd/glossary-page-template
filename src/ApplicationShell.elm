@@ -114,6 +114,11 @@ init flags =
                 |> Decode.decodeValue (Decode.field "enableHelpForMakingChanges" Decode.bool)
                 |> Result.withDefault False
 
+        enableExportMenu =
+            flags
+                |> Decode.decodeValue (Decode.field "enableExportMenu" Decode.bool)
+                |> Result.withDefault True
+
         cardWidth =
             flags
                 |> Decode.decodeValue CardWidth.decode
@@ -142,15 +147,15 @@ init flags =
         ( listAllModel, listAllCmd ) =
             Pages.ListAll.init
                 editorIsRunning
-                (CommonModel
-                    filename
-                    enableHelpForMakingChanges
-                    enableSavingChangesInMemory
-                    CommonModel.Alphabetically
-                    Nothing
-                    fragment
-                    glossary
-                )
+                { filename = filename
+                , enableHelpForMakingChanges = enableHelpForMakingChanges
+                , enableExportMenu = enableExportMenu
+                , enableSavingChangesInMemory = enableSavingChangesInMemory
+                , orderItemsBy = CommonModel.Alphabetically
+                , maybeIndex = Nothing
+                , fragment = fragment
+                , glossary = glossary
+                }
     in
     ( ListAll listAllModel
     , Cmd.map ListAllMsg listAllCmd
