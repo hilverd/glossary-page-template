@@ -103,6 +103,7 @@ type InternalMsg
     | ChangeOrderItemsBy CommonModel.OrderItemsBy
     | ToggleMarkdownBasedSyntax
     | ChangeCardWidth CardWidth
+    | ToggleEnableExportMenu
     | ChangedSettings Glossary
     | FailedToChangeSettings Http.Error
     | DownloadMarkdown
@@ -396,6 +397,26 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        ToggleEnableExportMenu ->
+            case model.common.glossary of
+                Ok glossary ->
+                    let
+                        common0 =
+                            model.common
+
+                        common1 =
+                            { common0 | enableExportMenu = not common0.enableExportMenu }
+
+                        model1 =
+                            { model | common = common1 }
+                    in
+                    ( model1
+                    , patchHtmlFileAfterChangingSettings model1.common glossary
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
         ChangedSettings glossary ->
             if model.common.enableSavingChangesInMemory then
                 let
@@ -618,7 +639,7 @@ viewSettings glossary model =
                 ]
             , Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
                 div
-                    [ class "mt-4" ]
+                    [ class "mt-6" ]
                     [ p
                         [ class "mt-3 max-w-xl" ]
                         [ text "These settings are updated in the HTML file when you change them, and the page will reload."
@@ -626,12 +647,23 @@ viewSettings glossary model =
                     ]
             , Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
                 div
-                    [ class "mt-4 pb-2" ]
+                    [ class "mt-6 pb-2" ]
                     [ viewSelectInputSyntax glossary model
                     ]
             , div
-                [ class "mt-4 pb-2" ]
+                [ class "mt-6 pb-2" ]
                 [ viewSelectCardWidth glossary model
+                ]
+            , div
+                [ class "mt-6 pb-2" ]
+                [ Components.Button.toggle
+                    model.common.enableExportMenu
+                    ElementIds.showExportMenuLabel
+                    [ Html.Events.onClick <| PageMsg.Internal ToggleEnableExportMenu ]
+                    [ span
+                        [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                        [ text "Show \"Export\" menu" ]
+                    ]
                 ]
             , model.errorWhileChangingSettings
                 |> Extras.Html.showMaybe

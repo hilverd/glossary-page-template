@@ -23,6 +23,7 @@ module ElementIds exposing
     , searchDialog
     , searchModalTitle
     , seeAlsoSelect
+    , showExportMenuLabel
     , staticSidebarForDesktop
     , termIndexGroupLabel
     , termInputField
@@ -198,3 +199,8 @@ abbreviationLabel termIndex =
 searchDialog : String
 searchDialog =
     prefixed "search-dialog"
+
+
+showExportMenuLabel : String
+showExportMenuLabel =
+    prefixed "show-export-menu"

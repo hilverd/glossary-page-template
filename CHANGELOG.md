@@ -13,8 +13,10 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 
-- Allow adjusting how "compact" the overall layout is using a `data-card-width` attribute which can be `compact` (default), `intermediate`, or `wide`.
-- Add a "Settings" section on the list page.
+- Add a "Settings" section on the list page which allows changing the following.
+  - How "compact" the overall layout is by adjusting the card widths.
+  - Whether a Markdown-based syntax is enabled.
+  - Whether the "Export" menu should be shown.
 
 ### Changed
 
