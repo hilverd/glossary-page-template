@@ -41,23 +41,3 @@ You can get the `hash-here` values from the [release notes](https://github.com/h
 
 * At the moment the template only supports plain text definitions consisting of a single (possibly long) paragraph for each definition.
 * The integrated editor UI is meant to be run and used by a single local user only. It is not designed to be exposed to untrusted users.
-
-## Development
-
-You'll need to have [pnpm](https://pnpm.io/) installed.
-
-```
-git clone https://github.com/hilverd/glossary-page-template.git
-cd glossary-page-template
-pnpm install
-pnpm run dev
-```
-
-Then open http://localhost:3000/glossary.html in a browser.
-
-### Building a release from sources
-
-```
-pnpm run build
-./bin/prepare-release
-```
