@@ -574,7 +574,7 @@ viewMakingChangesHelp filename tabbable =
                     , text " at a time and works best if the file is kept under version control."
                     ]
                 , p []
-                    [ text "If you're on macOS or Linux and have "
+                    [ text "If you're on macOS, Linux, or Cygwin and have "
                     , a
                         [ href "https://nodejs.org/"
                         , Html.Attributes.target "_blank"

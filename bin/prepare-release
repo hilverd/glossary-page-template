@@ -53,7 +53,7 @@ cat > dist/README.md <<EOF
 
 This page includes a web interface for making changes that are saved back to the HTML file itself. This is meant to be used _locally_ by a _single user_ at a time and works best if the file is kept under version control.
 
-If you're on macOS or Linux and have Node.js installed, then just run
+If you're on macOS, Linux, or Cygwin and have Node.js installed, then just run
 
 sed -n '/START OF editor.js\$/,\$p' glossary.html | node
 
