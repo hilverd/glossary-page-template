@@ -82,7 +82,7 @@ fromGlossaryItems glossaryItems =
         termIndexGroups =
             termListsByFirstCharacterIncludingAlphabet
                 |> Dict.toList
-                |> List.map (Tuple.mapSecond <| List.sortBy <| Term.raw >> String.toLower)
+                |> List.map (Tuple.mapSecond <| List.sortBy <| Term.raw >> String.toUpper)
                 |> List.map (\( label, terms ) -> TermGroup label terms)
     in
     IndexOfTerms termIndexGroups
