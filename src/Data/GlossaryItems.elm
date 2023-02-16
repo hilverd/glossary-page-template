@@ -42,7 +42,7 @@ fromList glossaryItems =
 
         alphabetically =
             sanitised
-                |> List.sortBy (.terms >> List.head >> Maybe.map Term.raw >> Maybe.withDefault "" >> String.toLower)
+                |> List.sortBy (.terms >> List.head >> Maybe.map Term.raw >> Maybe.withDefault "" >> String.toUpper)
                 |> zipListWithIndexes
 
         byFrequency =
@@ -136,8 +136,8 @@ orderListByFrequency indexedGlossaryItems =
 
                     EQ ->
                         compare
-                            (item1.terms |> List.head |> Maybe.map Term.raw |> Maybe.withDefault "" |> String.toLower)
-                            (item2.terms |> List.head |> Maybe.map Term.raw |> Maybe.withDefault "" |> String.toLower)
+                            (item1.terms |> List.head |> Maybe.map Term.raw |> Maybe.withDefault "" |> String.toUpper)
+                            (item2.terms |> List.head |> Maybe.map Term.raw |> Maybe.withDefault "" |> String.toUpper)
 
                     GT ->
                         LT

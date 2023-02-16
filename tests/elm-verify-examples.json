@@ -10,6 +10,7 @@
         "Data.GlossaryItemIndex",
         "Data.GlossaryItems",
         "Data.GlossaryTitle",
+        "Data.IndexOfTerms",
         "Data.MarkdownFragment",
         "Export.Anki",
         "Export.Markdown",

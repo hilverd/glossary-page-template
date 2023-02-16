@@ -21,6 +21,7 @@ import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
+import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Dict exposing (Dict)
 import ElementIds
 import Export.Anki
@@ -687,7 +688,7 @@ viewTermIndexItem tabbable term =
         ]
 
 
-viewTermIndexGroup : Bool -> Bool -> TermIndexGroup -> Html Msg
+viewTermIndexGroup : Bool -> Bool -> TermGroup -> Html Msg
 viewTermIndexGroup tabbable staticSidebar { label, terms } =
     li
         [ id <| ElementIds.termIndexGroupLabel staticSidebar label
@@ -702,76 +703,12 @@ viewTermIndexGroup tabbable staticSidebar { label, terms } =
         ]
 
 
-type alias TermIndexGroup =
-    { label : String
-    , terms : List Term
-    }
-
-
-type alias TermIndex =
-    List TermIndexGroup
-
-
-termIndexFromGlossaryItems : GlossaryItems -> TermIndex
-termIndexFromGlossaryItems glossaryItems =
+viewIndexOfTerms : Bool -> Bool -> IndexOfTerms -> Html Msg
+viewIndexOfTerms tabbable staticSidebar indexOfTerms =
     let
-        termListsByFirstCharacter : Dict String (List Term)
-        termListsByFirstCharacter =
-            glossaryItems
-                |> GlossaryItems.orderedAlphabetically
-                |> List.concatMap (Tuple.second >> .terms)
-                |> List.foldl
-                    (\term result ->
-                        let
-                            firstCharacterUpper =
-                                term |> Term.raw |> String.toUpper |> String.left 1
-                        in
-                        Dict.update
-                            firstCharacterUpper
-                            (\termList ->
-                                termList
-                                    |> Maybe.map (\terms -> term :: terms)
-                                    |> Maybe.withDefault [ term ]
-                                    |> Just
-                            )
-                            result
-                    )
-                    Dict.empty
-
-        alphabet : List String
-        alphabet =
-            List.range (Char.toCode 'A') (Char.toCode 'Z')
-                |> List.map (Char.fromCode >> String.fromChar)
-
-        termListsByFirstCharacterIncludingAlphabet : Dict String (List Term)
-        termListsByFirstCharacterIncludingAlphabet =
-            List.foldl
-                (\letter result ->
-                    Dict.update letter
-                        (\maybeTermList ->
-                            if maybeTermList == Nothing then
-                                Just []
-
-                            else
-                                maybeTermList
-                        )
-                        result
-                )
-                termListsByFirstCharacter
-                alphabet
-
-        termIndex : TermIndex
-        termIndex =
-            termListsByFirstCharacterIncludingAlphabet
-                |> Dict.toList
-                |> List.map (Tuple.mapSecond <| List.sortBy <| Term.raw >> String.toLower)
-                |> List.map (\( label, terms ) -> TermIndexGroup label terms)
+        termGroups =
+            IndexOfTerms.termGroups indexOfTerms
     in
-    termIndex
-
-
-viewTermsIndex : Bool -> Bool -> TermIndex -> Html Msg
-viewTermsIndex tabbable staticSidebar termIndex =
     ul
         [ id <| ElementIds.termsIndex staticSidebar
         , class "mb-10"
@@ -784,7 +721,7 @@ viewTermsIndex tabbable staticSidebar termIndex =
                 else
                     Just <| viewTermIndexGroup tabbable staticSidebar termIndexGroup
             )
-            termIndex
+            termGroups
         )
 
 
@@ -1010,7 +947,7 @@ viewCards model editable tabbable indexedGlossaryItems =
         ]
 
 
-viewMenuForMobile : Model -> Bool -> TermIndex -> Html Msg
+viewMenuForMobile : Model -> Bool -> IndexOfTerms -> Html Msg
 viewMenuForMobile model tabbable termIndex =
     div
         [ class "invisible" |> Extras.HtmlAttribute.showIf (model.menuForMobileVisibility == Invisible)
@@ -1066,7 +1003,7 @@ viewMenuForMobile model tabbable termIndex =
                     [ class "px-4 pt-1 pb-6" ]
                     [ viewBackToTopLink False tabbable
                     , viewTermIndexFirstCharacterGrid False tabbable termIndex
-                    , viewTermsIndex tabbable False termIndex
+                    , viewIndexOfTerms tabbable False termIndex
                     ]
                 ]
             ]
@@ -1140,8 +1077,12 @@ viewTermIndexFirstCharacter staticSidebar tabbable firstCharacter enabled =
         [ text firstCharacter ]
 
 
-viewTermIndexFirstCharacterGrid : Bool -> Bool -> TermIndex -> Html Msg
-viewTermIndexFirstCharacterGrid staticSidebar tabbable termIndex =
+viewTermIndexFirstCharacterGrid : Bool -> Bool -> IndexOfTerms -> Html Msg
+viewTermIndexFirstCharacterGrid staticSidebar tabbable indexOfTerms =
+    let
+        termGroups =
+            IndexOfTerms.termGroups indexOfTerms
+    in
     div
         [ class "bg-white dark:bg-slate-900 select-none pointer-events-auto" ]
         (List.map
@@ -1152,12 +1093,12 @@ viewTermIndexFirstCharacterGrid staticSidebar tabbable termIndex =
                     termIndexGroup.label
                     (not <| List.isEmpty termIndexGroup.terms)
             )
-            termIndex
+            termGroups
         )
 
 
-viewQuickSearchButtonAndLetterGrid : Bool -> Bool -> TermIndex -> Html Msg
-viewQuickSearchButtonAndLetterGrid staticSidebar tabbable termIndex =
+viewQuickSearchButtonAndLetterGrid : Bool -> Bool -> IndexOfTerms -> Html Msg
+viewQuickSearchButtonAndLetterGrid staticSidebar tabbable indexOfTerms =
     div
         [ id ElementIds.quickSearchButtonAndLetterGrid
         , class "-mb-6 sticky top-0 -ml-0.5 pointer-events-none"
@@ -1171,14 +1112,14 @@ viewQuickSearchButtonAndLetterGrid staticSidebar tabbable termIndex =
         , viewQuickSearchButton tabbable
         , div
             [ class "px-3 bg-white dark:bg-slate-900" ]
-            [ viewTermIndexFirstCharacterGrid staticSidebar tabbable termIndex ]
+            [ viewTermIndexFirstCharacterGrid staticSidebar tabbable indexOfTerms ]
         , div
             [ class "h-8 bg-gradient-to-b from-white dark:from-slate-900" ]
             []
         ]
 
 
-viewStaticSidebarForDesktop : Bool -> TermIndex -> Html Msg
+viewStaticSidebarForDesktop : Bool -> IndexOfTerms -> Html Msg
 viewStaticSidebarForDesktop tabbable termIndex =
     div
         [ class "hidden print:hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900"
@@ -1190,7 +1131,7 @@ viewStaticSidebarForDesktop tabbable termIndex =
             [ viewQuickSearchButtonAndLetterGrid True tabbable termIndex
             , nav
                 [ class "px-3" ]
-                [ viewTermsIndex tabbable True termIndex ]
+                [ viewIndexOfTerms tabbable True termIndex ]
             ]
         ]
 
@@ -1461,7 +1402,7 @@ view model =
                     noModalDialogShown model
 
                 termIndex =
-                    termIndexFromGlossaryItems glossary.items
+                    IndexOfTerms.fromGlossaryItems glossary.items
             in
             { title = GlossaryTitle.toString glossary.title
             , body =
