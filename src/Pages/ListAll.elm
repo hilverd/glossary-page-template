@@ -649,8 +649,7 @@ viewSettings glossary model =
             , Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
                 div
                     [ class "mt-6 pb-2" ]
-                    [ viewSelectInputSyntax glossary model
-                    ]
+                    [ viewSelectInputSyntax glossary model ]
             , div
                 [ class "mt-6 pb-2" ]
                 [ viewSelectCardWidth glossary model
@@ -668,9 +667,7 @@ viewSettings glossary model =
                 ]
             , model.errorWhileChangingSettings
                 |> Extras.Html.showMaybe
-                    (\errorMessage ->
-                        errorDiv <| "Failed to save — " ++ errorMessage ++ "."
-                    )
+                    (\errorMessage -> errorDiv <| "Failed to save — " ++ errorMessage ++ ".")
             ]
         ]
 
