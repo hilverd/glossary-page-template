@@ -21,6 +21,7 @@ imgTagRenderer =
         |> Markdown.Html.withOptionalAttribute "width"
         |> Markdown.Html.withOptionalAttribute "height"
         |> Markdown.Html.withOptionalAttribute "alt"
+        |> Markdown.Html.withOptionalAttribute "title"
         |> Markdown.Html.withOptionalAttribute "style"
 
 
@@ -45,14 +46,16 @@ viewImgTag :
     -> Maybe String
     -> Maybe String
     -> Maybe String
+    -> Maybe String
     -> List (Html msg)
     -> Html msg
-viewImgTag src width height alt style _ =
+viewImgTag src width height alt title style _ =
     Html.img
         [ Extras.HtmlAttribute.showMaybe Attr.src src
         , Extras.HtmlAttribute.showMaybe Attr.width (Maybe.andThen String.toInt width)
         , Extras.HtmlAttribute.showMaybe Attr.height (Maybe.andThen String.toInt height)
         , Extras.HtmlAttribute.showMaybe Attr.alt alt
+        , Extras.HtmlAttribute.showMaybe Attr.title title
         , Extras.HtmlAttribute.showMaybe (Attr.attribute "style") style
         ]
         []
