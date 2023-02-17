@@ -3,7 +3,7 @@ module Components.Form exposing (input, inputText, textarea)
 import Accessibility exposing (Attribute)
 import Accessibility.Aria
 import Extras.Html
-import Html exposing (Html)
+import Html exposing (Html, span)
 import Html.Attributes exposing (class)
 import Icons
 import Svg.Attributes
@@ -55,10 +55,30 @@ inputText value_ showValidationErrors validationError additionalAttributes =
         ]
 
 
-textarea : String -> Bool -> Maybe String -> List (Attribute msg) -> Html msg
-textarea body showValidationErrors validationError additionalAttributes =
+textarea : String -> Bool -> Bool -> Maybe String -> List (Attribute msg) -> Html msg
+textarea body markdownBasedSyntaxEnabled showValidationErrors validationError additionalAttributes =
     Html.div []
-        [ Accessibility.div
+        [ Extras.Html.showIf markdownBasedSyntaxEnabled <|
+            Accessibility.div
+                []
+                [ span
+                    [ class "inline-flex items-center text-sm text-gray-500 dark:text-gray-300" ]
+                    [ Icons.markdown
+                        [ Svg.Attributes.class "w-5 h-5 mr-2"
+                        , Accessibility.Aria.hidden True
+                        ]
+                    , Html.span
+                        []
+                        [ Html.a
+                            [ Html.Attributes.href "https://commonmark.org/help/"
+                            , Html.Attributes.target "_blank"
+                            ]
+                            [ Html.text "Markdown" ]
+                        , Html.text " supported."
+                        ]
+                    ]
+                ]
+        , Accessibility.div
             [ class "grow-wrap max-w-prose"
             , Html.Attributes.attribute "data-replicated-value" <| body ++ "\n\n"
             ]

@@ -453,13 +453,13 @@ viewCreateDescriptionTerms showValidationErrors termsArray =
         ]
 
 
-viewCreateDescriptionDetailsSingle : Bool -> Bool -> Int -> DetailsField -> Html Msg
-viewCreateDescriptionDetailsSingle showNewlineWarnings showValidationErrors index detailsSingle =
-    viewCreateDescriptionDetailsSingle1 showNewlineWarnings showValidationErrors (DetailsIndex.fromInt index) detailsSingle
+viewCreateDescriptionDetailsSingle : Bool -> Bool -> Bool -> Int -> DetailsField -> Html Msg
+viewCreateDescriptionDetailsSingle showNewlineWarnings markdownBasedSyntaxEnabled showValidationErrors index detailsSingle =
+    viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabled showValidationErrors (DetailsIndex.fromInt index) detailsSingle
 
 
-viewCreateDescriptionDetailsSingle1 : Bool -> Bool -> DetailsIndex -> DetailsField -> Html Msg
-viewCreateDescriptionDetailsSingle1 showNewlineWarnings showValidationErrors index detailsSingle =
+viewCreateDescriptionDetailsSingle1 : Bool -> Bool -> Bool -> DetailsIndex -> DetailsField -> Html Msg
+viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabled showValidationErrors index detailsSingle =
     let
         raw =
             DetailsField.raw detailsSingle
@@ -483,6 +483,7 @@ viewCreateDescriptionDetailsSingle1 showNewlineWarnings showValidationErrors ind
                 [ class "relative block min-w-0 w-full" ]
                 [ Components.Form.textarea
                     raw
+                    markdownBasedSyntaxEnabled
                     showValidationErrors
                     validationError
                     [ required True
@@ -534,8 +535,8 @@ viewAddDetailsButtonForEmptyState =
         ]
 
 
-viewCreateDescriptionDetails : Bool -> Bool -> Array DetailsField -> Html Msg
-viewCreateDescriptionDetails showNewlineWarnings showValidationErrors detailsArray =
+viewCreateDescriptionDetails : Bool -> Bool -> Bool -> Array DetailsField -> Html Msg
+viewCreateDescriptionDetails showNewlineWarnings markdownBasedSyntaxEnabled showValidationErrors detailsArray =
     let
         details =
             Array.toList detailsArray
@@ -552,7 +553,7 @@ viewCreateDescriptionDetails showNewlineWarnings showValidationErrors detailsArr
             ]
         , div
             [ class "space-y-6 sm:space-y-5" ]
-            (List.indexedMap (viewCreateDescriptionDetailsSingle showNewlineWarnings showValidationErrors) details
+            (List.indexedMap (viewCreateDescriptionDetailsSingle showNewlineWarnings markdownBasedSyntaxEnabled showValidationErrors) details
                 ++ [ if List.isEmpty details then
                         viewAddDetailsButtonForEmptyState
 
@@ -800,6 +801,7 @@ view model =
                                     [ viewCreateDescriptionTerms model.triedToSaveWhenFormInvalid terms
                                     , viewCreateDescriptionDetails
                                         (not glossary.enableMarkdownBasedSyntax)
+                                        glossary.enableMarkdownBasedSyntax
                                         model.triedToSaveWhenFormInvalid
                                         detailsArray
                                     , viewCreateSeeAlso model.triedToSaveWhenFormInvalid

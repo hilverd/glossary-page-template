@@ -303,8 +303,8 @@ viewEditTitle showValidationErrors titleField =
         ]
 
 
-viewEditAboutParagraph : Bool -> Bool -> Form.AboutParagraphField -> Html Msg
-viewEditAboutParagraph showNewlineWarnings showValidationErrors aboutParagraphField =
+viewEditAboutParagraph : Bool -> Bool -> Bool -> Form.AboutParagraphField -> Html Msg
+viewEditAboutParagraph showNewlineWarnings markdownBasedSyntaxEnabled showValidationErrors aboutParagraphField =
     div []
         [ div []
             [ h2
@@ -319,6 +319,7 @@ viewEditAboutParagraph showNewlineWarnings showValidationErrors aboutParagraphFi
                     [ class "relative block min-w-0 w-full" ]
                     [ Components.Form.textarea
                         aboutParagraphField.body
+                        markdownBasedSyntaxEnabled
                         showValidationErrors
                         aboutParagraphField.validationError
                         [ required True
@@ -583,7 +584,7 @@ view model =
                                 [ div
                                     [ class "lg:w-1/2 space-y-7 lg:space-y-8" ]
                                     [ viewEditTitle model.triedToSaveWhenFormInvalid <| Form.titleField model.form
-                                    , viewEditAboutParagraph (not enableMarkdownBasedSyntax) model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
+                                    , viewEditAboutParagraph (not enableMarkdownBasedSyntax) enableMarkdownBasedSyntax model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
                                     , viewEditAboutLinks model.triedToSaveWhenFormInvalid <| Form.aboutLinkFields model.form
                                     ]
                                 , div
