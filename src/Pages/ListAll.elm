@@ -1246,7 +1246,15 @@ viewSelectInputSyntax glossary model =
                         [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
                         , for ElementIds.inputSyntaxMarkdownBased
                         ]
-                        [ text "Markdown-based" ]
+                        [ span
+                            [ class "mt-1 inline-flex items-center" ]
+                            [ Icons.markdown
+                                [ Svg.Attributes.class "w-7 h-7 text-gray-600 dark:text-gray-300 mr-2"
+                                , Accessibility.Aria.hidden True
+                                ]
+                            , text "Markdown-based"
+                            ]
+                        ]
                     ]
                 ]
             ]

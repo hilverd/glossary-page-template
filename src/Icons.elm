@@ -5,6 +5,7 @@ module Icons exposing
     , documentDownload
     , exclamation
     , exclamationCircle
+    , markdown
     , menu
     , pencil
     , plus
@@ -16,7 +17,7 @@ module Icons exposing
 
 import Html exposing (Html)
 import Svg exposing (circle, path, svg)
-import Svg.Attributes exposing (clipRule, cx, cy, d, fill, fillRule, r, stroke, strokeLinecap, strokeLinejoin, strokeWidth, viewBox)
+import Svg.Attributes exposing (clipRule, cx, cy, d, fill, fillRule, height, r, stroke, strokeLinecap, strokeLinejoin, strokeWidth, viewBox, width)
 
 
 withAdditionalAttributes :
@@ -236,4 +237,29 @@ arrowUp =
             , d "M5 10l7-7m0 0l7 7m-7-7v18"
             ]
             []
+        ]
+
+
+markdown : List (Html.Attribute msg) -> Html msg
+markdown =
+    withAdditionalAttributes
+        [ fill "none"
+        , height "128"
+        , viewBox "0 0 208 128"
+        , width "208"
+        ]
+        [ Svg.g
+            [ fill "currentColor"
+            ]
+            [ path
+                [ clipRule "evenodd"
+                , d "m15 10c-2.7614 0-5 2.2386-5 5v98c0 2.761 2.2386 5 5 5h178c2.761 0 5-2.239 5-5v-98c0-2.7614-2.239-5-5-5zm-15 5c0-8.28427 6.71573-15 15-15h178c8.284 0 15 6.71573 15 15v98c0 8.284-6.716 15-15 15h-178c-8.28427 0-15-6.716-15-15z"
+                , fillRule "evenodd"
+                ]
+                []
+            , path
+                [ d "m30 98v-68h20l20 25 20-25h20v68h-20v-39l-20 25-20-25v39zm125 0-30-33h20v-35h20v35h20z"
+                ]
+                []
+            ]
         ]
