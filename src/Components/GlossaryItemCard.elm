@@ -137,7 +137,7 @@ viewGlossaryTerm preview tabbable term =
                 text <| Term.raw term
             ]
         , span
-            [ class "silcrow invisible group-hover:visible hover:visible" ]
+            [ class "silcrow invisible group-hover:visible hover:visible print:group-hover:invisible print:hover:invisible" ]
             [ Html.a
                 [ (if preview then
                     "#"
