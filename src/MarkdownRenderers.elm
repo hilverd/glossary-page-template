@@ -8,7 +8,7 @@ import Markdown.Html
 
 anchorTagRenderer : Markdown.Html.Renderer (List (Html msg) -> Html msg)
 anchorTagRenderer =
-    Markdown.Html.tag "img" viewAnchorTag
+    Markdown.Html.tag "a" viewAnchorTag
         |> Markdown.Html.withOptionalAttribute "href"
         |> Markdown.Html.withOptionalAttribute "target"
         |> Markdown.Html.withOptionalAttribute "style"
