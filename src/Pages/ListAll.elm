@@ -1343,8 +1343,8 @@ viewOrderItemsBy model numberOfItems =
             [ class "font-medium text-gray-900 dark:text-gray-100" ]
             [ text "Order items"
             , span
-                [ class "text-gray-500 dark:text-gray-400" ]
-                [ text " ("
+                [ class "ml-2 text-gray-500 dark:text-gray-400" ]
+                [ text "("
                 , text <| String.fromInt numberOfItems
                 , text ")"
                 ]
