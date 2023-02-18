@@ -1,7 +1,4 @@
-module Data.AboutParagraph exposing
-    ( AboutParagraph, fromPlaintext, fromMarkdown, raw, view
-    , markdown
-    )
+module Data.AboutParagraph exposing (AboutParagraph, fromPlaintext, fromMarkdown, raw, markdown, view)
 
 {-| The "about" paragraph(s) shown at the top of a glossary.
 This can be in either plain text or Markdown.
@@ -9,7 +6,7 @@ This can be in either plain text or Markdown.
 
 # "About" Paragraphs
 
-@docs AboutParagraph, fromPlaintext, fromMarkdown, raw, view
+@docs AboutParagraph, fromPlaintext, fromMarkdown, raw, markdown, view
 
 -}
 
