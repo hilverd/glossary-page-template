@@ -918,7 +918,7 @@ viewCards model editable tabbable indexedGlossaryItems =
                     ]
             ]
         , Extras.Html.showIf (not <| List.isEmpty indexedGlossaryItems) <|
-            viewOrderItemsBy model
+            viewOrderItemsBy model (List.length indexedGlossaryItems)
         , Html.dl
             []
             (indexedGlossaryItems
@@ -1331,8 +1331,8 @@ viewSelectCardWidth glossary model =
         ]
 
 
-viewOrderItemsBy : Model -> Html Msg
-viewOrderItemsBy model =
+viewOrderItemsBy : Model -> Int -> Html Msg
+viewOrderItemsBy model numberOfItems =
     let
         tabbable =
             noModalDialogShown model
@@ -1341,7 +1341,14 @@ viewOrderItemsBy model =
         [ class "print:hidden pt-4 pb-6" ]
         [ label
             [ class "font-medium text-gray-900 dark:text-gray-100" ]
-            [ text "Order items" ]
+            [ text "Order items"
+            , span
+                [ class "text-gray-500 dark:text-gray-400" ]
+                [ text " ("
+                , text <| String.fromInt numberOfItems
+                , text ")"
+                ]
+            ]
         , fieldset [ class "mt-4" ]
             [ legend
                 [ class "sr-only" ]
