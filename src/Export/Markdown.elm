@@ -16,32 +16,19 @@ import Data.GlossaryItem.Term as Term
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Extras.HtmlTree
+import Extras.String
 import File.Download as Download
-import Regex
-
-
-escape : String -> String
-escape string =
-    let
-        charactersToEscape =
-            -- It might be necessary to escape this set too: [().!-]
-            -- but these are left out for now.
-            "[\\`*_{}\\[\\]#+]"
-                |> Regex.fromString
-                |> Maybe.withDefault Regex.never
-    in
-    Regex.replace charactersToEscape (.match >> (++) "\\") string
 
 
 bold : String -> String
 bold string =
-    "**" ++ escape string ++ "**"
+    "**" ++ Extras.String.escapeForMarkdown string ++ "**"
 
 
 link : AboutLink -> String
 link aboutLink =
     "["
-        ++ (aboutLink |> AboutLink.body |> escape)
+        ++ (aboutLink |> AboutLink.body |> Extras.String.escapeForMarkdown)
         ++ "]("
         ++ (aboutLink |> AboutLink.href |> Extras.HtmlTree.escape)
         ++ ")"
@@ -78,7 +65,7 @@ itemToMarkdown { terms, details, relatedTerms } =
 
         detailsString =
             details
-                |> List.map (Details.raw >> escape)
+                |> List.map Details.markdown
                 |> paragraphs
 
         relatedTermsPrefix =
@@ -93,7 +80,7 @@ itemToMarkdown { terms, details, relatedTerms } =
 
         relatedTermsString =
             relatedTerms
-                |> List.map (RelatedTerm.raw >> escape)
+                |> List.map (RelatedTerm.raw >> Extras.String.escapeForMarkdown)
                 |> String.join ", "
                 |> (++) relatedTermsPrefix
     in
@@ -111,10 +98,10 @@ download glossaryTitle aboutSection glossaryItems =
             GlossaryTitle.toFilename ".md" glossaryTitle
 
         titleHeadingString =
-            glossaryTitle |> GlossaryTitle.toString |> escape |> (++) "# "
+            glossaryTitle |> GlossaryTitle.toString |> Extras.String.escapeForMarkdown |> (++) "# "
 
         aboutParagraphString =
-            aboutSection.paragraph |> AboutParagraph.raw |> escape
+            aboutSection.paragraph |> AboutParagraph.markdown
 
         aboutLinksString =
             aboutSection.links

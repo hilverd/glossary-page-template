@@ -1,4 +1,7 @@
-module Data.AboutParagraph exposing (AboutParagraph, fromPlaintext, fromMarkdown, raw, view)
+module Data.AboutParagraph exposing
+    ( AboutParagraph, fromPlaintext, fromMarkdown, raw, view
+    , markdown
+    )
 
 {-| The "about" paragraph(s) shown at the top of a glossary.
 This can be in either plain text or Markdown.
@@ -11,6 +14,7 @@ This can be in either plain text or Markdown.
 -}
 
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
+import Extras.String
 import Html exposing (Html, text)
 import Html.Attributes exposing (class)
 import Markdown.Block as Block exposing (Block)
@@ -56,6 +60,18 @@ raw aboutParagraph =
     case aboutParagraph of
         PlaintextAboutParagraph body ->
             body
+
+        MarkdownAboutParagraph fragment ->
+            MarkdownFragment.raw fragment
+
+
+{-| Convert an "about" paragraph to a string suitable for a Markdown document.
+-}
+markdown : AboutParagraph -> String
+markdown aboutParagraph =
+    case aboutParagraph of
+        PlaintextAboutParagraph body ->
+            Extras.String.escapeForMarkdown body
 
         MarkdownAboutParagraph fragment ->
             MarkdownFragment.raw fragment
