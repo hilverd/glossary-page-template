@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Details exposing (Details, fromPlaintext, fromMarkdown, raw, markdown, view)
+module Data.GlossaryItem.Details exposing (Details, fromPlaintext, fromMarkdown, raw, markdown, view, htmlTree)
 
 {-| A definition for a glossary item.
 This can be in either plain text or Markdown.
@@ -6,11 +6,12 @@ This can be in either plain text or Markdown.
 
 # Details
 
-@docs Details, fromPlaintext, fromMarkdown, raw, markdown, view
+@docs Details, fromPlaintext, fromMarkdown, raw, markdown, view, htmlTree
 
 -}
 
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
+import Extras.HtmlTree exposing (HtmlTree)
 import Extras.String
 import Html exposing (Html, text)
 import Html.Attributes exposing (class)
@@ -94,6 +95,21 @@ renderer =
     }
 
 
+htmlTreeRenderer : Renderer HtmlTree
+htmlTreeRenderer =
+    let
+        renderer0 =
+            MarkdownRenderers.htmlTreeRenderer
+    in
+    { renderer0
+        | html =
+            Markdown.Html.oneOf
+                [ MarkdownRenderers.anchorTagHtmlTreeRenderer
+                , MarkdownRenderers.imgTagHtmlTreeRenderer
+                ]
+    }
+
+
 {-| View details as HTML.
 
     import Html exposing (Html)
@@ -139,6 +155,28 @@ view details =
 
                 Err parsingError ->
                     text <| "Failed to parse Markdown: " ++ parsingError
+
+
+{-| Convert details to an HtmlTree.
+-}
+htmlTree : Details -> HtmlTree
+htmlTree details =
+    case details of
+        PlaintextDetails d ->
+            Extras.HtmlTree.Leaf d.body
+
+        MarkdownDetails d ->
+            case MarkdownFragment.parsed d.fragment of
+                Ok blocks ->
+                    case Renderer.render htmlTreeRenderer blocks of
+                        Ok rendered ->
+                            Extras.HtmlTree.Node "div" False [] rendered
+
+                        Err renderingError ->
+                            Extras.HtmlTree.Leaf <| "Failed to render Markdown: " ++ renderingError
+
+                Err parsingError ->
+                    Extras.HtmlTree.Leaf <| "Failed to parse Markdown: " ++ parsingError
 
 
 sanitiseMarkdownFragment : MarkdownFragment -> MarkdownFragment

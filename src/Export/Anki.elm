@@ -15,6 +15,7 @@ import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
+import Extras.HtmlTree
 import File.Download as Download
 import Regex
 
@@ -82,7 +83,7 @@ itemToAnki { terms, details, relatedTerms } =
 
             else
                 details
-                    |> List.map (Details.raw >> escape)
+                    |> List.map (Details.htmlTree >> Extras.HtmlTree.toHtml >> escape)
                     |> paragraphs
                     |> quote
     in
