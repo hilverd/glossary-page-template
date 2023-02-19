@@ -1191,10 +1191,22 @@ viewExportButton enabled exportDropdownMenu =
         , text "Export"
         ]
         [ Components.DropdownMenu.choice
-            [ text "Anki deck" ]
+            [ span
+                [ class "inline-flex items-center" ]
+                [ Icons.anki
+                    [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-600 mr-2" ]
+                , text "Anki deck"
+                ]
+            ]
             (PageMsg.Internal <| DownloadAnki)
         , Components.DropdownMenu.choice
-            [ text "Markdown" ]
+            [ span
+                [ class "inline-flex items-center" ]
+                [ Icons.markdown
+                    [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" ]
+                , text "Markdown"
+                ]
+            ]
             (PageMsg.Internal <| DownloadMarkdown)
         ]
 

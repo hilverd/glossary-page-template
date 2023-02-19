@@ -1,5 +1,6 @@
 module Icons exposing
-    ( arrowUp
+    ( anki
+    , arrowUp
     , chevronDown
     , chevronRight
     , documentDownload
@@ -16,8 +17,37 @@ module Icons exposing
     )
 
 import Html exposing (Html)
-import Svg exposing (circle, path, svg)
-import Svg.Attributes exposing (clipRule, cx, cy, d, fill, fillRule, height, r, stroke, strokeLinecap, strokeLinejoin, strokeWidth, viewBox, width)
+import Svg exposing (circle, clipPath, defs, g, node, path, svg)
+import Svg.Attributes
+    exposing
+        ( clipPathUnits
+        , clipRule
+        , cx
+        , cy
+        , d
+        , fill
+        , fillRule
+        , gradientTransform
+        , gradientUnits
+        , height
+        , offset
+        , r
+        , rx
+        , ry
+        , stroke
+        , strokeLinecap
+        , strokeLinejoin
+        , strokeWidth
+        , style
+        , transform
+        , viewBox
+        , width
+        , x1
+        , x2
+        , y
+        , y1
+        , y2
+        )
 
 
 withAdditionalAttributes :
@@ -261,5 +291,150 @@ markdown =
                 [ d "m30 98v-68h20l20 25 20-25h20v68h-20v-39l-20 25-20-25v39zm125 0-30-33h20v-35h20v35h20z"
                 ]
                 []
+            ]
+        ]
+
+
+anki : List (Html.Attribute msg) -> Html msg
+anki =
+    withAdditionalAttributes
+        [ viewBox "0 0 6.0854168 7.9375"
+        , fill "currentColor"
+        ]
+        [ defs []
+            [ clipPath
+                [ clipPathUnits "userSpaceOnUse"
+                ]
+                [ node "rect"
+                    [ height "30"
+                    , rx "4.6187186"
+                    , ry "4.6187186"
+                    , width "23"
+                    , Svg.Attributes.x "5"
+                    , y "1"
+                    ]
+                    []
+                ]
+            , node "linearGradient"
+                [ gradientTransform "matrix(0.954545,0,0,0.965517,1.704545,0.551724)"
+                , gradientUnits "userSpaceOnUse"
+                , x1 "15.5"
+                , x2 "4"
+                , y1 "5.9497476"
+                , y2 "31"
+                ]
+                []
+            , node "linearGradient"
+                []
+                [ node "stop"
+                    [ offset "0"
+                    , style "stop-color:#3c3c3c;stop-opacity:1"
+                    ]
+                    []
+                , node "stop"
+                    [ offset "1"
+                    , style "stop-color:#9e9e9e;stop-opacity:1"
+                    ]
+                    []
+                ]
+            , node "linearGradient"
+                [ gradientUnits "userSpaceOnUse"
+                , x1 "253.74718"
+                , x2 "188.00023"
+                , y1 "412.82977"
+                , y2 "542.33295"
+                ]
+                []
+            , node "linearGradient"
+                []
+                [ node "stop"
+                    [ offset "0"
+                    , style "stop-color:#0084dd;stop-opacity:1"
+                    ]
+                    []
+                , node "stop"
+                    [ offset "1"
+                    , style "stop-color:white;stop-opacity:1"
+                    ]
+                    []
+                ]
+            , node "linearGradient"
+                [ gradientTransform "matrix(0.09240924,0,0,0.09240924,-5.65772,-25.6423)"
+                , gradientUnits "userSpaceOnUse"
+                , x1 "247"
+                , x2 "292"
+                , y1 "441.86218"
+                , y2 "282.36218"
+                ]
+                []
+            , node "linearGradient"
+                []
+                [ node "stop"
+                    [ offset "0"
+                    , style "stop-color:white;stop-opacity:0.49411765;"
+                    ]
+                    []
+                , node "stop"
+                    [ offset "1"
+                    , style "stop-color:white;stop-opacity:0.25098041;"
+                    ]
+                    []
+                ]
+            , node "linearGradient"
+                [ gradientUnits "userSpaceOnUse"
+                , x1 "253.74718"
+                , x2 "188.00023"
+                , y1 "412.82977"
+                , y2 "542.33295"
+                ]
+                []
+            ]
+        , g [ transform "translate(-137.84645,-70.369748)" ]
+            [ g
+                [ style "display:inline"
+                , transform "matrix(0.26458333,0,0,0.26458333,136.52353,70.105165)"
+                ]
+                [ node "rect"
+                    [ height "32"
+                    , rx "0"
+                    , ry "0"
+                    , width "32"
+                    , Svg.Attributes.x "0"
+                    , y "0"
+                    ]
+                    []
+                , node "rect"
+                    [ height "28"
+                    , rx "4"
+                    , ry "4"
+                    , width "21"
+                    , Svg.Attributes.x "6"
+                    , y "2"
+                    ]
+                    []
+                , path
+                    [ d "m 312.50679,544.32837 c -20.28396,20.1643 -45.83498,-32.08006 -74.19864,-28.40036 -29.32333,3.80421 -41.202,60.28859 -67.50841,46.78663 -25.44547,-13.06007 16.34617,-53.50493 4.08171,-79.34329 -12.67942,-26.71258 -70.06997,-20.55523 -65.35797,-49.74645 4.55778,-28.23586 55.93746,-0.9878 76.72126,-20.63649 21.48703,-20.31349 -2.10362,-72.99241 27.11497,-77.53162 28.26233,-4.39065 18.22508,52.89443 43.33464,66.58923 25.95913,14.15816 68.76986,-24.55656 82.11594,1.82928 12.9093,25.52229 -44.67374,33.67836 -49.93898,61.7909 -5.4434,29.06371 44.60573,57.81562 23.63548,78.66217 z"
+                    , style "fill:none;fill-opacity:1;stroke:none;stroke-width:16.2321;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+                    , transform "matrix(0.09169279,0.01148462,-0.01148462,0.09169279,1.24989,-28.62005)"
+                    ]
+                    []
+                , path
+                    [ d "m 294.46869,523.45259 c -9.08043,8.81335 -45.57491,-17.76993 -58.10148,-15.97712 -12.52658,1.79282 -40.09949,37.54547 -51.28749,31.63294 -11.18801,-5.91252 2.81678,-48.83551 -2.75921,-60.19499 -5.57599,-11.35947 -48.09928,-26.53469 -45.93342,-39.00218 2.16586,-12.46749 47.31577,-12.41208 56.39619,-21.22544 9.08043,-8.81335 10.3725,-53.9448 22.89908,-55.73762 12.52657,-1.79281 26.42597,41.16443 37.61397,47.07695 11.188,5.91252 54.50984,-6.80503 60.08583,4.55445 5.57599,11.35947 -30.98363,37.85309 -33.14948,50.32059 -2.16586,12.46749 23.31643,49.73906 14.23601,58.55242 z"
+                    , style "fill:url(#linearGradient1230);fill-opacity:1;stroke:#ffffff;stroke-width:15.9837;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+                    , transform "matrix(0.07507522,4.398431e-4,-4.398431e-4,0.07507522,-2.36792,-12.92398)"
+                    ]
+                    []
+                , path
+                    [ d "m 294.46869,523.45259 c -9.08043,8.81335 -45.57491,-17.76993 -58.10148,-15.97712 -12.52658,1.79282 -40.09949,37.54547 -51.28749,31.63294 -11.18801,-5.91252 2.81678,-48.83551 -2.75921,-60.19499 -5.57599,-11.35947 -48.09928,-26.53469 -45.93342,-39.00218 2.16586,-12.46749 47.31577,-12.41208 56.39619,-21.22544 9.08043,-8.81335 10.3725,-53.9448 22.89908,-55.73762 12.52657,-1.79281 26.42597,41.16443 37.61397,47.07695 11.188,5.91252 54.50984,-6.80503 60.08583,4.55445 5.57599,11.35947 -30.98363,37.85309 -33.14948,50.32059 -2.16586,12.46749 23.31643,49.73906 14.23601,58.55242 z"
+                    , style "fill:url(#linearGradient2975);fill-opacity:1;stroke:#ffffff;stroke-width:24.8699;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+                    , transform "matrix(0.03131375,-0.02522366,0.02522366,0.03131375,2.32085,0.206819)"
+                    ]
+                    []
+                , path
+                    [ d "M 2.659112,0.45056835 H 30.289475 L 29.457792,20.39883 C 25.879683,16.517642 12.825421,10.535309 3.6153,10.535309 Z"
+                    , style "display:inline;opacity:1;fill:url(#linearGradient2979);fill-opacity:1;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1"
+                    ]
+                    []
+                ]
             ]
         ]
