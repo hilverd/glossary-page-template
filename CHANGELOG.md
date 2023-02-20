@@ -12,6 +12,24 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [2.0.0] - 2023-02-20
+
+The main change in this release is that it introduces support for a _Markdown-based syntax_. Using that syntax, term definitions can now contain multiple paragraphs, bold/italic text, ordered/unordered lists, hyperlinks, images, code fragments, and more.
+
+### How to upgrade from v1 and switch to Markdown
+
+1. Point the [static assets](https://github.com/hilverd/glossary-page-template#static-assets) to a version starting with `@2`.
+2. When making changes, open Settings at the top of the page and switch the input syntax to Markdown.
+3. Inspect all term definitions and correct the formatting where needed.
+
+### Added
+
+- Support a [Markdown](https://commonmark.org/help/)-based syntax for term descriptions.
+  - This uses [elm-markdown](https://github.com/dillonkearns/elm-markdown) which implements [GitHub Flavored Markdown](https://github.github.com/gfm/).
 
 - Add a "Settings" section on the list page which allows changing the following.
   - How "compact" the overall layout is by adjusting the card widths.
@@ -386,7 +404,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v1.9.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/hilverd/glossary-page-template/compare/v1.9.0...v2.0.0
 [1.9.0]: https://github.com/hilverd/glossary-page-template/compare/v1.8.6...v1.9.0
 [1.8.6]: https://github.com/hilverd/glossary-page-template/compare/v1.8.5...v1.8.6
 [1.8.5]: https://github.com/hilverd/glossary-page-template/compare/v1.8.4...v1.8.5

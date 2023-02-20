@@ -17,11 +17,11 @@ Download `glossary.html` from the [latest release](https://github.com/hilverd/gl
 The `glossary.html` file points to `glstatic.net` for static assets hosted using Cloudflare:
 
 ```
-https://glstatic.net/glossary-page-template@1/glossary.min.js
-https://glstatic.net/glossary-page-template@1/glossary.min.css
+https://glstatic.net/glossary-page-template@2/glossary.min.js
+https://glstatic.net/glossary-page-template@2/glossary.min.css
 ```
 
-These files are cached for 24 hours and get updated with any releases with a [major version number](https://semver.org/) of `1`. Alternatively you can change the URL to point to e.g. `@1.1` which gets all patch releases with version numbers of the form `1.1.x`. You can also specify a specific version such as `1.0.1` -- these are cached forever.
+These files are cached for 24 hours and get updated with any releases with a [major version number](https://semver.org/) of `2`. Alternatively you can change the URL to point to e.g. `@2.0` which gets all patch releases with version numbers of the form `2.0.x`. You can also use a specific version such as `2.0.1` -- these are cached forever.
 
 #### Security considerations
 
@@ -39,5 +39,4 @@ You can get the `hash-here` values from the [release notes](https://github.com/h
 
 ## Limitations
 
-* At the moment the template only supports plain text definitions consisting of a single (possibly long) paragraph for each definition.
 * The integrated editor UI is meant to be run and used by a single local user only. It is not designed to be exposed to untrusted users.
