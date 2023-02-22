@@ -9,7 +9,7 @@ module Components.SelectMenu exposing
     , validationError
     )
 
-import Accessibility exposing (Html, div)
+import Accessibility exposing (Html, div, option, p, select, text)
 import Accessibility.Aria
 import Extras.Html
 import Extras.HtmlAttribute
