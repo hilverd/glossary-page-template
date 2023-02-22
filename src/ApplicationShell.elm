@@ -11,7 +11,7 @@ module ApplicationShell exposing (main)
 
 import Browser exposing (Document)
 import Browser.Dom as Dom
-import CommonModel exposing (CommonModel)
+import CommonModel
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.CardWidth as CardWidth

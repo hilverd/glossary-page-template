@@ -24,8 +24,8 @@ import MarkdownRenderers
 {-| Details (i.e. a definition) for a glossary item.
 -}
 type Details
-    = PlaintextDetails { body : String }
-    | MarkdownDetails { fragment : MarkdownFragment }
+    = PlaintextDetails String
+    | MarkdownDetails MarkdownFragment
 
 
 {-| Construct details from a plain text string.
@@ -34,8 +34,8 @@ type Details
 
 -}
 fromPlaintext : String -> Details
-fromPlaintext body =
-    PlaintextDetails { body = body }
+fromPlaintext =
+    PlaintextDetails
 
 
 {-| Construct details from a Markdown string.
@@ -47,13 +47,8 @@ fromPlaintext body =
 
 -}
 fromMarkdown : String -> Details
-fromMarkdown raw0 =
-    MarkdownDetails
-        { fragment =
-            raw0
-                |> MarkdownFragment.fromString
-                |> sanitiseMarkdownFragment
-        }
+fromMarkdown =
+    MarkdownFragment.fromString >> sanitiseMarkdownFragment >> MarkdownDetails
 
 
 {-| Retrieve the raw body of details.
@@ -61,11 +56,11 @@ fromMarkdown raw0 =
 raw : Details -> String
 raw details =
     case details of
-        PlaintextDetails d ->
-            d.body
+        PlaintextDetails body ->
+            body
 
-        MarkdownDetails d ->
-            MarkdownFragment.raw d.fragment
+        MarkdownDetails fragment ->
+            MarkdownFragment.raw fragment
 
 
 {-| Convert details to a string suitable for a Markdown document.
@@ -73,11 +68,11 @@ raw details =
 markdown : Details -> String
 markdown details =
     case details of
-        PlaintextDetails d ->
-            Extras.String.escapeForMarkdown d.body
+        PlaintextDetails body ->
+            Extras.String.escapeForMarkdown body
 
-        MarkdownDetails d ->
-            MarkdownFragment.raw d.fragment
+        MarkdownDetails fragment ->
+            MarkdownFragment.raw fragment
 
 
 renderer : Renderer (Html msg)
@@ -133,14 +128,14 @@ htmlTreeRenderer =
 view : Details -> Html msg
 view details =
     case details of
-        PlaintextDetails d ->
-            text d.body
+        PlaintextDetails body ->
+            text body
 
-        MarkdownDetails d ->
+        MarkdownDetails fragment ->
             let
                 parsed : Result String (List Block)
                 parsed =
-                    MarkdownFragment.parsed d.fragment
+                    MarkdownFragment.parsed fragment
             in
             case parsed of
                 Ok blocks ->
@@ -162,11 +157,11 @@ view details =
 htmlTree : Details -> HtmlTree
 htmlTree details =
     case details of
-        PlaintextDetails d ->
-            Extras.HtmlTree.Leaf d.body
+        PlaintextDetails body ->
+            Extras.HtmlTree.Leaf body
 
-        MarkdownDetails d ->
-            case MarkdownFragment.parsed d.fragment of
+        MarkdownDetails fragment ->
+            case MarkdownFragment.parsed fragment of
                 Ok blocks ->
                     case Renderer.render htmlTreeRenderer blocks of
                         Ok rendered ->

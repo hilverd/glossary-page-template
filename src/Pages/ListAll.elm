@@ -22,7 +22,6 @@ import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
-import Dict exposing (Dict)
 import ElementIds
 import Export.Anki
 import Export.Markdown

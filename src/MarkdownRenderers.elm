@@ -4,9 +4,9 @@ import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
 import Html exposing (Html)
 import Html.Attributes as Attr
-import Markdown.Block as Block exposing (Block)
+import Markdown.Block as Block
 import Markdown.Html
-import Markdown.Renderer as Renderer exposing (Renderer)
+import Markdown.Renderer exposing (Renderer)
 
 
 anchorTagRenderer : Markdown.Html.Renderer (List (Html msg) -> Html msg)
