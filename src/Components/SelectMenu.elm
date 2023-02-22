@@ -1,5 +1,6 @@
 module Components.SelectMenu exposing
     ( Choice
+    , Property
     , ariaLabel
     , id
     , onChange
@@ -8,7 +9,7 @@ module Components.SelectMenu exposing
     , validationError
     )
 
-import Accessibility exposing (..)
+import Accessibility exposing (Html, div)
 import Accessibility.Aria
 import Extras.Html
 import Extras.HtmlAttribute
@@ -97,13 +98,9 @@ configFromProperties =
 render : List (Property msg) -> List Choice -> Html msg
 render properties choices =
     let
+        config : Config msg
         config =
             configFromProperties properties
-
-        pleaseSelectOption =
-            option
-                [ value "" ]
-                [ text "--- Please select ---" ]
     in
     div
         [ class "flex-auto" ]
@@ -123,7 +120,10 @@ render properties choices =
                 []
 
               else
-                [ pleaseSelectOption ]
+                [ option
+                    [ value "" ]
+                    [ text "--- Please select ---" ]
+                ]
              )
                 ++ (choices
                         |> List.map

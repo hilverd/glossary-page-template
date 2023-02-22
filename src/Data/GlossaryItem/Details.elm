@@ -78,6 +78,7 @@ markdown details =
 renderer : Renderer (Html msg)
 renderer =
     let
+        renderer0 : Renderer (Html msg)
         renderer0 =
             Renderer.defaultHtmlRenderer
     in
@@ -93,6 +94,7 @@ renderer =
 htmlTreeRenderer : Renderer HtmlTree
 htmlTreeRenderer =
     let
+        renderer0 : Renderer HtmlTree
         renderer0 =
             MarkdownRenderers.htmlTreeRenderer
     in

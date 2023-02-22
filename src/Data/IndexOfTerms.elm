@@ -41,6 +41,7 @@ fromGlossaryItems glossaryItems =
                 |> List.foldl
                     (\term result ->
                         let
+                            firstCharacterUpper : String
                             firstCharacterUpper =
                                 term |> Term.raw |> String.toUpper |> String.left 1
                         in

@@ -77,6 +77,7 @@ markdown aboutParagraph =
 renderer : Renderer (Html msg)
 renderer =
     let
+        renderer0 : Renderer (Html msg)
         renderer0 =
             Renderer.defaultHtmlRenderer
     in

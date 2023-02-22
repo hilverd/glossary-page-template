@@ -8,7 +8,7 @@ import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import ElementIds
-import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
+import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 
 
 type alias Glossary =

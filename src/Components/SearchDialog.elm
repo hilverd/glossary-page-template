@@ -1,6 +1,7 @@
 port module Components.SearchDialog exposing
     ( Model
     , Msg
+    , Property
     , SearchResult
     , hidden
     , hide
@@ -18,7 +19,7 @@ port module Components.SearchDialog exposing
     , visible
     )
 
-import Accessibility exposing (..)
+import Accessibility exposing (Html, div, p, text, ul)
 import Accessibility.Aria
 import Accessibility.Key
 import Accessibility.Role
@@ -133,6 +134,7 @@ hide =
 update : (Model parentMsg -> parentModel) -> (Msg -> parentMsg) -> Msg -> Model parentMsg -> ( parentModel, Cmd parentMsg )
 update updateParentModel toParentMsg msg model =
     let
+        model_ : { idPrefix : String, visibility : GradualVisibility, config : Config parentMsg, activeSearchResultIndex : Maybe SearchResultIndex }
         model_ =
             innerModel model
 
@@ -186,6 +188,7 @@ update updateParentModel toParentMsg msg model =
 
                 MakePreviousOrNextSearchResultActive numberOfSearchResults next ->
                     let
+                        delta : Int
                         delta =
                             if next then
                                 1
@@ -193,6 +196,7 @@ update updateParentModel toParentMsg msg model =
                             else
                                 -1
 
+                        initial : Int
                         initial =
                             if next then
                                 0
@@ -200,6 +204,7 @@ update updateParentModel toParentMsg msg model =
                             else
                                 numberOfSearchResults - 1
 
+                        activeSearchResultIndex_ : Maybe Int
                         activeSearchResultIndex_ =
                             model_.activeSearchResultIndex
                                 |> Maybe.map ((+) delta >> min (numberOfSearchResults - 1) >> max 0)
@@ -224,6 +229,7 @@ update updateParentModel toParentMsg msg model =
 
                 LoadUrlForActiveSearchResult searchResults ->
                     let
+                        activeSearchResult : Maybe String
                         activeSearchResult =
                             model_.activeSearchResultIndex
                                 |> Maybe.andThen
@@ -367,9 +373,16 @@ view :
     -> Html parentMsg
 view toParentMsg model searchTerm searchResults =
     let
+        model_ :
+            { idPrefix : String
+            , visibility : GradualVisibility
+            , config : Config parentMsg
+            , activeSearchResultIndex : Maybe SearchResultIndex
+            }
         model_ =
             innerModel model
 
+        config : Config parentMsg
         config =
             model_.config
     in

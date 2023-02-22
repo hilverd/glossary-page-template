@@ -16,7 +16,6 @@ import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Dict exposing (Dict)
-import Extras.HtmlTree exposing (HtmlTree(..))
 import Extras.Regex
 import Regex
 import Set
@@ -37,14 +36,17 @@ type GlossaryItems
 fromList : List GlossaryItem -> GlossaryItems
 fromList glossaryItems =
     let
+        sanitised : List GlossaryItem
         sanitised =
             sanitiseList glossaryItems
 
+        alphabetically : List ( GlossaryItemIndex, GlossaryItem )
         alphabetically =
             sanitised
                 |> List.sortBy (.terms >> List.head >> Maybe.map Term.raw >> Maybe.withDefault "" >> String.toUpper)
                 |> zipListWithIndexes
 
+        byFrequency : List ( GlossaryItemIndex, GlossaryItem )
         byFrequency =
             alphabetically
                 |> orderListByFrequency
@@ -58,6 +60,7 @@ fromList glossaryItems =
 orderListByFrequency : List ( GlossaryItemIndex, GlossaryItem ) -> List ( GlossaryItemIndex, GlossaryItem )
 orderListByFrequency indexedGlossaryItems =
     let
+        indexed : List ( Int, GlossaryItem )
         indexed =
             List.map (Tuple.mapFirst GlossaryItemIndex.toInt) indexedGlossaryItems
 
@@ -67,11 +70,13 @@ orderListByFrequency indexedGlossaryItems =
         termScoreInItem : Term -> GlossaryItem -> Int
         termScoreInItem term glossaryItem =
             let
+                termAsWord : Regex.Regex
                 termAsWord =
                     ("\\b" ++ Extras.Regex.escapeStringForUseInRegex (Term.raw term) ++ "\\b")
                         |> Regex.fromString
                         |> Maybe.withDefault Regex.never
 
+                score : Int
                 score =
                     (glossaryItem.terms |> List.map (Term.raw >> Regex.find termAsWord >> List.length) |> List.sum)
                         + (glossaryItem.details |> List.map (Details.raw >> Regex.find termAsWord >> List.length) |> List.sum)
@@ -102,11 +107,10 @@ orderListByFrequency indexedGlossaryItems =
         termBodyScores : Dict String Int
         termBodyScores =
             indexed
-                |> List.map
+                |> List.concatMap
                     (\( index, glossaryItem ) ->
                         List.map (\term -> ( index, term )) glossaryItem.terms
                     )
-                |> List.concat
                 |> List.foldl
                     (\( glossaryItemIndex, term ) result ->
                         Dict.insert
@@ -120,6 +124,7 @@ orderListByFrequency indexedGlossaryItems =
         |> List.sortWith
             (\( _, item1 ) ( _, item2 ) ->
                 let
+                    itemScore : { a | terms : List Term } -> Int
                     itemScore =
                         .terms
                             >> List.map
@@ -147,10 +152,10 @@ orderListByFrequency indexedGlossaryItems =
 sanitiseList : List GlossaryItem -> List GlossaryItem
 sanitiseList glossaryItems =
     let
+        primaryTermIdsSet : Set.Set String
         primaryTermIdsSet =
             glossaryItems
-                |> List.map (.terms >> List.take 1)
-                |> List.concat
+                |> List.concatMap (.terms >> List.take 1)
                 |> List.map Term.id
                 |> Set.fromList
     in
@@ -190,6 +195,7 @@ get indexWhenOrderedAlphabetically glossaryItems =
 insert : GlossaryItem -> GlossaryItems -> GlossaryItems
 insert glossaryItem glossaryItems =
     let
+        itemsList : List GlossaryItem
         itemsList =
             glossaryItems
                 |> orderedAlphabetically
@@ -255,8 +261,7 @@ orderedByFrequency glossaryItems =
 terms : GlossaryItems -> List Term
 terms =
     orderedAlphabetically
-        >> List.map (Tuple.second >> .terms)
-        >> List.concat
+        >> List.concatMap (Tuple.second >> .terms)
 
 
 {-| Retrieve the list of all primary terms in the glossary.
@@ -267,5 +272,4 @@ This is to encourage standardizing on one "primary" term for a concept, instead 
 primaryTerms : GlossaryItems -> List Term
 primaryTerms =
     orderedAlphabetically
-        >> List.map (Tuple.second >> .terms >> List.take 1)
-        >> List.concat
+        >> List.concatMap (Tuple.second >> .terms >> List.take 1)

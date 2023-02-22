@@ -117,6 +117,7 @@ termToHtmlTree term =
             [ HtmlTree.Leaf (Term.raw term)
                 |> (\inner ->
                         let
+                            linkedTerm : HtmlTree
                             linkedTerm =
                                 HtmlTree.Node "a"
                                     True

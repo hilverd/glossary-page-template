@@ -47,6 +47,7 @@ Any other characters which are not generally safe for filenames are omitted.
 toFilename : String -> GlossaryTitle -> String
 toFilename extension glossaryTitle =
     let
+        notSoNiceCharacters : Regex.Regex
         notSoNiceCharacters =
             "[^A-Za-zÀ-ÖØ-öø-įĴ-őŔ-žǍ-ǰǴ-ǵǸ-țȞ-ȟȤ-ȳɃɆ-ɏḀ-ẞƀ-ƓƗ-ƚƝ-ơƤ-ƥƫ-ưƲ-ƶẠ-ỿ0-9_-]"
                 |> Regex.fromString
