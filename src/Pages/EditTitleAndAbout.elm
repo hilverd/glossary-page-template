@@ -1,11 +1,11 @@
-module Pages.EditTitleAndAbout exposing (Model, Msg, init, subscriptions, update, view)
+module Pages.EditTitleAndAbout exposing (InternalMsg, Model, Msg, init, subscriptions, update, view)
 
-import Accessibility exposing (..)
+import Accessibility exposing (Html, div, form, h1, h2, label, main_, p, span, text)
 import Accessibility.Aria
 import Array exposing (Array)
 import Browser exposing (Document)
 import Browser.Dom as Dom
-import CommonModel exposing (CommonModel, OrderItemsBy(..))
+import CommonModel exposing (CommonModel)
 import Components.AboutSection
 import Components.Button
 import Components.Copy
@@ -20,7 +20,7 @@ import Data.GlossaryTitle as GlossaryTitle
 import ElementIds
 import Extras.Html
 import Extras.HtmlEvents
-import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
+import Extras.HtmlTree as HtmlTree
 import Extras.Http
 import Extras.Task
 import Html
@@ -28,6 +28,7 @@ import Html.Attributes exposing (class, for, id, name, placeholder, required, sp
 import Html.Events
 import Http
 import Icons
+import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
 import Svg.Attributes
 import Task
@@ -112,9 +113,11 @@ update msg model =
 
         AddAboutLink ->
             let
+                form : TitleAndAboutForm
                 form =
                     Form.addAboutLink model.form
 
+                latestAboutLinkIndex : AboutLinkIndex
                 latestAboutLinkIndex =
                     form
                         |> Form.aboutLinkFields
@@ -142,9 +145,11 @@ update msg model =
 
                     else
                         let
+                            common0 : CommonModel
                             common0 =
                                 model.common
 
+                            common1 : CommonModel
                             common1 =
                                 { common0
                                     | glossary =
@@ -155,6 +160,7 @@ update msg model =
                                             }
                                 }
 
+                            model1 : Model
                             model1 =
                                 { model | common = common1 }
                         in
@@ -202,6 +208,7 @@ aboutSectionFromForm enableMarkdownBasedSyntax form =
 patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
 patchHtmlFile common glossaryItems =
     let
+        msg : PageMsg a
         msg =
             PageMsg.NavigateToListAll common
     in
@@ -212,6 +219,7 @@ patchHtmlFile common glossaryItems =
         case common.glossary of
             Ok glossary0 ->
                 let
+                    glossary : Glossary.Glossary
                     glossary =
                         { glossary0 | items = glossaryItems }
                 in
@@ -352,6 +360,7 @@ viewEditAboutParagraph showNewlineWarnings markdownBasedSyntaxEnabled showValida
 viewEditAboutLinks : Bool -> Array Form.AboutLinkField -> Html Msg
 viewEditAboutLinks showValidationErrors aboutLinkFieldsArray =
     let
+        aboutLinkFields : List Form.AboutLinkField
         aboutLinkFields =
             Array.toList aboutLinkFieldsArray
     in
@@ -511,6 +520,7 @@ orMaybe first second =
 viewCreateFormFooter : Model -> Bool -> Maybe String -> GlossaryItems -> TitleAndAboutForm -> Html Msg
 viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossaryItems form =
     let
+        errorDiv : String -> Html msg
         errorDiv message =
             div
                 [ class "flex justify-end mb-2" ]
@@ -519,9 +529,11 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
                     [ text message ]
                 ]
 
+        common : CommonModel
         common =
             model.common
 
+        updatedGlossary : Result Decode.Error Glossary.Glossary
         updatedGlossary =
             case common.glossary of
                 Ok glossary ->
@@ -561,9 +573,11 @@ view model =
     case model.common.glossary of
         Ok { enableMarkdownBasedSyntax, items } ->
             let
+                title1 : GlossaryTitle.GlossaryTitle
                 title1 =
                     titleFromForm model.form
 
+                aboutSection : AboutSection
                 aboutSection =
                     aboutSectionFromForm enableMarkdownBasedSyntax model.form
             in

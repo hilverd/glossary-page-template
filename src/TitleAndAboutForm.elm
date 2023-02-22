@@ -87,18 +87,23 @@ aboutLinkFields titleAndAboutForm =
 validate : TitleAndAboutForm -> TitleAndAboutForm
 validate form =
     let
+        cannotBeEmptyMessage : String
         cannotBeEmptyMessage =
             "This field can't be empty"
 
+        titleField0 : TitleField
         titleField0 =
             titleField form
 
+        aboutParagraphField0 : AboutParagraphField
         aboutParagraphField0 =
             aboutParagraphField form
 
+        aboutLinkFields0 : Array AboutLinkField
         aboutLinkFields0 =
             aboutLinkFields form
 
+        validatedTitleField : TitleField
         validatedTitleField =
             { titleField0
                 | validationError =
@@ -109,6 +114,7 @@ validate form =
                         Nothing
             }
 
+        validatedAboutParagraphField : AboutParagraphField
         validatedAboutParagraphField =
             { aboutParagraphField0
                 | validationError =
@@ -124,6 +130,7 @@ validate form =
                         Nothing
             }
 
+        validatedAboutLinkFields : Array AboutLinkField
         validatedAboutLinkFields =
             aboutLinkFields0
                 |> Array.map
@@ -192,6 +199,7 @@ updateTitle title titleAndAboutForm =
     case titleAndAboutForm of
         TitleAndAboutForm form ->
             let
+                titleField0 : TitleField
                 titleField0 =
                     form.titleField
             in
@@ -204,6 +212,7 @@ updateAboutParagraph body titleAndAboutForm =
     case titleAndAboutForm of
         TitleAndAboutForm form ->
             let
+                aboutParagraphField0 : AboutParagraphField
                 aboutParagraphField0 =
                     form.aboutParagraphField
             in

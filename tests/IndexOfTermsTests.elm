@@ -1,11 +1,12 @@
-module IndexOfTermsTests exposing (..)
+module IndexOfTermsTests exposing (suite)
 
+import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Details as Details
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.IndexOfTerms as IndexOfTerms
 import Expect
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 
 
 termFromBody : String -> Term
@@ -16,24 +17,28 @@ termFromBody body =
 glossaryItems : GlossaryItems
 glossaryItems =
     let
+        one : GlossaryItem
         one =
             { terms = [ termFromBody "One" ]
             , details = [ Details.fromPlaintext "One" ]
             , relatedTerms = []
             }
 
+        two : GlossaryItem
         two =
             { terms = [ termFromBody "Two" ]
             , details = [ Details.fromPlaintext "Two" ]
             , relatedTerms = []
             }
 
+        three : GlossaryItem
         three =
             { terms = [ termFromBody "Three" ]
             , details = [ Details.fromPlaintext "Three" ]
             , relatedTerms = []
             }
 
+        future : GlossaryItem
         future =
             { terms = [ termFromBody "_future_" ]
             , details = [ Details.fromPlaintext "_future_" ]

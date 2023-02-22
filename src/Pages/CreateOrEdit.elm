@@ -1,6 +1,6 @@
-module Pages.CreateOrEdit exposing (Model, Msg, init, subscriptions, update, view)
+module Pages.CreateOrEdit exposing (InternalMsg, Model, Msg, init, subscriptions, update, view)
 
-import Accessibility exposing (..)
+import Accessibility exposing (Html, article, div, dl, form, h1, h2, p, span, text)
 import Accessibility.Aria
 import Array exposing (Array)
 import Browser exposing (Document)
@@ -13,6 +13,7 @@ import Components.GlossaryItemCard
 import Components.SelectMenu
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
 import Data.Glossary as Glossary
+import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -22,7 +23,7 @@ import Data.TermIndex as TermIndex exposing (TermIndex)
 import ElementIds
 import Extras.Html
 import Extras.HtmlEvents
-import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
+import Extras.HtmlTree as HtmlTree
 import Extras.Http
 import Extras.Task
 import GlossaryItemForm as Form exposing (GlossaryItemForm)
@@ -76,12 +77,15 @@ init commonModel =
     case commonModel.glossary of
         Ok { items } ->
             let
+                existingTerms : List Term
                 existingTerms =
                     GlossaryItems.terms items
 
+                existingPrimaryTerms : List Term
                 existingPrimaryTerms =
                     GlossaryItems.primaryTerms items
 
+                itemsListingThisItemAsRelated : List GlossaryItem
                 itemsListingThisItemAsRelated =
                     commonModel.maybeIndex
                         |> Maybe.andThen
@@ -105,6 +109,7 @@ init commonModel =
                             )
                         |> Maybe.withDefault []
 
+                emptyForm : GlossaryItemForm
                 emptyForm =
                     Form.empty existingTerms existingPrimaryTerms itemsListingThisItemAsRelated
             in
@@ -156,9 +161,11 @@ update msg model =
 
         AddTerm ->
             let
+                form : GlossaryItemForm
                 form =
                     Form.addTerm model.form
 
+                latestTermIndex : TermIndex
                 latestTermIndex =
                     Array.length (Form.termFields form) - 1 |> TermIndex.fromInt
             in
@@ -177,9 +184,11 @@ update msg model =
 
         AddDetails ->
             let
+                form : GlossaryItemForm
                 form =
                     Form.addDetails model.form
 
+                latestDetailsIndex : DetailsIndex
                 latestDetailsIndex =
                     Array.length (Form.detailsFields form) - 1 |> DetailsIndex.fromInt
             in
@@ -195,9 +204,11 @@ update msg model =
 
         AddRelatedTerm maybeTermId ->
             let
+                form : GlossaryItemForm
                 form =
                     Form.addRelatedTerm maybeTermId model.form
 
+                latestRelatedTermIndex : RelatedTermIndex
                 latestRelatedTermIndex =
                     Array.length (Form.relatedTermFields form) - 1 |> RelatedTermIndex.fromInt
             in
@@ -207,6 +218,7 @@ update msg model =
 
         SelectRelatedTerm relatedTermIndex selection ->
             let
+                relatedTermIdReference : Maybe String
                 relatedTermIdReference =
                     if selection == "" then
                         Nothing
@@ -232,9 +244,11 @@ update msg model =
 
                     else
                         let
+                            newOrUpdatedGlossaryItem : GlossaryItem
                             newOrUpdatedGlossaryItem =
                                 Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form
 
+                            common : CommonModel
                             common =
                                 model.common
 
@@ -247,6 +261,7 @@ update msg model =
 
                                     Nothing ->
                                         let
+                                            updated : GlossaryItems
                                             updated =
                                                 GlossaryItems.insert newOrUpdatedGlossaryItem glossary.items
                                         in
@@ -265,6 +280,7 @@ update msg model =
                                             |> Maybe.map Tuple.first
                                         )
 
+                            model_ : Model
                             model_ =
                                 { model
                                     | common =
@@ -292,6 +308,7 @@ patchHtmlFile common glossaryItems =
     case common.glossary of
         Ok glossary ->
             let
+                msg : PageMsg InternalMsg
                 msg =
                     PageMsg.NavigateToListAll { common | glossary = Ok { glossary | items = glossaryItems } }
             in
@@ -353,6 +370,7 @@ viewCreateDescriptionTerm showValidationErrors canBeDeleted index term =
 viewCreateDescriptionTermInternal : Bool -> Bool -> TermIndex -> TermField -> Html Msg
 viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex termField =
     let
+        abbreviationLabelId : String
         abbreviationLabelId =
             ElementIds.abbreviationLabel termIndex
     in
@@ -426,6 +444,7 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
 viewCreateDescriptionTerms : Bool -> Array TermField -> Html Msg
 viewCreateDescriptionTerms showValidationErrors termsArray =
     let
+        terms : List TermField
         terms =
             Array.toList termsArray
     in
@@ -461,9 +480,11 @@ viewCreateDescriptionDetailsSingle showNewlineWarnings markdownBasedSyntaxEnable
 viewCreateDescriptionDetailsSingle1 : Bool -> Bool -> Bool -> DetailsIndex -> DetailsField -> Html Msg
 viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabled showValidationErrors index detailsSingle =
     let
+        raw : String
         raw =
             DetailsField.raw detailsSingle
 
+        validationError : Maybe String
         validationError =
             DetailsField.validationError detailsSingle
     in
@@ -538,6 +559,7 @@ viewAddDetailsButtonForEmptyState =
 viewCreateDescriptionDetails : Bool -> Bool -> Bool -> Array DetailsField -> Html Msg
 viewCreateDescriptionDetails showNewlineWarnings markdownBasedSyntaxEnabled showValidationErrors detailsArray =
     let
+        details : List DetailsField
         details =
             Array.toList detailsArray
     in
@@ -642,9 +664,11 @@ viewCreateSeeAlso :
     -> Html Msg
 viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray suggestedRelatedTerms =
     let
+        termIdsSet : Set String
         termIdsSet =
             terms |> Array.toList |> List.map (TermField.raw >> Form.termBodyToId) |> Set.fromList
 
+        relatedTermsList : List Form.RelatedTermField
         relatedTermsList =
             Array.toList relatedTermsArray
 
@@ -720,6 +744,7 @@ viewAddSuggestedSeeAlso suggestedRelatedTerms =
 viewCreateFormFooter : Model -> Html Msg
 viewCreateFormFooter model =
     let
+        errorDiv : String -> Html msg
         errorDiv message =
             div
                 [ class "flex justify-end mb-2" ]
@@ -728,6 +753,7 @@ viewCreateFormFooter model =
                     [ text message ]
                 ]
 
+        common : CommonModel
         common =
             model.common
     in
@@ -762,18 +788,23 @@ view model =
     case model.common.glossary of
         Ok glossary ->
             let
+                terms : Array TermField
                 terms =
                     Form.termFields model.form
 
+                detailsArray : Array DetailsField
                 detailsArray =
                     Form.detailsFields model.form
 
+                relatedTerms : Array Form.RelatedTermField
                 relatedTerms =
                     Form.relatedTermFields model.form
 
+                suggestedRelatedTerms : List Term
                 suggestedRelatedTerms =
                     Form.suggestRelatedTerms model.form
 
+                newOrUpdatedGlossaryItem : GlossaryItem
                 newOrUpdatedGlossaryItem =
                     Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form
             in

@@ -9,19 +9,21 @@ import Extras.Url
 search : String -> GlossaryItems -> List SearchDialog.SearchResult
 search searchTerm glossaryItems =
     let
+        searchTermNormalised : String
         searchTermNormalised =
             searchTerm |> String.trim |> String.toLower
-
-        terms : List Term
-        terms =
-            glossaryItems
-                |> GlossaryItems.orderedByFrequency
-                |> List.concatMap (Tuple.second >> .terms)
     in
     if String.isEmpty searchTermNormalised then
         []
 
     else
+        let
+            terms : List Term
+            terms =
+                glossaryItems
+                    |> GlossaryItems.orderedByFrequency
+                    |> List.concatMap (Tuple.second >> .terms)
+        in
         terms
             |> List.filterMap
                 (\term ->

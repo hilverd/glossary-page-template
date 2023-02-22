@@ -1,13 +1,14 @@
-module SearchTests exposing (..)
+module SearchTests exposing (suite)
 
 import Components.SearchDialog exposing (searchResult)
+import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Details as Details
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Expect
 import Search
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 
 
 termFromBody : String -> Term
@@ -18,18 +19,21 @@ termFromBody body =
 loadedGlossaryItems : GlossaryItems
 loadedGlossaryItems =
     let
+        one : GlossaryItem
         one =
             { terms = [ termFromBody "One" ]
             , details = [ Details.fromPlaintext "One" ]
             , relatedTerms = [ RelatedTerm.fromPlaintext "#Two" "Two" ]
             }
 
+        two : GlossaryItem
         two =
             { terms = [ termFromBody "Two" ]
             , details = [ Details.fromPlaintext "Two" ]
             , relatedTerms = []
             }
 
+        three : GlossaryItem
         three =
             { terms = [ termFromBody "Three" ]
             , details = [ Details.fromPlaintext "Three" ]

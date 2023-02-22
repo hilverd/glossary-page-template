@@ -30,6 +30,7 @@ escape string =
 comment : String -> String
 comment =
     let
+        linebreaks : Regex.Regex
         linebreaks =
             "[\u{000D}\n]"
                 |> Regex.fromString
@@ -58,15 +59,18 @@ paragraphs =
 itemToAnki : GlossaryItem -> String
 itemToAnki { terms, details, relatedTerms } =
     let
+        quote : String -> String
         quote string =
             "\"" ++ string ++ "\""
 
+        front : String
         front =
             terms
                 |> List.map (Term.raw >> escape)
                 |> lines
                 |> quote
 
+        back : String
         back =
             if List.isEmpty details then
                 if List.isEmpty relatedTerms then
@@ -96,15 +100,19 @@ This is achieved by producing a [command for downloading](https://package.elm-la
 download : GlossaryTitle -> AboutSection -> GlossaryItems -> Cmd msg
 download glossaryTitle aboutSection glossaryItems =
     let
+        filename : String
         filename =
             GlossaryTitle.toFilename "-Anki_deck.txt" glossaryTitle
 
+        instructionsComment : String
         instructionsComment =
             comment "This file is meant to be imported into Anki (https://docs.ankiweb.net/importing.html#text-files)."
 
+        titleComment : String
         titleComment =
             glossaryTitle |> GlossaryTitle.toString |> comment
 
+        aboutLinksComment : String
         aboutLinksComment =
             aboutSection.links
                 |> List.map
@@ -114,12 +122,14 @@ download glossaryTitle aboutSection glossaryItems =
                 |> List.map comment
                 |> lines
 
+        itemsString : String
         itemsString =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
                 |> List.map (Tuple.second >> itemToAnki)
                 |> lines
 
+        content : String
         content =
             [ instructionsComment
             , comment ""

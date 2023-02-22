@@ -6,6 +6,7 @@ import Regex
 escapeForMarkdown : String -> String
 escapeForMarkdown string =
     let
+        charactersToEscape : Regex.Regex
         charactersToEscape =
             -- It might be necessary to escape this set too: [().!-]
             -- but these are left out for now.

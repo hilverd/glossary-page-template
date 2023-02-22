@@ -19,7 +19,6 @@ module Extras.HtmlTree exposing
 
 import Html
 import Html.Attributes
-import Http exposing (Response(..))
 
 
 {-| An `Attribute` is a `name` / `value` pair that represents a normal HTML attribute.
@@ -110,6 +109,7 @@ escape string =
 toIndentedHtml : Int -> Int -> Bool -> HtmlTree -> String
 toIndentedHtml initialLevel level format tree =
     let
+        prefix : String
         prefix =
             if format then
                 String.repeat (4 * (initialLevel + level)) " "
@@ -123,6 +123,7 @@ toIndentedHtml initialLevel level format tree =
 
         Node name formatChildren attributes children ->
             let
+                newLineIfFormatChildren : String
                 newLineIfFormatChildren =
                     if format && formatChildren then
                         "\n"
@@ -130,11 +131,7 @@ toIndentedHtml initialLevel level format tree =
                     else
                         ""
 
-                attributesString =
-                    attributes
-                        |> List.map (\attribute -> attribute.name ++ "=" ++ "\"" ++ escape attribute.value ++ "\"")
-                        |> String.join " "
-
+                openingTag : String
                 openingTag =
                     "<"
                         ++ name
@@ -142,10 +139,18 @@ toIndentedHtml initialLevel level format tree =
                                 ""
 
                             else
+                                let
+                                    attributesString : String
+                                    attributesString =
+                                        attributes
+                                            |> List.map (\attribute -> attribute.name ++ "=" ++ "\"" ++ escape attribute.value ++ "\"")
+                                            |> String.join " "
+                                in
                                 " " ++ attributesString
                            )
                         ++ ">"
 
+                closingTag : String
                 closingTag =
                     "</" ++ name ++ ">"
             in

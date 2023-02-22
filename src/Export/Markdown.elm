@@ -58,16 +58,19 @@ paragraphs =
 itemToMarkdown : GlossaryItem -> String
 itemToMarkdown { terms, details, relatedTerms } =
     let
+        termsString : String
         termsString =
             terms
                 |> List.map (Term.raw >> bold)
                 |> lines
 
+        detailsString : String
         detailsString =
             details
                 |> List.map Details.markdown
                 |> paragraphs
 
+        relatedTermsPrefix : String
         relatedTermsPrefix =
             if List.isEmpty relatedTerms then
                 ""
@@ -78,6 +81,7 @@ itemToMarkdown { terms, details, relatedTerms } =
             else
                 "See also: "
 
+        relatedTermsString : String
         relatedTermsString =
             relatedTerms
                 |> List.map (RelatedTerm.raw >> Extras.String.escapeForMarkdown)
@@ -94,26 +98,32 @@ This is achieved by producing a [command for downloading](https://package.elm-la
 download : GlossaryTitle -> AboutSection -> GlossaryItems -> Cmd msg
 download glossaryTitle aboutSection glossaryItems =
     let
+        filename : String
         filename =
             GlossaryTitle.toFilename ".md" glossaryTitle
 
+        titleHeadingString : String
         titleHeadingString =
             glossaryTitle |> GlossaryTitle.toString |> Extras.String.escapeForMarkdown |> (++) "# "
 
+        aboutParagraphString : String
         aboutParagraphString =
             aboutSection.paragraph |> AboutParagraph.markdown
 
+        aboutLinksString : String
         aboutLinksString =
             aboutSection.links
                 |> List.map (link >> (++) "* ")
                 |> lines
 
+        itemsString : String
         itemsString =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
                 |> List.map (Tuple.second >> itemToMarkdown)
                 |> paragraphs
 
+        content : String
         content =
             [ titleHeadingString
             , aboutParagraphString

@@ -1,7 +1,7 @@
 module MarkdownRenderers exposing (anchorTagHtmlTreeRenderer, anchorTagRenderer, htmlTreeRenderer, imgTagHtmlTreeRenderer, imgTagRenderer)
 
 import Extras.HtmlAttribute
-import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
+import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Markdown.Block as Block
@@ -206,6 +206,7 @@ htmlTreeRenderer =
                             case item of
                                 Block.ListItem task children ->
                                     let
+                                        checkbox : HtmlTree
                                         checkbox =
                                             case task of
                                                 Block.NoTask ->
@@ -272,6 +273,7 @@ htmlTreeRenderer =
     , tableHeaderCell =
         \maybeAlignment ->
             let
+                attrs : List HtmlTree.Attribute
                 attrs =
                     maybeAlignment
                         |> Maybe.map

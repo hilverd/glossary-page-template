@@ -103,9 +103,11 @@ itemsListingThisTermAsRelated glossaryItemForm =
 validate : GlossaryItemForm -> GlossaryItemForm
 validate form =
     let
+        cannotBeEmptyMessage : String
         cannotBeEmptyMessage =
             "This field can't be empty"
 
+        termIdsOutsideSet : Set String
         termIdsOutsideSet =
             form |> termsOutside |> List.map Term.id |> Set.fromList
 
@@ -122,43 +124,50 @@ validate form =
                     )
                     Dict.empty
 
+        validatedTermFields : Array TermField
         validatedTermFields =
             form
                 |> termFields
                 |> Array.map
                     (\termField ->
                         let
+                            body : String
                             body =
                                 TermField.raw termField
-
-                            termId =
-                                termBodyToId body
                         in
                         termField
                             |> TermField.setValidationError
                                 (if String.isEmpty body then
                                     Just cannotBeEmptyMessage
 
-                                 else if Set.member termId termIdsOutsideSet then
-                                    Just "This term already exists elsewhere"
-
-                                 else if (Dict.get termId termIdsInsideForm |> Maybe.withDefault 0) > 1 then
-                                    Just "This term occurs multiple times"
-
-                                 else if ElementIds.reserved termId then
-                                    Just "This term is reserved"
-
                                  else
-                                    Nothing
+                                    let
+                                        termId : String
+                                        termId =
+                                            termBodyToId body
+                                    in
+                                    if Set.member termId termIdsOutsideSet then
+                                        Just "This term already exists elsewhere"
+
+                                    else if (Dict.get termId termIdsInsideForm |> Maybe.withDefault 0) > 1 then
+                                        Just "This term occurs multiple times"
+
+                                    else if ElementIds.reserved termId then
+                                        Just "This term is reserved"
+
+                                    else
+                                        Nothing
                                 )
                     )
 
+        validatedDetailsFields : Array DetailsField
         validatedDetailsFields =
             form
                 |> detailsFields
                 |> Array.map
                     (\detailsField ->
                         let
+                            raw : String
                             raw =
                                 DetailsField.raw detailsField
                         in
@@ -172,6 +181,7 @@ validate form =
                                 )
                     )
 
+        validatedRelatedTermFields : Array RelatedTermField
         validatedRelatedTermFields =
             form
                 |> relatedTermFields
@@ -200,6 +210,7 @@ validate form =
 hasValidationErrors : GlossaryItemForm -> Bool
 hasValidationErrors form =
     let
+        hasErrors : (a -> Maybe b) -> Array a -> Bool
         hasErrors f =
             Array.toList >> List.any (f >> (/=) Nothing)
     in
@@ -231,6 +242,7 @@ emptyRelatedTermField =
 fromGlossaryItem : List Term -> List Term -> List GlossaryItem -> GlossaryItem -> GlossaryItemForm
 fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRelated item =
     let
+        termFieldsForItem : List TermField
         termFieldsForItem =
             List.map
                 (\term ->
@@ -260,6 +272,7 @@ fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRe
                 )
                 existingPrimaryTerms
 
+        detailsFieldsList : List DetailsField
         detailsFieldsList =
             List.map
                 (\detailsElem ->
@@ -311,6 +324,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form =
             |> List.map
                 (\termField ->
                     let
+                        raw : String
                         raw =
                             termField |> TermField.raw |> String.trim
                     in
@@ -433,14 +447,15 @@ deleteDetails index glossaryItemForm =
 
 addRelatedTerm : Maybe String -> GlossaryItemForm -> GlossaryItemForm
 addRelatedTerm maybeTermId glossaryItemForm =
-    let
-        relatedTermField =
-            maybeTermId
-                |> Maybe.map (\termId -> { idReference = Just termId, validationError = Nothing })
-                |> Maybe.withDefault emptyRelatedTermField
-    in
     case glossaryItemForm of
         GlossaryItemForm form ->
+            let
+                relatedTermField : RelatedTermField
+                relatedTermField =
+                    maybeTermId
+                        |> Maybe.map (\termId -> { idReference = Just termId, validationError = Nothing })
+                        |> Maybe.withDefault emptyRelatedTermField
+            in
             GlossaryItemForm
                 { form | relatedTermFields = Array.push relatedTermField form.relatedTermFields }
                 |> validate
@@ -492,37 +507,35 @@ suggestRelatedTerms glossaryItemForm =
                 |> List.filter
                     (\term -> not <| Set.member (Term.id term) relatedTermIdsAlreadyInForm)
 
+        detailsFieldBodies : List String
         detailsFieldBodies =
             glossaryItemForm
                 |> detailsFields
                 |> Array.toList
                 |> List.map (DetailsField.raw >> String.toLower)
 
+        primaryTermIdsOfItemsListingThisItemAsRelated : Set String
         primaryTermIdsOfItemsListingThisItemAsRelated =
             glossaryItemForm
                 |> itemsListingThisTermAsRelated
-                |> List.map (.terms >> List.head)
-                |> List.filterMap identity
+                |> List.filterMap (.terms >> List.head)
                 |> List.map Term.id
                 |> Set.fromList
-
-        relevantCandidateTerms : List Term
-        relevantCandidateTerms =
-            candidateTerms
-                |> List.filter
-                    (\candidateTerm ->
-                        let
-                            candidateTermAsWord =
-                                ("\\b" ++ Extras.Regex.escapeStringForUseInRegex (String.toLower (Term.raw candidateTerm)) ++ "\\b")
-                                    |> Regex.fromString
-                                    |> Maybe.withDefault Regex.never
-                        in
-                        Set.member (Term.id candidateTerm) primaryTermIdsOfItemsListingThisItemAsRelated
-                            || List.any
-                                (\detailsFieldBody ->
-                                    Regex.contains candidateTermAsWord detailsFieldBody
-                                )
-                                detailsFieldBodies
-                    )
     in
-    relevantCandidateTerms
+    candidateTerms
+        |> List.filter
+            (\candidateTerm ->
+                let
+                    candidateTermAsWord : Regex.Regex
+                    candidateTermAsWord =
+                        ("\\b" ++ Extras.Regex.escapeStringForUseInRegex (String.toLower (Term.raw candidateTerm)) ++ "\\b")
+                            |> Regex.fromString
+                            |> Maybe.withDefault Regex.never
+                in
+                Set.member (Term.id candidateTerm) primaryTermIdsOfItemsListingThisItemAsRelated
+                    || List.any
+                        (\detailsFieldBody ->
+                            Regex.contains candidateTermAsWord detailsFieldBody
+                        )
+                        detailsFieldBodies
+            )

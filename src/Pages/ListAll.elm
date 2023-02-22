@@ -1,8 +1,31 @@
-port module Pages.ListAll exposing (Model, Msg, init, subscriptions, update, view)
+port module Pages.ListAll exposing (InternalMsg, MakingChanges, MenuForMobileVisibility, Model, Msg, SearchDialog, init, subscriptions, update, view)
 
-import Accessibility exposing (..)
+import Accessibility
+    exposing
+        ( Html
+        , a
+        , button
+        , code
+        , details
+        , div
+        , fieldset
+        , h1
+        , h2
+        , h5
+        , header
+        , label
+        , legend
+        , li
+        , nav
+        , p
+        , pre
+        , span
+        , summary
+        , text
+        , ul
+        )
 import Accessibility.Aria
-import Accessibility.Key exposing (tabbable)
+import Accessibility.Key
 import Accessibility.Role
 import Browser exposing (Document)
 import Browser.Dom as Dom
@@ -29,7 +52,7 @@ import Extras.BrowserDom
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
-import Extras.HtmlTree as HtmlTree exposing (HtmlTree(..))
+import Extras.HtmlTree as HtmlTree
 import Extras.Http
 import Extras.Task
 import Extras.Url exposing (fragmentOnly)
@@ -191,6 +214,7 @@ update msg model =
 
         BackToTop staticSidebar ->
             let
+                idOfSidebarOrMenu : String
                 idOfSidebarOrMenu =
                     if staticSidebar then
                         ElementIds.staticSidebarForDesktop
@@ -218,6 +242,7 @@ update msg model =
             Components.SearchDialog.update
                 (\x ->
                     let
+                        searchDialog0 : SearchDialog
                         searchDialog0 =
                             model.searchDialog
                     in
@@ -229,6 +254,7 @@ update msg model =
 
         HideSearchDialog ->
             ( let
+                searchDialog0 : SearchDialog
                 searchDialog0 =
                     model.searchDialog
               in
@@ -238,9 +264,11 @@ update msg model =
 
         UpdateSearchTerm searchTerm ->
             ( let
+                searchDialog0 : SearchDialog
                 searchDialog0 =
                     model.searchDialog
 
+                results : List Components.SearchDialog.SearchResult
                 results =
                     Search.search searchTerm <|
                         case model.common.glossary of
@@ -274,6 +302,7 @@ update msg model =
             case model.common.glossary of
                 Ok { items } ->
                     let
+                        updatedGlossaryItems : GlossaryItems
                         updatedGlossaryItems =
                             GlossaryItems.remove index items
                     in
@@ -293,6 +322,7 @@ update msg model =
 
         Deleted updatedGlossaryItems ->
             let
+                common : CommonModel
                 common =
                     model.common
             in
@@ -315,6 +345,7 @@ update msg model =
 
         JumpToTermIndexGroup staticSidebar termIndexGroupLabel ->
             let
+                idOfSidebarOrMenu : String
                 idOfSidebarOrMenu =
                     if staticSidebar then
                         ElementIds.staticSidebarForDesktop
@@ -337,6 +368,7 @@ update msg model =
                                             |> Task.andThen
                                                 (\quickSearchButtonAndLetterGridElement ->
                                                     let
+                                                        height : Float
                                                         height =
                                                             quickSearchButtonAndLetterGridElement.element.height
                                                     in
@@ -356,6 +388,7 @@ update msg model =
 
         ChangeOrderItemsBy orderItemsBy ->
             let
+                common : CommonModel
                 common =
                     model.common
             in
@@ -367,6 +400,7 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
+                        updatedGlossary : Glossary
                         updatedGlossary =
                             { glossary | enableMarkdownBasedSyntax = not glossary.enableMarkdownBasedSyntax }
                     in
@@ -384,6 +418,7 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
+                        updatedGlossary : Glossary
                         updatedGlossary =
                             { glossary | cardWidth = cardWidth }
                     in
@@ -401,12 +436,15 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
+                        common0 : CommonModel
                         common0 =
                             model.common
 
+                        common1 : CommonModel
                         common1 =
                             { common0 | enableExportMenu = not common0.enableExportMenu }
 
+                        model1 : Model
                         model1 =
                             { model | common = common1 }
                     in
@@ -420,6 +458,7 @@ update msg model =
         ChangedSettings glossary ->
             if model.common.enableSavingChangesInMemory then
                 let
+                    common : CommonModel
                     common =
                         model.common
                 in
@@ -465,6 +504,7 @@ giveFocusToOuter =
 patchHtmlFileAfterChangingSettings : CommonModel -> Glossary -> Cmd Msg
 patchHtmlFileAfterChangingSettings common glossary =
     let
+        msg : PageMsg InternalMsg
         msg =
             PageMsg.Internal <| ChangedSettings glossary
     in
@@ -499,6 +539,7 @@ patchHtmlFileAfterChangingSettings common glossary =
 patchHtmlFileAfterDeletingItem : CommonModel -> GlossaryItemIndex -> GlossaryItems -> Cmd Msg
 patchHtmlFileAfterDeletingItem common indexOfItemBeingDeleted glossaryItems =
     let
+        msg : PageMsg InternalMsg
         msg =
             PageMsg.Internal <| Deleted glossaryItems
     in
@@ -509,6 +550,7 @@ patchHtmlFileAfterDeletingItem common indexOfItemBeingDeleted glossaryItems =
         case common.glossary of
             Ok glossary0 ->
                 let
+                    glossary : Glossary
                     glossary =
                         { glossary0 | items = glossaryItems }
                 in
@@ -587,6 +629,7 @@ viewMakingChangesHelp filename tabbable =
                     [ class "mt-5" ]
                     [ code [] <|
                         let
+                            defaultFilename : String
                             defaultFilename =
                                 "glossary.html"
                         in
@@ -617,6 +660,7 @@ viewMakingChangesHelp filename tabbable =
 viewSettings : Glossary -> Model -> Html Msg
 viewSettings glossary model =
     let
+        errorDiv : String -> Html msg
         errorDiv message =
             div
                 [ class "mt-2" ]
@@ -702,6 +746,7 @@ viewTermIndexGroup tabbable staticSidebar { label, terms } =
 viewIndexOfTerms : Bool -> Bool -> IndexOfTerms -> Html Msg
 viewIndexOfTerms tabbable staticSidebar indexOfTerms =
     let
+        termGroups : List TermGroup
         termGroups =
             IndexOfTerms.termGroups indexOfTerms
     in
@@ -724,6 +769,7 @@ viewIndexOfTerms tabbable staticSidebar indexOfTerms =
 viewGlossaryItem : GlossaryItemIndex -> Bool -> Model -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
 viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
     let
+        common : CommonModel
         common =
             model.common
     in
@@ -1076,6 +1122,7 @@ viewTermIndexFirstCharacter staticSidebar tabbable firstCharacter enabled =
 viewTermIndexFirstCharacterGrid : Bool -> Bool -> IndexOfTerms -> Html Msg
 viewTermIndexFirstCharacterGrid staticSidebar tabbable indexOfTerms =
     let
+        termGroups : List TermGroup
         termGroups =
             IndexOfTerms.termGroups indexOfTerms
     in
@@ -1213,6 +1260,7 @@ viewExportButton enabled exportDropdownMenu =
 viewSelectInputSyntax : Glossary -> Model -> Html Msg
 viewSelectInputSyntax glossary model =
     let
+        tabbable : Bool
         tabbable =
             noModalDialogShown model
     in
@@ -1275,6 +1323,7 @@ viewSelectInputSyntax glossary model =
 viewSelectCardWidth : Glossary -> Model -> Html Msg
 viewSelectCardWidth glossary model =
     let
+        tabbable : Bool
         tabbable =
             noModalDialogShown model
     in
@@ -1345,6 +1394,7 @@ viewSelectCardWidth glossary model =
 viewOrderItemsBy : Model -> Int -> Html Msg
 viewOrderItemsBy model numberOfItems =
     let
+        tabbable : Bool
         tabbable =
             noModalDialogShown model
     in
@@ -1418,13 +1468,16 @@ view model =
 
         Ok glossary ->
             let
+                editable : MakingChanges
                 editable =
                     model.makingChanges
 
+                noModalDialogShown_ : Bool
                 noModalDialogShown_ =
                     noModalDialogShown model
 
-                termIndex =
+                indexOfTerms : IndexOfTerms
+                indexOfTerms =
                     IndexOfTerms.fromGlossaryItems glossary.items
             in
             { title = GlossaryTitle.toString glossary.title
@@ -1454,12 +1507,13 @@ view model =
                                         else
                                             Nothing
 
-                                    ( _, _ ) ->
+                                    _ ->
                                         if event == Extras.HtmlEvents.controlK then
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show, True )
 
                                         else if model.makingChanges && event == Extras.HtmlEvents.n then
                                             let
+                                                common_ : CommonModel
                                                 common_ =
                                                     model.common
                                             in
@@ -1470,8 +1524,8 @@ view model =
                             )
                         )
                     ]
-                    [ viewMenuForMobile model noModalDialogShown_ termIndex
-                    , viewStaticSidebarForDesktop noModalDialogShown_ termIndex
+                    [ viewMenuForMobile model noModalDialogShown_ indexOfTerms
+                    , viewStaticSidebarForDesktop noModalDialogShown_ indexOfTerms
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar noModalDialogShown_
@@ -1489,12 +1543,15 @@ view model =
                             ]
                             [ header [] <|
                                 let
+                                    showMakingChangesHelp : Bool
                                     showMakingChangesHelp =
                                         model.common.enableHelpForMakingChanges && not model.common.enableSavingChangesInMemory && not editable
 
+                                    showMakeChangesButton : Bool
                                     showMakeChangesButton =
                                         model.common.enableSavingChangesInMemory && not model.makingChanges
 
+                                    showExportButton : Bool
                                     showExportButton =
                                         model.common.enableExportMenu
                                 in
@@ -1551,7 +1608,5 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch
-        [ Components.DropdownMenu.subscriptions model.exportDropdownMenu
-            |> Sub.map (ExportDropdownMenuMsg >> PageMsg.Internal)
-        ]
+    Components.DropdownMenu.subscriptions model.exportDropdownMenu
+        |> Sub.map (ExportDropdownMenuMsg >> PageMsg.Internal)

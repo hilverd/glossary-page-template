@@ -125,16 +125,17 @@ validationError termField =
 -}
 setBody : String -> TermField -> TermField
 setBody body0 termField =
-    let
-        isAbbreviation0 =
-            if isAbbreviationManuallyOverridden termField then
-                isAbbreviation termField
-
-            else
-                body0 |> stringLooksLikeAnAbbreviation
-    in
     case termField of
         PlaintextTermField field ->
+            let
+                isAbbreviation0 : Bool
+                isAbbreviation0 =
+                    if isAbbreviationManuallyOverridden termField then
+                        isAbbreviation termField
+
+                    else
+                        body0 |> stringLooksLikeAnAbbreviation
+            in
             PlaintextTermField { field | body = body0, isAbbreviation = isAbbreviation0 }
 
 
@@ -186,6 +187,7 @@ setValidationError error termField =
 stringLooksLikeAnAbbreviation : String -> Bool
 stringLooksLikeAnAbbreviation string =
     let
+        trimmed : String
         trimmed =
             String.trim string
     in

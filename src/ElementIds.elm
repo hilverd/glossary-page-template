@@ -21,7 +21,6 @@ module ElementIds exposing
     , quickSearchButtonAndLetterGrid
     , reserved
     , searchDialog
-    , searchModalTitle
     , seeAlsoSelect
     , showExportMenuLabel
     , staticSidebarForDesktop
@@ -111,11 +110,6 @@ orderItemsAlphabetically =
 orderItemsMostFrequentFirst : String
 orderItemsMostFrequentFirst =
     prefixed "order-items-most-frequent-first"
-
-
-searchModalTitle : String
-searchModalTitle =
-    prefixed "search-modal-title"
 
 
 confirmDeleteModalTitle : String

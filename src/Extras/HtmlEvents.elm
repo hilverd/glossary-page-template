@@ -1,6 +1,6 @@
 module Extras.HtmlEvents exposing
     ( KeyDownEvent
-    , control
+    , KeyValue
     , controlK
     , downArrow
     , end
@@ -13,7 +13,6 @@ module Extras.HtmlEvents exposing
     , onClickStopPropagation
     , onEnter
     , onEscape
-    , onKeydown
     , preventDefaultOnDecoder
     , upArrow
     )
@@ -101,11 +100,6 @@ downArrow =
 enter : KeyDownEvent
 enter =
     Control "Enter" |> withoutModifiers
-
-
-control : KeyDownEvent
-control =
-    Control "Control" |> withoutModifiers
 
 
 escape : KeyDownEvent

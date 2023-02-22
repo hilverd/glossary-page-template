@@ -6,6 +6,7 @@ import Regex
 escapeStringForUseInRegex : String -> String
 escapeStringForUseInRegex string =
     let
+        regex : Regex.Regex
         regex =
             "[-\\/\\\\^$*+?.()|[\\]{}]"
                 |> Regex.fromString
