@@ -1,6 +1,6 @@
 module Components.GlossaryItemCard exposing (Style(..), view)
 
-import Accessibility exposing (..)
+import Accessibility exposing (Html, div, p, span, text)
 import Accessibility.Key
 import Components.Button
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
@@ -10,7 +10,6 @@ import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import ElementIds
 import Extras.Html
-import Extras.HtmlTree exposing (HtmlTree(..))
 import Extras.Url exposing (fragmentOnly)
 import Html
 import Html.Attributes exposing (class, id)
@@ -36,9 +35,11 @@ view style glossaryItem =
     case style of
         Preview ->
             let
+                itemHasSomeDetails : Bool
                 itemHasSomeDetails =
                     GlossaryItem.hasSomeDetails glossaryItem
 
+                tabbable : Bool
                 tabbable =
                     True
             in
@@ -51,6 +52,7 @@ view style glossaryItem =
 
         Normal { index, tabbable, onClickEdit, onClickDelete, editable, errorWhileDeleting } ->
             let
+                errorDiv : String -> Html msg
                 errorDiv message =
                     div
                         [ class "flex justify-end mt-2" ]
@@ -59,6 +61,7 @@ view style glossaryItem =
                             [ text message ]
                         ]
 
+                itemHasSomeDetails : Bool
                 itemHasSomeDetails =
                     GlossaryItem.hasSomeDetails glossaryItem
             in

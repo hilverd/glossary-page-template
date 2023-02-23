@@ -3,17 +3,13 @@ port module Components.SearchDialog exposing
     , Msg
     , Property
     , SearchResult
-    , hidden
     , hide
     , init
     , onChangeSearchTerm
     , onHide
     , onShow
     , searchResult
-    , searchResultsListId
-    , searchTermFieldId
     , show
-    , subscriptions
     , update
     , view
     , visible
@@ -25,7 +21,6 @@ import Accessibility.Key
 import Accessibility.Role
 import Array
 import Browser.Dom as Dom
-import Browser.Events as Events
 import Browser.Navigation
 import Extras.Html
 import Extras.HtmlAttribute
@@ -33,7 +28,6 @@ import Extras.HtmlEvents
 import Html
 import Html.Attributes exposing (class)
 import Html.Events
-import Json.Decode as Decode
 import Process
 import Svg
 import Svg.Attributes
@@ -57,13 +51,6 @@ type Model parentMsg
         , config : Config parentMsg
         , activeSearchResultIndex : Maybe SearchResultIndex
         }
-
-
-hidden : Model parentMsg -> Model parentMsg
-hidden model =
-    case model of
-        Model model_ ->
-            Model { model_ | visibility = Invisible }
 
 
 visible : Model parentMsg -> Bool
@@ -534,16 +521,3 @@ view toParentMsg model searchTerm searchResults =
                 ]
             ]
         ]
-
-
-
--- SUBSCRIPTIONS
-
-
-subscriptions : Model parentMsg -> Sub Msg
-subscriptions model =
-    if model |> innerModel |> .visibility |> (==) Visible then
-        Events.onClick <| Decode.succeed StartHiding
-
-    else
-        Sub.none

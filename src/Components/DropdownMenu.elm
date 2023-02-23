@@ -2,6 +2,7 @@ module Components.DropdownMenu exposing
     ( Choice
     , Model
     , Msg
+    , Property
     , choice
     , hidden
     , id
@@ -9,10 +10,9 @@ module Components.DropdownMenu exposing
     , subscriptions
     , update
     , view
-    , visible
     )
 
-import Accessibility exposing (..)
+import Accessibility exposing (Html, div)
 import Accessibility.Aria
 import Accessibility.Key
 import Accessibility.Role
@@ -85,16 +85,10 @@ type Msg
     | MakeChoiceInactive ChoiceIndex
 
 
-visible : Model -> Bool
-visible =
-    innerModel
-        >> .visibility
-        >> (/=) Invisible
-
-
 update : (Model -> parentModel) -> (Msg -> parentMsg) -> Msg -> Model -> ( parentModel, Cmd parentMsg )
 update updateParentModel toParentMsg msg model =
     let
+        model_ : { visibility : GradualVisibility, config : Config, activeChoice : Maybe ChoiceIndex }
         model_ =
             innerModel model
 
@@ -186,9 +180,11 @@ view :
     -> Html parentMsg
 view toParentMsg model enabled body_ choices =
     let
+        model_ : { visibility : GradualVisibility, config : Config, activeChoice : Maybe ChoiceIndex }
         model_ =
             innerModel model
 
+        config : Config
         config =
             model_.config
     in
@@ -245,6 +241,7 @@ view toParentMsg model enabled body_ choices =
 
                             else if event == Extras.HtmlEvents.downArrow then
                                 let
+                                    numberOfChoices : Int
                                     numberOfChoices =
                                         List.length choices
                                 in
@@ -261,6 +258,7 @@ view toParentMsg model enabled body_ choices =
 
                             else if event == Extras.HtmlEvents.upArrow then
                                 let
+                                    numberOfChoices : Int
                                     numberOfChoices =
                                         List.length choices
                                 in

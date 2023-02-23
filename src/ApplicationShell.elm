@@ -1,22 +1,24 @@
-module ApplicationShell exposing (main)
+module ApplicationShell exposing (main, Flags, Model, Msg)
 
 {-| The application shell which shows different "pages" depending on the application state.
 
 
 # Definition
 
-@docs main
+@docs main, Flags, Model, Msg
 
 -}
 
 import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel
-import Data.AboutLink as AboutLink
-import Data.AboutParagraph as AboutParagraph
-import Data.CardWidth as CardWidth
-import Data.GlossaryTitle as GlossaryTitle
-import Data.LoadedGlossaryItems as LoadedGlossaryItems
+import Data.AboutLink as AboutLink exposing (AboutLink)
+import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
+import Data.AboutSection exposing (AboutSection)
+import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.Glossary exposing (Glossary)
+import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
+import Data.LoadedGlossaryItems as LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Html
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg(..))
@@ -43,6 +45,8 @@ main =
         }
 
 
+{-| Flags passed to the application from JavaScript.
+-}
 type alias Flags =
     Decode.Value
 
@@ -53,6 +57,8 @@ type Page
     | EditTitleAndAbout Pages.EditTitleAndAbout.Model
 
 
+{-| A model for the application.
+-}
 type alias Model =
     Page
 
@@ -60,82 +66,98 @@ type alias Model =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
+        maybeUrl : Maybe Url.Url
         maybeUrl =
             flags
                 |> Decode.decodeValue (Decode.field "windowLocationHref" Decode.string)
                 |> Result.toMaybe
                 |> Maybe.andThen Url.fromString
 
+        filename : Maybe String
         filename =
             maybeUrl
                 |> Maybe.map .path
                 |> Maybe.andThen (String.split "/" >> List.reverse >> List.head)
 
+        fragment : Maybe String
         fragment =
             maybeUrl |> Maybe.andThen .fragment
 
+        enableMarkdownBasedSyntax : Bool
         enableMarkdownBasedSyntax =
             flags
                 |> Decode.decodeValue (Decode.field "enableMarkdownBasedSyntax" Decode.bool)
                 |> Result.withDefault False
 
-        title =
-            flags
-                |> Decode.decodeValue (Decode.field "titleString" Decode.string)
-                |> Result.withDefault "Element not found"
-                |> GlossaryTitle.fromString
-
-        aboutParagraph =
-            flags
-                |> Decode.decodeValue (Decode.field "aboutParagraph" Decode.string)
-                |> Result.withDefault "Element not found"
-                |> (if enableMarkdownBasedSyntax then
-                        AboutParagraph.fromMarkdown
-
-                    else
-                        AboutParagraph.fromPlaintext
-                   )
-
-        aboutLinks =
-            flags
-                |> Decode.decodeValue (Decode.field "aboutLinks" <| Decode.list AboutLink.decode)
-                |> Result.withDefault []
-
-        aboutSection =
-            { paragraph = aboutParagraph, links = aboutLinks }
-
+        editorIsRunning : Bool
         editorIsRunning =
             flags
                 |> Decode.decodeValue (Decode.field "editorIsRunning" Decode.bool)
                 |> Result.withDefault False
 
+        enableHelpForMakingChanges : Bool
         enableHelpForMakingChanges =
             flags
                 |> Decode.decodeValue (Decode.field "enableHelpForMakingChanges" Decode.bool)
                 |> Result.withDefault False
 
+        enableExportMenu : Bool
         enableExportMenu =
             flags
                 |> Decode.decodeValue (Decode.field "enableExportMenu" Decode.bool)
                 |> Result.withDefault True
 
-        cardWidth =
-            flags
-                |> Decode.decodeValue CardWidth.decode
-                |> Result.withDefault CardWidth.Compact
-
+        enableSavingChangesInMemory : Bool
         enableSavingChangesInMemory =
             flags
                 |> Decode.decodeValue (Decode.field "enableSavingChangesInMemory" Decode.bool)
                 |> Result.withDefault False
 
+        loadedGlossaryItems : LoadedGlossaryItems
         loadedGlossaryItems =
             LoadedGlossaryItems.decodeFromFlags enableMarkdownBasedSyntax flags
 
+        glossary : Result Decode.Error Glossary
         glossary =
             loadedGlossaryItems
                 |> Result.map
                     (\items ->
+                        let
+                            cardWidth : CardWidth
+                            cardWidth =
+                                flags
+                                    |> Decode.decodeValue CardWidth.decode
+                                    |> Result.withDefault CardWidth.Compact
+
+                            title : GlossaryTitle
+                            title =
+                                flags
+                                    |> Decode.decodeValue (Decode.field "titleString" Decode.string)
+                                    |> Result.withDefault "Element not found"
+                                    |> GlossaryTitle.fromString
+
+                            aboutParagraph : AboutParagraph
+                            aboutParagraph =
+                                flags
+                                    |> Decode.decodeValue (Decode.field "aboutParagraph" Decode.string)
+                                    |> Result.withDefault "Element not found"
+                                    |> (if enableMarkdownBasedSyntax then
+                                            AboutParagraph.fromMarkdown
+
+                                        else
+                                            AboutParagraph.fromPlaintext
+                                       )
+
+                            aboutSection : AboutSection
+                            aboutSection =
+                                { paragraph = aboutParagraph, links = aboutLinks }
+
+                            aboutLinks : List AboutLink
+                            aboutLinks =
+                                flags
+                                    |> Decode.decodeValue (Decode.field "aboutLinks" <| Decode.list AboutLink.decode)
+                                    |> Result.withDefault []
+                        in
                         { enableMarkdownBasedSyntax = enableMarkdownBasedSyntax
                         , cardWidth = cardWidth
                         , title = title
@@ -162,6 +184,8 @@ init flags =
     )
 
 
+{-| Messages handled by the application.
+-}
 type Msg
     = NoOp
     | ListAllMsg Pages.ListAll.Msg
@@ -283,6 +307,7 @@ resetViewport =
 view : Model -> Document Msg
 view model =
     let
+        mapDocument : (a -> msg) -> Document a -> Document msg
         mapDocument msg { title, body } =
             { title = title
             , body = body |> List.map (Html.map msg)

@@ -1,6 +1,6 @@
 module Components.AboutSection exposing (view)
 
-import Accessibility exposing (..)
+import Accessibility exposing (Html, a, div, li, text, ul)
 import Accessibility.Key
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph

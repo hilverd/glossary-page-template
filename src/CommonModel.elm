@@ -2,7 +2,6 @@ module CommonModel exposing (CommonModel, OrderItemsBy(..))
 
 import Data.Glossary exposing (Glossary)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
-import Extras.HtmlTree exposing (HtmlTree(..))
 import Json.Decode as Decode
 
 
