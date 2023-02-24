@@ -20,16 +20,12 @@
     @apply pt-6 pb-4 mx-auto px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-prose;
   }
 
-  h1#glossary-page-title  {
-    @apply text-3xl font-bold leading-tight;
+  div#glossary-page-about {
+    @apply pb-3;
   }
 
   div#glossary-page-container main {
     @apply mx-auto px-6 lg:px-8 print:px-0 print:max-w-prose;
-  }
-
-  div#glossary-page-about {
-    @apply pb-3;
   }
 
   div#glossary-page-about:not([data-enable-markdown-based-syntax="true"]) div#glossary-page-about > p {
@@ -42,6 +38,10 @@
 
   div#glossary-page-about > ul {
     @apply pt-4 ml-1 list-disc list-inside;
+  }
+
+  h1#glossary-page-title  {
+    @apply text-3xl font-bold leading-tight;
   }
 
   article#glossary-page-items dl {
