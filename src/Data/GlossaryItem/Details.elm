@@ -83,7 +83,9 @@ renderer =
             Renderer.defaultHtmlRenderer
     in
     { renderer0
-        | html =
+        | paragraph = Html.p [ class "max-w-prose" ]
+        , blockQuote = Html.blockquote [ class "max-w-prose" ]
+        , html =
             Markdown.Html.oneOf
                 [ MarkdownRenderers.anchorTagRenderer
                 , MarkdownRenderers.imgTagRenderer
@@ -144,7 +146,7 @@ view details =
                     case Renderer.render renderer blocks of
                         Ok rendered ->
                             Html.div
-                                [ class "prose prose-pre:bg-inherit prose-pre:text-gray-700 prose-pre:border print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]
+                                [ class "prose print:prose-pre:overflow-x-hidden max-w-3xl prose-pre:bg-inherit prose-pre:text-gray-700 prose-pre:border print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]
                                 rendered
 
                         Err renderingError ->
