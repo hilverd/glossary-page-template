@@ -222,7 +222,7 @@ hasValidationErrors form =
 empty : List Term -> List Term -> List GlossaryItem -> GlossaryItemForm
 empty withTermsOutside withPrimaryTermsOutside withItemsListingThisTermAsRelated =
     GlossaryItemForm
-        { termFields = Array.fromList [ TermField.emptyPlaintext ]
+        { termFields = Array.fromList [ TermField.empty ]
         , detailsFields = Array.empty
         , relatedTermFields = Array.empty
         , termsOutside = withTermsOutside
@@ -246,7 +246,7 @@ fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRe
         termFieldsForItem =
             List.map
                 (\term ->
-                    TermField.fromPlaintext (Term.raw term) (Term.isAbbreviation term)
+                    TermField.fromString (Term.raw term) (Term.isAbbreviation term)
                 )
                 item.terms
 
@@ -278,7 +278,7 @@ fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRe
                 (\detailsElem ->
                     detailsElem
                         |> Details.raw
-                        |> DetailsField.fromPlaintext
+                        |> DetailsField.fromString
                 )
                 item.details
     in
@@ -365,7 +365,7 @@ addTerm glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
-                { form | termFields = Array.push TermField.emptyPlaintext form.termFields }
+                { form | termFields = Array.push TermField.empty form.termFields }
                 |> validate
 
 
@@ -417,7 +417,7 @@ addDetails glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
-                { form | detailsFields = form.detailsFields |> Array.push DetailsField.emptyPlaintext }
+                { form | detailsFields = form.detailsFields |> Array.push DetailsField.empty }
                 |> validate
 
 
@@ -429,7 +429,7 @@ updateDetails detailsIndex glossaryItemForm body =
                 { form
                     | detailsFields =
                         Extras.Array.update
-                            (always <| DetailsField.fromPlaintext body)
+                            (always <| DetailsField.fromString body)
                             (DetailsIndex.toInt detailsIndex)
                             form.detailsFields
                 }

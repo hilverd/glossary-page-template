@@ -1,12 +1,11 @@
-module GlossaryItemForm.TermField exposing (TermField, emptyPlaintext, fromPlaintext, raw, isAbbreviation, isAbbreviationManuallyOverridden, validationError, setBody, setIsAbbreviation, setIsAbbreviationManuallyOverridden, setValidationError)
+module GlossaryItemForm.TermField exposing (TermField, empty, fromString, raw, isAbbreviation, isAbbreviationManuallyOverridden, validationError, setBody, setIsAbbreviation, setIsAbbreviationManuallyOverridden, setValidationError)
 
 {-| A form field that contains a term.
-This can be in either plain text or Markdown.
 
 
 # Term Fields
 
-@docs TermField, emptyPlaintext, fromPlaintext, raw, isAbbreviation, isAbbreviationManuallyOverridden, validationError, setBody, setIsAbbreviation, setIsAbbreviationManuallyOverridden, setValidationError
+@docs TermField, empty, fromString, raw, isAbbreviation, isAbbreviationManuallyOverridden, validationError, setBody, setIsAbbreviation, setIsAbbreviationManuallyOverridden, setValidationError
 
 -}
 
@@ -14,7 +13,7 @@ This can be in either plain text or Markdown.
 {-| A term field.
 -}
 type TermField
-    = PlaintextTermField
+    = TermField
         { body : String
         , isAbbreviation : Bool
         , isAbbreviationManuallyOverridden : Bool
@@ -22,20 +21,20 @@ type TermField
         }
 
 
-{-| Construct an empty plain text term field.
+{-| Construct an empty term field.
 
-    emptyPlaintext |> raw --> ""
+    empty |> raw --> ""
 
-    emptyPlaintext |> isAbbreviation --> False
+    empty |> isAbbreviation --> False
 
-    emptyPlaintext |> isAbbreviationManuallyOverridden --> False
+    empty |> isAbbreviationManuallyOverridden --> False
 
-    emptyPlaintext |> validationError --> Nothing
+    empty |> validationError --> Nothing
 
 -}
-emptyPlaintext : TermField
-emptyPlaintext =
-    PlaintextTermField
+empty : TermField
+empty =
+    TermField
         { body = ""
         , isAbbreviation = False
         , isAbbreviationManuallyOverridden = False
@@ -43,20 +42,20 @@ emptyPlaintext =
         }
 
 
-{-| Construct a term field from a plain text string and a Boolean indicating whether the term is an abbreviation.
+{-| Construct a term field from a string and a Boolean indicating whether the term is an abbreviation.
 
-    fromPlaintext "NA" True |> raw --> "NA"
+    fromString "NA" True |> raw --> "NA"
 
-    fromPlaintext "NA" True |> isAbbreviation --> True
+    fromString "NA" True |> isAbbreviation --> True
 
-    fromPlaintext "Foo" True |> isAbbreviationManuallyOverridden --> True
+    fromString "Foo" True |> isAbbreviationManuallyOverridden --> True
 
-    fromPlaintext "Foo" True |> validationError --> Nothing
+    fromString "Foo" True |> validationError --> Nothing
 
 -}
-fromPlaintext : String -> Bool -> TermField
-fromPlaintext body0 isAbbreviation0 =
-    PlaintextTermField
+fromString : String -> Bool -> TermField
+fromString body0 isAbbreviation0 =
+    TermField
         { body = body0
         , isAbbreviation = isAbbreviation0
         , isAbbreviationManuallyOverridden = True
@@ -69,7 +68,7 @@ fromPlaintext body0 isAbbreviation0 =
 raw : TermField -> String
 raw termField =
     case termField of
-        PlaintextTermField field ->
+        TermField field ->
             field.body
 
 
@@ -78,7 +77,7 @@ raw termField =
 isAbbreviation : TermField -> Bool
 isAbbreviation termField =
     case termField of
-        PlaintextTermField field ->
+        TermField field ->
             field.isAbbreviation
 
 
@@ -87,7 +86,7 @@ isAbbreviation termField =
 isAbbreviationManuallyOverridden : TermField -> Bool
 isAbbreviationManuallyOverridden termField =
     case termField of
-        PlaintextTermField field ->
+        TermField field ->
             field.isAbbreviationManuallyOverridden
 
 
@@ -96,28 +95,28 @@ isAbbreviationManuallyOverridden termField =
 validationError : TermField -> Maybe String
 validationError termField =
     case termField of
-        PlaintextTermField field ->
+        TermField field ->
             field.validationError
 
 
 {-| Set the body on a term field.
 
-    emptyPlaintext
+    empty
     |> setBody "TBD"
     |> raw
     --> "TBD"
 
-    emptyPlaintext
+    empty
     |> setBody "Hello"
     |> isAbbreviation
     --> False
 
-    emptyPlaintext
+    empty
     |> setBody "TBD"
     |> isAbbreviation
     --> True
 
-    fromPlaintext "OK" True
+    fromString "OK" True
     |> setBody "Hello"
     |> isAbbreviation
     --> True
@@ -126,7 +125,7 @@ validationError termField =
 setBody : String -> TermField -> TermField
 setBody body0 termField =
     case termField of
-        PlaintextTermField field ->
+        TermField field ->
             let
                 isAbbreviation0 : Bool
                 isAbbreviation0 =
@@ -136,12 +135,12 @@ setBody body0 termField =
                     else
                         body0 |> stringLooksLikeAnAbbreviation
             in
-            PlaintextTermField { field | body = body0, isAbbreviation = isAbbreviation0 }
+            TermField { field | body = body0, isAbbreviation = isAbbreviation0 }
 
 
 {-| Set the "is an abbreviation" Boolean on a term field.
 
-    fromPlaintext "TBD" False
+    fromString "TBD" False
     |> setIsAbbreviation True
     |> isAbbreviation
     --> True
@@ -150,13 +149,13 @@ setBody body0 termField =
 setIsAbbreviation : Bool -> TermField -> TermField
 setIsAbbreviation isAbbreviation0 termField =
     case termField of
-        PlaintextTermField field ->
-            PlaintextTermField { field | isAbbreviation = isAbbreviation0 }
+        TermField field ->
+            TermField { field | isAbbreviation = isAbbreviation0 }
 
 
 {-| Set the "'is an abbreviation' Boolean was manually overridden" on a term field.
 
-    emptyPlaintext
+    empty
     |> setIsAbbreviationManuallyOverridden True
     |> isAbbreviationManuallyOverridden
     --> True
@@ -165,13 +164,13 @@ setIsAbbreviation isAbbreviation0 termField =
 setIsAbbreviationManuallyOverridden : Bool -> TermField -> TermField
 setIsAbbreviationManuallyOverridden manuallyOverridden termField =
     case termField of
-        PlaintextTermField field ->
-            PlaintextTermField { field | isAbbreviationManuallyOverridden = manuallyOverridden }
+        TermField field ->
+            TermField { field | isAbbreviationManuallyOverridden = manuallyOverridden }
 
 
 {-| Set the validation error on a term field.
 
-    emptyPlaintext
+    empty
     |> setValidationError (Just "Can't be empty")
     |> validationError
     --> Just "Can't be empty"
@@ -180,8 +179,8 @@ setIsAbbreviationManuallyOverridden manuallyOverridden termField =
 setValidationError : Maybe String -> TermField -> TermField
 setValidationError error termField =
     case termField of
-        PlaintextTermField field ->
-            PlaintextTermField { field | validationError = error }
+        TermField field ->
+            TermField { field | validationError = error }
 
 
 stringLooksLikeAnAbbreviation : String -> Bool
