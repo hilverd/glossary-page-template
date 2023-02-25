@@ -799,7 +799,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
         [ div
             [ class "flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0" ]
             [ Html.div
-                [ class "fixed inset-0 bg-gray-500 dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 transition-opacity"
+                [ class "fixed inset-0 bg-gray-500 dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 transition-opacity motion-reduce:transition-none"
                 , if maybeIndexOfItemToDelete == Nothing then
                     class "ease-in duration-200 opacity-0"
 
@@ -815,7 +815,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
                 ]
                 [ text "\u{200B}" ]
             , div
-                [ class "inline-block align-bottom bg-white dark:bg-gray-700 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
+                [ class "inline-block align-bottom bg-white dark:bg-gray-700 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform motion-reduce:transform-none transition-all motion-reduce:transition-none sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
                 , if maybeIndexOfItemToDelete == Nothing then
                     class "ease-in duration-200 opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
 
@@ -1000,10 +1000,10 @@ viewMenuForMobile model tabbable termIndex =
         [ Html.div
             [ class "fixed inset-0 bg-gray-600 bg-opacity-75"
             , if model.menuForMobileVisibility == Visible then
-                class "transition-opacity ease-linear duration-300 opacity-100"
+                class "transition-opacity motion-reduce:transition-none ease-linear duration-300 opacity-100"
 
               else
-                class "transition-opacity ease-linear duration-300 opacity-0"
+                class "transition-opacity motion-reduce:transition-none ease-linear duration-300 opacity-0"
             , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
             , Accessibility.Aria.hidden True
             ]
@@ -1011,18 +1011,18 @@ viewMenuForMobile model tabbable termIndex =
         , div
             [ class "relative flex-1 flex flex-col max-w-xs w-full pt-5 bg-white dark:bg-gray-900"
             , if model.menuForMobileVisibility == Visible then
-                class "transition ease-in-out duration-300 transform translate-x-0"
+                class "transition motion-reduce:transition-none ease-in-out duration-300 transform motion-reduce:transform-none translate-x-0"
 
               else
-                class "transition ease-in-out duration-300 transform -translate-x-full"
+                class "transition motion-reduce:transition-none ease-in-out duration-300 transform motion-reduce:transform-none -translate-x-full"
             ]
             [ div
                 [ class "absolute top-0 right-0 -mr-12 pt-2"
                 , if model.menuForMobileVisibility == Visible then
-                    class "ease-in-out duration-300 opacity-100"
+                    class "motion-reduce:transition-none ease-in-out duration-300 opacity-100"
 
                   else
-                    class "ease-in-out duration-300 opacity-0"
+                    class "motion-reduce:transition-none ease-in-out duration-300 opacity-0"
                 ]
                 [ button
                     [ Html.Attributes.type_ "button"
