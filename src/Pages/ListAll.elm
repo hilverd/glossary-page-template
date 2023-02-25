@@ -1489,8 +1489,18 @@ view model =
                     , Html.Events.preventDefaultOn "keydown"
                         (Extras.HtmlEvents.preventDefaultOnDecoder
                             (\event ->
-                                case ( model.confirmDeleteIndex, Components.SearchDialog.visible model.searchDialog.model ) of
-                                    ( Just index, _ ) ->
+                                let
+                                    confirmDeleteIndex =
+                                        model.confirmDeleteIndex
+
+                                    searchDialogVisible =
+                                        Components.SearchDialog.visible model.searchDialog.model
+
+                                    menuForMobileVisible =
+                                        model.menuForMobileVisibility == Visible
+                                in
+                                case ( confirmDeleteIndex, searchDialogVisible, menuForMobileVisible ) of
+                                    ( Just index, _, _ ) ->
                                         if event == Extras.HtmlEvents.escape then
                                             Just <| ( PageMsg.Internal CancelDelete, True )
 
@@ -1500,9 +1510,16 @@ view model =
                                         else
                                             Nothing
 
-                                    ( _, True ) ->
+                                    ( _, True, _ ) ->
                                         if event == Extras.HtmlEvents.escape || event == Extras.HtmlEvents.controlK then
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.hide, True )
+
+                                        else
+                                            Nothing
+
+                                    ( _, _, True ) ->
+                                        if event == Extras.HtmlEvents.escape then
+                                            Just <| ( PageMsg.Internal StartHidingMenuForMobile, True )
 
                                         else
                                             Nothing
