@@ -297,8 +297,8 @@ fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRe
 
 
 termBodyToId : String -> String
-termBodyToId body =
-    String.replace " " "_" body
+termBodyToId =
+    String.replace " " "_"
 
 
 toGlossaryItem : Bool -> GlossaryItems -> GlossaryItemForm -> GlossaryItem
@@ -328,7 +328,15 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form =
                         raw =
                             termField |> TermField.raw |> String.trim
                     in
-                    Term.fromPlaintext raw <| TermField.isAbbreviation termField
+                    (if enableMarkdownBasedSyntax then
+                        Term.fromMarkdown
+
+                     else
+                        Term.fromPlaintext
+                    )
+                        raw
+                    <|
+                        TermField.isAbbreviation termField
                 )
     , details =
         form

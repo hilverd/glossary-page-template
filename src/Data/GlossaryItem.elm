@@ -1,5 +1,5 @@
 module Data.GlossaryItem exposing
-    ( GlossaryItem, empty, decode, hasSomeDetails
+    ( GlossaryItem, decode, hasSomeDetails
     , toHtmlTree
     )
 
@@ -8,7 +8,7 @@ module Data.GlossaryItem exposing
 
 # Glossary Items
 
-@docs GlossaryItem, empty, decode, hasSomeDetails
+@docs GlossaryItem, decode, hasSomeDetails
 
 
 # Converting to HTML
@@ -27,22 +27,12 @@ import Json.Decode as Decode exposing (Decoder)
 
 {-| An item in a glossary, consisting of a list of terms (synonyms) being defined, a list of (alternative) definitions for those terms, and a list of related terms.
 It's probably unusual to have multiple definitions for a term (e.g. "Apple" being a fruit as well as a company) because a glossary would typically be focused on a single domain.
-However, this is allowed in the `<dl>` element so it's also allowed here.
+However, this is allowed in `<dl>` elements so it's also allowed here.
 -}
 type alias GlossaryItem =
     { terms : List Term
     , details : List Details
     , relatedTerms : List RelatedTerm
-    }
-
-
-{-| An empty glossary item, used as a starting point when creating a new one from a form.
--}
-empty : GlossaryItem
-empty =
-    { terms = [ Term.emptyPlaintext ]
-    , details = []
-    , relatedTerms = []
     }
 
 
@@ -97,6 +87,15 @@ decode enableMarkdownBasedSyntax =
 
 {-| Whether or not the glossary item has any details.
 Some items may not contain any details and instead point to a related item that is preferred.
+
+    import Data.GlossaryItem.Term as Term exposing (Term)
+
+    empty : GlossaryItem
+    empty =
+        { terms = [ Term.emptyPlaintext ]
+        , details = []
+        , relatedTerms = []
+        }
 
     hasSomeDetails empty --> False
 

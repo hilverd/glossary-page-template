@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw)
+module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, view)
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -9,11 +9,13 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw
+@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, view
 
 -}
 
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
+import Html exposing (Html, text)
+import Html.Attributes exposing (class)
 import Json.Decode as Decode exposing (Decoder)
 import Markdown.Block as Block exposing (Block)
 import Markdown.Html
@@ -68,7 +70,7 @@ fromMarkdown body isAbbreviation0 =
     MarkdownTerm
         { id = String.replace " " "_" body
         , isAbbreviation = isAbbreviation0
-        , body = body |> MarkdownFragment.fromString |> sanitiseMarkdownFragment
+        , body = MarkdownFragment.fromString body
         }
 
 
@@ -161,30 +163,48 @@ raw term =
             MarkdownFragment.raw t.body
 
 
-sanitiseMarkdownFragment : MarkdownFragment -> MarkdownFragment
-sanitiseMarkdownFragment fragment =
-    -- TODO
-    MarkdownFragment.transform
-        (\block ->
-            case block of
-                Block.Heading level children ->
-                    Block.Heading
-                        (case level of
-                            Block.H1 ->
-                                Block.H4
+{-| View a term as HTML.
 
-                            Block.H2 ->
-                                Block.H4
+    import Html exposing (Html)
 
-                            Block.H3 ->
-                                Block.H4
+    fromPlaintext "Foo" False |> view --> Html.text "Foo"
 
-                            _ ->
-                                level
-                        )
-                        children
+    expected : Html msg
+    expected =
+        Html.span []
+            [ Html.span []
+                [ Html.text "The "
+                , Html.em [] [ Html.text "ideal" ]
+                , Html.text " case"
+                ]
+            ]
 
-                _ ->
-                    block
-        )
-        fragment
+    fromMarkdown "The _ideal_ case" False |> view
+    --> expected
+
+-}
+view : Term -> Html msg
+view term =
+    case term of
+        PlaintextTerm t ->
+            text t.body
+
+        MarkdownTerm t ->
+            let
+                parsed : Result String (List Block)
+                parsed =
+                    MarkdownFragment.parsed t.body
+            in
+            case parsed of
+                Ok blocks ->
+                    case Renderer.render MarkdownRenderers.inlineHtmlMsgRenderer blocks of
+                        Ok rendered ->
+                            Html.span
+                                [ class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]
+                                rendered
+
+                        Err renderingError ->
+                            text <| "Failed to render Markdown: " ++ renderingError
+
+                Err parsingError ->
+                    text <| "Failed to parse Markdown: " ++ parsingError

@@ -134,10 +134,10 @@ viewGlossaryTerm preview tabbable term =
         [ Html.dfn
             [ Html.Attributes.id <| Term.id term ]
             [ if Term.isAbbreviation term then
-                Html.abbr [] [ text <| Term.raw term ]
+                Html.abbr [] [ Term.view term ]
 
               else
-                text <| Term.raw term
+                Term.view term
             ]
         , span
             [ class "silcrow invisible group-hover:visible hover:visible print:group-hover:invisible print:hover:invisible" ]
