@@ -79,7 +79,7 @@ empty =
 decode : Bool -> Decoder GlossaryItem
 decode enableMarkdownBasedSyntax =
     Decode.map3 GlossaryItem
-        (Decode.field "terms" <| Decode.list <| Term.decode)
+        (Decode.field "terms" <| Decode.list <| Term.decode enableMarkdownBasedSyntax)
         (Decode.field "details" <|
             Decode.list <|
                 Decode.map

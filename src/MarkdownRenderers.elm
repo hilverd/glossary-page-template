@@ -1,12 +1,12 @@
-module MarkdownRenderers exposing (anchorTagHtmlTreeRenderer, anchorTagRenderer, htmlTreeRenderer, imgTagHtmlTreeRenderer, imgTagRenderer)
+module MarkdownRenderers exposing (anchorTagHtmlTreeRenderer, anchorTagRenderer, htmlMsgRenderer, htmlTreeRenderer, imgTagHtmlTreeRenderer, imgTagRenderer, inlineHtmlMsgRenderer)
 
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Html exposing (Html)
-import Html.Attributes as Attr
+import Html.Attributes as Attr exposing (class)
 import Markdown.Block as Block
 import Markdown.Html
-import Markdown.Renderer exposing (Renderer)
+import Markdown.Renderer as Renderer exposing (Renderer)
 
 
 anchorTagRenderer : Markdown.Html.Renderer (List (Html msg) -> Html msg)
@@ -42,6 +42,58 @@ viewAnchorTag href target style renderedChildren =
         , Extras.HtmlAttribute.showMaybe (Attr.attribute "style") style
         ]
         renderedChildren
+
+
+htmlMsgRenderer : Renderer (Html msg)
+htmlMsgRenderer =
+    let
+        renderer0 : Renderer (Html msg)
+        renderer0 =
+            Renderer.defaultHtmlRenderer
+    in
+    { renderer0
+        | paragraph = Html.p [ class "max-w-prose" ]
+        , blockQuote = Html.blockquote [ class "max-w-prose" ]
+        , html =
+            Markdown.Html.oneOf
+                [ anchorTagRenderer
+                , imgTagRenderer
+                ]
+    }
+
+
+{-| A renderer that only handles inline elements (e.g. strong, emphasis) properly.
+Block elements are either ignored or have their children wrapped in a <span>.
+-}
+inlineHtmlMsgRenderer : Renderer (Html msg)
+inlineHtmlMsgRenderer =
+    { heading = \{ children } -> Html.span [] children
+    , paragraph = Html.span []
+    , hardLineBreak = Html.text ""
+    , blockQuote = Html.span []
+    , strong = Html.strong []
+    , emphasis = Html.em []
+    , strikethrough = Html.del []
+    , codeSpan = \content -> Html.code [] [ Html.text content ]
+    , link = always <| Html.span []
+    , image = always <| Html.text ""
+    , text = Html.text
+    , unorderedList = always <| Html.text ""
+    , orderedList = \_ _ -> Html.text ""
+    , html = Markdown.Html.oneOf []
+    , codeBlock = always <| Html.text ""
+    , thematicBreak = Html.span [] []
+    , table = Html.span []
+    , tableHeader = Html.span []
+    , tableBody = Html.span []
+    , tableRow = Html.span []
+    , tableHeaderCell = always <| Html.span []
+    , tableCell = always <| Html.span []
+    }
+
+
+
+-- TODO: define inlineHtmlTreeRenderer
 
 
 anchorTagToHtmlTree :

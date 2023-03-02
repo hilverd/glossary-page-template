@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromPlaintextWithId, decode, id, isAbbreviation, raw)
+module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw)
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -9,11 +9,17 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, emptyPlaintext, fromPlaintext, fromPlaintextWithId, decode, id, isAbbreviation, raw
+@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw
 
 -}
 
+import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Json.Decode as Decode exposing (Decoder)
+import Markdown.Block as Block exposing (Block)
+import Markdown.Html
+import Markdown.Renderer as Renderer exposing (Renderer)
+import MarkdownRenderers
+import Svg.Attributes exposing (from)
 
 
 {-| A term.
@@ -23,6 +29,11 @@ type Term
         { id : String
         , isAbbreviation : Bool
         , body : String
+        }
+    | MarkdownTerm
+        { id : String
+        , isAbbreviation : Bool
+        , body : MarkdownFragment
         }
 
 
@@ -47,6 +58,20 @@ fromPlaintext body isAbbreviation0 =
         }
 
 
+{-| Construct a term from a Markdown string and a Boolean indicating whether the term is an abbreviation.
+
+    fromMarkdown "The _ideal_ case" True |> raw --> "The _ideal_ case"
+
+-}
+fromMarkdown : String -> Bool -> Term
+fromMarkdown body isAbbreviation0 =
+    MarkdownTerm
+        { id = String.replace " " "_" body
+        , isAbbreviation = isAbbreviation0
+        , body = body |> MarkdownFragment.fromString |> sanitiseMarkdownFragment
+        }
+
+
 {-| Construct a term from a plain text string, an ID and a Boolean indicating whether the term is an abbreviation.
 
     fromPlaintextWithId "Hello" "id1" False
@@ -63,13 +88,34 @@ fromPlaintextWithId body id0 isAbbreviation0 =
         }
 
 
+{-| Construct a term from a Markdown string, an ID and a Boolean indicating whether the term is an abbreviation.
+
+    fromMarkdownWithId "The _ideal_ case" "id1" False
+    |> id
+    --> "id1"
+
+-}
+fromMarkdownWithId : String -> String -> Bool -> Term
+fromMarkdownWithId body id0 isAbbreviation0 =
+    PlaintextTerm
+        { id = id0
+        , isAbbreviation = isAbbreviation0
+        , body = body
+        }
+
+
 {-| Decode a term from its JSON representation.
 -}
-decode : Decoder Term
-decode =
-    Decode.map3 fromPlaintextWithId
+decode : Bool -> Decoder Term
+decode enableMarkdownBasedSyntax =
+    (if enableMarkdownBasedSyntax then
+        Decode.map3 fromMarkdownWithId
+
+     else
+        Decode.map3 fromPlaintextWithId
+    )
         (Decode.field "body" Decode.string)
-        (Decode.field "id" <| Decode.string)
+        (Decode.field "id" Decode.string)
         (Decode.field "isAbbreviation" Decode.bool)
 
 
@@ -84,6 +130,9 @@ id term =
         PlaintextTerm t ->
             t.id
 
+        MarkdownTerm t ->
+            t.id
+
 
 {-| Retrieve the "is an abbreviation" Boolean of a term.
 
@@ -96,6 +145,9 @@ isAbbreviation term =
         PlaintextTerm t ->
             t.isAbbreviation
 
+        MarkdownTerm t ->
+            t.isAbbreviation
+
 
 {-| Retrieve the raw body of a term.
 -}
@@ -104,3 +156,35 @@ raw term =
     case term of
         PlaintextTerm t ->
             t.body
+
+        MarkdownTerm t ->
+            MarkdownFragment.raw t.body
+
+
+sanitiseMarkdownFragment : MarkdownFragment -> MarkdownFragment
+sanitiseMarkdownFragment fragment =
+    -- TODO
+    MarkdownFragment.transform
+        (\block ->
+            case block of
+                Block.Heading level children ->
+                    Block.Heading
+                        (case level of
+                            Block.H1 ->
+                                Block.H4
+
+                            Block.H2 ->
+                                Block.H4
+
+                            Block.H3 ->
+                                Block.H4
+
+                            _ ->
+                                level
+                        )
+                        children
+
+                _ ->
+                    block
+        )
+        fragment

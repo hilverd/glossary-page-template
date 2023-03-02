@@ -75,24 +75,6 @@ markdown details =
             MarkdownFragment.raw fragment
 
 
-renderer : Renderer (Html msg)
-renderer =
-    let
-        renderer0 : Renderer (Html msg)
-        renderer0 =
-            Renderer.defaultHtmlRenderer
-    in
-    { renderer0
-        | paragraph = Html.p [ class "max-w-prose" ]
-        , blockQuote = Html.blockquote [ class "max-w-prose" ]
-        , html =
-            Markdown.Html.oneOf
-                [ MarkdownRenderers.anchorTagRenderer
-                , MarkdownRenderers.imgTagRenderer
-                ]
-    }
-
-
 htmlTreeRenderer : Renderer HtmlTree
 htmlTreeRenderer =
     let
@@ -143,7 +125,7 @@ view details =
             in
             case parsed of
                 Ok blocks ->
-                    case Renderer.render renderer blocks of
+                    case Renderer.render MarkdownRenderers.htmlMsgRenderer blocks of
                         Ok rendered ->
                             Html.div
                                 [ class "prose print:prose-pre:overflow-x-hidden max-w-3xl prose-pre:bg-inherit prose-pre:text-gray-700 prose-pre:border print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]
