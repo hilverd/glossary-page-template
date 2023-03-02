@@ -99,10 +99,10 @@ fromPlaintextWithId body id0 isAbbreviation0 =
 -}
 fromMarkdownWithId : String -> String -> Bool -> Term
 fromMarkdownWithId body id0 isAbbreviation0 =
-    PlaintextTerm
+    MarkdownTerm
         { id = id0
         , isAbbreviation = isAbbreviation0
-        , body = body
+        , body = MarkdownFragment.fromString body
         }
 
 
