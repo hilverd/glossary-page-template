@@ -626,7 +626,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms 
                             (\term ->
                                 Components.SelectMenu.Choice
                                     (Term.id term)
-                                    (Term.raw term)
+                                    [ Term.view term ]
                                     (Just (Term.id term) == relatedTerm.idReference)
                             )
                     )

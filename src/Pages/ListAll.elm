@@ -724,7 +724,7 @@ viewTermIndexItem tabbable term =
             , Accessibility.Key.tabbable tabbable
             , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
             ]
-            [ text <| Term.raw term ]
+            [ Term.view term ]
         ]
 
 

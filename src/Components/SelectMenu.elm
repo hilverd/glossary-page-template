@@ -13,6 +13,7 @@ import Accessibility exposing (Html, div, option, p, select, text)
 import Accessibility.Aria
 import Extras.Html
 import Extras.HtmlAttribute
+import Html
 import Html.Attributes exposing (class, selected, value)
 import Html.Events
 import Json.Decode as Decode
@@ -37,7 +38,7 @@ type alias Config msg =
 
 type alias Choice =
     { value : String
-    , body : String
+    , body : List (Html Never)
     , selected : Bool
     }
 
@@ -132,7 +133,7 @@ render properties choices =
                                     [ value choice.value
                                     , selected choice.selected
                                     ]
-                                    [ text choice.body ]
+                                    (List.map (Html.map Basics.never) choice.body)
                             )
                    )
             )
