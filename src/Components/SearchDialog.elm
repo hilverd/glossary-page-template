@@ -288,11 +288,11 @@ type alias SearchResultIndex =
 type SearchResult
     = SearchResult
         { href : String
-        , body : String
+        , body : List (Html Never)
         }
 
 
-searchResult : String -> String -> SearchResult
+searchResult : String -> List (Html Never) -> SearchResult
 searchResult href body =
     SearchResult { href = href, body = body }
 
@@ -489,7 +489,7 @@ view toParentMsg model searchTerm searchResults =
                                         SearchResult { href, body } ->
                                             Html.li
                                                 [ class "cursor-default select-none px-4 py-2"
-                                                , class "bg-indigo-600 dark:bg-indigo-200" |> Extras.HtmlAttribute.showIf (Just index == model_.activeSearchResultIndex)
+                                                , class "bg-blue-200 dark:bg-blue-700" |> Extras.HtmlAttribute.showIf (Just index == model_.activeSearchResultIndex)
                                                 , Accessibility.Role.option
                                                 , Accessibility.Key.tabbable False
                                                 , Html.Attributes.id <| searchResultId index model_.idPrefix
@@ -510,7 +510,7 @@ view toParentMsg model searchTerm searchResults =
                                                         toParentMsg <|
                                                             LoadUrl href
                                                     ]
-                                                    [ text body ]
+                                                    (List.map (Html.map Basics.never) body)
                                                 ]
                                 )
                         )

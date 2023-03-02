@@ -7,6 +7,7 @@ import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Expect
+import Html
 import Search
 import Test exposing (Test, describe, test)
 
@@ -52,6 +53,6 @@ suite =
                     loadedGlossaryItems
                         |> Search.search "Two"
                         |> Expect.equal
-                            [ searchResult "#Two" "Two" ]
+                            [ searchResult "#Two" [ Html.text "Two" ] ]
             ]
         ]
