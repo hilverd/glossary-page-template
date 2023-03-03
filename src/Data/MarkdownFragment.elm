@@ -1,15 +1,16 @@
-module Data.MarkdownFragment exposing (MarkdownFragment, fromString, raw, parsed, transform)
+module Data.MarkdownFragment exposing (MarkdownFragment, fromString, raw, parsed, transform, inlineFoldl)
 
 {-| A Markdown fragment is a string that has been parsed as Markdown.
 
 
 # Markdown Fragments
 
-@docs MarkdownFragment, fromString, raw, parsed, transform
+@docs MarkdownFragment, fromString, raw, parsed, transform, inlineFoldl
 
 -}
 
-import Markdown.Block as Block exposing (Block)
+import Components.DropdownMenu exposing (init)
+import Markdown.Block as Block exposing (Block, Inline)
 import Markdown.Parser
 
 
@@ -80,3 +81,12 @@ transform f markdownFragment =
                 { raw = fragment.raw
                 , parsed = Result.map (List.map <| Block.walk f) fragment.parsed
                 }
+
+
+{-| Fold over all inlines within a Markdown fragment to yield a value.
+-}
+inlineFoldl : (Inline -> acc -> acc) -> acc -> MarkdownFragment -> Result String acc
+inlineFoldl f initial markdownFragment =
+    case markdownFragment of
+        MarkdownFragment fragment ->
+            Result.map (Block.inlineFoldl f initial) fragment.parsed
