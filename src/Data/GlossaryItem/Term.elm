@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, view, groupCharacter)
+module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, view, indexGroupCharacter)
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -9,7 +9,7 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, view, groupCharacter
+@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, view, indexGroupCharacter
 
 -}
 
@@ -33,11 +33,15 @@ type Term
         { id : String
         , isAbbreviation : Bool
         , body : String
+        , indexGroupCharacter : String
+        , inlineText : String
         }
     | MarkdownTerm
         { id : String
         , isAbbreviation : Bool
         , body : MarkdownFragment
+        , indexGroupCharacter : String
+        , inlineText : String
         }
 
 
@@ -46,6 +50,14 @@ type Term
 emptyPlaintext : Term
 emptyPlaintext =
     fromPlaintext "" False
+
+
+stringToIndexGroupCharacter : String -> String
+stringToIndexGroupCharacter =
+    String.Normalize.removeDiacritics
+        >> String.toUpper
+        >> Extras.String.firstAlphabeticCharacter
+        >> Maybe.withDefault "…"
 
 
 {-| Construct a term from a plain text string and a Boolean indicating whether the term is an abbreviation.
@@ -59,20 +71,34 @@ fromPlaintext body isAbbreviation0 =
         { id = String.replace " " "_" body
         , isAbbreviation = isAbbreviation0
         , body = body
+        , indexGroupCharacter = stringToIndexGroupCharacter body
+        , inlineText = body
         }
 
 
 {-| Construct a term from a Markdown string and a Boolean indicating whether the term is an abbreviation.
 
-    fromMarkdown "The _ideal_ case" True |> raw --> "The _ideal_ case"
+    fromMarkdown "The _ideal_ case" False |> raw --> "The _ideal_ case"
 
 -}
 fromMarkdown : String -> Bool -> Term
 fromMarkdown body isAbbreviation0 =
+    let
+        fragment =
+            MarkdownFragment.fromString body
+
+        inlineTextConcatenated =
+            fragment
+                |> MarkdownFragment.concatenateInlineText
+                |> Result.withDefault body
+    in
     MarkdownTerm
         { id = String.replace " " "_" body
         , isAbbreviation = isAbbreviation0
-        , body = MarkdownFragment.fromString body
+        , body = fragment
+        , indexGroupCharacter =
+            inlineTextConcatenated |> stringToIndexGroupCharacter
+        , inlineText = inlineTextConcatenated
         }
 
 
@@ -89,6 +115,8 @@ fromPlaintextWithId body id0 isAbbreviation0 =
         { id = id0
         , isAbbreviation = isAbbreviation0
         , body = body
+        , indexGroupCharacter = stringToIndexGroupCharacter body
+        , inlineText = body
         }
 
 
@@ -101,11 +129,16 @@ fromPlaintextWithId body id0 isAbbreviation0 =
 -}
 fromMarkdownWithId : String -> String -> Bool -> Term
 fromMarkdownWithId body id0 isAbbreviation0 =
-    MarkdownTerm
-        { id = id0
-        , isAbbreviation = isAbbreviation0
-        , body = MarkdownFragment.fromString body
-        }
+    let
+        result0 =
+            fromMarkdown body isAbbreviation0
+    in
+    case result0 of
+        PlaintextTerm _ ->
+            result0
+
+        MarkdownTerm t ->
+            MarkdownTerm { t | id = id0 }
 
 
 {-| Decode a term from its JSON representation.
@@ -165,6 +198,23 @@ raw term =
             MarkdownFragment.raw t.body
 
 
+{-| Retrieve the concatenated inline text of a term.
+
+    fromMarkdown "*Hello* _there_" False
+    |> inlineText
+    --> "Hello there"
+
+-}
+inlineText : Term -> String
+inlineText term =
+    case term of
+        PlaintextTerm t ->
+            t.inlineText
+
+        MarkdownTerm t ->
+            t.inlineText
+
+
 {-| View a term as HTML.
 
     import Html exposing (Html)
@@ -212,12 +262,22 @@ view term =
                     text <| "Failed to parse Markdown: " ++ parsingError
 
 
-{-| The _group character_ of a term is the character it will be listed under in the index.
+{-| The _index group character_ of a term is the character it will be listed under in the index.
+
+    fromMarkdown "__future__" False
+    |> indexGroupCharacter
+    --> "F"
+
+    fromMarkdown "123" False
+    |> indexGroupCharacter
+    --> "…"
+
 -}
-groupCharacter : Term -> String
-groupCharacter =
-    raw
-        >> String.Normalize.removeDiacritics
-        >> String.toUpper
-        >> Extras.String.firstAlphabeticCharacter
-        >> Maybe.withDefault "…"
+indexGroupCharacter : Term -> String
+indexGroupCharacter term =
+    case term of
+        PlaintextTerm t ->
+            t.indexGroupCharacter
+
+        MarkdownTerm t ->
+            t.indexGroupCharacter

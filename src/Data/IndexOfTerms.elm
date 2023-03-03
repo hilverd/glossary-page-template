@@ -73,7 +73,7 @@ fromGlossaryItems glossaryItems =
                         let
                             first : String
                             first =
-                                Term.groupCharacter term
+                                Term.indexGroupCharacter term
                         in
                         Dict.update first
                             (\termList ->

@@ -43,7 +43,7 @@ fromList glossaryItems =
         alphabetically : List ( GlossaryItemIndex, GlossaryItem )
         alphabetically =
             sanitised
-                |> List.sortBy (.terms >> List.head >> Maybe.map Term.groupCharacter >> Maybe.withDefault "")
+                |> List.sortBy (.terms >> List.head >> Maybe.map Term.indexGroupCharacter >> Maybe.withDefault "")
                 |> zipListWithIndexes
 
         byFrequency : List ( GlossaryItemIndex, GlossaryItem )
