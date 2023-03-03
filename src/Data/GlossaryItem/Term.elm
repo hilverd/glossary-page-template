@@ -34,7 +34,6 @@ type Term
         , isAbbreviation : Bool
         , body : String
         , indexGroupCharacter : String
-        , inlineText : String
         }
     | MarkdownTerm
         { id : String
@@ -72,7 +71,6 @@ fromPlaintext body isAbbreviation0 =
         , isAbbreviation = isAbbreviation0
         , body = body
         , indexGroupCharacter = stringToIndexGroupCharacter body
-        , inlineText = body
         }
 
 
@@ -96,8 +94,7 @@ fromMarkdown body isAbbreviation0 =
         { id = String.replace " " "_" body
         , isAbbreviation = isAbbreviation0
         , body = fragment
-        , indexGroupCharacter =
-            inlineTextConcatenated |> stringToIndexGroupCharacter
+        , indexGroupCharacter = inlineTextConcatenated |> stringToIndexGroupCharacter
         , inlineText = inlineTextConcatenated
         }
 
@@ -116,7 +113,6 @@ fromPlaintextWithId body id0 isAbbreviation0 =
         , isAbbreviation = isAbbreviation0
         , body = body
         , indexGroupCharacter = stringToIndexGroupCharacter body
-        , inlineText = body
         }
 
 
@@ -209,7 +205,7 @@ inlineText : Term -> String
 inlineText term =
     case term of
         PlaintextTerm t ->
-            t.inlineText
+            t.body
 
         MarkdownTerm t ->
             t.inlineText

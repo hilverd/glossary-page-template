@@ -27,7 +27,7 @@ search searchTerm glossaryItems =
         terms
             |> List.filterMap
                 (\term ->
-                    if String.contains searchTermNormalised (String.toLower (Term.raw term)) then
+                    if String.contains searchTermNormalised (term |> Term.inlineText |> String.toLower) then
                         Just <| SearchDialog.searchResult (Extras.Url.fragmentOnly <| Term.id term) [ Term.view term ]
 
                     else
