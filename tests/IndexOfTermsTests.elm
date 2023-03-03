@@ -19,8 +19,8 @@ glossaryItems =
     let
         one : GlossaryItem
         one =
-            { terms = [ termFromBody "One" ]
-            , details = [ Details.fromPlaintext "One" ]
+            { terms = [ termFromBody "Óne" ]
+            , details = [ Details.fromPlaintext "Óne" ]
             , relatedTerms = []
             }
 
@@ -33,8 +33,15 @@ glossaryItems =
 
         three : GlossaryItem
         three =
-            { terms = [ termFromBody "Three" ]
-            , details = [ Details.fromPlaintext "Three" ]
+            { terms = [ termFromBody "3Three" ]
+            , details = [ Details.fromPlaintext "3Three" ]
+            , relatedTerms = []
+            }
+
+        doubleOhSeven : GlossaryItem
+        doubleOhSeven =
+            { terms = [ termFromBody "007" ]
+            , details = [ Details.fromPlaintext "007" ]
             , relatedTerms = []
             }
 
@@ -45,15 +52,50 @@ glossaryItems =
             , relatedTerms = []
             }
     in
-    GlossaryItems.fromList [ one, two, three, future ]
+    GlossaryItems.fromList [ doubleOhSeven, one, two, three, future ]
 
 
 suite : Test
 suite =
     describe "The IndexOfTerms module"
-        [ test "sorts terms alphabetically by their first character" <|
+        [ test "sorts terms alphabetically by their first alphabetic character (stripped of any diacritical marks)" <|
             \_ ->
                 glossaryItems
+                    |> IndexOfTerms.fromGlossaryItems
+                    |> IndexOfTerms.termGroups
+                    |> Expect.equal
+                        [ { label = "A", terms = [] }
+                        , { label = "B", terms = [] }
+                        , { label = "C", terms = [] }
+                        , { label = "D", terms = [] }
+                        , { label = "E", terms = [] }
+                        , { label = "F", terms = [ termFromBody "_future_" ] }
+                        , { label = "G", terms = [] }
+                        , { label = "H", terms = [] }
+                        , { label = "I", terms = [] }
+                        , { label = "J", terms = [] }
+                        , { label = "K", terms = [] }
+                        , { label = "L", terms = [] }
+                        , { label = "M", terms = [] }
+                        , { label = "N", terms = [] }
+                        , { label = "O", terms = [ termFromBody "Óne" ] }
+                        , { label = "P", terms = [] }
+                        , { label = "Q", terms = [] }
+                        , { label = "R", terms = [] }
+                        , { label = "S", terms = [] }
+                        , { label = "T", terms = [ termFromBody "3Three", termFromBody "Two" ] }
+                        , { label = "U", terms = [] }
+                        , { label = "V", terms = [] }
+                        , { label = "W", terms = [] }
+                        , { label = "X", terms = [] }
+                        , { label = "Y", terms = [] }
+                        , { label = "Z", terms = [] }
+                        , { label = "…", terms = [ termFromBody "007" ] }
+                        ]
+        , test "doesn't include ellipsis if not needed" <|
+            \_ ->
+                []
+                    |> GlossaryItems.fromList
                     |> IndexOfTerms.fromGlossaryItems
                     |> IndexOfTerms.termGroups
                     |> Expect.equal
@@ -71,18 +113,17 @@ suite =
                         , { label = "L", terms = [] }
                         , { label = "M", terms = [] }
                         , { label = "N", terms = [] }
-                        , { label = "O", terms = [ termFromBody "One" ] }
+                        , { label = "O", terms = [] }
                         , { label = "P", terms = [] }
                         , { label = "Q", terms = [] }
                         , { label = "R", terms = [] }
                         , { label = "S", terms = [] }
-                        , { label = "T", terms = [ termFromBody "Three", termFromBody "Two" ] }
+                        , { label = "T", terms = [] }
                         , { label = "U", terms = [] }
                         , { label = "V", terms = [] }
                         , { label = "W", terms = [] }
                         , { label = "X", terms = [] }
                         , { label = "Y", terms = [] }
                         , { label = "Z", terms = [] }
-                        , { label = "_", terms = [ termFromBody "_future_" ] }
                         ]
         ]

@@ -12,6 +12,8 @@ module Data.IndexOfTerms exposing (TermGroup, IndexOfTerms, fromGlossaryItems, t
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Dict exposing (Dict)
+import Extras.String
+import String.Normalize
 
 
 {-| A group of terms, where `label` is the first character of each item in `terms`.
@@ -28,25 +30,52 @@ type IndexOfTerms
     = IndexOfTerms (List TermGroup)
 
 
+compareTerms : Term -> Term -> Order
+compareTerms term1 term2 =
+    let
+        raw1 =
+            term1 |> Term.raw |> String.Normalize.removeDiacritics |> String.toUpper
+
+        raw2 =
+            term2 |> Term.raw |> String.Normalize.removeDiacritics |> String.toUpper
+
+        first1 =
+            raw1 |> Extras.String.firstAlphabeticCharacter |> Maybe.withDefault ""
+
+        first2 =
+            raw2 |> Extras.String.firstAlphabeticCharacter |> Maybe.withDefault ""
+    in
+    case
+        compare first1 first2
+    of
+        LT ->
+            LT
+
+        GT ->
+            GT
+
+        EQ ->
+            compare raw1 raw2
+
+
 {-| Create an index of terms from glossary items.
 -}
 fromGlossaryItems : GlossaryItems -> IndexOfTerms
 fromGlossaryItems glossaryItems =
     let
-        termListsByFirstCharacter : Dict String (List Term)
-        termListsByFirstCharacter =
+        termListsByFirstAlphabeticCharacterOrEllpisis : Dict String (List Term)
+        termListsByFirstAlphabeticCharacterOrEllpisis =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
                 |> List.concatMap (Tuple.second >> .terms)
                 |> List.foldl
                     (\term result ->
                         let
-                            firstCharacterUpper : String
-                            firstCharacterUpper =
-                                term |> Term.raw |> String.toUpper |> String.left 1
+                            first : String
+                            first =
+                                Term.groupCharacter term
                         in
-                        Dict.update
-                            firstCharacterUpper
+                        Dict.update first
                             (\termList ->
                                 termList
                                     |> Maybe.map (\terms -> term :: terms)
@@ -57,13 +86,15 @@ fromGlossaryItems glossaryItems =
                     )
                     Dict.empty
 
-        alphabet : List String
-        alphabet =
-            List.range (Char.toCode 'A') (Char.toCode 'Z')
+        alphabetAndEllipsis : List String
+        alphabetAndEllipsis =
+            (List.range (Char.toCode 'A') (Char.toCode 'Z')
                 |> List.map (Char.fromCode >> String.fromChar)
+            )
+                ++ [ "…" ]
 
-        termListsByFirstCharacterIncludingAlphabet : Dict String (List Term)
-        termListsByFirstCharacterIncludingAlphabet =
+        termListsByFirstCharacterIncludingAlphabetAndEllipsis : Dict String (List Term)
+        termListsByFirstCharacterIncludingAlphabetAndEllipsis =
             List.foldl
                 (\letter result ->
                     Dict.update letter
@@ -76,14 +107,21 @@ fromGlossaryItems glossaryItems =
                         )
                         result
                 )
-                termListsByFirstCharacter
-                alphabet
+                termListsByFirstAlphabeticCharacterOrEllpisis
+                alphabetAndEllipsis
 
         termIndexGroups : List TermGroup
         termIndexGroups =
-            termListsByFirstCharacterIncludingAlphabet
+            termListsByFirstCharacterIncludingAlphabetAndEllipsis
+                |> (\d ->
+                        if Dict.get "…" d == Just [] then
+                            Dict.remove "…" d
+
+                        else
+                            d
+                   )
                 |> Dict.toList
-                |> List.map (Tuple.mapSecond <| List.sortBy <| Term.raw >> String.toUpper)
+                |> List.map (Tuple.mapSecond <| List.sortWith compareTerms)
                 |> List.map (\( label, terms ) -> TermGroup label terms)
     in
     IndexOfTerms termIndexGroups

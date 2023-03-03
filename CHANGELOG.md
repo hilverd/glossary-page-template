@@ -12,7 +12,11 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
 ### Changed
+
+- The term index now lists all terms that do not contain an alphabetic character (with or without diacritics) under `…`.
+
 ### Fixed
 ### Removed
 

@@ -19,6 +19,7 @@
         "Export.Markdown",
         "Extras.Array",
         "Extras.HtmlTree",
+        "Extras.String",
         "Extras.Url",
         "GlossaryItemForm.DetailsField",
         "GlossaryItemForm.TermField"

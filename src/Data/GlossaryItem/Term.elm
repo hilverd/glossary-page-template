@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, view)
+module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, view, groupCharacter)
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -9,11 +9,12 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, view
+@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, view, groupCharacter
 
 -}
 
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
+import Extras.String
 import Html exposing (Html, text)
 import Html.Attributes exposing (class)
 import Json.Decode as Decode exposing (Decoder)
@@ -21,6 +22,7 @@ import Markdown.Block as Block exposing (Block)
 import Markdown.Html
 import Markdown.Renderer as Renderer exposing (Renderer)
 import MarkdownRenderers
+import String.Normalize
 import Svg.Attributes exposing (from)
 
 
@@ -208,3 +210,14 @@ view term =
 
                 Err parsingError ->
                     text <| "Failed to parse Markdown: " ++ parsingError
+
+
+{-| The _group character_ of a term is the character it will be listed under in the index.
+-}
+groupCharacter : Term -> String
+groupCharacter =
+    raw
+        >> String.Normalize.removeDiacritics
+        >> String.toUpper
+        >> Extras.String.firstAlphabeticCharacter
+        >> Maybe.withDefault "…"
