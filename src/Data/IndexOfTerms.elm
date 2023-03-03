@@ -30,34 +30,6 @@ type IndexOfTerms
     = IndexOfTerms (List TermGroup)
 
 
-compareTerms : Term -> Term -> Order
-compareTerms term1 term2 =
-    let
-        raw1 =
-            term1 |> Term.raw |> String.Normalize.removeDiacritics |> String.toUpper
-
-        raw2 =
-            term2 |> Term.raw |> String.Normalize.removeDiacritics |> String.toUpper
-
-        first1 =
-            raw1 |> Extras.String.firstAlphabeticCharacter |> Maybe.withDefault ""
-
-        first2 =
-            raw2 |> Extras.String.firstAlphabeticCharacter |> Maybe.withDefault ""
-    in
-    case
-        compare first1 first2
-    of
-        LT ->
-            LT
-
-        GT ->
-            GT
-
-        EQ ->
-            compare raw1 raw2
-
-
 {-| Create an index of terms from glossary items.
 -}
 fromGlossaryItems : GlossaryItems -> IndexOfTerms
@@ -121,7 +93,7 @@ fromGlossaryItems glossaryItems =
                             d
                    )
                 |> Dict.toList
-                |> List.map (Tuple.mapSecond <| List.sortWith compareTerms)
+                |> List.map (Tuple.mapSecond <| List.sortWith Term.compareAlphabetically)
                 |> List.map (\( label, terms ) -> TermGroup label terms)
     in
     IndexOfTerms termIndexGroups

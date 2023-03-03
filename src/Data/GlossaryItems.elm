@@ -13,7 +13,7 @@ import Array
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Details as Details
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
-import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItem.Term as Term exposing (Term, indexGroupCharacter)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Dict exposing (Dict)
 import Extras.Regex
@@ -31,7 +31,41 @@ type GlossaryItems
         }
 
 
+compareForSortingAlphabetically : GlossaryItem -> GlossaryItem -> Order
+compareForSortingAlphabetically item1 item2 =
+    Term.compareAlphabetically
+        (item1.terms |> List.head |> Maybe.withDefault Term.emptyPlaintext)
+        (item2.terms |> List.head |> Maybe.withDefault Term.emptyPlaintext)
+
+
 {-| Build glossary items from a list.
+
+    import Data.GlossaryItem exposing (GlossaryItem)
+    import Data.GlossaryItem.Term as Term exposing (Term)
+
+    item1 : GlossaryItem
+    item1 = { terms = [ Term.fromMarkdown "\\_\\_slots\\_\\_" False ]
+            , details = []
+            , relatedTerms = []
+            }
+
+    item2 : GlossaryItem
+    item2 = { terms = [ Term.fromMarkdown "Situation" False ]
+            , details = []
+            , relatedTerms = []
+            }
+
+    item3 : GlossaryItem
+    item3 = { terms = [ Term.fromMarkdown "strong" False ]
+            , details = []
+            , relatedTerms = []
+            }
+
+    fromList [item1, item2, item3]
+    |> orderedAlphabetically
+    |> List.map (Tuple.second >> .terms >> List.map Term.raw)
+    --> [["Situation"], ["\\_\\_slots\\_\\_"], ["strong"]]
+
 -}
 fromList : List GlossaryItem -> GlossaryItems
 fromList glossaryItems =
@@ -43,13 +77,12 @@ fromList glossaryItems =
         alphabetically : List ( GlossaryItemIndex, GlossaryItem )
         alphabetically =
             sanitised
-                |> List.sortBy (.terms >> List.head >> Maybe.map Term.indexGroupCharacter >> Maybe.withDefault "")
+                |> List.sortWith compareForSortingAlphabetically
                 |> zipListWithIndexes
 
         byFrequency : List ( GlossaryItemIndex, GlossaryItem )
         byFrequency =
-            alphabetically
-                |> orderListByFrequency
+            orderListByFrequency alphabetically
     in
     GlossaryItems <|
         { orderedAlphabetically = alphabetically

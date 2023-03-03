@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, view, indexGroupCharacter)
+module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, view, indexGroupCharacter, compareAlphabetically)
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -9,7 +9,7 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, view, indexGroupCharacter
+@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, view, indexGroupCharacter, compareAlphabetically
 
 -}
 
@@ -22,6 +22,7 @@ import Markdown.Block as Block exposing (Block)
 import Markdown.Html
 import Markdown.Renderer as Renderer exposing (Renderer)
 import MarkdownRenderers
+import Regex
 import String.Normalize
 import Svg.Attributes exposing (from)
 
@@ -277,3 +278,42 @@ indexGroupCharacter term =
 
         MarkdownTerm t ->
             t.indexGroupCharacter
+
+
+preserveOnlyAlphaNumChars : String -> String
+preserveOnlyAlphaNumChars =
+    let
+        regex : Regex.Regex
+        regex =
+            "[^A-Za-z0-9]"
+                |> Regex.fromString
+                |> Maybe.withDefault Regex.never
+    in
+    Regex.replace regex (always "")
+
+
+{-| Compares two terms for listing them alphabetically.
+-}
+compareAlphabetically : Term -> Term -> Order
+compareAlphabetically term1 term2 =
+    case compare (indexGroupCharacter term1) (indexGroupCharacter term2) of
+        LT ->
+            LT
+
+        GT ->
+            GT
+
+        EQ ->
+            compare
+                (term1
+                    |> inlineText
+                    |> String.Normalize.removeDiacritics
+                    |> preserveOnlyAlphaNumChars
+                    |> String.toUpper
+                )
+                (term2
+                    |> inlineText
+                    |> String.Normalize.removeDiacritics
+                    |> preserveOnlyAlphaNumChars
+                    |> String.toUpper
+                )
