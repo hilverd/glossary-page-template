@@ -1,5 +1,14 @@
 module MarkdownRenderers exposing (anchorTagHtmlTreeRenderer, anchorTagRenderer, htmlMsgRenderer, htmlTreeRenderer, imgTagHtmlTreeRenderer, imgTagRenderer, inlineHtmlMsgRenderer)
 
+{-| Renderers for Markdown data.
+
+
+# Markdown Renderers
+
+@docs anchorTagHtmlTreeRenderer, anchorTagRenderer, htmlMsgRenderer, htmlTreeRenderer, imgTagHtmlTreeRenderer, imgTagRenderer, inlineHtmlMsgRenderer
+
+-}
+
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Html exposing (Html)
@@ -9,11 +18,15 @@ import Markdown.Html
 import Markdown.Renderer as Renderer exposing (Renderer)
 
 
+{-| Render an anchor tag as HTML.
+-}
 anchorTagRenderer : Markdown.Html.Renderer (List (Html msg) -> Html msg)
 anchorTagRenderer =
     anchorTagRendererForViewFunction viewAnchorTag
 
 
+{-| Render an anchor tag as an HtmlTree.
+-}
 anchorTagHtmlTreeRenderer : Markdown.Html.Renderer (List HtmlTree -> HtmlTree)
 anchorTagHtmlTreeRenderer =
     anchorTagRendererForViewFunction anchorTagToHtmlTree
@@ -44,6 +57,8 @@ viewAnchorTag href target style renderedChildren =
         renderedChildren
 
 
+{-| Render Markdown to HTML.
+-}
 htmlMsgRenderer : Renderer (Html msg)
 htmlMsgRenderer =
     let
@@ -114,11 +129,15 @@ anchorTagToHtmlTree href target style renderedChildren =
         renderedChildren
 
 
+{-| Render an image tag as HTML.
+-}
 imgTagRenderer : Markdown.Html.Renderer (List (Html msg) -> Html msg)
 imgTagRenderer =
     imgTagRendererForViewFunction viewImgTag
 
 
+{-| Render an image tags as an HtmlTree.
+-}
 imgTagHtmlTreeRenderer : Markdown.Html.Renderer (List HtmlTree -> HtmlTree)
 imgTagHtmlTreeRenderer =
     imgTagRendererForViewFunction imgTagToHtmlTree
@@ -182,6 +201,8 @@ imgTagToHtmlTree src width height alt title style _ =
         []
 
 
+{-| Render Markdown as an HtmlTree.
+-}
 htmlTreeRenderer : Renderer HtmlTree
 htmlTreeRenderer =
     { heading =

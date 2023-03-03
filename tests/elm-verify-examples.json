@@ -19,6 +19,7 @@
         "Extras.String",
         "Extras.Url",
         "GlossaryItemForm.DetailsField",
-        "GlossaryItemForm.TermField"
+        "GlossaryItemForm.TermField",
+        "MarkdownRenderers"
     ]
 }
