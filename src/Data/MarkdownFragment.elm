@@ -1,11 +1,11 @@
-module Data.MarkdownFragment exposing (MarkdownFragment, fromString, raw, parsed, transform, inlineFoldl)
+module Data.MarkdownFragment exposing (MarkdownFragment, fromString, raw, parsed, transform, inlineFoldl, concatenateInlineText)
 
 {-| A Markdown fragment is a string that has been parsed as Markdown.
 
 
 # Markdown Fragments
 
-@docs MarkdownFragment, fromString, raw, parsed, transform, inlineFoldl
+@docs MarkdownFragment, fromString, raw, parsed, transform, inlineFoldl, concatenateInlineText
 
 -}
 
@@ -90,3 +90,29 @@ inlineFoldl f initial markdownFragment =
     case markdownFragment of
         MarkdownFragment fragment ->
             Result.map (Block.inlineFoldl f initial) fragment.parsed
+
+
+{-| Concatenate the inlines within a Markdown fragment to produce a string.
+
+    "*Hello* _there_"
+    |> fromString
+    |> concatenateInlineText
+    --> Ok "Hello there"
+
+-}
+concatenateInlineText : MarkdownFragment -> Result String String
+concatenateInlineText =
+    inlineFoldl
+        (\inline result ->
+            case inline of
+                Block.CodeSpan str ->
+                    str :: result
+
+                Block.Text str ->
+                    str :: result
+
+                _ ->
+                    result
+        )
+        []
+        >> Result.map (List.reverse >> String.concat)
