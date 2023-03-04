@@ -43,44 +43,6 @@
                 <dl>
                     <div>
                         <dt>
-                            <dfn id="2to3">
-                                <a href="#2to3">
-                                    2to3
-                                </a>
-                            </dfn>
-                        </dt>
-                        <dd>A tool that tries to convert Python 2.x code to Python 3.x code by handling most of the incompatibilities which can be detected by parsing the source and traversing the parse tree.
-
-2to3 is available in the standard library as [`lib2to3`](https://docs.python.org/3/library/2to3.html#module-lib2to3 &quot;lib2to3: The 2to3 library&quot;); a standalone entry point is provided as `Tools/scripts/2to3`. See [2to3 — Automated Python 2 to 3 code translation](https://docs.python.org/3/library/2to3.html#to3-reference).</dd>
-                    </div>
-                    <div>
-                        <dt>
-                            <dfn id="__future__">
-                                <a href="#__future__">
-                                    __future__
-                                </a>
-                            </dfn>
-                        </dt>
-                        <dd>A [future statement](https://docs.python.org/3/reference/simple_stmts.html#future), `from __future__ import &lt;feature&gt;`, directs the compiler to compile the current module using syntax or semantics that will become standard in a future release of Python. The [`__future__`](https://docs.python.org/3/library/__future__.html#module-__future__ &quot;__future__: Future statement definitions&quot;) module documents the possible values of _feature_. By importing this module and evaluating its variables, you can see when a new feature was first added to the language and when it will (or did) become the default:
-    
-```
-&gt;&gt;&gt; import __future__
-&gt;&gt;&gt; __future__.division
-_Feature((2, 2, 0, &#39;alpha&#39;, 2), (3, 0, 0, &#39;alpha&#39;, 0), 8192)
-```</dd>
-                    </div>
-                    <div>
-                        <dt>
-                            <dfn id="__slots__">
-                                <a href="#__slots__">
-                                    __slots__
-                                </a>
-                            </dfn>
-                        </dt>
-                        <dd>A declaration inside a class that saves memory by pre-declaring space for instance attributes and eliminating instance dictionaries. Though popular, the technique is somewhat tricky to get right and is best reserved for rare cases where there are large numbers of instances in a memory-critical application.</dd>
-                    </div>
-                    <div>
-                        <dt>
                             <dfn id="Abstract_base_class">
                                 <a href="#Abstract_base_class">
                                     Abstract base class
@@ -505,13 +467,13 @@ For more information about descriptors’ methods, see [Implementing Descriptors
                     </div>
                     <div>
                         <dt>
-                            <dfn id="F-string">
-                                <a href="#F-string">
-                                    F-string
+                            <dfn id="File-like_object">
+                                <a href="#File-like_object">
+                                    File-like object
                                 </a>
                             </dfn>
                         </dt>
-                        <dd>String literals prefixed with `&#39;f&#39;` or `&#39;F&#39;` are commonly called “f-strings” which is short for [formatted string literals](https://docs.python.org/3/reference/lexical_analysis.html#f-strings). See also [**PEP 498**](https://peps.python.org/pep-0498/).</dd>
+                        <dd class="related-terms">See: <a href="#File_object">File object</a></dd>
                     </div>
                     <div>
                         <dt>
@@ -524,16 +486,6 @@ For more information about descriptors’ methods, see [Implementing Descriptors
                         <dd>An object exposing a file-oriented API (with methods such as `read()` or `write()`) to an underlying resource. Depending on the way it was created, a file object can mediate access to a real on-disk file or to another type of storage or communication device (for example standard input/output, in-memory buffers, sockets, pipes, etc.). File objects are also called _file-like objects_ or _streams_.
 
 There are actually three categories of file objects: raw binary files, buffered binary files and text files. Their interfaces are defined in the [`io`](https://docs.python.org/3/library/io.html#module-io &quot;io: Core tools for working with streams.&quot;) module. The canonical way to create a file object is by using the [`open()`](https://docs.python.org/3/library/functions.html#open &quot;open&quot;) function.</dd>
-                    </div>
-                    <div>
-                        <dt>
-                            <dfn id="File-like_object">
-                                <a href="#File-like_object">
-                                    File-like object
-                                </a>
-                            </dfn>
-                        </dt>
-                        <dd class="related-terms">See: <a href="#File_object">File object</a></dd>
                     </div>
                     <div>
                         <dt>
@@ -578,6 +530,16 @@ See [**PEP 302**](https://peps.python.org/pep-0302/), [**PEP 420**](https://peps
                     </div>
                     <div>
                         <dt>
+                            <dfn id="F-string">
+                                <a href="#F-string">
+                                    F-string
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>String literals prefixed with `&#39;f&#39;` or `&#39;F&#39;` are commonly called “f-strings” which is short for [formatted string literals](https://docs.python.org/3/reference/lexical_analysis.html#f-strings). See also [**PEP 498**](https://peps.python.org/pep-0498/).</dd>
+                    </div>
+                    <div>
+                        <dt>
                             <dfn id="Function">
                                 <a href="#Function">
                                     Function
@@ -607,6 +569,22 @@ def sum_two_numbers(a: int, b: int) -&gt; int:
 Function annotation syntax is explained in section [Function definitions](https://docs.python.org/3/reference/compound_stmts.html#function).
 
 See variable annotation and [**PEP 484**](https://peps.python.org/pep-0484/), which describe this functionality. Also see [Annotations Best Practices](https://docs.python.org/3/howto/annotations.html#annotations-howto) for best practices on working with annotations.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="\_\_future\_\_">
+                                <a href="#\_\_future\_\_">
+                                    \_\_future\_\_
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A [future statement](https://docs.python.org/3/reference/simple_stmts.html#future), `from __future__ import &lt;feature&gt;`, directs the compiler to compile the current module using syntax or semantics that will become standard in a future release of Python. The [`__future__`](https://docs.python.org/3/library/__future__.html#module-__future__ &quot;__future__: Future statement definitions&quot;) module documents the possible values of _feature_. By importing this module and evaluating its variables, you can see when a new feature was first added to the language and when it will (or did) become the default:
+    
+```
+&gt;&gt;&gt; import __future__
+&gt;&gt;&gt; __future__.division
+_Feature((2, 2, 0, &#39;alpha&#39;, 2), (3, 0, 0, &#39;alpha&#39;, 0), 8192)
+```</dd>
                     </div>
                     <div>
                         <dt>
@@ -707,16 +685,6 @@ Past efforts to create a “free-threaded” interpreter (one which locks shared
                     </div>
                     <div>
                         <dt>
-                            <dfn id="Hash-based_pyc">
-                                <a href="#Hash-based_pyc">
-                                    Hash-based pyc
-                                </a>
-                            </dfn>
-                        </dt>
-                        <dd>A bytecode cache file that uses the hash rather than the last-modified time of the corresponding source file to determine its validity. See [Cached bytecode invalidation](https://docs.python.org/3/reference/import.html#pyc-invalidation).</dd>
-                    </div>
-                    <div>
-                        <dt>
                             <dfn id="Hashable">
                                 <a href="#Hashable">
                                     Hashable
@@ -728,6 +696,16 @@ Past efforts to create a “free-threaded” interpreter (one which locks shared
 Hashability makes an object usable as a dictionary key and a set member, because these data structures use the hash value internally.
 
 Most of Python’s immutable built-in objects are hashable; mutable containers (such as lists or dictionaries) are not; immutable containers (such as tuples and frozensets) are only hashable if their elements are hashable. Objects which are instances of user-defined classes are hashable by default. They all compare unequal (except with themselves), and their hash value is derived from their [`id()`](https://docs.python.org/3/library/functions.html#id &quot;id&quot;).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Hash-based_pyc">
+                                <a href="#Hash-based_pyc">
+                                    Hash-based pyc
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A bytecode cache file that uses the hash rather than the last-modified time of the corresponding source file to determine its validity. See [Cached bytecode invalidation](https://docs.python.org/3/reference/import.html#pyc-invalidation).</dd>
                     </div>
                     <div>
                         <dt>
@@ -753,16 +731,6 @@ Most of Python’s immutable built-in objects are hashable; mutable containers (
                     </div>
                     <div>
                         <dt>
-                            <dfn id="Import_path">
-                                <a href="#Import_path">
-                                    Import path
-                                </a>
-                            </dfn>
-                        </dt>
-                        <dd>A list of locations (or path entries) that are searched by the path based finder for modules to import. During import, this list of locations usually comes from [`sys.path`](https://docs.python.org/3/library/sys.html#sys.path &quot;sys.path&quot;), but for subpackages it may also come from the parent package’s `__path__` attribute.</dd>
-                    </div>
-                    <div>
-                        <dt>
                             <dfn id="Importer">
                                 <a href="#Importer">
                                     Importer
@@ -780,6 +748,16 @@ Most of Python’s immutable built-in objects are hashable; mutable containers (
                             </dfn>
                         </dt>
                         <dd>The process by which Python code in one module is made available to Python code in another module.</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Import_path">
+                                <a href="#Import_path">
+                                    Import path
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A list of locations (or path entries) that are searched by the path based finder for modules to import. During import, this list of locations usually comes from [`sys.path`](https://docs.python.org/3/library/sys.html#sys.path &quot;sys.path&quot;), but for subpackages it may also come from the parent package’s `__path__` attribute.</dd>
                     </div>
                     <div>
                         <dt>
@@ -958,18 +936,6 @@ On Android and VxWorks, Python uses `&quot;utf-8&quot;` as the locale encoding.
                     </div>
                     <div>
                         <dt>
-                            <dfn id="Meta_path_finder">
-                                <a href="#Meta_path_finder">
-                                    Meta path finder
-                                </a>
-                            </dfn>
-                        </dt>
-                        <dd>A finder returned by a search of [`sys.meta_path`](https://docs.python.org/3/library/sys.html#sys.meta_path &quot;sys.meta_path&quot;). Meta path finders are related to, but different from path entry finders.
-
-See [`importlib.abc.MetaPathFinder`](https://docs.python.org/3/library/importlib.html#importlib.abc.MetaPathFinder &quot;importlib.abc.MetaPathFinder&quot;) for the methods that meta path finders implement.</dd>
-                    </div>
-                    <div>
-                        <dt>
                             <dfn id="Metaclass">
                                 <a href="#Metaclass">
                                     Metaclass
@@ -979,6 +945,18 @@ See [`importlib.abc.MetaPathFinder`](https://docs.python.org/3/library/importlib
                         <dd>The class of a class. Class definitions create a class name, a class dictionary, and a list of base classes. The metaclass is responsible for taking those three arguments and creating the class. Most object oriented programming languages provide a default implementation. What makes Python special is that it is possible to create custom metaclasses. Most users never need this tool, but when the need arises, metaclasses can provide powerful, elegant solutions. They have been used for logging attribute access, adding thread-safety, tracking object creation, implementing singletons, and many other tasks.
 
 More information can be found in [Metaclasses](https://docs.python.org/3/reference/datamodel.html#metaclasses).</dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Meta_path_finder">
+                                <a href="#Meta_path_finder">
+                                    Meta path finder
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A finder returned by a search of [`sys.meta_path`](https://docs.python.org/3/library/sys.html#sys.meta_path &quot;sys.meta_path&quot;). Meta path finders are related to, but different from path entry finders.
+
+See [`importlib.abc.MetaPathFinder`](https://docs.python.org/3/library/importlib.html#importlib.abc.MetaPathFinder &quot;importlib.abc.MetaPathFinder&quot;) for the methods that meta path finders implement.</dd>
                     </div>
                     <div>
                         <dt>
@@ -1400,6 +1378,16 @@ The [`collections.abc.Sequence`](https://docs.python.org/3/library/collections.a
                     </div>
                     <div>
                         <dt>
+                            <dfn id="\_\_slots\_\_">
+                                <a href="#\_\_slots\_\_">
+                                    \_\_slots\_\_
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A declaration inside a class that saves memory by pre-declaring space for instance attributes and eliminating instance dictionaries. Though popular, the technique is somewhat tricky to get right and is best reserved for rare cases where there are large numbers of instances in a memory-critical application.</dd>
+                    </div>
+                    <div>
+                        <dt>
                             <dfn id="Special_method">
                                 <a href="#Special_method">
                                     Special method
@@ -1430,6 +1418,18 @@ The [`collections.abc.Sequence`](https://docs.python.org/3/library/collections.a
 
 The [`Py_NewRef()`](https://docs.python.org/3/c-api/refcounting.html#c.Py_NewRef &quot;Py_NewRef&quot;) function can be used to create a strong reference to an object. Usually, the [`Py_DECREF()`](https://docs.python.org/3/c-api/refcounting.html#c.Py_DECREF &quot;Py_DECREF&quot;) function must be called on the strong reference before exiting the scope of the strong reference, to avoid leaking one reference.</dd>
                         <dd class="related-terms">See also: <a href="#Borrowed_reference">Borrowed reference</a></dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="2to3">
+                                <a href="#2to3">
+                                    2to3
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A tool that tries to convert Python 2.x code to Python 3.x code by handling most of the incompatibilities which can be detected by parsing the source and traversing the parse tree.
+
+2to3 is available in the standard library as [`lib2to3`](https://docs.python.org/3/library/2to3.html#module-lib2to3 &quot;lib2to3: The 2to3 library&quot;); a standalone entry point is provided as `Tools/scripts/2to3`. See [2to3 — Automated Python 2 to 3 code translation](https://docs.python.org/3/library/2to3.html#to3-reference).</dd>
                     </div>
                     <div>
                         <dt>
