@@ -33,10 +33,11 @@ input value_ showValidationErrors validationError additionalAttributes =
         ]
 
 
-inputText : String -> Bool -> Maybe String -> List (Attribute msg) -> Html msg
-inputText value_ showValidationErrors validationError additionalAttributes =
+inputText : String -> Bool -> Bool -> Maybe String -> List (Attribute msg) -> Html msg
+inputText value_ markdownBasedSyntaxEnabled showValidationErrors validationError additionalAttributes =
     Accessibility.div []
-        [ Accessibility.inputText value_
+        [ Extras.Html.showIf markdownBasedSyntaxEnabled markdownSupportedMessage
+        , Accessibility.inputText value_
             ([ if not showValidationErrors || validationError == Nothing then
                 class "w-full min-w-0 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
 
@@ -57,27 +58,8 @@ inputText value_ showValidationErrors validationError additionalAttributes =
 
 textarea : String -> Bool -> Bool -> Maybe String -> List (Attribute msg) -> Html msg
 textarea body markdownBasedSyntaxEnabled showValidationErrors validationError additionalAttributes =
-    Html.div []
-        [ Extras.Html.showIf markdownBasedSyntaxEnabled <|
-            Accessibility.div
-                []
-                [ span
-                    [ class "inline-flex items-center text-sm text-gray-500 dark:text-gray-300" ]
-                    [ Icons.markdown
-                        [ Svg.Attributes.class "w-5 h-5 mr-2"
-                        , Accessibility.Aria.hidden True
-                        ]
-                    , Html.span
-                        []
-                        [ Html.a
-                            [ Html.Attributes.href "https://commonmark.org/help/"
-                            , Html.Attributes.target "_blank"
-                            ]
-                            [ Html.text "Markdown" ]
-                        , Html.text " supported."
-                        ]
-                    ]
-                ]
+    Accessibility.div []
+        [ Extras.Html.showIf markdownBasedSyntaxEnabled markdownSupportedMessage
         , Accessibility.div
             [ class "grow-wrap max-w-prose"
             , Html.Attributes.attribute "data-replicated-value" <| body ++ "\n\n"
@@ -100,4 +82,27 @@ textarea body markdownBasedSyntaxEnabled showValidationErrors validationError ad
                 [ Icons.exclamationCircle
                     [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
                 ]
+        ]
+
+
+markdownSupportedMessage : Html msg
+markdownSupportedMessage =
+    Accessibility.div
+        []
+        [ span
+            [ class "inline-flex items-center text-sm text-gray-500 dark:text-gray-300" ]
+            [ Icons.markdown
+                [ Svg.Attributes.class "w-5 h-5 mr-2"
+                , Accessibility.Aria.hidden True
+                ]
+            , Html.span
+                []
+                [ Html.a
+                    [ Html.Attributes.href "https://commonmark.org/help/"
+                    , Html.Attributes.target "_blank"
+                    ]
+                    [ Html.text "Markdown" ]
+                , Html.text " supported."
+                ]
+            ]
         ]

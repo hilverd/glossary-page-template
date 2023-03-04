@@ -281,6 +281,7 @@ viewEditTitle showValidationErrors titleField =
                                 [ class "relative block w-full min-w-0" ]
                                 [ Components.Form.inputText
                                     titleField.body
+                                    False
                                     showValidationErrors
                                     titleField.validationError
                                     [ required True
@@ -473,6 +474,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                             [ class "block w-full min-w-0" ]
                             [ Components.Form.inputText
                                 aboutLinkBody.body
+                                False
                                 showValidationErrors
                                 aboutLinkBody.validationError
                                 [ class "block w-full border-0 p-0 focus:ring-0 dark:bg-gray-700 dark:text-white"

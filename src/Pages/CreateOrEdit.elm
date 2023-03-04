@@ -362,13 +362,18 @@ giveFocusToSeeAlsoSelect index =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.seeAlsoSelect index)
 
 
-viewCreateDescriptionTerm : Bool -> Bool -> Int -> TermField -> Html Msg
-viewCreateDescriptionTerm showValidationErrors canBeDeleted index term =
-    viewCreateDescriptionTermInternal showValidationErrors canBeDeleted (TermIndex.fromInt index) term
+viewCreateDescriptionTerm : Bool -> Bool -> Bool -> Int -> TermField -> Html Msg
+viewCreateDescriptionTerm showMarkdownBasedSyntaxEnabled showValidationErrors canBeDeleted index term =
+    viewCreateDescriptionTermInternal
+        (showMarkdownBasedSyntaxEnabled && index == 0)
+        showValidationErrors
+        canBeDeleted
+        (TermIndex.fromInt index)
+        term
 
 
-viewCreateDescriptionTermInternal : Bool -> Bool -> TermIndex -> TermField -> Html Msg
-viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex termField =
+viewCreateDescriptionTermInternal : Bool -> Bool -> Bool -> TermIndex -> TermField -> Html Msg
+viewCreateDescriptionTermInternal showMarkdownBasedSyntaxEnabled showValidationErrors canBeDeleted termIndex termField =
     let
         abbreviationLabelId : String
         abbreviationLabelId =
@@ -397,6 +402,7 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
                             [ class "relative block w-full min-w-0" ]
                             [ Components.Form.inputText
                                 (TermField.raw termField)
+                                showMarkdownBasedSyntaxEnabled
                                 showValidationErrors
                                 (TermField.validationError termField)
                                 [ id <| ElementIds.termInputField termIndex
@@ -441,8 +447,8 @@ viewCreateDescriptionTermInternal showValidationErrors canBeDeleted termIndex te
         ]
 
 
-viewCreateDescriptionTerms : Bool -> Array TermField -> Html Msg
-viewCreateDescriptionTerms showValidationErrors termsArray =
+viewCreateDescriptionTerms : Bool -> Bool -> Array TermField -> Html Msg
+viewCreateDescriptionTerms markdownBasedSyntaxEnabled showValidationErrors termsArray =
     let
         terms : List TermField
         terms =
@@ -459,7 +465,7 @@ viewCreateDescriptionTerms showValidationErrors termsArray =
             ]
         , div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
-            (List.indexedMap (viewCreateDescriptionTerm showValidationErrors (List.length terms > 1)) terms
+            (List.indexedMap (viewCreateDescriptionTerm markdownBasedSyntaxEnabled showValidationErrors (List.length terms > 1)) terms
                 ++ [ div []
                         [ Components.Button.secondary
                             [ Html.Events.onClick <| PageMsg.Internal AddTerm ]
@@ -829,7 +835,7 @@ view model =
                                 [ class "lg:flex lg:space-x-8" ]
                                 [ div
                                     [ class "lg:w-1/2 space-y-8 divide-y divide-gray-200 dark:divide-gray-800 sm:space-y-5" ]
-                                    [ viewCreateDescriptionTerms model.triedToSaveWhenFormInvalid terms
+                                    [ viewCreateDescriptionTerms glossary.enableMarkdownBasedSyntax model.triedToSaveWhenFormInvalid terms
                                     , viewCreateDescriptionDetails
                                         (not glossary.enableMarkdownBasedSyntax)
                                         glossary.enableMarkdownBasedSyntax
