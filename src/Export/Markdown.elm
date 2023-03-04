@@ -22,7 +22,7 @@ import File.Download as Download
 
 bold : String -> String
 bold string =
-    "**" ++ Extras.String.escapeForMarkdown string ++ "**"
+    "**" ++ string ++ "**"
 
 
 link : AboutLink -> String
@@ -61,7 +61,7 @@ itemToMarkdown { terms, details, relatedTerms } =
         termsString : String
         termsString =
             terms
-                |> List.map (Term.raw >> bold)
+                |> List.map (Term.markdown >> bold)
                 |> lines
 
         detailsString : String

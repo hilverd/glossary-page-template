@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, view, indexGroupCharacter, compareAlphabetically)
+module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically)
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -9,7 +9,7 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, view, indexGroupCharacter, compareAlphabetically
+@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically
 
 -}
 
@@ -210,6 +210,18 @@ inlineText term =
 
         MarkdownTerm t ->
             t.inlineText
+
+
+{-| Convert a term to a string suitable for a Markdown document.
+-}
+markdown : Term -> String
+markdown term =
+    case term of
+        PlaintextTerm t ->
+            Extras.String.escapeForMarkdown t.body
+
+        MarkdownTerm t ->
+            MarkdownFragment.raw t.body
 
 
 {-| View a term as HTML.
