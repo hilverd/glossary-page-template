@@ -739,7 +739,7 @@ viewAddSuggestedSeeAlso suggestedRelatedTerms =
                                 ]
                                 [ Icons.plus
                                     [ Svg.Attributes.class "-ml-1 mr-2 h-4 w-4" ]
-                                , text <| Term.raw suggestedRelatedTerm
+                                , Term.view suggestedRelatedTerm
                                 ]
                         )
                 )

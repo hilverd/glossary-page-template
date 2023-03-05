@@ -362,7 +362,15 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form =
                         |> Maybe.andThen
                             (\ref ->
                                 Dict.get ref bodyByIdReference
-                                    |> Maybe.map (RelatedTerm.fromPlaintext ref)
+                                    |> Maybe.map
+                                        ((if enableMarkdownBasedSyntax then
+                                            RelatedTerm.fromMarkdown
+
+                                          else
+                                            RelatedTerm.fromPlaintext
+                                         )
+                                            ref
+                                        )
                             )
                 )
     }
@@ -536,7 +544,7 @@ suggestRelatedTerms glossaryItemForm =
                 let
                     candidateTermAsWord : Regex.Regex
                     candidateTermAsWord =
-                        ("\\b" ++ Extras.Regex.escapeStringForUseInRegex (String.toLower (Term.raw candidateTerm)) ++ "\\b")
+                        ("\\b" ++ Extras.Regex.escapeStringForUseInRegex (String.toLower (Term.inlineText candidateTerm)) ++ "\\b")
                             |> Regex.fromString
                             |> Maybe.withDefault Regex.never
                 in

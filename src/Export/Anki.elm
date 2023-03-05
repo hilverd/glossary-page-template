@@ -89,7 +89,7 @@ itemToAnki { terms, details, relatedTerms } =
                 else
                     ("See: "
                         ++ (relatedTerms
-                                |> List.map RelatedTerm.raw
+                                |> List.map (RelatedTerm.htmlTree >> Extras.HtmlTree.toHtml >> escape)
                                 |> String.join ", "
                            )
                     )

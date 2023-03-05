@@ -84,7 +84,7 @@ itemToMarkdown { terms, details, relatedTerms } =
         relatedTermsString : String
         relatedTermsString =
             relatedTerms
-                |> List.map (RelatedTerm.raw >> Extras.String.escapeForMarkdown)
+                |> List.map RelatedTerm.markdown
                 |> String.join ", "
                 |> (++) relatedTermsPrefix
     in

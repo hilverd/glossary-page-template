@@ -82,7 +82,7 @@ decode enableMarkdownBasedSyntax =
                 <|
                     Decode.string
         )
-        (Decode.field "relatedTerms" <| Decode.list <| RelatedTerm.decode)
+        (Decode.field "relatedTerms" <| Decode.list <| RelatedTerm.decode enableMarkdownBasedSyntax)
 
 
 {-| Whether or not the glossary item has any details.

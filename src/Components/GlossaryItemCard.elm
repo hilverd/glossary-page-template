@@ -191,7 +191,7 @@ viewGlossaryItemRelatedTerms preview tabbable itemHasSomeDetails relatedTerms =
                                         |> Html.Attributes.href
                                     , Accessibility.Key.tabbable tabbable
                                     ]
-                                    [ text <| RelatedTerm.raw relatedTerm ]
+                                    [ RelatedTerm.view relatedTerm ]
                             )
                         |> List.intersperse (text ", ")
                    )
