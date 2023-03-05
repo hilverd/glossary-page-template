@@ -814,7 +814,7 @@ view model =
                 newOrUpdatedGlossaryItem =
                     Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form
             in
-            { title = GlossaryTitle.raw glossary.title
+            { title = GlossaryTitle.inlineText glossary.title
             , body =
                 [ div
                     [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]

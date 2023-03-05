@@ -134,7 +134,12 @@ init flags =
                                 flags
                                     |> Decode.decodeValue (Decode.field "titleString" Decode.string)
                                     |> Result.withDefault "Element not found"
-                                    |> GlossaryTitle.fromPlaintext
+                                    |> (if enableMarkdownBasedSyntax then
+                                            GlossaryTitle.fromMarkdown
+
+                                        else
+                                            GlossaryTitle.fromPlaintext
+                                       )
 
                             aboutParagraph : AboutParagraph
                             aboutParagraph =

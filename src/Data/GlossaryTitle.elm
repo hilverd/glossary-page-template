@@ -1,4 +1,4 @@
-module Data.GlossaryTitle exposing (GlossaryTitle, fromPlaintext, raw, toFilename)
+module Data.GlossaryTitle exposing (GlossaryTitle, fromPlaintext, fromMarkdown, raw, toFilename, inlineText, markdown, view, htmlTree)
 
 {-| The title of a glossary.
 This can be in either plain text or Markdown.
@@ -6,10 +6,19 @@ This can be in either plain text or Markdown.
 
 # Glossary Titles
 
-@docs GlossaryTitle, fromPlaintext, raw, toFilename
+@docs GlossaryTitle, fromPlaintext, fromMarkdown, raw, toFilename, inlineText, markdown, view, htmlTree
 
 -}
 
+import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
+import Extras.HtmlTree exposing (HtmlTree)
+import Extras.String
+import Html exposing (Html, text)
+import Html.Attributes exposing (class)
+import Markdown.Block as Block exposing (Block)
+import Markdown.Html
+import Markdown.Renderer as Renderer exposing (Renderer)
+import MarkdownRenderers
 import Regex
 
 
@@ -17,6 +26,7 @@ import Regex
 -}
 type GlossaryTitle
     = PlaintextGlossaryTitle String
+    | MarkdownGlossaryTitle MarkdownFragment
 
 
 {-| Construct a glossary title from a plain text string.
@@ -26,6 +36,19 @@ fromPlaintext =
     PlaintextGlossaryTitle
 
 
+{-| Construct a glossary title from a Markdown string.
+
+    title : GlossaryTitle
+    title = fromMarkdown "The _ideal_ case"
+
+    raw title --> "The _ideal_ case"
+
+-}
+fromMarkdown : String -> GlossaryTitle
+fromMarkdown =
+    MarkdownFragment.fromString >> MarkdownGlossaryTitle
+
+
 {-| Retrieve the raw body of a glossary title.
 -}
 raw : GlossaryTitle -> String
@@ -33,6 +56,9 @@ raw glossaryTitle =
     case glossaryTitle of
         PlaintextGlossaryTitle title ->
             title
+
+        MarkdownGlossaryTitle fragment ->
+            MarkdownFragment.raw fragment
 
 
 {-| Convert a glossary title to a filename with the given extension.
@@ -72,3 +98,103 @@ toFilename extension glossaryTitle =
                     result
            )
         |> (\result -> result ++ extension)
+
+
+{-| Retrieve the concatenated inline text of a glossary title.
+
+    fromMarkdown "*Hello* _there_"
+    |> inlineText
+    --> "Hello there"
+
+-}
+inlineText : GlossaryTitle -> String
+inlineText glossaryTitle =
+    case glossaryTitle of
+        PlaintextGlossaryTitle title ->
+            title
+
+        MarkdownGlossaryTitle fragment ->
+            fragment
+                |> MarkdownFragment.concatenateInlineText
+                |> Result.withDefault (MarkdownFragment.raw fragment)
+
+
+{-| Convert a glossary title to a string suitable for a Markdown document.
+-}
+markdown : GlossaryTitle -> String
+markdown glossaryTitle =
+    case glossaryTitle of
+        PlaintextGlossaryTitle body ->
+            Extras.String.escapeForMarkdown body
+
+        MarkdownGlossaryTitle fragment ->
+            MarkdownFragment.raw fragment
+
+
+{-| View a glossary title as HTML.
+
+    import Html exposing (Html)
+
+    fromPlaintext "Foo" |> view --> Html.text "Foo"
+
+    expected : Html msg
+    expected =
+        Html.span []
+            [ Html.span []
+                [ Html.text "The "
+                , Html.em [] [ Html.text "ideal" ]
+                , Html.text " case"
+                ]
+            ]
+
+    fromMarkdown "The _ideal_ case" |> view
+    --> expected
+
+-}
+view : GlossaryTitle -> Html msg
+view glossaryTitle =
+    case glossaryTitle of
+        PlaintextGlossaryTitle title ->
+            text title
+
+        MarkdownGlossaryTitle fragment ->
+            let
+                parsed : Result String (List Block)
+                parsed =
+                    MarkdownFragment.parsed fragment
+            in
+            case parsed of
+                Ok blocks ->
+                    case Renderer.render MarkdownRenderers.inlineHtmlMsgRenderer blocks of
+                        Ok rendered ->
+                            Html.span
+                                [ class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]
+                                rendered
+
+                        Err renderingError ->
+                            text <| "Failed to render Markdown: " ++ renderingError
+
+                Err parsingError ->
+                    text <| "Failed to parse Markdown: " ++ parsingError
+
+
+{-| Convert a glossary title to an HtmlTree.
+-}
+htmlTree : GlossaryTitle -> HtmlTree
+htmlTree glossaryTitle =
+    case glossaryTitle of
+        PlaintextGlossaryTitle title ->
+            Extras.HtmlTree.Leaf title
+
+        MarkdownGlossaryTitle fragment ->
+            case MarkdownFragment.parsed fragment of
+                Ok blocks ->
+                    case Renderer.render MarkdownRenderers.inlineHtmlTreeRenderer blocks of
+                        Ok rendered ->
+                            Extras.HtmlTree.Node "span" False [] rendered
+
+                        Err renderingError ->
+                            Extras.HtmlTree.Leaf <| "Failed to render Markdown: " ++ renderingError
+
+                Err parsingError ->
+                    Extras.HtmlTree.Leaf <| "Failed to parse Markdown: " ++ parsingError

@@ -38,7 +38,7 @@ toHtmlTree enableExportMenu enableHelpForMakingChanges { enableMarkdownBasedSynt
             [ HtmlTree.Node "h1"
                 True
                 [ HtmlTree.Attribute "id" ElementIds.title ]
-                [ HtmlTree.Leaf <| GlossaryTitle.raw title ]
+                [ GlossaryTitle.htmlTree title ]
             ]
         , HtmlTree.Node "main"
             True

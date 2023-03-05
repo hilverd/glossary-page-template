@@ -1480,7 +1480,7 @@ view model =
                 indexOfTerms =
                     IndexOfTerms.fromGlossaryItems glossary.items
             in
-            { title = GlossaryTitle.raw glossary.title
+            { title = GlossaryTitle.inlineText glossary.title
             , body =
                 [ Html.div
                     [ class "min-h-full focus:outline-none"
@@ -1594,7 +1594,7 @@ view model =
                                 , Extras.Html.showIf editable <| viewSettings glossary model
                                 , h1
                                     [ id ElementIds.title ]
-                                    [ text <| GlossaryTitle.raw glossary.title ]
+                                    [ GlossaryTitle.view glossary.title ]
                                 ]
                             , Html.main_
                                 []
