@@ -128,7 +128,7 @@ download glossaryTitle aboutSection glossaryItems =
 
         titleComment : String
         titleComment =
-            glossaryTitle |> GlossaryTitle.toString |> comment
+            glossaryTitle |> GlossaryTitle.raw |> comment
 
         aboutLinksComment : String
         aboutLinksComment =

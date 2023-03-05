@@ -134,7 +134,7 @@ init flags =
                                 flags
                                     |> Decode.decodeValue (Decode.field "titleString" Decode.string)
                                     |> Result.withDefault "Element not found"
-                                    |> GlossaryTitle.fromString
+                                    |> GlossaryTitle.fromPlaintext
 
                             aboutParagraph : AboutParagraph
                             aboutParagraph =

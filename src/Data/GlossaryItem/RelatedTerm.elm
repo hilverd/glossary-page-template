@@ -88,7 +88,7 @@ fromMarkdown idReference0 body =
             ]
 
     decoded : Result Decode.Error RelatedTerm
-    decoded = Decode.decodeValue decode deviceEdge
+    decoded = Decode.decodeValue (decode False) deviceEdge
 
     Result.map idReference decoded --> Ok "Device_Edge"
 

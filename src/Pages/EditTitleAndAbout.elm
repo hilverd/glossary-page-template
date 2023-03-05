@@ -78,7 +78,7 @@ init common =
         _ ->
             ( { common = common
               , form =
-                    Form.create (GlossaryTitle.fromString "")
+                    Form.create (GlossaryTitle.fromPlaintext "")
                         { paragraph = AboutParagraph.fromPlaintext ""
                         , links = []
                         }
@@ -179,7 +179,7 @@ update msg model =
 
 titleFromForm : Form.TitleAndAboutForm -> GlossaryTitle.GlossaryTitle
 titleFromForm =
-    Form.titleField >> .body >> GlossaryTitle.fromString
+    Form.titleField >> .body >> GlossaryTitle.fromPlaintext
 
 
 aboutSectionFromForm : Bool -> Form.TitleAndAboutForm -> AboutSection
@@ -583,7 +583,7 @@ view model =
                 aboutSection =
                     aboutSectionFromForm enableMarkdownBasedSyntax model.form
             in
-            { title = GlossaryTitle.toString title1
+            { title = GlossaryTitle.raw title1
             , body =
                 [ div
                     [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
@@ -612,7 +612,7 @@ view model =
                                             [ text "Preview" ]
                                         , h2
                                             [ class "pb-4 text-2xl font-bold leading-tight text-gray-700 dark:text-gray-300" ]
-                                            [ text <| GlossaryTitle.toString title1 ]
+                                            [ text <| GlossaryTitle.raw title1 ]
                                         , Components.AboutSection.view False aboutSection
                                         ]
                                     ]

@@ -1,11 +1,12 @@
-module Data.GlossaryTitle exposing (GlossaryTitle, fromString, toString, toFilename)
+module Data.GlossaryTitle exposing (GlossaryTitle, fromPlaintext, raw, toFilename)
 
 {-| The title of a glossary.
+This can be in either plain text or Markdown.
 
 
 # Glossary Titles
 
-@docs GlossaryTitle, fromString, toString, toFilename
+@docs GlossaryTitle, fromPlaintext, raw, toFilename
 
 -}
 
@@ -15,22 +16,22 @@ import Regex
 {-| An opaque type for a glossary title which is just a wrapper around a string.
 -}
 type GlossaryTitle
-    = GlossaryTitle String
+    = PlaintextGlossaryTitle String
 
 
-{-| Construct a glossary title from a string.
+{-| Construct a glossary title from a plain text string.
 -}
-fromString : String -> GlossaryTitle
-fromString =
-    GlossaryTitle
+fromPlaintext : String -> GlossaryTitle
+fromPlaintext =
+    PlaintextGlossaryTitle
 
 
-{-| Get the string representation of a glossary title.
+{-| Retrieve the raw body of a glossary title.
 -}
-toString : GlossaryTitle -> String
-toString glossaryTitle =
+raw : GlossaryTitle -> String
+raw glossaryTitle =
     case glossaryTitle of
-        GlossaryTitle title ->
+        PlaintextGlossaryTitle title ->
             title
 
 
@@ -39,7 +40,7 @@ Spaces are replaced by underscores.
 Any other characters which are not generally safe for filenames are omitted.
 
     "Weather Terms: A Complete Guide"
-    |> fromString
+    |> fromPlaintext
     |> toFilename ".html"
     --> "Weather_Terms_A_Complete_Guide.html"
 
@@ -54,7 +55,7 @@ toFilename extension glossaryTitle =
                 |> Maybe.withDefault Regex.never
     in
     glossaryTitle
-        |> toString
+        |> raw
         |> Regex.replace notSoNiceCharacters
             (\m ->
                 if m.match == " " then
