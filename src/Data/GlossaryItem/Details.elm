@@ -75,22 +75,6 @@ markdown details =
             MarkdownFragment.raw fragment
 
 
-htmlTreeRenderer : Renderer HtmlTree
-htmlTreeRenderer =
-    let
-        renderer0 : Renderer HtmlTree
-        renderer0 =
-            MarkdownRenderers.htmlTreeRenderer
-    in
-    { renderer0
-        | html =
-            Markdown.Html.oneOf
-                [ MarkdownRenderers.anchorTagHtmlTreeRenderer
-                , MarkdownRenderers.imgTagHtmlTreeRenderer
-                ]
-    }
-
-
 {-| View details as HTML.
 
     import Html exposing (Html)
@@ -136,6 +120,22 @@ view details =
 
                 Err parsingError ->
                     text <| "Failed to parse Markdown: " ++ parsingError
+
+
+htmlTreeRenderer : Renderer HtmlTree
+htmlTreeRenderer =
+    let
+        renderer0 : Renderer HtmlTree
+        renderer0 =
+            MarkdownRenderers.htmlTreeRenderer
+    in
+    { renderer0
+        | html =
+            Markdown.Html.oneOf
+                [ MarkdownRenderers.anchorTagHtmlTreeRenderer
+                , MarkdownRenderers.imgTagHtmlTreeRenderer
+                ]
+    }
 
 
 {-| Convert details to an HtmlTree.

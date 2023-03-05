@@ -40,6 +40,11 @@ comment =
         >> (++) "# "
 
 
+header : String -> String -> String
+header key value =
+    "#" ++ key ++ ":" ++ value
+
+
 crlf : String
 crlf =
     "\u{000D}\n"
@@ -48,6 +53,11 @@ crlf =
 lines : List String -> String
 lines =
     String.join crlf
+
+
+htmlLines : List String -> String
+htmlLines =
+    String.join "<br>"
 
 
 paragraphs : List String -> String
@@ -66,8 +76,8 @@ itemToAnki { terms, details, relatedTerms } =
         front : String
         front =
             terms
-                |> List.map (Term.raw >> escape)
-                |> lines
+                |> List.map (Term.htmlTree >> Extras.HtmlTree.toHtml >> escape)
+                |> htmlLines
                 |> quote
 
         back : String
@@ -104,6 +114,14 @@ download glossaryTitle aboutSection glossaryItems =
         filename =
             GlossaryTitle.toFilename "-Anki_deck.txt" glossaryTitle
 
+        separatorHeader : String
+        separatorHeader =
+            header "separator" "Tab"
+
+        htmlHeader : String
+        htmlHeader =
+            header "html" "true"
+
         instructionsComment : String
         instructionsComment =
             comment "This file is meant to be imported into Anki (https://docs.ankiweb.net/importing.html#text-files)."
@@ -131,7 +149,9 @@ download glossaryTitle aboutSection glossaryItems =
 
         content : String
         content =
-            [ instructionsComment
+            [ separatorHeader
+            , htmlHeader
+            , instructionsComment
             , comment ""
             , titleComment
             , comment ""

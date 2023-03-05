@@ -1,4 +1,7 @@
-module MarkdownRenderers exposing (anchorTagHtmlTreeRenderer, anchorTagRenderer, htmlMsgRenderer, htmlTreeRenderer, imgTagHtmlTreeRenderer, imgTagRenderer, inlineHtmlMsgRenderer)
+module MarkdownRenderers exposing
+    ( anchorTagHtmlTreeRenderer, anchorTagRenderer, htmlMsgRenderer, htmlTreeRenderer, imgTagHtmlTreeRenderer, imgTagRenderer, inlineHtmlMsgRenderer
+    , inlineHtmlTreeRenderer
+    )
 
 {-| Renderers for Markdown data.
 
@@ -105,10 +108,6 @@ inlineHtmlMsgRenderer =
     , tableHeaderCell = always <| Html.span []
     , tableCell = always <| Html.span []
     }
-
-
-
--- TODO: define inlineHtmlTreeRenderer
 
 
 anchorTagToHtmlTree :
@@ -368,4 +367,34 @@ htmlTreeRenderer =
             HtmlTree.Node "th" False attrs
     , tableCell = \_ children -> HtmlTree.Node "td" False [] children
     , strikethrough = HtmlTree.Node "span" False [ HtmlTree.Attribute "style" "text-decoration-line: line-through" ]
+    }
+
+
+{-| A HtmlTree renderer that only handles inline elements (e.g. strong, emphasis) properly.
+Block elements are either ignored or have their children wrapped in a <span>.
+-}
+inlineHtmlTreeRenderer : Renderer HtmlTree
+inlineHtmlTreeRenderer =
+    { heading = \{ children } -> HtmlTree.Node "span" False [] children
+    , paragraph = HtmlTree.Node "span" False []
+    , hardLineBreak = HtmlTree.Leaf ""
+    , blockQuote = HtmlTree.Node "span" False []
+    , strong = HtmlTree.Node "strong" False []
+    , emphasis = HtmlTree.Node "em" False []
+    , strikethrough = HtmlTree.Node "del" False []
+    , codeSpan = \content -> HtmlTree.Node "code" False [] [ HtmlTree.Leaf content ]
+    , link = always <| HtmlTree.Node "span" False []
+    , image = always <| HtmlTree.Leaf ""
+    , text = HtmlTree.Leaf
+    , unorderedList = always <| HtmlTree.Leaf ""
+    , orderedList = \_ _ -> HtmlTree.Leaf ""
+    , html = Markdown.Html.oneOf []
+    , codeBlock = always <| HtmlTree.Leaf ""
+    , thematicBreak = HtmlTree.Node "span" False [] []
+    , table = HtmlTree.Node "span" False []
+    , tableHeader = HtmlTree.Node "span" False []
+    , tableBody = HtmlTree.Node "span" False []
+    , tableRow = HtmlTree.Node "span" False []
+    , tableHeaderCell = always <| HtmlTree.Node "span" False []
+    , tableCell = always <| HtmlTree.Node "span" False []
     }
