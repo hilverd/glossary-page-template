@@ -1,7 +1,4 @@
-module Data.GlossaryItem.Term exposing
-    ( Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically
-    , htmlTree
-    )
+module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, htmlTree)
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -12,7 +9,7 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically
+@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, htmlTree
 
 -}
 

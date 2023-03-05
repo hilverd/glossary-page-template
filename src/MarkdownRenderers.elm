@@ -1,14 +1,11 @@
-module MarkdownRenderers exposing
-    ( anchorTagHtmlTreeRenderer, anchorTagRenderer, htmlMsgRenderer, htmlTreeRenderer, imgTagHtmlTreeRenderer, imgTagRenderer, inlineHtmlMsgRenderer
-    , inlineHtmlTreeRenderer
-    )
+module MarkdownRenderers exposing (anchorTagHtmlTreeRenderer, anchorTagRenderer, htmlMsgRenderer, htmlTreeRenderer, imgTagHtmlTreeRenderer, imgTagRenderer, inlineHtmlMsgRenderer, inlineHtmlTreeRenderer)
 
 {-| Renderers for Markdown data.
 
 
 # Markdown Renderers
 
-@docs anchorTagHtmlTreeRenderer, anchorTagRenderer, htmlMsgRenderer, htmlTreeRenderer, imgTagHtmlTreeRenderer, imgTagRenderer, inlineHtmlMsgRenderer
+@docs anchorTagHtmlTreeRenderer, anchorTagRenderer, htmlMsgRenderer, htmlTreeRenderer, imgTagHtmlTreeRenderer, imgTagRenderer, inlineHtmlMsgRenderer, inlineHtmlTreeRenderer
 
 -}
 
