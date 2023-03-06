@@ -266,8 +266,8 @@ giveFocusToAboutLinkHref index =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.aboutLinkHref index)
 
 
-viewEditTitle : Bool -> Form.TitleField -> Html Msg
-viewEditTitle showValidationErrors titleField =
+viewEditTitle : Bool -> Bool -> Form.TitleField -> Html Msg
+viewEditTitle enableMarkdownBasedSyntax showValidationErrors titleField =
     div []
         [ div []
             [ h2
@@ -288,7 +288,7 @@ viewEditTitle showValidationErrors titleField =
                                 [ class "relative block w-full min-w-0" ]
                                 [ Components.Form.inputText
                                     titleField.body
-                                    False
+                                    enableMarkdownBasedSyntax
                                     showValidationErrors
                                     titleField.validationError
                                     [ required True
@@ -606,7 +606,7 @@ view model =
                                 [ class "lg:flex lg:space-x-8" ]
                                 [ div
                                     [ class "lg:w-1/2 space-y-7 lg:space-y-8" ]
-                                    [ viewEditTitle model.triedToSaveWhenFormInvalid <| Form.titleField model.form
+                                    [ viewEditTitle enableMarkdownBasedSyntax model.triedToSaveWhenFormInvalid <| Form.titleField model.form
                                     , viewEditAboutParagraph (not enableMarkdownBasedSyntax) enableMarkdownBasedSyntax model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
                                     , viewEditAboutLinks model.triedToSaveWhenFormInvalid <| Form.aboutLinkFields model.form
                                     ]
