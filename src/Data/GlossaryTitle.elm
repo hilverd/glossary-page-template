@@ -168,7 +168,7 @@ view glossaryTitle =
                     case Renderer.render MarkdownRenderers.inlineHtmlMsgRenderer blocks of
                         Ok rendered ->
                             Html.span
-                                [ class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]
+                                [ class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden text-3xl font-bold leading-tight" ]
                                 rendered
 
                         Err renderingError ->
