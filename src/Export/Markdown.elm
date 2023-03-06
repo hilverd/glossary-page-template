@@ -104,7 +104,7 @@ download glossaryTitle aboutSection glossaryItems =
 
         titleHeadingString : String
         titleHeadingString =
-            glossaryTitle |> GlossaryTitle.raw |> Extras.String.escapeForMarkdown |> (++) "# "
+            glossaryTitle |> GlossaryTitle.markdown |> (++) "# "
 
         aboutParagraphString : String
         aboutParagraphString =
