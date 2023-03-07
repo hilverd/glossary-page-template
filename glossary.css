@@ -122,6 +122,10 @@
     @apply text-inherit no-underline text-gray-500 dark:text-gray-400 font-normal;
   }
 
+  article#glossary-page-items dl dd + dd:not(.related-terms) {
+    @apply border-t border-b-0 border-dashed border-gray-300 dark:border-gray-600 mt-3 pt-4;
+  }
+
   /* Start of trick for autogrowing textareas
      https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */
 
