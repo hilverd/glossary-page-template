@@ -1,5 +1,6 @@
 import './glossary.css';
 import { Elm } from './src/ApplicationShell.elm';
+import '@webcomponents/custom-elements';
 
 const containerElement = document.getElementById('glossary-page-container');
 
@@ -121,4 +122,40 @@ domReady(() => {
             document.getElementById("glossary-page-outer")?.focus();
         }
     })
+
+    if (typeof katex != "undefined") {
+        customElements.define('katex-inline',
+            class extends HTMLElement {
+                constructor() { super(); }
+                connectedCallback() { this.setTextContent(); }
+                attributeChangedCallback() { this.setTextContent(); }
+                static get observedAttributes() { return []; }
+
+                setTextContent() {
+                    katex.render(this.textContent, this, {
+                        throwOnError: false
+                    });
+
+                }
+            }
+        );
+
+        customElements.define('katex-display',
+            class extends HTMLElement {
+                constructor() { super(); }
+                connectedCallback() { this.setTextContent(); }
+                attributeChangedCallback() { this.setTextContent(); }
+                static get observedAttributes() { return []; }
+
+                setTextContent() {
+                    katex.render(this.textContent, this, {
+                        displayMode: true,
+                        throwOnError: false
+                    });
+                }
+            }
+        );
+    } else {
+        console.error("It appears that the KaTeX assets have not been loaded.");
+    }
 });
