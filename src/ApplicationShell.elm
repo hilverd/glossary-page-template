@@ -123,6 +123,12 @@ init flags =
                 |> Result.map
                     (\items ->
                         let
+                            katexIsAvailable : Bool
+                            katexIsAvailable =
+                                flags
+                                    |> Decode.decodeValue (Decode.field "katexIsAvailable" Decode.bool)
+                                    |> Result.withDefault False
+
                             cardWidth : CardWidth
                             cardWidth =
                                 flags
@@ -164,6 +170,7 @@ init flags =
                                     |> Result.withDefault []
                         in
                         { enableMarkdownBasedSyntax = enableMarkdownBasedSyntax
+                        , enableMathSupport = enableMarkdownBasedSyntax && katexIsAvailable
                         , cardWidth = cardWidth
                         , title = title
                         , aboutSection = aboutSection

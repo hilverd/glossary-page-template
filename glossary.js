@@ -2,6 +2,8 @@ import './glossary.css';
 import { Elm } from './src/ApplicationShell.elm';
 import '@webcomponents/custom-elements';
 
+const katexIsAvailable = typeof katex != "undefined";
+
 const containerElement = document.getElementById('glossary-page-container');
 
 const enableHelpForMakingChanges = containerElement.getAttribute('data-enable-help-for-making-changes') === 'true';
@@ -89,7 +91,8 @@ const app = Elm.ApplicationShell.init({
         enableSavingChangesInMemory: enableSavingChangesInMemory,
         enableExportMenu: enableExportMenu,
         enableMarkdownBasedSyntax: enableMarkdownBasedSyntax,
-        cardWidth: cardWidth
+        cardWidth: cardWidth,
+        katexIsAvailable: katexIsAvailable
     }
 });
 
@@ -123,16 +126,16 @@ domReady(() => {
         }
     })
 
-    if (typeof katex != "undefined") {
+    if (katexIsAvailable) {
         customElements.define('katex-inline',
             class extends HTMLElement {
                 constructor() { super(); }
                 connectedCallback() { this.setTextContent(); }
                 attributeChangedCallback() { this.setTextContent(); }
-                static get observedAttributes() { return []; }
+                static get observedAttributes() { return ['data-expr']; }
 
                 setTextContent() {
-                    katex.render(this.textContent, this, {
+                    katex.render(this.getAttribute('data-expr'), this, {
                         throwOnError: false
                     });
 
@@ -145,17 +148,15 @@ domReady(() => {
                 constructor() { super(); }
                 connectedCallback() { this.setTextContent(); }
                 attributeChangedCallback() { this.setTextContent(); }
-                static get observedAttributes() { return []; }
+                static get observedAttributes() { return ['data-expr']; }
 
                 setTextContent() {
-                    katex.render(this.textContent, this, {
+                    katex.render(this.getAttribute('data-expr'), this, {
                         displayMode: true,
                         throwOnError: false
                     });
                 }
             }
         );
-    } else {
-        console.error("It appears that the KaTeX assets have not been loaded.");
     }
 });

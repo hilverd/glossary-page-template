@@ -6,8 +6,8 @@ import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Extras.Url
 
 
-search : String -> GlossaryItems -> List SearchDialog.SearchResult
-search searchTerm glossaryItems =
+search : Bool -> String -> GlossaryItems -> List SearchDialog.SearchResult
+search enableMathSupport searchTerm glossaryItems =
     let
         searchTermNormalised : String
         searchTermNormalised =
@@ -28,7 +28,7 @@ search searchTerm glossaryItems =
             |> List.filterMap
                 (\term ->
                     if String.contains searchTermNormalised (term |> Term.inlineText |> String.toLower) then
-                        Just <| SearchDialog.searchResult (Extras.Url.fragmentOnly <| Term.id term) [ Term.view term ]
+                        Just <| SearchDialog.searchResult (Extras.Url.fragmentOnly <| Term.id term) [ Term.view enableMathSupport term ]
 
                     else
                         Nothing

@@ -3,6 +3,7 @@ module Components.Form exposing (input, inputText, textarea)
 import Accessibility exposing (Attribute)
 import Accessibility.Aria
 import Extras.Html
+import Extras.HtmlAttribute
 import Html exposing (Html, span)
 import Html.Attributes exposing (class)
 import Icons
@@ -61,7 +62,7 @@ textarea body markdownBasedSyntaxEnabled showValidationErrors validationError ad
     Accessibility.div []
         [ Extras.Html.showIf markdownBasedSyntaxEnabled markdownSupportedMessage
         , Accessibility.div
-            [ class "grow-wrap max-w-prose"
+            [ class "grow-wrap"
             , Html.Attributes.attribute "data-replicated-value" <| body ++ "\n\n"
             ]
             [ Accessibility.textarea
@@ -71,6 +72,7 @@ textarea body markdownBasedSyntaxEnabled showValidationErrors validationError ad
                    else
                     class "shadow-sm w-full rounded-md border-red-300 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500 dark:bg-gray-700"
                  , Accessibility.Aria.invalid <| validationError /= Nothing
+                 , Extras.HtmlAttribute.showIf markdownBasedSyntaxEnabled <| class "font-mono text-sm"
                  ]
                     ++ additionalAttributes
                 )

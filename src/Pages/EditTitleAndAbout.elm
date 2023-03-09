@@ -580,7 +580,7 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
-        Ok { enableMarkdownBasedSyntax, items } ->
+        Ok { enableMarkdownBasedSyntax, enableMathSupport, items } ->
             let
                 title1 : GlossaryTitle.GlossaryTitle
                 title1 =
@@ -619,8 +619,8 @@ view model =
                                             [ text "Preview" ]
                                         , h2
                                             [ class "pb-4 text-2xl font-bold leading-tight text-gray-700 dark:text-gray-300" ]
-                                            [ GlossaryTitle.view title1 ]
-                                        , Components.AboutSection.view False aboutSection
+                                            [ GlossaryTitle.view enableMathSupport title1 ]
+                                        , Components.AboutSection.view enableMathSupport False aboutSection
                                         ]
                                     ]
                                 ]

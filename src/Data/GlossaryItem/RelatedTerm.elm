@@ -145,8 +145,8 @@ markdown relatedTerm =
 
 {-| View a related term as HTML.
 -}
-view : RelatedTerm -> Html msg
-view relatedTerm =
+view : Bool -> RelatedTerm -> Html msg
+view enableMathSupport relatedTerm =
     case relatedTerm of
         PlaintextRelatedTerm t ->
             text t.body
@@ -159,7 +159,7 @@ view relatedTerm =
             in
             case parsed of
                 Ok blocks ->
-                    case Renderer.render MarkdownRenderers.inlineHtmlMsgRenderer blocks of
+                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
                         Ok rendered ->
                             Html.span
                                 [ class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]

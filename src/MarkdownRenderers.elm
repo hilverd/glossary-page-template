@@ -59,8 +59,8 @@ viewAnchorTag href target style renderedChildren =
 
 {-| Render Markdown to HTML.
 -}
-htmlMsgRenderer : Renderer (Html msg)
-htmlMsgRenderer =
+htmlMsgRenderer : Bool -> Renderer (Html msg)
+htmlMsgRenderer enableMathSupport =
     let
         renderer0 : Renderer (Html msg)
         renderer0 =
@@ -74,14 +74,39 @@ htmlMsgRenderer =
                 [ anchorTagRenderer
                 , imgTagRenderer
                 ]
+        , codeSpan =
+            \content ->
+                if enableMathSupport && String.startsWith "$" content && String.endsWith "$" content then
+                    Html.node "katex-inline"
+                        [ content
+                            |> String.slice 1 -1
+                            |> Attr.attribute "data-expr"
+                        ]
+                        []
+
+                else
+                    Html.code [] [ Html.text content ]
+        , codeBlock =
+            if enableMathSupport then
+                \{ body, language } ->
+                    if language == Just "math" then
+                        Html.node "katex-display"
+                            [ Attr.attribute "data-expr" body ]
+                            []
+
+                    else
+                        Renderer.defaultHtmlRenderer.codeBlock { body = body, language = language }
+
+            else
+                Renderer.defaultHtmlRenderer.codeBlock
     }
 
 
 {-| A renderer that only handles inline elements (e.g. strong, emphasis) properly.
 Block elements are either ignored or have their children wrapped in a <span>.
 -}
-inlineHtmlMsgRenderer : Renderer (Html msg)
-inlineHtmlMsgRenderer =
+inlineHtmlMsgRenderer : Bool -> Renderer (Html msg)
+inlineHtmlMsgRenderer enableMathSupport =
     { heading = \{ children } -> Html.span [] children
     , paragraph = Html.span []
     , hardLineBreak = Html.text ""
@@ -89,7 +114,18 @@ inlineHtmlMsgRenderer =
     , strong = Html.strong []
     , emphasis = Html.em []
     , strikethrough = Html.del []
-    , codeSpan = \content -> Html.code [] [ Html.text content ]
+    , codeSpan =
+        \content ->
+            if enableMathSupport && String.startsWith "$" content && String.endsWith "$" content then
+                Html.node "katex-inline"
+                    [ content
+                        |> String.slice 1 -1
+                        |> Attr.attribute "data-expr"
+                    ]
+                    []
+
+            else
+                Html.code [] [ Html.text content ]
     , link = always <| Html.span []
     , image = always <| Html.text ""
     , text = Html.text

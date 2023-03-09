@@ -135,7 +135,7 @@ markdown glossaryTitle =
 
     import Html exposing (Html)
 
-    fromPlaintext "Foo" |> view --> Html.text "Foo"
+    fromPlaintext "Foo" |> view False --> Html.text "Foo"
 
     expected : Html msg
     expected =
@@ -147,12 +147,12 @@ markdown glossaryTitle =
                 ]
             ]
 
-    fromMarkdown "The _ideal_ case" |> view
+    fromMarkdown "The _ideal_ case" |> view False
     --> expected
 
 -}
-view : GlossaryTitle -> Html msg
-view glossaryTitle =
+view : Bool -> GlossaryTitle -> Html msg
+view enableMathSupport glossaryTitle =
     case glossaryTitle of
         PlaintextGlossaryTitle title ->
             text title
@@ -165,7 +165,7 @@ view glossaryTitle =
             in
             case parsed of
                 Ok blocks ->
-                    case Renderer.render MarkdownRenderers.inlineHtmlMsgRenderer blocks of
+                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
                         Ok rendered ->
                             Html.span
                                 [ class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden text-3xl font-bold leading-tight" ]

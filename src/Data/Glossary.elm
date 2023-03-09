@@ -13,6 +13,7 @@ import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 
 type alias Glossary =
     { enableMarkdownBasedSyntax : Bool
+    , enableMathSupport : Bool
     , cardWidth : CardWidth
     , title : GlossaryTitle
     , aboutSection : AboutSection

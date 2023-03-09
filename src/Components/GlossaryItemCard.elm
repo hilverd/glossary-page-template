@@ -30,8 +30,8 @@ type Style msg
         }
 
 
-view : Style msg -> GlossaryItem -> Html msg
-view style glossaryItem =
+view : Bool -> Style msg -> GlossaryItem -> Html msg
+view enableMathSupport style glossaryItem =
     case style of
         Preview ->
             let
@@ -45,9 +45,9 @@ view style glossaryItem =
             in
             div
                 [ Html.Attributes.style "max-height" "100%" ]
-                (List.map (viewGlossaryTerm True tabbable) glossaryItem.terms
+                (List.map (viewGlossaryTerm enableMathSupport True tabbable) glossaryItem.terms
                     ++ List.map viewGlossaryItemDetails glossaryItem.details
-                    ++ viewGlossaryItemRelatedTerms True tabbable itemHasSomeDetails glossaryItem.relatedTerms
+                    ++ viewGlossaryItemRelatedTerms enableMathSupport True tabbable itemHasSomeDetails glossaryItem.relatedTerms
                 )
 
         Normal { index, tabbable, onClickEdit, onClickDelete, editable, errorWhileDeleting } ->
@@ -72,9 +72,9 @@ view style glossaryItem =
                     ]
                     [ div
                         []
-                        (List.map (viewGlossaryTerm False tabbable) glossaryItem.terms
+                        (List.map (viewGlossaryTerm enableMathSupport False tabbable) glossaryItem.terms
                             ++ List.map viewGlossaryItemDetails glossaryItem.details
-                            ++ viewGlossaryItemRelatedTerms False tabbable itemHasSomeDetails glossaryItem.relatedTerms
+                            ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails glossaryItem.relatedTerms
                         )
                     , div
                         [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
@@ -121,23 +121,23 @@ view style glossaryItem =
 
             else
                 div []
-                    (List.map (viewGlossaryTerm False tabbable) glossaryItem.terms
+                    (List.map (viewGlossaryTerm enableMathSupport False tabbable) glossaryItem.terms
                         ++ List.map viewGlossaryItemDetails glossaryItem.details
-                        ++ viewGlossaryItemRelatedTerms False tabbable itemHasSomeDetails glossaryItem.relatedTerms
+                        ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails glossaryItem.relatedTerms
                     )
 
 
-viewGlossaryTerm : Bool -> Bool -> Term -> Html msg
-viewGlossaryTerm preview tabbable term =
+viewGlossaryTerm : Bool -> Bool -> Bool -> Term -> Html msg
+viewGlossaryTerm enableMathSupport preview tabbable term =
     Html.dt
         [ class "group" ]
         [ Html.dfn
             [ Html.Attributes.id <| Term.id term ]
             [ if Term.isAbbreviation term then
-                Html.abbr [] [ Term.view term ]
+                Html.abbr [] [ Term.view enableMathSupport term ]
 
               else
-                Term.view term
+                Term.view enableMathSupport term
             ]
         , span
             [ class "silcrow invisible group-hover:visible hover:visible print:group-hover:invisible print:hover:invisible" ]
@@ -163,8 +163,8 @@ viewGlossaryItemDetails details =
         [ Details.view details ]
 
 
-viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> List RelatedTerm -> List (Html msg)
-viewGlossaryItemRelatedTerms preview tabbable itemHasSomeDetails relatedTerms =
+viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Bool -> List RelatedTerm -> List (Html msg)
+viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDetails relatedTerms =
     if List.isEmpty relatedTerms then
         []
 
@@ -191,7 +191,7 @@ viewGlossaryItemRelatedTerms preview tabbable itemHasSomeDetails relatedTerms =
                                         |> Html.Attributes.href
                                     , Accessibility.Key.tabbable tabbable
                                     ]
-                                    [ RelatedTerm.view relatedTerm ]
+                                    [ RelatedTerm.view enableMathSupport relatedTerm ]
                             )
                         |> List.intersperse (text ", ")
                    )

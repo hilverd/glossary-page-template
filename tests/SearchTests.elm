@@ -51,7 +51,7 @@ suite =
             [ test "returns search results sorted by relevance for a given search term" <|
                 \_ ->
                     loadedGlossaryItems
-                        |> Search.search "Two"
+                        |> Search.search False "Two"
                         |> Expect.equal
                             [ searchResult "#Two" [ Html.text "Two" ] ]
             ]

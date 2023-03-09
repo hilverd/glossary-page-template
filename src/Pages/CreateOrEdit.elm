@@ -592,13 +592,13 @@ viewCreateDescriptionDetails showNewlineWarnings markdownBasedSyntaxEnabled show
         ]
 
 
-viewCreateSeeAlsoSingle : Bool -> Set String -> List Term -> Int -> Form.RelatedTermField -> Html Msg
-viewCreateSeeAlsoSingle showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
-    viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms (RelatedTermIndex.fromInt index) relatedTerm
+viewCreateSeeAlsoSingle : Bool -> Bool -> Set String -> List Term -> Int -> Form.RelatedTermField -> Html Msg
+viewCreateSeeAlsoSingle enableMathSupport showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
+    viewCreateSeeAlsoSingle1 enableMathSupport showValidationErrors relatedTermsIdReferences allTerms (RelatedTermIndex.fromInt index) relatedTerm
 
 
-viewCreateSeeAlsoSingle1 : Bool -> Set String -> List Term -> RelatedTermIndex -> Form.RelatedTermField -> Html Msg
-viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
+viewCreateSeeAlsoSingle1 : Bool -> Bool -> Set String -> List Term -> RelatedTermIndex -> Form.RelatedTermField -> Html Msg
+viewCreateSeeAlsoSingle1 enableMathSupport showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
     div
         []
         [ div
@@ -632,7 +632,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms 
                             (\term ->
                                 Components.SelectMenu.Choice
                                     (Term.id term)
-                                    [ Term.view term ]
+                                    [ Term.view enableMathSupport term ]
                                     (Just (Term.id term) == relatedTerm.idReference)
                             )
                     )
@@ -663,12 +663,13 @@ viewAddRelatedTermButtonForEmptyState =
 
 viewCreateSeeAlso :
     Bool
+    -> Bool
     -> GlossaryItems
     -> Array TermField
     -> Array Form.RelatedTermField
     -> List Term
     -> Html Msg
-viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray suggestedRelatedTerms =
+viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms relatedTermsArray suggestedRelatedTerms =
     let
         termIdsSet : Set String
         termIdsSet =
@@ -698,6 +699,7 @@ viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray sug
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
             (List.indexedMap
                 (viewCreateSeeAlsoSingle
+                    enableMathSupport
                     showValidationErrors
                     (relatedTermsList
                         |> List.filterMap .idReference
@@ -715,12 +717,12 @@ viewCreateSeeAlso showValidationErrors glossaryItems terms relatedTermsArray sug
               else
                 viewAddRelatedTermButton
             ]
-        , viewAddSuggestedSeeAlso suggestedRelatedTerms |> Extras.Html.showIf (not <| List.isEmpty suggestedRelatedTerms)
+        , viewAddSuggestedSeeAlso enableMathSupport suggestedRelatedTerms |> Extras.Html.showIf (not <| List.isEmpty suggestedRelatedTerms)
         ]
 
 
-viewAddSuggestedSeeAlso : List Term -> Html Msg
-viewAddSuggestedSeeAlso suggestedRelatedTerms =
+viewAddSuggestedSeeAlso : Bool -> List Term -> Html Msg
+viewAddSuggestedSeeAlso enableMathSupport suggestedRelatedTerms =
     div
         []
         [ p
@@ -739,7 +741,7 @@ viewAddSuggestedSeeAlso suggestedRelatedTerms =
                                 ]
                                 [ Icons.plus
                                     [ Svg.Attributes.class "-ml-1 mr-2 h-4 w-4" ]
-                                , Term.view suggestedRelatedTerm
+                                , Term.view enableMathSupport suggestedRelatedTerm
                                 ]
                         )
                 )
@@ -841,7 +843,9 @@ view model =
                                         glossary.enableMarkdownBasedSyntax
                                         model.triedToSaveWhenFormInvalid
                                         detailsArray
-                                    , viewCreateSeeAlso model.triedToSaveWhenFormInvalid
+                                    , viewCreateSeeAlso
+                                        glossary.enableMathSupport
+                                        model.triedToSaveWhenFormInvalid
                                         glossary.items
                                         terms
                                         relatedTerms
@@ -859,6 +863,7 @@ view model =
                                             [ dl
                                                 [ style "display" "block" ]
                                                 [ Components.GlossaryItemCard.view
+                                                    glossary.enableMathSupport
                                                     Components.GlossaryItemCard.Preview
                                                     newOrUpdatedGlossaryItem
                                                 ]

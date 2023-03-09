@@ -229,7 +229,7 @@ markdown term =
 
     import Html exposing (Html)
 
-    fromPlaintext "Foo" False |> view --> Html.text "Foo"
+    fromPlaintext "Foo" False |> view False --> Html.text "Foo"
 
     expected : Html msg
     expected =
@@ -241,12 +241,12 @@ markdown term =
                 ]
             ]
 
-    fromMarkdown "The _ideal_ case" False |> view
+    fromMarkdown "The _ideal_ case" False |> view False
     --> expected
 
 -}
-view : Term -> Html msg
-view term =
+view : Bool -> Term -> Html msg
+view enableMathSupport term =
     case term of
         PlaintextTerm t ->
             text t.body
@@ -259,7 +259,7 @@ view term =
             in
             case parsed of
                 Ok blocks ->
-                    case Renderer.render MarkdownRenderers.inlineHtmlMsgRenderer blocks of
+                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
                         Ok rendered ->
                             Html.span
                                 [ class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]

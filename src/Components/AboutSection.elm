@@ -10,12 +10,12 @@ import Extras.Html
 import Html.Attributes exposing (href, id, target)
 
 
-view : Bool -> Data.AboutSection.AboutSection -> Html msg
-view modalDialogShown { paragraph, links } =
+view : Bool -> Bool -> Data.AboutSection.AboutSection -> Html msg
+view enableMathSupport modalDialogShown { paragraph, links } =
     div
         [ id ElementIds.about ]
         [ div []
-            [ AboutParagraph.view paragraph ]
+            [ AboutParagraph.view enableMathSupport paragraph ]
         , Extras.Html.showIf (not <| List.isEmpty links) <|
             ul [] <|
                 List.map

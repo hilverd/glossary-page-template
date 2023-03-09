@@ -270,13 +270,12 @@ update msg model =
 
                 results : List Components.SearchDialog.SearchResult
                 results =
-                    Search.search searchTerm <|
-                        case model.common.glossary of
-                            Ok { items } ->
-                                items
+                    case model.common.glossary of
+                        Ok { enableMathSupport, items } ->
+                            Search.search enableMathSupport searchTerm items
 
-                            Err _ ->
-                                GlossaryItems.fromList []
+                        Err _ ->
+                            Search.search False searchTerm <| GlossaryItems.fromList []
               in
               { model
                 | searchDialog =
@@ -715,8 +714,8 @@ viewSettings glossary model =
         ]
 
 
-viewTermIndexItem : Bool -> Term -> Html Msg
-viewTermIndexItem tabbable term =
+viewTermIndexItem : Bool -> Bool -> Term -> Html Msg
+viewTermIndexItem enableMathSupport tabbable term =
     li []
         [ Html.a
             [ class "block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
@@ -724,12 +723,12 @@ viewTermIndexItem tabbable term =
             , Accessibility.Key.tabbable tabbable
             , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
             ]
-            [ Term.view term ]
+            [ Term.view enableMathSupport term ]
         ]
 
 
-viewTermIndexGroup : Bool -> Bool -> TermGroup -> Html Msg
-viewTermIndexGroup tabbable staticSidebar { label, terms } =
+viewTermIndexGroup : Bool -> Bool -> Bool -> TermGroup -> Html Msg
+viewTermIndexGroup enableMathSupport tabbable staticSidebar { label, terms } =
     li
         [ id <| ElementIds.termIndexGroupLabel staticSidebar label
         , class "mt-6"
@@ -739,12 +738,12 @@ viewTermIndexGroup tabbable staticSidebar { label, terms } =
             [ text label ]
         , ul
             [ class "space-y-6 lg:space-y-2 border-l border-slate-200 dark:border-slate-600" ]
-            (List.map (viewTermIndexItem tabbable) terms)
+            (List.map (viewTermIndexItem enableMathSupport tabbable) terms)
         ]
 
 
-viewIndexOfTerms : Bool -> Bool -> IndexOfTerms -> Html Msg
-viewIndexOfTerms tabbable staticSidebar indexOfTerms =
+viewIndexOfTerms : Bool -> Bool -> Bool -> IndexOfTerms -> Html Msg
+viewIndexOfTerms enableMathSupport tabbable staticSidebar indexOfTerms =
     let
         termGroups : List TermGroup
         termGroups =
@@ -760,20 +759,21 @@ viewIndexOfTerms tabbable staticSidebar indexOfTerms =
                     Nothing
 
                 else
-                    Just <| viewTermIndexGroup tabbable staticSidebar termIndexGroup
+                    Just <| viewTermIndexGroup enableMathSupport tabbable staticSidebar termIndexGroup
             )
             termGroups
         )
 
 
-viewGlossaryItem : GlossaryItemIndex -> Bool -> Model -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
-viewGlossaryItem index tabbable model editable errorWhileDeleting glossaryItem =
+viewGlossaryItem : Bool -> GlossaryItemIndex -> Bool -> Model -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
+viewGlossaryItem enableMathSupport index tabbable model editable errorWhileDeleting glossaryItem =
     let
         common : CommonModel
         common =
             model.common
     in
     Components.GlossaryItemCard.view
+        enableMathSupport
         (Components.GlossaryItemCard.Normal
             { index = index
             , tabbable = tabbable
@@ -946,8 +946,8 @@ viewCreateGlossaryItemButton tabbable common =
         ]
 
 
-viewCards : Model -> Bool -> Bool -> List ( GlossaryItemIndex, GlossaryItem ) -> Html Msg
-viewCards model editable tabbable indexedGlossaryItems =
+viewCards : Model -> Bool -> Bool -> Bool -> List ( GlossaryItemIndex, GlossaryItem ) -> Html Msg
+viewCards model enableMathSupport editable tabbable indexedGlossaryItems =
     Html.article
         [ Html.Attributes.id ElementIds.items ]
         [ div
@@ -970,6 +970,7 @@ viewCards model editable tabbable indexedGlossaryItems =
                 |> List.map
                     (\( index, glossaryItem ) ->
                         viewGlossaryItem
+                            enableMathSupport
                             index
                             tabbable
                             model
@@ -989,8 +990,8 @@ viewCards model editable tabbable indexedGlossaryItems =
         ]
 
 
-viewMenuForMobile : Model -> Bool -> IndexOfTerms -> Html Msg
-viewMenuForMobile model tabbable termIndex =
+viewMenuForMobile : Model -> Bool -> Bool -> IndexOfTerms -> Html Msg
+viewMenuForMobile model enableMathSupport tabbable termIndex =
     div
         [ class "invisible" |> Extras.HtmlAttribute.showIf (model.menuForMobileVisibility == Invisible)
         , class "fixed inset-0 flex z-40 lg:hidden"
@@ -1045,7 +1046,7 @@ viewMenuForMobile model tabbable termIndex =
                     [ class "px-4 pt-1 pb-6" ]
                     [ viewBackToTopLink False tabbable
                     , viewTermIndexFirstCharacterGrid False tabbable termIndex
-                    , viewIndexOfTerms tabbable False termIndex
+                    , viewIndexOfTerms enableMathSupport tabbable False termIndex
                     ]
                 ]
             ]
@@ -1162,8 +1163,8 @@ viewQuickSearchButtonAndLetterGrid staticSidebar tabbable indexOfTerms =
         ]
 
 
-viewStaticSidebarForDesktop : Bool -> IndexOfTerms -> Html Msg
-viewStaticSidebarForDesktop tabbable termIndex =
+viewStaticSidebarForDesktop : Bool -> Bool -> IndexOfTerms -> Html Msg
+viewStaticSidebarForDesktop enableMathSupport tabbable termIndex =
     div
         [ class "hidden print:hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900"
         ]
@@ -1174,7 +1175,7 @@ viewStaticSidebarForDesktop tabbable termIndex =
             [ viewQuickSearchButtonAndLetterGrid True tabbable termIndex
             , nav
                 [ class "px-3" ]
-                [ viewIndexOfTerms tabbable True termIndex ]
+                [ viewIndexOfTerms enableMathSupport tabbable True termIndex ]
             ]
         ]
 
@@ -1541,8 +1542,8 @@ view model =
                             )
                         )
                     ]
-                    [ viewMenuForMobile model noModalDialogShown_ indexOfTerms
-                    , viewStaticSidebarForDesktop noModalDialogShown_ indexOfTerms
+                    [ viewMenuForMobile model glossary.enableMathSupport noModalDialogShown_ indexOfTerms
+                    , viewStaticSidebarForDesktop glossary.enableMathSupport noModalDialogShown_ indexOfTerms
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar noModalDialogShown_
@@ -1594,11 +1595,11 @@ view model =
                                 , Extras.Html.showIf editable <| viewSettings glossary model
                                 , h1
                                     [ id ElementIds.title ]
-                                    [ GlossaryTitle.view glossary.title ]
+                                    [ GlossaryTitle.view glossary.enableMathSupport glossary.title ]
                                 ]
                             , Html.main_
                                 []
-                                [ Components.AboutSection.view (not noModalDialogShown_) glossary.aboutSection
+                                [ Components.AboutSection.view glossary.enableMathSupport (not noModalDialogShown_) glossary.aboutSection
                                 , Extras.Html.showIf editable <|
                                     div
                                         [ class "flex-none mt-2" ]
@@ -1610,7 +1611,7 @@ view model =
                                         else
                                             GlossaryItems.orderedByFrequency
                                        )
-                                    |> viewCards model editable noModalDialogShown_
+                                    |> viewCards model glossary.enableMathSupport editable noModalDialogShown_
                                 ]
                             ]
                         ]

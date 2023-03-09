@@ -77,7 +77,7 @@ markdown aboutParagraph =
 
     import Html exposing (Html)
 
-    "Foo" |> fromPlaintext |> view --> Html.text "Foo"
+    "Foo" |> fromPlaintext |> view False --> Html.text "Foo"
 
     expected : Html msg
     expected =
@@ -89,12 +89,12 @@ markdown aboutParagraph =
                 ]
             ]
 
-    "The _ideal_ case" |> fromMarkdown |> view
+    "The _ideal_ case" |> fromMarkdown |> view False
     --> expected
 
 -}
-view : AboutParagraph -> Html msg
-view aboutParagraph =
+view : Bool -> AboutParagraph -> Html msg
+view enableMathSupport aboutParagraph =
     case aboutParagraph of
         PlaintextAboutParagraph body ->
             text body
@@ -107,7 +107,7 @@ view aboutParagraph =
             in
             case parsed of
                 Ok blocks ->
-                    case Renderer.render MarkdownRenderers.htmlMsgRenderer blocks of
+                    case Renderer.render (MarkdownRenderers.htmlMsgRenderer enableMathSupport) blocks of
                         Ok rendered ->
                             Html.div
                                 [ class "prose print:prose-pre:overflow-x-hidden max-w-3xl prose-pre:bg-inherit prose-pre:text-gray-700 prose-pre:border print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]
