@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Glossary</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content="https://glossary.page/template" />
+    <link rel="preconnect" href="https://glstatic.net" crossorigin>
+    <link rel="apple-touch-icon" sizes="180x180" href="https://glstatic.net/glossary-page-template-favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://glstatic.net/glossary-page-template-favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://glstatic.net/glossary-page-template-favicons/favicon-16x16.png">
+    <link rel="manifest" href="https://glstatic.net/glossary-page-template-favicons/site.webmanifest">
+    <link rel="mask-icon" href="https://glstatic.net/glossary-page-template-favicons/safari-pinned-tab.svg" color="#5bbad5">
+    <link rel="shortcut icon" href="https://glstatic.net/glossary-page-template-favicons/favicon.ico">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="msapplication-config" content="https://glstatic.net/glossary-page-template-favicons/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+    <script type="text/javascript">
+        // Prevent FOUC
+        document.documentElement.className = 'invisible';
+    </script>
+
+    <!-- Uncomment the two lines below to add support for math typesetting using KaTeX. -->
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js" integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+
+    <script type="module" crossorigin src="glossary.min.js"></script>
+    <link rel="stylesheet" crossorigin href="glossary.min.css">
+</head>
+
+<body>
+    <div id="glossary-page-container" data-enable-help-for-making-changes="true" data-enable-export-menu="true" data-enable-markdown-based-syntax="true" data-card-width="intermediate">
+        <header>
+            <h1 id="glossary-page-title">
+                <span><span>Glossary of group theory</span></span>
+            </h1>
+        </header>
+        <main>
+            <div id="glossary-page-about">
+                <p>This example glossary was adapted in March 2023 from Wikipedia&#39;s [Glossary of group theory](https://en.wikipedia.org/wiki/Glossary_of_group_theory).
+
+* Original licence: [Creative Commons Attribution-ShareAlike License 3.0](https://en.wikipedia.org/wiki/Wikipedia:Text_of_the_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License)
+
+A group is a set together with an associative operation which admits an identity element and such that every element has an inverse.
+
+Throughout the article, we use $e$ to denote the identity element of a group.</p>
+                <ul>
+
+                </ul>
+            </div>
+            <article id="glossary-page-items">
+                <dl>
+
+                </dl>
+            </article>
+        </main>
+    </div>
+</body>
+
+</html>
+
+<!--
+
+#!/usr/bin/env node
+
+/* START OF editor.js
+
+This script starts a simple server listening on localhost.
+
+* GET requests are served by local HTML/JS/CSS files.
+* PATCH requests to / expect to receive an HTML fragment string in the body.
+  This string is used to update the glossary file, replacing
+    <div id="glossary-page-container"
+      ...
+    </div>.
+
+This allows the editor to save any updates made in the UI.
+
+*/
+
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const HOST = process.env['HOST'] || 'localhost';
+const PORT = process.env['PORT'] || 3003;
+const FILE = process.env['FILE'] || './glossary.html';
+
+const mimeTypes = {
+    '.html': 'text/html',
+    '.js': 'text/javascript',
+    '.css': 'text/css'
+};
+
+const server = http.createServer(async (req, res) => {
+    if (req.url === '/' && req.method === 'PATCH') {
+        const buffers = [];
+        for await (const chunk of req) {
+            buffers.push(chunk);
+        }
+        const body = Buffer.concat(buffers).toString();
+        replaceGlossaryElementInFile(body);
+        res.writeHead(204).end();
+    } else {
+        serveLocalFile(req, res);
+    }
+});
+
+server.listen(PORT, HOST, () => {
+    console.log(`Server started at http://${HOST}:${PORT}`);
+});
+
+function serveLocalFile(req, res) {
+    var filePath = '.' + req.url;
+    if (filePath === './') filePath = FILE;
+
+    const extname = String(path.extname(filePath)).toLowerCase();
+    const contentType = mimeTypes[extname] || 'application/octet-stream';
+
+    fs.readFile(filePath, 'utf-8', (err, fileContents) => {
+        if (err) {
+            serveErrorPage(err, res);
+        } else {
+            if (filePath === FILE)
+                fileContents = fileContents.replace(
+                    /<div id="glossary-page-container"/,
+                    `<div id="glossary-page-container" data-editor-is-running="true"`
+                );
+
+            res.writeHead(200, { 'Content-Type': contentType });
+            res.end(fileContents, 'utf-8');
+        }
+    });
+}
+
+function serveErrorPage(err, res) {
+    if (err.code == 'ENOENT') {
+        res.writeHead(404, { 'Content-Type': 'text/html' });
+        res.end('<html><body>Page not found</body></html>');
+    } else {
+        res.writeHead(500, { 'Content-Type': 'text/html' });
+        res.end('<html><body>Internal server error</body></html>');
+    }
+}
+
+function replaceGlossaryElementInFile(newElementString) {
+    fs.readFile(FILE, 'utf8', (err, fileContents) => {
+        if (err) return console.log(err);
+
+        const regex = /\n[ \t]*<div id="glossary-page-container".*<\/div>\n/s;
+
+        if (!fileContents.replace(regex, 'replacing-worked').includes('replacing-worked')) {
+            return console.log(`Unable to save changes using the regex ${regex}`);
+        }
+
+        const updatedFileContents = fileContents.replace(regex, "\n" + newElementString + "\n");
+
+        fs.writeFile(FILE, updatedFileContents, 'utf8', (err) => {
+            if (err) return console.log(err);
+        });
+    });
+}
+
+// -->
