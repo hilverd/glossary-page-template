@@ -518,7 +518,7 @@ patchHtmlFileAfterChangingSettings common glossary =
             , body =
                 glossary
                     |> Glossary.toHtmlTree common.enableExportMenu common.enableHelpForMakingChanges
-                    |> HtmlTree.toHtml
+                    |> HtmlTree.toHtmlReplacementString
                     |> Http.stringBody "text/html"
             , expect =
                 Http.expectWhatever
@@ -560,7 +560,7 @@ patchHtmlFileAfterDeletingItem common indexOfItemBeingDeleted glossaryItems =
                     , body =
                         glossary
                             |> Glossary.toHtmlTree common.enableExportMenu common.enableHelpForMakingChanges
-                            |> HtmlTree.toHtml
+                            |> HtmlTree.toHtmlReplacementString
                             |> Http.stringBody "text/html"
                     , expect =
                         Http.expectWhatever

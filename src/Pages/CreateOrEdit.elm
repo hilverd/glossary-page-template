@@ -323,7 +323,7 @@ patchHtmlFile common glossaryItems =
                     , body =
                         { glossary | items = glossaryItems }
                             |> Glossary.toHtmlTree common.enableExportMenu common.enableHelpForMakingChanges
-                            |> HtmlTree.toHtml
+                            |> HtmlTree.toHtmlReplacementString
                             |> Http.stringBody "text/html"
                     , expect =
                         Http.expectWhatever

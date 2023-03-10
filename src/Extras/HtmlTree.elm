@@ -1,6 +1,6 @@
 module Extras.HtmlTree exposing
     ( Attribute, attributeToHtmlAttribute, boolAttribute, HtmlTree(..)
-    , toHtml, escape
+    , toHtml, toHtmlReplacementString, escape
     )
 
 {-| An `HtmlTree` represents some HTML content that is to be written to a file.
@@ -13,7 +13,7 @@ module Extras.HtmlTree exposing
 
 # Converting to a String
 
-@docs toHtml, escape
+@docs toHtml, toHtmlReplacementString, escape
 
 -}
 
@@ -82,6 +82,13 @@ type HtmlTree
 toHtml : HtmlTree -> String
 toHtml =
     toIndentedHtml 1 0 True
+
+
+{-| Format the given `HtmlTree` as a string, escaped to make it suitable as a replacement string in `String.prototype.replace()`.
+-}
+toHtmlReplacementString : HtmlTree -> String
+toHtmlReplacementString =
+    toHtml >> String.replace "$" "$$"
 
 
 {-| Perform HTML escaping on the given string, transforming special characters to HTML entities.
