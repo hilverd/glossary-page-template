@@ -1,4 +1,4 @@
-module Data.GlossaryTitle exposing (GlossaryTitle, fromPlaintext, fromMarkdown, raw, toFilename, inlineText, markdown, view, htmlTree)
+module Data.GlossaryTitle exposing (GlossaryTitle, fromPlaintext, fromMarkdown, raw, toFilename, inlineText, markdown, view)
 
 {-| The title of a glossary.
 This can be in either plain text or Markdown.
@@ -6,7 +6,7 @@ This can be in either plain text or Markdown.
 
 # Glossary Titles
 
-@docs GlossaryTitle, fromPlaintext, fromMarkdown, raw, toFilename, inlineText, markdown, view, htmlTree
+@docs GlossaryTitle, fromPlaintext, fromMarkdown, raw, toFilename, inlineText, markdown, view
 
 -}
 
@@ -176,25 +176,3 @@ view enableMathSupport glossaryTitle =
 
                 Err parsingError ->
                     text <| "Failed to parse Markdown: " ++ parsingError
-
-
-{-| Convert a glossary title to an HtmlTree.
--}
-htmlTree : GlossaryTitle -> HtmlTree
-htmlTree glossaryTitle =
-    case glossaryTitle of
-        PlaintextGlossaryTitle title ->
-            Extras.HtmlTree.Leaf title
-
-        MarkdownGlossaryTitle fragment ->
-            case MarkdownFragment.parsed fragment of
-                Ok blocks ->
-                    case Renderer.render MarkdownRenderers.inlineHtmlTreeRenderer blocks of
-                        Ok rendered ->
-                            Extras.HtmlTree.Node "span" False [] rendered
-
-                        Err renderingError ->
-                            Extras.HtmlTree.Leaf <| "Failed to render Markdown: " ++ renderingError
-
-                Err parsingError ->
-                    Extras.HtmlTree.Leaf <| "Failed to parse Markdown: " ++ parsingError
