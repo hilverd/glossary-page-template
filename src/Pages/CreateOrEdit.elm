@@ -513,7 +513,7 @@ viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabl
                 [ class "relative block min-w-0 w-full" ]
                 [ Components.Form.textarea
                     raw
-                    markdownBasedSyntaxEnabled
+                    (markdownBasedSyntaxEnabled && DetailsIndex.toInt index == 0)
                     mathSupportEnabled
                     showValidationErrors
                     validationError
