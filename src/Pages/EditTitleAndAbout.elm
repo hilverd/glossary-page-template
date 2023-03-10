@@ -266,8 +266,8 @@ giveFocusToAboutLinkHref index =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.aboutLinkHref index)
 
 
-viewEditTitle : Bool -> Bool -> Form.TitleField -> Html Msg
-viewEditTitle enableMarkdownBasedSyntax showValidationErrors titleField =
+viewEditTitle : Bool -> Bool -> Bool -> Form.TitleField -> Html Msg
+viewEditTitle enableMarkdownBasedSyntax mathSupportEnabled showValidationErrors titleField =
     div []
         [ div []
             [ h2
@@ -289,6 +289,7 @@ viewEditTitle enableMarkdownBasedSyntax showValidationErrors titleField =
                                 [ Components.Form.inputText
                                     titleField.body
                                     enableMarkdownBasedSyntax
+                                    mathSupportEnabled
                                     showValidationErrors
                                     titleField.validationError
                                     [ required True
@@ -319,8 +320,8 @@ viewEditTitle enableMarkdownBasedSyntax showValidationErrors titleField =
         ]
 
 
-viewEditAboutParagraph : Bool -> Bool -> Bool -> Form.AboutParagraphField -> Html Msg
-viewEditAboutParagraph showNewlineWarnings markdownBasedSyntaxEnabled showValidationErrors aboutParagraphField =
+viewEditAboutParagraph : Bool -> Bool -> Bool -> Bool -> Form.AboutParagraphField -> Html Msg
+viewEditAboutParagraph showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors aboutParagraphField =
     div []
         [ div []
             [ h2
@@ -328,7 +329,7 @@ viewEditAboutParagraph showNewlineWarnings markdownBasedSyntaxEnabled showValida
                 [ text "About" ]
             ]
         , div
-            [ class "mt-4 max-w-prose" ]
+            [ class "mt-4 max-w-2xl" ]
             [ div
                 [ class "sm:flex sm:flex-row sm:items-center" ]
                 [ div
@@ -336,6 +337,7 @@ viewEditAboutParagraph showNewlineWarnings markdownBasedSyntaxEnabled showValida
                     [ Components.Form.textarea
                         aboutParagraphField.body
                         markdownBasedSyntaxEnabled
+                        mathSupportEnabled
                         showValidationErrors
                         aboutParagraphField.validationError
                         [ required True
@@ -482,6 +484,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                             [ Components.Form.inputText
                                 aboutLinkBody.body
                                 False
+                                False
                                 showValidationErrors
                                 aboutLinkBody.validationError
                                 [ class "block w-full border-0 p-0 focus:ring-0 dark:bg-gray-700 dark:text-white"
@@ -606,8 +609,8 @@ view model =
                                 [ class "lg:flex lg:space-x-8" ]
                                 [ div
                                     [ class "lg:w-1/2 space-y-7 lg:space-y-8" ]
-                                    [ viewEditTitle enableMarkdownBasedSyntax model.triedToSaveWhenFormInvalid <| Form.titleField model.form
-                                    , viewEditAboutParagraph (not enableMarkdownBasedSyntax) enableMarkdownBasedSyntax model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
+                                    [ viewEditTitle enableMarkdownBasedSyntax enableMathSupport model.triedToSaveWhenFormInvalid <| Form.titleField model.form
+                                    , viewEditAboutParagraph (not enableMarkdownBasedSyntax) enableMarkdownBasedSyntax enableMathSupport model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
                                     , viewEditAboutLinks model.triedToSaveWhenFormInvalid <| Form.aboutLinkFields model.form
                                     ]
                                 , div

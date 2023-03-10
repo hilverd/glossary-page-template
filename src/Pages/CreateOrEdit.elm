@@ -362,18 +362,19 @@ giveFocusToSeeAlsoSelect index =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.seeAlsoSelect index)
 
 
-viewCreateDescriptionTerm : Bool -> Bool -> Bool -> Int -> TermField -> Html Msg
-viewCreateDescriptionTerm showMarkdownBasedSyntaxEnabled showValidationErrors canBeDeleted index term =
+viewCreateDescriptionTerm : Bool -> Bool -> Bool -> Bool -> Int -> TermField -> Html Msg
+viewCreateDescriptionTerm showMarkdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors canBeDeleted index term =
     viewCreateDescriptionTermInternal
         (showMarkdownBasedSyntaxEnabled && index == 0)
+        mathSupportEnabled
         showValidationErrors
         canBeDeleted
         (TermIndex.fromInt index)
         term
 
 
-viewCreateDescriptionTermInternal : Bool -> Bool -> Bool -> TermIndex -> TermField -> Html Msg
-viewCreateDescriptionTermInternal showMarkdownBasedSyntaxEnabled showValidationErrors canBeDeleted termIndex termField =
+viewCreateDescriptionTermInternal : Bool -> Bool -> Bool -> Bool -> TermIndex -> TermField -> Html Msg
+viewCreateDescriptionTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors canBeDeleted termIndex termField =
     let
         abbreviationLabelId : String
         abbreviationLabelId =
@@ -403,6 +404,7 @@ viewCreateDescriptionTermInternal showMarkdownBasedSyntaxEnabled showValidationE
                             [ Components.Form.inputText
                                 (TermField.raw termField)
                                 showMarkdownBasedSyntaxEnabled
+                                mathSupportEnabled
                                 showValidationErrors
                                 (TermField.validationError termField)
                                 [ id <| ElementIds.termInputField termIndex
@@ -447,8 +449,8 @@ viewCreateDescriptionTermInternal showMarkdownBasedSyntaxEnabled showValidationE
         ]
 
 
-viewCreateDescriptionTerms : Bool -> Bool -> Array TermField -> Html Msg
-viewCreateDescriptionTerms markdownBasedSyntaxEnabled showValidationErrors termsArray =
+viewCreateDescriptionTerms : Bool -> Bool -> Bool -> Array TermField -> Html Msg
+viewCreateDescriptionTerms markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors termsArray =
     let
         terms : List TermField
         terms =
@@ -465,7 +467,7 @@ viewCreateDescriptionTerms markdownBasedSyntaxEnabled showValidationErrors terms
             ]
         , div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
-            (List.indexedMap (viewCreateDescriptionTerm markdownBasedSyntaxEnabled showValidationErrors (List.length terms > 1)) terms
+            (List.indexedMap (viewCreateDescriptionTerm markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors (List.length terms > 1)) terms
                 ++ [ div []
                         [ Components.Button.secondary
                             [ Html.Events.onClick <| PageMsg.Internal AddTerm ]
@@ -478,13 +480,13 @@ viewCreateDescriptionTerms markdownBasedSyntaxEnabled showValidationErrors terms
         ]
 
 
-viewCreateDescriptionDetailsSingle : Bool -> Bool -> Bool -> Int -> DetailsField -> Html Msg
-viewCreateDescriptionDetailsSingle showNewlineWarnings markdownBasedSyntaxEnabled showValidationErrors index detailsSingle =
-    viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabled showValidationErrors (DetailsIndex.fromInt index) detailsSingle
+viewCreateDescriptionDetailsSingle : Bool -> Bool -> Bool -> Bool -> Int -> DetailsField -> Html Msg
+viewCreateDescriptionDetailsSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors index detailsSingle =
+    viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors (DetailsIndex.fromInt index) detailsSingle
 
 
-viewCreateDescriptionDetailsSingle1 : Bool -> Bool -> Bool -> DetailsIndex -> DetailsField -> Html Msg
-viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabled showValidationErrors index detailsSingle =
+viewCreateDescriptionDetailsSingle1 : Bool -> Bool -> Bool -> Bool -> DetailsIndex -> DetailsField -> Html Msg
+viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors index detailsSingle =
     let
         raw : String
         raw =
@@ -496,7 +498,7 @@ viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabl
     in
     div []
         [ div
-            [ class "flex-auto max-w-2xl flex" ]
+            [ class "flex-auto max-w-3xl flex" ]
             [ span [ class "inline-flex items-center" ]
                 [ Components.Button.rounded True
                     [ Accessibility.Aria.label "Delete"
@@ -511,6 +513,7 @@ viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabl
                 [ Components.Form.textarea
                     raw
                     markdownBasedSyntaxEnabled
+                    mathSupportEnabled
                     showValidationErrors
                     validationError
                     [ required True
@@ -562,8 +565,8 @@ viewAddDetailsButtonForEmptyState =
         ]
 
 
-viewCreateDescriptionDetails : Bool -> Bool -> Bool -> Array DetailsField -> Html Msg
-viewCreateDescriptionDetails showNewlineWarnings markdownBasedSyntaxEnabled showValidationErrors detailsArray =
+viewCreateDescriptionDetails : Bool -> Bool -> Bool -> Bool -> Array DetailsField -> Html Msg
+viewCreateDescriptionDetails showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors detailsArray =
     let
         details : List DetailsField
         details =
@@ -581,7 +584,7 @@ viewCreateDescriptionDetails showNewlineWarnings markdownBasedSyntaxEnabled show
             ]
         , div
             [ class "space-y-6 sm:space-y-5" ]
-            (List.indexedMap (viewCreateDescriptionDetailsSingle showNewlineWarnings markdownBasedSyntaxEnabled showValidationErrors) details
+            (List.indexedMap (viewCreateDescriptionDetailsSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors) details
                 ++ [ if List.isEmpty details then
                         viewAddDetailsButtonForEmptyState
 
@@ -837,10 +840,11 @@ view model =
                                 [ class "lg:flex lg:space-x-8" ]
                                 [ div
                                     [ class "lg:w-1/2 space-y-8 divide-y divide-gray-200 dark:divide-gray-800 sm:space-y-5" ]
-                                    [ viewCreateDescriptionTerms glossary.enableMarkdownBasedSyntax model.triedToSaveWhenFormInvalid terms
+                                    [ viewCreateDescriptionTerms glossary.enableMarkdownBasedSyntax glossary.enableMathSupport model.triedToSaveWhenFormInvalid terms
                                     , viewCreateDescriptionDetails
                                         (not glossary.enableMarkdownBasedSyntax)
                                         glossary.enableMarkdownBasedSyntax
+                                        glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
                                         detailsArray
                                     , viewCreateSeeAlso

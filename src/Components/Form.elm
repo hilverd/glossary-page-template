@@ -34,10 +34,10 @@ input value_ showValidationErrors validationError additionalAttributes =
         ]
 
 
-inputText : String -> Bool -> Bool -> Maybe String -> List (Attribute msg) -> Html msg
-inputText value_ markdownBasedSyntaxEnabled showValidationErrors validationError additionalAttributes =
+inputText : String -> Bool -> Bool -> Bool -> Maybe String -> List (Attribute msg) -> Html msg
+inputText value_ markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors validationError additionalAttributes =
     Accessibility.div []
-        [ Extras.Html.showIf markdownBasedSyntaxEnabled markdownSupportedMessage
+        [ Extras.Html.showIf markdownBasedSyntaxEnabled <| markdownSupportedMessage mathSupportEnabled
         , Accessibility.inputText value_
             ([ if not showValidationErrors || validationError == Nothing then
                 class "w-full min-w-0 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -57,10 +57,10 @@ inputText value_ markdownBasedSyntaxEnabled showValidationErrors validationError
         ]
 
 
-textarea : String -> Bool -> Bool -> Maybe String -> List (Attribute msg) -> Html msg
-textarea body markdownBasedSyntaxEnabled showValidationErrors validationError additionalAttributes =
+textarea : String -> Bool -> Bool -> Bool -> Maybe String -> List (Attribute msg) -> Html msg
+textarea body markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors validationError additionalAttributes =
     Accessibility.div []
-        [ Extras.Html.showIf markdownBasedSyntaxEnabled markdownSupportedMessage
+        [ Extras.Html.showIf markdownBasedSyntaxEnabled <| markdownSupportedMessage mathSupportEnabled
         , Accessibility.div
             [ class "grow-wrap"
             , Html.Attributes.attribute "data-replicated-value" <| body ++ "\n\n"
@@ -87,8 +87,8 @@ textarea body markdownBasedSyntaxEnabled showValidationErrors validationError ad
         ]
 
 
-markdownSupportedMessage : Html msg
-markdownSupportedMessage =
+markdownSupportedMessage : Bool -> Html msg
+markdownSupportedMessage mathSupportEnabled =
     Accessibility.div
         []
         [ span
@@ -102,8 +102,23 @@ markdownSupportedMessage =
                 [ Html.a
                     [ Html.Attributes.href "https://commonmark.org/help/"
                     , Html.Attributes.target "_blank"
+                    , class "text-inherit no-underline text-gray-500 dark:text-gray-400 font-normal"
                     ]
                     [ Html.text "Markdown" ]
+                , Extras.Html.showIf mathSupportEnabled <|
+                    Html.span []
+                        [ Html.text " and "
+                        , Html.a
+                            [ Html.Attributes.href "https://katex.org/docs/supported.html"
+                            , Html.Attributes.target "_blank"
+                            , class "text-inherit no-underline text-gray-500 dark:text-gray-400 font-normal"
+                            ]
+                            [ Html.node "katex-inline"
+                                [ Html.Attributes.attribute "data-expr" "\\TeX"
+                                ]
+                                []
+                            ]
+                        ]
                 , Html.text " supported."
                 ]
             ]
