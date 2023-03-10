@@ -12,10 +12,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
-
-- Support Markdown for glossary titles.
-- Support Markdown for terms.
-
 ### Changed
 
 - The term index now lists all terms that do not contain an alphabetic character (with or without diacritics) under `…`.

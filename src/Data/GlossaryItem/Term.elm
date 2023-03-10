@@ -13,6 +13,7 @@ The `body` is the actual term.
 
 -}
 
+import Data.FeatureFlag exposing (enableFeaturesInProgress)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.HtmlTree exposing (HtmlTree)
 import Extras.String
@@ -143,7 +144,7 @@ fromMarkdownWithId body id0 isAbbreviation0 =
 -}
 decode : Bool -> Decoder Term
 decode enableMarkdownBasedSyntax =
-    (if enableMarkdownBasedSyntax then
+    (if enableFeaturesInProgress && enableMarkdownBasedSyntax then
         Decode.map3 fromMarkdownWithId
 
      else

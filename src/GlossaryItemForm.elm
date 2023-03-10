@@ -24,6 +24,7 @@ module GlossaryItemForm exposing
 
 import Array exposing (Array)
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
+import Data.FeatureFlag exposing (enableFeaturesInProgress)
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Details as Details
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
@@ -328,7 +329,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form =
                         raw =
                             termField |> TermField.raw |> String.trim
                     in
-                    (if enableMarkdownBasedSyntax then
+                    (if enableFeaturesInProgress && enableMarkdownBasedSyntax then
                         Term.fromMarkdown
 
                      else

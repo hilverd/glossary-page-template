@@ -14,6 +14,7 @@ import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
+import Data.FeatureFlag exposing (enableFeaturesInProgress)
 import Data.Glossary as Glossary
 import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -181,7 +182,7 @@ titleFromForm : Bool -> Form.TitleAndAboutForm -> GlossaryTitle.GlossaryTitle
 titleFromForm enableMarkdownBasedSyntax =
     Form.titleField
         >> .body
-        >> (if enableMarkdownBasedSyntax then
+        >> (if enableFeaturesInProgress && enableMarkdownBasedSyntax then
                 GlossaryTitle.fromMarkdown
 
             else
@@ -288,7 +289,7 @@ viewEditTitle enableMarkdownBasedSyntax mathSupportEnabled showValidationErrors 
                                 [ class "relative block w-full min-w-0" ]
                                 [ Components.Form.inputText
                                     titleField.body
-                                    enableMarkdownBasedSyntax
+                                    (enableFeaturesInProgress && enableMarkdownBasedSyntax)
                                     mathSupportEnabled
                                     showValidationErrors
                                     titleField.validationError
