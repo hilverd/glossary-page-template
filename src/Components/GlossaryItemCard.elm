@@ -46,7 +46,7 @@ view enableMathSupport style glossaryItem =
             div
                 [ Html.Attributes.style "max-height" "100%" ]
                 (List.map (viewGlossaryTerm enableMathSupport True tabbable) glossaryItem.terms
-                    ++ List.map viewGlossaryItemDetails glossaryItem.details
+                    ++ List.map (viewGlossaryItemDetails enableMathSupport) glossaryItem.details
                     ++ viewGlossaryItemRelatedTerms enableMathSupport True tabbable itemHasSomeDetails glossaryItem.relatedTerms
                 )
 
@@ -73,7 +73,7 @@ view enableMathSupport style glossaryItem =
                     [ div
                         []
                         (List.map (viewGlossaryTerm enableMathSupport False tabbable) glossaryItem.terms
-                            ++ List.map viewGlossaryItemDetails glossaryItem.details
+                            ++ List.map (viewGlossaryItemDetails enableMathSupport) glossaryItem.details
                             ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails glossaryItem.relatedTerms
                         )
                     , div
@@ -122,7 +122,7 @@ view enableMathSupport style glossaryItem =
             else
                 div []
                     (List.map (viewGlossaryTerm enableMathSupport False tabbable) glossaryItem.terms
-                        ++ List.map viewGlossaryItemDetails glossaryItem.details
+                        ++ List.map (viewGlossaryItemDetails enableMathSupport) glossaryItem.details
                         ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails glossaryItem.relatedTerms
                     )
 
@@ -156,11 +156,11 @@ viewGlossaryTerm enableMathSupport preview tabbable term =
         ]
 
 
-viewGlossaryItemDetails : Details.Details -> Html msg
-viewGlossaryItemDetails details =
+viewGlossaryItemDetails : Bool -> Details.Details -> Html msg
+viewGlossaryItemDetails enableMathSupport details =
     Html.dd
         []
-        [ Details.view details ]
+        [ Details.view enableMathSupport details ]
 
 
 viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Bool -> List RelatedTerm -> List (Html msg)
