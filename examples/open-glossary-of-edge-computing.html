@@ -24,7 +24,7 @@
 </head>
 
 <body>
-    <div id="glossary-page-container" data-enable-help-for-making-changes="true" data-enable-markdown-based-syntax="false">
+    <div id="glossary-page-container" data-enable-help-for-making-changes="true" data-enable-export-menu="true" data-enable-markdown-based-syntax="false" data-card-width="compact">
         <header>
             <h1 id="glossary-page-title">
                 Open Glossary of Edge Computing
@@ -32,9 +32,7 @@
         </header>
         <main>
             <div id="glossary-page-about">
-                <p>
-                    This example glossary was adapted in January 2022 from the Open Glossary of Edge Computing.
-                </p>
+                <p>This example glossary was adapted in January 2022 from the Open Glossary of Edge Computing.</p>
                 <ul>
                     <li>
                         <a target="_blank" href="https://github.com/State-of-the-Edge/glossary">
@@ -50,19 +48,6 @@
             </div>
             <article id="glossary-page-items">
                 <dl>
-                    <div>
-                        <dt>
-                            <dfn id="3G,_4G,_5G">
-                                <abbr>
-                                    <a href="#3G,_4G,_5G">
-                                        3G, 4G, 5G
-                                    </a>
-                                </abbr>
-                            </dfn>
-                        </dt>
-                        <dd>3rd, 4th, and 5th generation cellular technologies, respectively. In simple terms, 3G represents the introduction of the smartphone along with their mobile web browsers; 4G, the current generation cellular technology, delivers true broadband internet access to mobile devices; the coming 5G cellular technologies will deliver massive bandwidth and reduced latency to cellular systems, supporting a range of devices from smartphones to autonomous vehicles and large-scale IoT. Edge computing at the infrastructure edge is considered a key building block for 5G.</dd>
-                        <dd class="related-terms">See also: <a href="#MEC">MEC</a></dd>
-                    </div>
                     <div>
                         <dt>
                             <dfn id="Access_Edge">
@@ -128,26 +113,6 @@
                     </div>
                     <div>
                         <dt>
-                            <dfn id="C-RAN">
-                                <abbr>
-                                    <a href="#C-RAN">
-                                        C-RAN
-                                    </a>
-                                </abbr>
-                            </dfn>
-                        </dt>
-                        <dt>
-                            <dfn id="Cloud_RAN">
-                                <a href="#Cloud_RAN">
-                                    Cloud RAN
-                                </a>
-                            </dfn>
-                        </dt>
-                        <dd>An evolution of the RAN that allows the functionality of the wireless base station to be split into two components: A Remote Radio Head (RRH) and a centralized BBU. Rather than requiring a BBU to be located with each cellular radio antenna, C-RAN allows the BBUs to operate at some distance from the tower, at an aggregation point, often referred to as a Distributed Antenna System (DAS) Hub. Co-locating multiple BBUs in an aggregation facility creates infrastructure efficiencies and allows for a more graceful evolution to Cloud RAN. In a C-RAN architecture, tasks performed by a legacy base station are often performed as VNFs operating on infrastructure edge micro data centers on general-purpose compute hardware. These tasks must be performed at high levels of performance and with as little latency as possible, requiring the use of infrastructure edge computing at the cellular network site to support them.</dd>
-                        <dd class="related-terms">See also: <a href="#Infrastructure_Edge">Infrastructure Edge</a>, <a href="#DAS_Hub">DAS Hub</a></dd>
-                    </div>
-                    <div>
-                        <dt>
                             <dfn id="CDN">
                                 <abbr>
                                     <a href="#CDN">
@@ -190,17 +155,6 @@
                     </div>
                     <div>
                         <dt>
-                            <dfn id="Cloud_Node">
-                                <a href="#Cloud_Node">
-                                    Cloud Node
-                                </a>
-                            </dfn>
-                        </dt>
-                        <dd>A compute node, such as an individual server or other set of computing resources, operated as part of a cloud computing infrastructure. Typically resides within a centralized data center.</dd>
-                        <dd class="related-terms">See also: <a href="#Edge_Node">Edge Node</a></dd>
-                    </div>
-                    <div>
-                        <dt>
                             <dfn id="Cloudlet">
                                 <a href="#Cloudlet">
                                     Cloudlet
@@ -209,6 +163,17 @@
                         </dt>
                         <dd>In academic circles, this term refers to a mobility-enhanced public or private cloud at the infrastructure edge, as popularized by Mahadev Satyanarayanan of Carnegie Mellon University. It is synonymous with the term Edge Cloud as defined in this glossary. It has also been used interchangeably with Edge Data Center and Edge Node in the literature. In a 3-tier computing architecture, the term &quot;cloudlet&quot; refers to the middle tier (Tier 2), with Tier 1 being the cloud and Tier 3 being a smartphone, wearable device, smart sensor or other such weight/size/energy-constrained entity. In the context of CDNs such as Akamai, cloudlet refers to the practice of deploying self-serviceable applications at CDN nodes.</dd>
                         <dd class="related-terms">See also: <a href="#Edge_Cloud">Edge Cloud</a>, <a href="#Edge_Data_Center">Edge Data Center</a>, <a href="#Edge_Node">Edge Node</a></dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Cloud_Node">
+                                <a href="#Cloud_Node">
+                                    Cloud Node
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A compute node, such as an individual server or other set of computing resources, operated as part of a cloud computing infrastructure. Typically resides within a centralized data center.</dd>
+                        <dd class="related-terms">See also: <a href="#Edge_Node">Edge Node</a></dd>
                     </div>
                     <div>
                         <dt>
@@ -330,6 +295,26 @@
                         </dt>
                         <dd>The local piece of equipment such as a cable network modem which allows the subscriber to a network service to connect to the access network of the service provider. Typically one hop away towards the end users from infrastructure edge computing resources.</dd>
                         <dd class="related-terms">See also: <a href="#Access_Network">Access Network</a></dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="C-RAN">
+                                <abbr>
+                                    <a href="#C-RAN">
+                                        C-RAN
+                                    </a>
+                                </abbr>
+                            </dfn>
+                        </dt>
+                        <dt>
+                            <dfn id="Cloud_RAN">
+                                <a href="#Cloud_RAN">
+                                    Cloud RAN
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>An evolution of the RAN that allows the functionality of the wireless base station to be split into two components: A Remote Radio Head (RRH) and a centralized BBU. Rather than requiring a BBU to be located with each cellular radio antenna, C-RAN allows the BBUs to operate at some distance from the tower, at an aggregation point, often referred to as a Distributed Antenna System (DAS) Hub. Co-locating multiple BBUs in an aggregation facility creates infrastructure efficiencies and allows for a more graceful evolution to Cloud RAN. In a C-RAN architecture, tasks performed by a legacy base station are often performed as VNFs operating on infrastructure edge micro data centers on general-purpose compute hardware. These tasks must be performed at high levels of performance and with as little latency as possible, requiring the use of infrastructure edge computing at the cellular network site to support them.</dd>
+                        <dd class="related-terms">See also: <a href="#Infrastructure_Edge">Infrastructure Edge</a>, <a href="#DAS_Hub">DAS Hub</a></dd>
                     </div>
                     <div>
                         <dt>
@@ -494,6 +479,17 @@
                     </div>
                     <div>
                         <dt>
+                            <dfn id="Edge-Enhanced_Application">
+                                <a href="#Edge-Enhanced_Application">
+                                    Edge-Enhanced Application
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>An application which is capable of operating in a centralized data center, but which gains performance, typically in terms of latency, or functionality advantages when operated using edge computing. These applications may be adapted from existing applications which operate in a centralized data center, or may require no changes.</dd>
+                        <dd class="related-terms">See also: <a href="#Edge-Native_Application">Edge-Native Application</a></dd>
+                    </div>
+                    <div>
+                        <dt>
                             <dfn id="Edge_Exchange">
                                 <a href="#Edge_Exchange">
                                     Edge Exchange
@@ -513,6 +509,17 @@
                         </dt>
                         <dd>An area within an edge data center where tenants and telecommunications providers can interconnect with each other and other edge data centers in the same fashion as they would in a traditional meet me room environment, except at the edge.</dd>
                         <dd class="related-terms">See also: <a href="#Interconnection">Interconnection</a></dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="Edge-Native_Application">
+                                <a href="#Edge-Native_Application">
+                                    Edge-Native Application
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>An application built natively to leverage edge computing capabilities, which would be impractical or undesirable to operate in a centralized data center. Edge-native applications leverage cloud-native principles while taking into account the unique characteristics of the edge in areas such as resource constraints, security, latency and autonomy. Edge native applications are developed in ways that leverage the cloud and work in concert with upstream resources. Edge applications that don’t comprehend centralized cloud compute resources, remote management and orchestration or leverage CI/CD aren’t truly “edge native”, rather they more closely resemble traditional on-premises applications. A traditional SCADA application within a nuclear power plant that has no connection to the cloud would not be considered an Edge-Native Application. May use edge capabilities to provide data ingest, data reduction, real-time decision support, or to solve data sovereignty issues.</dd>
+                        <dd class="related-terms">See also: <a href="#Edge-Enhanced_Application">Edge-Enhanced Application</a></dd>
                     </div>
                     <div>
                         <dt>
@@ -538,28 +545,6 @@
                     </div>
                     <div>
                         <dt>
-                            <dfn id="Edge-Enhanced_Application">
-                                <a href="#Edge-Enhanced_Application">
-                                    Edge-Enhanced Application
-                                </a>
-                            </dfn>
-                        </dt>
-                        <dd>An application which is capable of operating in a centralized data center, but which gains performance, typically in terms of latency, or functionality advantages when operated using edge computing. These applications may be adapted from existing applications which operate in a centralized data center, or may require no changes.</dd>
-                        <dd class="related-terms">See also: <a href="#Edge-Native_Application">Edge-Native Application</a></dd>
-                    </div>
-                    <div>
-                        <dt>
-                            <dfn id="Edge-Native_Application">
-                                <a href="#Edge-Native_Application">
-                                    Edge-Native Application
-                                </a>
-                            </dfn>
-                        </dt>
-                        <dd>An application built natively to leverage edge computing capabilities, which would be impractical or undesirable to operate in a centralized data center. Edge-native applications leverage cloud-native principles while taking into account the unique characteristics of the edge in areas such as resource constraints, security, latency and autonomy. Edge native applications are developed in ways that leverage the cloud and work in concert with upstream resources. Edge applications that don’t comprehend centralized cloud compute resources, remote management and orchestration or leverage CI/CD aren’t truly “edge native”, rather they more closely resemble traditional on-premises applications. A traditional SCADA application within a nuclear power plant that has no connection to the cloud would not be considered an Edge-Native Application. May use edge capabilities to provide data ingest, data reduction, real-time decision support, or to solve data sovereignty issues.</dd>
-                        <dd class="related-terms">See also: <a href="#Edge-Enhanced_Application">Edge-Enhanced Application</a></dd>
-                    </div>
-                    <div>
-                        <dt>
                             <dfn id="Fog_Computing">
                                 <a href="#Fog_Computing">
                                     Fog Computing
@@ -568,6 +553,19 @@
                         </dt>
                         <dd>An early edge computing concept that stipulates compute and data storage resources, as well as applications and their data, be positioned in the most optimal place between the user and Cloud with the goal of improving performance and redundancy. The term fog computing was originally coined by Cisco as an alternative to edge computing, but has more recently fallen into disuse in favor of more precise terms.</dd>
                         <dd class="related-terms">See also: <a href="#Workload_Orchestration">Workload Orchestration</a></dd>
+                    </div>
+                    <div>
+                        <dt>
+                            <dfn id="3G,_4G,_5G">
+                                <abbr>
+                                    <a href="#3G,_4G,_5G">
+                                        3G, 4G, 5G
+                                    </a>
+                                </abbr>
+                            </dfn>
+                        </dt>
+                        <dd>3rd, 4th, and 5th generation cellular technologies, respectively. In simple terms, 3G represents the introduction of the smartphone along with their mobile web browsers; 4G, the current generation cellular technology, delivers true broadband internet access to mobile devices; the coming 5G cellular technologies will deliver massive bandwidth and reduced latency to cellular systems, supporting a range of devices from smartphones to autonomous vehicles and large-scale IoT. Edge computing at the infrastructure edge is considered a key building block for 5G.</dd>
+                        <dd class="related-terms">See also: <a href="#MEC">MEC</a></dd>
                     </div>
                     <div>
                         <dt>
