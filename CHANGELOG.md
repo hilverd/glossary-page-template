@@ -12,6 +12,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [2.1.0] - 2023-03-11
+
+### Added
 
 - Close menu for mobile when escape key is pressed.
 - Respect `prefers-reduced-motion` for mobile menu.
@@ -25,8 +32,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 
 - Fix bug in logic for writing back to HTML file. Dollar signs need to be escaped.
-
-### Removed
 
 ## [2.0.0] - 2023-02-20
 
@@ -416,7 +421,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/hilverd/glossary-page-template/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/hilverd/glossary-page-template/compare/v1.9.0...v2.0.0
 [1.9.0]: https://github.com/hilverd/glossary-page-template/compare/v1.8.6...v1.9.0
 [1.8.6]: https://github.com/hilverd/glossary-page-template/compare/v1.8.5...v1.8.6
