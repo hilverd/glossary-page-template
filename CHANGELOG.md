@@ -12,11 +12,20 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Close menu for mobile when escape key is pressed.
+- Respect `prefers-reduced-motion` for mobile menu.
+- Respect `prefers-contrast: more` on index page.
+
 ### Changed
 
 - The term index now lists all terms that do not contain an alphabetic character (with or without diacritics) under `…`.
+- Separate multiple definitions by a dotted line.
 
 ### Fixed
+
+- Fix bug in logic for writing back to HTML file. Dollar signs need to be escaped.
+
 ### Removed
 
 ## [2.0.0] - 2023-02-20
