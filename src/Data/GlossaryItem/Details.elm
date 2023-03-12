@@ -79,7 +79,7 @@ markdown details =
 
     import Html exposing (Html)
 
-    "Foo" |> fromPlaintext |> view --> Html.text "Foo"
+    "Foo" |> fromPlaintext |> view False --> Html.text "Foo"
 
     expected : Html msg
     expected =
@@ -91,7 +91,7 @@ markdown details =
                 ]
             ]
 
-    "The _ideal_ case" |> fromMarkdown |> view
+    "The _ideal_ case" |> fromMarkdown |> view False
     --> expected
 
 -}
