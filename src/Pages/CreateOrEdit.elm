@@ -636,7 +636,7 @@ viewCreateSeeAlsoSingle1 enableMathSupport showValidationErrors relatedTermsIdRe
                             (\term ->
                                 Components.SelectMenu.Choice
                                     (Term.id term)
-                                    [ Term.view enableMathSupport term ]
+                                    [ text <| Term.inlineText term ]
                                     (Just (Term.id term) == relatedTerm.idReference)
                             )
                     )
