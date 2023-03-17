@@ -258,8 +258,8 @@ imgTagToHtmlTree src width height alt title style _ =
 
 {-| Render Markdown as an HtmlTree for Anki.
 -}
-htmlTreeRendererForAnki : Renderer HtmlTree
-htmlTreeRendererForAnki =
+htmlTreeRendererForAnki : Bool -> Renderer HtmlTree
+htmlTreeRendererForAnki enableMathSupport =
     { heading =
         \{ level, children } ->
             case level of
@@ -288,7 +288,12 @@ htmlTreeRendererForAnki =
     , emphasis =
         \children -> HtmlTree.Node "em" False [] children
     , codeSpan =
-        \content -> HtmlTree.Node "code" False [] [ HtmlTree.Leaf content ]
+        \content ->
+            if enableMathSupport && String.startsWith "$" content && String.endsWith "$" content then
+                HtmlTree.Node "anki-mathjax" False [] [ HtmlTree.Leaf <| String.slice 1 -1 content ]
+
+            else
+                HtmlTree.Node "code" False [] [ HtmlTree.Leaf content ]
     , link =
         \link content ->
             case link.title of
@@ -384,15 +389,23 @@ htmlTreeRendererForAnki =
     , html = Markdown.Html.oneOf []
     , codeBlock =
         \block ->
-            HtmlTree.Node "pre"
-                False
-                []
-                [ HtmlTree.Node "code"
+            if enableMathSupport then
+                HtmlTree.Node "anki-mathjax"
                     False
-                    []
+                    [ HtmlTree.boolAttribute "block" True ]
                     [ HtmlTree.Leaf block.body
                     ]
-                ]
+
+            else
+                HtmlTree.Node "pre"
+                    False
+                    []
+                    [ HtmlTree.Node "code"
+                        False
+                        []
+                        [ HtmlTree.Leaf block.body
+                        ]
+                    ]
     , thematicBreak = HtmlTree.Node "hr" False [] []
     , table = HtmlTree.Node "table" False []
     , tableHeader = HtmlTree.Node "thead" False []
@@ -429,8 +442,8 @@ htmlTreeRendererForAnki =
 {-| A HtmlTree renderer for Anki that only handles inline elements (e.g. strong, emphasis) properly.
 Block elements are either ignored or have their children wrapped in a <span>.
 -}
-inlineHtmlTreeRendererForAnki : Renderer HtmlTree
-inlineHtmlTreeRendererForAnki =
+inlineHtmlTreeRendererForAnki : Bool -> Renderer HtmlTree
+inlineHtmlTreeRendererForAnki enableMathSupport =
     { heading = \{ children } -> HtmlTree.Node "span" False [] children
     , paragraph = HtmlTree.Node "span" False []
     , hardLineBreak = HtmlTree.Leaf ""
@@ -438,7 +451,13 @@ inlineHtmlTreeRendererForAnki =
     , strong = HtmlTree.Node "strong" False []
     , emphasis = HtmlTree.Node "em" False []
     , strikethrough = HtmlTree.Node "del" False []
-    , codeSpan = \content -> HtmlTree.Node "code" False [] [ HtmlTree.Leaf content ]
+    , codeSpan =
+        \content ->
+            if enableMathSupport && String.startsWith "$" content && String.endsWith "$" content then
+                HtmlTree.Node "anki-mathjax" False [] [ HtmlTree.Leaf <| String.slice 1 -1 content ]
+
+            else
+                HtmlTree.Node "code" False [] [ HtmlTree.Leaf content ]
     , link = always <| HtmlTree.Node "span" False []
     , image = always <| HtmlTree.Leaf ""
     , text = HtmlTree.Leaf

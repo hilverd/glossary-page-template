@@ -66,8 +66,8 @@ paragraphs =
         >> String.join (crlf ++ crlf)
 
 
-itemToAnki : GlossaryItem -> String
-itemToAnki { terms, details, relatedTerms } =
+itemToAnki : Bool -> GlossaryItem -> String
+itemToAnki enableMathSupport { terms, details, relatedTerms } =
     let
         quote : String -> String
         quote string =
@@ -76,7 +76,7 @@ itemToAnki { terms, details, relatedTerms } =
         front : String
         front =
             terms
-                |> List.map (Term.htmlTreeForAnki >> Extras.HtmlTree.toHtml >> escape)
+                |> List.map (Term.htmlTreeForAnki enableMathSupport >> Extras.HtmlTree.toHtml >> escape)
                 |> htmlLines
                 |> quote
 
@@ -89,7 +89,7 @@ itemToAnki { terms, details, relatedTerms } =
                 else
                     ("See: "
                         ++ (relatedTerms
-                                |> List.map (RelatedTerm.htmlTreeForAnki >> Extras.HtmlTree.toHtml >> escape)
+                                |> List.map (RelatedTerm.htmlTreeForAnki enableMathSupport >> Extras.HtmlTree.toHtml >> escape)
                                 |> String.join ", "
                            )
                     )
@@ -97,7 +97,7 @@ itemToAnki { terms, details, relatedTerms } =
 
             else
                 details
-                    |> List.map (Details.htmlTreeForAnki >> Extras.HtmlTree.toHtml >> escape)
+                    |> List.map (Details.htmlTreeForAnki enableMathSupport >> Extras.HtmlTree.toHtml >> escape)
                     |> paragraphs
                     |> quote
     in
@@ -107,8 +107,8 @@ itemToAnki { terms, details, relatedTerms } =
 {-| Export a glossary with the given title, "about" paragraph, and "about" links to a [text file suitable for Anki](https://docs.ankiweb.net/importing.html#text-files).
 This is achieved by producing a [command for downloading](https://package.elm-lang.org/packages/elm/file/latest/File.Download) this file.
 -}
-download : GlossaryTitle -> AboutSection -> GlossaryItems -> Cmd msg
-download glossaryTitle aboutSection glossaryItems =
+download : Bool -> GlossaryTitle -> AboutSection -> GlossaryItems -> Cmd msg
+download enableMathSupport glossaryTitle aboutSection glossaryItems =
     let
         filename : String
         filename =
@@ -144,7 +144,7 @@ download glossaryTitle aboutSection glossaryItems =
         itemsString =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
-                |> List.map (Tuple.second >> itemToAnki)
+                |> List.map (Tuple.second >> itemToAnki enableMathSupport)
                 |> lines
 
         content : String

@@ -487,8 +487,8 @@ update msg model =
         DownloadAnki ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
             , case model.common.glossary of
-                Ok { title, aboutSection, items } ->
-                    Export.Anki.download title aboutSection items
+                Ok { enableMathSupport, title, aboutSection, items } ->
+                    Export.Anki.download enableMathSupport title aboutSection items
 
                 _ ->
                     Cmd.none

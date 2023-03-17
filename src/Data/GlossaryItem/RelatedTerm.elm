@@ -177,8 +177,8 @@ view enableMathSupport relatedTerm =
 
 {-| Convert a related term to an HtmlTree for Anki.
 -}
-htmlTreeForAnki : RelatedTerm -> HtmlTree
-htmlTreeForAnki relatedTerm =
+htmlTreeForAnki : Bool -> RelatedTerm -> HtmlTree
+htmlTreeForAnki enableMathSupport relatedTerm =
     case relatedTerm of
         PlaintextRelatedTerm t ->
             Extras.HtmlTree.Leaf t.body
@@ -186,7 +186,7 @@ htmlTreeForAnki relatedTerm =
         MarkdownRelatedTerm t ->
             case MarkdownFragment.parsed t.body of
                 Ok blocks ->
-                    case Renderer.render MarkdownRenderers.inlineHtmlTreeRendererForAnki blocks of
+                    case blocks |> Renderer.render (MarkdownRenderers.inlineHtmlTreeRendererForAnki enableMathSupport) of
                         Ok rendered ->
                             Extras.HtmlTree.Node "span" False [] rendered
 

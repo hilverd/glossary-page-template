@@ -338,8 +338,8 @@ compareAlphabetically term1 term2 =
 
 {-| Convert a term to an HtmlTree for Anki.
 -}
-htmlTreeForAnki : Term -> HtmlTree
-htmlTreeForAnki term =
+htmlTreeForAnki : Bool -> Term -> HtmlTree
+htmlTreeForAnki enableMathSupport term =
     case term of
         PlaintextTerm t ->
             Extras.HtmlTree.Leaf t.body
@@ -347,7 +347,7 @@ htmlTreeForAnki term =
         MarkdownTerm t ->
             case MarkdownFragment.parsed t.body of
                 Ok blocks ->
-                    case Renderer.render MarkdownRenderers.inlineHtmlTreeRendererForAnki blocks of
+                    case blocks |> Renderer.render (MarkdownRenderers.inlineHtmlTreeRendererForAnki enableMathSupport) of
                         Ok rendered ->
                             Extras.HtmlTree.Node "span" False [] rendered
 

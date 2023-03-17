@@ -138,12 +138,12 @@ view { enableMathSupport, makeLinksTabbable } details =
                     text <| "Failed to parse Markdown: " ++ parsingError
 
 
-htmlTreeRendererForAnki : Renderer HtmlTree
-htmlTreeRendererForAnki =
+htmlTreeRendererForAnki : Bool -> Renderer HtmlTree
+htmlTreeRendererForAnki enableMathSupport =
     let
         renderer0 : Renderer HtmlTree
         renderer0 =
-            MarkdownRenderers.htmlTreeRendererForAnki
+            MarkdownRenderers.htmlTreeRendererForAnki enableMathSupport
     in
     { renderer0
         | html =
@@ -156,8 +156,8 @@ htmlTreeRendererForAnki =
 
 {-| Convert details to an HtmlTree for Anki.
 -}
-htmlTreeForAnki : Details -> HtmlTree
-htmlTreeForAnki details =
+htmlTreeForAnki : Bool -> Details -> HtmlTree
+htmlTreeForAnki enableMathSupport details =
     case details of
         PlaintextDetails body ->
             Extras.HtmlTree.Leaf body
@@ -165,7 +165,7 @@ htmlTreeForAnki details =
         MarkdownDetails fragment ->
             case MarkdownFragment.parsed fragment of
                 Ok blocks ->
-                    case Renderer.render htmlTreeRendererForAnki blocks of
+                    case Renderer.render (htmlTreeRendererForAnki enableMathSupport) blocks of
                         Ok rendered ->
                             Extras.HtmlTree.Node "div" False [] rendered
 
