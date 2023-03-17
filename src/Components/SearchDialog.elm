@@ -53,6 +53,23 @@ type Model parentMsg
         }
 
 
+type alias SearchResultIndex =
+    Int
+
+
+type alias Config parentMsg =
+    { onChangeSearchTerm : Maybe (String -> parentMsg)
+    , onShow : Maybe (Cmd parentMsg)
+    , onHide : Maybe (Cmd parentMsg)
+    }
+
+
+type Property parentMsg
+    = OnChangeSearchTerm (String -> parentMsg)
+    | OnShow (Cmd parentMsg)
+    | OnHide (Cmd parentMsg)
+
+
 visible : Model parentMsg -> Bool
 visible =
     innerModel
@@ -266,23 +283,6 @@ loadUrl toParentMsg model url =
 
 
 -- VIEW
-
-
-type Property parentMsg
-    = OnChangeSearchTerm (String -> parentMsg)
-    | OnShow (Cmd parentMsg)
-    | OnHide (Cmd parentMsg)
-
-
-type alias Config parentMsg =
-    { onChangeSearchTerm : Maybe (String -> parentMsg)
-    , onShow : Maybe (Cmd parentMsg)
-    , onHide : Maybe (Cmd parentMsg)
-    }
-
-
-type alias SearchResultIndex =
-    Int
 
 
 type SearchResult
