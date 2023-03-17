@@ -48,7 +48,7 @@ raw markdownFragment =
             fragment.raw
 
 
-{-| Retrieve the raw string that was used to construct this Markdown fragment.
+{-| Retrieve result of parsing this Markdown fragment.
 
     import Markdown.Block as Block exposing (Block)
 
