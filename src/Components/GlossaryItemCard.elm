@@ -30,8 +30,8 @@ type Style msg
         }
 
 
-view : Bool -> Style msg -> GlossaryItem -> Html msg
-view enableMathSupport style glossaryItem =
+view : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> Style msg -> GlossaryItem -> Html msg
+view { enableMathSupport, makeLinksTabbable } style glossaryItem =
     case style of
         Preview ->
             let
@@ -46,7 +46,13 @@ view enableMathSupport style glossaryItem =
             div
                 [ Html.Attributes.style "max-height" "100%" ]
                 (List.map (viewGlossaryTerm enableMathSupport True tabbable) glossaryItem.terms
-                    ++ List.map (viewGlossaryItemDetails enableMathSupport) glossaryItem.details
+                    ++ List.map
+                        (viewGlossaryItemDetails
+                            { enableMathSupport = enableMathSupport
+                            , makeLinksTabbable = makeLinksTabbable
+                            }
+                        )
+                        glossaryItem.details
                     ++ viewGlossaryItemRelatedTerms enableMathSupport True tabbable itemHasSomeDetails glossaryItem.relatedTerms
                 )
 
@@ -73,7 +79,13 @@ view enableMathSupport style glossaryItem =
                     [ div
                         []
                         (List.map (viewGlossaryTerm enableMathSupport False tabbable) glossaryItem.terms
-                            ++ List.map (viewGlossaryItemDetails enableMathSupport) glossaryItem.details
+                            ++ List.map
+                                (viewGlossaryItemDetails
+                                    { enableMathSupport = enableMathSupport
+                                    , makeLinksTabbable = makeLinksTabbable
+                                    }
+                                )
+                                glossaryItem.details
                             ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails glossaryItem.relatedTerms
                         )
                     , div
@@ -122,7 +134,13 @@ view enableMathSupport style glossaryItem =
             else
                 div []
                     (List.map (viewGlossaryTerm enableMathSupport False tabbable) glossaryItem.terms
-                        ++ List.map (viewGlossaryItemDetails enableMathSupport) glossaryItem.details
+                        ++ List.map
+                            (viewGlossaryItemDetails
+                                { enableMathSupport = enableMathSupport
+                                , makeLinksTabbable = makeLinksTabbable
+                                }
+                            )
+                            glossaryItem.details
                         ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails glossaryItem.relatedTerms
                     )
 
@@ -156,11 +174,11 @@ viewGlossaryTerm enableMathSupport preview tabbable term =
         ]
 
 
-viewGlossaryItemDetails : Bool -> Details.Details -> Html msg
-viewGlossaryItemDetails enableMathSupport details =
+viewGlossaryItemDetails : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> Details.Details -> Html msg
+viewGlossaryItemDetails { enableMathSupport, makeLinksTabbable } details =
     Html.dd
         []
-        [ Details.view enableMathSupport details ]
+        [ Details.view { enableMathSupport = enableMathSupport, makeLinksTabbable = makeLinksTabbable } details ]
 
 
 viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Bool -> List RelatedTerm -> List (Html msg)

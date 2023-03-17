@@ -624,7 +624,11 @@ view model =
                                         , h2
                                             [ class "pb-4 text-2xl font-bold leading-tight text-gray-700 dark:text-gray-300" ]
                                             [ GlossaryTitle.view enableMathSupport title1 ]
-                                        , Components.AboutSection.view { enableMathSupport = enableMathSupport, modalDialogShown = False } aboutSection
+                                        , Components.AboutSection.view
+                                            { enableMathSupport = enableMathSupport
+                                            , modalDialogShown = False
+                                            }
+                                            aboutSection
                                         ]
                                     ]
                                 ]

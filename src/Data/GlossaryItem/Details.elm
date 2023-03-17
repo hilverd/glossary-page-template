@@ -79,7 +79,10 @@ markdown details =
 
     import Html exposing (Html)
 
-    "Foo" |> fromPlaintext |> view False --> Html.text "Foo"
+    "Foo"
+    |> fromPlaintext
+    |> view {enableMathSupport = False, makeLinksTabbable = True}
+    --> Html.text "Foo"
 
     expected : Html msg
     expected =
@@ -91,12 +94,14 @@ markdown details =
                 ]
             ]
 
-    "The _ideal_ case" |> fromMarkdown |> view False
+    "The _ideal_ case"
+    |> fromMarkdown
+    |> view {enableMathSupport = False, makeLinksTabbable = True}
     --> expected
 
 -}
-view : Bool -> Details -> Html msg
-view enableMathSupport details =
+view : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> Details -> Html msg
+view { enableMathSupport, makeLinksTabbable } details =
     case details of
         PlaintextDetails body ->
             text body
@@ -109,7 +114,15 @@ view enableMathSupport details =
             in
             case parsed of
                 Ok blocks ->
-                    case Renderer.render (MarkdownRenderers.htmlMsgRenderer { enableMathSupport = enableMathSupport }) blocks of
+                    case
+                        Renderer.render
+                            (MarkdownRenderers.htmlMsgRenderer
+                                { enableMathSupport = enableMathSupport
+                                , makeLinksTabbable = makeLinksTabbable
+                                }
+                            )
+                            blocks
+                    of
                         Ok rendered ->
                             Html.div
                                 [ class "prose print:prose-pre:overflow-x-hidden max-w-3xl prose-pre:bg-inherit prose-pre:text-gray-700 prose-pre:border print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]

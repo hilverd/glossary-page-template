@@ -21,7 +21,14 @@ e = mc^2
 ```"""
                         |> MarkdownFragment.fromString
                         |> MarkdownFragment.parsed
-                        |> Result.andThen (Renderer.render (MarkdownRenderers.htmlMsgRenderer { enableMathSupport = False }))
+                        |> Result.andThen
+                            (Renderer.render
+                                (MarkdownRenderers.htmlMsgRenderer
+                                    { enableMathSupport = False
+                                    , makeLinksTabbable = True
+                                    }
+                                )
+                            )
                         |> Expect.equal
                             (Ok
                                 [ Html.pre
@@ -41,7 +48,14 @@ e = mc^2
 ```"""
                         |> MarkdownFragment.fromString
                         |> MarkdownFragment.parsed
-                        |> Result.andThen (Renderer.render (MarkdownRenderers.htmlMsgRenderer { enableMathSupport = True }))
+                        |> Result.andThen
+                            (Renderer.render
+                                (MarkdownRenderers.htmlMsgRenderer
+                                    { enableMathSupport = True
+                                    , makeLinksTabbable = True
+                                    }
+                                )
+                            )
                         |> Expect.equal
                             (Ok
                                 [ Html.node "katex-display"
@@ -54,7 +68,14 @@ e = mc^2
                     "`$e = mc^2$`"
                         |> MarkdownFragment.fromString
                         |> MarkdownFragment.parsed
-                        |> Result.andThen (Renderer.render (MarkdownRenderers.htmlMsgRenderer { enableMathSupport = True }))
+                        |> Result.andThen
+                            (Renderer.render
+                                (MarkdownRenderers.htmlMsgRenderer
+                                    { enableMathSupport = True
+                                    , makeLinksTabbable = True
+                                    }
+                                )
+                            )
                         |> Expect.equal
                             (Ok
                                 [ Html.p [ class "max-w-prose" ]

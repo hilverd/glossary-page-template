@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- Make links in Markdown content not "tabbable" if a modal dialog is shown.
+
 ### Removed
 
 ## [2.1.0] - 2023-03-11

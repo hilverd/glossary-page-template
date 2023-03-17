@@ -868,7 +868,7 @@ view model =
                                             [ dl
                                                 [ style "display" "block" ]
                                                 [ Components.GlossaryItemCard.view
-                                                    glossary.enableMathSupport
+                                                    { enableMathSupport = glossary.enableMathSupport, makeLinksTabbable = True }
                                                     Components.GlossaryItemCard.Preview
                                                     newOrUpdatedGlossaryItem
                                                 ]

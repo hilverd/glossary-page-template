@@ -18,7 +18,7 @@ view { enableMathSupport, modalDialogShown } { paragraph, links } =
     div
         [ id ElementIds.about ]
         [ div []
-            [ AboutParagraph.view enableMathSupport paragraph ]
+            [ AboutParagraph.view { enableMathSupport = enableMathSupport, makeLinksTabbable = not modalDialogShown } paragraph ]
         , Extras.Html.showIf (not <| List.isEmpty links) <|
             ul [] <|
                 List.map

@@ -9,6 +9,7 @@ module MarkdownRenderers exposing (anchorTagHtmlTreeRenderer, anchorTagRenderer,
 
 -}
 
+import Accessibility.Key
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Html exposing (Html)
@@ -20,9 +21,9 @@ import Markdown.Renderer as Renderer exposing (Renderer)
 
 {-| Render an anchor tag as HTML.
 -}
-anchorTagRenderer : Markdown.Html.Renderer (List (Html msg) -> Html msg)
+anchorTagRenderer : Bool -> Markdown.Html.Renderer (List (Html msg) -> Html msg)
 anchorTagRenderer =
-    anchorTagRendererForViewFunction viewAnchorTag
+    anchorTagRendererForViewFunction << viewAnchorTag
 
 
 {-| Render an anchor tag as an HtmlTree.
@@ -43,14 +44,16 @@ anchorTagRendererForViewFunction viewFunction =
 
 
 viewAnchorTag :
-    Maybe String
+    Bool
+    -> Maybe String
     -> Maybe String
     -> Maybe String
     -> List (Html msg)
     -> Html msg
-viewAnchorTag href target style renderedChildren =
+viewAnchorTag tabbable href target style renderedChildren =
     Html.a
-        [ Extras.HtmlAttribute.showMaybe Attr.href href
+        [ Accessibility.Key.tabbable tabbable
+        , Extras.HtmlAttribute.showMaybe Attr.href href
         , Extras.HtmlAttribute.showMaybe Attr.target target
         , Extras.HtmlAttribute.showMaybe (Attr.attribute "style") style
         ]
@@ -59,8 +62,8 @@ viewAnchorTag href target style renderedChildren =
 
 {-| Render Markdown to HTML.
 -}
-htmlMsgRenderer : { enableMathSupport : Bool } -> Renderer (Html msg)
-htmlMsgRenderer { enableMathSupport } =
+htmlMsgRenderer : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> Renderer (Html msg)
+htmlMsgRenderer { enableMathSupport, makeLinksTabbable } =
     let
         renderer0 : Renderer (Html msg)
         renderer0 =
@@ -71,7 +74,7 @@ htmlMsgRenderer { enableMathSupport } =
         , blockQuote = Html.blockquote [ class "max-w-prose" ]
         , html =
             Markdown.Html.oneOf
-                [ anchorTagRenderer
+                [ anchorTagRenderer makeLinksTabbable
                 , imgTagRenderer
                 ]
         , codeSpan =
@@ -86,6 +89,23 @@ htmlMsgRenderer { enableMathSupport } =
 
                 else
                     Html.code [] [ Html.text content ]
+        , link =
+            \link content ->
+                case link.title of
+                    Just title ->
+                        Html.a
+                            [ Attr.href link.destination
+                            , Attr.title title
+                            , Accessibility.Key.tabbable makeLinksTabbable
+                            ]
+                            content
+
+                    Nothing ->
+                        Html.a
+                            [ Attr.href link.destination
+                            , Accessibility.Key.tabbable makeLinksTabbable
+                            ]
+                            content
         , codeBlock =
             if enableMathSupport then
                 \{ body, language } ->

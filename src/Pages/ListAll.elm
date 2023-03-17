@@ -773,7 +773,7 @@ viewGlossaryItem enableMathSupport index tabbable model editable errorWhileDelet
             model.common
     in
     Components.GlossaryItemCard.view
-        enableMathSupport
+        { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable }
         (Components.GlossaryItemCard.Normal
             { index = index
             , tabbable = tabbable
