@@ -376,7 +376,7 @@ view toParentMsg model searchTerm searchResults =
     div
         [ Accessibility.Aria.modal True
         , Accessibility.Role.dialog
-        , class "relative z-10"
+        , class "relative z-20"
         ]
         [ Html.div
             [ class "fixed inset-0 bg-gray-500 dark:bg-gray-800 bg-opacity-50 dark:bg-opacity-75 transition-opacity motion-reduce:transition-none"
@@ -389,7 +389,7 @@ view toParentMsg model searchTerm searchResults =
             ]
             []
         , Html.div
-            [ class "fixed inset-0 z-10 overflow-y-auto p-4 sm:p-6 md:p-20"
+            [ class "fixed inset-0 z-20 overflow-y-auto p-4 sm:p-6 md:p-20"
             , class "invisible" |> Extras.HtmlAttribute.showIf (model_.visibility == Invisible)
             , Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <|
                 toParentMsg <|

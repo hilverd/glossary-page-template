@@ -789,7 +789,7 @@ viewGlossaryItem enableMathSupport index tabbable model editable errorWhileDelet
 viewConfirmDeleteModal : Bool -> Maybe GlossaryItemIndex -> Html Msg
 viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
     Html.div
-        [ class "fixed z-10 inset-0 overflow-y-auto print:hidden"
+        [ class "fixed z-20 inset-0 overflow-y-auto print:hidden"
         , Extras.HtmlAttribute.showIf (maybeIndexOfItemToDelete == Nothing) <| class "invisible"
         , Extras.HtmlEvents.onEscape <| PageMsg.Internal CancelDelete
         , Accessibility.Aria.labelledBy ElementIds.confirmDeleteModalTitle
@@ -1145,7 +1145,7 @@ viewQuickSearchButtonAndLetterGrid : Bool -> Bool -> IndexOfTerms -> Html Msg
 viewQuickSearchButtonAndLetterGrid staticSidebar tabbable indexOfTerms =
     div
         [ id ElementIds.quickSearchButtonAndLetterGrid
-        , class "-mb-6 sticky top-0 -ml-0.5 pointer-events-none"
+        , class "z-10 -mb-6 sticky top-0 -ml-0.5 pointer-events-none"
         ]
         [ div
             [ class "h-7 bg-white dark:bg-slate-900" ]
@@ -1183,7 +1183,7 @@ viewStaticSidebarForDesktop enableMathSupport tabbable termIndex =
 viewTopBar : Bool -> Maybe Components.DropdownMenu.Model -> Html Msg
 viewTopBar tabbable maybeExportDropdownMenu =
     div
-        [ class "sticky top-0 z-10 shrink-0 flex justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
+        [ class "sticky top-0 z-20 shrink-0 flex justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
         [ div
             [ class "flex-1" ]
             [ button
