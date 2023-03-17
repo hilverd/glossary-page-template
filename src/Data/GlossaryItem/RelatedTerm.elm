@@ -159,7 +159,7 @@ view enableMathSupport relatedTerm =
             in
             case parsed of
                 Ok blocks ->
-                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
+                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer { enableMathSupport = enableMathSupport }) blocks of
                         Ok rendered ->
                             Html.span
                                 [ class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]

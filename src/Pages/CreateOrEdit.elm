@@ -388,7 +388,7 @@ viewCreateDescriptionTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnab
                 [ class "flex-auto max-w-2xl flex" ]
                 [ span
                     [ class "inline-flex items-center" ]
-                    [ Components.Button.rounded canBeDeleted
+                    [ Components.Button.rounded { enabled = canBeDeleted }
                         [ Accessibility.Aria.label "Delete"
                         , Html.Events.onClick <| PageMsg.Internal <| DeleteTerm termIndex
                         ]
@@ -422,7 +422,7 @@ viewCreateDescriptionTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnab
                             [ div
                                 [ class "sm:ml-5" ]
                                 [ Components.Button.toggle
-                                    (TermField.isAbbreviation termField)
+                                    { on = TermField.isAbbreviation termField }
                                     abbreviationLabelId
                                     [ Html.Events.onClick <| PageMsg.Internal <| ToggleAbbreviation termIndex ]
                                     [ span
@@ -501,7 +501,7 @@ viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabl
         [ div
             [ class "flex-auto max-w-3xl flex" ]
             [ span [ class "inline-flex items-center" ]
-                [ Components.Button.rounded True
+                [ Components.Button.rounded { enabled = True }
                     [ Accessibility.Aria.label "Delete"
                     , Html.Events.onClick <| PageMsg.Internal <| DeleteDetails index
                     ]
@@ -611,7 +611,7 @@ viewCreateSeeAlsoSingle1 enableMathSupport showValidationErrors relatedTermsIdRe
                 [ class "flex-auto max-w-lg flex" ]
                 [ span
                     [ class "inline-flex items-center" ]
-                    [ Components.Button.rounded True
+                    [ Components.Button.rounded { enabled = True }
                         [ Accessibility.Aria.label "Delete"
                         , Html.Events.onClick <| PageMsg.Internal <| DeleteRelatedTerm index
                         ]
@@ -739,7 +739,7 @@ viewAddSuggestedSeeAlso enableMathSupport suggestedRelatedTerms =
                 (suggestedRelatedTerms
                     |> List.map
                         (\suggestedRelatedTerm ->
-                            Components.Button.white True
+                            Components.Button.white { enabled = True }
                                 [ class "m-1 text-sm"
                                 , Html.Events.onClick <| PageMsg.Internal (AddRelatedTerm <| Just <| Term.id suggestedRelatedTerm)
                                 ]
@@ -781,12 +781,12 @@ viewCreateFormFooter model =
                 [ text Components.Copy.sandboxModeMessage ]
         , div
             [ class "flex justify-end" ]
-            [ Components.Button.white True
+            [ Components.Button.white { enabled = True }
                 [ Html.Events.onClick <|
                     PageMsg.NavigateToListAll common
                 ]
                 [ text "Cancel" ]
-            , Components.Button.primary True
+            , Components.Button.primary { enabled = True }
                 [ class "ml-3"
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]

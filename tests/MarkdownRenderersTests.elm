@@ -21,7 +21,7 @@ e = mc^2
 ```"""
                         |> MarkdownFragment.fromString
                         |> MarkdownFragment.parsed
-                        |> Result.andThen (Renderer.render (MarkdownRenderers.htmlMsgRenderer False))
+                        |> Result.andThen (Renderer.render (MarkdownRenderers.htmlMsgRenderer { enableMathSupport = False }))
                         |> Expect.equal
                             (Ok
                                 [ Html.pre
@@ -41,7 +41,7 @@ e = mc^2
 ```"""
                         |> MarkdownFragment.fromString
                         |> MarkdownFragment.parsed
-                        |> Result.andThen (Renderer.render (MarkdownRenderers.htmlMsgRenderer True))
+                        |> Result.andThen (Renderer.render (MarkdownRenderers.htmlMsgRenderer { enableMathSupport = True }))
                         |> Expect.equal
                             (Ok
                                 [ Html.node "katex-display"
@@ -54,7 +54,7 @@ e = mc^2
                     "`$e = mc^2$`"
                         |> MarkdownFragment.fromString
                         |> MarkdownFragment.parsed
-                        |> Result.andThen (Renderer.render (MarkdownRenderers.htmlMsgRenderer True))
+                        |> Result.andThen (Renderer.render (MarkdownRenderers.htmlMsgRenderer { enableMathSupport = True }))
                         |> Expect.equal
                             (Ok
                                 [ Html.p [ class "max-w-prose" ]
@@ -71,7 +71,7 @@ e = mc^2
                     "`$e = mc^2$`"
                         |> MarkdownFragment.fromString
                         |> MarkdownFragment.parsed
-                        |> Result.andThen (Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer True))
+                        |> Result.andThen (Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer { enableMathSupport = True }))
                         |> Expect.equal
                             (Ok
                                 [ Html.span []

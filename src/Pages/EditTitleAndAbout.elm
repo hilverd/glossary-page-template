@@ -428,7 +428,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
             [ class "flex flex-auto max-w-2xl" ]
             [ span
                 [ class "flex-none inline-flex items-center" ]
-                [ Components.Button.rounded True
+                [ Components.Button.rounded { enabled = True }
                     [ Accessibility.Aria.label "Delete"
                     , Html.Events.onClick <| PageMsg.Internal <| DeleteAboutLink index
                     ]
@@ -567,12 +567,12 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
                 [ text Components.Copy.sandboxModeMessage ]
         , div
             [ class "flex justify-end" ]
-            [ Components.Button.white True
+            [ Components.Button.white { enabled = True }
                 [ Html.Events.onClick <|
                     PageMsg.NavigateToListAll { common | glossary = updatedGlossary }
                 ]
                 [ text "Cancel" ]
-            , Components.Button.primary True
+            , Components.Button.primary { enabled = True }
                 [ class "ml-3"
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]
@@ -624,7 +624,7 @@ view model =
                                         , h2
                                             [ class "pb-4 text-2xl font-bold leading-tight text-gray-700 dark:text-gray-300" ]
                                             [ GlossaryTitle.view enableMathSupport title1 ]
-                                        , Components.AboutSection.view enableMathSupport False aboutSection
+                                        , Components.AboutSection.view { enableMathSupport = enableMathSupport, modalDialogShown = False } aboutSection
                                         ]
                                     ]
                                 ]

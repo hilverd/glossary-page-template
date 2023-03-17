@@ -192,7 +192,7 @@ view toParentMsg model enabled body_ choices =
         [ class "relative inline-block text-left" ]
         [ div
             []
-            [ Components.Button.white enabled
+            [ Components.Button.white { enabled = enabled }
                 [ class "w-full"
                 , Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
                 , Accessibility.Aria.expanded <| model_.visibility == Visible

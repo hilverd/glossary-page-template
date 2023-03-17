@@ -699,7 +699,7 @@ viewSettings glossary model =
             , div
                 [ class "mt-6 pb-2" ]
                 [ Components.Button.toggle
-                    model.common.enableExportMenu
+                    { on = model.common.enableExportMenu }
                     ElementIds.showExportMenuLabel
                     [ Html.Events.onClick <| PageMsg.Internal ToggleEnableExportMenu ]
                     [ span
@@ -853,14 +853,14 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
                         [ text Components.Copy.sandboxModeMessage ]
                 , div
                     [ class "mt-5 sm:mt-4 sm:flex sm:flex-row-reverse" ]
-                    [ Components.Button.primary True
+                    [ Components.Button.primary { enabled = True }
                         [ class "w-full bg-red-600 dark:bg-red-400 hover:bg-red-700 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm dark:text-gray-800"
                         , Extras.HtmlAttribute.showMaybe
                             (Html.Events.onClick << PageMsg.Internal << Delete)
                             maybeIndexOfItemToDelete
                         ]
                         [ text "Delete" ]
-                    , Components.Button.white True
+                    , Components.Button.white { enabled = True }
                         [ class "mt-3 w-full sm:mt-0 sm:w-auto sm:text-sm"
                         , Html.Events.onClick <| PageMsg.Internal CancelDelete
                         , Extras.HtmlEvents.onEnter <| PageMsg.Internal CancelDelete
@@ -876,7 +876,7 @@ viewMakeChangesButton : Bool -> Bool -> Html Msg
 viewMakeChangesButton showSandboxModeMessage tabbable =
     div
         [ class "print:hidden" ]
-        [ Components.Button.white True
+        [ Components.Button.white { enabled = True }
             [ Html.Events.onClick <| PageMsg.Internal MakeChanges
             , Accessibility.Key.tabbable tabbable
             ]
@@ -1107,7 +1107,7 @@ viewQuickSearchButton tabbable =
 
 viewTermIndexFirstCharacter : Bool -> Bool -> String -> Bool -> Html Msg
 viewTermIndexFirstCharacter staticSidebar tabbable firstCharacter enabled =
-    Components.Button.white (tabbable && enabled)
+    Components.Button.white { enabled = tabbable && enabled }
         [ class "m-0.5 px-3 py-2 leading-4"
         , Html.Events.onClick <|
             PageMsg.Internal <|
@@ -1599,7 +1599,11 @@ view model =
                                 ]
                             , Html.main_
                                 []
-                                [ Components.AboutSection.view glossary.enableMathSupport (not noModalDialogShown_) glossary.aboutSection
+                                [ Components.AboutSection.view
+                                    { enableMathSupport = glossary.enableMathSupport
+                                    , modalDialogShown = not noModalDialogShown_
+                                    }
+                                    glossary.aboutSection
                                 , Extras.Html.showIf editable <|
                                     div
                                         [ class "flex-none mt-2" ]

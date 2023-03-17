@@ -10,8 +10,11 @@ import Extras.Html
 import Html.Attributes exposing (href, id, target)
 
 
-view : Bool -> Bool -> Data.AboutSection.AboutSection -> Html msg
-view enableMathSupport modalDialogShown { paragraph, links } =
+view :
+    { enableMathSupport : Bool, modalDialogShown : Bool }
+    -> Data.AboutSection.AboutSection
+    -> Html msg
+view { enableMathSupport, modalDialogShown } { paragraph, links } =
     div
         [ id ElementIds.about ]
         [ div []
