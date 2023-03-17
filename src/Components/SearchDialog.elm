@@ -151,7 +151,7 @@ update updateParentModel toParentMsg msg model =
                     ( { model_ | visibility = Visible, activeSearchResultIndex = Nothing }
                     , Cmd.batch
                         [ model_.config.onShow |> Maybe.withDefault Cmd.none
-                        , Process.sleep 100
+                        , Process.sleep 200
                             |> Task.perform (always <| FocusOnSearchTermInputField <| searchTermFieldId model_.idPrefix)
                             |> Cmd.map toParentMsg
                         ]
