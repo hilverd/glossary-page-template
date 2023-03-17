@@ -76,7 +76,7 @@ itemToAnki { terms, details, relatedTerms } =
         front : String
         front =
             terms
-                |> List.map (Term.htmlTree >> Extras.HtmlTree.toHtml >> escape)
+                |> List.map (Term.htmlTreeForAnki >> Extras.HtmlTree.toHtml >> escape)
                 |> htmlLines
                 |> quote
 
@@ -89,7 +89,7 @@ itemToAnki { terms, details, relatedTerms } =
                 else
                     ("See: "
                         ++ (relatedTerms
-                                |> List.map (RelatedTerm.htmlTree >> Extras.HtmlTree.toHtml >> escape)
+                                |> List.map (RelatedTerm.htmlTreeForAnki >> Extras.HtmlTree.toHtml >> escape)
                                 |> String.join ", "
                            )
                     )
@@ -97,7 +97,7 @@ itemToAnki { terms, details, relatedTerms } =
 
             else
                 details
-                    |> List.map (Details.htmlTree >> Extras.HtmlTree.toHtml >> escape)
+                    |> List.map (Details.htmlTreeForAnki >> Extras.HtmlTree.toHtml >> escape)
                     |> paragraphs
                     |> quote
     in

@@ -1,4 +1,7 @@
-module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, htmlTree)
+module Data.GlossaryItem.Term exposing
+    ( Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically
+    , htmlTreeForAnki
+    )
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -333,10 +336,10 @@ compareAlphabetically term1 term2 =
                 )
 
 
-{-| Convert a term to an HtmlTree.
+{-| Convert a term to an HtmlTree for Anki.
 -}
-htmlTree : Term -> HtmlTree
-htmlTree term =
+htmlTreeForAnki : Term -> HtmlTree
+htmlTreeForAnki term =
     case term of
         PlaintextTerm t ->
             Extras.HtmlTree.Leaf t.body
@@ -344,7 +347,7 @@ htmlTree term =
         MarkdownTerm t ->
             case MarkdownFragment.parsed t.body of
                 Ok blocks ->
-                    case Renderer.render MarkdownRenderers.inlineHtmlTreeRenderer blocks of
+                    case Renderer.render MarkdownRenderers.inlineHtmlTreeRendererForAnki blocks of
                         Ok rendered ->
                             Extras.HtmlTree.Node "span" False [] rendered
 

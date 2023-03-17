@@ -1,4 +1,7 @@
-module MarkdownRenderers exposing (anchorTagHtmlTreeRenderer, anchorTagRenderer, htmlMsgRenderer, htmlTreeRenderer, imgTagHtmlTreeRenderer, imgTagRenderer, inlineHtmlMsgRenderer, inlineHtmlTreeRenderer)
+module MarkdownRenderers exposing
+    ( anchorTagHtmlTreeRenderer, anchorTagRenderer, htmlMsgRenderer, imgTagHtmlTreeRenderer, imgTagRenderer, inlineHtmlMsgRenderer
+    , htmlTreeRendererForAnki, inlineHtmlTreeRendererForAnki
+    )
 
 {-| Renderers for Markdown data.
 
@@ -253,10 +256,10 @@ imgTagToHtmlTree src width height alt title style _ =
         []
 
 
-{-| Render Markdown as an HtmlTree.
+{-| Render Markdown as an HtmlTree for Anki.
 -}
-htmlTreeRenderer : Renderer HtmlTree
-htmlTreeRenderer =
+htmlTreeRendererForAnki : Renderer HtmlTree
+htmlTreeRendererForAnki =
     { heading =
         \{ level, children } ->
             case level of
@@ -423,11 +426,11 @@ htmlTreeRenderer =
     }
 
 
-{-| A HtmlTree renderer that only handles inline elements (e.g. strong, emphasis) properly.
+{-| A HtmlTree renderer for Anki that only handles inline elements (e.g. strong, emphasis) properly.
 Block elements are either ignored or have their children wrapped in a <span>.
 -}
-inlineHtmlTreeRenderer : Renderer HtmlTree
-inlineHtmlTreeRenderer =
+inlineHtmlTreeRendererForAnki : Renderer HtmlTree
+inlineHtmlTreeRendererForAnki =
     { heading = \{ children } -> HtmlTree.Node "span" False [] children
     , paragraph = HtmlTree.Node "span" False []
     , hardLineBreak = HtmlTree.Leaf ""

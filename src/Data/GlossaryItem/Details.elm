@@ -1,4 +1,7 @@
-module Data.GlossaryItem.Details exposing (Details, fromPlaintext, fromMarkdown, raw, markdown, view, htmlTree)
+module Data.GlossaryItem.Details exposing
+    ( Details, fromPlaintext, fromMarkdown, raw, markdown, view
+    , htmlTreeForAnki
+    )
 
 {-| A definition for a glossary item.
 This can be in either plain text or Markdown.
@@ -135,12 +138,12 @@ view { enableMathSupport, makeLinksTabbable } details =
                     text <| "Failed to parse Markdown: " ++ parsingError
 
 
-htmlTreeRenderer : Renderer HtmlTree
-htmlTreeRenderer =
+htmlTreeRendererForAnki : Renderer HtmlTree
+htmlTreeRendererForAnki =
     let
         renderer0 : Renderer HtmlTree
         renderer0 =
-            MarkdownRenderers.htmlTreeRenderer
+            MarkdownRenderers.htmlTreeRendererForAnki
     in
     { renderer0
         | html =
@@ -151,10 +154,10 @@ htmlTreeRenderer =
     }
 
 
-{-| Convert details to an HtmlTree.
+{-| Convert details to an HtmlTree for Anki.
 -}
-htmlTree : Details -> HtmlTree
-htmlTree details =
+htmlTreeForAnki : Details -> HtmlTree
+htmlTreeForAnki details =
     case details of
         PlaintextDetails body ->
             Extras.HtmlTree.Leaf body
@@ -162,7 +165,7 @@ htmlTree details =
         MarkdownDetails fragment ->
             case MarkdownFragment.parsed fragment of
                 Ok blocks ->
-                    case Renderer.render htmlTreeRenderer blocks of
+                    case Renderer.render htmlTreeRendererForAnki blocks of
                         Ok rendered ->
                             Extras.HtmlTree.Node "div" False [] rendered
 

@@ -1,4 +1,7 @@
-module Data.GlossaryItem.RelatedTerm exposing (RelatedTerm, fromPlaintext, fromMarkdown, decode, raw, idReference, markdown, view, htmlTree)
+module Data.GlossaryItem.RelatedTerm exposing
+    ( RelatedTerm, fromPlaintext, fromMarkdown, decode, raw, idReference, markdown, view
+    , htmlTreeForAnki
+    )
 
 {-| A related term.
 
@@ -172,10 +175,10 @@ view enableMathSupport relatedTerm =
                     text <| "Failed to parse Markdown: " ++ parsingError
 
 
-{-| Convert a related term to an HtmlTree.
+{-| Convert a related term to an HtmlTree for Anki.
 -}
-htmlTree : RelatedTerm -> HtmlTree
-htmlTree relatedTerm =
+htmlTreeForAnki : RelatedTerm -> HtmlTree
+htmlTreeForAnki relatedTerm =
     case relatedTerm of
         PlaintextRelatedTerm t ->
             Extras.HtmlTree.Leaf t.body
@@ -183,7 +186,7 @@ htmlTree relatedTerm =
         MarkdownRelatedTerm t ->
             case MarkdownFragment.parsed t.body of
                 Ok blocks ->
-                    case Renderer.render MarkdownRenderers.inlineHtmlTreeRenderer blocks of
+                    case Renderer.render MarkdownRenderers.inlineHtmlTreeRendererForAnki blocks of
                         Ok rendered ->
                             Extras.HtmlTree.Node "span" False [] rendered
 
