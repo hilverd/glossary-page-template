@@ -12,7 +12,6 @@ import Components.Form
 import Components.GlossaryItemCard
 import Components.SelectMenu
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
-import Data.FeatureFlag exposing (enableFeaturesInProgress)
 import Data.Glossary as Glossary
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
@@ -404,7 +403,7 @@ viewCreateDescriptionTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnab
                             [ class "relative block w-full min-w-0" ]
                             [ Components.Form.inputText
                                 (TermField.raw termField)
-                                (enableFeaturesInProgress && showMarkdownBasedSyntaxEnabled)
+                                showMarkdownBasedSyntaxEnabled
                                 mathSupportEnabled
                                 showValidationErrors
                                 (TermField.validationError termField)

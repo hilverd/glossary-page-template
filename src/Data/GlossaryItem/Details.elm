@@ -1,7 +1,4 @@
-module Data.GlossaryItem.Details exposing
-    ( Details, fromPlaintext, fromMarkdown, raw, markdown, view
-    , htmlTreeForAnki
-    )
+module Data.GlossaryItem.Details exposing (Details, fromPlaintext, fromMarkdown, raw, markdown, view, htmlTreeForAnki)
 
 {-| A definition for a glossary item.
 This can be in either plain text or Markdown.
@@ -9,7 +6,7 @@ This can be in either plain text or Markdown.
 
 # Details
 
-@docs Details, fromPlaintext, fromMarkdown, raw, markdown, view, htmlTree
+@docs Details, fromPlaintext, fromMarkdown, raw, markdown, view, htmlTreeForAnki
 
 -}
 

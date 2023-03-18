@@ -1,14 +1,11 @@
-module Data.GlossaryItem.RelatedTerm exposing
-    ( RelatedTerm, fromPlaintext, fromMarkdown, decode, raw, idReference, markdown, view
-    , htmlTreeForAnki
-    )
+module Data.GlossaryItem.RelatedTerm exposing (RelatedTerm, fromPlaintext, fromMarkdown, decode, raw, idReference, markdown, view, htmlTreeForAnki)
 
 {-| A related term.
 
 
 # Related Terms
 
-@docs RelatedTerm, fromPlaintext, fromMarkdown, decode, raw, idReference, markdown, view, htmlTree
+@docs RelatedTerm, fromPlaintext, fromMarkdown, decode, raw, idReference, markdown, view, htmlTreeForAnki
 
 -}
 

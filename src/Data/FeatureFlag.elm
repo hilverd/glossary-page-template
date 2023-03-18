@@ -1,6 +1,11 @@
-module Data.FeatureFlag exposing (enableFeaturesInProgress)
+module Data.FeatureFlag exposing (foo)
+
+
+foo : Int
+foo =
+    42
 
 
 enableFeaturesInProgress : Bool
 enableFeaturesInProgress =
-    False
+    True

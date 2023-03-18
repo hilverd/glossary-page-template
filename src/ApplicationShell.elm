@@ -16,7 +16,6 @@ import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
-import Data.FeatureFlag exposing (enableFeaturesInProgress)
 import Data.Glossary exposing (Glossary)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems exposing (LoadedGlossaryItems)
@@ -141,7 +140,7 @@ init flags =
                                 flags
                                     |> Decode.decodeValue (Decode.field "titleString" Decode.string)
                                     |> Result.withDefault "Element not found"
-                                    |> (if enableFeaturesInProgress && enableMarkdownBasedSyntax then
+                                    |> (if enableMarkdownBasedSyntax then
                                             GlossaryTitle.fromMarkdown
 
                                         else

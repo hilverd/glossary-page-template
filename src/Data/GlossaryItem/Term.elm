@@ -1,7 +1,4 @@
-module Data.GlossaryItem.Term exposing
-    ( Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically
-    , htmlTreeForAnki
-    )
+module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, htmlTreeForAnki)
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -12,11 +9,10 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, htmlTree
+@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, htmlTreeForAnki
 
 -}
 
-import Data.FeatureFlag exposing (enableFeaturesInProgress)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.HtmlTree exposing (HtmlTree)
 import Extras.String
@@ -147,7 +143,7 @@ fromMarkdownWithId body id0 isAbbreviation0 =
 -}
 decode : Bool -> Decoder Term
 decode enableMarkdownBasedSyntax =
-    (if enableFeaturesInProgress && enableMarkdownBasedSyntax then
+    (if enableMarkdownBasedSyntax then
         Decode.map3 fromMarkdownWithId
 
      else
