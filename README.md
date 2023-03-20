@@ -19,11 +19,11 @@ Download `glossary.html` from the [latest release](https://github.com/hilverd/gl
 The `glossary.html` file points to `glstatic.net` for static assets hosted using Cloudflare:
 
 ```
-https://glstatic.net/glossary-page-template@2/glossary.min.js
-https://glstatic.net/glossary-page-template@2/glossary.min.css
+https://glstatic.net/glossary-page-template@3/glossary.min.js
+https://glstatic.net/glossary-page-template@3/glossary.min.css
 ```
 
-These files are cached for 24 hours and get updated with any releases with a [major version number](https://semver.org/) of `2`. Alternatively you can change the URL to point to e.g. `@2.0` which gets all patch releases with version numbers of the form `2.0.x`. You can also use a specific version such as `2.0.1` -- these are cached forever.
+These files are cached for 24 hours and get updated with any releases with a [major version number](https://semver.org/) of `3`. Alternatively you can change the URL to point to e.g. `@3.0` which gets all patch releases with version numbers of the form `3.0.x`. You can also use a specific version such as `3.0.0` -- these are cached forever.
 
 #### Security considerations
 
