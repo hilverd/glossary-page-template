@@ -12,9 +12,17 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [3.0.0] - 2023-03-20
+
+### Added
 
 - Support a Markdown-based syntax for the glossary title and for terms (not just term descriptions).
 - When Markdown is enabled, support _math typesetting_ using [KaTeX](https://katex.org/).
+  - See the Settings menu for how to enable this.
   - Inline math is written by surrounding an expression with dollar signs inside a code fragment: ` $e = mc^2$ `.
   - Display math is written using code blocks whose language is declared as `math`:
 
@@ -24,12 +32,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
   ```
   ````
 
-### Changed
 ### Fixed
 
 - Make links in Markdown content not "tabbable" if a modal dialog is shown.
-
-### Removed
 
 ## [2.1.0] - 2023-03-11
 
@@ -436,7 +441,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/hilverd/glossary-page-template/compare/v2.1.0...v3.0.0
 [2.1.0]: https://github.com/hilverd/glossary-page-template/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/hilverd/glossary-page-template/compare/v1.9.0...v2.0.0
 [1.9.0]: https://github.com/hilverd/glossary-page-template/compare/v1.8.6...v1.9.0
