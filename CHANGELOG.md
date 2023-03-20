@@ -14,7 +14,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 
 - Support a Markdown-based syntax for the glossary title and for terms (not just term descriptions).
-- When Markdown is enabled, support _math typesetting_ using KaTeX.
+- When Markdown is enabled, support _math typesetting_ using [KaTeX](https://katex.org/).
   - Inline math is written by surrounding an expression with dollar signs inside a code fragment: ` $e = mc^2$ `.
   - Display math is written using code blocks whose language is declared as `math`:
 
