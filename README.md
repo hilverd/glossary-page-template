@@ -8,7 +8,7 @@ This project makes it easy to create a glossary as a single HTML page that can b
 * Represents a glossary as a standard [`dl`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dl) element for accessibility and portability.
 * Supports different screen sizes using responsive design and includes dark mode support.
 * Write in either plain text or a Markdown-based syntax.
-* Supports math typesetting using [KaTeX](https://katex.org/). **Update** This is not ready for use yet until a layout bug is fixed.
+* Supports math typesetting using [KaTeX](https://katex.org/).
 
 ## Getting Started
 
