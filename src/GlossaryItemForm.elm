@@ -544,7 +544,7 @@ suggestRelatedTerms glossaryItemForm =
                 let
                     candidateTermAsWord : Regex.Regex
                     candidateTermAsWord =
-                        ("\\b" ++ Extras.Regex.escapeStringForUseInRegex (String.toLower (Term.inlineText candidateTerm)) ++ "\\b")
+                        ("(\\b| )" ++ Extras.Regex.escapeStringForUseInRegex (String.toLower (Term.raw candidateTerm)) ++ "(\\b| )")
                             |> Regex.fromString
                             |> Maybe.withDefault Regex.never
                 in
