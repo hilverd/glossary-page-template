@@ -20,8 +20,8 @@ withAdditionalAttributes attributes additionalAttributes children =
         children
 
 
-primary : { enabled : Bool } -> List (Attribute msg) -> List (Html msg) -> Html msg
-primary { enabled } =
+primary : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
+primary enabled =
     withAdditionalAttributes
         [ if enabled then
             class "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
@@ -39,8 +39,8 @@ secondary =
         [ class "inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300" ]
 
 
-white : { enabled : Bool } -> List (Attribute msg) -> List (Html msg) -> Html msg
-white { enabled } =
+white : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
+white enabled =
     withAdditionalAttributes
         [ class "inline-flex justify-center items-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 font-medium"
         , if enabled then
@@ -65,8 +65,8 @@ emptyState =
         [ class "relative block max-w-lg border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-lg p-5 text-center hover:border-gray-400 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300" ]
 
 
-rounded : { enabled : Bool } -> List (Attribute msg) -> List (Html msg) -> Html msg
-rounded { enabled } =
+rounded : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
+rounded enabled =
     withAdditionalAttributes
         [ class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-sm rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
         , if enabled then
@@ -79,8 +79,8 @@ rounded { enabled } =
         ]
 
 
-toggle : { on : Bool } -> String -> List (Attribute msg) -> List (Html msg) -> Html msg
-toggle { on } labelId additionalAttributes children =
+toggle : Bool -> String -> List (Attribute msg) -> List (Html msg) -> Html msg
+toggle on labelId additionalAttributes children =
     Html.div
         (class "flex items-center" :: additionalAttributes)
         [ Accessibility.button

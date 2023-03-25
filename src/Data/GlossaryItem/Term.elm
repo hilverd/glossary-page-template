@@ -19,13 +19,11 @@ import Extras.String
 import Html exposing (Html, text)
 import Html.Attributes exposing (class)
 import Json.Decode as Decode exposing (Decoder)
-import Markdown.Block as Block exposing (Block)
-import Markdown.Html
-import Markdown.Renderer as Renderer exposing (Renderer)
+import Markdown.Block exposing (Block)
+import Markdown.Renderer as Renderer
 import MarkdownRenderers
 import Regex
 import String.Normalize
-import Svg.Attributes exposing (from)
 
 
 {-| A term.
@@ -143,12 +141,13 @@ fromMarkdownWithId body id0 isAbbreviation0 =
 -}
 decode : Bool -> Decoder Term
 decode enableMarkdownBasedSyntax =
-    (if enableMarkdownBasedSyntax then
-        Decode.map3 fromMarkdownWithId
+    Decode.map3
+        (if enableMarkdownBasedSyntax then
+            fromMarkdownWithId
 
-     else
-        Decode.map3 fromPlaintextWithId
-    )
+         else
+            fromPlaintextWithId
+        )
         (Decode.field "body" Decode.string)
         (Decode.field "id" Decode.string)
         (Decode.field "isAbbreviation" Decode.bool)
@@ -259,7 +258,7 @@ view enableMathSupport term =
             in
             case parsed of
                 Ok blocks ->
-                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer { enableMathSupport = enableMathSupport }) blocks of
+                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
                         Ok rendered ->
                             Html.span
                                 [ class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]

@@ -12,8 +12,6 @@ module Data.IndexOfTerms exposing (TermGroup, IndexOfTerms, fromGlossaryItems, t
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Dict exposing (Dict)
-import Extras.String
-import String.Normalize
 
 
 {-| A group of terms, where `label` is the first character of each item in `terms`.

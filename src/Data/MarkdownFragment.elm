@@ -9,7 +9,6 @@ module Data.MarkdownFragment exposing (MarkdownFragment, fromString, raw, parsed
 
 -}
 
-import Components.DropdownMenu exposing (init)
 import Markdown.Block as Block exposing (Block, Inline)
 import Markdown.Parser
 

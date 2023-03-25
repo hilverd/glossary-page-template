@@ -387,7 +387,7 @@ viewCreateDescriptionTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnab
                 [ class "flex-auto max-w-2xl flex" ]
                 [ span
                     [ class "inline-flex items-center" ]
-                    [ Components.Button.rounded { enabled = canBeDeleted }
+                    [ Components.Button.rounded canBeDeleted
                         [ Accessibility.Aria.label "Delete"
                         , Html.Events.onClick <| PageMsg.Internal <| DeleteTerm termIndex
                         ]
@@ -421,7 +421,7 @@ viewCreateDescriptionTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnab
                             [ div
                                 [ class "sm:ml-5" ]
                                 [ Components.Button.toggle
-                                    { on = TermField.isAbbreviation termField }
+                                    (TermField.isAbbreviation termField)
                                     abbreviationLabelId
                                     [ Html.Events.onClick <| PageMsg.Internal <| ToggleAbbreviation termIndex ]
                                     [ span
@@ -500,7 +500,7 @@ viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabl
         [ div
             [ class "flex-auto max-w-3xl flex" ]
             [ span [ class "inline-flex items-center" ]
-                [ Components.Button.rounded { enabled = True }
+                [ Components.Button.rounded True
                     [ Accessibility.Aria.label "Delete"
                     , Html.Events.onClick <| PageMsg.Internal <| DeleteDetails index
                     ]
@@ -595,13 +595,13 @@ viewCreateDescriptionDetails showNewlineWarnings markdownBasedSyntaxEnabled math
         ]
 
 
-viewCreateSeeAlsoSingle : Bool -> Bool -> Set String -> List Term -> Int -> Form.RelatedTermField -> Html Msg
-viewCreateSeeAlsoSingle enableMathSupport showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
-    viewCreateSeeAlsoSingle1 enableMathSupport showValidationErrors relatedTermsIdReferences allTerms (RelatedTermIndex.fromInt index) relatedTerm
+viewCreateSeeAlsoSingle : Bool -> Set String -> List Term -> Int -> Form.RelatedTermField -> Html Msg
+viewCreateSeeAlsoSingle showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
+    viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms (RelatedTermIndex.fromInt index) relatedTerm
 
 
-viewCreateSeeAlsoSingle1 : Bool -> Bool -> Set String -> List Term -> RelatedTermIndex -> Form.RelatedTermField -> Html Msg
-viewCreateSeeAlsoSingle1 enableMathSupport showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
+viewCreateSeeAlsoSingle1 : Bool -> Set String -> List Term -> RelatedTermIndex -> Form.RelatedTermField -> Html Msg
+viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
     div
         []
         [ div
@@ -610,7 +610,7 @@ viewCreateSeeAlsoSingle1 enableMathSupport showValidationErrors relatedTermsIdRe
                 [ class "flex-auto max-w-lg flex" ]
                 [ span
                     [ class "inline-flex items-center" ]
-                    [ Components.Button.rounded { enabled = True }
+                    [ Components.Button.rounded True
                         [ Accessibility.Aria.label "Delete"
                         , Html.Events.onClick <| PageMsg.Internal <| DeleteRelatedTerm index
                         ]
@@ -702,7 +702,6 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
             (List.indexedMap
                 (viewCreateSeeAlsoSingle
-                    enableMathSupport
                     showValidationErrors
                     (relatedTermsList
                         |> List.filterMap .idReference
@@ -738,7 +737,7 @@ viewAddSuggestedSeeAlso enableMathSupport suggestedRelatedTerms =
                 (suggestedRelatedTerms
                     |> List.map
                         (\suggestedRelatedTerm ->
-                            Components.Button.white { enabled = True }
+                            Components.Button.white True
                                 [ class "m-1 text-sm"
                                 , Html.Events.onClick <| PageMsg.Internal (AddRelatedTerm <| Just <| Term.id suggestedRelatedTerm)
                                 ]
@@ -780,12 +779,12 @@ viewCreateFormFooter model =
                 [ text Components.Copy.sandboxModeMessage ]
         , div
             [ class "flex justify-end" ]
-            [ Components.Button.white { enabled = True }
+            [ Components.Button.white True
                 [ Html.Events.onClick <|
                     PageMsg.NavigateToListAll common
                 ]
                 [ text "Cancel" ]
-            , Components.Button.primary { enabled = True }
+            , Components.Button.primary True
                 [ class "ml-3"
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]

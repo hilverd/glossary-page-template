@@ -15,13 +15,9 @@ import Extras.String
 import Html exposing (Html, text)
 import Html.Attributes exposing (class)
 import Json.Decode as Decode exposing (Decoder)
-import Markdown.Block as Block exposing (Block)
-import Markdown.Html
-import Markdown.Renderer as Renderer exposing (Renderer)
+import Markdown.Block exposing (Block)
+import Markdown.Renderer as Renderer
 import MarkdownRenderers
-import Regex
-import String.Normalize
-import Svg.Attributes exposing (from)
 
 
 {-| A related term.
@@ -97,12 +93,13 @@ fromMarkdown idReference0 body =
 -}
 decode : Bool -> Decoder RelatedTerm
 decode enableMarkdownBasedSyntax =
-    (if enableMarkdownBasedSyntax then
-        Decode.map2 fromMarkdown
+    Decode.map2
+        (if enableMarkdownBasedSyntax then
+            fromMarkdown
 
-     else
-        Decode.map2 fromPlaintext
-    )
+         else
+            fromPlaintext
+        )
         (Decode.field "idReference" Decode.string)
         (Decode.field "body" Decode.string)
 
@@ -159,7 +156,7 @@ view enableMathSupport relatedTerm =
             in
             case parsed of
                 Ok blocks ->
-                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer { enableMathSupport = enableMathSupport }) blocks of
+                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
                         Ok rendered ->
                             Html.span
                                 [ class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]

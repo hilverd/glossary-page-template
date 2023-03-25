@@ -125,8 +125,8 @@ htmlMsgRenderer { enableMathSupport, makeLinksTabbable } =
 {-| A renderer that only handles inline elements (e.g. strong, emphasis) properly.
 Block elements are either ignored or have their children wrapped in a <span>.
 -}
-inlineHtmlMsgRenderer : { enableMathSupport : Bool } -> Renderer (Html msg)
-inlineHtmlMsgRenderer { enableMathSupport } =
+inlineHtmlMsgRenderer : Bool -> Renderer (Html msg)
+inlineHtmlMsgRenderer enableMathSupport =
     { heading = \{ children } -> Html.span [] children
     , paragraph = Html.span []
     , hardLineBreak = Html.text ""

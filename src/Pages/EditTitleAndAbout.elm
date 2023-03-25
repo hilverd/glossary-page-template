@@ -427,7 +427,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
             [ class "flex flex-auto max-w-2xl" ]
             [ span
                 [ class "flex-none inline-flex items-center" ]
-                [ Components.Button.rounded { enabled = True }
+                [ Components.Button.rounded True
                     [ Accessibility.Aria.label "Delete"
                     , Html.Events.onClick <| PageMsg.Internal <| DeleteAboutLink index
                     ]
@@ -566,12 +566,12 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
                 [ text Components.Copy.sandboxModeMessage ]
         , div
             [ class "flex justify-end" ]
-            [ Components.Button.white { enabled = True }
+            [ Components.Button.white True
                 [ Html.Events.onClick <|
                     PageMsg.NavigateToListAll { common | glossary = updatedGlossary }
                 ]
                 [ text "Cancel" ]
-            , Components.Button.primary { enabled = True }
+            , Components.Button.primary True
                 [ class "ml-3"
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]

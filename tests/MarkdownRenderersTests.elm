@@ -92,7 +92,7 @@ e = mc^2
                     "`$e = mc^2$`"
                         |> MarkdownFragment.fromString
                         |> MarkdownFragment.parsed
-                        |> Result.andThen (Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer { enableMathSupport = True }))
+                        |> Result.andThen (Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer True))
                         |> Expect.equal
                             (Ok
                                 [ Html.span []

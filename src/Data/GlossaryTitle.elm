@@ -11,13 +11,11 @@ This can be in either plain text or Markdown.
 -}
 
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
-import Extras.HtmlTree exposing (HtmlTree)
 import Extras.String
 import Html exposing (Html, text)
 import Html.Attributes exposing (class)
-import Markdown.Block as Block exposing (Block)
-import Markdown.Html
-import Markdown.Renderer as Renderer exposing (Renderer)
+import Markdown.Block exposing (Block)
+import Markdown.Renderer as Renderer
 import MarkdownRenderers
 import Regex
 
@@ -165,7 +163,7 @@ view enableMathSupport glossaryTitle =
             in
             case parsed of
                 Ok blocks ->
-                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer { enableMathSupport = enableMathSupport }) blocks of
+                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
                         Ok rendered ->
                             Html.span
                                 [ class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden text-3xl font-bold leading-tight" ]
