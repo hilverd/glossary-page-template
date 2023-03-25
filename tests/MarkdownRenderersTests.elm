@@ -1,11 +1,10 @@
 module MarkdownRenderersTests exposing (suite)
 
-import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
+import Data.MarkdownFragment as MarkdownFragment
 import Expect
 import Html
 import Html.Attributes as Attr exposing (class)
-import Markdown.Block as Block exposing (Inline)
-import Markdown.Renderer as Renderer exposing (Renderer)
+import Markdown.Renderer as Renderer
 import MarkdownRenderers
 import Test exposing (Test, describe, test)
 

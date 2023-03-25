@@ -1,11 +1,11 @@
-module MarkdownRenderers exposing (anchorTagHtmlTreeRenderer, anchorTagRenderer, htmlMsgRenderer, htmlTreeRendererForAnki, imgTagHtmlTreeRenderer, imgTagRenderer, inlineHtmlMsgRenderer, inlineHtmlTreeRendererForAnki)
+module MarkdownRenderers exposing (anchorTagHtmlTreeRenderer, htmlMsgRenderer, htmlTreeRendererForAnki, imgTagHtmlTreeRenderer, inlineHtmlMsgRenderer, inlineHtmlTreeRendererForAnki)
 
 {-| Renderers for Markdown data.
 
 
 # Markdown Renderers
 
-@docs anchorTagHtmlTreeRenderer, anchorTagRenderer, htmlMsgRenderer, htmlTreeRendererForAnki, imgTagHtmlTreeRenderer, imgTagRenderer, inlineHtmlMsgRenderer, inlineHtmlTreeRendererForAnki
+@docs anchorTagHtmlTreeRenderer, htmlMsgRenderer, htmlTreeRendererForAnki, imgTagHtmlTreeRenderer, inlineHtmlMsgRenderer, inlineHtmlTreeRendererForAnki
 
 -}
 

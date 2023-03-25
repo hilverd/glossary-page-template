@@ -82,9 +82,11 @@ fromPlaintext body isAbbreviation0 =
 fromMarkdown : String -> Bool -> Term
 fromMarkdown body isAbbreviation0 =
     let
+        fragment : MarkdownFragment
         fragment =
             MarkdownFragment.fromString body
 
+        inlineTextConcatenated : String
         inlineTextConcatenated =
             fragment
                 |> MarkdownFragment.concatenateInlineText
@@ -126,6 +128,7 @@ fromPlaintextWithId body id0 isAbbreviation0 =
 fromMarkdownWithId : String -> String -> Bool -> Term
 fromMarkdownWithId body id0 isAbbreviation0 =
     let
+        result0 : Term
         result0 =
             fromMarkdown body isAbbreviation0
     in

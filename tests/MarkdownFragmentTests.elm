@@ -1,8 +1,8 @@
 module MarkdownFragmentTests exposing (suite)
 
-import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
+import Data.MarkdownFragment as MarkdownFragment
 import Expect
-import Markdown.Block as Block exposing (Inline)
+import Markdown.Block as Block
 import Test exposing (Test, describe, test)
 
 

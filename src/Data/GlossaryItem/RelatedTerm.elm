@@ -62,6 +62,7 @@ fromPlaintext idReference0 body =
 fromMarkdown : String -> String -> RelatedTerm
 fromMarkdown idReference0 body =
     let
+        fragment : MarkdownFragment
         fragment =
             MarkdownFragment.fromString body
     in

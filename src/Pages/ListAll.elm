@@ -1518,12 +1518,15 @@ view model =
                         (Extras.HtmlEvents.preventDefaultOnDecoder
                             (\event ->
                                 let
+                                    confirmDeleteIndex : Maybe GlossaryItemIndex
                                     confirmDeleteIndex =
                                         model.confirmDeleteIndex
 
+                                    searchDialogVisible : Bool
                                     searchDialogVisible =
                                         Components.SearchDialog.visible model.searchDialog.model
 
+                                    menuForMobileVisible : Bool
                                     menuForMobileVisible =
                                         model.menuForMobileVisibility == Visible
                                 in
