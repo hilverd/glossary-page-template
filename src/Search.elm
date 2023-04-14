@@ -28,8 +28,12 @@ search enableMathSupport searchTerm glossaryItems =
             |> List.filterMap
                 (\term ->
                     if String.contains searchTermNormalised (term |> Term.inlineText |> String.toLower) then
-                        Just <| SearchDialog.searchResult (Extras.Url.fragmentOnly <| Term.id term) [ Term.view enableMathSupport term ]
+                        Just term
 
                     else
                         Nothing
+                )
+            |> List.map
+                (\term ->
+                    SearchDialog.searchResult (Extras.Url.fragmentOnly <| Term.id term) [ Term.view enableMathSupport term ]
                 )

@@ -22,23 +22,23 @@ loadedGlossaryItems =
     let
         one : GlossaryItem
         one =
-            { terms = [ termFromBody "First term" ]
-            , details = [ Details.fromPlaintext "First term" ]
-            , relatedTerms = [ RelatedTerm.fromPlaintext "Second_term" "Second term" ]
+            { terms = [ termFromBody "The term one" ]
+            , details = [ Details.fromPlaintext "The term one" ]
+            , relatedTerms = [ RelatedTerm.fromPlaintext "Second_the_term" "Second the term" ]
             }
 
         two : GlossaryItem
         two =
-            { terms = [ termFromBody "Second term" ]
-            , details = [ Details.fromPlaintext "Second term" ]
+            { terms = [ termFromBody "Second the term" ]
+            , details = [ Details.fromPlaintext "Second the term" ]
             , relatedTerms = []
             }
 
         three : GlossaryItem
         three =
-            { terms = [ termFromBody "Third term" ]
-            , details = [ Details.fromPlaintext "Third term" ]
-            , relatedTerms = [ RelatedTerm.fromPlaintext "Second_term" "Second term" ]
+            { terms = [ termFromBody "The term three" ]
+            , details = [ Details.fromPlaintext "The term three" ]
+            , relatedTerms = [ RelatedTerm.fromPlaintext "Second_the_term" "Second the term" ]
             }
     in
     GlossaryItems.fromList [ one, two, three ]
@@ -53,9 +53,19 @@ suite =
                     loadedGlossaryItems
                         |> Search.search False "term"
                         |> Expect.equal
-                            [ searchResult "#Second_term" [ Html.text "Second term" ]
-                            , searchResult "#First_term" [ Html.text "First term" ]
-                            , searchResult "#Third_term" [ Html.text "Third term" ]
+                            [ searchResult "#Second_the_term" [ Html.text "Second the term" ]
+                            , searchResult "#The_term_one" [ Html.text "The term one" ]
+                            , searchResult "#The_term_three" [ Html.text "The term three" ]
                             ]
+
+            -- , test "terms for which the search term is a prefix are ranked higher than other terms" <|
+            --     \_ ->
+            --         loadedGlossaryItems
+            --             |> Search.search False "the"
+            --             |> Expect.equal
+            --                 [ searchResult "#The_term_one" [ Html.text "The term one" ]
+            --                 , searchResult "#The_term_three" [ Html.text "The term three" ]
+            --                 , searchResult "#Second_the_term" [ Html.text "Second the term" ]
+            --                 ]
             ]
         ]
