@@ -12,6 +12,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Make it clear that "n" is a keyboard shortcut for creating a new item.
+
 ### Changed
 
 - When searching, terms for which the search string is a prefix are ranked higher than other terms.
