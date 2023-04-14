@@ -6,6 +6,7 @@ overrides:
   got@<11.8.5: '>=11.8.5'
   qs@>=6.5.0 <6.5.3: '>=6.5.3'
   qs@>=6.7.0 <6.7.3: '>=6.7.3'
+  http-cache-semantics@<4.1.1: '>=4.1.1'
 
 devDependencies:
   '@tailwindcss/forms':
@@ -2018,13 +2019,13 @@ packages:
   /jsonfile@2.4.0:
     resolution: {integrity: sha512-PKllAqbgLgxHaj8TElYymKCAgrASebJrWpTnEkOaTowt23VKXXN0sUeriJ+eh7y6ufb/CC5ap11pz71/cM0hUw==}
     optionalDependencies:
-      graceful-fs: 4.2.10
+      graceful-fs: 4.2.11
     dev: true
 
   /jsonfile@4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
     optionalDependencies:
-      graceful-fs: 4.2.10
+      graceful-fs: 4.2.11
     dev: true
 
   /jsonfile@6.1.0:
