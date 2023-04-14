@@ -13,6 +13,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+
+- When searching, terms for which the search string is a prefix are ranked higher than other terms.
+
 ### Fixed
 ### Removed
 

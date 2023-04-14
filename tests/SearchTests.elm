@@ -48,7 +48,7 @@ suite : Test
 suite =
     describe "The Search module"
         [ describe "Search.search"
-            [ test "returns search results sorted by relevance for a given search term" <|
+            [ test "returns search results sorted by relevance for a given search string" <|
                 \_ ->
                     loadedGlossaryItems
                         |> Search.search False "term"
@@ -57,15 +57,14 @@ suite =
                             , searchResult "#The_term_one" [ Html.text "The term one" ]
                             , searchResult "#The_term_three" [ Html.text "The term three" ]
                             ]
-
-            -- , test "terms for which the search term is a prefix are ranked higher than other terms" <|
-            --     \_ ->
-            --         loadedGlossaryItems
-            --             |> Search.search False "the"
-            --             |> Expect.equal
-            --                 [ searchResult "#The_term_one" [ Html.text "The term one" ]
-            --                 , searchResult "#The_term_three" [ Html.text "The term three" ]
-            --                 , searchResult "#Second_the_term" [ Html.text "Second the term" ]
-            --                 ]
+            , test "terms for which the search string is a prefix are ranked higher than other terms" <|
+                \_ ->
+                    loadedGlossaryItems
+                        |> Search.search False "the"
+                        |> Expect.equal
+                            [ searchResult "#The_term_one" [ Html.text "The term one" ]
+                            , searchResult "#The_term_three" [ Html.text "The term three" ]
+                            , searchResult "#Second_the_term" [ Html.text "Second the term" ]
+                            ]
             ]
         ]

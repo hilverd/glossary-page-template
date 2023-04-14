@@ -33,6 +33,13 @@ search enableMathSupport searchString glossaryItems =
                     else
                         Nothing
                 )
+            |> List.partition
+                (\term ->
+                    String.startsWith searchStringNormalised (term |> Term.inlineText |> String.toLower)
+                )
+            |> (\( whereSearchStringIsPrefix, whereSearchStringIsNotPrefix ) ->
+                    whereSearchStringIsPrefix ++ whereSearchStringIsNotPrefix
+               )
             |> List.map
                 (\term ->
                     SearchDialog.searchResult (Extras.Url.fragmentOnly <| Term.id term) [ Term.view enableMathSupport term ]
