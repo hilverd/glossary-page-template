@@ -7,13 +7,13 @@ import Extras.Url
 
 
 search : Bool -> String -> GlossaryItems -> List SearchDialog.SearchResult
-search enableMathSupport searchTerm glossaryItems =
+search enableMathSupport searchString glossaryItems =
     let
-        searchTermNormalised : String
-        searchTermNormalised =
-            searchTerm |> String.trim |> String.toLower
+        searchStringNormalised : String
+        searchStringNormalised =
+            searchString |> String.trim |> String.toLower
     in
-    if String.isEmpty searchTermNormalised then
+    if String.isEmpty searchStringNormalised then
         []
 
     else
@@ -27,7 +27,7 @@ search enableMathSupport searchTerm glossaryItems =
         terms
             |> List.filterMap
                 (\term ->
-                    if String.contains searchTermNormalised (term |> Term.inlineText |> String.toLower) then
+                    if String.contains searchStringNormalised (term |> Term.inlineText |> String.toLower) then
                         Just term
 
                     else

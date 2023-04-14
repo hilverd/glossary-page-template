@@ -5,7 +5,7 @@ port module Components.SearchDialog exposing
     , SearchResult
     , hide
     , init
-    , onChangeSearchTerm
+    , onChangeSearchString
     , onHide
     , onShow
     , searchResult
@@ -58,14 +58,14 @@ type alias SearchResultIndex =
 
 
 type alias Config parentMsg =
-    { onChangeSearchTerm : Maybe (String -> parentMsg)
+    { onChangeSearchString : Maybe (String -> parentMsg)
     , onShow : Maybe (Cmd parentMsg)
     , onHide : Maybe (Cmd parentMsg)
     }
 
 
 type Property parentMsg
-    = OnChangeSearchTerm (String -> parentMsg)
+    = OnChangeSearchString (String -> parentMsg)
     | OnShow (Cmd parentMsg)
     | OnHide (Cmd parentMsg)
 
@@ -115,7 +115,7 @@ port scrollSearchResultIntoView : String -> Cmd msg
 type Msg
     = NoOp
     | Show
-    | FocusOnSearchTermInputField String
+    | FocusOnSearchStringInputField String
     | StartHiding
     | CompleteHiding
     | MakeSearchResultActive SearchResultIndex
@@ -152,12 +152,12 @@ update updateParentModel toParentMsg msg model =
                     , Cmd.batch
                         [ model_.config.onShow |> Maybe.withDefault Cmd.none
                         , Process.sleep 200
-                            |> Task.perform (always <| FocusOnSearchTermInputField <| searchTermFieldId model_.idPrefix)
+                            |> Task.perform (always <| FocusOnSearchStringInputField <| searchStringFieldId model_.idPrefix)
                             |> Cmd.map toParentMsg
                         ]
                     )
 
-                FocusOnSearchTermInputField elementId ->
+                FocusOnSearchStringInputField elementId ->
                     ( model_
                     , Task.attempt (always <| toParentMsg NoOp) (Dom.focus elementId)
                     )
@@ -297,9 +297,9 @@ searchResult href body =
     SearchResult { href = href, body = body }
 
 
-onChangeSearchTerm : (String -> parentMsg) -> Property parentMsg
-onChangeSearchTerm =
-    OnChangeSearchTerm
+onChangeSearchString : (String -> parentMsg) -> Property parentMsg
+onChangeSearchString =
+    OnChangeSearchString
 
 
 onShow : Cmd parentMsg -> Property parentMsg
@@ -317,8 +317,8 @@ withIdPrefix suffix idPrefix =
     idPrefix ++ "-" ++ suffix
 
 
-searchTermFieldId : String -> String
-searchTermFieldId =
+searchStringFieldId : String -> String
+searchStringFieldId =
     withIdPrefix "search-term-field"
 
 
@@ -337,8 +337,8 @@ configFromProperties =
     List.foldl
         (\property config ->
             case property of
-                OnChangeSearchTerm f ->
-                    { config | onChangeSearchTerm = Just f }
+                OnChangeSearchString f ->
+                    { config | onChangeSearchString = Just f }
 
                 OnShow parentMsg ->
                     { config | onShow = Just parentMsg }
@@ -346,7 +346,7 @@ configFromProperties =
                 OnHide parentMsg ->
                     { config | onHide = Just parentMsg }
         )
-        { onChangeSearchTerm = Nothing
+        { onChangeSearchString = Nothing
         , onShow = Nothing
         , onHide = Nothing
         }
@@ -358,7 +358,7 @@ view :
     -> String
     -> List SearchResult
     -> Html parentMsg
-view toParentMsg model searchTerm searchResults =
+view toParentMsg model searchString searchResults =
     let
         model_ :
             { idPrefix : String
@@ -427,7 +427,7 @@ view toParentMsg model searchTerm searchResults =
                             []
                         ]
                     , Accessibility.inputText
-                        searchTerm
+                        searchString
                         [ Accessibility.Aria.controls [ "options" ]
                         , Accessibility.Role.comboBox
                         , Accessibility.Aria.expanded (model_.visibility == Visible && not (List.isEmpty searchResults))
@@ -437,9 +437,9 @@ view toParentMsg model searchTerm searchResults =
                         , Html.Attributes.attribute "autocapitalize" "off"
                         , Html.Attributes.spellcheck False
                         , class "h-12 w-full border-0 bg-transparent dark:bg-gray-600 pl-11 pr-4 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-0"
-                        , Html.Attributes.id <| searchTermFieldId model_.idPrefix
+                        , Html.Attributes.id <| searchStringFieldId model_.idPrefix
                         , Html.Attributes.placeholder "Search..."
-                        , Extras.HtmlAttribute.showMaybe Html.Events.onInput config.onChangeSearchTerm
+                        , Extras.HtmlAttribute.showMaybe Html.Events.onInput config.onChangeSearchString
                         , Html.Events.preventDefaultOn "keydown"
                             (Extras.HtmlEvents.preventDefaultOnDecoder
                                 (\event ->
@@ -514,7 +514,7 @@ view toParentMsg model searchTerm searchResults =
                                                 ]
                                 )
                         )
-                , Extras.Html.showIf (String.trim searchTerm /= "" && List.isEmpty searchResults) <|
+                , Extras.Html.showIf (String.trim searchString /= "" && List.isEmpty searchResults) <|
                     p
                         [ class "p-4 text-gray-500 dark:text-gray-300" ]
                         [ text "No results found." ]

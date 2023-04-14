@@ -116,7 +116,7 @@ type InternalMsg
     | ExportDropdownMenuMsg Components.DropdownMenu.Msg
     | SearchDialogMsg Components.SearchDialog.Msg
     | HideSearchDialog
-    | UpdateSearchTerm String
+    | UpdateSearchString String
     | ConfirmDelete GlossaryItemIndex
     | CancelDelete
     | Delete GlossaryItemIndex
@@ -151,7 +151,7 @@ init editorIsRunning commonModel =
             , results = []
             , model =
                 Components.SearchDialog.init ElementIds.searchDialog
-                    [ Components.SearchDialog.onChangeSearchTerm (PageMsg.Internal << UpdateSearchTerm)
+                    [ Components.SearchDialog.onChangeSearchString (PageMsg.Internal << UpdateSearchString)
                     , Components.SearchDialog.onShow <| preventBackgroundScrolling ()
                     , Components.SearchDialog.onHide <| Extras.Task.messageToCommand <| PageMsg.Internal HideSearchDialog
                     ]
@@ -262,7 +262,7 @@ update msg model =
             , allowBackgroundScrolling ()
             )
 
-        UpdateSearchTerm searchTerm ->
+        UpdateSearchString searchString ->
             ( let
                 searchDialog0 : SearchDialog
                 searchDialog0 =
@@ -272,15 +272,15 @@ update msg model =
                 results =
                     case model.common.glossary of
                         Ok { enableMathSupport, items } ->
-                            Search.search enableMathSupport searchTerm items
+                            Search.search enableMathSupport searchString items
 
                         Err _ ->
-                            Search.search False searchTerm <| GlossaryItems.fromList []
+                            Search.search False searchString <| GlossaryItems.fromList []
               in
               { model
                 | searchDialog =
                     { searchDialog0
-                        | term = searchTerm
+                        | term = searchString
                         , results = results
                     }
               }
