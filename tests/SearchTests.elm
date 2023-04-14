@@ -22,23 +22,23 @@ loadedGlossaryItems =
     let
         one : GlossaryItem
         one =
-            { terms = [ termFromBody "One" ]
-            , details = [ Details.fromPlaintext "One" ]
-            , relatedTerms = [ RelatedTerm.fromPlaintext "#Two" "Two" ]
+            { terms = [ termFromBody "First term" ]
+            , details = [ Details.fromPlaintext "First term" ]
+            , relatedTerms = [ RelatedTerm.fromPlaintext "Second_term" "Second term" ]
             }
 
         two : GlossaryItem
         two =
-            { terms = [ termFromBody "Two" ]
-            , details = [ Details.fromPlaintext "Two" ]
+            { terms = [ termFromBody "Second term" ]
+            , details = [ Details.fromPlaintext "Second term" ]
             , relatedTerms = []
             }
 
         three : GlossaryItem
         three =
-            { terms = [ termFromBody "Three" ]
-            , details = [ Details.fromPlaintext "Three" ]
-            , relatedTerms = [ RelatedTerm.fromPlaintext "#Two" "Two" ]
+            { terms = [ termFromBody "Third term" ]
+            , details = [ Details.fromPlaintext "Third term" ]
+            , relatedTerms = [ RelatedTerm.fromPlaintext "Second_term" "Second term" ]
             }
     in
     GlossaryItems.fromList [ one, two, three ]
@@ -51,8 +51,11 @@ suite =
             [ test "returns search results sorted by relevance for a given search term" <|
                 \_ ->
                     loadedGlossaryItems
-                        |> Search.search False "Two"
+                        |> Search.search False "term"
                         |> Expect.equal
-                            [ searchResult "#Two" [ Html.text "Two" ] ]
+                            [ searchResult "#Second_term" [ Html.text "Second term" ]
+                            , searchResult "#First_term" [ Html.text "First term" ]
+                            , searchResult "#Third_term" [ Html.text "Third term" ]
+                            ]
             ]
         ]
