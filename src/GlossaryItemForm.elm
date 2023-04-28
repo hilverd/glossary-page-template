@@ -11,6 +11,7 @@ module GlossaryItemForm exposing
     , empty
     , fromGlossaryItem
     , hasValidationErrors
+    , needsUpdating
     , relatedTermFields
     , selectRelatedTerm
     , suggestRelatedTerms
@@ -18,6 +19,7 @@ module GlossaryItemForm exposing
     , termFields
     , toGlossaryItem
     , toggleAbbreviation
+    , toggleNeedsUpdating
     , updateDetails
     , updateTerm
     )
@@ -37,6 +39,7 @@ import Extras.Array
 import Extras.Regex
 import GlossaryItemForm.DetailsField as DetailsField exposing (DetailsField)
 import GlossaryItemForm.TermField as TermField exposing (TermField)
+import Html exposing (details)
 import Regex
 import Set exposing (Set)
 
@@ -55,6 +58,7 @@ type GlossaryItemForm
         , termsOutside : List Term
         , primaryTermsOutside : List Term
         , itemsListingThisItemAsRelated : List GlossaryItem
+        , needsUpdating : Bool
         }
 
 
@@ -98,6 +102,13 @@ itemsListingThisTermAsRelated glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             form.itemsListingThisItemAsRelated
+
+
+needsUpdating : GlossaryItemForm -> Bool
+needsUpdating glossaryItemForm =
+    case glossaryItemForm of
+        GlossaryItemForm form ->
+            form.needsUpdating
 
 
 validate : GlossaryItemForm -> GlossaryItemForm
@@ -204,6 +215,7 @@ validate form =
         , termsOutside = termsOutside form
         , primaryTermsOutside = primaryTermsOutside form
         , itemsListingThisItemAsRelated = itemsListingThisTermAsRelated form
+        , needsUpdating = needsUpdating form
         }
 
 
@@ -228,6 +240,7 @@ empty withTermsOutside withPrimaryTermsOutside withItemsListingThisTermAsRelated
         , termsOutside = withTermsOutside
         , primaryTermsOutside = withPrimaryTermsOutside
         , itemsListingThisItemAsRelated = withItemsListingThisTermAsRelated
+        , needsUpdating = True
         }
         |> validate
 
@@ -292,6 +305,7 @@ fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRe
         , termsOutside = termsOutside1
         , primaryTermsOutside = primaryTermsOutside1
         , itemsListingThisItemAsRelated = withItemsListingThisTermAsRelated
+        , needsUpdating = item.needsUpdating
         }
         |> validate
 
@@ -373,6 +387,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form =
                                         )
                             )
                 )
+    , needsUpdating = needsUpdating form
     }
 
 
@@ -432,8 +447,20 @@ addDetails : GlossaryItemForm -> GlossaryItemForm
 addDetails glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
+            let
+                needsUpdating1 : Bool
+                needsUpdating1 =
+                    if not (formHasDetailsOrRelatedTerms glossaryItemForm) && form.needsUpdating then
+                        False
+
+                    else
+                        form.needsUpdating
+            in
             GlossaryItemForm
-                { form | detailsFields = form.detailsFields |> Array.push DetailsField.empty }
+                { form
+                    | detailsFields = form.detailsFields |> Array.push DetailsField.empty
+                    , needsUpdating = needsUpdating1
+                }
                 |> validate
 
 
@@ -461,6 +488,13 @@ deleteDetails index glossaryItemForm =
                 |> validate
 
 
+formHasDetailsOrRelatedTerms : GlossaryItemForm -> Bool
+formHasDetailsOrRelatedTerms glossaryItemForm =
+    case glossaryItemForm of
+        GlossaryItemForm form ->
+            form.detailsFields /= Array.empty || form.relatedTermFields /= Array.empty
+
+
 addRelatedTerm : Maybe String -> GlossaryItemForm -> GlossaryItemForm
 addRelatedTerm maybeTermId glossaryItemForm =
     case glossaryItemForm of
@@ -471,9 +505,20 @@ addRelatedTerm maybeTermId glossaryItemForm =
                     maybeTermId
                         |> Maybe.map (\termId -> { idReference = Just termId, validationError = Nothing })
                         |> Maybe.withDefault emptyRelatedTermField
+
+                needsUpdating1 : Bool
+                needsUpdating1 =
+                    if not (formHasDetailsOrRelatedTerms glossaryItemForm) && form.needsUpdating then
+                        False
+
+                    else
+                        form.needsUpdating
             in
             GlossaryItemForm
-                { form | relatedTermFields = Array.push relatedTermField form.relatedTermFields }
+                { form
+                    | relatedTermFields = Array.push relatedTermField form.relatedTermFields
+                    , needsUpdating = needsUpdating1
+                }
                 |> validate
 
 
@@ -555,3 +600,14 @@ suggestRelatedTerms glossaryItemForm =
                         )
                         detailsFieldBodies
             )
+
+
+toggleNeedsUpdating : GlossaryItemForm -> GlossaryItemForm
+toggleNeedsUpdating glossaryItemForm =
+    case glossaryItemForm of
+        GlossaryItemForm form ->
+            GlossaryItemForm
+                { form
+                    | needsUpdating = not form.needsUpdating
+                }
+                |> validate

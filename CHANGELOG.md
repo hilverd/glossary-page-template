@@ -14,6 +14,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 
 - Make it clear that "n" is a keyboard shortcut for creating a new item.
+- Glossary items can have a "Needs updating" badge.
 
 ### Changed
 

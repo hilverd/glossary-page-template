@@ -33,6 +33,7 @@ type alias GlossaryItem =
     { terms : List Term
     , details : List Details
     , relatedTerms : List RelatedTerm
+    , needsUpdating : Bool
     }
 
 
@@ -56,6 +57,7 @@ type alias GlossaryItem =
             )
             , ( "details", Encode.list Encode.string [ "Condensed moisture." ] )
             , ( "relatedTerms", Encode.list Encode.object [] )
+            , ( "needsUpdating", Encode.bool True )
             ]
 
     Decode.decodeValue (decode False) rain
@@ -63,12 +65,13 @@ type alias GlossaryItem =
     -->     { terms = [ Term.fromPlaintext "Rain" False ]
     -->     , details = [ Details.fromPlaintext "Condensed moisture." ]
     -->     , relatedTerms = []
+    -->     , needsUpdating = True
     -->     }
 
 -}
 decode : Bool -> Decoder GlossaryItem
 decode enableMarkdownBasedSyntax =
-    Decode.map3 GlossaryItem
+    Decode.map4 GlossaryItem
         (Decode.field "terms" <| Decode.list <| Term.decode enableMarkdownBasedSyntax)
         (Decode.field "details" <|
             Decode.list <|
@@ -83,6 +86,7 @@ decode enableMarkdownBasedSyntax =
                     Decode.string
         )
         (Decode.field "relatedTerms" <| Decode.list <| RelatedTerm.decode enableMarkdownBasedSyntax)
+        (Decode.field "needsUpdating" Decode.bool)
 
 
 {-| Whether or not the glossary item has any details.
@@ -95,6 +99,7 @@ Some items may not contain any details and instead point to a related item that 
         { terms = [ Term.emptyPlaintext ]
         , details = []
         , relatedTerms = []
+        , needsUpdating = False
         }
 
     hasSomeDetails empty --> False
@@ -176,6 +181,20 @@ toHtmlTree glossaryItem =
         True
         []
         (List.map termToHtmlTree glossaryItem.terms
+            ++ (if glossaryItem.needsUpdating then
+                    [ HtmlTree.Node "dd"
+                        False
+                        [ HtmlTree.Attribute "class" "needs-updating" ]
+                        [ HtmlTree.Node "span"
+                            False
+                            []
+                            [ HtmlTree.Leaf "[Needs updating]" ]
+                        ]
+                    ]
+
+                else
+                    []
+               )
             ++ List.map (Details.raw >> detailsToHtmlTree) glossaryItem.details
             ++ (if List.isEmpty glossaryItem.relatedTerms then
                     []

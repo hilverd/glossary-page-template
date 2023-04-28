@@ -90,6 +90,14 @@
     @apply mt-1 print:mt-0 py-2 print:py-0 text-gray-600 dark:text-gray-300 print:text-black;
   }
 
+  article#glossary-page-items dl dd.needs-updating {
+    @apply mt-1 py-2 print:py-2 text-gray-600 dark:text-gray-300 print:text-black;
+  }
+
+  article#glossary-page-items dl dd.needs-updating span {
+    @apply inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-400/10 px-2 py-1 text-sm font-medium text-yellow-800 dark:text-yellow-500 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-400/20;
+  }
+
   div#glossary-page-container:not([data-enable-markdown-based-syntax="true"]) article#glossary-page-items dl dd {
     @apply max-w-prose print:max-w-full;
   }
@@ -122,7 +130,7 @@
     @apply text-inherit no-underline text-gray-500 dark:text-gray-400 font-normal;
   }
 
-  article#glossary-page-items dl dd + dd:not(.related-terms) {
+  article#glossary-page-items dl dd:not(.needs-updating) + dd:not(.related-terms) {
     @apply border-t border-b-0 border-dashed border-gray-300 dark:border-gray-600 mt-3 pt-4;
   }
 

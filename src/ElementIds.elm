@@ -15,6 +15,7 @@ module ElementIds exposing
     , inputSyntaxMarkdownBased
     , inputSyntaxPlainText
     , items
+    , needsUpdatingToggleLabel
     , orderItemsAlphabetically
     , orderItemsMostFrequentFirst
     , outer
@@ -188,6 +189,11 @@ exportDropdownButton =
 abbreviationLabel : TermIndex -> String
 abbreviationLabel termIndex =
     prefixed <| "term-" ++ (termIndex |> TermIndex.toInt |> String.fromInt) ++ "-abbreviation"
+
+
+needsUpdatingToggleLabel : String
+needsUpdatingToggleLabel =
+    prefixed "needs-updating-toggle"
 
 
 searchDialog : String

@@ -46,6 +46,18 @@ view { enableMathSupport, makeLinksTabbable } style glossaryItem =
             div
                 [ Html.Attributes.style "max-height" "100%" ]
                 (List.map (viewGlossaryTerm enableMathSupport True tabbable) glossaryItem.terms
+                    ++ (if glossaryItem.needsUpdating then
+                            [ Html.dd
+                                [ class "needs-updating" ]
+                                [ span
+                                    []
+                                    [ text "Needs updating" ]
+                                ]
+                            ]
+
+                        else
+                            []
+                       )
                     ++ List.map
                         (viewGlossaryItemDetails
                             { enableMathSupport = enableMathSupport
@@ -79,6 +91,18 @@ view { enableMathSupport, makeLinksTabbable } style glossaryItem =
                     [ div
                         []
                         (List.map (viewGlossaryTerm enableMathSupport False tabbable) glossaryItem.terms
+                            ++ (if glossaryItem.needsUpdating then
+                                    [ Html.dd
+                                        [ class "needs-updating" ]
+                                        [ span
+                                            []
+                                            [ text "Needs updating" ]
+                                        ]
+                                    ]
+
+                                else
+                                    []
+                               )
                             ++ List.map
                                 (viewGlossaryItemDetails
                                     { enableMathSupport = enableMathSupport
@@ -134,6 +158,18 @@ view { enableMathSupport, makeLinksTabbable } style glossaryItem =
             else
                 div []
                     (List.map (viewGlossaryTerm enableMathSupport False tabbable) glossaryItem.terms
+                        ++ (if glossaryItem.needsUpdating then
+                                [ Html.dd
+                                    [ class "needs-updating" ]
+                                    [ span
+                                        []
+                                        [ text "Needs updating" ]
+                                    ]
+                                ]
+
+                            else
+                                []
+                           )
                         ++ List.map
                             (viewGlossaryItemDetails
                                 { enableMathSupport = enableMathSupport

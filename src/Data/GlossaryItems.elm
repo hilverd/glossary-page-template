@@ -47,18 +47,21 @@ compareForSortingAlphabetically item1 item2 =
     item1 = { terms = [ Term.fromMarkdown "\\_\\_slots\\_\\_" False ]
             , details = []
             , relatedTerms = []
+            , needsUpdating = False
             }
 
     item2 : GlossaryItem
     item2 = { terms = [ Term.fromMarkdown "Situation" False ]
             , details = []
             , relatedTerms = []
+            , needsUpdating = False
             }
 
     item3 : GlossaryItem
     item3 = { terms = [ Term.fromMarkdown "strong" False ]
             , details = []
             , relatedTerms = []
+            , needsUpdating = False
             }
 
     fromList [item1, item2, item3]

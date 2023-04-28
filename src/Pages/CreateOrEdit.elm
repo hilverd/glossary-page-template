@@ -64,6 +64,7 @@ type InternalMsg
     | AddRelatedTerm (Maybe String)
     | SelectRelatedTerm RelatedTermIndex String
     | DeleteRelatedTerm RelatedTermIndex
+    | ToggleNeedsUpdating
     | Save
     | FailedToSave Http.Error
 
@@ -230,6 +231,9 @@ update msg model =
 
         DeleteRelatedTerm relatedTermIndex ->
             ( { model | form = Form.deleteRelatedTerm relatedTermIndex model.form }, Cmd.none )
+
+        ToggleNeedsUpdating ->
+            ( { model | form = Form.toggleNeedsUpdating model.form }, Cmd.none )
 
         Save ->
             case model.common.glossary of
@@ -751,6 +755,23 @@ viewAddSuggestedSeeAlso enableMathSupport suggestedRelatedTerms =
         ]
 
 
+viewNeedsUpdating :
+    Bool
+    -> Html Msg
+viewNeedsUpdating on =
+    div
+        [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
+        [ Components.Button.toggle
+            on
+            ElementIds.needsUpdatingToggleLabel
+            [ Html.Events.onClick <| PageMsg.Internal <| ToggleNeedsUpdating ]
+            [ span
+                [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                [ text "Needs updating" ]
+            ]
+        ]
+
+
 viewCreateFormFooter : Model -> Html Msg
 viewCreateFormFooter model =
     let
@@ -853,6 +874,7 @@ view model =
                                         terms
                                         relatedTerms
                                         suggestedRelatedTerms
+                                    , viewNeedsUpdating <| Form.needsUpdating model.form
                                     ]
                                 , div
                                     [ class "mt-8 lg:w-1/2 lg:mt-0 max-w-4xl text-gray-900 dark:text-gray-100" ]
