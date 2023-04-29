@@ -185,7 +185,8 @@ viewGlossaryTerm : Bool -> Bool -> Bool -> Term -> Html msg
 viewGlossaryTerm enableMathSupport preview tabbable term =
     Html.dt
         [ class "group" ]
-        [ Html.dfn
+        [ span [ class "mr-1.5 hidden print:inline" ] [ text "➢" ]
+        , Html.dfn
             [ Html.Attributes.id <| Term.id term ]
             [ if Term.isAbbreviation term then
                 Html.abbr [] [ Term.view enableMathSupport term ]
