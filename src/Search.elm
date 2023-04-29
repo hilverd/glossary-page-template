@@ -21,7 +21,7 @@ search enableMathSupport searchString glossaryItems =
             terms : List Term
             terms =
                 glossaryItems
-                    |> GlossaryItems.orderedByFrequency
+                    |> GlossaryItems.orderedByMostMentionedFirst
                     |> List.concatMap (Tuple.second >> .terms)
         in
         terms

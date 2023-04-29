@@ -1,11 +1,11 @@
-module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByFrequency, get, insert, update, remove, terms, primaryTerms)
+module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, get, insert, update, remove, terms, primaryTerms)
 
 {-| A set of glossary items that make up a glossary.
 
 
 # Glossary Items
 
-@docs GlossaryItems, fromList, orderedAlphabetically, orderedByFrequency, get, insert, update, remove, terms, primaryTerms
+@docs GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, get, insert, update, remove, terms, primaryTerms
 
 -}
 
@@ -22,12 +22,12 @@ import Set
 
 
 {-| Glossary items constructed by the functions below.
-This is done using an opaque type that supports efficiently retrieving the items ordered alphabetically or by frequency.
+This is done using an opaque type that supports efficiently retrieving the items ordered alphabetically or by most mentioned first.
 -}
 type GlossaryItems
     = GlossaryItems
         { orderedAlphabetically : List ( GlossaryItemIndex, GlossaryItem )
-        , orderedByFrequency : List ( GlossaryItemIndex, GlossaryItem )
+        , orderedByMostMentionedFirst : List ( GlossaryItemIndex, GlossaryItem )
         }
 
 
@@ -83,18 +83,18 @@ fromList glossaryItems =
                 |> List.sortWith compareForSortingAlphabetically
                 |> zipListWithIndexes
 
-        byFrequency : List ( GlossaryItemIndex, GlossaryItem )
-        byFrequency =
-            orderListByFrequency alphabetically
+        byMostMentionedFirst : List ( GlossaryItemIndex, GlossaryItem )
+        byMostMentionedFirst =
+            orderListByMostMentionedFirst alphabetically
     in
     GlossaryItems <|
         { orderedAlphabetically = alphabetically
-        , orderedByFrequency = byFrequency
+        , orderedByMostMentionedFirst = byMostMentionedFirst
         }
 
 
-orderListByFrequency : List ( GlossaryItemIndex, GlossaryItem ) -> List ( GlossaryItemIndex, GlossaryItem )
-orderListByFrequency indexedGlossaryItems =
+orderListByMostMentionedFirst : List ( GlossaryItemIndex, GlossaryItem ) -> List ( GlossaryItemIndex, GlossaryItem )
+orderListByMostMentionedFirst indexedGlossaryItems =
     let
         indexed : List ( Int, GlossaryItem )
         indexed =
@@ -283,13 +283,13 @@ orderedAlphabetically glossaryItems =
             items.orderedAlphabetically
 
 
-{-| Retrieve the glossary items ordered by frequency.
+{-| Retrieve the glossary items ordered by most mentioned first.
 -}
-orderedByFrequency : GlossaryItems -> List ( GlossaryItemIndex, GlossaryItem )
-orderedByFrequency glossaryItems =
+orderedByMostMentionedFirst : GlossaryItems -> List ( GlossaryItemIndex, GlossaryItem )
+orderedByMostMentionedFirst glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
-            items.orderedByFrequency
+            items.orderedByMostMentionedFirst
 
 
 {-| Retrieve the list of all terms in the glossary.

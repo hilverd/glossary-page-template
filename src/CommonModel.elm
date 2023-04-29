@@ -7,7 +7,7 @@ import Json.Decode as Decode
 
 type OrderItemsBy
     = Alphabetically
-    | MostFrequentFirst
+    | MostMentionedFirst
 
 
 type alias CommonModel =

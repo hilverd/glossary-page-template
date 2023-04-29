@@ -17,7 +17,7 @@ module ElementIds exposing
     , items
     , needsUpdatingToggleLabel
     , orderItemsAlphabetically
-    , orderItemsMostFrequentFirst
+    , orderItemsMostMentionedFirst
     , outer
     , quickSearchButtonAndLetterGrid
     , reserved
@@ -108,9 +108,9 @@ orderItemsAlphabetically =
     prefixed "order-items-alphabetically"
 
 
-orderItemsMostFrequentFirst : String
-orderItemsMostFrequentFirst =
-    prefixed "order-items-most-frequent-first"
+orderItemsMostMentionedFirst : String
+orderItemsMostMentionedFirst =
+    prefixed "order-items-most-mentioned-first"
 
 
 confirmDeleteModalTitle : String

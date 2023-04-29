@@ -1467,17 +1467,17 @@ viewOrderItemsBy model numberOfItems =
                     [ class "flex items-center" ]
                     [ Components.Button.radio
                         "order-items-by"
-                        "order-items-most-frequent-first"
-                        (model.common.orderItemsBy == CommonModel.MostFrequentFirst)
+                        "order-items-most-mentioned-first"
+                        (model.common.orderItemsBy == CommonModel.MostMentionedFirst)
                         tabbable
-                        [ id ElementIds.orderItemsMostFrequentFirst
-                        , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy CommonModel.MostFrequentFirst
+                        [ id ElementIds.orderItemsMostMentionedFirst
+                        , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy CommonModel.MostMentionedFirst
                         ]
                     , label
                         [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
-                        , for ElementIds.orderItemsMostFrequentFirst
+                        , for ElementIds.orderItemsMostMentionedFirst
                         ]
-                        [ text "most frequent first" ]
+                        [ text "most mentioned first" ]
                     ]
                 ]
             ]
@@ -1646,7 +1646,7 @@ view model =
                                             GlossaryItems.orderedAlphabetically
 
                                         else
-                                            GlossaryItems.orderedByFrequency
+                                            GlossaryItems.orderedByMostMentionedFirst
                                        )
                                     |> viewCards model glossary.enableMathSupport editable noModalDialogShown_
                                 ]

@@ -276,8 +276,8 @@ update msg model =
                                                     Alphabetically ->
                                                         GlossaryItems.orderedAlphabetically
 
-                                                    MostFrequentFirst ->
-                                                        GlossaryItems.orderedByFrequency
+                                                    MostMentionedFirst ->
+                                                        GlossaryItems.orderedByMostMentionedFirst
                                                )
                                             |> List.filter (Tuple.second >> (==) newOrUpdatedGlossaryItem)
                                             |> List.head
