@@ -17,7 +17,7 @@
   }
 
   div#glossary-page-container header {
-    @apply pt-6 pb-4 mx-auto px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-prose;
+    @apply pt-6 pb-4 mx-auto px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-full;
   }
 
   div#glossary-page-about {
@@ -25,11 +25,11 @@
   }
 
   div#glossary-page-container main {
-    @apply mx-auto px-6 lg:px-8 print:px-0 print:max-w-prose;
+    @apply mx-auto px-6 lg:px-8 print:px-0 print:max-w-full;
   }
 
   div#glossary-page-about:not([data-enable-markdown-based-syntax="true"]) div#glossary-page-about > p {
-    @apply max-w-prose;
+    @apply max-w-prose print:max-w-full;
   }
 
   div#glossary-page-container[data-enable-markdown-based-syntax="true"]:not([data-markdown-rendered="true"]) div#glossary-page-about > p {
@@ -62,7 +62,7 @@
   }
 
   article#glossary-page-items dl > div {
-    @apply bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0;
+    @apply bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0 print:break-inside-avoid-page;
   }
 
   div#glossary-page-container:not([data-card-width]) article#glossary-page-items dl > div,

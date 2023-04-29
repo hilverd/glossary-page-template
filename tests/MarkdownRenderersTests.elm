@@ -77,7 +77,7 @@ e = mc^2
                             )
                         |> Expect.equal
                             (Ok
-                                [ Html.p [ class "max-w-prose" ]
+                                [ Html.p [ class "max-w-prose print:max-w-full" ]
                                     [ Html.node "katex-inline"
                                         [ Attr.attribute "data-expr" "e = mc^2" ]
                                         []

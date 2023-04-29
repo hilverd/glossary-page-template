@@ -70,8 +70,8 @@ htmlMsgRenderer { enableMathSupport, makeLinksTabbable } =
             Renderer.defaultHtmlRenderer
     in
     { renderer0
-        | paragraph = Html.p [ class "max-w-prose" ]
-        , blockQuote = Html.blockquote [ class "max-w-prose" ]
+        | paragraph = Html.p [ class "max-w-prose print:max-w-full" ]
+        , blockQuote = Html.blockquote [ class "max-w-prose print:max-w-full" ]
         , html =
             Markdown.Html.oneOf
                 [ anchorTagRenderer makeLinksTabbable
