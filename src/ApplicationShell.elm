@@ -19,6 +19,7 @@ import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Glossary exposing (Glossary)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems exposing (LoadedGlossaryItems)
+import Data.Theme as Theme exposing (Theme)
 import Html
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg(..))
@@ -82,6 +83,12 @@ init flags =
         fragment : Maybe String
         fragment =
             maybeUrl |> Maybe.andThen .fragment
+
+        theme : Theme
+        theme =
+            flags
+                |> Decode.decodeValue Theme.decode
+                |> Result.withDefault Theme.System
 
         enableMarkdownBasedSyntax : Bool
         enableMarkdownBasedSyntax =
@@ -183,6 +190,7 @@ init flags =
                 editorIsRunning
                 { filename = filename
                 , enableHelpForMakingChanges = enableHelpForMakingChanges
+                , theme = theme
                 , enableExportMenu = enableExportMenu
                 , enableSavingChangesInMemory = enableSavingChangesInMemory
                 , orderItemsBy = CommonModel.Alphabetically

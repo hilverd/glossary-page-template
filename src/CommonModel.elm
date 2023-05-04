@@ -2,6 +2,7 @@ module CommonModel exposing (CommonModel, OrderItemsBy(..))
 
 import Data.Glossary exposing (Glossary)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
+import Data.Theme exposing (Theme)
 import Json.Decode as Decode
 
 
@@ -13,6 +14,7 @@ type OrderItemsBy
 type alias CommonModel =
     { filename : Maybe String
     , enableHelpForMakingChanges : Bool
+    , theme : Theme
     , enableExportMenu : Bool
     , enableSavingChangesInMemory : Bool
     , orderItemsBy : OrderItemsBy

@@ -45,6 +45,7 @@ import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
+import Data.Theme exposing (Theme(..))
 import ElementIds
 import Export.Anki
 import Export.Markdown
@@ -98,6 +99,7 @@ type alias Model =
     { common : CommonModel
     , makingChanges : MakingChanges
     , menuForMobileVisibility : MenuForMobileVisibility
+    , themeDropdownMenu : Components.DropdownMenu.Model
     , exportDropdownMenu : Components.DropdownMenu.Model
     , searchDialog : SearchDialog
     , confirmDeleteIndex : Maybe GlossaryItemIndex
@@ -113,10 +115,12 @@ type InternalMsg
     | StartHidingMenuForMobile
     | CompleteHidingMenuForMobile
     | BackToTop Bool
+    | ThemeDropdownMenuMsg Components.DropdownMenu.Msg
     | ExportDropdownMenuMsg Components.DropdownMenu.Msg
     | SearchDialogMsg Components.SearchDialog.Msg
     | HideSearchDialog
     | UpdateSearchString String
+    | ChangeTheme Theme
     | ConfirmDelete GlossaryItemIndex
     | CancelDelete
     | Delete GlossaryItemIndex
@@ -143,6 +147,9 @@ init editorIsRunning commonModel =
       , common = commonModel
       , menuForMobileVisibility = Invisible
       , confirmDeleteIndex = Nothing
+      , themeDropdownMenu =
+            Components.DropdownMenu.init
+                [ Components.DropdownMenu.id ElementIds.themeDropdownButton ]
       , exportDropdownMenu =
             Components.DropdownMenu.init
                 [ Components.DropdownMenu.id ElementIds.exportDropdownButton ]
@@ -178,6 +185,9 @@ port allowBackgroundScrolling : () -> Cmd msg
 
 
 port preventBackgroundScrolling : () -> Cmd msg
+
+
+port changeTheme : Maybe String -> Cmd msg
 
 
 
@@ -231,9 +241,16 @@ update msg model =
                 ]
             )
 
+        ThemeDropdownMenuMsg msg_ ->
+            Components.DropdownMenu.update
+                (\x -> { model | themeDropdownMenu = x, exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu })
+                (PageMsg.Internal << ThemeDropdownMenuMsg)
+                msg_
+                model.themeDropdownMenu
+
         ExportDropdownMenuMsg msg_ ->
             Components.DropdownMenu.update
-                (\x -> { model | exportDropdownMenu = x })
+                (\x -> { model | themeDropdownMenu = Components.DropdownMenu.hidden model.themeDropdownMenu, exportDropdownMenu = x })
                 (PageMsg.Internal << ExportDropdownMenuMsg)
                 msg_
                 model.exportDropdownMenu
@@ -285,6 +302,27 @@ update msg model =
                     }
               }
             , Cmd.none
+            )
+
+        ChangeTheme theme ->
+            let
+                common0 =
+                    model.common
+            in
+            ( { model
+                | common = { common0 | theme = theme }
+                , themeDropdownMenu = Components.DropdownMenu.hidden model.themeDropdownMenu
+              }
+            , changeTheme <|
+                case theme of
+                    Light ->
+                        Just "light"
+
+                    Dark ->
+                        Just "dark"
+
+                    System ->
+                        Nothing
             )
 
         ConfirmDelete index ->
@@ -1183,8 +1221,8 @@ viewStaticSidebarForDesktop enableMathSupport tabbable termIndex =
         ]
 
 
-viewTopBar : Bool -> Maybe Components.DropdownMenu.Model -> Html Msg
-viewTopBar tabbable maybeExportDropdownMenu =
+viewTopBar : Bool -> Theme -> Components.DropdownMenu.Model -> Maybe Components.DropdownMenu.Model -> Html Msg
+viewTopBar tabbable theme themeDropdownMenu maybeExportDropdownMenu =
     div
         [ class "sticky top-0 z-20 shrink-0 flex justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
         [ div
@@ -1220,6 +1258,9 @@ viewTopBar tabbable maybeExportDropdownMenu =
                     ]
                 ]
             ]
+        , div
+            [ class "flex pr-4" ]
+            [ viewThemeButton tabbable theme themeDropdownMenu ]
         , Extras.Html.showMaybe
             (\exportDropdownMenu ->
                 div
@@ -1227,6 +1268,58 @@ viewTopBar tabbable maybeExportDropdownMenu =
                     [ viewExportButton tabbable exportDropdownMenu ]
             )
             maybeExportDropdownMenu
+        ]
+
+
+themeIcon : Theme -> List (Html.Attribute msg) -> Html msg
+themeIcon theme =
+    case theme of
+        Light ->
+            Icons.sun
+
+        Dark ->
+            Icons.moon
+
+        System ->
+            Icons.computerDesktop
+
+
+viewThemeButton : Bool -> Theme -> Components.DropdownMenu.Model -> Html Msg
+viewThemeButton enabled theme themeDropdownMenu =
+    Components.DropdownMenu.view
+        (PageMsg.Internal << ThemeDropdownMenuMsg)
+        themeDropdownMenu
+        enabled
+        [ themeIcon theme
+            [ Svg.Attributes.class "h-5 w-5" ]
+        ]
+        [ Components.DropdownMenu.choice
+            [ span
+                [ class "inline-flex items-center" ]
+                [ themeIcon Light
+                    [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" ]
+                , text "Light"
+                ]
+            ]
+            (PageMsg.Internal <| ChangeTheme Light)
+        , Components.DropdownMenu.choice
+            [ span
+                [ class "inline-flex items-center" ]
+                [ themeIcon Dark
+                    [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" ]
+                , text "Dark"
+                ]
+            ]
+            (PageMsg.Internal <| ChangeTheme Dark)
+        , Components.DropdownMenu.choice
+            [ span
+                [ class "inline-flex items-center" ]
+                [ themeIcon System
+                    [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" ]
+                , text "System"
+                ]
+            ]
+            (PageMsg.Internal <| ChangeTheme System)
         ]
 
 
@@ -1580,6 +1673,8 @@ view model =
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar noModalDialogShown_
+                            model.common.theme
+                            model.themeDropdownMenu
                             (if model.common.enableExportMenu then
                                 Just model.exportDropdownMenu
 
@@ -1617,7 +1712,11 @@ view model =
                                                     [ viewMakeChangesButton model.common.enableSavingChangesInMemory noModalDialogShown_
                                                     ]
                                             , div
-                                                [ class "hidden lg:block ml-auto pb-3" ]
+                                                [ class "hidden lg:block ml-auto pb-3 pt-0.5" ]
+                                                [ viewThemeButton noModalDialogShown_ model.common.theme model.themeDropdownMenu
+                                                ]
+                                            , div
+                                                [ class "hidden lg:block pl-4 pb-3" ]
                                                 [ Extras.Html.showIf showExportButton <|
                                                     viewExportButton noModalDialogShown_ model.exportDropdownMenu
                                                 ]
@@ -1663,5 +1762,9 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Components.DropdownMenu.subscriptions model.exportDropdownMenu
-        |> Sub.map (ExportDropdownMenuMsg >> PageMsg.Internal)
+    Sub.batch
+        [ Components.DropdownMenu.subscriptions model.themeDropdownMenu
+            |> Sub.map (ThemeDropdownMenuMsg >> PageMsg.Internal)
+        , Components.DropdownMenu.subscriptions model.exportDropdownMenu
+            |> Sub.map (ExportDropdownMenuMsg >> PageMsg.Internal)
+        ]

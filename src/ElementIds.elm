@@ -28,6 +28,7 @@ module ElementIds exposing
     , termIndexGroupLabel
     , termInputField
     , termsIndex
+    , themeDropdownButton
     , title
     )
 
@@ -179,6 +180,11 @@ aboutLinkHref index =
 aboutLinkBody : AboutLinkIndex -> String
 aboutLinkBody index =
     prefixed <| "about-link-body-" ++ (index |> AboutLinkIndex.toInt |> String.fromInt)
+
+
+themeDropdownButton : String
+themeDropdownButton =
+    prefixed "theme-dropdown-button"
 
 
 exportDropdownButton : String

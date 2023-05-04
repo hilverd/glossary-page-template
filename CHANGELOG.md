@@ -12,6 +12,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Add button for choosing theme: light, dark, or operating system preference.
+
 ### Changed
 ### Fixed
 ### Removed

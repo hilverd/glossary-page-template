@@ -81,6 +81,15 @@ function glossaryItemRelatedTermFromDdElement(ddElement) {
     });
 }
 
+function reflectThemeInClassList() {
+    if (localStorage.glossaryPageTheme === 'dark' || (!('glossaryPageTheme' in localStorage) &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+}
+
 const app = Elm.ApplicationShell.init({
     flags: {
         windowLocationHref: window.location.href,
@@ -93,6 +102,7 @@ const app = Elm.ApplicationShell.init({
         enableSavingChangesInMemory: enableSavingChangesInMemory,
         enableExportMenu: enableExportMenu,
         enableMarkdownBasedSyntax: enableMarkdownBasedSyntax,
+        theme: localStorage.glossaryPageTheme || "system",
         cardWidth: cardWidth,
         katexIsAvailable: katexIsAvailable
     }
@@ -110,6 +120,16 @@ app.ports.scrollSearchResultIntoView.subscribe((elementId) => {
     document.getElementById(elementId).scrollIntoView({ block: "nearest" });
 });
 
+app.ports.changeTheme.subscribe((themeName) => {
+    if (themeName) {
+        localStorage.glossaryPageTheme = themeName;
+    } else {
+        localStorage.removeItem('glossaryPageTheme');
+    }
+
+    reflectThemeInClassList();
+});
+
 function domReady(callback) {
     document.readyState === 'interactive' || document.readyState === 'complete' ?
         callback() : document.addEventListener('DOMContentLoaded', callback);
@@ -117,6 +137,8 @@ function domReady(callback) {
 
 // Prevent FOUC
 domReady(() => {
+    reflectThemeInClassList();
+
     document.body.style.visibility = 'visible';
 
     // Try to keep the focus on the element that receives overall keyboard shortcuts like Control-K

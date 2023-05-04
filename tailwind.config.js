@@ -10,6 +10,7 @@ module.exports = {
     require('@tailwindcss/forms'),
     require('@tailwindcss/typography'),
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       screens: {
