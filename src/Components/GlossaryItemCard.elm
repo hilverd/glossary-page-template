@@ -3,6 +3,7 @@ module Components.GlossaryItemCard exposing (Style(..), view)
 import Accessibility exposing (Html, div, p, span, text)
 import Accessibility.Key
 import Components.Button
+import Data.FeatureFlag exposing (enableFeaturesInProgress)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Details as Details
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
@@ -45,7 +46,7 @@ view { enableMathSupport, makeLinksTabbable } style glossaryItem =
             in
             div
                 [ Html.Attributes.style "max-height" "100%" ]
-                (List.map (viewGlossaryTerm enableMathSupport True tabbable) glossaryItem.terms
+                (List.map (viewGlossaryTerm enableMathSupport False True tabbable) glossaryItem.terms
                     ++ (if glossaryItem.needsUpdating then
                             [ Html.dd
                                 [ class "needs-updating" ]
@@ -90,7 +91,7 @@ view { enableMathSupport, makeLinksTabbable } style glossaryItem =
                     ]
                     [ div
                         []
-                        (List.map (viewGlossaryTerm enableMathSupport False tabbable) glossaryItem.terms
+                        (List.indexedMap (\k -> viewGlossaryTerm enableMathSupport (k == 0) False tabbable) glossaryItem.terms
                             ++ (if glossaryItem.needsUpdating then
                                     [ Html.dd
                                         [ class "needs-updating" ]
@@ -157,7 +158,7 @@ view { enableMathSupport, makeLinksTabbable } style glossaryItem =
 
             else
                 div []
-                    (List.map (viewGlossaryTerm enableMathSupport False tabbable) glossaryItem.terms
+                    (List.indexedMap (\k -> viewGlossaryTerm enableMathSupport (k == 0) False tabbable) glossaryItem.terms
                         ++ (if glossaryItem.needsUpdating then
                                 [ Html.dd
                                     [ class "needs-updating" ]
@@ -181,33 +182,46 @@ view { enableMathSupport, makeLinksTabbable } style glossaryItem =
                     )
 
 
-viewGlossaryTerm : Bool -> Bool -> Bool -> Term -> Html msg
-viewGlossaryTerm enableMathSupport preview tabbable term =
-    Html.dt
-        [ class "group" ]
-        [ span [ class "mr-1.5 hidden print:inline" ] [ text "➢" ]
-        , Html.dfn
-            [ Html.Attributes.id <| Term.id term ]
-            [ if Term.isAbbreviation term then
-                Html.abbr [] [ Term.view enableMathSupport term ]
+viewGlossaryTerm : Bool -> Bool -> Bool -> Bool -> Term -> Html msg
+viewGlossaryTerm enableMathSupport allowViewFull preview tabbable term =
+    div
+        [ class "flex justify-between" ]
+        [ Html.dt
+            [ class "group" ]
+            [ span [ class "mr-1.5 hidden print:inline" ] [ text "➢" ]
+            , Html.dfn
+                [ Html.Attributes.id <| Term.id term ]
+                [ if Term.isAbbreviation term then
+                    Html.abbr [] [ Term.view enableMathSupport term ]
 
-              else
-                Term.view enableMathSupport term
-            ]
-        , span
-            [ class "silcrow invisible group-hover:visible hover:visible print:group-hover:invisible print:hover:invisible" ]
-            [ Html.a
-                [ (if preview then
-                    "#"
-
-                   else
-                    term |> Term.id |> fragmentOnly
-                  )
-                    |> Html.Attributes.href
-                , Accessibility.Key.tabbable tabbable
+                  else
+                    Term.view enableMathSupport term
                 ]
-                [ text "§" ]
+            , span
+                [ class "silcrow invisible group-hover:visible hover:visible print:group-hover:invisible print:hover:invisible" ]
+                [ Html.a
+                    [ (if preview then
+                        "#"
+
+                       else
+                        term |> Term.id |> fragmentOnly
+                      )
+                        |> Html.Attributes.href
+                    , Accessibility.Key.tabbable tabbable
+                    ]
+                    [ text "§" ]
+                ]
             ]
+        , Extras.Html.showIf (enableFeaturesInProgress && allowViewFull) <|
+            span
+                [ class "print:hidden" ]
+                [ Components.Button.text
+                    [ Accessibility.Key.tabbable tabbable
+                    ]
+                    [ Icons.arrowsPointingOut
+                        [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
+                    ]
+                ]
         ]
 
 
