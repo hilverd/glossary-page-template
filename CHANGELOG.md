@@ -12,15 +12,19 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [3.2.0] - 2023-05-05
+
+### Added
 
 - Add button for choosing theme: light, dark, or operating system preference.
 
 ### Changed
 
 - Upgrade KaTeX to version 0.16.7.
-
-### Fixed
-### Removed
 
 ## [3.1.0] - 2023-04-30
 
@@ -460,7 +464,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/hilverd/glossary-page-template/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/hilverd/glossary-page-template/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/hilverd/glossary-page-template/compare/v2.1.0...v3.0.0
 [2.1.0]: https://github.com/hilverd/glossary-page-template/compare/v2.0.0...v2.1.0
