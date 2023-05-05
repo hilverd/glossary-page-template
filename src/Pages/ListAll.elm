@@ -1701,27 +1701,28 @@ view model =
                                     showExportButton =
                                         model.common.enableExportMenu
                                 in
-                                [ Extras.Html.showIf (showMakeChangesButton || showExportButton) <|
-                                    div
-                                        [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
-                                        [ div
-                                            [ class "flex flex-row justify-start lg:justify-end" ]
-                                            [ Extras.Html.showIf showMakeChangesButton <|
-                                                div
-                                                    [ class "flex-none" ]
-                                                    [ viewMakeChangesButton model.common.enableSavingChangesInMemory noModalDialogShown_
-                                                    ]
-                                            , div
-                                                [ class "hidden lg:block ml-auto pb-3 pt-0.5" ]
-                                                [ viewThemeButton noModalDialogShown_ model.common.theme model.themeDropdownMenu
+                                [ div
+                                    [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
+                                    [ div
+                                        [ class "flex flex-row justify-start lg:justify-end" ]
+                                        [ Extras.Html.showIf showMakeChangesButton <|
+                                            div
+                                                [ class "flex-none" ]
+                                                [ viewMakeChangesButton model.common.enableSavingChangesInMemory noModalDialogShown_
                                                 ]
-                                            , div
-                                                [ class "hidden lg:block pl-4 pb-3" ]
-                                                [ Extras.Html.showIf showExportButton <|
-                                                    viewExportButton noModalDialogShown_ model.exportDropdownMenu
-                                                ]
+                                        , div
+                                            [ class "hidden lg:block ml-auto pb-3 pt-0.5" ]
+                                            [ viewThemeButton noModalDialogShown_ model.common.theme model.themeDropdownMenu
+                                            ]
+                                        , div
+                                            [ class "hidden lg:block" ]
+                                            [ Extras.Html.showIf showExportButton <|
+                                                span
+                                                    [ class "pl-4 pb-3" ]
+                                                    [ viewExportButton noModalDialogShown_ model.exportDropdownMenu ]
                                             ]
                                         ]
+                                    ]
                                 , viewMakingChangesHelp model.common.filename noModalDialogShown_
                                     |> Extras.Html.showIf showMakingChangesHelp
                                 , Extras.Html.showIf editable <| viewSettings glossary model
