@@ -46,7 +46,7 @@ view { enableMathSupport, makeLinksTabbable } style glossaryItem =
             in
             div
                 [ Html.Attributes.style "max-height" "100%" ]
-                (List.map (viewGlossaryTerm enableMathSupport False True tabbable) glossaryItem.terms
+                (List.map (viewGlossaryTerm enableMathSupport True tabbable) glossaryItem.terms
                     ++ (if glossaryItem.needsUpdating then
                             [ Html.dd
                                 [ class "needs-updating" ]
@@ -91,28 +91,44 @@ view { enableMathSupport, makeLinksTabbable } style glossaryItem =
                     ]
                     [ div
                         []
-                        (List.indexedMap (\k -> viewGlossaryTerm enableMathSupport (k == 0) False tabbable) glossaryItem.terms
-                            ++ (if glossaryItem.needsUpdating then
-                                    [ Html.dd
-                                        [ class "needs-updating" ]
-                                        [ span
-                                            []
-                                            [ text "Needs updating" ]
+                        [ Extras.Html.showIf enableFeaturesInProgress <|
+                            div
+                                [ class "float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
+                                [ span
+                                    [ class "print:hidden" ]
+                                    [ Components.Button.text
+                                        [ Accessibility.Key.tabbable tabbable
+                                        ]
+                                        [ Icons.arrowsPointingOut
+                                            [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
                                         ]
                                     ]
+                                ]
+                        , div
+                            []
+                            (List.map (viewGlossaryTerm enableMathSupport False tabbable) glossaryItem.terms
+                                ++ (if glossaryItem.needsUpdating then
+                                        [ Html.dd
+                                            [ class "needs-updating" ]
+                                            [ span
+                                                []
+                                                [ text "Needs updating" ]
+                                            ]
+                                        ]
 
-                                else
-                                    []
-                               )
-                            ++ List.map
-                                (viewGlossaryItemDetails
-                                    { enableMathSupport = enableMathSupport
-                                    , makeLinksTabbable = makeLinksTabbable
-                                    }
-                                )
-                                glossaryItem.details
-                            ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails glossaryItem.relatedTerms
-                        )
+                                    else
+                                        []
+                                   )
+                                ++ List.map
+                                    (viewGlossaryItemDetails
+                                        { enableMathSupport = enableMathSupport
+                                        , makeLinksTabbable = makeLinksTabbable
+                                        }
+                                    )
+                                    glossaryItem.details
+                                ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails glossaryItem.relatedTerms
+                            )
+                        ]
                     , div
                         [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
                         [ div
@@ -158,32 +174,47 @@ view { enableMathSupport, makeLinksTabbable } style glossaryItem =
 
             else
                 div []
-                    (List.indexedMap (\k -> viewGlossaryTerm enableMathSupport (k == 0) False tabbable) glossaryItem.terms
-                        ++ (if glossaryItem.needsUpdating then
-                                [ Html.dd
-                                    [ class "needs-updating" ]
-                                    [ span
-                                        []
-                                        [ text "Needs updating" ]
+                    [ Extras.Html.showIf enableFeaturesInProgress <|
+                        div
+                            [ class "float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
+                            [ span
+                                [ class "print:hidden" ]
+                                [ Components.Button.text
+                                    [ Accessibility.Key.tabbable tabbable
+                                    ]
+                                    [ Icons.arrowsPointingOut
+                                        [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
                                     ]
                                 ]
+                            ]
+                    , div []
+                        (List.map (viewGlossaryTerm enableMathSupport False tabbable) glossaryItem.terms
+                            ++ (if glossaryItem.needsUpdating then
+                                    [ Html.dd
+                                        [ class "needs-updating" ]
+                                        [ span
+                                            []
+                                            [ text "Needs updating" ]
+                                        ]
+                                    ]
 
-                            else
-                                []
-                           )
-                        ++ List.map
-                            (viewGlossaryItemDetails
-                                { enableMathSupport = enableMathSupport
-                                , makeLinksTabbable = makeLinksTabbable
-                                }
-                            )
-                            glossaryItem.details
-                        ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails glossaryItem.relatedTerms
-                    )
+                                else
+                                    []
+                               )
+                            ++ List.map
+                                (viewGlossaryItemDetails
+                                    { enableMathSupport = enableMathSupport
+                                    , makeLinksTabbable = makeLinksTabbable
+                                    }
+                                )
+                                glossaryItem.details
+                            ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails glossaryItem.relatedTerms
+                        )
+                    ]
 
 
-viewGlossaryTerm : Bool -> Bool -> Bool -> Bool -> Term -> Html msg
-viewGlossaryTerm enableMathSupport allowViewFull preview tabbable term =
+viewGlossaryTerm : Bool -> Bool -> Bool -> Term -> Html msg
+viewGlossaryTerm enableMathSupport preview tabbable term =
     div
         [ class "flex justify-between" ]
         [ Html.dt
@@ -212,16 +243,6 @@ viewGlossaryTerm enableMathSupport allowViewFull preview tabbable term =
                     [ text "§" ]
                 ]
             ]
-        , Extras.Html.showIf (enableFeaturesInProgress && allowViewFull) <|
-            span
-                [ class "print:hidden" ]
-                [ Components.Button.text
-                    [ Accessibility.Key.tabbable tabbable
-                    ]
-                    [ Icons.arrowsPointingOut
-                        [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
-                    ]
-                ]
         ]
 
 
