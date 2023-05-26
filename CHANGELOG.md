@@ -12,12 +12,15 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
-
-- Allow showing last updated dates for items.
-
 ### Changed
 ### Fixed
 ### Removed
+
+## [3.3.0] - 2023-05-26
+
+### Added
+
+- Allow showing last updated dates for items.
 
 ## [3.2.0] - 2023-05-05
 
@@ -467,7 +470,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.3.0...HEAD
+[3.3.0]: https://github.com/hilverd/glossary-page-template/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/hilverd/glossary-page-template/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/hilverd/glossary-page-template/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/hilverd/glossary-page-template/compare/v2.1.0...v3.0.0
