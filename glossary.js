@@ -5,14 +5,15 @@ import '@webcomponents/custom-elements';
 const katexIsAvailable = typeof katex != "undefined";
 
 const containerElement = document.getElementById('glossary-page-container');
+const containerDataset = containerElement.dataset;
 
-const enableHelpForMakingChanges = containerElement.getAttribute('data-enable-help-for-making-changes') === 'true';
-const enableSavingChangesInMemory = containerElement.getAttribute('data-enable-saving-changes-in-memory') === 'true';
-const enableMarkdownBasedSyntax = containerElement.getAttribute('data-enable-markdown-based-syntax') === 'true';
-const enableExportMenu = containerElement.getAttribute('data-enable-export-menu') !== 'false';
-const cardWidth = containerElement.getAttribute('data-card-width');
-const enableLastUpdatedDates = containerElement.getAttribute('data-enable-last-updated-dates') === 'true';
-const editorIsRunning = containerElement.getAttribute('data-editor-is-running') === 'true';
+const enableHelpForMakingChanges = containerDataset.enableHelpForMakingChanges === 'true';
+const enableSavingChangesInMemory = containerDataset.enableSavingChangesInMemory === 'true';
+const enableMarkdownBasedSyntax = containerDataset.enableMarkdownBasedSyntax === 'true';
+const enableExportMenu = containerDataset.enableExportMenu !== 'false';
+const cardWidth = containerDataset.cardWidth;
+const enableLastUpdatedDates = containerDataset.enableLastUpdatedDates === 'true';
+const editorIsRunning = containerDataset.editorIsRunning === 'true';
 
 const titleElement = document.getElementById('glossary-page-title');
 const aboutElement = document.getElementById('glossary-page-about');
@@ -47,7 +48,7 @@ function glossaryItemFromDivElement(glossaryItemDivElement) {
     const relatedTermDdElements = ddElements.filter(ddElement => ddElement.getAttribute('class') === 'related-terms');
     const relatedTerms = (relatedTermDdElements.length > 0) ? glossaryItemRelatedTermFromDdElement(relatedTermDdElements[0]) : [];
     const needsUpdatingDdElements = ddElements.filter(ddElement => ddElement.getAttribute('class') === 'needs-updating');
-    const lastUpdatedDate = glossaryItemDivElement.getAttribute('data-last-updated');
+    const lastUpdatedDate = glossaryItemDivElement.dataset.lastUpdated;
 
     return {
         terms: dtElements.map(glossaryItemTermFromDtElement),
@@ -188,7 +189,7 @@ domReady(() => {
                 static get observedAttributes() { return ['data-expr']; }
 
                 setTextContent() {
-                    katex.render(this.getAttribute('data-expr'), this, {
+                    katex.render(this.dataset.expr, this, {
                         throwOnError: false
                     });
 
@@ -204,7 +205,7 @@ domReady(() => {
                 static get observedAttributes() { return ['data-expr']; }
 
                 setTextContent() {
-                    katex.render(this.getAttribute('data-expr'), this, {
+                    katex.render(this.dataset.expr, this, {
                         displayMode: true,
                         throwOnError: false
                     });
