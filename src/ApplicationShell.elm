@@ -114,6 +114,12 @@ init flags =
                 |> Decode.decodeValue (Decode.field "enableExportMenu" Decode.bool)
                 |> Result.withDefault True
 
+        enableLastUpdatedDates : Bool
+        enableLastUpdatedDates =
+            flags
+                |> Decode.decodeValue (Decode.field "enableLastUpdatedDates" Decode.bool)
+                |> Result.withDefault False
+
         enableSavingChangesInMemory : Bool
         enableSavingChangesInMemory =
             flags
@@ -178,6 +184,7 @@ init flags =
                         in
                         { enableMarkdownBasedSyntax = enableMarkdownBasedSyntax
                         , enableMathSupport = enableMarkdownBasedSyntax && katexIsAvailable
+                        , enableLastUpdatedDates = enableLastUpdatedDates
                         , cardWidth = cardWidth
                         , title = title
                         , aboutSection = aboutSection

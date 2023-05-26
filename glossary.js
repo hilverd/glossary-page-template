@@ -11,6 +11,7 @@ const enableSavingChangesInMemory = containerElement.getAttribute('data-enable-s
 const enableMarkdownBasedSyntax = containerElement.getAttribute('data-enable-markdown-based-syntax') === 'true';
 const enableExportMenu = containerElement.getAttribute('data-enable-export-menu') !== 'false';
 const cardWidth = containerElement.getAttribute('data-card-width');
+const enableLastUpdatedDates = containerElement.getAttribute('data-enable-last-updated-dates') === 'true';
 const editorIsRunning = containerElement.getAttribute('data-editor-is-running') === 'true';
 
 const titleElement = document.getElementById('glossary-page-title');
@@ -102,6 +103,7 @@ const app = Elm.ApplicationShell.init({
         enableSavingChangesInMemory: enableSavingChangesInMemory,
         enableExportMenu: enableExportMenu,
         enableMarkdownBasedSyntax: enableMarkdownBasedSyntax,
+        enableLastUpdatedDates: enableLastUpdatedDates,
         theme: localStorage.glossaryPageTheme || "system",
         cardWidth: cardWidth,
         katexIsAvailable: katexIsAvailable
@@ -148,7 +150,32 @@ domReady(() => {
         if (e.relatedTarget == null) {
             document.getElementById("glossary-page-outer")?.focus();
         }
-    })
+    });
+
+    const browserLocale =
+        navigator.languages && navigator.languages.length
+            ? navigator.languages[0]
+            : navigator.language;
+
+    const lastUpdatedDateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+
+    customElements.define('last-updated',
+        class extends HTMLElement {
+            constructor() { super(); }
+            connectedCallback() { this.setTextContent(); }
+            attributeChangedCallback() { this.setTextContent(); }
+            static get observedAttributes() { return []; }
+
+            setTextContent() {
+                const datetimeAttribute = this.getAttribute('datetime');
+
+                if (datetimeAttribute)
+                    this.textContent = new Date(datetimeAttribute).toLocaleDateString(browserLocale, lastUpdatedDateOptions);
+                else
+                    this.textContent = "unknown";
+            }
+        }
+    );
 
     if (katexIsAvailable) {
         customElements.define('katex-inline',

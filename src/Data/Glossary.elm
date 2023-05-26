@@ -14,6 +14,7 @@ import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 type alias Glossary =
     { enableMarkdownBasedSyntax : Bool
     , enableMathSupport : Bool
+    , enableLastUpdatedDates : Bool
     , cardWidth : CardWidth
     , title : GlossaryTitle
     , aboutSection : AboutSection
@@ -24,13 +25,14 @@ type alias Glossary =
 {-| Represent these glossary items as an HTML tree, ready for writing back to the glossary's HTML file.
 -}
 toHtmlTree : Bool -> Bool -> Glossary -> HtmlTree
-toHtmlTree enableExportMenu enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, title, aboutSection, items } =
+toHtmlTree enableExportMenu enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, title, aboutSection, enableLastUpdatedDates, items } =
     HtmlTree.Node "div"
         True
         [ HtmlTree.Attribute "id" ElementIds.container
         , HtmlTree.boolAttribute "data-enable-help-for-making-changes" enableHelpForMakingChanges
         , HtmlTree.boolAttribute "data-enable-export-menu" enableExportMenu
         , HtmlTree.boolAttribute "data-enable-markdown-based-syntax" enableMarkdownBasedSyntax
+        , HtmlTree.boolAttribute "data-enable-last-updated-dates" enableLastUpdatedDates
         , cardWidth |> CardWidth.toHtmlTreeAttribute
         ]
         [ HtmlTree.Node "header"

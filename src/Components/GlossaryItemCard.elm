@@ -34,8 +34,15 @@ type Style msg
         }
 
 
-view : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> Style msg -> GlossaryItem -> Html msg
-view { enableMathSupport, makeLinksTabbable } style glossaryItem =
+view :
+    { enableMathSupport : Bool
+    , makeLinksTabbable : Bool
+    , enableLastUpdatedDates : Bool
+    }
+    -> Style msg
+    -> GlossaryItem
+    -> Html msg
+view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glossaryItem =
     case style of
         Preview ->
             let
@@ -178,44 +185,57 @@ view { enableMathSupport, makeLinksTabbable } style glossaryItem =
 
             else
                 div
-                    [ Extras.HtmlAttribute.showIf shownAsSingle <| Html.Attributes.style "max-height" "100%" ]
-                    [ Extras.Html.showIf (enableFeaturesInProgress && not shownAsSingle) <|
-                        div
-                            [ class "float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
-                            [ span
-                                [ class "print:hidden" ]
-                                [ Components.Button.text
-                                    [ Accessibility.Key.tabbable tabbable
-                                    , Html.Events.onClick onClickViewFull
-                                    ]
-                                    [ Icons.arrowsPointingOut
-                                        [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
-                                    ]
-                                ]
-                            ]
-                    , div []
-                        (List.map (viewGlossaryTerm enableMathSupport False tabbable) glossaryItem.terms
-                            ++ (if glossaryItem.needsUpdating then
-                                    [ Html.dd
-                                        [ class "needs-updating" ]
-                                        [ span
-                                            []
-                                            [ text "Needs updating" ]
+                    [ Extras.HtmlAttribute.showIf shownAsSingle <| Html.Attributes.style "max-height" "100%"
+                    , class "flex flex-col justify-between"
+                    ]
+                    [ div
+                        [ class "flex-1" ]
+                        [ Extras.Html.showIf (enableFeaturesInProgress && not shownAsSingle) <|
+                            div
+                                [ class "float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
+                                [ span
+                                    [ class "print:hidden" ]
+                                    [ Components.Button.text
+                                        [ Accessibility.Key.tabbable tabbable
+                                        , Html.Events.onClick onClickViewFull
+                                        ]
+                                        [ Icons.arrowsPointingOut
+                                            [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
                                         ]
                                     ]
+                                ]
+                        , div []
+                            (List.map (viewGlossaryTerm enableMathSupport False tabbable) glossaryItem.terms
+                                ++ (if glossaryItem.needsUpdating then
+                                        [ Html.dd
+                                            [ class "needs-updating" ]
+                                            [ span
+                                                []
+                                                [ text "Needs updating" ]
+                                            ]
+                                        ]
 
-                                else
-                                    []
-                               )
-                            ++ List.map
-                                (viewGlossaryItemDetails
-                                    { enableMathSupport = enableMathSupport
-                                    , makeLinksTabbable = makeLinksTabbable
-                                    }
-                                )
-                                glossaryItem.details
-                            ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails glossaryItem.relatedTerms
-                        )
+                                    else
+                                        []
+                                   )
+                                ++ List.map
+                                    (viewGlossaryItemDetails
+                                        { enableMathSupport = enableMathSupport
+                                        , makeLinksTabbable = makeLinksTabbable
+                                        }
+                                    )
+                                    glossaryItem.details
+                                ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails glossaryItem.relatedTerms
+                            )
+                        ]
+                    , Extras.Html.showIf enableLastUpdatedDates <|
+                        div
+                            [ class "text-right text-sm mt-1.5 text-gray-500 dark:text-gray-400" ]
+                            [ text "Updated: "
+                            , Html.node "last-updated"
+                                [ Html.Attributes.attribute "datetime" "2011-11-18T14:54:39.929Z" ]
+                                []
+                            ]
                     ]
 
 

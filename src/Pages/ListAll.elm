@@ -836,15 +836,26 @@ viewIndexOfTerms enableMathSupport tabbable staticSidebar indexOfTerms =
         )
 
 
-viewGlossaryItem : Bool -> GlossaryItemIndex -> Bool -> Model -> Bool -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
-viewGlossaryItem enableMathSupport index tabbable model editable shownAsSingle errorWhileDeleting glossaryItem =
+viewGlossaryItem :
+    { enableMathSupport : Bool
+    , tabbable : Bool
+    , editable : Bool
+    , enableLastUpdatedDates : Bool
+    , shownAsSingle : Bool
+    }
+    -> GlossaryItemIndex
+    -> Model
+    -> Maybe ( GlossaryItemIndex, String )
+    -> GlossaryItem
+    -> Html Msg
+viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle } index model errorWhileDeleting glossaryItem =
     let
         common : CommonModel
         common =
             model.common
     in
     Components.GlossaryItemCard.view
-        { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable }
+        { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable, enableLastUpdatedDates = enableLastUpdatedDates }
         (Components.GlossaryItemCard.Normal
             { index = index
             , tabbable = tabbable
@@ -1022,8 +1033,12 @@ viewCreateGlossaryItemButton tabbable common =
         ]
 
 
-viewCards : Model -> Bool -> Bool -> Bool -> List ( GlossaryItemIndex, GlossaryItem ) -> Html Msg
-viewCards model enableMathSupport editable tabbable indexedGlossaryItems =
+viewCards :
+    Model
+    -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
+    -> List ( GlossaryItemIndex, GlossaryItem )
+    -> Html Msg
+viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } indexedGlossaryItems =
     Html.article
         [ Html.Attributes.id ElementIds.items ]
         [ div
@@ -1055,12 +1070,14 @@ viewCards model enableMathSupport editable tabbable indexedGlossaryItems =
                             )
                         |> List.map
                             (viewGlossaryItem
-                                enableMathSupport
+                                { enableMathSupport = enableMathSupport
+                                , tabbable = tabbable
+                                , editable = editable
+                                , enableLastUpdatedDates = enableLastUpdatedDates
+                                , shownAsSingle = True
+                                }
                                 index
-                                tabbable
                                 model
-                                editable
-                                True
                                 model.errorWhileDeleting
                             )
                     )
@@ -1072,12 +1089,14 @@ viewCards model enableMathSupport editable tabbable indexedGlossaryItems =
                         |> List.map
                             (\( index, glossaryItem ) ->
                                 viewGlossaryItem
-                                    enableMathSupport
+                                    { enableMathSupport = enableMathSupport
+                                    , tabbable = tabbable
+                                    , editable = editable
+                                    , enableLastUpdatedDates = enableLastUpdatedDates
+                                    , shownAsSingle = True
+                                    }
                                     index
-                                    tabbable
                                     model
-                                    editable
-                                    False
                                     model.errorWhileDeleting
                                     glossaryItem
                             )
@@ -1810,7 +1829,13 @@ view model =
                                         else
                                             GlossaryItems.orderedByMostMentionedFirst
                                        )
-                                    |> viewCards model glossary.enableMathSupport editable noModalDialogShown_
+                                    |> viewCards
+                                        model
+                                        { enableMathSupport = glossary.enableMathSupport
+                                        , editable = editable
+                                        , tabbable = noModalDialogShown_
+                                        , enableLastUpdatedDates = glossary.enableLastUpdatedDates
+                                        }
                                 ]
                             ]
                         ]
