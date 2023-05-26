@@ -24,6 +24,7 @@ module ElementIds exposing
     , searchDialog
     , seeAlsoSelect
     , showExportMenuLabel
+    , showLastUpdatedDatesLabel
     , staticSidebarForDesktop
     , termIndexGroupLabel
     , termInputField
@@ -210,3 +211,8 @@ searchDialog =
 showExportMenuLabel : String
 showExportMenuLabel =
     prefixed "show-export-menu"
+
+
+showLastUpdatedDatesLabel : String
+showLastUpdatedDatesLabel =
+    prefixed "show-last-updated-dates"

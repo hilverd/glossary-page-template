@@ -139,6 +139,7 @@ type InternalMsg
     | ToggleMarkdownBasedSyntax
     | ChangeCardWidth CardWidth
     | ToggleEnableExportMenu
+    | ToggleEnableLastUpdatedDates
     | ChangedSettings Glossary
     | FailedToChangeSettings Http.Error
     | DownloadMarkdown
@@ -525,6 +526,28 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        ToggleEnableLastUpdatedDates ->
+            case model.common.glossary of
+                Ok glossary ->
+                    let
+                        enableLastUpdatedDates0 : Bool
+                        enableLastUpdatedDates0 =
+                            glossary.enableLastUpdatedDates
+
+                        updatedGlossary : Glossary
+                        updatedGlossary =
+                            { glossary | enableLastUpdatedDates = not enableLastUpdatedDates0 }
+                    in
+                    ( { model
+                        | confirmDeleteIndex = Nothing
+                        , errorWhileDeleting = Nothing
+                      }
+                    , patchHtmlFileAfterChangingSettings model.common updatedGlossary
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
         ChangedSettings glossary ->
             if model.common.enableSavingChangesInMemory then
                 let
@@ -776,6 +799,17 @@ viewSettings glossary model =
                     [ span
                         [ class "font-medium text-gray-900 dark:text-gray-300" ]
                         [ text "Show \"Export\" menu" ]
+                    ]
+                ]
+            , div
+                [ class "mt-6 pb-2" ]
+                [ Components.Button.toggle
+                    glossary.enableLastUpdatedDates
+                    ElementIds.showLastUpdatedDatesLabel
+                    [ Html.Events.onClick <| PageMsg.Internal ToggleEnableLastUpdatedDates ]
+                    [ span
+                        [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                        [ text "Show last updated date for each item" ]
                     ]
                 ]
             , model.errorWhileChangingSettings
