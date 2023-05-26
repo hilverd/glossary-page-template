@@ -12,6 +12,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Allow showing last updated dates for items.
+
 ### Changed
 ### Fixed
 ### Removed
