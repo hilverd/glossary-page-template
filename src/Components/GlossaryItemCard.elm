@@ -229,13 +229,17 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                             )
                         ]
                     , Extras.Html.showIf enableLastUpdatedDates <|
-                        div
-                            [ class "text-right text-sm mt-1.5 text-gray-500 dark:text-gray-400" ]
-                            [ text "Updated: "
-                            , Html.node "last-updated"
-                                [ Html.Attributes.attribute "datetime" "2011-11-18T14:54:39.929Z" ]
-                                []
-                            ]
+                        Extras.Html.showMaybe
+                            (\lastUpdatedDate ->
+                                div
+                                    [ class "text-right text-sm mt-1.5 text-gray-500 dark:text-gray-400" ]
+                                    [ text "Updated: "
+                                    , Html.node "last-updated"
+                                        [ Html.Attributes.attribute "datetime" lastUpdatedDate ]
+                                        []
+                                    ]
+                            )
+                            glossaryItem.lastUpdatedDate
                     ]
 
 

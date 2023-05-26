@@ -59,6 +59,7 @@ type GlossaryItemForm
         , primaryTermsOutside : List Term
         , itemsListingThisItemAsRelated : List GlossaryItem
         , needsUpdating : Bool
+        , lastUpdatedDate : String
         }
 
 
@@ -109,6 +110,13 @@ needsUpdating glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             form.needsUpdating
+
+
+lastUpdatedDate : GlossaryItemForm -> String
+lastUpdatedDate glossaryItemForm =
+    case glossaryItemForm of
+        GlossaryItemForm form ->
+            "2011-11-18T14:54:39.929Z"
 
 
 validate : GlossaryItemForm -> GlossaryItemForm
@@ -216,6 +224,7 @@ validate form =
         , primaryTermsOutside = primaryTermsOutside form
         , itemsListingThisItemAsRelated = itemsListingThisTermAsRelated form
         , needsUpdating = needsUpdating form
+        , lastUpdatedDate = lastUpdatedDate form
         }
 
 
@@ -241,6 +250,7 @@ empty withTermsOutside withPrimaryTermsOutside withItemsListingThisTermAsRelated
         , primaryTermsOutside = withPrimaryTermsOutside
         , itemsListingThisItemAsRelated = withItemsListingThisTermAsRelated
         , needsUpdating = True
+        , lastUpdatedDate = ""
         }
         |> validate
 
@@ -306,6 +316,7 @@ fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRe
         , primaryTermsOutside = primaryTermsOutside1
         , itemsListingThisItemAsRelated = withItemsListingThisTermAsRelated
         , needsUpdating = item.needsUpdating
+        , lastUpdatedDate = item.lastUpdatedDate |> Maybe.withDefault ""
         }
         |> validate
 
@@ -388,6 +399,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form =
                             )
                 )
     , needsUpdating = needsUpdating form
+    , lastUpdatedDate = Just <| lastUpdatedDate form
     }
 
 

@@ -34,6 +34,7 @@ type alias GlossaryItem =
     , details : List Details
     , relatedTerms : List RelatedTerm
     , needsUpdating : Bool
+    , lastUpdatedDate : Maybe String -- expected to be in ISO 8601 format
     }
 
 
@@ -66,12 +67,13 @@ type alias GlossaryItem =
     -->     , details = [ Details.fromPlaintext "Condensed moisture." ]
     -->     , relatedTerms = []
     -->     , needsUpdating = True
+    -->     , lastUpdatedDate = Nothing
     -->     }
 
 -}
 decode : Bool -> Decoder GlossaryItem
 decode enableMarkdownBasedSyntax =
-    Decode.map4 GlossaryItem
+    Decode.map5 GlossaryItem
         (Decode.field "terms" <| Decode.list <| Term.decode enableMarkdownBasedSyntax)
         (Decode.field "details" <|
             Decode.list <|
@@ -87,6 +89,7 @@ decode enableMarkdownBasedSyntax =
         )
         (Decode.field "relatedTerms" <| Decode.list <| RelatedTerm.decode enableMarkdownBasedSyntax)
         (Decode.field "needsUpdating" Decode.bool)
+        (Decode.maybe <| Decode.field "lastUpdatedDate" Decode.string)
 
 
 {-| Whether or not the glossary item has any details.
