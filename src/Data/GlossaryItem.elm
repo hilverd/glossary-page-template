@@ -182,7 +182,13 @@ toHtmlTree : GlossaryItem -> HtmlTree
 toHtmlTree glossaryItem =
     HtmlTree.Node "div"
         True
-        []
+        (glossaryItem.lastUpdatedDate
+            |> Maybe.map
+                (\lastUpdatedDate ->
+                    [ HtmlTree.Attribute "data-last-updated" lastUpdatedDate ]
+                )
+            |> Maybe.withDefault []
+        )
         (List.map termToHtmlTree glossaryItem.terms
             ++ (if glossaryItem.needsUpdating then
                     [ HtmlTree.Node "dd"
