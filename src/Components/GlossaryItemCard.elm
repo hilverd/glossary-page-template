@@ -11,6 +11,7 @@ import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import ElementIds
 import Extras.Html
+import Extras.HtmlAttribute
 import Extras.Url exposing (fragmentOnly)
 import Html
 import Html.Attributes exposing (class, id)
@@ -24,9 +25,11 @@ type Style msg
     | Normal
         { index : GlossaryItemIndex
         , tabbable : Bool
+        , onClickViewFull : msg
         , onClickEdit : msg
         , onClickDelete : msg
         , editable : Bool
+        , shownAsSingle : Bool
         , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
         }
 
@@ -69,7 +72,7 @@ view { enableMathSupport, makeLinksTabbable } style glossaryItem =
                     ++ viewGlossaryItemRelatedTerms enableMathSupport True tabbable itemHasSomeDetails glossaryItem.relatedTerms
                 )
 
-        Normal { index, tabbable, onClickEdit, onClickDelete, editable, errorWhileDeleting } ->
+        Normal { index, tabbable, onClickViewFull, onClickEdit, onClickDelete, editable, shownAsSingle, errorWhileDeleting } ->
             let
                 errorDiv : String -> Html msg
                 errorDiv message =
@@ -91,13 +94,14 @@ view { enableMathSupport, makeLinksTabbable } style glossaryItem =
                     ]
                     [ div
                         []
-                        [ Extras.Html.showIf enableFeaturesInProgress <|
+                        [ Extras.Html.showIf (enableFeaturesInProgress && not shownAsSingle) <|
                             div
                                 [ class "float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
                                 [ span
                                     [ class "print:hidden" ]
                                     [ Components.Button.text
                                         [ Accessibility.Key.tabbable tabbable
+                                        , Html.Events.onClick onClickViewFull
                                         ]
                                         [ Icons.arrowsPointingOut
                                             [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
@@ -173,14 +177,16 @@ view { enableMathSupport, makeLinksTabbable } style glossaryItem =
                     ]
 
             else
-                div []
-                    [ Extras.Html.showIf enableFeaturesInProgress <|
+                div
+                    [ Extras.HtmlAttribute.showIf shownAsSingle <| Html.Attributes.style "max-height" "100%" ]
+                    [ Extras.Html.showIf (enableFeaturesInProgress && not shownAsSingle) <|
                         div
                             [ class "float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
                             [ span
                                 [ class "print:hidden" ]
                                 [ Components.Button.text
                                     [ Accessibility.Key.tabbable tabbable
+                                    , Html.Events.onClick onClickViewFull
                                     ]
                                     [ Icons.arrowsPointingOut
                                         [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]

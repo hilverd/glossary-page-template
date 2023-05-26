@@ -95,6 +95,11 @@ type alias SearchDialog =
     }
 
 
+type Layout
+    = ShowAllItems
+    | ShowSingleItem
+
+
 type alias Model =
     { common : CommonModel
     , makingChanges : MakingChanges
@@ -102,6 +107,7 @@ type alias Model =
     , themeDropdownMenu : Components.DropdownMenu.Model
     , exportDropdownMenu : Components.DropdownMenu.Model
     , searchDialog : SearchDialog
+    , layout : Layout
     , confirmDeleteIndex : Maybe GlossaryItemIndex
     , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
     , errorWhileChangingSettings : Maybe String
@@ -121,6 +127,8 @@ type InternalMsg
     | HideSearchDialog
     | UpdateSearchString String
     | ChangeTheme Theme
+    | ChangeLayoutToShowSingle GlossaryItemIndex
+    | ChangeLayoutToShowAll
     | ConfirmDelete GlossaryItemIndex
     | CancelDelete
     | Delete GlossaryItemIndex
@@ -146,6 +154,7 @@ init editorIsRunning commonModel =
     ( { makingChanges = editorIsRunning
       , common = commonModel
       , menuForMobileVisibility = Invisible
+      , layout = ShowAllItems
       , confirmDeleteIndex = Nothing
       , themeDropdownMenu =
             Components.DropdownMenu.init
@@ -323,6 +332,30 @@ update msg model =
 
                     System ->
                         Nothing
+            )
+
+        ChangeLayoutToShowSingle index ->
+            let
+                common0 =
+                    model.common
+            in
+            ( { model
+                | common = { common0 | maybeIndex = Just index }
+                , layout = ShowSingleItem
+              }
+            , Cmd.none
+            )
+
+        ChangeLayoutToShowAll ->
+            let
+                common0 =
+                    model.common
+            in
+            ( { model
+                | common = { common0 | maybeIndex = Nothing }
+                , layout = ShowAllItems
+              }
+            , Cmd.none
             )
 
         ConfirmDelete index ->
@@ -803,8 +836,8 @@ viewIndexOfTerms enableMathSupport tabbable staticSidebar indexOfTerms =
         )
 
 
-viewGlossaryItem : Bool -> GlossaryItemIndex -> Bool -> Model -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
-viewGlossaryItem enableMathSupport index tabbable model editable errorWhileDeleting glossaryItem =
+viewGlossaryItem : Bool -> GlossaryItemIndex -> Bool -> Model -> Bool -> Bool -> Maybe ( GlossaryItemIndex, String ) -> GlossaryItem -> Html Msg
+viewGlossaryItem enableMathSupport index tabbable model editable shownAsSingle errorWhileDeleting glossaryItem =
     let
         common : CommonModel
         common =
@@ -815,9 +848,11 @@ viewGlossaryItem enableMathSupport index tabbable model editable errorWhileDelet
         (Components.GlossaryItemCard.Normal
             { index = index
             , tabbable = tabbable
+            , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle index
             , onClickEdit = PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
             , onClickDelete = PageMsg.Internal <| ConfirmDelete index
             , editable = editable
+            , shownAsSingle = shownAsSingle
             , errorWhileDeleting = errorWhileDeleting
             }
         )
@@ -1005,21 +1040,48 @@ viewCards model enableMathSupport editable tabbable indexedGlossaryItems =
             ]
         , Extras.Html.showIf (not <| List.isEmpty indexedGlossaryItems) <|
             viewOrderItemsBy model (List.length indexedGlossaryItems)
-        , Html.dl
-            []
-            (indexedGlossaryItems
-                |> List.map
-                    (\( index, glossaryItem ) ->
-                        viewGlossaryItem
-                            enableMathSupport
-                            index
-                            tabbable
-                            model
-                            editable
-                            model.errorWhileDeleting
-                            glossaryItem
+        , case ( model.layout, model.common.maybeIndex ) of
+            ( ShowSingleItem, Just index ) ->
+                Html.dl
+                    []
+                    (indexedGlossaryItems
+                        |> List.filterMap
+                            (\( index0, item ) ->
+                                if index0 == index then
+                                    Just item
+
+                                else
+                                    Nothing
+                            )
+                        |> List.map
+                            (viewGlossaryItem
+                                enableMathSupport
+                                index
+                                tabbable
+                                model
+                                editable
+                                True
+                                model.errorWhileDeleting
+                            )
                     )
-            )
+
+            _ ->
+                Html.dl
+                    []
+                    (indexedGlossaryItems
+                        |> List.map
+                            (\( index, glossaryItem ) ->
+                                viewGlossaryItem
+                                    enableMathSupport
+                                    index
+                                    tabbable
+                                    model
+                                    editable
+                                    False
+                                    model.errorWhileDeleting
+                                    glossaryItem
+                            )
+                    )
         , Components.SearchDialog.view
             (PageMsg.Internal << SearchDialogMsg)
             model.searchDialog.model
