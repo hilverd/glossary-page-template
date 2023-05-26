@@ -142,7 +142,19 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                         ]
                     , div
                         [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
-                        [ div
+                        [ Extras.Html.showIf enableLastUpdatedDates <|
+                            Extras.Html.showMaybe
+                                (\lastUpdatedDate ->
+                                    div
+                                        [ class "text-right text-sm mt-1.5 mb-2.5 text-gray-500 dark:text-gray-400" ]
+                                        [ text "Updated: "
+                                        , Html.node "last-updated"
+                                            [ Html.Attributes.attribute "datetime" lastUpdatedDate ]
+                                            []
+                                        ]
+                                )
+                                glossaryItem.lastUpdatedDate
+                        , div
                             [ class "flex justify-between" ]
                             [ span
                                 [ class "inline-flex items-center" ]
