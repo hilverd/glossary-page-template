@@ -1,4 +1,4 @@
-module Pages.CreateOrEdit exposing (InternalMsg, Model, Msg, init, subscriptions, update, view)
+port module Pages.CreateOrEdit exposing (InternalMsg, Model, Msg, init, subscriptions, update, view)
 
 import Accessibility exposing (Html, article, div, dl, form, h1, h2, p, span, text)
 import Accessibility.Aria
@@ -66,6 +66,7 @@ type InternalMsg
     | DeleteRelatedTerm RelatedTermIndex
     | ToggleNeedsUpdating
     | Save
+    | ReceiveCurrentDateTimeForSaving String
     | FailedToSave Http.Error
 
 
@@ -148,6 +149,16 @@ init commonModel =
               }
             , Cmd.none
             )
+
+
+
+-- PORTS
+
+
+port getCurrentDateTimeForSaving : () -> Cmd msg
+
+
+port receiveCurrentDateTimeForSaving : (String -> msg) -> Sub msg
 
 
 
@@ -236,6 +247,9 @@ update msg model =
             ( { model | form = Form.toggleNeedsUpdating model.form }, Cmd.none )
 
         Save ->
+            ( model, getCurrentDateTimeForSaving () )
+
+        ReceiveCurrentDateTimeForSaving dateTime ->
             case model.common.glossary of
                 Ok glossary ->
                     if Form.hasValidationErrors model.form then
@@ -250,7 +264,7 @@ update msg model =
                         let
                             newOrUpdatedGlossaryItem : GlossaryItem
                             newOrUpdatedGlossaryItem =
-                                Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form
+                                Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form <| Just dateTime
 
                             common : CommonModel
                             common =
@@ -837,7 +851,7 @@ view model =
 
                 newOrUpdatedGlossaryItem : GlossaryItem
                 newOrUpdatedGlossaryItem =
-                    Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form
+                    Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form Nothing
             in
             { title = GlossaryTitle.inlineText glossary.title
             , body =
@@ -917,4 +931,4 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    receiveCurrentDateTimeForSaving ReceiveCurrentDateTimeForSaving |> Sub.map PageMsg.Internal

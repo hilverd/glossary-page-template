@@ -326,8 +326,8 @@ termBodyToId =
     String.replace " " "_"
 
 
-toGlossaryItem : Bool -> GlossaryItems -> GlossaryItemForm -> GlossaryItem
-toGlossaryItem enableMarkdownBasedSyntax glossaryItems form =
+toGlossaryItem : Bool -> GlossaryItems -> GlossaryItemForm -> Maybe String -> GlossaryItem
+toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
     let
         bodyByIdReference : Dict String String
         bodyByIdReference =
@@ -399,7 +399,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form =
                             )
                 )
     , needsUpdating = needsUpdating form
-    , lastUpdatedDate = Just <| lastUpdatedDate form
+    , lastUpdatedDate = dateTime
     }
 
 

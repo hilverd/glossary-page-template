@@ -135,6 +135,10 @@ app.ports.changeTheme.subscribe((themeName) => {
     reflectThemeInClassList();
 });
 
+app.ports.getCurrentDateTimeForSaving.subscribe(() => {
+    app.ports.receiveCurrentDateTimeForSaving.send(new Date().toISOString());
+});
+
 function domReady(callback) {
     document.readyState === 'interactive' || document.readyState === 'complete' ?
         callback() : document.addEventListener('DOMContentLoaded', callback);
