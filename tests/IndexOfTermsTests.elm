@@ -23,6 +23,7 @@ glossaryItems =
             , details = [ Details.fromPlaintext "Óne" ]
             , relatedTerms = []
             , needsUpdating = False
+            , lastUpdatedDate = Nothing
             }
 
         two : GlossaryItem
@@ -31,6 +32,7 @@ glossaryItems =
             , details = [ Details.fromPlaintext "Two" ]
             , relatedTerms = []
             , needsUpdating = False
+            , lastUpdatedDate = Nothing
             }
 
         three : GlossaryItem
@@ -39,6 +41,7 @@ glossaryItems =
             , details = [ Details.fromPlaintext "3Three" ]
             , relatedTerms = []
             , needsUpdating = False
+            , lastUpdatedDate = Nothing
             }
 
         doubleOhSeven : GlossaryItem
@@ -47,6 +50,7 @@ glossaryItems =
             , details = [ Details.fromPlaintext "007" ]
             , relatedTerms = []
             , needsUpdating = False
+            , lastUpdatedDate = Nothing
             }
 
         future : GlossaryItem
@@ -55,6 +59,7 @@ glossaryItems =
             , details = [ Details.fromPlaintext "_future_" ]
             , relatedTerms = []
             , needsUpdating = False
+            , lastUpdatedDate = Nothing
             }
     in
     GlossaryItems.fromList [ doubleOhSeven, one, two, three, future ]

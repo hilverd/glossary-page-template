@@ -26,6 +26,7 @@ loadedGlossaryItems =
             , details = [ Details.fromPlaintext "The term one" ]
             , relatedTerms = [ RelatedTerm.fromPlaintext "Second_the_term" "Second the term" ]
             , needsUpdating = False
+            , lastUpdatedDate = Nothing
             }
 
         two : GlossaryItem
@@ -34,6 +35,7 @@ loadedGlossaryItems =
             , details = [ Details.fromPlaintext "Second the term" ]
             , relatedTerms = []
             , needsUpdating = False
+            , lastUpdatedDate = Nothing
             }
 
         three : GlossaryItem
@@ -42,6 +44,7 @@ loadedGlossaryItems =
             , details = [ Details.fromPlaintext "The term three" ]
             , relatedTerms = [ RelatedTerm.fromPlaintext "Second_the_term" "Second the term" ]
             , needsUpdating = False
+            , lastUpdatedDate = Nothing
             }
     in
     GlossaryItems.fromList [ one, two, three ]

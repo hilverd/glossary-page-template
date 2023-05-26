@@ -103,6 +103,7 @@ Some items may not contain any details and instead point to a related item that 
         , details = []
         , relatedTerms = []
         , needsUpdating = False
+        , lastUpdatedDate = Nothing
         }
 
     hasSomeDetails empty --> False

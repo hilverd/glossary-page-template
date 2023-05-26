@@ -48,6 +48,7 @@ compareForSortingAlphabetically item1 item2 =
             , details = []
             , relatedTerms = []
             , needsUpdating = False
+            , lastUpdatedDate = Nothing
             }
 
     item2 : GlossaryItem
@@ -55,6 +56,7 @@ compareForSortingAlphabetically item1 item2 =
             , details = []
             , relatedTerms = []
             , needsUpdating = False
+            , lastUpdatedDate = Nothing
             }
 
     item3 : GlossaryItem
@@ -62,6 +64,7 @@ compareForSortingAlphabetically item1 item2 =
             , details = []
             , relatedTerms = []
             , needsUpdating = False
+            , lastUpdatedDate = Nothing
             }
 
     fromList [item1, item2, item3]
