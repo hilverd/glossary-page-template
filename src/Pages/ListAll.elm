@@ -45,6 +45,7 @@ import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
+import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Theme exposing (Theme(..))
 import ElementIds
 import Export.Anki
@@ -135,7 +136,7 @@ type InternalMsg
     | Deleted GlossaryItems
     | FailedToDelete GlossaryItemIndex Http.Error
     | JumpToTermIndexGroup Bool String
-    | ChangeOrderItemsBy CommonModel.OrderItemsBy
+    | ChangeOrderItemsBy OrderItemsBy
     | ToggleMarkdownBasedSyntax
     | ChangeCardWidth CardWidth
     | ToggleEnableExportMenu
@@ -1660,10 +1661,10 @@ viewOrderItemsBy model numberOfItems =
                     [ Components.Button.radio
                         "order-items-by"
                         "order-items-alphabetically"
-                        (model.common.orderItemsBy == CommonModel.Alphabetically)
+                        (model.common.orderItemsBy == Alphabetically)
                         tabbable
                         [ id ElementIds.orderItemsAlphabetically
-                        , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy CommonModel.Alphabetically
+                        , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy Alphabetically
                         ]
                     , label
                         [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
@@ -1676,10 +1677,10 @@ viewOrderItemsBy model numberOfItems =
                     [ Components.Button.radio
                         "order-items-by"
                         "order-items-most-mentioned-first"
-                        (model.common.orderItemsBy == CommonModel.MostMentionedFirst)
+                        (model.common.orderItemsBy == MostMentionedFirst)
                         tabbable
                         [ id ElementIds.orderItemsMostMentionedFirst
-                        , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy CommonModel.MostMentionedFirst
+                        , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy MostMentionedFirst
                         ]
                     , label
                         [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
@@ -1857,7 +1858,7 @@ view model =
                                         [ class "flex-none mt-2" ]
                                         [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
                                 , glossary.items
-                                    |> (if model.common.orderItemsBy == CommonModel.Alphabetically then
+                                    |> (if model.common.orderItemsBy == Alphabetically then
                                             GlossaryItems.orderedAlphabetically
 
                                         else

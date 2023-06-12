@@ -5,7 +5,7 @@ import Accessibility.Aria
 import Array exposing (Array)
 import Browser exposing (Document)
 import Browser.Dom as Dom
-import CommonModel exposing (CommonModel, OrderItemsBy(..))
+import CommonModel exposing (CommonModel)
 import Components.Button
 import Components.Copy
 import Components.Form
@@ -18,6 +18,7 @@ import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
+import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import ElementIds

@@ -11,7 +11,6 @@ module ApplicationShell exposing (main, Flags, Model, Msg)
 
 import Browser exposing (Document)
 import Browser.Dom as Dom
-import CommonModel
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
@@ -19,6 +18,7 @@ import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Glossary exposing (Glossary)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems exposing (LoadedGlossaryItems)
+import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Theme as Theme exposing (Theme)
 import Html
 import Json.Decode as Decode
@@ -200,7 +200,7 @@ init flags =
                 , theme = theme
                 , enableExportMenu = enableExportMenu
                 , enableSavingChangesInMemory = enableSavingChangesInMemory
-                , orderItemsBy = CommonModel.Alphabetically
+                , orderItemsBy = Alphabetically
                 , maybeIndex = Nothing
                 , fragment = fragment
                 , glossary = glossary

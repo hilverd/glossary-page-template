@@ -1,14 +1,10 @@
-module CommonModel exposing (CommonModel, OrderItemsBy(..))
+module CommonModel exposing (CommonModel)
 
 import Data.Glossary exposing (Glossary)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
+import Data.OrderItemsBy exposing (OrderItemsBy)
 import Data.Theme exposing (Theme)
 import Json.Decode as Decode
-
-
-type OrderItemsBy
-    = Alphabetically
-    | MostMentionedFirst
 
 
 type alias CommonModel =
