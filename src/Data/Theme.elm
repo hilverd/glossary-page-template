@@ -11,21 +11,19 @@ type Theme
 
 decode : Decoder Theme
 decode =
-    Decode.field "theme"
-        (Decode.string
-            |> Decode.andThen
-                (\str ->
-                    case str of
-                        "light" ->
-                            Decode.succeed Light
+    Decode.string
+        |> Decode.andThen
+            (\str ->
+                case str of
+                    "light" ->
+                        Decode.succeed Light
 
-                        "dark" ->
-                            Decode.succeed Dark
+                    "dark" ->
+                        Decode.succeed Dark
 
-                        "system" ->
-                            Decode.succeed System
+                    "system" ->
+                        Decode.succeed System
 
-                        somethingElse ->
-                            Decode.fail <| "Unknown theme: " ++ somethingElse
-                )
-        )
+                    somethingElse ->
+                        Decode.fail <| "Unknown theme: " ++ somethingElse
+            )

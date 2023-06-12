@@ -18,7 +18,7 @@ import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Glossary exposing (Glossary)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems exposing (LoadedGlossaryItems)
-import Data.OrderItemsBy exposing (OrderItemsBy(..))
+import Data.OrderItemsBy as OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Theme as Theme exposing (Theme)
 import Html
 import Json.Decode as Decode
@@ -87,8 +87,14 @@ init flags =
         theme : Theme
         theme =
             flags
-                |> Decode.decodeValue Theme.decode
+                |> Decode.decodeValue (Decode.field "theme" Theme.decode)
                 |> Result.withDefault Theme.System
+
+        orderItemsBy : OrderItemsBy
+        orderItemsBy =
+            flags
+                |> Decode.decodeValue (Decode.field "orderItemsBy" OrderItemsBy.decode)
+                |> Result.withDefault OrderItemsBy.Alphabetically
 
         enableMarkdownBasedSyntax : Bool
         enableMarkdownBasedSyntax =
@@ -200,7 +206,7 @@ init flags =
                 , theme = theme
                 , enableExportMenu = enableExportMenu
                 , enableSavingChangesInMemory = enableSavingChangesInMemory
-                , orderItemsBy = Alphabetically
+                , orderItemsBy = orderItemsBy
                 , maybeIndex = Nothing
                 , fragment = fragment
                 , glossary = glossary

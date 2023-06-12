@@ -201,6 +201,9 @@ port preventBackgroundScrolling : () -> Cmd msg
 port changeTheme : Maybe String -> Cmd msg
 
 
+port changeOrderItemsBy : String -> Cmd msg
+
+
 
 -- UPDATE
 
@@ -465,7 +468,13 @@ update msg model =
                     model.common
             in
             ( { model | common = { common | orderItemsBy = orderItemsBy } }
-            , Cmd.none
+            , changeOrderItemsBy <|
+                case orderItemsBy of
+                    Alphabetically ->
+                        "alphabetically"
+
+                    MostMentionedFirst ->
+                        "most-mentioned-first"
             )
 
         ToggleMarkdownBasedSyntax ->

@@ -107,7 +107,8 @@ const app = Elm.ApplicationShell.init({
         enableExportMenu: enableExportMenu,
         enableMarkdownBasedSyntax: enableMarkdownBasedSyntax,
         enableLastUpdatedDates: enableLastUpdatedDates,
-        theme: localStorage.glossaryPageTheme || "system",
+        theme: localStorage.glossaryPageTheme || 'system',
+        orderItemsBy: localStorage.orderItemsBy || 'alphabetically',
         cardWidth: cardWidth,
         katexIsAvailable: katexIsAvailable
     }
@@ -133,6 +134,10 @@ app.ports.changeTheme.subscribe((themeName) => {
     }
 
     reflectThemeInClassList();
+});
+
+app.ports.changeOrderItemsBy.subscribe((orderItemsBy) => {
+    localStorage.orderItemsBy = orderItemsBy;
 });
 
 app.ports.getCurrentDateTimeForSaving.subscribe(() => {
