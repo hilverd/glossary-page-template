@@ -197,7 +197,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
 
             else
                 div
-                    [ Extras.HtmlAttribute.showIf shownAsSingle <| Html.Attributes.style "max-height" "100%"
+                    [ Extras.HtmlAttribute.showIf (enableFeaturesInProgress && shownAsSingle) <| Html.Attributes.style "max-height" "100%"
                     , class "flex flex-col justify-between"
                     ]
                     [ div

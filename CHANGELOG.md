@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- Fix layout bug that removed the maximum height restriction for items.
+
 ### Removed
 
 ## [3.3.0] - 2023-05-26
