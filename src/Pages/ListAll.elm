@@ -36,6 +36,7 @@ import Components.Button
 import Components.Copy
 import Components.DropdownMenu
 import Components.GlossaryItemCard
+import Components.ModalDialog
 import Components.SearchDialog
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Glossary as Glossary exposing (Glossary)
@@ -954,88 +955,58 @@ viewSingleItemModal model { enableMathSupport, editable, tabbable, enableLastUpd
 
 viewConfirmDeleteModal : Bool -> Maybe GlossaryItemIndex -> Html Msg
 viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
-    Html.div
-        [ class "fixed z-20 inset-0 overflow-y-auto print:hidden"
-        , Extras.HtmlAttribute.showIf (maybeIndexOfItemToDelete == Nothing) <| class "invisible"
-        , Extras.HtmlEvents.onEscape <| PageMsg.Internal CancelDelete
-        , Accessibility.Aria.labelledBy ElementIds.confirmDeleteModalTitle
-        , Accessibility.Role.dialog
-        , Accessibility.Aria.modal True
-        ]
-        [ div
-            [ class "flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0" ]
-            [ Html.div
-                [ class "fixed inset-0 bg-gray-500 dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 transition-opacity motion-reduce:transition-none"
-                , if maybeIndexOfItemToDelete == Nothing then
-                    class "ease-in duration-200 opacity-0"
-
-                  else
-                    class "ease-out duration-300 opacity-100"
-                , Accessibility.Aria.hidden True
-                , Html.Events.onClick <| PageMsg.Internal CancelDelete
-                ]
-                []
-            , span
-                [ class "hidden sm:inline-block sm:align-middle sm:h-screen"
-                , Accessibility.Aria.hidden True
-                ]
-                [ text "\u{200B}" ]
-            , div
-                [ class "inline-block align-bottom bg-white dark:bg-gray-700 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform motion-reduce:transform-none transition-all motion-reduce:transition-none sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
-                , if maybeIndexOfItemToDelete == Nothing then
-                    class "ease-in duration-200 opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-
-                  else
-                    class "ease-out duration-300 opacity-100 translate-y-0 sm:scale-100"
-                ]
+    Components.ModalDialog.view
+        (PageMsg.Internal CancelDelete)
+        ElementIds.confirmDeleteModalTitle
+        (Html.div []
+            [ div
+                [ class "sm:flex sm:items-start" ]
                 [ div
-                    [ class "sm:flex sm:items-start" ]
-                    [ div
-                        [ class "mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-300 sm:mx-0 sm:h-10 sm:w-10" ]
-                        [ Icons.exclamation
-                            [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-800"
-                            , Accessibility.Aria.hidden True
-                            ]
+                    [ class "mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-300 sm:mx-0 sm:h-10 sm:w-10" ]
+                    [ Icons.exclamation
+                        [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-800"
+                        , Accessibility.Aria.hidden True
+                        ]
+                    ]
+                , div
+                    [ class "mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left" ]
+                    [ h2
+                        [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100"
+                        , id ElementIds.confirmDeleteModalTitle
+                        ]
+                        [ text "Delete item"
                         ]
                     , div
-                        [ class "mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left" ]
-                        [ h2
-                            [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100"
-                            , id ElementIds.confirmDeleteModalTitle
-                            ]
-                            [ text "Delete item"
-                            ]
-                        , div
-                            [ class "mt-2" ]
-                            [ p
-                                [ class "text-sm text-gray-500 dark:text-gray-400" ]
-                                [ text "Are you sure you want to delete this item?" ]
-                            ]
+                        [ class "mt-2" ]
+                        [ p
+                            [ class "text-sm text-gray-500 dark:text-gray-400" ]
+                            [ text "Are you sure you want to delete this item?" ]
                         ]
-                    ]
-                , Extras.Html.showIf enableSavingChangesInMemory <|
-                    div
-                        [ class "mt-5 sm:mt-4 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
-                        [ text Components.Copy.sandboxModeMessage ]
-                , div
-                    [ class "mt-5 sm:mt-4 sm:flex sm:flex-row-reverse" ]
-                    [ Components.Button.primary True
-                        [ class "w-full bg-red-600 dark:bg-red-400 hover:bg-red-700 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm dark:text-gray-800"
-                        , Extras.HtmlAttribute.showMaybe
-                            (Html.Events.onClick << PageMsg.Internal << Delete)
-                            maybeIndexOfItemToDelete
-                        ]
-                        [ text "Delete" ]
-                    , Components.Button.white True
-                        [ class "mt-3 w-full sm:mt-0 sm:w-auto sm:text-sm"
-                        , Html.Events.onClick <| PageMsg.Internal CancelDelete
-                        , Extras.HtmlEvents.onEnter <| PageMsg.Internal CancelDelete
-                        ]
-                        [ text "Cancel" ]
                     ]
                 ]
+            , Extras.Html.showIf enableSavingChangesInMemory <|
+                div
+                    [ class "mt-5 sm:mt-4 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
+                    [ text Components.Copy.sandboxModeMessage ]
+            , div
+                [ class "mt-5 sm:mt-4 sm:flex sm:flex-row-reverse" ]
+                [ Components.Button.primary True
+                    [ class "w-full bg-red-600 dark:bg-red-400 hover:bg-red-700 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm dark:text-gray-800"
+                    , Extras.HtmlAttribute.showMaybe
+                        (Html.Events.onClick << PageMsg.Internal << Delete)
+                        maybeIndexOfItemToDelete
+                    ]
+                    [ text "Delete" ]
+                , Components.Button.white True
+                    [ class "mt-3 w-full sm:mt-0 sm:w-auto sm:text-sm"
+                    , Html.Events.onClick <| PageMsg.Internal CancelDelete
+                    , Extras.HtmlEvents.onEnter <| PageMsg.Internal CancelDelete
+                    ]
+                    [ text "Cancel" ]
+                ]
             ]
-        ]
+        )
+        (maybeIndexOfItemToDelete /= Nothing)
 
 
 viewMakeChangesButton : Bool -> Bool -> Html Msg
