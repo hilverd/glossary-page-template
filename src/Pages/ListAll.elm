@@ -904,6 +904,7 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
             { index = index
             , tabbable = tabbable
             , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle index
+            , onClickClose = PageMsg.Internal <| ChangeLayoutToShowAll
             , onClickEdit = PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
             , onClickDelete = PageMsg.Internal <| ConfirmDelete index
             , editable = editable
@@ -912,6 +913,43 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
             }
         )
         glossaryItem
+
+
+viewSingleItemModal :
+    Model
+    -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
+    -> List ( GlossaryItemIndex, GlossaryItem )
+    -> Maybe GlossaryItemIndex
+    -> Html Msg
+viewSingleItemModal model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } indexedGlossaryItems =
+    Extras.Html.showMaybe
+        (\index ->
+            Html.dl
+                [ class "right-0 fixed top-20 left-0 right-0 ml-28 mr-10 print:hidden"
+                ]
+                (indexedGlossaryItems
+                    |> List.filterMap
+                        (\( index0, item ) ->
+                            if index0 == index then
+                                Just item
+
+                            else
+                                Nothing
+                        )
+                    |> List.map
+                        (viewGlossaryItem
+                            { enableMathSupport = enableMathSupport
+                            , tabbable = tabbable
+                            , editable = editable
+                            , enableLastUpdatedDates = enableLastUpdatedDates
+                            , shownAsSingle = True
+                            }
+                            index
+                            model
+                            model.errorWhileDeleting
+                        )
+                )
+        )
 
 
 viewConfirmDeleteModal : Bool -> Maybe GlossaryItemIndex -> Html Msg
@@ -1099,52 +1137,24 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             ]
         , Extras.Html.showIf (not <| List.isEmpty indexedGlossaryItems) <|
             viewOrderItemsBy model (List.length indexedGlossaryItems)
-        , case ( model.layout, model.common.maybeIndex ) of
-            ( ShowSingleItem, Just index ) ->
-                Html.dl
-                    []
-                    (indexedGlossaryItems
-                        |> List.filterMap
-                            (\( index0, item ) ->
-                                if index0 == index then
-                                    Just item
-
-                                else
-                                    Nothing
-                            )
-                        |> List.map
-                            (viewGlossaryItem
-                                { enableMathSupport = enableMathSupport
-                                , tabbable = tabbable
-                                , editable = editable
-                                , enableLastUpdatedDates = enableLastUpdatedDates
-                                , shownAsSingle = True
-                                }
-                                index
-                                model
-                                model.errorWhileDeleting
-                            )
+        , Html.dl
+            []
+            (indexedGlossaryItems
+                |> List.map
+                    (\( index, glossaryItem ) ->
+                        viewGlossaryItem
+                            { enableMathSupport = enableMathSupport
+                            , tabbable = tabbable
+                            , editable = editable
+                            , enableLastUpdatedDates = enableLastUpdatedDates
+                            , shownAsSingle = False
+                            }
+                            index
+                            model
+                            model.errorWhileDeleting
+                            glossaryItem
                     )
-
-            _ ->
-                Html.dl
-                    []
-                    (indexedGlossaryItems
-                        |> List.map
-                            (\( index, glossaryItem ) ->
-                                viewGlossaryItem
-                                    { enableMathSupport = enableMathSupport
-                                    , tabbable = tabbable
-                                    , editable = editable
-                                    , enableLastUpdatedDates = enableLastUpdatedDates
-                                    , shownAsSingle = True
-                                    }
-                                    index
-                                    model
-                                    model.errorWhileDeleting
-                                    glossaryItem
-                            )
-                    )
+            )
         , Components.SearchDialog.view
             (PageMsg.Internal << SearchDialogMsg)
             model.searchDialog.model
@@ -1153,6 +1163,21 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
         , viewConfirmDeleteModal
             model.common.enableSavingChangesInMemory
             model.confirmDeleteIndex
+        , viewSingleItemModal
+            model
+            { enableMathSupport = enableMathSupport
+            , editable = editable
+            , tabbable = tabbable
+            , enableLastUpdatedDates = enableLastUpdatedDates
+            }
+            indexedGlossaryItems
+          <|
+            case ( model.layout, model.common.maybeIndex ) of
+                ( ShowSingleItem, Just index ) ->
+                    Just index
+
+                _ ->
+                    Nothing
         ]
 
 
@@ -1200,7 +1225,7 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
                         [ class "sr-only" ]
                         [ text "Close sidebar"
                         ]
-                    , Icons.x
+                    , Icons.xMark
                         [ Svg.Attributes.class "h-6 w-6 text-white" ]
                     ]
                 ]
@@ -1808,9 +1833,14 @@ view model =
                             )
                         , div
                             [ Html.Attributes.id ElementIds.container
+                            , class "relative"
                             , Extras.HtmlAttribute.fromBool "data-enable-markdown-based-syntax" glossary.enableMarkdownBasedSyntax
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
-                            , glossary.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
+                            , if model.layout == ShowAllItems then
+                                glossary.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
+
+                              else
+                                CardWidth.Wide |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
                             ]
                             [ header [] <|
                                 let
