@@ -928,7 +928,7 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
             Components.ModalDialog.view
                 (PageMsg.Internal ChangeLayoutToShowAll)
                 ElementIds.viewSingleItemModalTitle
-                [ class "relative max-w-3xl mx-1.5" ]
+                [ class "relative max-w-xl lg:max-w-3xl mx-1.5" ]
                 (Html.div
                     []
                     [ Html.div

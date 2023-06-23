@@ -123,9 +123,9 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                         []
                         [ Extras.Html.showIf (enableFeaturesInProgress && not shownAsSingle) <|
                             div
-                                [ class "float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
+                                [ class "print:hidden hidden sm:block float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
                                 [ span
-                                    [ class "print:hidden" ]
+                                    []
                                     [ Components.Button.text
                                         [ Accessibility.Key.tabbable tabbable
                                         , Accessibility.Aria.label "View as single item"
@@ -232,9 +232,9 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                         [ class "flex-1" ]
                         [ Extras.Html.showIf enableFeaturesInProgress <|
                             div
-                                [ class "float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
+                                [ class "print:hidden hidden sm:block float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
                                 [ span
-                                    [ class "print:hidden" ]
+                                    []
                                     [ Components.Button.text
                                         [ Accessibility.Key.tabbable tabbable
                                         , Accessibility.Aria.label "View as single item"
