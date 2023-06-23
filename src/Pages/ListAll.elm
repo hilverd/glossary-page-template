@@ -43,7 +43,8 @@ import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
+import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
+import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
@@ -840,7 +841,7 @@ viewTermIndexItem enableMathSupport tabbable term =
             , Accessibility.Key.tabbable tabbable
             , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
             ]
-            [ Term.view enableMathSupport term ]
+            [ Term.view enableMathSupport [] term ]
         ]
 
 
@@ -889,31 +890,54 @@ viewGlossaryItem :
     , enableLastUpdatedDates : Bool
     , shownAsSingle : Bool
     }
-    -> GlossaryItemIndex
     -> Model
     -> Maybe ( GlossaryItemIndex, String )
-    -> GlossaryItem
+    -> GlossaryItemWithPreviousAndNext
     -> Html Msg
-viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle } index model errorWhileDeleting glossaryItem =
+viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle } model errorWhileDeleting itemWithPreviousAndNext =
     let
         common : CommonModel
         common =
             model.common
     in
-    Components.GlossaryItemCard.view
-        { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable, enableLastUpdatedDates = enableLastUpdatedDates }
-        (Components.GlossaryItemCard.Normal
-            { index = index
-            , tabbable = tabbable
-            , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle index
-            , onClickEdit = PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
-            , onClickDelete = PageMsg.Internal <| ConfirmDelete index
-            , editable = editable
-            , shownAsSingle = shownAsSingle
-            , errorWhileDeleting = errorWhileDeleting
-            }
+    Extras.Html.showMaybe
+        (\( index, _ ) ->
+            Components.GlossaryItemCard.view
+                { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable, enableLastUpdatedDates = enableLastUpdatedDates }
+                (Components.GlossaryItemCard.Normal
+                    { tabbable = tabbable
+                    , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle index
+                    , onClickEdit = PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
+                    , onClickDelete = PageMsg.Internal <| ConfirmDelete index
+                    , editable = editable
+                    , shownAsSingle = shownAsSingle
+                    , errorWhileDeleting = errorWhileDeleting
+                    }
+                )
+                itemWithPreviousAndNext
         )
-        glossaryItem
+        itemWithPreviousAndNext.item
+
+
+itemWithPreviousAndNextForIndex : GlossaryItemIndex -> Array ( GlossaryItemIndex, GlossaryItem ) -> GlossaryItemWithPreviousAndNext
+itemWithPreviousAndNextForIndex index indexedGlossaryItems =
+    indexedGlossaryItems
+        |> Array.toList
+        |> List.foldl
+            (\( index0, item0 ) { previous, item, next } ->
+                if index0 == GlossaryItemIndex.minusOne index then
+                    { previous = Just ( index0, item0 ), item = item, next = next }
+
+                else if index0 == GlossaryItemIndex.plusOne index then
+                    { previous = previous, item = item, next = Just ( index0, item0 ) }
+
+                else if index0 == index then
+                    { previous = previous, item = Just ( index0, item0 ), next = next }
+
+                else
+                    { previous = previous, item = item, next = next }
+            )
+            { previous = Nothing, item = Nothing, next = Nothing }
 
 
 viewSingleItemModalDialog :
@@ -925,10 +949,14 @@ viewSingleItemModalDialog :
 viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } indexedGlossaryItems =
     Maybe.map
         (\index ->
+            let
+                itemWithPreviousAndNext =
+                    itemWithPreviousAndNextForIndex index indexedGlossaryItems
+            in
             Components.ModalDialog.view
                 (PageMsg.Internal ChangeLayoutToShowAll)
                 ElementIds.viewSingleItemModalTitle
-                [ class "relative max-w-xl lg:max-w-3xl mx-1.5" ]
+                [ class "relative max-w-xl lg:max-w-3xl mx-1.5 bg-white dark:bg-gray-800" ]
                 (Html.div
                     []
                     [ Html.div
@@ -943,31 +971,17 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
                         ]
                     , Html.dl
                         [ Html.Attributes.style "display" "block" ]
-                        (indexedGlossaryItems
-                            |> Array.toList
-                            |> List.filterMap
-                                (\( index0, item ) ->
-                                    if index0 == index then
-                                        Just item
-
-                                    else
-                                        Nothing
-                                )
-                            |> List.map
-                                (\item ->
-                                    viewGlossaryItem
-                                        { enableMathSupport = enableMathSupport
-                                        , tabbable = tabbable
-                                        , editable = editable
-                                        , enableLastUpdatedDates = enableLastUpdatedDates
-                                        , shownAsSingle = True
-                                        }
-                                        index
-                                        model
-                                        model.errorWhileDeleting
-                                        item
-                                )
-                        )
+                        [ viewGlossaryItem
+                            { enableMathSupport = enableMathSupport
+                            , tabbable = tabbable
+                            , editable = editable
+                            , enableLastUpdatedDates = enableLastUpdatedDates
+                            , shownAsSingle = True
+                            }
+                            model
+                            model.errorWhileDeleting
+                            itemWithPreviousAndNext
+                        ]
                     ]
                 )
                 True
@@ -987,7 +1001,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
     Components.ModalDialog.view
         (PageMsg.Internal CancelDelete)
         ElementIds.confirmDeleteModalTitle
-        [ class "sm:max-w-lg" ]
+        [ class "sm:max-w-lg bg-white dark:bg-gray-700" ]
         (Html.div []
             [ div
                 [ class "sm:flex sm:items-start" ]
@@ -1143,7 +1157,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             (indexedGlossaryItems
                 |> Array.toList
                 |> List.map
-                    (\( index, glossaryItem ) ->
+                    (\indexedItem ->
                         viewGlossaryItem
                             { enableMathSupport = enableMathSupport
                             , tabbable = tabbable
@@ -1151,10 +1165,9 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                             , enableLastUpdatedDates = enableLastUpdatedDates
                             , shownAsSingle = False
                             }
-                            index
                             model
                             model.errorWhileDeleting
-                            glossaryItem
+                            { previous = Nothing, item = Just indexedItem, next = Nothing }
                     )
             )
         , Components.SearchDialog.view

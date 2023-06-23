@@ -16,7 +16,7 @@ The `body` is the actual term.
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.HtmlTree exposing (HtmlTree)
 import Extras.String
-import Html exposing (Html, text)
+import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
 import Json.Decode as Decode exposing (Decoder)
 import Markdown.Block exposing (Block)
@@ -247,11 +247,11 @@ markdown term =
     --> expected
 
 -}
-view : Bool -> Term -> Html msg
-view enableMathSupport term =
+view : Bool -> List (Attribute msg) -> Term -> Html msg
+view enableMathSupport additionalAttributes term =
     case term of
         PlaintextTerm t ->
-            text t.body
+            Html.span additionalAttributes [ text t.body ]
 
         MarkdownTerm t ->
             let
@@ -264,7 +264,7 @@ view enableMathSupport term =
                     case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
                         Ok rendered ->
                             Html.span
-                                [ class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]
+                                (class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" :: additionalAttributes)
                                 rendered
 
                         Err renderingError ->

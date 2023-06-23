@@ -39,7 +39,7 @@ view onEscape labelledBy additionalAttributes body visible =
                 ]
                 [ text "\u{200B}" ]
             , div
-                ([ class "inline-block align-bottom bg-white dark:bg-gray-700 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform motion-reduce:transform-none transition-all motion-reduce:transition-none sm:my-8 sm:align-middle sm:w-full sm:p-6"
+                ([ class "dark:border dark:border-gray-400 bg-white dark:bg-gray-800 inline-block align-bottom rounded-lg px-4 pt-5 pb-4 sm:p-6 text-left overflow-hidden shadow-xl transform motion-reduce:transform-none transition-all motion-reduce:transition-none sm:my-8 sm:align-middle sm:w-full"
                  , if visible then
                     class "ease-out duration-300 opacity-100 translate-y-0 sm:scale-100"
 

@@ -16,6 +16,7 @@ import Data.Glossary as Glossary
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItemIndex as GlossaryItemIndex
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
@@ -765,7 +766,7 @@ viewAddSuggestedSeeAlso enableMathSupport suggestedRelatedTerms =
                                 ]
                                 [ Icons.plus
                                     [ Svg.Attributes.class "-ml-1 mr-2 h-4 w-4" ]
-                                , Term.view enableMathSupport suggestedRelatedTerm
+                                , Term.view enableMathSupport [] suggestedRelatedTerm
                                 ]
                         )
                 )
@@ -908,7 +909,10 @@ view model =
                                                 [ Components.GlossaryItemCard.view
                                                     { enableMathSupport = glossary.enableMathSupport, makeLinksTabbable = True, enableLastUpdatedDates = False }
                                                     Components.GlossaryItemCard.Preview
-                                                    newOrUpdatedGlossaryItem
+                                                    { previous = Nothing
+                                                    , item = Just ( GlossaryItemIndex.fromInt -1, newOrUpdatedGlossaryItem )
+                                                    , next = Nothing
+                                                    }
                                                 ]
                                             ]
                                         ]

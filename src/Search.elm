@@ -44,5 +44,5 @@ search enableMathSupport searchString glossaryItems =
                )
             |> List.map
                 (\term ->
-                    SearchDialog.searchResult (Extras.Url.fragmentOnly <| Term.id term) [ Term.view enableMathSupport term ]
+                    SearchDialog.searchResult (Extras.Url.fragmentOnly <| Term.id term) [ Term.view enableMathSupport [] term ]
                 )

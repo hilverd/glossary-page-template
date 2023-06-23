@@ -1,11 +1,11 @@
-module Data.GlossaryItemIndex exposing (GlossaryItemIndex, fromInt, toInt)
+module Data.GlossaryItemIndex exposing (GlossaryItemIndex, fromInt, toInt, minusOne, plusOne)
 
 {-| An index of a glossary item.
 
 
 # Glossary Item Indices
 
-@docs GlossaryItemIndex, fromInt, toInt
+@docs GlossaryItemIndex, fromInt, toInt, minusOne, plusOne
 
 -}
 
@@ -30,3 +30,21 @@ toInt glossaryItemIndex =
     case glossaryItemIndex of
         GlossaryItemIndex index ->
             index
+
+
+{-| Subtract one from the index.
+-}
+minusOne : GlossaryItemIndex -> GlossaryItemIndex
+minusOne glossaryItemIndex =
+    case glossaryItemIndex of
+        GlossaryItemIndex index ->
+            GlossaryItemIndex <| index - 1
+
+
+{-| Add one to the index.
+-}
+plusOne : GlossaryItemIndex -> GlossaryItemIndex
+plusOne glossaryItemIndex =
+    case glossaryItemIndex of
+        GlossaryItemIndex index ->
+            GlossaryItemIndex <| index + 1
