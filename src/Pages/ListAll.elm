@@ -1746,11 +1746,6 @@ viewOrderItemsBy model numberOfItems =
         ]
 
 
-noModalDialogShown : Model -> Bool
-noModalDialogShown model =
-    model.confirmDeleteIndex == Nothing && not (Components.SearchDialog.visible model.searchDialog.model)
-
-
 type MenuOrDialogShown
     = MenuForMobileShown
     | SearchDialogShown
@@ -1776,6 +1771,25 @@ menuOrDialogShown model =
         model.confirmDeleteIndex
             |> Maybe.map ConfirmDeleteModalDialogShown
             |> Maybe.withDefault NoMenuOrDialogShown
+
+
+noModalDialogShown : Model -> Bool
+noModalDialogShown model =
+    case menuOrDialogShown model of
+        MenuForMobileShown ->
+            True
+
+        SearchDialogShown ->
+            False
+
+        ConfirmDeleteModalDialogShown _ ->
+            False
+
+        ViewSingleItemModalDialogShown _ ->
+            False
+
+        NoMenuOrDialogShown ->
+            True
 
 
 view : Model -> Document Msg
