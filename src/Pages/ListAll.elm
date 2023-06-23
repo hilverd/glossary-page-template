@@ -1755,28 +1755,27 @@ type MenuOrDialogShown
     = MenuForMobileShown
     | SearchDialogShown
     | ConfirmDeleteModalDialogShown GlossaryItemIndex
-    | ViewSingleItemModalDialogShown
+    | ViewSingleItemModalDialogShown GlossaryItemIndex
     | NoMenuOrDialogShown
 
 
 menuOrDialogShown : Model -> MenuOrDialogShown
 menuOrDialogShown model =
-    case model.confirmDeleteIndex of
-        Just index ->
-            ConfirmDeleteModalDialogShown index
+    if Components.SearchDialog.visible model.searchDialog.model then
+        SearchDialogShown
 
-        Nothing ->
-            if Components.SearchDialog.visible model.searchDialog.model then
-                SearchDialogShown
+    else if model.menuForMobileVisibility == Visible then
+        MenuForMobileShown
 
-            else if model.menuForMobileVisibility == Visible then
-                MenuForMobileShown
+    else if model.layout == ShowSingleItem then
+        model.common.maybeIndex
+            |> Maybe.map ViewSingleItemModalDialogShown
+            |> Maybe.withDefault NoMenuOrDialogShown
 
-            else if model.layout == ShowSingleItem then
-                ViewSingleItemModalDialogShown
-
-            else
-                NoMenuOrDialogShown
+    else
+        model.confirmDeleteIndex
+            |> Maybe.map ConfirmDeleteModalDialogShown
+            |> Maybe.withDefault NoMenuOrDialogShown
 
 
 view : Model -> Document Msg
@@ -1835,12 +1834,34 @@ view model =
                                         else
                                             Nothing
 
-                                    ViewSingleItemModalDialogShown ->
+                                    ViewSingleItemModalDialogShown index ->
                                         if event == Extras.HtmlEvents.escape then
                                             Just <| ( PageMsg.Internal ChangeLayoutToShowAll, True )
 
                                         else
-                                            Nothing
+                                            let
+                                                itemWithPreviousAndNext =
+                                                    glossary.items
+                                                        |> (if model.common.orderItemsBy == Alphabetically then
+                                                                GlossaryItems.orderedAlphabetically
+
+                                                            else
+                                                                GlossaryItems.orderedByMostMentionedFirst
+                                                           )
+                                                        |> itemWithPreviousAndNextForIndex index
+                                            in
+                                            if event == Extras.HtmlEvents.leftArrow then
+                                                itemWithPreviousAndNext.previous
+                                                    |> Maybe.map
+                                                        (\( newIndex, _ ) -> ( PageMsg.Internal <| ChangeLayoutToShowSingle newIndex, True ))
+
+                                            else if event == Extras.HtmlEvents.rightArrow then
+                                                itemWithPreviousAndNext.next
+                                                    |> Maybe.map
+                                                        (\( newIndex, _ ) -> ( PageMsg.Internal <| ChangeLayoutToShowSingle newIndex, True ))
+
+                                            else
+                                                Nothing
 
                                     NoMenuOrDialogShown ->
                                         if event == Extras.HtmlEvents.controlK then

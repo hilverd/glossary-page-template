@@ -7,6 +7,7 @@ module Extras.HtmlEvents exposing
     , enter
     , escape
     , home
+    , leftArrow
     , n
     , onClickPreventDefault
     , onClickPreventDefaultAndStopPropagation
@@ -14,6 +15,7 @@ module Extras.HtmlEvents exposing
     , onEnter
     , onEscape
     , preventDefaultOnDecoder
+    , rightArrow
     , upArrow
     )
 
@@ -95,6 +97,16 @@ upArrow =
 downArrow : KeyDownEvent
 downArrow =
     Control "ArrowDown" |> withoutModifiers
+
+
+leftArrow : KeyDownEvent
+leftArrow =
+    Control "ArrowLeft" |> withoutModifiers
+
+
+rightArrow : KeyDownEvent
+rightArrow =
+    Control "ArrowRight" |> withoutModifiers
 
 
 enter : KeyDownEvent
