@@ -133,7 +133,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                 , Html.Attributes.title "View as single item"
                                                 , Html.Events.onClick onClickViewFull
                                                 ]
-                                                [ Icons.arrowsPointingOut
+                                                [ Icons.window
                                                     [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
                                                 ]
                                             ]
@@ -242,7 +242,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                 , Html.Attributes.title "View as single item"
                                                 , Html.Events.onClick onClickViewFull
                                                 ]
-                                                [ Icons.arrowsPointingOut
+                                                [ Icons.window
                                                     [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
                                                 ]
                                             ]
