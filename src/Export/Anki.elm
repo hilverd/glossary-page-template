@@ -6,6 +6,7 @@ module Export.Anki exposing (download)
 
 -}
 
+import Array
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
@@ -144,6 +145,7 @@ download enableMathSupport glossaryTitle aboutSection glossaryItems =
         itemsString =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
+                |> Array.toList
                 |> List.map (Tuple.second >> itemToAnki enableMathSupport)
                 |> lines
 

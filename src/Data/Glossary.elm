@@ -1,5 +1,6 @@
 module Data.Glossary exposing (Glossary, toHtmlTree)
 
+import Array exposing (Array)
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
@@ -80,6 +81,7 @@ toHtmlTree enableExportMenu enableHelpForMakingChanges { enableMarkdownBasedSynt
                     []
                     (items
                         |> GlossaryItems.orderedAlphabetically
+                        |> Array.toList
                         |> List.map (Tuple.second >> GlossaryItem.toHtmlTree)
                     )
                 ]

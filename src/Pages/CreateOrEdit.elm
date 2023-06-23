@@ -98,6 +98,7 @@ init commonModel =
                                     |> Maybe.map
                                         (\currentItem ->
                                             GlossaryItems.orderedAlphabetically items
+                                                |> Array.toList
                                                 |> List.map Tuple.second
                                                 |> List.filter
                                                     (\item ->
@@ -294,6 +295,7 @@ update msg model =
                                                     MostMentionedFirst ->
                                                         GlossaryItems.orderedByMostMentionedFirst
                                                )
+                                            |> Array.toList
                                             |> List.filter (Tuple.second >> (==) newOrUpdatedGlossaryItem)
                                             |> List.head
                                             |> Maybe.map Tuple.first
@@ -705,6 +707,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
         allTerms =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
+                |> Array.toList
                 |> List.filterMap (Tuple.second >> .terms >> List.head)
     in
     div

@@ -9,7 +9,7 @@ module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetical
 
 -}
 
-import Array
+import Array exposing (Array)
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Details as Details
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
@@ -26,8 +26,8 @@ This is done using an opaque type that supports efficiently retrieving the items
 -}
 type GlossaryItems
     = GlossaryItems
-        { orderedAlphabetically : List ( GlossaryItemIndex, GlossaryItem )
-        , orderedByMostMentionedFirst : List ( GlossaryItemIndex, GlossaryItem )
+        { orderedAlphabetically : Array ( GlossaryItemIndex, GlossaryItem )
+        , orderedByMostMentionedFirst : Array ( GlossaryItemIndex, GlossaryItem )
         }
 
 
@@ -91,8 +91,8 @@ fromList glossaryItems =
             orderListByMostMentionedFirst alphabetically
     in
     GlossaryItems <|
-        { orderedAlphabetically = alphabetically
-        , orderedByMostMentionedFirst = byMostMentionedFirst
+        { orderedAlphabetically = Array.fromList alphabetically
+        , orderedByMostMentionedFirst = Array.fromList byMostMentionedFirst
         }
 
 
@@ -224,8 +224,7 @@ get : GlossaryItemIndex -> GlossaryItems -> Maybe GlossaryItem
 get indexWhenOrderedAlphabetically glossaryItems =
     glossaryItems
         |> orderedAlphabetically
-        |> List.map Tuple.second
-        |> Array.fromList
+        |> Array.map Tuple.second
         |> Array.get (GlossaryItemIndex.toInt indexWhenOrderedAlphabetically)
 
 
@@ -238,6 +237,7 @@ insert glossaryItem glossaryItems =
         itemsList =
             glossaryItems
                 |> orderedAlphabetically
+                |> Array.toList
                 |> List.map Tuple.second
     in
     glossaryItem :: itemsList |> fromList
@@ -249,6 +249,7 @@ update : GlossaryItemIndex -> GlossaryItem -> GlossaryItems -> GlossaryItems
 update indexWhenOrderedAlphabetically glossaryItem glossaryItems =
     glossaryItems
         |> orderedAlphabetically
+        |> Array.toList
         |> List.map
             (\( index, item ) ->
                 if index == indexWhenOrderedAlphabetically then
@@ -266,6 +267,7 @@ remove : GlossaryItemIndex -> GlossaryItems -> GlossaryItems
 remove indexWhenOrderedAlphabetically glossaryItems =
     glossaryItems
         |> orderedAlphabetically
+        |> Array.toList
         |> List.filterMap
             (\( index, item ) ->
                 if index == indexWhenOrderedAlphabetically then
@@ -279,7 +281,7 @@ remove indexWhenOrderedAlphabetically glossaryItems =
 
 {-| Retrieve the glossary items ordered alphabetically.
 -}
-orderedAlphabetically : GlossaryItems -> List ( GlossaryItemIndex, GlossaryItem )
+orderedAlphabetically : GlossaryItems -> Array ( GlossaryItemIndex, GlossaryItem )
 orderedAlphabetically glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
@@ -288,7 +290,7 @@ orderedAlphabetically glossaryItems =
 
 {-| Retrieve the glossary items ordered by most mentioned first.
 -}
-orderedByMostMentionedFirst : GlossaryItems -> List ( GlossaryItemIndex, GlossaryItem )
+orderedByMostMentionedFirst : GlossaryItems -> Array ( GlossaryItemIndex, GlossaryItem )
 orderedByMostMentionedFirst glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
@@ -300,6 +302,7 @@ orderedByMostMentionedFirst glossaryItems =
 terms : GlossaryItems -> List Term
 terms =
     orderedAlphabetically
+        >> Array.toList
         >> List.concatMap (Tuple.second >> .terms)
 
 
@@ -311,4 +314,5 @@ This is to encourage standardizing on one "primary" term for a concept, instead 
 primaryTerms : GlossaryItems -> List Term
 primaryTerms =
     orderedAlphabetically
+        >> Array.toList
         >> List.concatMap (Tuple.second >> .terms >> List.take 1)

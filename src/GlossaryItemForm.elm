@@ -333,6 +333,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
         bodyByIdReference =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
+                |> Array.toList
                 |> List.foldl
                     (\( _, glossaryItem ) result ->
                         List.foldl

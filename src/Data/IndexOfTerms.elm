@@ -9,6 +9,7 @@ module Data.IndexOfTerms exposing (TermGroup, IndexOfTerms, fromGlossaryItems, t
 
 -}
 
+import Array exposing (Array)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Dict exposing (Dict)
@@ -37,6 +38,7 @@ fromGlossaryItems glossaryItems =
         termListsByFirstAlphabeticCharacterOrEllpisis =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
+                |> Array.toList
                 |> List.concatMap (Tuple.second >> .terms)
                 |> List.foldl
                     (\term result ->

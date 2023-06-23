@@ -1,5 +1,6 @@
 module Search exposing (search)
 
+import Array
 import Components.SearchDialog as SearchDialog
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -22,6 +23,7 @@ search enableMathSupport searchString glossaryItems =
             terms =
                 glossaryItems
                     |> GlossaryItems.orderedByMostMentionedFirst
+                    |> Array.toList
                     |> List.concatMap (Tuple.second >> .terms)
         in
         terms

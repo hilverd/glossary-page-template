@@ -6,6 +6,7 @@ module Export.Markdown exposing (download)
 
 -}
 
+import Array exposing (Array)
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
@@ -120,6 +121,7 @@ download glossaryTitle aboutSection glossaryItems =
         itemsString =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
+                |> Array.toList
                 |> List.map (Tuple.second >> itemToMarkdown)
                 |> paragraphs
 

@@ -27,6 +27,7 @@ import Accessibility
 import Accessibility.Aria
 import Accessibility.Key
 import Accessibility.Role
+import Array exposing (Array)
 import Browser exposing (Document)
 import Browser.Dom as Dom
 import Browser.Navigation as Navigation
@@ -918,7 +919,7 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
 viewSingleItemModalDialog :
     Model
     -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
-    -> List ( GlossaryItemIndex, GlossaryItem )
+    -> Array ( GlossaryItemIndex, GlossaryItem )
     -> Maybe GlossaryItemIndex
     -> Html Msg
 viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } indexedGlossaryItems =
@@ -927,11 +928,11 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
             Components.ModalDialog.view
                 (PageMsg.Internal ChangeLayoutToShowAll)
                 ElementIds.viewSingleItemModalTitle
-                [ class "relative sm:max-w-3xl" ]
+                [ class "relative max-w-3xl mx-1.5" ]
                 (Html.div
                     []
                     [ Html.div
-                        [ class "absolute right-0 top-0 hidden pr-4 pt-4 sm:block" ]
+                        [ class "absolute right-0 top-0 pr-4 pt-4" ]
                         [ Components.Button.text
                             [ Accessibility.Key.tabbable tabbable
                             , Html.Events.onClick <| PageMsg.Internal ChangeLayoutToShowAll
@@ -943,6 +944,7 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
                     , Html.dl
                         [ Html.Attributes.style "display" "block" ]
                         (indexedGlossaryItems
+                            |> Array.toList
                             |> List.filterMap
                                 (\( index0, item ) ->
                                     if index0 == index then
@@ -1117,7 +1119,7 @@ viewCreateGlossaryItemButton tabbable common =
 viewCards :
     Model
     -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
-    -> List ( GlossaryItemIndex, GlossaryItem )
+    -> Array ( GlossaryItemIndex, GlossaryItem )
     -> Html Msg
 viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } indexedGlossaryItems =
     Html.article
@@ -1127,18 +1129,19 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             [ Extras.Html.showIf editable <|
                 div
                     [ class "pt-2" ]
-                    [ if List.isEmpty indexedGlossaryItems then
+                    [ if Array.isEmpty indexedGlossaryItems then
                         viewCreateGlossaryItemButtonForEmptyState tabbable model.common
 
                       else
                         viewCreateGlossaryItemButton tabbable model.common
                     ]
             ]
-        , Extras.Html.showIf (not <| List.isEmpty indexedGlossaryItems) <|
-            viewOrderItemsBy model (List.length indexedGlossaryItems)
+        , Extras.Html.showIf (not <| Array.isEmpty indexedGlossaryItems) <|
+            viewOrderItemsBy model (Array.length indexedGlossaryItems)
         , Html.dl
             []
             (indexedGlossaryItems
+                |> Array.toList
                 |> List.map
                     (\( index, glossaryItem ) ->
                         viewGlossaryItem
