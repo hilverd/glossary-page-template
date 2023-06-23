@@ -42,6 +42,7 @@ import Components.SearchDialog
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
@@ -50,6 +51,7 @@ import Data.GlossaryTitle as GlossaryTitle
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Theme exposing (Theme(..))
+import Dict
 import ElementIds
 import Export.Anki
 import Export.Markdown
@@ -132,6 +134,7 @@ type InternalMsg
     | UpdateSearchString String
     | ChangeTheme Theme
     | ChangeLayoutToShowSingle GlossaryItemIndex
+    | ShowRelatedTermAsSingle RelatedTerm
     | ChangeLayoutToShowAll
     | ConfirmDelete GlossaryItemIndex
     | CancelDelete
@@ -353,6 +356,35 @@ update msg model =
               }
             , preventBackgroundScrolling ()
             )
+
+        ShowRelatedTermAsSingle relatedTerm ->
+            let
+                common0 =
+                    model.common
+
+                model1 =
+                    case model.common.glossary of
+                        Ok glossary ->
+                            glossary.items
+                                |> (if model.common.orderItemsBy == Alphabetically then
+                                        GlossaryItems.orderedAlphabeticallyPrimaryTermIdsToIndexes
+
+                                    else
+                                        GlossaryItems.orderedByMostMentionedPrimaryTermIdsToIndexes
+                                   )
+                                |> Dict.get (RelatedTerm.idReference relatedTerm)
+                                |> Maybe.map
+                                    (\index ->
+                                        { model
+                                            | common = { common0 | maybeIndex = Just index }
+                                        }
+                                    )
+                                |> Maybe.withDefault model
+
+                        _ ->
+                            model
+            in
+            ( model1, Cmd.none )
 
         ChangeLayoutToShowAll ->
             let
@@ -910,6 +942,7 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
                     , onClickEdit = PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
                     , onClickDelete = PageMsg.Internal <| ConfirmDelete index
                     , onClickItem = PageMsg.Internal << ChangeLayoutToShowSingle
+                    , onClickRelatedTerm = PageMsg.Internal << ShowRelatedTermAsSingle
                     , editable = editable
                     , shownAsSingle = shownAsSingle
                     , errorWhileDeleting = errorWhileDeleting

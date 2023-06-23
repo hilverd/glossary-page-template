@@ -231,7 +231,7 @@ markdown term =
 
     import Html exposing (Html)
 
-    fromPlaintext "Foo" False |> view False --> Html.text "Foo"
+    fromPlaintext "Foo" False |> view False [] --> Html.span [] [ Html.text "Foo" ]
 
     expected : Html msg
     expected =
@@ -243,7 +243,7 @@ markdown term =
                 ]
             ]
 
-    fromMarkdown "The _ideal_ case" False |> view False
+    fromMarkdown "The _ideal_ case" False |> view False []
     --> expected
 
 -}

@@ -59,18 +59,18 @@ suite =
                     loadedGlossaryItems
                         |> Search.search False "term"
                         |> Expect.equal
-                            [ searchResult "#Second_the_term" [ Html.text "Second the term" ]
-                            , searchResult "#The_term_one" [ Html.text "The term one" ]
-                            , searchResult "#The_term_three" [ Html.text "The term three" ]
+                            [ searchResult "#Second_the_term" [ Html.span [] [ Html.text "Second the term" ] ]
+                            , searchResult "#The_term_one" [ Html.span [] [ Html.text "The term one" ] ]
+                            , searchResult "#The_term_three" [ Html.span [] [ Html.text "The term three" ] ]
                             ]
             , test "terms for which the search string is a prefix are ranked higher than other terms" <|
                 \_ ->
                     loadedGlossaryItems
                         |> Search.search False "the"
                         |> Expect.equal
-                            [ searchResult "#The_term_one" [ Html.text "The term one" ]
-                            , searchResult "#The_term_three" [ Html.text "The term three" ]
-                            , searchResult "#Second_the_term" [ Html.text "Second the term" ]
+                            [ searchResult "#The_term_one" [ Html.span [] [ Html.text "The term one" ] ]
+                            , searchResult "#The_term_three" [ Html.span [] [ Html.text "The term three" ] ]
+                            , searchResult "#Second_the_term" [ Html.span [] [ Html.text "Second the term" ] ]
                             ]
             ]
         ]

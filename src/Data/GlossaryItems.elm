@@ -1,11 +1,11 @@
-module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, get, insert, update, remove, terms, primaryTerms)
+module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedAlphabeticallyPrimaryTermIdsToIndexes, orderedByMostMentionedPrimaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms)
 
 {-| A set of glossary items that make up a glossary.
 
 
 # Glossary Items
 
-@docs GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, get, insert, update, remove, terms, primaryTerms
+@docs GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedAlphabeticallyPrimaryTermIdsToIndexes, orderedByMostMentionedPrimaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms
 
 -}
 
@@ -27,7 +27,9 @@ This is done using an opaque type that supports efficiently retrieving the items
 type GlossaryItems
     = GlossaryItems
         { orderedAlphabetically : Array ( GlossaryItemIndex, GlossaryItem )
+        , orderedAlphabeticallyPrimaryTermIdsToIndexes : Dict String GlossaryItemIndex
         , orderedByMostMentionedFirst : Array ( GlossaryItemIndex, GlossaryItem )
+        , orderedByMostMentionedPrimaryTermIdsToIndexes : Dict String GlossaryItemIndex
         }
 
 
@@ -40,6 +42,7 @@ compareForSortingAlphabetically item1 item2 =
 
 {-| Build glossary items from a list.
 
+    import Array
     import Data.GlossaryItem exposing (GlossaryItem)
     import Data.GlossaryItem.Term as Term exposing (Term)
 
@@ -69,6 +72,7 @@ compareForSortingAlphabetically item1 item2 =
 
     fromList [item1, item2, item3]
     |> orderedAlphabetically
+    |> Array.toList
     |> List.map (Tuple.second >> .terms >> List.map Term.raw)
     --> [["Situation"], ["\\_\\_slots\\_\\_"], ["strong"]]
 
@@ -89,10 +93,26 @@ fromList glossaryItems =
         byMostMentionedFirst : List ( GlossaryItemIndex, GlossaryItem )
         byMostMentionedFirst =
             orderListByMostMentionedFirst alphabetically
+
+        primaryTermIdsToIndexes : List ( GlossaryItemIndex, GlossaryItem ) -> Dict String GlossaryItemIndex
+        primaryTermIdsToIndexes =
+            List.foldl
+                (\( index, item ) result ->
+                    item.terms
+                        |> List.head
+                        |> Maybe.map
+                            (\primaryTerm ->
+                                Dict.insert (Term.id primaryTerm) index result
+                            )
+                        |> Maybe.withDefault result
+                )
+                Dict.empty
     in
     GlossaryItems <|
         { orderedAlphabetically = Array.fromList alphabetically
         , orderedByMostMentionedFirst = Array.fromList byMostMentionedFirst
+        , orderedAlphabeticallyPrimaryTermIdsToIndexes = primaryTermIdsToIndexes alphabetically
+        , orderedByMostMentionedPrimaryTermIdsToIndexes = primaryTermIdsToIndexes byMostMentionedFirst
         }
 
 
@@ -295,6 +315,24 @@ orderedByMostMentionedFirst glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             items.orderedByMostMentionedFirst
+
+
+{-| Retrieve a dict mapping each primary term ID to its index in the item list that is sorted alphabetically.
+-}
+orderedAlphabeticallyPrimaryTermIdsToIndexes : GlossaryItems -> Dict String GlossaryItemIndex
+orderedAlphabeticallyPrimaryTermIdsToIndexes glossaryItems =
+    case glossaryItems of
+        GlossaryItems items ->
+            items.orderedAlphabeticallyPrimaryTermIdsToIndexes
+
+
+{-| Retrieve a dict mapping each primary term ID to its index in the item list that is sorted by most mentioned first.
+-}
+orderedByMostMentionedPrimaryTermIdsToIndexes : GlossaryItems -> Dict String GlossaryItemIndex
+orderedByMostMentionedPrimaryTermIdsToIndexes glossaryItems =
+    case glossaryItems of
+        GlossaryItems items ->
+            items.orderedByMostMentionedPrimaryTermIdsToIndexes
 
 
 {-| Retrieve the list of all terms in the glossary.

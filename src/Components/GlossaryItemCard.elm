@@ -13,6 +13,8 @@ import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import ElementIds
 import Extras.Html
+import Extras.HtmlAttribute
+import Extras.HtmlEvents
 import Extras.Url exposing (fragmentOnly)
 import Html
 import Html.Attributes exposing (class, id, style)
@@ -29,6 +31,7 @@ type Style msg
         , onClickEdit : msg
         , onClickDelete : msg
         , onClickItem : GlossaryItemIndex -> msg
+        , onClickRelatedTerm : RelatedTerm -> msg
         , editable : Bool
         , shownAsSingle : Bool
         , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
@@ -87,10 +90,10 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                     }
                                 )
                                 glossaryItem.details
-                            ++ viewGlossaryItemRelatedTerms enableMathSupport True tabbable itemHasSomeDetails glossaryItem.relatedTerms
+                            ++ viewGlossaryItemRelatedTerms enableMathSupport True tabbable itemHasSomeDetails Nothing glossaryItem.relatedTerms
                         )
 
-                Normal { tabbable, onClickViewFull, onClickEdit, onClickDelete, onClickItem, editable, shownAsSingle, errorWhileDeleting } ->
+                Normal { tabbable, onClickViewFull, onClickEdit, onClickDelete, onClickItem, onClickRelatedTerm, editable, shownAsSingle, errorWhileDeleting } ->
                     let
                         itemHasSomeDetails : Bool
                         itemHasSomeDetails =
@@ -107,6 +110,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                 , makeLinksTabbable = makeLinksTabbable
                                 , enableLastUpdatedDates = enableLastUpdatedDates
                                 , onClickItem = onClickItem
+                                , onClickRelatedTerm = onClickRelatedTerm
                                 }
                                 glossaryItemWithPreviousAndNext
                             ]
@@ -164,7 +168,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                 }
                                             )
                                             glossaryItem.details
-                                        ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails glossaryItem.relatedTerms
+                                        ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails (Just onClickRelatedTerm) glossaryItem.relatedTerms
                                     )
                                 ]
                             , div
@@ -272,7 +276,13 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                 }
                                             )
                                             glossaryItem.details
-                                        ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails glossaryItem.relatedTerms
+                                        ++ viewGlossaryItemRelatedTerms
+                                            enableMathSupport
+                                            False
+                                            tabbable
+                                            itemHasSomeDetails
+                                            (Just onClickRelatedTerm)
+                                            glossaryItem.relatedTerms
                                     )
                                 ]
                             , Extras.Html.showIf enableLastUpdatedDates <|
@@ -298,10 +308,11 @@ viewAsSingle :
     , makeLinksTabbable : Bool
     , enableLastUpdatedDates : Bool
     , onClickItem : GlossaryItemIndex -> msg
+    , onClickRelatedTerm : RelatedTerm -> msg
     }
     -> GlossaryItemWithPreviousAndNext
     -> Html msg
-viewAsSingle { tabbable, enableMathSupport, makeLinksTabbable, enableLastUpdatedDates, onClickItem } glossaryItemWithPreviousAndNext =
+viewAsSingle { tabbable, enableMathSupport, makeLinksTabbable, enableLastUpdatedDates, onClickItem, onClickRelatedTerm } glossaryItemWithPreviousAndNext =
     let
         primaryTermForPreviousOrNext glossaryItem =
             glossaryItem.terms
@@ -414,6 +425,7 @@ viewAsSingle { tabbable, enableMathSupport, makeLinksTabbable, enableLastUpdated
                             False
                             tabbable
                             (GlossaryItem.hasSomeDetails glossaryItem)
+                            (Just onClickRelatedTerm)
                             glossaryItem.relatedTerms
                     )
                 , div
@@ -487,8 +499,8 @@ viewGlossaryItemDetails { enableMathSupport, makeLinksTabbable } details =
         [ Details.view { enableMathSupport = enableMathSupport, makeLinksTabbable = makeLinksTabbable } details ]
 
 
-viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Bool -> List RelatedTerm -> List (Html msg)
-viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDetails relatedTerms =
+viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Bool -> Maybe (RelatedTerm -> msg) -> List RelatedTerm -> List (Html msg)
+viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDetails onClick relatedTerms =
     if List.isEmpty relatedTerms then
         []
 
@@ -514,6 +526,11 @@ viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDetai
                                       )
                                         |> Html.Attributes.href
                                     , Accessibility.Key.tabbable tabbable
+                                    , Extras.HtmlAttribute.showMaybe
+                                        (\onClick1 ->
+                                            Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <| onClick1 relatedTerm
+                                        )
+                                        onClick
                                     ]
                                     [ RelatedTerm.view enableMathSupport relatedTerm ]
                             )
