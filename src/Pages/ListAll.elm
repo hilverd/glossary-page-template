@@ -349,7 +349,7 @@ update msg model =
                 | common = { common0 | maybeIndex = Just index }
                 , layout = ShowSingleItem
               }
-            , Cmd.none
+            , preventBackgroundScrolling ()
             )
 
         ChangeLayoutToShowAll ->
@@ -361,7 +361,7 @@ update msg model =
                 | common = { common0 | maybeIndex = Nothing }
                 , layout = ShowAllItems
               }
-            , Cmd.none
+            , allowBackgroundScrolling ()
             )
 
         ConfirmDelete index ->
@@ -905,7 +905,6 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
             { index = index
             , tabbable = tabbable
             , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle index
-            , onClickClose = PageMsg.Internal <| ChangeLayoutToShowAll
             , onClickEdit = PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
             , onClickDelete = PageMsg.Internal <| ConfirmDelete index
             , editable = editable
@@ -916,41 +915,69 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
         glossaryItem
 
 
-viewSingleItemModal :
+viewSingleItemModalDialog :
     Model
     -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
     -> List ( GlossaryItemIndex, GlossaryItem )
     -> Maybe GlossaryItemIndex
     -> Html Msg
-viewSingleItemModal model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } indexedGlossaryItems =
-    Extras.Html.showMaybe
+viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } indexedGlossaryItems =
+    Maybe.map
         (\index ->
-            Html.dl
-                [ class "right-0 fixed top-20 left-0 right-0 ml-28 mr-10 print:hidden"
-                ]
-                (indexedGlossaryItems
-                    |> List.filterMap
-                        (\( index0, item ) ->
-                            if index0 == index then
-                                Just item
+            Components.ModalDialog.view
+                (PageMsg.Internal ChangeLayoutToShowAll)
+                ElementIds.viewSingleItemModalTitle
+                [ class "relative sm:max-w-3xl" ]
+                (Html.div
+                    []
+                    [ Html.div
+                        [ class "absolute right-0 top-0 hidden pr-4 pt-4 sm:block" ]
+                        [ Components.Button.text
+                            [ Accessibility.Key.tabbable tabbable
+                            , Html.Events.onClick <| PageMsg.Internal ChangeLayoutToShowAll
+                            ]
+                            [ Icons.xMark
+                                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
+                            ]
+                        ]
+                    , Html.dl
+                        [ Html.Attributes.style "display" "block" ]
+                        (indexedGlossaryItems
+                            |> List.filterMap
+                                (\( index0, item ) ->
+                                    if index0 == index then
+                                        Just item
 
-                            else
-                                Nothing
+                                    else
+                                        Nothing
+                                )
+                            |> List.map
+                                (\item ->
+                                    viewGlossaryItem
+                                        { enableMathSupport = enableMathSupport
+                                        , tabbable = tabbable
+                                        , editable = editable
+                                        , enableLastUpdatedDates = enableLastUpdatedDates
+                                        , shownAsSingle = True
+                                        }
+                                        index
+                                        model
+                                        model.errorWhileDeleting
+                                        item
+                                )
                         )
-                    |> List.map
-                        (viewGlossaryItem
-                            { enableMathSupport = enableMathSupport
-                            , tabbable = tabbable
-                            , editable = editable
-                            , enableLastUpdatedDates = enableLastUpdatedDates
-                            , shownAsSingle = True
-                            }
-                            index
-                            model
-                            model.errorWhileDeleting
-                        )
+                    ]
                 )
+                True
         )
+        >> Maybe.withDefault
+            (Components.ModalDialog.view
+                (PageMsg.Internal NoOp)
+                ElementIds.viewSingleItemModalTitle
+                []
+                Extras.Html.nothing
+                False
+            )
 
 
 viewConfirmDeleteModal : Bool -> Maybe GlossaryItemIndex -> Html Msg
@@ -958,6 +985,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
     Components.ModalDialog.view
         (PageMsg.Internal CancelDelete)
         ElementIds.confirmDeleteModalTitle
+        [ class "sm:max-w-lg" ]
         (Html.div []
             [ div
                 [ class "sm:flex sm:items-start" ]
@@ -1134,7 +1162,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
         , viewConfirmDeleteModal
             model.common.enableSavingChangesInMemory
             model.confirmDeleteIndex
-        , viewSingleItemModal
+        , viewSingleItemModalDialog
             model
             { enableMathSupport = enableMathSupport
             , editable = editable
@@ -1703,6 +1731,34 @@ noModalDialogShown model =
     model.confirmDeleteIndex == Nothing && not (Components.SearchDialog.visible model.searchDialog.model)
 
 
+type MenuOrDialogShown
+    = MenuForMobileShown
+    | SearchDialogShown
+    | ConfirmDeleteModalDialogShown GlossaryItemIndex
+    | ViewSingleItemModalDialogShown
+    | NoMenuOrDialogShown
+
+
+menuOrDialogShown : Model -> MenuOrDialogShown
+menuOrDialogShown model =
+    case model.confirmDeleteIndex of
+        Just index ->
+            ConfirmDeleteModalDialogShown index
+
+        Nothing ->
+            if Components.SearchDialog.visible model.searchDialog.model then
+                SearchDialogShown
+
+            else if model.menuForMobileVisibility == Visible then
+                MenuForMobileShown
+
+            else if model.layout == ShowSingleItem then
+                ViewSingleItemModalDialogShown
+
+            else
+                NoMenuOrDialogShown
+
+
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
@@ -1734,21 +1790,8 @@ view model =
                     , Html.Events.preventDefaultOn "keydown"
                         (Extras.HtmlEvents.preventDefaultOnDecoder
                             (\event ->
-                                let
-                                    confirmDeleteIndex : Maybe GlossaryItemIndex
-                                    confirmDeleteIndex =
-                                        model.confirmDeleteIndex
-
-                                    searchDialogVisible : Bool
-                                    searchDialogVisible =
-                                        Components.SearchDialog.visible model.searchDialog.model
-
-                                    menuForMobileVisible : Bool
-                                    menuForMobileVisible =
-                                        model.menuForMobileVisibility == Visible
-                                in
-                                case ( confirmDeleteIndex, searchDialogVisible, menuForMobileVisible ) of
-                                    ( Just index, _, _ ) ->
+                                case menuOrDialogShown model of
+                                    ConfirmDeleteModalDialogShown index ->
                                         if event == Extras.HtmlEvents.escape then
                                             Just <| ( PageMsg.Internal CancelDelete, True )
 
@@ -1758,21 +1801,28 @@ view model =
                                         else
                                             Nothing
 
-                                    ( _, True, _ ) ->
+                                    SearchDialogShown ->
                                         if event == Extras.HtmlEvents.escape || event == Extras.HtmlEvents.controlK then
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.hide, True )
 
                                         else
                                             Nothing
 
-                                    ( _, _, True ) ->
+                                    MenuForMobileShown ->
                                         if event == Extras.HtmlEvents.escape then
                                             Just <| ( PageMsg.Internal StartHidingMenuForMobile, True )
 
                                         else
                                             Nothing
 
-                                    _ ->
+                                    ViewSingleItemModalDialogShown ->
+                                        if event == Extras.HtmlEvents.escape then
+                                            Just <| ( PageMsg.Internal ChangeLayoutToShowAll, True )
+
+                                        else
+                                            Nothing
+
+                                    NoMenuOrDialogShown ->
                                         if event == Extras.HtmlEvents.controlK then
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show, True )
 
@@ -1807,11 +1857,7 @@ view model =
                             , class "relative"
                             , Extras.HtmlAttribute.fromBool "data-enable-markdown-based-syntax" glossary.enableMarkdownBasedSyntax
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
-                            , if model.layout == ShowAllItems then
-                                glossary.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
-
-                              else
-                                CardWidth.Wide |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
+                            , glossary.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
                             ]
                             [ header [] <|
                                 let

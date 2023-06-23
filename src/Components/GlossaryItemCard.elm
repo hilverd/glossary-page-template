@@ -28,7 +28,6 @@ type Style msg
         { index : GlossaryItemIndex
         , tabbable : Bool
         , onClickViewFull : msg
-        , onClickClose : msg
         , onClickEdit : msg
         , onClickDelete : msg
         , editable : Bool
@@ -90,7 +89,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                     ++ viewGlossaryItemRelatedTerms enableMathSupport True tabbable itemHasSomeDetails glossaryItem.relatedTerms
                 )
 
-        Normal { index, tabbable, onClickViewFull, onClickClose, onClickEdit, onClickDelete, editable, shownAsSingle, errorWhileDeleting } ->
+        Normal { index, tabbable, onClickViewFull, onClickEdit, onClickDelete, editable, shownAsSingle, errorWhileDeleting } ->
             let
                 itemHasSomeDetails : Bool
                 itemHasSomeDetails =
@@ -98,12 +97,13 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
             in
             if shownAsSingle then
                 div
-                    [ Html.Attributes.style "max-height" "100%" ]
+                    [ Html.Attributes.style "max-height" "100%"
+                    , Html.Attributes.style "border-width" "0px"
+                    ]
                 <|
                     viewAsSingle
                         { index = index
                         , tabbable = tabbable
-                        , onClickClose = onClickClose
                         , onClickEdit = onClickEdit
                         , onClickDelete = onClickDelete
                         , editable = editable
@@ -296,7 +296,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
 viewAsSingle :
     { index : GlossaryItemIndex
     , tabbable : Bool
-    , onClickClose : msg
     , onClickEdit : msg
     , onClickDelete : msg
     , editable : Bool
@@ -307,20 +306,8 @@ viewAsSingle :
     }
     -> GlossaryItem
     -> List (Html msg)
-viewAsSingle { index, tabbable, onClickClose, onClickEdit, onClickDelete, editable, errorWhileDeleting, enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } glossaryItem =
-    [ div
-        [ class "flex justify-end mb-3" ]
-        [ Components.Button.text
-            [ Accessibility.Key.tabbable tabbable
-            , Accessibility.Aria.label "Close single item view"
-            , Html.Attributes.title "Close single item view"
-            , Html.Events.onClick onClickClose
-            ]
-            [ Icons.xMark
-                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
-            ]
-        ]
-    , Html.nav
+viewAsSingle { index, tabbable, onClickEdit, onClickDelete, editable, errorWhileDeleting, enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } glossaryItem =
+    [ Html.nav
         [ class "flex items-start justify-between px-4 sm:px-0"
         ]
         [ Html.div

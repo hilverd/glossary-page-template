@@ -31,6 +31,7 @@ module ElementIds exposing
     , termsIndex
     , themeDropdownButton
     , title
+    , viewSingleItemModalTitle
     )
 
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
@@ -118,6 +119,11 @@ orderItemsMostMentionedFirst =
 confirmDeleteModalTitle : String
 confirmDeleteModalTitle =
     prefixed "confirm-delete-modal-title"
+
+
+viewSingleItemModalTitle : String
+viewSingleItemModalTitle =
+    prefixed "view-single-item-modal-title"
 
 
 termInputField : TermIndex -> String
