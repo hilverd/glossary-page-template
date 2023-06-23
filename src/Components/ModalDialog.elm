@@ -10,8 +10,8 @@ import Html.Attributes exposing (class)
 import Html.Events
 
 
-view : msg -> String -> List (Attribute Never) -> Html msg -> Bool -> Html msg
-view onEscape labelledBy additionalAttributes body visible =
+view : msg -> String -> Bool -> List (Attribute Never) -> Html msg -> Bool -> Html msg
+view onEscape labelledBy alignTop additionalAttributes body visible =
     Html.div
         [ class "fixed z-20 inset-0 overflow-y-auto print:hidden"
         , Extras.HtmlAttribute.showIf (not visible) <| class "invisible"
@@ -34,7 +34,14 @@ view onEscape labelledBy additionalAttributes body visible =
                 ]
                 []
             , span
-                [ class "hidden sm:inline-block sm:align-middle sm:h-screen"
+                [ class "hidden sm:inline-block sm:h-screen"
+                , class
+                    (if alignTop then
+                        "align-top"
+
+                     else
+                        "sm:align-middle"
+                    )
                 , Accessibility.Aria.hidden True
                 ]
                 [ text "\u{200B}" ]

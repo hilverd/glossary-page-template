@@ -5,7 +5,7 @@ import Accessibility.Aria
 import Accessibility.Key exposing (tabbable)
 import Components.Button
 import Data.FeatureFlag exposing (enableFeaturesInProgress)
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Details as Details
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
@@ -13,13 +13,11 @@ import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import ElementIds
 import Extras.Html
-import Extras.HtmlAttribute
 import Extras.Url exposing (fragmentOnly)
 import Html
 import Html.Attributes exposing (class, id, style)
 import Html.Events
 import Icons
-import Svg
 import Svg.Attributes
 
 
@@ -30,6 +28,7 @@ type Style msg
         , onClickViewFull : msg
         , onClickEdit : msg
         , onClickDelete : msg
+        , onClickItem : GlossaryItemIndex -> msg
         , editable : Bool
         , shownAsSingle : Bool
         , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
@@ -91,7 +90,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                             ++ viewGlossaryItemRelatedTerms enableMathSupport True tabbable itemHasSomeDetails glossaryItem.relatedTerms
                         )
 
-                Normal { tabbable, onClickViewFull, onClickEdit, onClickDelete, editable, shownAsSingle, errorWhileDeleting } ->
+                Normal { tabbable, onClickViewFull, onClickEdit, onClickDelete, onClickItem, editable, shownAsSingle, errorWhileDeleting } ->
                     let
                         itemHasSomeDetails : Bool
                         itemHasSomeDetails =
@@ -104,13 +103,10 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                             ]
                             [ viewAsSingle
                                 { tabbable = tabbable
-                                , onClickEdit = onClickEdit
-                                , onClickDelete = onClickDelete
-                                , editable = editable
-                                , errorWhileDeleting = errorWhileDeleting
                                 , enableMathSupport = enableMathSupport
                                 , makeLinksTabbable = makeLinksTabbable
                                 , enableLastUpdatedDates = enableLastUpdatedDates
+                                , onClickItem = onClickItem
                                 }
                                 glossaryItemWithPreviousAndNext
                             ]
@@ -298,17 +294,14 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
 
 viewAsSingle :
     { tabbable : Bool
-    , onClickEdit : msg
-    , onClickDelete : msg
-    , editable : Bool
-    , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
     , enableMathSupport : Bool
     , makeLinksTabbable : Bool
     , enableLastUpdatedDates : Bool
+    , onClickItem : GlossaryItemIndex -> msg
     }
     -> GlossaryItemWithPreviousAndNext
     -> Html msg
-viewAsSingle { tabbable, onClickEdit, onClickDelete, editable, errorWhileDeleting, enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } glossaryItemWithPreviousAndNext =
+viewAsSingle { tabbable, enableMathSupport, makeLinksTabbable, enableLastUpdatedDates, onClickItem } glossaryItemWithPreviousAndNext =
     let
         primaryTermForPreviousOrNext glossaryItem =
             glossaryItem.terms
@@ -330,7 +323,7 @@ viewAsSingle { tabbable, onClickEdit, onClickDelete, editable, errorWhileDeletin
                     )
     in
     Extras.Html.showMaybe
-        (\( index, glossaryItem ) ->
+        (\( _, glossaryItem ) ->
             Html.div []
                 [ Html.nav
                     [ class "flex items-start justify-between px-4 sm:px-0"
@@ -339,9 +332,10 @@ viewAsSingle { tabbable, onClickEdit, onClickDelete, editable, errorWhileDeletin
                         [ class "-mt-px flex w-0 flex-1"
                         ]
                         [ Extras.Html.showMaybe
-                            (\( previousIndex, previousItem ) ->
+                            (\( previousItemIndex, previousItem ) ->
                                 Components.Button.text
                                     [ Accessibility.Key.tabbable tabbable
+                                    , Html.Events.onClick <| onClickItem previousItemIndex
                                     ]
                                     [ Icons.arrowLongLeft
                                         [ Svg.Attributes.class "h-5 w-5" ]
@@ -353,7 +347,7 @@ viewAsSingle { tabbable, onClickEdit, onClickDelete, editable, errorWhileDeletin
                             glossaryItemWithPreviousAndNext.previous
                         ]
                     , Html.div
-                        [ class "hidden md:-mt-px md:flex md:flex-col px-2" ]
+                        [ class "hidden md:-mt-px md:flex md:flex-col px-3" ]
                         (List.map
                             (viewGlossaryTerm
                                 { enableMathSupport = enableMathSupport
@@ -367,9 +361,10 @@ viewAsSingle { tabbable, onClickEdit, onClickDelete, editable, errorWhileDeletin
                     , Html.div
                         [ class "-mt-px flex w-0 flex-1 justify-end" ]
                         [ Extras.Html.showMaybe
-                            (\( nextIndex, nextItem ) ->
+                            (\( nextItemIndex, nextItem ) ->
                                 Components.Button.text
                                     [ Accessibility.Key.tabbable tabbable
+                                    , Html.Events.onClick <| onClickItem nextItemIndex
                                     ]
                                     [ span
                                         [ class "font-medium" ]

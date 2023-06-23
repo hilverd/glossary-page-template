@@ -909,6 +909,7 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
                     , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle index
                     , onClickEdit = PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
                     , onClickDelete = PageMsg.Internal <| ConfirmDelete index
+                    , onClickItem = PageMsg.Internal << ChangeLayoutToShowSingle
                     , editable = editable
                     , shownAsSingle = shownAsSingle
                     , errorWhileDeleting = errorWhileDeleting
@@ -956,6 +957,7 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
             Components.ModalDialog.view
                 (PageMsg.Internal ChangeLayoutToShowAll)
                 ElementIds.viewSingleItemModalTitle
+                True
                 [ class "relative max-w-xl lg:max-w-3xl mx-1.5 bg-white dark:bg-gray-800" ]
                 (Html.div
                     []
@@ -990,6 +992,7 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
             (Components.ModalDialog.view
                 (PageMsg.Internal NoOp)
                 ElementIds.viewSingleItemModalTitle
+                True
                 []
                 Extras.Html.nothing
                 False
@@ -1001,6 +1004,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
     Components.ModalDialog.view
         (PageMsg.Internal CancelDelete)
         ElementIds.confirmDeleteModalTitle
+        False
         [ class "sm:max-w-lg bg-white dark:bg-gray-700" ]
         (Html.div []
             [ div
