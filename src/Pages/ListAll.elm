@@ -809,7 +809,7 @@ viewSettings glossary model =
                 ]
     in
     div
-        [ class "mb-5 rounded-md overflow-x-auto bg-amber-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 print:hidden"
+        [ class "mb-5 rounded-md max-w-xl overflow-x-auto bg-amber-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 print:hidden"
         , class "pt-4 pr-4 pl-4 pb-2"
         ]
         [ details
