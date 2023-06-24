@@ -168,7 +168,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                 }
                                             )
                                             glossaryItem.details
-                                        ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails (Just onClickRelatedTerm) glossaryItem.relatedTerms
+                                        ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails Nothing glossaryItem.relatedTerms
                                     )
                                 ]
                             , div
@@ -283,7 +283,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                             False
                                             tabbable
                                             itemHasSomeDetails
-                                            (Just onClickRelatedTerm)
+                                            Nothing
                                             glossaryItem.relatedTerms
                                     )
                                 ]
@@ -479,13 +479,7 @@ viewGlossaryTerm { enableMathSupport, preview, tabbable, showSilcrow } term =
                 span
                     [ class "silcrow invisible group-hover:visible hover:visible print:group-hover:invisible print:hover:invisible" ]
                     [ Html.a
-                        [ (if preview then
-                            "#"
-
-                           else
-                            term |> Term.id |> fragmentOnly
-                          )
-                            |> Html.Attributes.href
+                        [ term |> Term.id |> fragmentOnly |> Html.Attributes.href
                         , Accessibility.Key.tabbable tabbable
                         ]
                         [ text "§" ]
