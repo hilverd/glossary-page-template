@@ -1631,9 +1631,14 @@ viewSelectInputSyntax glossary model =
         , Extras.Html.showIf (glossary.enableMarkdownBasedSyntax && glossary.enableMathSupport) <|
             div
                 [ class "mt-2 max-w-prose" ]
-                [ text "Math typesetting support is enabled. Inline math is written like this: "
-                , code [] [ text "`$e = mc^2$`" ]
-                , text ". Display math is written like this:"
+                [ text "Math typesetting support is enabled. Inline math is written like"
+                , pre
+                    [ class "mt-4" ]
+                    [ code
+                        []
+                        [ text "`$e = mc^2$`" ]
+                    ]
+                , p [ class "mt-4" ] [ text "and display math is written like this:" ]
                 , pre
                     [ class "mt-4" ]
                     [ code
