@@ -38,8 +38,7 @@ import ElementIds
 import Extras.Array
 import Extras.Regex
 import GlossaryItemForm.DetailsField as DetailsField exposing (DetailsField)
-import GlossaryItemForm.TermField as TermField exposing (TermField)
-import Html exposing (details)
+import GlossaryItemForm.TermField as TermField exposing (TermField, isAbbreviation)
 import Regex
 import Set exposing (Set)
 
@@ -115,7 +114,7 @@ needsUpdating glossaryItemForm =
 lastUpdatedDate : GlossaryItemForm -> String
 lastUpdatedDate glossaryItemForm =
     case glossaryItemForm of
-        GlossaryItemForm form ->
+        GlossaryItemForm _ ->
             "2011-11-18T14:54:39.929Z"
 
 
@@ -353,6 +352,9 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                         raw : String
                         raw =
                             termField |> TermField.raw |> String.trim
+
+                        isAbbreviation =
+                            TermField.isAbbreviation termField
                     in
                     (if enableMarkdownBasedSyntax then
                         Term.fromMarkdown
@@ -361,8 +363,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                         Term.fromPlaintext
                     )
                         raw
-                    <|
-                        TermField.isAbbreviation termField
+                        isAbbreviation
                 )
     , details =
         form

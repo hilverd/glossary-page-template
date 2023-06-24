@@ -2,9 +2,8 @@ module Components.GlossaryItemCard exposing (Style(..), view)
 
 import Accessibility exposing (Html, div, p, span, text)
 import Accessibility.Aria
-import Accessibility.Key exposing (tabbable)
+import Accessibility.Key
 import Components.Button
-import Data.FeatureFlag exposing (enableFeaturesInProgress)
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Details as Details
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
@@ -17,7 +16,7 @@ import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.Url exposing (fragmentOnly)
 import Html
-import Html.Attributes exposing (class, id, style)
+import Html.Attributes exposing (class, id)
 import Html.Events
 import Icons
 import Svg.Attributes
@@ -65,7 +64,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                         (List.map
                             (viewGlossaryTerm
                                 { enableMathSupport = enableMathSupport
-                                , preview = True
                                 , tabbable = tabbable
                                 , showSilcrow = False
                                 }
@@ -364,7 +362,6 @@ viewAsSingle { tabbable, enableMathSupport, makeLinksTabbable, enableLastUpdated
                         (List.map
                             (viewGlossaryTerm
                                 { enableMathSupport = enableMathSupport
-                                , preview = False
                                 , tabbable = tabbable
                                 , showSilcrow = False
                                 }
@@ -394,7 +391,6 @@ viewAsSingle { tabbable, enableMathSupport, makeLinksTabbable, enableLastUpdated
                     (List.map
                         (viewGlossaryTerm
                             { enableMathSupport = enableMathSupport
-                            , preview = False
                             , tabbable = tabbable
                             , showSilcrow = False
                             }
@@ -460,8 +456,8 @@ errorDiv message =
         ]
 
 
-viewGlossaryTerm : { enableMathSupport : Bool, preview : Bool, tabbable : Bool, showSilcrow : Bool } -> Term -> Html msg
-viewGlossaryTerm { enableMathSupport, preview, tabbable, showSilcrow } term =
+viewGlossaryTerm : { enableMathSupport : Bool, tabbable : Bool, showSilcrow : Bool } -> Term -> Html msg
+viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow } term =
     div
         [ class "flex justify-between" ]
         [ Html.dt

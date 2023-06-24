@@ -6,7 +6,7 @@ module Export.Markdown exposing (download)
 
 -}
 
-import Array exposing (Array)
+import Array
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)

@@ -1,6 +1,6 @@
 module Data.Glossary exposing (Glossary, toHtmlTree)
 
-import Array exposing (Array)
+import Array
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
