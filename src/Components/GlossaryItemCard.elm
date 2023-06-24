@@ -123,7 +123,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                             ]
                             [ div
                                 []
-                                [ Extras.Html.showIf (enableFeaturesInProgress && not shownAsSingle) <|
+                                [ Extras.Html.showIf (not shownAsSingle) <|
                                     div
                                         [ class "print:hidden hidden sm:block float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
                                         [ span
@@ -234,22 +234,21 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                             ]
                             [ div
                                 [ class "flex-1" ]
-                                [ Extras.Html.showIf enableFeaturesInProgress <|
-                                    div
-                                        [ class "print:hidden hidden lg:block float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
-                                        [ span
-                                            []
-                                            [ Components.Button.text
-                                                [ Accessibility.Key.tabbable tabbable
-                                                , Accessibility.Aria.label "View as single item"
-                                                , Html.Attributes.title "View as single item"
-                                                , Html.Events.onClick onClickViewFull
-                                                ]
-                                                [ Icons.window
-                                                    [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
-                                                ]
+                                [ div
+                                    [ class "print:hidden hidden lg:block float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
+                                    [ span
+                                        []
+                                        [ Components.Button.text
+                                            [ Accessibility.Key.tabbable tabbable
+                                            , Accessibility.Aria.label "View as single item"
+                                            , Html.Attributes.title "View as single item"
+                                            , Html.Events.onClick onClickViewFull
+                                            ]
+                                            [ Icons.window
+                                                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
                                             ]
                                         ]
+                                    ]
                                 , div []
                                     (List.map
                                         (viewGlossaryTerm
