@@ -103,6 +103,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                         div
                             [ Html.Attributes.style "max-height" "100%"
                             , Html.Attributes.style "border-width" "0px"
+                            , class "mt-1.5"
                             ]
                             [ viewAsSingle
                                 { tabbable = tabbable
