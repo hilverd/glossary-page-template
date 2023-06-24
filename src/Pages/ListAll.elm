@@ -957,17 +957,14 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
 itemWithPreviousAndNextForIndex : GlossaryItemIndex -> Array ( GlossaryItemIndex, GlossaryItem ) -> GlossaryItemWithPreviousAndNext
 itemWithPreviousAndNextForIndex index indexedGlossaryItems =
     indexedGlossaryItems
-        |> Array.toList
+        |> Array.toIndexedList
         |> List.foldl
-            (\( index0, item0 ) { previous, item, next } ->
-                if index0 == GlossaryItemIndex.minusOne index then
-                    { previous = Just ( index0, item0 ), item = item, next = next }
-
-                else if index0 == GlossaryItemIndex.plusOne index then
-                    { previous = previous, item = item, next = Just ( index0, item0 ) }
-
-                else if index0 == index then
-                    { previous = previous, item = Just ( index0, item0 ), next = next }
+            (\( artificialIndex, ( index0, item0 ) ) { previous, item, next } ->
+                if index0 == index then
+                    { previous = Array.get (artificialIndex - 1) indexedGlossaryItems
+                    , item = Just ( index0, item0 )
+                    , next = Array.get (artificialIndex + 1) indexedGlossaryItems
+                    }
 
                 else
                     { previous = previous, item = item, next = next }
