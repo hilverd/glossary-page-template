@@ -142,7 +142,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                     (List.map
                                         (viewGlossaryTerm
                                             { enableMathSupport = enableMathSupport
-                                            , preview = False
                                             , tabbable = tabbable
                                             , showSilcrow = True
                                             }
@@ -251,7 +250,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                     (List.map
                                         (viewGlossaryTerm
                                             { enableMathSupport = enableMathSupport
-                                            , preview = False
                                             , tabbable = tabbable
                                             , showSilcrow = True
                                             }
