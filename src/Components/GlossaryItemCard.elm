@@ -228,7 +228,9 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
 
                     else
                         div
-                            [ class "flex flex-col justify-between" ]
+                            [ class "flex flex-col justify-between"
+                            , id <| ElementIds.glossaryItemDiv index
+                            ]
                             [ div
                                 [ class "flex-1" ]
                                 [ Extras.Html.showIf enableFeaturesInProgress <|

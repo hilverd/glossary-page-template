@@ -210,6 +210,9 @@ port changeTheme : Maybe String -> Cmd msg
 port changeOrderItemsBy : String -> Cmd msg
 
 
+port scrollElementIntoView : String -> Cmd msg
+
+
 
 -- UPDATE
 
@@ -387,15 +390,13 @@ update msg model =
             ( model1, Cmd.none )
 
         ChangeLayoutToShowAll ->
-            let
-                common0 =
-                    model.common
-            in
-            ( { model
-                | common = { common0 | maybeIndex = Nothing }
-                , layout = ShowAllItems
-              }
-            , allowBackgroundScrolling ()
+            ( { model | layout = ShowAllItems }
+            , Cmd.batch
+                [ allowBackgroundScrolling ()
+                , model.common.maybeIndex
+                    |> Maybe.map (ElementIds.glossaryItemDiv >> scrollElementIntoView)
+                    |> Maybe.withDefault Cmd.none
+                ]
             )
 
         ConfirmDelete index ->

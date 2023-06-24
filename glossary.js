@@ -122,6 +122,10 @@ app.ports.preventBackgroundScrolling.subscribe(() => {
     document.querySelector('body').classList.toggle('overflow-hidden', true);
 });
 
+app.ports.scrollElementIntoView.subscribe((elementId) => {
+    document.getElementById(elementId).scrollIntoView({ block: "nearest" });
+});
+
 app.ports.scrollSearchResultIntoView.subscribe((elementId) => {
     document.getElementById(elementId).scrollIntoView({ block: "nearest" });
 });
