@@ -12,6 +12,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Add "View as single item" button on each card. This is available on "larger" screens and is meant to help make longer descriptions more readable.
+
 ### Changed
 
 - Backfill last updated dates for example glossaries.
