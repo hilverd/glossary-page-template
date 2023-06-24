@@ -104,8 +104,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                             , class "mt-1.5"
                             ]
                             [ viewAsSingle
-                                { tabbable = tabbable
-                                , enableMathSupport = enableMathSupport
+                                { enableMathSupport = enableMathSupport
                                 , makeLinksTabbable = makeLinksTabbable
                                 , enableLastUpdatedDates = enableLastUpdatedDates
                                 , onClickItem = onClickItem
@@ -301,8 +300,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
 
 
 viewAsSingle :
-    { tabbable : Bool
-    , enableMathSupport : Bool
+    { enableMathSupport : Bool
     , makeLinksTabbable : Bool
     , enableLastUpdatedDates : Bool
     , onClickItem : GlossaryItemIndex -> msg
@@ -310,7 +308,7 @@ viewAsSingle :
     }
     -> GlossaryItemWithPreviousAndNext
     -> Html msg
-viewAsSingle { tabbable, enableMathSupport, makeLinksTabbable, enableLastUpdatedDates, onClickItem, onClickRelatedTerm } glossaryItemWithPreviousAndNext =
+viewAsSingle { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates, onClickItem, onClickRelatedTerm } glossaryItemWithPreviousAndNext =
     let
         primaryTermForPreviousOrNext glossaryItem =
             glossaryItem.terms
@@ -343,9 +341,7 @@ viewAsSingle { tabbable, enableMathSupport, makeLinksTabbable, enableLastUpdated
                         [ Extras.Html.showMaybe
                             (\( previousItemIndex, previousItem ) ->
                                 Components.Button.text
-                                    [ Accessibility.Key.tabbable tabbable
-                                    , Html.Events.onClick <| onClickItem previousItemIndex
-                                    ]
+                                    [ Html.Events.onClick <| onClickItem previousItemIndex ]
                                     [ Icons.arrowLongLeft
                                         [ Svg.Attributes.class "h-5 w-5" ]
                                     , span
@@ -360,7 +356,7 @@ viewAsSingle { tabbable, enableMathSupport, makeLinksTabbable, enableLastUpdated
                         (List.map
                             (viewGlossaryTerm
                                 { enableMathSupport = enableMathSupport
-                                , tabbable = tabbable
+                                , tabbable = True
                                 , showSilcrow = False
                                 }
                             )
@@ -371,9 +367,7 @@ viewAsSingle { tabbable, enableMathSupport, makeLinksTabbable, enableLastUpdated
                         [ Extras.Html.showMaybe
                             (\( nextItemIndex, nextItem ) ->
                                 Components.Button.text
-                                    [ Accessibility.Key.tabbable tabbable
-                                    , Html.Events.onClick <| onClickItem nextItemIndex
-                                    ]
+                                    [ Html.Events.onClick <| onClickItem nextItemIndex ]
                                     [ span
                                         [ class "font-medium" ]
                                         (primaryTermForPreviousOrNext nextItem)
@@ -389,7 +383,7 @@ viewAsSingle { tabbable, enableMathSupport, makeLinksTabbable, enableLastUpdated
                     (List.map
                         (viewGlossaryTerm
                             { enableMathSupport = enableMathSupport
-                            , tabbable = tabbable
+                            , tabbable = True
                             , showSilcrow = False
                             }
                         )
@@ -419,7 +413,7 @@ viewAsSingle { tabbable, enableMathSupport, makeLinksTabbable, enableLastUpdated
                         ++ viewGlossaryItemRelatedTerms
                             enableMathSupport
                             False
-                            tabbable
+                            True
                             (GlossaryItem.hasSomeDetails glossaryItem)
                             (Just onClickRelatedTerm)
                             glossaryItem.relatedTerms
