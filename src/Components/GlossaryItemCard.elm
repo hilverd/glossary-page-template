@@ -125,7 +125,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                 []
                                 [ Extras.Html.showIf (not shownAsSingle) <|
                                     div
-                                        [ class "print:hidden hidden sm:block float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
+                                        [ class "print:hidden hidden lg:block float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
                                         [ span
                                             []
                                             [ Components.Button.text
