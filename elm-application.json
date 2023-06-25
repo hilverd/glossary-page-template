@@ -1,7 +1,7 @@
 {
     "name": "hilverd/glossary-page-template",
     "summary": "Create a glossary as a single HTML page hosted anywhere.",
-    "version": "3.4.0",
+    "version": "3.4.1",
     "exposed-modules": [
         "ApplicationShell",
         "Data.AboutLink",
