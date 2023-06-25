@@ -14,10 +14,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+### Removed
+
+## [3.4.2] - 2023-06-25
+
+### Fixed
 
 - Fix bug where last updated date was not changing in "View as single item" modal dialog.
-
-### Removed
 
 ## [3.4.1] - 2023-06-25
 
@@ -493,7 +496,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.4.1...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.4.2...HEAD
+[3.4.2]: https://github.com/hilverd/glossary-page-template/compare/v3.4.1...v3.4.2
 [3.4.1]: https://github.com/hilverd/glossary-page-template/compare/v3.3.1...v3.4.1
 [3.3.1]: https://github.com/hilverd/glossary-page-template/compare/v3.3.0...v3.3.1
 [3.3.0]: https://github.com/hilverd/glossary-page-template/compare/v3.2.0...v3.3.0
