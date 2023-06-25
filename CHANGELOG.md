@@ -12,15 +12,19 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [3.4.0] - 2023-06-25
+
+### Added
 
 - Add "View as single item" button on each card. This is available on "larger" screens and is meant to help make longer descriptions more readable.
 
 ### Changed
 
 - Backfill last updated dates for example glossaries.
-
-### Fixed
-### Removed
 
 ## [3.3.1] - 2023-06-13
 
@@ -486,7 +490,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.3.1...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.4.0...HEAD
+[3.4.0]: https://github.com/hilverd/glossary-page-template/compare/v3.3.1...v3.4.0
 [3.3.1]: https://github.com/hilverd/glossary-page-template/compare/v3.3.0...v3.3.1
 [3.3.0]: https://github.com/hilverd/glossary-page-template/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/hilverd/glossary-page-template/compare/v3.1.0...v3.2.0
