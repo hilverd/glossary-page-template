@@ -180,7 +180,7 @@ domReady(() => {
             constructor() { super(); }
             connectedCallback() { this.setTextContent(); }
             attributeChangedCallback() { this.setTextContent(); }
-            static get observedAttributes() { return []; }
+            static get observedAttributes() { return ['datetime']; }
 
             setTextContent() {
                 const datetimeAttribute = this.getAttribute('datetime');

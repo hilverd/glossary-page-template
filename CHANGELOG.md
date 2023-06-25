@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- Fix bug where last updated date was not changing in "View as single item" modal dialog.
+
 ### Removed
 
 ## [3.4.1] - 2023-06-25
