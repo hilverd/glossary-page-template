@@ -13,11 +13,14 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
-
-- Make icon for "View as single item" button more intuitive.
-
 ### Fixed
 ### Removed
+
+## [3.4.3] - 2023-06-27
+
+### Changed
+
+- Make icon for "View as single item" button more intuitive.
 
 ## [3.4.2] - 2023-06-25
 
@@ -499,7 +502,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.4.2...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.4.3...HEAD
+[3.4.3]: https://github.com/hilverd/glossary-page-template/compare/v3.4.2...v3.4.3
 [3.4.2]: https://github.com/hilverd/glossary-page-template/compare/v3.4.1...v3.4.2
 [3.4.1]: https://github.com/hilverd/glossary-page-template/compare/v3.3.1...v3.4.1
 [3.3.1]: https://github.com/hilverd/glossary-page-template/compare/v3.3.0...v3.3.1
