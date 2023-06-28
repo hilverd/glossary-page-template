@@ -12,10 +12,10 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- In search results, show a preview of each term's definition.
+
 ### Changed
-
-- Upgrade to Vite 4.
-
 ### Fixed
 ### Removed
 

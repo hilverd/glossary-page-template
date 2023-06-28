@@ -1,6 +1,6 @@
 module SearchTests exposing (suite)
 
-import Components.SearchDialog exposing (searchResult)
+import Components.SearchDialog as SearchDialog exposing (SearchResult, searchResult)
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Details as Details
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
@@ -58,19 +58,21 @@ suite =
                 \_ ->
                     loadedGlossaryItems
                         |> Search.search False "term"
+                        |> List.map SearchDialog.searchResultHref
                         |> Expect.equal
-                            [ searchResult "#Second_the_term" [ Html.span [] [ Html.text "Second the term" ] ]
-                            , searchResult "#The_term_one" [ Html.span [] [ Html.text "The term one" ] ]
-                            , searchResult "#The_term_three" [ Html.span [] [ Html.text "The term three" ] ]
+                            [ "#Second_the_term"
+                            , "#The_term_one"
+                            , "#The_term_three"
                             ]
             , test "terms for which the search string is a prefix are ranked higher than other terms" <|
                 \_ ->
                     loadedGlossaryItems
                         |> Search.search False "the"
+                        |> List.map SearchDialog.searchResultHref
                         |> Expect.equal
-                            [ searchResult "#The_term_one" [ Html.span [] [ Html.text "The term one" ] ]
-                            , searchResult "#The_term_three" [ Html.span [] [ Html.text "The term three" ] ]
-                            , searchResult "#Second_the_term" [ Html.span [] [ Html.text "Second the term" ] ]
+                            [ "#The_term_one"
+                            , "#The_term_three"
+                            , "#Second_the_term"
                             ]
             ]
         ]

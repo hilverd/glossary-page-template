@@ -9,6 +9,7 @@ port module Components.SearchDialog exposing
     , onHide
     , onShow
     , searchResult
+    , searchResultHref
     , show
     , update
     , view
@@ -297,6 +298,13 @@ searchResult href body =
     SearchResult { href = href, body = body }
 
 
+searchResultHref : SearchResult -> String
+searchResultHref searchResult0 =
+    case searchResult0 of
+        SearchResult result ->
+            result.href
+
+
 onChangeSearchString : (String -> parentMsg) -> Property parentMsg
 onChangeSearchString =
     OnChangeSearchString
@@ -498,12 +506,7 @@ view toParentMsg model searchString searchResults =
                                                 ]
                                                 [ Html.a
                                                     [ class "hover:no-underline block"
-                                                    , class <|
-                                                        if Just index == model_.activeSearchResultIndex then
-                                                            "text-white dark:text-black"
-
-                                                        else
-                                                            "text-black dark:text-white"
+                                                    , class "text-gray-800 dark:text-gray-200"
                                                     , Accessibility.Key.tabbable False
                                                     , Html.Attributes.href href
                                                     , Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <|

@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Details exposing (Details, fromPlaintext, fromMarkdown, raw, markdown, view, htmlTreeForAnki)
+module Data.GlossaryItem.Details exposing (Details, fromPlaintext, fromMarkdown, raw, markdown, view, viewInline, htmlTreeForAnki)
 
 {-| A definition for a glossary item.
 This can be in either plain text or Markdown.
@@ -6,14 +6,14 @@ This can be in either plain text or Markdown.
 
 # Details
 
-@docs Details, fromPlaintext, fromMarkdown, raw, markdown, view, htmlTreeForAnki
+@docs Details, fromPlaintext, fromMarkdown, raw, markdown, view, viewInline, htmlTreeForAnki
 
 -}
 
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.HtmlTree exposing (HtmlTree)
 import Extras.String
-import Html exposing (Html, text)
+import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
 import Markdown.Block as Block exposing (Block)
 import Markdown.Html
@@ -126,6 +126,35 @@ view { enableMathSupport, makeLinksTabbable } details =
                         Ok rendered ->
                             Html.div
                                 [ class "prose print:prose-pre:overflow-x-hidden max-w-3xl prose-pre:bg-inherit prose-pre:text-gray-700 prose-pre:border print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]
+                                rendered
+
+                        Err renderingError ->
+                            text <| "Failed to render Markdown: " ++ renderingError
+
+                Err parsingError ->
+                    text <| "Failed to parse Markdown: " ++ parsingError
+
+
+{-| View details as inline HTML.
+-}
+viewInline : Bool -> List (Attribute msg) -> Details -> Html msg
+viewInline enableMathSupport additionalAttributes details =
+    case details of
+        PlaintextDetails body ->
+            Html.span additionalAttributes [ text body ]
+
+        MarkdownDetails fragment ->
+            let
+                parsed : Result String (List Block)
+                parsed =
+                    MarkdownFragment.parsed fragment
+            in
+            case parsed of
+                Ok blocks ->
+                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
+                        Ok rendered ->
+                            Html.span
+                                (class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" :: additionalAttributes)
                                 rendered
 
                         Err renderingError ->
