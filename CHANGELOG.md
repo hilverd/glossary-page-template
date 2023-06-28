@@ -14,6 +14,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 
 - In search results, show a preview of each term's definition.
+- Style external links with an icon.
 
 ### Changed
 ### Fixed
