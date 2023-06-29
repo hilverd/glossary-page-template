@@ -109,6 +109,9 @@ innerModel model =
 port scrollSearchResultIntoView : String -> Cmd msg
 
 
+port giveSearchFieldFocusOnceItIsPresent : String -> Cmd msg
+
+
 
 -- UPDATE
 
@@ -116,7 +119,6 @@ port scrollSearchResultIntoView : String -> Cmd msg
 type Msg
     = NoOp
     | Show
-    | FocusOnSearchStringInputField String
     | StartHiding
     | CompleteHiding
     | MakeSearchResultActive SearchResultIndex
@@ -151,16 +153,9 @@ update updateParentModel toParentMsg msg model =
                 Show ->
                     ( { model_ | visibility = Visible, activeSearchResultIndex = Nothing }
                     , Cmd.batch
-                        [ model_.config.onShow |> Maybe.withDefault Cmd.none
-                        , Process.sleep 200
-                            |> Task.perform (always <| FocusOnSearchStringInputField <| searchStringFieldId model_.idPrefix)
-                            |> Cmd.map toParentMsg
+                        [ Maybe.withDefault Cmd.none model_.config.onShow
+                        , giveSearchFieldFocusOnceItIsPresent <| searchStringFieldId model_.idPrefix
                         ]
-                    )
-
-                FocusOnSearchStringInputField elementId ->
-                    ( model_
-                    , Task.attempt (always <| toParentMsg NoOp) (Dom.focus elementId)
                     )
 
                 StartHiding ->
