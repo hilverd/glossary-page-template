@@ -128,7 +128,7 @@ Block elements are either ignored or have their children wrapped in a <span>.
 inlineHtmlMsgRenderer : Bool -> Renderer (Html msg)
 inlineHtmlMsgRenderer enableMathSupport =
     { heading = \{ children } -> Html.span [] children
-    , paragraph = Html.span []
+    , paragraph = Html.span [ class "mr-1" ]
     , hardLineBreak = Html.text ""
     , blockQuote = Html.span []
     , strong = Html.strong []

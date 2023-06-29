@@ -77,7 +77,8 @@ e = mc^2
                             )
                         |> Expect.equal
                             (Ok
-                                [ Html.p [ class "max-w-prose print:max-w-full" ]
+                                [ Html.p
+                                    [ class "max-w-prose print:max-w-full" ]
                                     [ Html.node "katex-inline"
                                         [ Attr.attribute "data-expr" "e = mc^2" ]
                                         []
@@ -94,7 +95,8 @@ e = mc^2
                         |> Result.andThen (Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer True))
                         |> Expect.equal
                             (Ok
-                                [ Html.span []
+                                [ Html.span
+                                    [ class "mr-1" ]
                                     [ Html.node "katex-inline"
                                         [ Attr.attribute "data-expr" "e = mc^2" ]
                                         []

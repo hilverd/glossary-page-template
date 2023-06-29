@@ -65,8 +65,8 @@ search enableMathSupport searchString glossaryItems =
                             , Extras.Html.showMaybe
                                 (\details ->
                                     Html.div
-                                        [ class "truncate" ]
-                                        [ Details.viewInline enableMathSupport [ class "text-sm" ] details
+                                        [ class "overflow-hidden whitespace-nowrap" ]
+                                        [ Details.viewInline enableMathSupport [] details
                                         ]
                                 )
                                 maybeDetails
