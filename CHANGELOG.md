@@ -12,13 +12,16 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
-
-- In search results, show a preview of each term's definition.
-- Style external links with an icon.
-
 ### Changed
 ### Fixed
 ### Removed
+
+## [3.5.0] - 2023-06-29
+
+### Added
+
+- In search results, show a preview of each term's definition.
+- Style external links with an icon.
 
 ## [3.4.3] - 2023-06-27
 
@@ -506,7 +509,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.4.3...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.5.0...HEAD
+[3.5.0]: https://github.com/hilverd/glossary-page-template/compare/v3.4.3...v3.5.0
 [3.4.3]: https://github.com/hilverd/glossary-page-template/compare/v3.4.2...v3.4.3
 [3.4.2]: https://github.com/hilverd/glossary-page-template/compare/v3.4.1...v3.4.2
 [3.4.1]: https://github.com/hilverd/glossary-page-template/compare/v3.3.1...v3.4.1
