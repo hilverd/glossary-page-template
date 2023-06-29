@@ -151,7 +151,11 @@ inlineHtmlMsgRenderer enableMathSupport =
     , text = Html.text
     , unorderedList = always <| Html.text ""
     , orderedList = \_ _ -> Html.text ""
-    , html = Markdown.Html.oneOf []
+    , html =
+        Markdown.Html.oneOf
+            [ Markdown.Html.tag "a" (always <| Html.text "")
+            , Markdown.Html.tag "img" (always <| Html.text "")
+            ]
     , codeBlock = always <| Html.text ""
     , thematicBreak = Html.span [] []
     , table = Html.span []
@@ -460,7 +464,11 @@ inlineHtmlTreeRendererForAnki enableMathSupport =
     , text = HtmlTree.Leaf
     , unorderedList = always <| HtmlTree.Leaf ""
     , orderedList = \_ _ -> HtmlTree.Leaf ""
-    , html = Markdown.Html.oneOf []
+    , html =
+        Markdown.Html.oneOf
+            [ Markdown.Html.tag "a" (always <| HtmlTree.Leaf "")
+            , Markdown.Html.tag "img" (always <| HtmlTree.Leaf "")
+            ]
     , codeBlock = always <| HtmlTree.Leaf ""
     , thematicBreak = HtmlTree.Node "span" False [] []
     , table = HtmlTree.Node "span" False []
