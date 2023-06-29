@@ -13,6 +13,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+
+- Make minor improvement to styling of search results (use ellipsis unless math support is enabled).
+
 ### Fixed
 
 - Fix layout bug that was causing a space to appear before each comma under "See also".
