@@ -8,6 +8,7 @@ import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
 import Components.Button
 import Components.Copy
+import Components.Dividers
 import Components.Form
 import Components.GlossaryItemCard
 import Components.SelectMenu
@@ -878,7 +879,7 @@ view model =
                             [ div
                                 [ class "lg:flex lg:space-x-8" ]
                                 [ div
-                                    [ class "lg:w-1/2 space-y-8 divide-y divide-gray-200 dark:divide-gray-800 sm:space-y-5" ]
+                                    [ class "lg:w-1/2 space-y-8 divide-y divide-gray-300 dark:divide-gray-600 sm:space-y-5" ]
                                     [ viewCreateDescriptionTerms glossary.enableMarkdownBasedSyntax glossary.enableMathSupport model.triedToSaveWhenFormInvalid terms
                                     , viewCreateDescriptionDetails
                                         (not glossary.enableMarkdownBasedSyntax)
@@ -886,14 +887,20 @@ view model =
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
                                         detailsArray
-                                    , viewCreateSeeAlso
-                                        glossary.enableMathSupport
-                                        model.triedToSaveWhenFormInvalid
-                                        glossary.items
-                                        terms
-                                        relatedTerms
-                                        suggestedRelatedTerms
-                                    , viewNeedsUpdating <| Form.needsUpdating model.form
+                                    , div
+                                        []
+                                        [ viewCreateSeeAlso
+                                            glossary.enableMathSupport
+                                            model.triedToSaveWhenFormInvalid
+                                            glossary.items
+                                            terms
+                                            relatedTerms
+                                            suggestedRelatedTerms
+                                        , Components.Dividers.withLabel
+                                            [ class "mt-8" ]
+                                            "Miscellaneous"
+                                        , viewNeedsUpdating <| Form.needsUpdating model.form
+                                        ]
                                     ]
                                 , div
                                     [ class "mt-8 lg:w-1/2 lg:mt-0 max-w-4xl text-gray-900 dark:text-gray-100" ]
