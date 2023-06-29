@@ -116,8 +116,12 @@ if (containerElement) {
         }
     });
 
-    app.ports.allowBackgroundScrolling.subscribe(() => {
+    function allowBackgroundScrolling() {
         document.querySelector('body').classList.toggle('overflow-hidden', false);
+    }
+
+    app.ports.allowBackgroundScrolling.subscribe(() => {
+        allowBackgroundScrolling();
     });
 
     app.ports.preventBackgroundScrolling.subscribe(() => {
@@ -125,11 +129,22 @@ if (containerElement) {
     });
 
     app.ports.scrollElementIntoView.subscribe((elementId) => {
-        document.getElementById(elementId).scrollIntoView({ block: "nearest" });
+        const elem = document.getElementById(elementId);
+
+        if (elem) {
+            elem.scrollIntoView({ block: "nearest" });
+        } else {
+            // Do this just in case, as it seems that there might be situations where the background is left "locked".
+            allowBackgroundScrolling();
+        }
     });
 
     app.ports.scrollSearchResultIntoView.subscribe((elementId) => {
-        document.getElementById(elementId).scrollIntoView({ block: "nearest" });
+        const elem = document.getElementById(elementId);
+
+        if (elem) {
+            elem.scrollIntoView({ block: "nearest" });
+        }
     });
 
     app.ports.changeTheme.subscribe((themeName) => {
