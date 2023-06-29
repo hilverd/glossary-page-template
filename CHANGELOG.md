@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- Fix layout bug that was causing a space to appear before each comma under "See also".
+
 ### Removed
 
 ## [3.5.0] - 2023-06-29
