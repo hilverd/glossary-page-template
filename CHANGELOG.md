@@ -13,6 +13,12 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+### Fixed
+### Removed
+
+## [3.5.1] - 2023-06-30
+
+### Changed
 
 - Make minor improvement to styling of search results (use ellipsis unless math support is enabled).
 
@@ -20,8 +26,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 - Fix layout bug that was causing a space to appear before each comma under "See also".
 - Give search field focus more reliably.
-
-### Removed
 
 ## [3.5.0] - 2023-06-29
 
@@ -516,7 +520,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.5.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.5.1...HEAD
+[3.5.1]: https://github.com/hilverd/glossary-page-template/compare/v3.5.0...v3.5.1
 [3.5.0]: https://github.com/hilverd/glossary-page-template/compare/v3.4.3...v3.5.0
 [3.4.3]: https://github.com/hilverd/glossary-page-template/compare/v3.4.2...v3.4.3
 [3.4.2]: https://github.com/hilverd/glossary-page-template/compare/v3.4.1...v3.4.2
