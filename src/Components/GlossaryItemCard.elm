@@ -3,7 +3,9 @@ module Components.GlossaryItemCard exposing (Style(..), view)
 import Accessibility exposing (Html, div, p, span, text)
 import Accessibility.Aria
 import Accessibility.Key
+import Components.Badge
 import Components.Button
+import Data.FeatureFlag exposing (enableFeaturesInProgress)
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Details as Details
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
@@ -480,7 +482,16 @@ viewGlossaryItemDetails : { enableMathSupport : Bool, makeLinksTabbable : Bool }
 viewGlossaryItemDetails { enableMathSupport, makeLinksTabbable } details =
     Html.dd
         []
-        [ Details.view { enableMathSupport = enableMathSupport, makeLinksTabbable = makeLinksTabbable } details ]
+        [ Details.view { enableMathSupport = enableMathSupport, makeLinksTabbable = makeLinksTabbable } details
+        , Extras.Html.showIf enableFeaturesInProgress <|
+            Html.div
+                [ class "mt-4" ]
+                [ Components.Button.softSmall
+                    True
+                    [ class "mr-2 mb-2" ]
+                    [ text "First Topic" ]
+                ]
+        ]
 
 
 viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Bool -> Maybe (RelatedTerm -> msg) -> List RelatedTerm -> List (Html msg)

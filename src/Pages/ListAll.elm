@@ -33,6 +33,7 @@ import Browser.Dom as Dom
 import Browser.Navigation as Navigation
 import CommonModel exposing (CommonModel)
 import Components.AboutSection
+import Components.Badge
 import Components.Button
 import Components.Copy
 import Components.DropdownMenu
@@ -40,6 +41,7 @@ import Components.GlossaryItemCard
 import Components.ModalDialog
 import Components.SearchDialog
 import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.FeatureFlag exposing (enableFeaturesInProgress)
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
@@ -1185,6 +1187,10 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                         viewCreateGlossaryItemButton tabbable model.common
                     ]
             ]
+        , Extras.Html.showIf enableFeaturesInProgress <|
+            viewCurrentTopicFilter tabbable
+        , Extras.Html.showIf enableFeaturesInProgress <|
+            viewAllTopicFilters tabbable
         , Extras.Html.showIf (not <| Array.isEmpty indexedGlossaryItems) <|
             viewOrderItemsBy model (Array.length indexedGlossaryItems)
         , Html.dl
@@ -1717,6 +1723,38 @@ viewSelectCardWidth glossary model =
                     ]
                 ]
             ]
+        ]
+
+
+viewCurrentTopicFilter : Bool -> Html Msg
+viewCurrentTopicFilter tabbable =
+    div
+        [ class "print:hidden pt-4 font-medium text-gray-900 dark:text-gray-100" ]
+        [ span
+            [ class "mr-2" ]
+            [ text "Only showing selected topic:" ]
+        , Components.Badge.withBorderAndRemoveButton
+            tabbable
+            [ class "mt-2" ]
+            "First Topic"
+        ]
+
+
+viewAllTopicFilters : Bool -> Html Msg
+viewAllTopicFilters tabbable =
+    div
+        [ class "print:hidden pt-4 font-medium text-gray-900 dark:text-gray-100" ]
+        [ span
+            [ class "mr-2" ]
+            [ text "Topics:" ]
+        , Components.Button.soft
+            tabbable
+            [ class "mr-2 mb-2" ]
+            [ text "First Topic (4)" ]
+        , Components.Button.soft
+            tabbable
+            [ class "mr-2 mb-2" ]
+            [ text "Second Topic (1)" ]
         ]
 
 

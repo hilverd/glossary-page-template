@@ -1,4 +1,4 @@
-module Components.Button exposing (emptyState, primary, radio, rounded, secondary, text, toggle, white)
+module Components.Button exposing (emptyState, primary, radio, rounded, secondary, soft, softSmall, text, toggle, white)
 
 import Accessibility exposing (Attribute)
 import Accessibility.Aria
@@ -71,6 +71,34 @@ rounded enabled =
         [ class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-sm rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
         , if enabled then
             class "hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+
+          else
+            class "opacity-50"
+        , Html.Attributes.disabled <| not enabled
+        , Accessibility.Key.tabbable enabled
+        ]
+
+
+softSmall : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
+softSmall enabled =
+    withAdditionalAttributes
+        [ class "rounded-full bg-indigo-50 dark:bg-indigo-900 px-2 py-1 text-sm text-indigo-700 dark:text-indigo-100 shadow-sm"
+        , if enabled then
+            class "hover:bg-indigo-100 dark:hover:bg-indigo-700"
+
+          else
+            class "opacity-50"
+        , Html.Attributes.disabled <| not enabled
+        , Accessibility.Key.tabbable enabled
+        ]
+
+
+soft : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
+soft enabled =
+    withAdditionalAttributes
+        [ class "rounded-full bg-indigo-100 dark:bg-indigo-900 px-2 py-1 text-indigo-700 dark:text-indigo-100 shadow-sm"
+        , if enabled then
+            class "hover:bg-indigo-200 dark:hover:bg-indigo-700"
 
           else
             class "opacity-50"
