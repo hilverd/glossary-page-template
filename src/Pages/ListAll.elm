@@ -1159,10 +1159,13 @@ viewCreateGlossaryItemButton tabbable common =
                 , fill "currentColor"
                 , stroke "none"
                 ]
-            , text "Create a new glossary item"
-            , Html.kbd
-                [ class "ml-2 inline-flex items-center rounded border border-indigo-700 dark:border-indigo-300 px-1 font-sans text-xs" ]
-                [ text "n" ]
+            , span
+                [ class "inline-flex items-center" ]
+                [ text "Create a new glossary item"
+                , Html.kbd
+                    [ class "ml-2 inline-flex items-center rounded border border-indigo-700 dark:border-indigo-300 px-1 font-sans text-xs" ]
+                    [ text "n" ]
+                ]
             ]
         ]
 

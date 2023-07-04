@@ -6,6 +6,7 @@ import Array exposing (Array)
 import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
+import Components.Badge
 import Components.Button
 import Components.Copy
 import Components.Dividers
@@ -563,6 +564,37 @@ viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabl
             p
                 [ class "mt-2 text-red-800 dark:text-red-200" ]
                 [ text "This will be turned into a single paragraph — line breaks are automatically converted to spaces" ]
+        , div
+            [ class "mt-4" ]
+            [ Components.Badge.withCheckbox
+                True
+                "First Topic"
+                [ class "mr-2 mb-2" ]
+            , Components.Badge.withCheckbox
+                True
+                "Second Topic"
+                [ class "mr-2 mb-2" ]
+            , Components.Badge.withCheckbox
+                True
+                "First Topic"
+                [ class "mr-2 mb-2" ]
+            , Components.Badge.withCheckbox
+                True
+                "First Topic"
+                [ class "mr-2 mb-2" ]
+            , Components.Badge.withCheckbox
+                True
+                "First Topic"
+                [ class "mr-2 mb-2" ]
+            , Components.Badge.withCheckbox
+                True
+                "First Topic"
+                [ class "mr-2 mb-2" ]
+            , Components.Badge.withCheckbox
+                True
+                "First Topic"
+                [ class "mr-2 mb-2" ]
+            ]
         ]
 
 

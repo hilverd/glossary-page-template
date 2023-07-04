@@ -86,7 +86,8 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                             ++ List.map
                                 (viewGlossaryItemDetails
                                     { enableMathSupport = enableMathSupport
-                                    , makeLinksTabbable = makeLinksTabbable
+                                    , tabbable = makeLinksTabbable
+                                    , topicsClickable = False
                                     }
                                 )
                                 glossaryItem.details
@@ -163,7 +164,8 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                         ++ List.map
                                             (viewGlossaryItemDetails
                                                 { enableMathSupport = enableMathSupport
-                                                , makeLinksTabbable = makeLinksTabbable
+                                                , tabbable = makeLinksTabbable
+                                                , topicsClickable = makeLinksTabbable
                                                 }
                                             )
                                             glossaryItem.details
@@ -271,7 +273,8 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                         ++ List.map
                                             (viewGlossaryItemDetails
                                                 { enableMathSupport = enableMathSupport
-                                                , makeLinksTabbable = makeLinksTabbable
+                                                , tabbable = makeLinksTabbable
+                                                , topicsClickable = makeLinksTabbable
                                                 }
                                             )
                                             glossaryItem.details
@@ -408,7 +411,8 @@ viewAsSingle { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates, onC
                         ++ List.map
                             (viewGlossaryItemDetails
                                 { enableMathSupport = enableMathSupport
-                                , makeLinksTabbable = makeLinksTabbable
+                                , tabbable = True
+                                , topicsClickable = False
                                 }
                             )
                             glossaryItem.details
@@ -478,17 +482,19 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow } term =
         ]
 
 
-viewGlossaryItemDetails : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> Details.Details -> Html msg
-viewGlossaryItemDetails { enableMathSupport, makeLinksTabbable } details =
+viewGlossaryItemDetails : { enableMathSupport : Bool, tabbable : Bool, topicsClickable : Bool } -> Details.Details -> Html msg
+viewGlossaryItemDetails { enableMathSupport, tabbable, topicsClickable } details =
     Html.dd
         []
-        [ Details.view { enableMathSupport = enableMathSupport, makeLinksTabbable = makeLinksTabbable } details
+        [ Details.view { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable } details
         , Extras.Html.showIf enableFeaturesInProgress <|
             Html.div
                 [ class "mt-4" ]
                 [ Components.Button.softSmall
-                    True
-                    [ class "mr-2 mb-2" ]
+                    topicsClickable
+                    [ class "mr-2 mb-2"
+                    , Html.Attributes.title "Topic: First Topic"
+                    ]
                     [ text "First Topic" ]
                 ]
         ]
