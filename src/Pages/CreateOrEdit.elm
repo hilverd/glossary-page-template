@@ -14,6 +14,7 @@ import Components.Form
 import Components.GlossaryItemCard
 import Components.SelectMenu
 import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
+import Data.FeatureFlag exposing (enableFeaturesInProgress)
 import Data.Glossary as Glossary
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
@@ -564,37 +565,38 @@ viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabl
             p
                 [ class "mt-2 text-red-800 dark:text-red-200" ]
                 [ text "This will be turned into a single paragraph — line breaks are automatically converted to spaces" ]
-        , div
-            [ class "mt-4" ]
-            [ Components.Badge.withCheckbox
-                True
-                "First Topic"
-                [ class "mr-2 mb-2" ]
-            , Components.Badge.withCheckbox
-                True
-                "Second Topic"
-                [ class "mr-2 mb-2" ]
-            , Components.Badge.withCheckbox
-                True
-                "First Topic"
-                [ class "mr-2 mb-2" ]
-            , Components.Badge.withCheckbox
-                True
-                "First Topic"
-                [ class "mr-2 mb-2" ]
-            , Components.Badge.withCheckbox
-                True
-                "First Topic"
-                [ class "mr-2 mb-2" ]
-            , Components.Badge.withCheckbox
-                True
-                "First Topic"
-                [ class "mr-2 mb-2" ]
-            , Components.Badge.withCheckbox
-                True
-                "First Topic"
-                [ class "mr-2 mb-2" ]
-            ]
+        , Extras.Html.showIf enableFeaturesInProgress <|
+            div
+                [ class "mt-4" ]
+                [ Components.Badge.withCheckbox
+                    True
+                    "First Topic"
+                    [ class "mr-2 mb-2" ]
+                , Components.Badge.withCheckbox
+                    True
+                    "Second Topic"
+                    [ class "mr-2 mb-2" ]
+                , Components.Badge.withCheckbox
+                    True
+                    "First Topic"
+                    [ class "mr-2 mb-2" ]
+                , Components.Badge.withCheckbox
+                    True
+                    "First Topic"
+                    [ class "mr-2 mb-2" ]
+                , Components.Badge.withCheckbox
+                    True
+                    "First Topic"
+                    [ class "mr-2 mb-2" ]
+                , Components.Badge.withCheckbox
+                    True
+                    "First Topic"
+                    [ class "mr-2 mb-2" ]
+                , Components.Badge.withCheckbox
+                    True
+                    "First Topic"
+                    [ class "mr-2 mb-2" ]
+                ]
         ]
 
 
