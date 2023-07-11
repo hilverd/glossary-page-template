@@ -11,7 +11,7 @@ import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
 import Data.GlossaryItem exposing (GlossaryItem)
-import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -68,7 +68,7 @@ paragraphs =
 
 
 itemToAnki : Bool -> GlossaryItem -> String
-itemToAnki enableMathSupport { terms, details, relatedTerms } =
+itemToAnki enableMathSupport { terms, definitions, relatedTerms } =
     let
         quote : String -> String
         quote string =
@@ -83,7 +83,7 @@ itemToAnki enableMathSupport { terms, details, relatedTerms } =
 
         back : String
         back =
-            if List.isEmpty details then
+            if List.isEmpty definitions then
                 if List.isEmpty relatedTerms then
                     ""
 
@@ -97,8 +97,8 @@ itemToAnki enableMathSupport { terms, details, relatedTerms } =
                         |> quote
 
             else
-                details
-                    |> List.map (Details.htmlTreeForAnki enableMathSupport >> Extras.HtmlTree.toHtml >> escape)
+                definitions
+                    |> List.map (Definition.htmlTreeForAnki enableMathSupport >> Extras.HtmlTree.toHtml >> escape)
                     |> paragraphs
                     |> quote
     in

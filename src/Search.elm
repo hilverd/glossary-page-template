@@ -2,7 +2,7 @@ module Search exposing (search)
 
 import Array
 import Components.SearchDialog as SearchDialog
-import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Extras.Html
@@ -23,8 +23,8 @@ search enableMathSupport searchString glossaryItems =
 
     else
         let
-            termsAndDetails : List ( Term, Maybe Details.Details )
-            termsAndDetails =
+            termsAndDefinitions : List ( Term, Maybe Definition )
+            termsAndDefinitions =
                 glossaryItems
                     |> GlossaryItems.orderedByMostMentionedFirst
                     |> Array.toList
@@ -33,15 +33,15 @@ search enableMathSupport searchString glossaryItems =
                             item.terms
                                 |> List.map
                                     (\term ->
-                                        ( term, List.head item.details )
+                                        ( term, List.head item.definitions )
                                     )
                         )
         in
-        termsAndDetails
+        termsAndDefinitions
             |> List.filterMap
-                (\( term, details ) ->
+                (\( term, definition ) ->
                     if String.contains searchStringNormalised (term |> Term.inlineText |> String.toLower) then
-                        Just ( term, details )
+                        Just ( term, definition )
 
                     else
                         Nothing
@@ -54,7 +54,7 @@ search enableMathSupport searchString glossaryItems =
                     whereSearchStringIsPrefix ++ whereSearchStringIsNotPrefix
                )
             |> List.map
-                (\( term, maybeDetails ) ->
+                (\( term, maybeDefinition ) ->
                     SearchDialog.searchResult
                         (Extras.Url.fragmentOnly <| Term.id term)
                         [ Html.div
@@ -63,7 +63,7 @@ search enableMathSupport searchString glossaryItems =
                                 [ class "font-medium" ]
                                 [ Term.view enableMathSupport [] term ]
                             , Extras.Html.showMaybe
-                                (\details ->
+                                (\definition ->
                                     Html.div
                                         [ if enableMathSupport then
                                             class "overflow-hidden whitespace-nowrap"
@@ -71,10 +71,10 @@ search enableMathSupport searchString glossaryItems =
                                           else
                                             class "truncate"
                                         ]
-                                        [ Details.viewInline enableMathSupport [] details
+                                        [ Definition.viewInline enableMathSupport [] definition
                                         ]
                                 )
-                                maybeDetails
+                                maybeDefinition
                             ]
                         ]
                 )

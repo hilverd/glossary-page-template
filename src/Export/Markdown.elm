@@ -11,7 +11,7 @@ import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
 import Data.GlossaryItem exposing (GlossaryItem)
-import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -57,7 +57,7 @@ paragraphs =
 
 
 itemToMarkdown : GlossaryItem -> String
-itemToMarkdown { terms, details, relatedTerms } =
+itemToMarkdown { terms, definitions, relatedTerms } =
     let
         termsString : String
         termsString =
@@ -65,10 +65,10 @@ itemToMarkdown { terms, details, relatedTerms } =
                 |> List.map (Term.markdown >> bold)
                 |> lines
 
-        detailsString : String
-        detailsString =
-            details
-                |> List.map Details.markdown
+        definitionsString : String
+        definitionsString =
+            definitions
+                |> List.map Definition.markdown
                 |> paragraphs
 
         relatedTermsPrefix : String
@@ -76,7 +76,7 @@ itemToMarkdown { terms, details, relatedTerms } =
             if List.isEmpty relatedTerms then
                 ""
 
-            else if List.isEmpty details then
+            else if List.isEmpty definitions then
                 "See: "
 
             else
@@ -89,7 +89,7 @@ itemToMarkdown { terms, details, relatedTerms } =
                 |> String.join ", "
                 |> (++) relatedTermsPrefix
     in
-    [ termsString, detailsString, relatedTermsString ]
+    [ termsString, definitionsString, relatedTermsString ]
         |> paragraphs
 
 

@@ -1,5 +1,5 @@
 module Data.GlossaryItem exposing
-    ( GlossaryItem, decode, hasSomeDetails
+    ( GlossaryItem, decode, hasSomeDefinitions
     , toHtmlTree
     )
 
@@ -8,7 +8,7 @@ module Data.GlossaryItem exposing
 
 # Glossary Items
 
-@docs GlossaryItem, decode, hasSomeDetails
+@docs GlossaryItem, decode, hasSomeDefinitions
 
 
 # Converting to HTML
@@ -17,7 +17,7 @@ module Data.GlossaryItem exposing
 
 -}
 
-import Data.GlossaryItem.Details as Details exposing (Details)
+import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
@@ -31,7 +31,7 @@ However, this is allowed in `<dl>` elements so it's also allowed here.
 -}
 type alias GlossaryItem =
     { terms : List Term
-    , details : List Details
+    , definitions : List Definition
     , relatedTerms : List RelatedTerm
     , needsUpdating : Bool
     , lastUpdatedDate : Maybe String -- expected to be in ISO 8601 format
@@ -42,7 +42,7 @@ type alias GlossaryItem =
 
     import Json.Decode as Decode exposing (Decoder)
     import Json.Encode as Encode
-    import Data.GlossaryItem.Details as Details
+    import Data.GlossaryItem.Definition as Definition
     import Data.GlossaryItem.Term as Term
 
     rain : Encode.Value
@@ -56,7 +56,7 @@ type alias GlossaryItem =
                     ]
                     ]
             )
-            , ( "details", Encode.list Encode.string [ "Condensed moisture." ] )
+            , ( "definitions", Encode.list Encode.string [ "Condensed moisture." ] )
             , ( "relatedTerms", Encode.list Encode.object [] )
             , ( "needsUpdating", Encode.bool True )
             ]
@@ -64,7 +64,7 @@ type alias GlossaryItem =
     Decode.decodeValue (decode False) rain
     --> Ok
     -->     { terms = [ Term.fromPlaintext "Rain" False ]
-    -->     , details = [ Details.fromPlaintext "Condensed moisture." ]
+    -->     , definitions = [ Definition.fromPlaintext "Condensed moisture." ]
     -->     , relatedTerms = []
     -->     , needsUpdating = True
     -->     , lastUpdatedDate = Nothing
@@ -75,14 +75,14 @@ decode : Bool -> Decoder GlossaryItem
 decode enableMarkdownBasedSyntax =
     Decode.map5 GlossaryItem
         (Decode.field "terms" <| Decode.list <| Term.decode enableMarkdownBasedSyntax)
-        (Decode.field "details" <|
+        (Decode.field "definitions" <|
             Decode.list <|
                 Decode.map
                     (if enableMarkdownBasedSyntax then
-                        Details.fromMarkdown
+                        Definition.fromMarkdown
 
                      else
-                        Details.fromPlaintext
+                        Definition.fromPlaintext
                     )
                 <|
                     Decode.string
@@ -92,26 +92,26 @@ decode enableMarkdownBasedSyntax =
         (Decode.maybe <| Decode.field "lastUpdatedDate" Decode.string)
 
 
-{-| Whether or not the glossary item has any details.
-Some items may not contain any details and instead point to a related item that is preferred.
+{-| Whether or not the glossary item has any definitions.
+Some items may not contain any definitions and instead point to a related item that is preferred.
 
     import Data.GlossaryItem.Term as Term exposing (Term)
 
     empty : GlossaryItem
     empty =
         { terms = [ Term.emptyPlaintext ]
-        , details = []
+        , definitions = []
         , relatedTerms = []
         , needsUpdating = False
         , lastUpdatedDate = Nothing
         }
 
-    hasSomeDetails empty --> False
+    hasSomeDefinitions empty --> False
 
 -}
-hasSomeDetails : GlossaryItem -> Bool
-hasSomeDetails glossaryItem =
-    not <| List.isEmpty glossaryItem.details
+hasSomeDefinitions : GlossaryItem -> Bool
+hasSomeDefinitions glossaryItem =
+    not <| List.isEmpty glossaryItem.definitions
 
 
 termToHtmlTree : Term -> HtmlTree
@@ -142,12 +142,12 @@ termToHtmlTree term =
         ]
 
 
-detailsToHtmlTree : String -> HtmlTree
-detailsToHtmlTree details =
+definitionToHtmlTree : String -> HtmlTree
+definitionToHtmlTree definition =
     HtmlTree.Node "dd"
         False
         []
-        [ HtmlTree.Leaf details ]
+        [ HtmlTree.Leaf definition ]
 
 
 relatedTermToHtmlTree : RelatedTerm -> HtmlTree
@@ -159,12 +159,12 @@ relatedTermToHtmlTree relatedTerm =
 
 
 nonemptyRelatedTermsToHtmlTree : Bool -> List RelatedTerm -> HtmlTree
-nonemptyRelatedTermsToHtmlTree itemHasSomeDetails relatedTerms =
+nonemptyRelatedTermsToHtmlTree itemHasSomeDefinitions relatedTerms =
     HtmlTree.Node "dd"
         False
         [ HtmlTree.Attribute "class" "related-terms" ]
         (HtmlTree.Leaf
-            (if itemHasSomeDetails then
+            (if itemHasSomeDefinitions then
                 "See also: "
 
              else
@@ -205,13 +205,13 @@ toHtmlTree glossaryItem =
                 else
                     []
                )
-            ++ List.map (Details.raw >> detailsToHtmlTree) glossaryItem.details
+            ++ List.map (Definition.raw >> definitionToHtmlTree) glossaryItem.definitions
             ++ (if List.isEmpty glossaryItem.relatedTerms then
                     []
 
                 else
                     [ nonemptyRelatedTermsToHtmlTree
-                        (hasSomeDetails glossaryItem)
+                        (hasSomeDefinitions glossaryItem)
                         glossaryItem.relatedTerms
                     ]
                )

@@ -6,7 +6,7 @@
         "ApplicationShell",
         "Data.AboutLink",
         "Data.AboutParagraph",
-        "Data.GlossaryItem.Details",
+        "Data.GlossaryItem.Definition",
         "Data.GlossaryItem.RelatedTerm",
         "Data.GlossaryItem.Term",
         "Data.GlossaryItem",
@@ -21,7 +21,7 @@
         "Extras.HtmlTree",
         "Extras.String",
         "Extras.Url",
-        "GlossaryItemForm.DetailsField",
+        "GlossaryItemForm.DefinitionField",
         "GlossaryItemForm.TermField",
         "MarkdownRenderers"
     ]

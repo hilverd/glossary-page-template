@@ -11,7 +11,7 @@ module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetical
 
 import Array exposing (Array)
 import Data.GlossaryItem exposing (GlossaryItem)
-import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
@@ -48,7 +48,7 @@ compareForSortingAlphabetically item1 item2 =
 
     item1 : GlossaryItem
     item1 = { terms = [ Term.fromMarkdown "\\_\\_slots\\_\\_" False ]
-            , details = []
+            , definitions = []
             , relatedTerms = []
             , needsUpdating = False
             , lastUpdatedDate = Nothing
@@ -56,7 +56,7 @@ compareForSortingAlphabetically item1 item2 =
 
     item2 : GlossaryItem
     item2 = { terms = [ Term.fromMarkdown "Situation" False ]
-            , details = []
+            , definitions = []
             , relatedTerms = []
             , needsUpdating = False
             , lastUpdatedDate = Nothing
@@ -64,7 +64,7 @@ compareForSortingAlphabetically item1 item2 =
 
     item3 : GlossaryItem
     item3 = { terms = [ Term.fromMarkdown "strong" False ]
-            , details = []
+            , definitions = []
             , relatedTerms = []
             , needsUpdating = False
             , lastUpdatedDate = Nothing
@@ -138,7 +138,7 @@ orderListByMostMentionedFirst indexedGlossaryItems =
                 score : Int
                 score =
                     (glossaryItem.terms |> List.map (Term.raw >> Regex.find termAsWord >> List.length) |> List.sum)
-                        + (glossaryItem.details |> List.map (Details.raw >> Regex.find termAsWord >> List.length) |> List.sum)
+                        + (glossaryItem.definitions |> List.map (Definition.raw >> Regex.find termAsWord >> List.length) |> List.sum)
                         + (glossaryItem.relatedTerms |> List.map RelatedTerm.raw |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
             in
             if score > 0 then

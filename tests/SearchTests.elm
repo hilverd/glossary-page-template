@@ -2,7 +2,7 @@ module SearchTests exposing (suite)
 
 import Components.SearchDialog as SearchDialog exposing (SearchResult, searchResult)
 import Data.GlossaryItem exposing (GlossaryItem)
-import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -23,7 +23,7 @@ loadedGlossaryItems =
         one : GlossaryItem
         one =
             { terms = [ termFromBody "The term one" ]
-            , details = [ Details.fromPlaintext "The term one" ]
+            , definitions = [ Definition.fromPlaintext "The term one" ]
             , relatedTerms = [ RelatedTerm.fromPlaintext "Second_the_term" "Second the term" ]
             , needsUpdating = False
             , lastUpdatedDate = Nothing
@@ -32,7 +32,7 @@ loadedGlossaryItems =
         two : GlossaryItem
         two =
             { terms = [ termFromBody "Second the term" ]
-            , details = [ Details.fromPlaintext "Second the term" ]
+            , definitions = [ Definition.fromPlaintext "Second the term" ]
             , relatedTerms = []
             , needsUpdating = False
             , lastUpdatedDate = Nothing
@@ -41,7 +41,7 @@ loadedGlossaryItems =
         three : GlossaryItem
         three =
             { terms = [ termFromBody "The term three" ]
-            , details = [ Details.fromPlaintext "The term three" ]
+            , definitions = [ Definition.fromPlaintext "The term three" ]
             , relatedTerms = [ RelatedTerm.fromPlaintext "Second_the_term" "Second the term" ]
             , needsUpdating = False
             , lastUpdatedDate = Nothing

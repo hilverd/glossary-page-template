@@ -1,12 +1,12 @@
-module Data.GlossaryItem.Details exposing (Details, fromPlaintext, fromMarkdown, raw, markdown, view, viewInline, htmlTreeForAnki)
+module Data.GlossaryItem.Definition exposing (Definition, fromPlaintext, fromMarkdown, raw, markdown, view, viewInline, htmlTreeForAnki)
 
 {-| A definition for a glossary item.
 This can be in either plain text or Markdown.
 
 
-# Details
+# Definition
 
-@docs Details, fromPlaintext, fromMarkdown, raw, markdown, view, viewInline, htmlTreeForAnki
+@docs Definition, fromPlaintext, fromMarkdown, raw, markdown, view, viewInline, htmlTreeForAnki
 
 -}
 
@@ -21,61 +21,61 @@ import Markdown.Renderer as Renderer exposing (Renderer)
 import MarkdownRenderers
 
 
-{-| Details (i.e. a definition) for a glossary item.
+{-| A definition for a glossary item.
 -}
-type Details
-    = PlaintextDetails String
-    | MarkdownDetails MarkdownFragment
+type Definition
+    = PlaintextDefinition String
+    | MarkdownDefinition MarkdownFragment
 
 
-{-| Construct details from a plain text string.
+{-| Construct a definition from a plain text string.
 
     fromPlaintext "Foo" |> raw --> "Foo"
 
 -}
-fromPlaintext : String -> Details
+fromPlaintext : String -> Definition
 fromPlaintext =
-    PlaintextDetails
+    PlaintextDefinition
 
 
-{-| Construct details from a Markdown string.
+{-| Construct a definition from a Markdown string.
 
-    details : Details
-    details = fromMarkdown "The _ideal_ case"
+    definition : Definition
+    definition = fromMarkdown "The _ideal_ case"
 
-    raw details --> "The _ideal_ case"
+    raw definition --> "The _ideal_ case"
 
 -}
-fromMarkdown : String -> Details
+fromMarkdown : String -> Definition
 fromMarkdown =
-    MarkdownFragment.fromString >> sanitiseMarkdownFragment >> MarkdownDetails
+    MarkdownFragment.fromString >> sanitiseMarkdownFragment >> MarkdownDefinition
 
 
-{-| Retrieve the raw body of details.
+{-| Retrieve the raw body of a definition.
 -}
-raw : Details -> String
-raw details =
-    case details of
-        PlaintextDetails body ->
+raw : Definition -> String
+raw definition =
+    case definition of
+        PlaintextDefinition body ->
             body
 
-        MarkdownDetails fragment ->
+        MarkdownDefinition fragment ->
             MarkdownFragment.raw fragment
 
 
-{-| Convert details to a string suitable for a Markdown document.
+{-| Convert a definition to a string suitable for a Markdown document.
 -}
-markdown : Details -> String
-markdown details =
-    case details of
-        PlaintextDetails body ->
+markdown : Definition -> String
+markdown definition =
+    case definition of
+        PlaintextDefinition body ->
             Extras.String.escapeForMarkdown body
 
-        MarkdownDetails fragment ->
+        MarkdownDefinition fragment ->
             MarkdownFragment.raw fragment
 
 
-{-| View details as HTML.
+{-| View a definition as HTML.
 
     import Html exposing (Html)
 
@@ -100,13 +100,13 @@ markdown details =
     --> expected
 
 -}
-view : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> Details -> Html msg
-view { enableMathSupport, makeLinksTabbable } details =
-    case details of
-        PlaintextDetails body ->
+view : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> Definition -> Html msg
+view { enableMathSupport, makeLinksTabbable } definition =
+    case definition of
+        PlaintextDefinition body ->
             text body
 
-        MarkdownDetails fragment ->
+        MarkdownDefinition fragment ->
             let
                 parsed : Result String (List Block)
                 parsed =
@@ -135,15 +135,15 @@ view { enableMathSupport, makeLinksTabbable } details =
                     text <| "Failed to parse Markdown: " ++ parsingError
 
 
-{-| View details as inline HTML.
+{-| View a definition as inline HTML.
 -}
-viewInline : Bool -> List (Attribute msg) -> Details -> Html msg
-viewInline enableMathSupport additionalAttributes details =
-    case details of
-        PlaintextDetails body ->
+viewInline : Bool -> List (Attribute msg) -> Definition -> Html msg
+viewInline enableMathSupport additionalAttributes definition =
+    case definition of
+        PlaintextDefinition body ->
             Html.span additionalAttributes [ text body ]
 
-        MarkdownDetails fragment ->
+        MarkdownDefinition fragment ->
             let
                 parsed : Result String (List Block)
                 parsed =
@@ -180,15 +180,15 @@ htmlTreeRendererForAnki enableMathSupport =
     }
 
 
-{-| Convert details to an HtmlTree for Anki.
+{-| Convert a definition to an HtmlTree for Anki.
 -}
-htmlTreeForAnki : Bool -> Details -> HtmlTree
-htmlTreeForAnki enableMathSupport details =
-    case details of
-        PlaintextDetails body ->
+htmlTreeForAnki : Bool -> Definition -> HtmlTree
+htmlTreeForAnki enableMathSupport definition =
+    case definition of
+        PlaintextDefinition body ->
             Extras.HtmlTree.Leaf body
 
-        MarkdownDetails fragment ->
+        MarkdownDefinition fragment ->
             case MarkdownFragment.parsed fragment of
                 Ok blocks ->
                     case Renderer.render (htmlTreeRendererForAnki enableMathSupport) blocks of

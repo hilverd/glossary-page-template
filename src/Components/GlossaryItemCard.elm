@@ -7,7 +7,7 @@ import Components.Badge
 import Components.Button
 import Data.FeatureFlag exposing (enableFeaturesInProgress)
 import Data.GlossaryItem as GlossaryItem
-import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
@@ -53,9 +53,9 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
             case style of
                 Preview ->
                     let
-                        itemHasSomeDetails : Bool
-                        itemHasSomeDetails =
-                            GlossaryItem.hasSomeDetails glossaryItem
+                        itemHasSomeDefinitions : Bool
+                        itemHasSomeDefinitions =
+                            GlossaryItem.hasSomeDefinitions glossaryItem
 
                         tabbable : Bool
                         tabbable =
@@ -84,21 +84,21 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                     []
                                )
                             ++ List.map
-                                (viewGlossaryItemDetails
+                                (viewGlossaryItemDefinition
                                     { enableMathSupport = enableMathSupport
                                     , tabbable = makeLinksTabbable
                                     , topicsClickable = False
                                     }
                                 )
-                                glossaryItem.details
-                            ++ viewGlossaryItemRelatedTerms enableMathSupport True tabbable itemHasSomeDetails Nothing glossaryItem.relatedTerms
+                                glossaryItem.definitions
+                            ++ viewGlossaryItemRelatedTerms enableMathSupport True tabbable itemHasSomeDefinitions Nothing glossaryItem.relatedTerms
                         )
 
                 Normal { tabbable, onClickViewFull, onClickEdit, onClickDelete, onClickItem, onClickRelatedTerm, editable, shownAsSingle, errorWhileDeleting } ->
                     let
-                        itemHasSomeDetails : Bool
-                        itemHasSomeDetails =
-                            GlossaryItem.hasSomeDetails glossaryItem
+                        itemHasSomeDefinitions : Bool
+                        itemHasSomeDefinitions =
+                            GlossaryItem.hasSomeDefinitions glossaryItem
                     in
                     if shownAsSingle then
                         div
@@ -162,14 +162,14 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                 []
                                            )
                                         ++ List.map
-                                            (viewGlossaryItemDetails
+                                            (viewGlossaryItemDefinition
                                                 { enableMathSupport = enableMathSupport
                                                 , tabbable = makeLinksTabbable
                                                 , topicsClickable = makeLinksTabbable
                                                 }
                                             )
-                                            glossaryItem.details
-                                        ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDetails Nothing glossaryItem.relatedTerms
+                                            glossaryItem.definitions
+                                        ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDefinitions Nothing glossaryItem.relatedTerms
                                     )
                                 ]
                             , div
@@ -271,18 +271,18 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                 []
                                            )
                                         ++ List.map
-                                            (viewGlossaryItemDetails
+                                            (viewGlossaryItemDefinition
                                                 { enableMathSupport = enableMathSupport
                                                 , tabbable = makeLinksTabbable
                                                 , topicsClickable = makeLinksTabbable
                                                 }
                                             )
-                                            glossaryItem.details
+                                            glossaryItem.definitions
                                         ++ viewGlossaryItemRelatedTerms
                                             enableMathSupport
                                             False
                                             tabbable
-                                            itemHasSomeDetails
+                                            itemHasSomeDefinitions
                                             Nothing
                                             glossaryItem.relatedTerms
                                     )
@@ -409,18 +409,18 @@ viewAsSingle { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates, onC
                         []
                      )
                         ++ List.map
-                            (viewGlossaryItemDetails
+                            (viewGlossaryItemDefinition
                                 { enableMathSupport = enableMathSupport
                                 , tabbable = True
                                 , topicsClickable = False
                                 }
                             )
-                            glossaryItem.details
+                            glossaryItem.definitions
                         ++ viewGlossaryItemRelatedTerms
                             enableMathSupport
                             False
                             True
-                            (GlossaryItem.hasSomeDetails glossaryItem)
+                            (GlossaryItem.hasSomeDefinitions glossaryItem)
                             (Just onClickRelatedTerm)
                             glossaryItem.relatedTerms
                     )
@@ -482,11 +482,11 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow } term =
         ]
 
 
-viewGlossaryItemDetails : { enableMathSupport : Bool, tabbable : Bool, topicsClickable : Bool } -> Details.Details -> Html msg
-viewGlossaryItemDetails { enableMathSupport, tabbable, topicsClickable } details =
+viewGlossaryItemDefinition : { enableMathSupport : Bool, tabbable : Bool, topicsClickable : Bool } -> Definition -> Html msg
+viewGlossaryItemDefinition { enableMathSupport, tabbable, topicsClickable } definition =
     Html.dd
         []
-        [ Details.view { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable } details
+        [ Definition.view { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable } definition
         , Extras.Html.showIf enableFeaturesInProgress <|
             Html.div
                 [ class "mt-4" ]
@@ -501,7 +501,7 @@ viewGlossaryItemDetails { enableMathSupport, tabbable, topicsClickable } details
 
 
 viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Bool -> Maybe (RelatedTerm -> msg) -> List RelatedTerm -> List (Html msg)
-viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDetails onClick relatedTerms =
+viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDefinitions onClick relatedTerms =
     if List.isEmpty relatedTerms then
         []
 
@@ -509,7 +509,7 @@ viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDetai
         [ Html.dd
             [ class "related-terms" ]
             (text
-                (if itemHasSomeDetails then
+                (if itemHasSomeDefinitions then
                     "See also: "
 
                  else

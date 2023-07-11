@@ -8,7 +8,7 @@ module ElementIds exposing
     , cardWidthWide
     , confirmDeleteModalTitle
     , container
-    , descriptionDetailsSingle
+    , definitionSingle
     , exportDropdownButton
     , glossaryItemDiv
     , indexForMobile
@@ -35,7 +35,7 @@ module ElementIds exposing
     )
 
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
-import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
+import Data.DefinitionIndex as DefinitionIndex exposing (DefinitionIndex)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
@@ -131,9 +131,9 @@ termInputField termIndex =
     prefixed <| "term-" ++ (termIndex |> TermIndex.toInt |> String.fromInt)
 
 
-descriptionDetailsSingle : DetailsIndex -> String
-descriptionDetailsSingle index =
-    prefixed <| "details-" ++ (index |> DetailsIndex.toInt |> String.fromInt)
+definitionSingle : DefinitionIndex -> String
+definitionSingle index =
+    prefixed <| "definition-" ++ (index |> DefinitionIndex.toInt |> String.fromInt)
 
 
 seeAlsoSelect : RelatedTermIndex -> String

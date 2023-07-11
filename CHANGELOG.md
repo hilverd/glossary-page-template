@@ -13,6 +13,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+
+- Use "definition" instead of "description" or "details" for consistency.
+
 ### Fixed
 ### Removed
 

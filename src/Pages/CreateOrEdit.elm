@@ -13,7 +13,7 @@ import Components.Dividers
 import Components.Form
 import Components.GlossaryItemCard
 import Components.SelectMenu
-import Data.DetailsIndex as DetailsIndex exposing (DetailsIndex)
+import Data.DefinitionIndex as DefinitionIndex exposing (DefinitionIndex)
 import Data.FeatureFlag exposing (enableFeaturesInProgress)
 import Data.Glossary as Glossary
 import Data.GlossaryItem exposing (GlossaryItem)
@@ -32,7 +32,7 @@ import Extras.HtmlTree as HtmlTree
 import Extras.Http
 import Extras.Task
 import GlossaryItemForm as Form exposing (GlossaryItemForm)
-import GlossaryItemForm.DetailsField as DetailsField exposing (DetailsField)
+import GlossaryItemForm.DefinitionField as DefinitionField exposing (DefinitionField)
 import GlossaryItemForm.TermField as TermField exposing (TermField)
 import Html
 import Html.Attributes exposing (class, id, required, style)
@@ -63,9 +63,9 @@ type InternalMsg
     | DeleteTerm TermIndex
     | UpdateTerm TermIndex String
     | ToggleAbbreviation TermIndex
-    | AddDetails
-    | UpdateDetails DetailsIndex String
-    | DeleteDetails DetailsIndex
+    | AddDefinition
+    | UpdateDefinition DefinitionIndex String
+    | DeleteDefinition DefinitionIndex
     | AddRelatedTerm (Maybe String)
     | SelectRelatedTerm RelatedTermIndex String
     | DeleteRelatedTerm RelatedTermIndex
@@ -200,25 +200,25 @@ update msg model =
         ToggleAbbreviation termIndex ->
             ( { model | form = Form.toggleAbbreviation termIndex model.form }, Cmd.none )
 
-        AddDetails ->
+        AddDefinition ->
             let
                 form : GlossaryItemForm
                 form =
-                    Form.addDetails model.form
+                    Form.addDefinition model.form
 
-                latestDetailsIndex : DetailsIndex
-                latestDetailsIndex =
-                    Array.length (Form.detailsFields form) - 1 |> DetailsIndex.fromInt
+                latestDefinitionIndex : DefinitionIndex
+                latestDefinitionIndex =
+                    Array.length (Form.definitionFields form) - 1 |> DefinitionIndex.fromInt
             in
             ( { model | form = form }
-            , giveFocusToDescriptionDetailsSingle latestDetailsIndex
+            , giveFocusToDefinitionSingle latestDefinitionIndex
             )
 
-        UpdateDetails detailsIndex body ->
-            ( { model | form = Form.updateDetails detailsIndex model.form body }, Cmd.none )
+        UpdateDefinition definitionIndex body ->
+            ( { model | form = Form.updateDefinition definitionIndex model.form body }, Cmd.none )
 
-        DeleteDetails detailsIndex ->
-            ( { model | form = Form.deleteDetails detailsIndex model.form }, Cmd.none )
+        DeleteDefinition definitionIndex ->
+            ( { model | form = Form.deleteDefinition definitionIndex model.form }, Cmd.none )
 
         AddRelatedTerm maybeTermId ->
             let
@@ -377,9 +377,9 @@ giveFocusToTermInputField termIndex =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.termInputField termIndex)
 
 
-giveFocusToDescriptionDetailsSingle : DetailsIndex -> Cmd Msg
-giveFocusToDescriptionDetailsSingle index =
-    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.descriptionDetailsSingle index)
+giveFocusToDefinitionSingle : DefinitionIndex -> Cmd Msg
+giveFocusToDefinitionSingle index =
+    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.definitionSingle index)
 
 
 giveFocusToSeeAlsoSelect : RelatedTermIndex -> Cmd Msg
@@ -387,9 +387,9 @@ giveFocusToSeeAlsoSelect index =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.seeAlsoSelect index)
 
 
-viewCreateDescriptionTerm : Bool -> Bool -> Bool -> Bool -> Int -> TermField -> Html Msg
-viewCreateDescriptionTerm showMarkdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors canBeDeleted index term =
-    viewCreateDescriptionTermInternal
+viewCreateTerm : Bool -> Bool -> Bool -> Bool -> Int -> TermField -> Html Msg
+viewCreateTerm showMarkdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors canBeDeleted index term =
+    viewCreateTermInternal
         (showMarkdownBasedSyntaxEnabled && index == 0)
         mathSupportEnabled
         showValidationErrors
@@ -398,8 +398,8 @@ viewCreateDescriptionTerm showMarkdownBasedSyntaxEnabled mathSupportEnabled show
         term
 
 
-viewCreateDescriptionTermInternal : Bool -> Bool -> Bool -> Bool -> TermIndex -> TermField -> Html Msg
-viewCreateDescriptionTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors canBeDeleted termIndex termField =
+viewCreateTermInternal : Bool -> Bool -> Bool -> Bool -> TermIndex -> TermField -> Html Msg
+viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors canBeDeleted termIndex termField =
     let
         abbreviationLabelId : String
         abbreviationLabelId =
@@ -474,8 +474,8 @@ viewCreateDescriptionTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnab
         ]
 
 
-viewCreateDescriptionTerms : Bool -> Bool -> Bool -> Array TermField -> Html Msg
-viewCreateDescriptionTerms markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors termsArray =
+viewCreateTerms : Bool -> Bool -> Bool -> Array TermField -> Html Msg
+viewCreateTerms markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors termsArray =
     let
         terms : List TermField
         terms =
@@ -485,14 +485,14 @@ viewCreateDescriptionTerms markdownBasedSyntaxEnabled mathSupportEnabled showVal
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Description Terms" ]
+                [ text "Terms" ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
                 [ text "List the group of terms being defined." ]
             ]
         , div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
-            (List.indexedMap (viewCreateDescriptionTerm markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors (List.length terms > 1)) terms
+            (List.indexedMap (viewCreateTerm markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors (List.length terms > 1)) terms
                 ++ [ div []
                         [ Components.Button.secondary
                             [ Html.Events.onClick <| PageMsg.Internal AddTerm ]
@@ -505,21 +505,21 @@ viewCreateDescriptionTerms markdownBasedSyntaxEnabled mathSupportEnabled showVal
         ]
 
 
-viewCreateDescriptionDetailsSingle : Bool -> Bool -> Bool -> Bool -> Int -> DetailsField -> Html Msg
-viewCreateDescriptionDetailsSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors index detailsSingle =
-    viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors (DetailsIndex.fromInt index) detailsSingle
+viewCreateDefinitionSingle : Bool -> Bool -> Bool -> Bool -> Int -> DefinitionField -> Html Msg
+viewCreateDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors index definitionSingle =
+    viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors (DefinitionIndex.fromInt index) definitionSingle
 
 
-viewCreateDescriptionDetailsSingle1 : Bool -> Bool -> Bool -> Bool -> DetailsIndex -> DetailsField -> Html Msg
-viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors index detailsSingle =
+viewCreateDefinitionSingle1 : Bool -> Bool -> Bool -> Bool -> DefinitionIndex -> DefinitionField -> Html Msg
+viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors index definitionSingle =
     let
         raw : String
         raw =
-            DetailsField.raw detailsSingle
+            DefinitionField.raw definitionSingle
 
         validationError : Maybe String
         validationError =
-            DetailsField.validationError detailsSingle
+            DefinitionField.validationError definitionSingle
     in
     div []
         [ div
@@ -527,7 +527,7 @@ viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabl
             [ span [ class "inline-flex items-center" ]
                 [ Components.Button.rounded True
                     [ Accessibility.Aria.label "Delete"
-                    , Html.Events.onClick <| PageMsg.Internal <| DeleteDetails index
+                    , Html.Events.onClick <| PageMsg.Internal <| DeleteDefinition index
                     ]
                     [ Icons.trash
                         [ Svg.Attributes.class "h-5 w-5" ]
@@ -537,15 +537,15 @@ viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabl
                 [ class "relative block min-w-0 w-full" ]
                 [ Components.Form.textarea
                     raw
-                    (markdownBasedSyntaxEnabled && DetailsIndex.toInt index == 0)
+                    (markdownBasedSyntaxEnabled && DefinitionIndex.toInt index == 0)
                     mathSupportEnabled
                     showValidationErrors
                     validationError
                     [ required True
-                    , Accessibility.Aria.label "Details"
+                    , Accessibility.Aria.label "Definition"
                     , Accessibility.Aria.required True
-                    , id <| ElementIds.descriptionDetailsSingle index
-                    , Html.Events.onInput (PageMsg.Internal << UpdateDetails index)
+                    , id <| ElementIds.definitionSingle index
+                    , Html.Events.onInput (PageMsg.Internal << UpdateDefinition index)
                     ]
                 ]
             ]
@@ -600,53 +600,53 @@ viewCreateDescriptionDetailsSingle1 showNewlineWarnings markdownBasedSyntaxEnabl
         ]
 
 
-viewAddDetailsButton : Html Msg
-viewAddDetailsButton =
+viewAddDefinitionButton : Html Msg
+viewAddDefinitionButton =
     div []
         [ Components.Button.secondary
-            [ Html.Events.onClick <| PageMsg.Internal AddDetails ]
+            [ Html.Events.onClick <| PageMsg.Internal AddDefinition ]
             [ Icons.plus [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
-            , text "Add details"
+            , text "Add definition"
             ]
         ]
 
 
-viewAddDetailsButtonForEmptyState : Html Msg
-viewAddDetailsButtonForEmptyState =
+viewAddDefinitionButtonForEmptyState : Html Msg
+viewAddDefinitionButtonForEmptyState =
     Components.Button.emptyState
-        [ Html.Events.onClick <| PageMsg.Internal AddDetails ]
+        [ Html.Events.onClick <| PageMsg.Internal AddDefinition ]
         [ Icons.plus [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
         , span
             [ class "mt-2 block font-medium text-gray-900 dark:text-gray-200" ]
-            [ text "Add details" ]
+            [ text "Add definition" ]
         ]
 
 
-viewCreateDescriptionDetails : Bool -> Bool -> Bool -> Bool -> Array DetailsField -> Html Msg
-viewCreateDescriptionDetails showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors detailsArray =
+viewCreateDefinition : Bool -> Bool -> Bool -> Bool -> Array DefinitionField -> Html Msg
+viewCreateDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionArray =
     let
-        details : List DetailsField
-        details =
-            Array.toList detailsArray
+        definitions : List DefinitionField
+        definitions =
+            Array.toList definitionArray
     in
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Description Details" ]
+                [ text "Definitions" ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
                 [ text "Provide one or more definitions for this group of terms." ]
             ]
         , div
             [ class "space-y-6 sm:space-y-5" ]
-            (List.indexedMap (viewCreateDescriptionDetailsSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors) details
-                ++ [ if List.isEmpty details then
-                        viewAddDetailsButtonForEmptyState
+            (List.indexedMap (viewCreateDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors) definitions
+                ++ [ if List.isEmpty definitions then
+                        viewAddDefinitionButtonForEmptyState
 
                      else
-                        viewAddDetailsButton
+                        viewAddDefinitionButton
                    ]
             )
         ]
@@ -877,9 +877,9 @@ view model =
                 terms =
                     Form.termFields model.form
 
-                detailsArray : Array DetailsField
-                detailsArray =
-                    Form.detailsFields model.form
+                definitionArray : Array DefinitionField
+                definitionArray =
+                    Form.definitionFields model.form
 
                 relatedTerms : Array Form.RelatedTermField
                 relatedTerms =
@@ -914,13 +914,13 @@ view model =
                                 [ class "lg:flex lg:space-x-8" ]
                                 [ div
                                     [ class "lg:w-1/2 space-y-8 divide-y divide-gray-300 dark:divide-gray-600 sm:space-y-5" ]
-                                    [ viewCreateDescriptionTerms glossary.enableMarkdownBasedSyntax glossary.enableMathSupport model.triedToSaveWhenFormInvalid terms
-                                    , viewCreateDescriptionDetails
+                                    [ viewCreateTerms glossary.enableMarkdownBasedSyntax glossary.enableMathSupport model.triedToSaveWhenFormInvalid terms
+                                    , viewCreateDefinition
                                         (not glossary.enableMarkdownBasedSyntax)
                                         glossary.enableMarkdownBasedSyntax
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
-                                        detailsArray
+                                        definitionArray
                                     , div
                                         []
                                         [ viewCreateSeeAlso

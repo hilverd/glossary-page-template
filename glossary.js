@@ -54,7 +54,7 @@ if (containerElement) {
 
         return {
             terms: dtElements.map(glossaryItemTermFromDtElement),
-            details: ddElements
+            definitions: ddElements
                 .filter(ddElement => ddElement.getAttribute('class') !== 'related-terms' && ddElement.getAttribute('class') !== 'needs-updating')
                 .map(ddElement => ddElement.textContent.trim()),
             relatedTerms: relatedTerms,

@@ -1,7 +1,7 @@
 module IndexOfTermsTests exposing (suite)
 
 import Data.GlossaryItem exposing (GlossaryItem)
-import Data.GlossaryItem.Details as Details
+import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.IndexOfTerms as IndexOfTerms
@@ -20,7 +20,7 @@ glossaryItems =
         one : GlossaryItem
         one =
             { terms = [ termFromBody "Óne" ]
-            , details = [ Details.fromPlaintext "Óne" ]
+            , definitions = [ Definition.fromPlaintext "Óne" ]
             , relatedTerms = []
             , needsUpdating = False
             , lastUpdatedDate = Nothing
@@ -29,7 +29,7 @@ glossaryItems =
         two : GlossaryItem
         two =
             { terms = [ termFromBody "Two" ]
-            , details = [ Details.fromPlaintext "Two" ]
+            , definitions = [ Definition.fromPlaintext "Two" ]
             , relatedTerms = []
             , needsUpdating = False
             , lastUpdatedDate = Nothing
@@ -38,7 +38,7 @@ glossaryItems =
         three : GlossaryItem
         three =
             { terms = [ termFromBody "3Three" ]
-            , details = [ Details.fromPlaintext "3Three" ]
+            , definitions = [ Definition.fromPlaintext "3Three" ]
             , relatedTerms = []
             , needsUpdating = False
             , lastUpdatedDate = Nothing
@@ -47,7 +47,7 @@ glossaryItems =
         doubleOhSeven : GlossaryItem
         doubleOhSeven =
             { terms = [ termFromBody "007" ]
-            , details = [ Details.fromPlaintext "007" ]
+            , definitions = [ Definition.fromPlaintext "007" ]
             , relatedTerms = []
             , needsUpdating = False
             , lastUpdatedDate = Nothing
@@ -56,7 +56,7 @@ glossaryItems =
         future : GlossaryItem
         future =
             { terms = [ termFromBody "_future_" ]
-            , details = [ Details.fromPlaintext "_future_" ]
+            , definitions = [ Definition.fromPlaintext "_future_" ]
             , relatedTerms = []
             , needsUpdating = False
             , lastUpdatedDate = Nothing
