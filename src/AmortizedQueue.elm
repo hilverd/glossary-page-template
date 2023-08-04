@@ -78,7 +78,7 @@ dequeue queue =
                         |> dequeue
 
 
-{-| Returns the queue represented as a list where the first element is the head of the queue.
+{-| Return the queue represented as a list where the first element is the head of the queue.
 
     empty
     |> enqueue "a"
