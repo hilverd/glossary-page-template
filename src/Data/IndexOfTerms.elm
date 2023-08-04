@@ -3,7 +3,7 @@ module Data.IndexOfTerms exposing (TermGroup, IndexOfTerms, fromGlossaryItems, t
 {-| An index of terms, grouped in alphabetical order by their first character.
 
 
-# Index of Terms
+# Indexes of Terms
 
 @docs TermGroup, IndexOfTerms, fromGlossaryItems, termGroups
 

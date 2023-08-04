@@ -3,7 +3,7 @@ module Data.GlossaryItemIndex exposing (GlossaryItemIndex, fromInt, toInt, minus
 {-| An index of a glossary item.
 
 
-# Glossary Item Indices
+# Glossary Item Indexes
 
 @docs GlossaryItemIndex, fromInt, toInt, minusOne, plusOne
 
