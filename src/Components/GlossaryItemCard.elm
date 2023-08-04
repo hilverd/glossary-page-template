@@ -10,6 +10,7 @@ import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import ElementIds
@@ -462,7 +463,7 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow } term =
             [ class "group" ]
             [ span [ class "mr-1.5 hidden print:inline" ] [ text "➢" ]
             , Html.dfn
-                [ Html.Attributes.id <| Term.id term ]
+                [ Html.Attributes.id <| TermId.toString <| Term.id term ]
                 [ if Term.isAbbreviation term then
                     Html.abbr [] [ Term.view enableMathSupport [] term ]
 
@@ -473,7 +474,7 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow } term =
                 span
                     [ class "silcrow invisible group-hover:visible hover:visible print:group-hover:invisible print:hover:invisible" ]
                     [ Html.a
-                        [ term |> Term.id |> fragmentOnly |> Html.Attributes.href
+                        [ term |> Term.id |> TermId.toString |> fragmentOnly |> Html.Attributes.href
                         , Accessibility.Key.tabbable tabbable
                         ]
                         [ text "§" ]
@@ -523,7 +524,7 @@ viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDefin
                                         "#"
 
                                        else
-                                        fragmentOnly (RelatedTerm.idReference relatedTerm)
+                                        relatedTerm |> RelatedTerm.idReference |> TermId.toString |> fragmentOnly
                                       )
                                         |> Html.Attributes.href
                                     , Accessibility.Key.tabbable tabbable

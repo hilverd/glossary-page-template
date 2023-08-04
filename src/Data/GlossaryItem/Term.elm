@@ -13,6 +13,7 @@ The `body` is the actual term.
 
 -}
 
+import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.HtmlTree exposing (HtmlTree)
 import Extras.String
@@ -30,13 +31,13 @@ import String.Normalize
 -}
 type Term
     = PlaintextTerm
-        { id : String
+        { id : TermId
         , isAbbreviation : Bool
         , body : String
         , indexGroupCharacter : String
         }
     | MarkdownTerm
-        { id : String
+        { id : TermId
         , isAbbreviation : Bool
         , body : MarkdownFragment
         , indexGroupCharacter : String
@@ -67,7 +68,7 @@ stringToIndexGroupCharacter =
 fromPlaintext : String -> Bool -> Term
 fromPlaintext body isAbbreviation0 =
     PlaintextTerm
-        { id = String.replace " " "_" body
+        { id = body |> String.replace " " "_" |> TermId.fromString
         , isAbbreviation = isAbbreviation0
         , body = body
         , indexGroupCharacter = stringToIndexGroupCharacter body
@@ -93,7 +94,7 @@ fromMarkdown body isAbbreviation0 =
                 |> Result.withDefault body
     in
     MarkdownTerm
-        { id = String.replace " " "_" body
+        { id = body |> String.replace " " "_" |> TermId.fromString
         , isAbbreviation = isAbbreviation0
         , body = fragment
         , indexGroupCharacter = inlineTextConcatenated |> stringToIndexGroupCharacter
@@ -103,12 +104,15 @@ fromMarkdown body isAbbreviation0 =
 
 {-| Construct a term from a plain text string, an ID and a Boolean indicating whether the term is an abbreviation.
 
-    fromPlaintextWithId "Hello" "id1" False
+    import Data.GlossaryItem.TermId as TermId
+
+    fromPlaintextWithId "Hello" (TermId.fromString "id1") False
     |> id
+    |> TermId.toString
     --> "id1"
 
 -}
-fromPlaintextWithId : String -> String -> Bool -> Term
+fromPlaintextWithId : String -> TermId -> Bool -> Term
 fromPlaintextWithId body id0 isAbbreviation0 =
     PlaintextTerm
         { id = id0
@@ -120,12 +124,15 @@ fromPlaintextWithId body id0 isAbbreviation0 =
 
 {-| Construct a term from a Markdown string, an ID and a Boolean indicating whether the term is an abbreviation.
 
-    fromMarkdownWithId "The _ideal_ case" "id1" False
+    import Data.GlossaryItem.TermId as TermId
+
+    fromMarkdownWithId "The _ideal_ case" (TermId.fromString "id1") False
     |> id
+    |> TermId.toString
     --> "id1"
 
 -}
-fromMarkdownWithId : String -> String -> Bool -> Term
+fromMarkdownWithId : String -> TermId -> Bool -> Term
 fromMarkdownWithId body id0 isAbbreviation0 =
     let
         result0 : Term
@@ -152,16 +159,21 @@ decode enableMarkdownBasedSyntax =
             fromPlaintextWithId
         )
         (Decode.field "body" Decode.string)
-        (Decode.field "id" Decode.string)
+        (Decode.field "id" <| Decode.map TermId.fromString <| Decode.string)
         (Decode.field "isAbbreviation" Decode.bool)
 
 
 {-| Retrieve the ID of a term.
 
-    fromPlaintext "Hi there" False |> id --> "Hi_there"
+    import Data.GlossaryItem.TermId as TermId
+
+    fromPlaintext "Hi there" False
+    |> id
+    |> TermId.toString
+    --> "Hi_there"
 
 -}
-id : Term -> String
+id : Term -> TermId
 id term =
     case term of
         PlaintextTerm t ->

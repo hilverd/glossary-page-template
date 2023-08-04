@@ -4,6 +4,7 @@ import Array
 import Components.SearchDialog as SearchDialog
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Extras.Html
 import Extras.Url
@@ -56,7 +57,7 @@ search enableMathSupport searchString glossaryItems =
             |> List.map
                 (\( term, maybeDefinition ) ->
                     SearchDialog.searchResult
-                        (Extras.Url.fragmentOnly <| Term.id term)
+                        (Extras.Url.fragmentOnly <| TermId.toString <| Term.id term)
                         [ Html.div
                             []
                             [ Html.p

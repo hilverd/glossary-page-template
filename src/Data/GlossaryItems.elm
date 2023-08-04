@@ -14,6 +14,7 @@ import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Dict exposing (Dict)
 import Extras.Regex
@@ -102,7 +103,7 @@ fromList glossaryItems =
                         |> List.head
                         |> Maybe.map
                             (\primaryTerm ->
-                                Dict.insert (Term.id primaryTerm) index result
+                                Dict.insert (primaryTerm |> Term.id |> TermId.toString) index result
                             )
                         |> Maybe.withDefault result
                 )
@@ -215,7 +216,7 @@ sanitiseList glossaryItems =
         primaryTermIdsSet =
             glossaryItems
                 |> List.concatMap (.terms >> List.take 1)
-                |> List.map Term.id
+                |> List.map (Term.id >> TermId.toString)
                 |> Set.fromList
     in
     glossaryItems
@@ -226,7 +227,7 @@ sanitiseList glossaryItems =
                         glossaryItem.relatedTerms
                             |> List.filter
                                 (\relatedTerm ->
-                                    Set.member (RelatedTerm.idReference relatedTerm) primaryTermIdsSet
+                                    Set.member (relatedTerm |> RelatedTerm.idReference |> TermId.toString) primaryTermIdsSet
                                 )
                 }
             )

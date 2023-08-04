@@ -5,6 +5,7 @@ import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Expect
 import Html
@@ -24,7 +25,7 @@ loadedGlossaryItems =
         one =
             { terms = [ termFromBody "The term one" ]
             , definitions = [ Definition.fromPlaintext "The term one" ]
-            , relatedTerms = [ RelatedTerm.fromPlaintext "Second_the_term" "Second the term" ]
+            , relatedTerms = [ RelatedTerm.fromPlaintext (TermId.fromString "Second_the_term") "Second the term" ]
             , needsUpdating = False
             , lastUpdatedDate = Nothing
             }
@@ -42,7 +43,7 @@ loadedGlossaryItems =
         three =
             { terms = [ termFromBody "The term three" ]
             , definitions = [ Definition.fromPlaintext "The term three" ]
-            , relatedTerms = [ RelatedTerm.fromPlaintext "Second_the_term" "Second the term" ]
+            , relatedTerms = [ RelatedTerm.fromPlaintext (TermId.fromString "Second_the_term") "Second the term" ]
             , needsUpdating = False
             , lastUpdatedDate = Nothing
             }

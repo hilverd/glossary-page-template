@@ -20,6 +20,7 @@ module Data.GlossaryItem exposing
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItem.TermId as TermId
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Extras.Url exposing (fragmentOnly)
 import Json.Decode as Decode exposing (Decoder)
@@ -121,7 +122,7 @@ termToHtmlTree term =
         []
         [ HtmlTree.Node "dfn"
             True
-            [ HtmlTree.Attribute "id" <| Term.id term ]
+            [ HtmlTree.Attribute "id" <| TermId.toString <| Term.id term ]
             [ HtmlTree.Leaf (Term.raw term)
                 |> (\inner ->
                         let
@@ -220,9 +221,9 @@ toHtmlTree glossaryItem =
 
 hrefToTerm : Term -> HtmlTree.Attribute
 hrefToTerm term =
-    HtmlTree.Attribute "href" <| fragmentOnly <| Term.id term
+    HtmlTree.Attribute "href" <| fragmentOnly <| TermId.toString <| Term.id term
 
 
 hrefFromRelatedTerm : RelatedTerm -> HtmlTree.Attribute
 hrefFromRelatedTerm relatedTerm =
-    HtmlTree.Attribute "href" <| fragmentOnly <| RelatedTerm.idReference relatedTerm
+    HtmlTree.Attribute "href" <| fragmentOnly <| TermId.toString <| RelatedTerm.idReference relatedTerm

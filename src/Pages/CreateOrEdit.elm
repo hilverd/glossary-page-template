@@ -19,6 +19,7 @@ import Data.Glossary as Glossary
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemIndex as GlossaryItemIndex
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -66,7 +67,7 @@ type InternalMsg
     | AddDefinition
     | UpdateDefinition DefinitionIndex String
     | DeleteDefinition DefinitionIndex
-    | AddRelatedTerm (Maybe String)
+    | AddRelatedTerm (Maybe TermId)
     | SelectRelatedTerm RelatedTermIndex String
     | DeleteRelatedTerm RelatedTermIndex
     | ToggleNeedsUpdating
@@ -236,13 +237,13 @@ update msg model =
 
         SelectRelatedTerm relatedTermIndex selection ->
             let
-                relatedTermIdReference : Maybe String
+                relatedTermIdReference : Maybe TermId
                 relatedTermIdReference =
                     if selection == "" then
                         Nothing
 
                     else
-                        Just selection
+                        Just <| TermId.fromString selection
             in
             ( { model | form = Form.selectRelatedTerm relatedTermIndex model.form relatedTermIdReference }, Cmd.none )
 
@@ -685,13 +686,13 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms 
                     (allTerms
                         |> List.filter
                             (\term ->
-                                (not <| Set.member (Term.id term) relatedTermsIdReferences)
+                                (not <| Set.member (Term.id term |> TermId.toString) relatedTermsIdReferences)
                                     || (Just (Term.id term) == relatedTerm.idReference)
                             )
                         |> List.map
                             (\term ->
                                 Components.SelectMenu.Choice
-                                    (Term.id term)
+                                    (Term.id term |> TermId.toString)
                                     [ text <| Term.inlineText term ]
                                     (Just (Term.id term) == relatedTerm.idReference)
                             )
@@ -762,10 +763,10 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
                 (viewCreateSeeAlsoSingle
                     showValidationErrors
                     (relatedTermsList
-                        |> List.filterMap .idReference
+                        |> List.filterMap (.idReference >> Maybe.map TermId.toString)
                         |> Set.fromList
                     )
-                    (List.filter (\term -> not <| Set.member (Term.id term) termIdsSet) allTerms)
+                    (List.filter (\term -> not <| Set.member (Term.id term |> TermId.toString) termIdsSet) allTerms)
                 )
                 relatedTermsList
             )

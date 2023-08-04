@@ -46,6 +46,7 @@ import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -377,7 +378,7 @@ update msg model =
                                     else
                                         GlossaryItems.orderedByMostMentionedPrimaryTermIdsToIndexes
                                    )
-                                |> Dict.get (RelatedTerm.idReference relatedTerm)
+                                |> Dict.get (relatedTerm |> RelatedTerm.idReference |> TermId.toString)
                                 |> Maybe.map
                                     (\index ->
                                         { model
@@ -866,7 +867,7 @@ viewTermIndexItem enableMathSupport tabbable term =
     li []
         [ Html.a
             [ class "block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
-            , Html.Attributes.href <| fragmentOnly <| Term.id term
+            , Html.Attributes.href <| fragmentOnly <| TermId.toString <| Term.id term
             , Accessibility.Key.tabbable tabbable
             , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
             ]

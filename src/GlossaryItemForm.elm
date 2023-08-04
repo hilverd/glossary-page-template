@@ -30,6 +30,7 @@ import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
@@ -44,7 +45,7 @@ import Set exposing (Set)
 
 
 type alias RelatedTermField =
-    { idReference : Maybe String
+    { idReference : Maybe TermId
     , validationError : Maybe String
     }
 
@@ -127,7 +128,7 @@ validate form =
 
         termIdsOutsideSet : Set String
         termIdsOutsideSet =
-            form |> termsOutside |> List.map Term.id |> Set.fromList
+            form |> termsOutside |> List.map (Term.id >> TermId.toString) |> Set.fromList
 
         termIdsInsideForm : Dict String Int
         termIdsInsideForm =
@@ -282,7 +283,7 @@ fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRe
         termsOutside1 =
             List.filter
                 (\existingTerm ->
-                    not <| Set.member (Term.id existingTerm) termIdsForItem
+                    not <| Set.member (Term.id existingTerm |> TermId.toString) termIdsForItem
                 )
                 existingTerms
 
@@ -290,7 +291,7 @@ fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRe
         primaryTermsOutside1 =
             List.filter
                 (\existingTerm ->
-                    not <| Set.member (Term.id existingTerm) termIdsForItem
+                    not <| Set.member (Term.id existingTerm |> TermId.toString) termIdsForItem
                 )
                 existingPrimaryTerms
 
@@ -336,7 +337,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                 |> List.foldl
                     (\( _, glossaryItem ) result ->
                         List.foldl
-                            (\term -> Dict.update (Term.id term) (always <| Just <| Term.raw term))
+                            (\term -> Dict.update (Term.id term |> TermId.toString) (always <| Just <| Term.raw term))
                             result
                             glossaryItem.terms
                     )
@@ -386,6 +387,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
             |> List.filterMap
                 (\relatedTermField ->
                     relatedTermField.idReference
+                        |> Maybe.map TermId.toString
                         |> Maybe.andThen
                             (\ref ->
                                 Dict.get ref bodyByIdReference
@@ -396,7 +398,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                                           else
                                             RelatedTerm.fromPlaintext
                                          )
-                                            ref
+                                            (TermId.fromString ref)
                                         )
                             )
                 )
@@ -509,7 +511,7 @@ formHasDefinitionsOrRelatedTerms glossaryItemForm =
             form.definitionFields /= Array.empty || form.relatedTermFields /= Array.empty
 
 
-addRelatedTerm : Maybe String -> GlossaryItemForm -> GlossaryItemForm
+addRelatedTerm : Maybe TermId -> GlossaryItemForm -> GlossaryItemForm
 addRelatedTerm maybeTermId glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
@@ -536,7 +538,7 @@ addRelatedTerm maybeTermId glossaryItemForm =
                 |> validate
 
 
-selectRelatedTerm : RelatedTermIndex -> GlossaryItemForm -> Maybe String -> GlossaryItemForm
+selectRelatedTerm : RelatedTermIndex -> GlossaryItemForm -> Maybe TermId -> GlossaryItemForm
 selectRelatedTerm index glossaryItemForm relatedTermIdReference =
     case glossaryItemForm of
         GlossaryItemForm form ->
@@ -570,7 +572,7 @@ suggestRelatedTerms glossaryItemForm =
                 |> Array.foldl
                     (\relatedTermField result ->
                         relatedTermField.idReference
-                            |> Maybe.map (\idReference -> Set.insert idReference result)
+                            |> Maybe.map (\idReference -> Set.insert (TermId.toString idReference) result)
                             |> Maybe.withDefault result
                     )
                     Set.empty
@@ -580,7 +582,7 @@ suggestRelatedTerms glossaryItemForm =
             glossaryItemForm
                 |> primaryTermsOutside
                 |> List.filter
-                    (\term -> not <| Set.member (Term.id term) relatedTermIdsAlreadyInForm)
+                    (\term -> not <| Set.member (Term.id term |> TermId.toString) relatedTermIdsAlreadyInForm)
 
         definitionFieldBodies : List String
         definitionFieldBodies =
@@ -594,7 +596,7 @@ suggestRelatedTerms glossaryItemForm =
             glossaryItemForm
                 |> itemsListingThisTermAsRelated
                 |> List.filterMap (.terms >> List.head)
-                |> List.map Term.id
+                |> List.map (Term.id >> TermId.toString)
                 |> Set.fromList
     in
     candidateTerms
@@ -607,7 +609,7 @@ suggestRelatedTerms glossaryItemForm =
                             |> Regex.fromString
                             |> Maybe.withDefault Regex.never
                 in
-                Set.member (Term.id candidateTerm) primaryTermIdsOfItemsListingThisItemAsRelated
+                Set.member (Term.id candidateTerm |> TermId.toString) primaryTermIdsOfItemsListingThisItemAsRelated
                     || List.any
                         (\definitionFieldBody ->
                             Regex.contains candidateTermAsWord definitionFieldBody

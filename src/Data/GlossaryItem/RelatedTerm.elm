@@ -9,6 +9,7 @@ module Data.GlossaryItem.RelatedTerm exposing (RelatedTerm, fromPlaintext, fromM
 
 -}
 
+import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.HtmlTree exposing (HtmlTree)
 import Extras.String
@@ -24,25 +25,29 @@ import MarkdownRenderers
 -}
 type RelatedTerm
     = PlaintextRelatedTerm
-        { idReference : String
+        { idReference : TermId
         , body : String
         }
     | MarkdownRelatedTerm
-        { idReference : String
+        { idReference : TermId
         , body : MarkdownFragment
         }
 
 
 {-| Construct a related term from plain text.
 
-    fromPlaintext "Device_Edge" "Device Edge"
+    import Data.GlossaryItem.TermId as TermId
+
+    fromPlaintext (TermId.fromString "Device_Edge") "Device Edge"
     |> raw --> "Device Edge"
 
-    fromPlaintext "Device_Edge" "Device Edge"
-    |> idReference --> "Device_Edge"
+    fromPlaintext (TermId.fromString "Device_Edge") "Device Edge"
+    |> idReference
+    |> TermId.toString
+    --> "Device_Edge"
 
 -}
-fromPlaintext : String -> String -> RelatedTerm
+fromPlaintext : TermId -> String -> RelatedTerm
 fromPlaintext idReference0 body =
     PlaintextRelatedTerm
         { idReference = idReference0
@@ -52,14 +57,18 @@ fromPlaintext idReference0 body =
 
 {-| Construct a related term from a Markdown string.
 
-    fromMarkdown "Device_Edge" "Device _Edge_"
+    import Data.GlossaryItem.TermId as TermId
+
+    fromMarkdown (TermId.fromString "Device_Edge") "Device _Edge_"
     |> raw --> "Device _Edge_"
 
-    fromMarkdown "Device_Edge" "Device _Edge_"
-    |> idReference --> "Device_Edge"
+    fromMarkdown (TermId.fromString "Device_Edge") "Device _Edge_"
+    |> idReference
+    |> TermId.toString
+    --> "Device_Edge"
 
 -}
-fromMarkdown : String -> String -> RelatedTerm
+fromMarkdown : TermId -> String -> RelatedTerm
 fromMarkdown idReference0 body =
     let
         fragment : MarkdownFragment
@@ -76,6 +85,7 @@ fromMarkdown idReference0 body =
 
     import Json.Decode as Decode exposing (Decoder)
     import Json.Encode as Encode
+    import Data.GlossaryItem.TermId as TermId
 
     deviceEdge : Encode.Value
     deviceEdge =
@@ -87,7 +97,8 @@ fromMarkdown idReference0 body =
     decoded : Result Decode.Error RelatedTerm
     decoded = Decode.decodeValue (decode False) deviceEdge
 
-    Result.map idReference decoded --> Ok "Device_Edge"
+    Result.map idReference decoded
+    --> Ok <| TermId.fromString "Device_Edge"
 
     Result.map raw decoded --> Ok "Device Edge"
 
@@ -101,13 +112,13 @@ decode enableMarkdownBasedSyntax =
          else
             fromPlaintext
         )
-        (Decode.field "idReference" Decode.string)
+        (Decode.field "idReference" <| Decode.map TermId.fromString <| Decode.string)
         (Decode.field "body" Decode.string)
 
 
 {-| Retrieve the ID reference of a related term.
 -}
-idReference : RelatedTerm -> String
+idReference : RelatedTerm -> TermId
 idReference relatedTerm =
     case relatedTerm of
         PlaintextRelatedTerm t ->
