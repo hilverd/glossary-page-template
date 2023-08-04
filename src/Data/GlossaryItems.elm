@@ -18,7 +18,7 @@ import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Dict exposing (Dict)
 import Extras.Regex
 import Regex
-import Set
+import Set exposing (Set)
 
 
 {-| Glossary items constructed by the functions below.
@@ -211,7 +211,7 @@ orderListByMostMentionedFirst indexedGlossaryItems =
 sanitiseList : List GlossaryItem -> List GlossaryItem
 sanitiseList glossaryItems =
     let
-        primaryTermIdsSet : Set.Set String
+        primaryTermIdsSet : Set String
         primaryTermIdsSet =
             glossaryItems
                 |> List.concatMap (.terms >> List.take 1)
