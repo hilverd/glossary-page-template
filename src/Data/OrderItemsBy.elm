@@ -1,4 +1,4 @@
-module Data.OrderItemsBy exposing (OrderItemsBy(..), decode)
+module Data.OrderItemsBy exposing (OrderItemsBy(..), decode, encode)
 
 import Json.Decode as Decode exposing (Decoder)
 
@@ -23,3 +23,13 @@ decode =
                     somethingElse ->
                         Decode.fail <| "Unknown order: " ++ somethingElse
             )
+
+
+encode : OrderItemsBy -> String
+encode orderItemsBy =
+    case orderItemsBy of
+        Alphabetically ->
+            "alphabetically"
+
+        MostMentionedFirst ->
+            "most-mentioned-first"

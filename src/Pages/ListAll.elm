@@ -506,13 +506,7 @@ update msg model =
                     model.common
             in
             ( { model | common = { common | orderItemsBy = orderItemsBy } }
-            , changeOrderItemsBy <|
-                case orderItemsBy of
-                    Alphabetically ->
-                        "alphabetically"
-
-                    MostMentionedFirst ->
-                        "most-mentioned-first"
+            , orderItemsBy |> Data.OrderItemsBy.encode |> changeOrderItemsBy
             )
 
         ToggleMarkdownBasedSyntax ->
