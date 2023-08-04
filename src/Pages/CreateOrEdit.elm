@@ -293,13 +293,7 @@ update msg model =
                                         ( updated
                                         , -- Find index of newly inserted item
                                           updated
-                                            |> (case common.orderItemsBy of
-                                                    Alphabetically ->
-                                                        GlossaryItems.orderedAlphabetically
-
-                                                    MostMentionedFirst ->
-                                                        GlossaryItems.orderedByMostMentionedFirst
-                                               )
+                                            |> GlossaryItems.orderedAlphabetically
                                             |> Array.toList
                                             |> List.filter (Tuple.second >> (==) newOrUpdatedGlossaryItem)
                                             |> List.head

@@ -372,12 +372,7 @@ update msg model =
                     case model.common.glossary of
                         Ok glossary ->
                             glossary.items
-                                |> (if model.common.orderItemsBy == Alphabetically then
-                                        GlossaryItems.orderedAlphabeticallyPrimaryTermIdsToIndexes
-
-                                    else
-                                        GlossaryItems.orderedByMostMentionedPrimaryTermIdsToIndexes
-                                   )
+                                |> GlossaryItems.primaryTermIdsToIndexes
                                 |> Dict.get (relatedTerm |> RelatedTerm.idReference |> TermId.toString)
                                 |> Maybe.map
                                     (\index ->

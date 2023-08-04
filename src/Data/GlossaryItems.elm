@@ -1,11 +1,11 @@
-module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedAlphabeticallyPrimaryTermIdsToIndexes, orderedByMostMentionedPrimaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms)
+module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, primaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms)
 
 {-| A set of glossary items that make up a glossary.
 
 
 # Glossary Items
 
-@docs GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedAlphabeticallyPrimaryTermIdsToIndexes, orderedByMostMentionedPrimaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms
+@docs GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, primaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms
 
 -}
 
@@ -28,9 +28,8 @@ This is done using an opaque type that supports efficiently retrieving the items
 type GlossaryItems
     = GlossaryItems
         { orderedAlphabetically : Array ( GlossaryItemIndex, GlossaryItem )
-        , orderedAlphabeticallyPrimaryTermIdsToIndexes : Dict String GlossaryItemIndex
         , orderedByMostMentionedFirst : Array ( GlossaryItemIndex, GlossaryItem )
-        , orderedByMostMentionedPrimaryTermIdsToIndexes : Dict String GlossaryItemIndex
+        , primaryTermIdsToIndexes : Dict String GlossaryItemIndex
         }
 
 
@@ -95,8 +94,8 @@ fromList glossaryItems =
         byMostMentionedFirst =
             orderListByMostMentionedFirst alphabetically
 
-        primaryTermIdsToIndexes : List ( GlossaryItemIndex, GlossaryItem ) -> Dict String GlossaryItemIndex
-        primaryTermIdsToIndexes =
+        primaryTermIdsToIndexes1 : List ( GlossaryItemIndex, GlossaryItem ) -> Dict String GlossaryItemIndex
+        primaryTermIdsToIndexes1 =
             List.foldl
                 (\( index, item ) result ->
                     item.terms
@@ -112,8 +111,7 @@ fromList glossaryItems =
     GlossaryItems <|
         { orderedAlphabetically = Array.fromList alphabetically
         , orderedByMostMentionedFirst = Array.fromList byMostMentionedFirst
-        , orderedAlphabeticallyPrimaryTermIdsToIndexes = primaryTermIdsToIndexes alphabetically
-        , orderedByMostMentionedPrimaryTermIdsToIndexes = primaryTermIdsToIndexes byMostMentionedFirst
+        , primaryTermIdsToIndexes = primaryTermIdsToIndexes1 alphabetically
         }
 
 
@@ -318,22 +316,13 @@ orderedByMostMentionedFirst glossaryItems =
             items.orderedByMostMentionedFirst
 
 
-{-| Retrieve a dict mapping each primary term ID to its index in the item list that is sorted alphabetically.
+{-| Retrieve a dict mapping each primary term ID to its index in the item list (no matter how it's sorted).
 -}
-orderedAlphabeticallyPrimaryTermIdsToIndexes : GlossaryItems -> Dict String GlossaryItemIndex
-orderedAlphabeticallyPrimaryTermIdsToIndexes glossaryItems =
+primaryTermIdsToIndexes : GlossaryItems -> Dict String GlossaryItemIndex
+primaryTermIdsToIndexes glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
-            items.orderedAlphabeticallyPrimaryTermIdsToIndexes
-
-
-{-| Retrieve a dict mapping each primary term ID to its index in the item list that is sorted by most mentioned first.
--}
-orderedByMostMentionedPrimaryTermIdsToIndexes : GlossaryItems -> Dict String GlossaryItemIndex
-orderedByMostMentionedPrimaryTermIdsToIndexes glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            items.orderedByMostMentionedPrimaryTermIdsToIndexes
+            items.primaryTermIdsToIndexes
 
 
 {-| Retrieve the list of all terms in the glossary.
