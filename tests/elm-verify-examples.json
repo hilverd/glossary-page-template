@@ -1,6 +1,7 @@
 {
     "root": "../src",
     "tests": [
+        "AmortizedQueue",
         "Data.AboutLink",
         "Data.AboutParagraph",
         "Data.GlossaryItem.Definition",

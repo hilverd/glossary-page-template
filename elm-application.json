@@ -3,6 +3,7 @@
     "summary": "Create a glossary as a single HTML page hosted anywhere.",
     "version": "3.5.2",
     "exposed-modules": [
+        "AmortizedQueue",
         "ApplicationShell",
         "Data.AboutLink",
         "Data.AboutParagraph",
