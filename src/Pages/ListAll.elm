@@ -1923,11 +1923,16 @@ view model =
                                             let
                                                 itemWithPreviousAndNext =
                                                     glossary.items
-                                                        |> (if model.common.orderItemsBy == Alphabetically then
-                                                                GlossaryItems.orderedAlphabetically
+                                                        |> (case model.common.orderItemsBy of
+                                                                Alphabetically ->
+                                                                    GlossaryItems.orderedAlphabetically
 
-                                                            else
-                                                                GlossaryItems.orderedByMostMentionedFirst
+                                                                MostMentionedFirst ->
+                                                                    GlossaryItems.orderedByMostMentionedFirst
+
+                                                                FocusedOn termId ->
+                                                                    GlossaryItems.orderedFocusedOn termId
+                                                                        >> Maybe.withDefault Array.empty
                                                            )
                                                         |> itemWithPreviousAndNextForIndex index
                                             in
@@ -2036,11 +2041,16 @@ view model =
                                         [ class "flex-none mt-2" ]
                                         [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
                                 , glossary.items
-                                    |> (if model.common.orderItemsBy == Alphabetically then
-                                            GlossaryItems.orderedAlphabetically
+                                    |> (case model.common.orderItemsBy of
+                                            Alphabetically ->
+                                                GlossaryItems.orderedAlphabetically
 
-                                        else
-                                            GlossaryItems.orderedByMostMentionedFirst
+                                            MostMentionedFirst ->
+                                                GlossaryItems.orderedByMostMentionedFirst
+
+                                            FocusedOn termId ->
+                                                GlossaryItems.orderedFocusedOn termId
+                                                    >> Maybe.withDefault Array.empty
                                        )
                                     |> viewCards
                                         model

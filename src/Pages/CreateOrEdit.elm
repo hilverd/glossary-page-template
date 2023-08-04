@@ -300,18 +300,26 @@ update msg model =
                                             |> Maybe.map Tuple.first
                                         )
 
+                            updatedGlossaryItemsWithFocusedOn =
+                                case common.orderItemsBy of
+                                    FocusedOn termId ->
+                                        GlossaryItems.enableFocusingOn termId updatedGlossaryItems
+
+                                    _ ->
+                                        updatedGlossaryItems
+
                             model_ : Model
                             model_ =
                                 { model
                                     | common =
                                         { common
-                                            | glossary = Ok <| { glossary | items = updatedGlossaryItems }
+                                            | glossary = Ok <| { glossary | items = updatedGlossaryItemsWithFocusedOn }
                                             , maybeIndex = maybeIndex
                                         }
                                 }
                         in
                         ( model_
-                        , patchHtmlFile model_.common updatedGlossaryItems
+                        , patchHtmlFile model_.common updatedGlossaryItemsWithFocusedOn
                         )
 
                 _ ->

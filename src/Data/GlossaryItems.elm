@@ -1,11 +1,11 @@
-module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, primaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms)
+module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, primaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms, enableFocusingOn)
 
 {-| A set of glossary items that make up a glossary.
 
 
 # Glossary Items
 
-@docs GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, primaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms
+@docs GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, primaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms, enableFocusingOn
 
 -}
 
@@ -14,12 +14,13 @@ import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItem.TermId as TermId
+import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Dict exposing (Dict)
 import Extras.Regex
 import Regex
 import Set exposing (Set)
+import UndirectedGraph exposing (UndirectedGraph)
 
 
 {-| Glossary items constructed by the functions below.
@@ -29,6 +30,7 @@ type GlossaryItems
     = GlossaryItems
         { orderedAlphabetically : Array ( GlossaryItemIndex, GlossaryItem )
         , orderedByMostMentionedFirst : Array ( GlossaryItemIndex, GlossaryItem )
+        , orderedFocusedOn : Maybe ( TermId, Array ( GlossaryItemIndex, GlossaryItem ) )
         , primaryTermIdsToIndexes : Dict String GlossaryItemIndex
         }
 
@@ -111,6 +113,7 @@ fromList glossaryItems =
     GlossaryItems <|
         { orderedAlphabetically = Array.fromList alphabetically
         , orderedByMostMentionedFirst = Array.fromList byMostMentionedFirst
+        , orderedFocusedOn = Nothing
         , primaryTermIdsToIndexes = primaryTermIdsToIndexes1 alphabetically
         }
 
@@ -316,6 +319,24 @@ orderedByMostMentionedFirst glossaryItems =
             items.orderedByMostMentionedFirst
 
 
+{-| Retrieve the glossary items ordered "focused on" a specific item, identified by its primary term.
+-}
+orderedFocusedOn : TermId -> GlossaryItems -> Maybe (Array ( GlossaryItemIndex, GlossaryItem ))
+orderedFocusedOn termId glossaryItems =
+    case glossaryItems of
+        GlossaryItems items ->
+            case items.orderedFocusedOn of
+                Just ( termIdFocusedOn, indexedItems ) ->
+                    if termIdFocusedOn == termId then
+                        Just indexedItems
+
+                    else
+                        Nothing
+
+                _ ->
+                    Nothing
+
+
 {-| Retrieve a dict mapping each primary term ID to its index in the item list (no matter how it's sorted).
 -}
 primaryTermIdsToIndexes : GlossaryItems -> Dict String GlossaryItemIndex
@@ -344,3 +365,65 @@ primaryTerms =
     orderedAlphabetically
         >> Array.toList
         >> List.concatMap (Tuple.second >> .terms >> List.take 1)
+
+
+{-| Make it easy to retrieve the items ordered "focused on" a specific item (identified by the ID of that item's primary term).
+Returns an updated `GlossaryItems` where the necessary computations have been done.
+-}
+enableFocusingOn : TermId -> GlossaryItems -> GlossaryItems
+enableFocusingOn termId glossaryItems =
+    case glossaryItems of
+        GlossaryItems items ->
+            let
+                primaryTermsGraph : UndirectedGraph TermId
+                primaryTermsGraph =
+                    items.primaryTermIdsToIndexes
+                        |> Dict.keys
+                        |> List.foldl
+                            (TermId.fromString >> UndirectedGraph.insertVertex)
+                            (UndirectedGraph.empty TermId.toString TermId.fromString)
+
+                relatedTermsGraph : UndirectedGraph TermId
+                relatedTermsGraph =
+                    items.orderedAlphabetically
+                        |> Array.toList
+                        |> List.map Tuple.second
+                        |> List.foldl
+                            (\item graph ->
+                                item.terms
+                                    |> List.head
+                                    |> Maybe.map
+                                        (\primaryTerm ->
+                                            item.relatedTerms
+                                                |> List.foldl
+                                                    (\relatedTerm graph_ ->
+                                                        UndirectedGraph.insertEdge
+                                                            (Term.id primaryTerm)
+                                                            (RelatedTerm.idReference relatedTerm)
+                                                            graph_
+                                                    )
+                                                    graph
+                                        )
+                                    |> Maybe.withDefault graph
+                            )
+                            primaryTermsGraph
+
+                termIdsByDistance : List TermId
+                termIdsByDistance =
+                    UndirectedGraph.verticesByDistance termId relatedTermsGraph
+
+                itemsByDistance : Array ( GlossaryItemIndex, GlossaryItem )
+                itemsByDistance =
+                    termIdsByDistance
+                        |> List.filterMap
+                            (\termId_ ->
+                                items.primaryTermIdsToIndexes
+                                    |> Dict.get (TermId.toString termId_)
+                                    |> Maybe.andThen
+                                        (\index ->
+                                            Array.get (GlossaryItemIndex.toInt index) items.orderedAlphabetically
+                                        )
+                            )
+                        |> Array.fromList
+            in
+            GlossaryItems { items | orderedFocusedOn = Just ( termId, itemsByDistance ) }

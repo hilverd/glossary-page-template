@@ -1,11 +1,13 @@
 module Data.OrderItemsBy exposing (OrderItemsBy(..), decode, encode)
 
+import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Json.Decode as Decode exposing (Decoder)
 
 
 type OrderItemsBy
     = Alphabetically
     | MostMentionedFirst
+    | FocusedOn TermId
 
 
 decode : Decoder OrderItemsBy
@@ -21,7 +23,17 @@ decode =
                         Decode.succeed MostMentionedFirst
 
                     somethingElse ->
-                        Decode.fail <| "Unknown order: " ++ somethingElse
+                        if String.startsWith "focused-on-" str then
+                            let
+                                termId =
+                                    str
+                                        |> String.slice 11 (String.length str - 1)
+                                        |> TermId.fromString
+                            in
+                            Decode.succeed <| FocusedOn termId
+
+                        else
+                            Decode.fail <| "Unknown order: " ++ somethingElse
             )
 
 
@@ -33,3 +45,6 @@ encode orderItemsBy =
 
         MostMentionedFirst ->
             "most-mentioned-first"
+
+        FocusedOn termId ->
+            "focused-on-" ++ TermId.toString termId

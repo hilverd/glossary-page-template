@@ -16,6 +16,8 @@ import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Glossary exposing (Glossary)
+import Data.GlossaryItem.TermId as TermId
+import Data.GlossaryItems as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Data.OrderItemsBy as OrderItemsBy exposing (OrderItemsBy(..))
@@ -187,6 +189,14 @@ init flags =
                                 flags
                                     |> Decode.decodeValue (Decode.field "aboutLinks" <| Decode.list AboutLink.decode)
                                     |> Result.withDefault []
+
+                            items1 =
+                                case orderItemsBy of
+                                    FocusedOn termId ->
+                                        GlossaryItems.enableFocusingOn termId items
+
+                                    _ ->
+                                        items
                         in
                         { enableMarkdownBasedSyntax = enableMarkdownBasedSyntax
                         , enableMathSupport = enableMarkdownBasedSyntax && katexIsAvailable
@@ -194,7 +204,7 @@ init flags =
                         , cardWidth = cardWidth
                         , title = title
                         , aboutSection = aboutSection
-                        , items = items
+                        , items = items1
                         }
                     )
 
