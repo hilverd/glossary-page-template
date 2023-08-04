@@ -21,6 +21,7 @@
         "Extras.Url",
         "GlossaryItemForm.DefinitionField",
         "GlossaryItemForm.TermField",
-        "MarkdownRenderers"
+        "MarkdownRenderers",
+        "UndirectedGraph"
     ]
 }
