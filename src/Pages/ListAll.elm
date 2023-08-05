@@ -1918,6 +1918,10 @@ viewOrderItemsBy model numberOfItems enableMathSupport primaryTerms orderItemsFo
                         ]
                 ]
             ]
+        , Extras.Html.showIf (model.common.orderItemsBy == MostMentionedFirst) <|
+            p
+                [ class "mt-2 text-gray-700 dark:text-gray-300" ]
+                [ text "Items that are mentioned in many other items are shown first." ]
         , Extras.Html.showMaybe
             (\term ->
                 p
