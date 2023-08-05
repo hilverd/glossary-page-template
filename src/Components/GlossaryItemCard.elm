@@ -5,7 +5,7 @@ import Accessibility.Aria
 import Accessibility.Key
 import Components.Badge
 import Components.Button
-import Data.FeatureFlag exposing (enableFeaturesInProgress)
+import Data.FeatureFlag exposing (enableFeaturesInProgress, enableTopicsFeature)
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
@@ -488,7 +488,7 @@ viewGlossaryItemDefinition { enableMathSupport, tabbable, topicsClickable } defi
     Html.dd
         []
         [ Definition.view { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable } definition
-        , Extras.Html.showIf enableFeaturesInProgress <|
+        , Extras.Html.showIf enableTopicsFeature <|
             Html.div
                 [ class "mt-4" ]
                 [ Components.Button.softSmall

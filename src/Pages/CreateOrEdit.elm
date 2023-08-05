@@ -44,6 +44,7 @@ import PageMsg exposing (PageMsg)
 import Set exposing (Set)
 import Svg.Attributes
 import Task
+import Data.FeatureFlag exposing (enableTopicsFeature)
 
 
 
@@ -568,7 +569,7 @@ viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathS
             p
                 [ class "mt-2 text-red-800 dark:text-red-200" ]
                 [ text "This will be turned into a single paragraph — line breaks are automatically converted to spaces" ]
-        , Extras.Html.showIf enableFeaturesInProgress <|
+        , Extras.Html.showIf enableTopicsFeature <|
             div
                 [ class "mt-4" ]
                 [ Components.Badge.withCheckbox

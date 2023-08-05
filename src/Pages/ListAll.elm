@@ -40,8 +40,9 @@ import Components.DropdownMenu
 import Components.GlossaryItemCard
 import Components.ModalDialog
 import Components.SearchDialog
+import Components.SelectMenu
 import Data.CardWidth as CardWidth exposing (CardWidth)
-import Data.FeatureFlag exposing (enableFeaturesInProgress)
+import Data.FeatureFlag exposing (enableFeaturesInProgress, enableTopicsFeature)
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
@@ -146,6 +147,7 @@ type InternalMsg
     | FailedToDelete GlossaryItemIndex Http.Error
     | JumpToTermIndexGroup Bool String
     | ChangeOrderItemsBy OrderItemsBy
+    | ChangeOrderItemsByToFocusedOn String
     | ToggleMarkdownBasedSyntax
     | ChangeCardWidth CardWidth
     | ToggleEnableExportMenu
@@ -500,10 +502,26 @@ update msg model =
                 common : CommonModel
                 common =
                     model.common
+
+                common1 =
+                    case ( orderItemsBy, common.glossary ) of
+                        ( FocusedOn termId, Ok glossary ) ->
+                            let
+                                glossary1 =
+                                    { glossary | items = GlossaryItems.enableFocusingOn termId glossary.items }
+                            in
+                            { common | glossary = Ok glossary1 }
+
+                        _ ->
+                            common
             in
-            ( { model | common = { common | orderItemsBy = orderItemsBy } }
+            ( { model | common = { common1 | orderItemsBy = orderItemsBy } }
             , orderItemsBy |> Data.OrderItemsBy.encode |> changeOrderItemsBy
             )
+
+        ChangeOrderItemsByToFocusedOn selection ->
+            -- TODO remove this message type
+            ( model, Cmd.none )
 
         ToggleMarkdownBasedSyntax ->
             case model.common.glossary of
@@ -1163,9 +1181,15 @@ viewCreateGlossaryItemButton tabbable common =
 viewCards :
     Model
     -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
+    -> GlossaryItems
     -> Array ( GlossaryItemIndex, GlossaryItem )
     -> Html Msg
-viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } indexedGlossaryItems =
+viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } glossaryItems indexedGlossaryItems =
+    let
+        primaryTerms : List Term
+        primaryTerms =
+            GlossaryItems.primaryTerms glossaryItems
+    in
     Html.article
         [ Html.Attributes.id ElementIds.items ]
         [ div
@@ -1180,12 +1204,12 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                         viewCreateGlossaryItemButton tabbable model.common
                     ]
             ]
-        , Extras.Html.showIf enableFeaturesInProgress <|
+        , Extras.Html.showIf enableTopicsFeature <|
             viewCurrentTopicFilter tabbable
-        , Extras.Html.showIf enableFeaturesInProgress <|
+        , Extras.Html.showIf enableTopicsFeature <|
             viewAllTopicFilters tabbable
         , Extras.Html.showIf (not <| Array.isEmpty indexedGlossaryItems) <|
-            viewOrderItemsBy model (Array.length indexedGlossaryItems)
+            viewOrderItemsBy model (Array.length indexedGlossaryItems) primaryTerms
         , Html.dl
             []
             (indexedGlossaryItems
@@ -1751,8 +1775,8 @@ viewAllTopicFilters tabbable =
         ]
 
 
-viewOrderItemsBy : Model -> Int -> Html Msg
-viewOrderItemsBy model numberOfItems =
+viewOrderItemsBy : Model -> Int -> List Term -> Html Msg
+viewOrderItemsBy model numberOfItems primaryTerms =
     let
         tabbable : Bool
         tabbable =
@@ -1808,6 +1832,46 @@ viewOrderItemsBy model numberOfItems =
                         ]
                         [ text "most mentioned first" ]
                     ]
+                , Extras.Html.showIf enableFeaturesInProgress <|
+                    div
+                        [ class "flex items-center" ]
+                        [ Components.Button.radio
+                            "order-items-by"
+                            "order-items-focused-on"
+                            (case model.common.orderItemsBy of
+                                FocusedOn _ ->
+                                    True
+
+                                _ ->
+                                    False
+                            )
+                            tabbable
+                            [ id ElementIds.orderItemsFocusedOn
+                            , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy <| FocusedOn <| TermId.fromString "Markdown"
+                            ]
+                        , label
+                            [ class "ml-3 inline-flex items-center font-medium text-gray-700 dark:text-gray-300 select-none"
+                            , for ElementIds.orderItemsFocusedOn
+                            ]
+                            [ span
+                                [ class "mr-2" ]
+                                [ text "focused on" ]
+                            , Components.SelectMenu.render
+                                [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect
+                                , Components.SelectMenu.ariaLabel "Focus on term"
+                                , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsByToFocusedOn)
+                                ]
+                                (primaryTerms
+                                    |> List.map
+                                        (\primaryTerm ->
+                                            Components.SelectMenu.Choice
+                                                (Term.id primaryTerm |> TermId.toString)
+                                                [ text <| Term.inlineText primaryTerm ]
+                                                False
+                                        )
+                                )
+                            ]
+                        ]
                 ]
             ]
         ]
@@ -2059,6 +2123,7 @@ view model =
                                         , tabbable = noModalDialogShown_
                                         , enableLastUpdatedDates = glossary.enableLastUpdatedDates
                                         }
+                                        glossary.items
                                 ]
                             ]
                         ]

@@ -17,6 +17,8 @@ module ElementIds exposing
     , items
     , needsUpdatingToggleLabel
     , orderItemsAlphabetically
+    , orderItemsFocusedOn
+    , orderItemsFocusedOnSelect
     , orderItemsMostMentionedFirst
     , outer
     , quickSearchButtonAndLetterGrid
@@ -116,6 +118,11 @@ orderItemsMostMentionedFirst =
     prefixed "order-items-most-mentioned-first"
 
 
+orderItemsFocusedOn : String
+orderItemsFocusedOn =
+    prefixed "order-items-focused-on"
+
+
 confirmDeleteModalTitle : String
 confirmDeleteModalTitle =
     prefixed "confirm-delete-modal-title"
@@ -139,6 +146,11 @@ definitionSingle index =
 seeAlsoSelect : RelatedTermIndex -> String
 seeAlsoSelect index =
     prefixed <| "see-also-" ++ (index |> RelatedTermIndex.toInt |> String.fromInt)
+
+
+orderItemsFocusedOnSelect : String
+orderItemsFocusedOnSelect =
+    prefixed "order-items-focused-on"
 
 
 termIndexGroupLabel : Bool -> String -> String
