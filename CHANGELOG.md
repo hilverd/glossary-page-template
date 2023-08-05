@@ -12,6 +12,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Allow ordering items "focused on" a particular term. Items that are closely related to this term (i.e. have a shorter path to the term's item via "See also" links) are shown earlier. For larger glossaries, this hopefully provides a way to focus on a certain topic by allowing the user to browse the items closely related to that topic, gradually moving towards topics that are further removed.
+
 ### Changed
 ### Fixed
 ### Removed

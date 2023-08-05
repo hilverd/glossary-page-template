@@ -47,8 +47,8 @@ import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItem.TermId as TermId
-import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
+import Data.GlossaryItem.TermId as TermId exposing (TermId)
+import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -121,6 +121,7 @@ type alias Model =
     , confirmDeleteIndex : Maybe GlossaryItemIndex
     , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
     , errorWhileChangingSettings : Maybe String
+    , mostRecentTermIdForOrderingItemsFocusedOn : Maybe TermId
     }
 
 
@@ -147,7 +148,6 @@ type InternalMsg
     | FailedToDelete GlossaryItemIndex Http.Error
     | JumpToTermIndexGroup Bool String
     | ChangeOrderItemsBy OrderItemsBy
-    | ChangeOrderItemsByToFocusedOn String
     | ToggleMarkdownBasedSyntax
     | ChangeCardWidth CardWidth
     | ToggleEnableExportMenu
@@ -187,6 +187,13 @@ init editorIsRunning commonModel =
             }
       , errorWhileDeleting = Nothing
       , errorWhileChangingSettings = Nothing
+      , mostRecentTermIdForOrderingItemsFocusedOn =
+            case commonModel.orderItemsBy of
+                FocusedOn termId ->
+                    Just termId
+
+                _ ->
+                    Nothing
       }
     , case commonModel.maybeIndex of
         Just index ->
@@ -503,6 +510,15 @@ update msg model =
                 common =
                     model.common
 
+                mostRecentTermIdForOrderingItemsFocusedOn1 : Maybe TermId
+                mostRecentTermIdForOrderingItemsFocusedOn1 =
+                    case orderItemsBy of
+                        FocusedOn termId ->
+                            Just termId
+
+                        _ ->
+                            model.mostRecentTermIdForOrderingItemsFocusedOn
+
                 common1 =
                     case ( orderItemsBy, common.glossary ) of
                         ( FocusedOn termId, Ok glossary ) ->
@@ -515,13 +531,12 @@ update msg model =
                         _ ->
                             common
             in
-            ( { model | common = { common1 | orderItemsBy = orderItemsBy } }
+            ( { model
+                | common = { common1 | orderItemsBy = orderItemsBy }
+                , mostRecentTermIdForOrderingItemsFocusedOn = mostRecentTermIdForOrderingItemsFocusedOn1
+              }
             , orderItemsBy |> Data.OrderItemsBy.encode |> changeOrderItemsBy
             )
-
-        ChangeOrderItemsByToFocusedOn selection ->
-            -- TODO remove this message type
-            ( model, Cmd.none )
 
         ToggleMarkdownBasedSyntax ->
             case model.common.glossary of
@@ -1189,6 +1204,22 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
         primaryTerms : List Term
         primaryTerms =
             GlossaryItems.primaryTerms glossaryItems
+
+        orderItemsFocusedOnTerm : Maybe Term
+        orderItemsFocusedOnTerm =
+            case model.common.orderItemsBy of
+                FocusedOn termId ->
+                    GlossaryItems.primaryTermIdsToIndexes glossaryItems
+                        |> Dict.get (TermId.toString termId)
+                        |> Maybe.andThen
+                            (\index ->
+                                Array.get (GlossaryItemIndex.toInt index)
+                                    (GlossaryItems.orderedAlphabetically glossaryItems)
+                            )
+                        |> Maybe.andThen (Tuple.second >> .terms >> List.head)
+
+                _ ->
+                    Nothing
     in
     Html.article
         [ Html.Attributes.id ElementIds.items ]
@@ -1209,7 +1240,12 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
         , Extras.Html.showIf enableTopicsFeature <|
             viewAllTopicFilters tabbable
         , Extras.Html.showIf (not <| Array.isEmpty indexedGlossaryItems) <|
-            viewOrderItemsBy model (Array.length indexedGlossaryItems) primaryTerms
+            viewOrderItemsBy
+                model
+                (Array.length indexedGlossaryItems)
+                enableMathSupport
+                primaryTerms
+                orderItemsFocusedOnTerm
         , Html.dl
             []
             (indexedGlossaryItems
@@ -1775,8 +1811,8 @@ viewAllTopicFilters tabbable =
         ]
 
 
-viewOrderItemsBy : Model -> Int -> List Term -> Html Msg
-viewOrderItemsBy model numberOfItems primaryTerms =
+viewOrderItemsBy : Model -> Int -> Bool -> List Term -> Maybe Term -> Html Msg
+viewOrderItemsBy model numberOfItems enableMathSupport primaryTerms orderItemsFocusedOnTerm =
     let
         tabbable : Bool
         tabbable =
@@ -1847,7 +1883,11 @@ viewOrderItemsBy model numberOfItems primaryTerms =
                             )
                             tabbable
                             [ id ElementIds.orderItemsFocusedOn
-                            , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy <| FocusedOn <| TermId.fromString "Markdown"
+                            , Extras.HtmlAttribute.showMaybe
+                                (\termId ->
+                                    Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy <| FocusedOn termId
+                                )
+                                model.mostRecentTermIdForOrderingItemsFocusedOn
                             ]
                         , label
                             [ class "ml-3 inline-flex items-center font-medium text-gray-700 dark:text-gray-300 select-none"
@@ -1859,21 +1899,35 @@ viewOrderItemsBy model numberOfItems primaryTerms =
                             , Components.SelectMenu.render
                                 [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect
                                 , Components.SelectMenu.ariaLabel "Focus on term"
-                                , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsByToFocusedOn)
+                                , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << TermId.fromString)
                                 ]
                                 (primaryTerms
                                     |> List.map
                                         (\primaryTerm ->
+                                            let
+                                                primaryTermId =
+                                                    Term.id primaryTerm
+                                            in
                                             Components.SelectMenu.Choice
-                                                (Term.id primaryTerm |> TermId.toString)
+                                                (TermId.toString primaryTermId)
                                                 [ text <| Term.inlineText primaryTerm ]
-                                                False
+                                                (model.mostRecentTermIdForOrderingItemsFocusedOn == Just primaryTermId)
                                         )
                                 )
                             ]
                         ]
                 ]
             ]
+        , Extras.Html.showMaybe
+            (\term ->
+                p
+                    [ class "mt-2 text-gray-700 dark:text-gray-300" ]
+                    [ text "Items closely related to \""
+                    , Term.view enableMathSupport [] term
+                    , text "\" are shown first."
+                    ]
+            )
+            orderItemsFocusedOnTerm
         ]
 
 
