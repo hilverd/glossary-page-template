@@ -3,14 +3,13 @@ module Components.GlossaryItemCard exposing (Style(..), view)
 import Accessibility exposing (Html, div, p, span, text)
 import Accessibility.Aria
 import Accessibility.Key
-import Components.Badge
 import Components.Button
-import Data.FeatureFlag exposing (enableFeaturesInProgress, enableTopicsFeature)
+import Data.FeatureFlag exposing (enableTopicsFeature)
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItem.TermId as TermId exposing (TermId)
+import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import ElementIds
@@ -314,7 +313,7 @@ viewAsSingle :
     }
     -> GlossaryItemWithPreviousAndNext
     -> Html msg
-viewAsSingle { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates, onClickItem, onClickRelatedTerm } glossaryItemWithPreviousAndNext =
+viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRelatedTerm } glossaryItemWithPreviousAndNext =
     let
         primaryTermForPreviousOrNext glossaryItem =
             glossaryItem.terms

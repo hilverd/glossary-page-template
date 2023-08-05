@@ -14,7 +14,7 @@ import Components.Form
 import Components.GlossaryItemCard
 import Components.SelectMenu
 import Data.DefinitionIndex as DefinitionIndex exposing (DefinitionIndex)
-import Data.FeatureFlag exposing (enableFeaturesInProgress)
+import Data.FeatureFlag exposing (enableTopicsFeature)
 import Data.Glossary as Glossary
 import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
@@ -44,7 +44,6 @@ import PageMsg exposing (PageMsg)
 import Set exposing (Set)
 import Svg.Attributes
 import Task
-import Data.FeatureFlag exposing (enableTopicsFeature)
 
 
 

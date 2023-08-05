@@ -11,7 +11,6 @@ module UndirectedGraph exposing (UndirectedGraph, empty, insertVertex, insertEdg
 
 import AmortizedQueue exposing (AmortizedQueue)
 import Dict exposing (Dict)
-import Html exposing (a)
 import Set exposing (Set)
 
 

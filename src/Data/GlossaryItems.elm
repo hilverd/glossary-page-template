@@ -11,7 +11,7 @@ module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetical
 
 import Array exposing (Array)
 import Data.GlossaryItem exposing (GlossaryItem)
-import Data.GlossaryItem.Definition as Definition exposing (Definition)
+import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)

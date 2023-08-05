@@ -2,7 +2,6 @@ module Components.Badge exposing (withBorderAndRemoveButton, withCheckbox)
 
 import Accessibility exposing (Attribute, Html, button, checkbox, span, text)
 import Accessibility.Key
-import Html exposing (label)
 import Html.Attributes exposing (class, for, id)
 import Icons
 import Svg.Attributes

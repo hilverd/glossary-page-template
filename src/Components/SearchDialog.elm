@@ -21,7 +21,6 @@ import Accessibility.Aria
 import Accessibility.Key
 import Accessibility.Role
 import Array
-import Browser.Dom as Dom
 import Browser.Navigation
 import Extras.Html
 import Extras.HtmlAttribute

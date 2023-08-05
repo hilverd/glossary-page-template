@@ -16,7 +16,6 @@ import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Glossary exposing (Glossary)
-import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItems as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems exposing (LoadedGlossaryItems)
