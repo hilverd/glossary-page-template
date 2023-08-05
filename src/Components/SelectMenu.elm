@@ -2,6 +2,7 @@ module Components.SelectMenu exposing
     ( Choice
     , Property
     , ariaLabel
+    , enabled
     , id
     , onChange
     , render
@@ -14,7 +15,7 @@ import Accessibility.Aria
 import Extras.Html
 import Extras.HtmlAttribute
 import Html
-import Html.Attributes exposing (class, selected, value)
+import Html.Attributes exposing (class, disabled, selected, value)
 import Html.Events
 import Json.Decode as Decode
 
@@ -25,6 +26,7 @@ type Property msg
     | ValidationError (Maybe String)
     | ShowValidationErrors Bool
     | OnChange (String -> msg)
+    | Enabled Bool
 
 
 type alias Config msg =
@@ -33,6 +35,7 @@ type alias Config msg =
     , validationError : Maybe String
     , showValidationErrors : Bool
     , onChange : Maybe (String -> msg)
+    , enabled : Maybe Bool
     }
 
 
@@ -68,6 +71,11 @@ onChange =
     OnChange
 
 
+enabled : Bool -> Property msg
+enabled =
+    Enabled
+
+
 configFromProperties : List (Property msg) -> Config msg
 configFromProperties =
     List.foldl
@@ -87,12 +95,16 @@ configFromProperties =
 
                 OnChange handler ->
                     { config | onChange = Just handler }
+
+                Enabled enabled_ ->
+                    { config | enabled = Just enabled_ }
         )
         { id = Nothing
         , ariaLabel = Nothing
         , validationError = Nothing
         , showValidationErrors = False
         , onChange = Nothing
+        , enabled = Nothing
         }
 
 
@@ -116,6 +128,7 @@ render properties choices =
                             Decode.andThen Decode.succeed Html.Events.targetValue
                 )
                 config.onChange
+            , config.enabled |> Maybe.withDefault True |> not |> disabled
             ]
             ((if List.any .selected choices then
                 []
