@@ -27,7 +27,7 @@ decode =
                             let
                                 termId =
                                     str
-                                        |> String.slice 11 (String.length str - 1)
+                                        |> String.slice 11 (String.length str)
                                         |> TermId.fromString
                             in
                             Decode.succeed <| FocusedOn termId
