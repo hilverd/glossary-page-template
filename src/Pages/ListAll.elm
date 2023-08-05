@@ -1835,7 +1835,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport primaryTerms orderItemsFo
                 [ class "sr-only" ]
                 [ text "Sort order" ]
             , div
-                [ class "space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6" ]
+                [ class "space-y-4 xl:flex xl:items-center xl:space-y-0 xl:space-x-6" ]
                 [ div
                     [ class "flex items-center" ]
                     [ Components.Button.radio
