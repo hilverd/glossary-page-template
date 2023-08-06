@@ -17,7 +17,7 @@
             "elm/svg": "1.0.1",
             "elm/url": "1.0.0",
             "kuon/elm-string-normalize": "1.0.5",
-            "tesk9/accessible-html": "5.0.0"
+            "tesk9/accessible-html": "6.2.0"
         },
         "indirect": {
             "elm/bytes": "1.0.8",
