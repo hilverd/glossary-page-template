@@ -142,6 +142,7 @@ adjacentVertices vertex graph =
 
 {-| Given a vertex `v` which is assumed to be in the graph, list the vertices in the graph in an order such that for any distinct vertices `v1`, `v2` in the graph, if `v1` can be reached from `v` using a shorter path than `v2`, then `v1` appears before `v2` in the list.
 If `v1` and `v2` have the same distance to `v` then the vertex that is smaller according to `comparable` order appears first.
+The result is separated into two lists --- the first contains items vertices reachable from `v` the second contains those that are not.
 
     empty identity identity
     |> insertEdge "R" "A"
@@ -152,10 +153,10 @@ If `v1` and `v2` have the same distance to `v` then the vertex that is smaller a
     |> insertEdge "C" "E"
     |> insertVertex "F"
     |> verticesByDistance "R"
-    --> ["R", "A", "B", "C", "D", "E", "F"]
+    --> (["R", "A", "B", "C", "D", "E"], ["F"])
 
 -}
-verticesByDistance : a -> UndirectedGraph a -> List a
+verticesByDistance : a -> UndirectedGraph a -> ( List a, List a )
 verticesByDistance startingVertex graph =
     case graph of
         UndirectedGraph { vertexToString, vertexFromString, vertices_ } ->
@@ -214,4 +215,4 @@ verticesByDistance startingVertex graph =
                         |> Set.toList
                         |> List.map vertexFromString
             in
-            List.append reachableVertices unreachableVertices
+            ( reachableVertices, unreachableVertices )

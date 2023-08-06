@@ -30,7 +30,13 @@ type GlossaryItems
     = GlossaryItems
         { orderedAlphabetically : Array ( GlossaryItemIndex, GlossaryItem )
         , orderedByMostMentionedFirst : Array ( GlossaryItemIndex, GlossaryItem )
-        , orderedFocusedOn : Maybe ( TermId, Array ( GlossaryItemIndex, GlossaryItem ) )
+        , orderedFocusedOn :
+            Maybe
+                ( TermId
+                , ( Array ( GlossaryItemIndex, GlossaryItem )
+                  , Array ( GlossaryItemIndex, GlossaryItem )
+                  )
+                )
         , primaryTermIdsToIndexes : Dict String GlossaryItemIndex
         }
 
@@ -321,7 +327,14 @@ orderedByMostMentionedFirst glossaryItems =
 
 {-| Retrieve the glossary items ordered "focused on" a specific item, identified by its primary term.
 -}
-orderedFocusedOn : TermId -> GlossaryItems -> Maybe (Array ( GlossaryItemIndex, GlossaryItem ))
+orderedFocusedOn :
+    TermId
+    -> GlossaryItems
+    ->
+        Maybe
+            ( Array ( GlossaryItemIndex, GlossaryItem )
+            , Array ( GlossaryItemIndex, GlossaryItem )
+            )
 orderedFocusedOn termId glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
@@ -408,22 +421,33 @@ enableFocusingOn termId glossaryItems =
                             )
                             primaryTermsGraph
 
-                termIdsByDistance : List TermId
+                termIdsByDistance : ( List TermId, List TermId )
                 termIdsByDistance =
                     UndirectedGraph.verticesByDistance termId relatedTermsGraph
 
-                itemsByDistance : Array ( GlossaryItemIndex, GlossaryItem )
+                termIdToIndexedItem : TermId -> Maybe ( GlossaryItemIndex, GlossaryItem )
+                termIdToIndexedItem termId_ =
+                    items.primaryTermIdsToIndexes
+                        |> Dict.get (TermId.toString termId_)
+                        |> Maybe.andThen
+                            (\index ->
+                                Array.get (GlossaryItemIndex.toInt index) items.orderedAlphabetically
+                            )
+
+                itemsByDistance :
+                    ( Array ( GlossaryItemIndex, GlossaryItem )
+                    , Array ( GlossaryItemIndex, GlossaryItem )
+                    )
                 itemsByDistance =
                     termIdsByDistance
-                        |> List.filterMap
-                            (\termId_ ->
-                                items.primaryTermIdsToIndexes
-                                    |> Dict.get (TermId.toString termId_)
-                                    |> Maybe.andThen
-                                        (\index ->
-                                            Array.get (GlossaryItemIndex.toInt index) items.orderedAlphabetically
-                                        )
+                        |> Tuple.mapBoth
+                            (List.filterMap
+                                termIdToIndexedItem
+                                >> Array.fromList
                             )
-                        |> Array.fromList
+                            (List.filterMap
+                                termIdToIndexedItem
+                                >> Array.fromList
+                            )
             in
             GlossaryItems { items | orderedFocusedOn = Just ( termId, itemsByDistance ) }

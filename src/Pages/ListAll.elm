@@ -36,6 +36,7 @@ import Components.AboutSection
 import Components.Badge
 import Components.Button
 import Components.Copy
+import Components.Dividers
 import Components.DropdownMenu
 import Components.GlossaryItemCard
 import Components.ModalDialog
@@ -1197,10 +1198,14 @@ viewCards :
     Model
     -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
     -> GlossaryItems
-    -> Array ( GlossaryItemIndex, GlossaryItem )
+    -> ( Array ( GlossaryItemIndex, GlossaryItem ), Array ( GlossaryItemIndex, GlossaryItem ) )
     -> Html Msg
-viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } glossaryItems indexedGlossaryItems =
+viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
+        combinedGlossaryItems : Array ( GlossaryItemIndex, GlossaryItem )
+        combinedGlossaryItems =
+            Array.append indexedGlossaryItems otherIndexedGlossaryItems
+
         primaryTerms : List Term
         primaryTerms =
             GlossaryItems.primaryTerms glossaryItems
@@ -1220,6 +1225,19 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
 
                 _ ->
                     Nothing
+
+        viewIndexedItem : ( GlossaryItemIndex, GlossaryItem ) -> Html Msg
+        viewIndexedItem indexedItem =
+            viewGlossaryItem
+                { enableMathSupport = enableMathSupport
+                , tabbable = tabbable
+                , editable = editable
+                , enableLastUpdatedDates = enableLastUpdatedDates
+                , shownAsSingle = False
+                }
+                model
+                model.errorWhileDeleting
+                { previous = Nothing, item = Just indexedItem, next = Nothing }
     in
     Html.article
         [ Html.Attributes.id ElementIds.items ]
@@ -1228,7 +1246,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             [ Extras.Html.showIf editable <|
                 div
                     [ class "pt-2" ]
-                    [ if Array.isEmpty indexedGlossaryItems then
+                    [ if Array.isEmpty combinedGlossaryItems then
                         viewCreateGlossaryItemButtonForEmptyState tabbable model.common
 
                       else
@@ -1239,10 +1257,10 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             viewCurrentTopicFilter tabbable
         , Extras.Html.showIf enableTopicsFeature <|
             viewAllTopicFilters tabbable
-        , Extras.Html.showIf (not <| Array.isEmpty indexedGlossaryItems) <|
+        , Extras.Html.showIf (not <| Array.isEmpty combinedGlossaryItems) <|
             viewOrderItemsBy
                 model
-                (Array.length indexedGlossaryItems)
+                (Array.length combinedGlossaryItems)
                 enableMathSupport
                 primaryTerms
                 orderItemsFocusedOnTerm
@@ -1250,20 +1268,23 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             []
             (indexedGlossaryItems
                 |> Array.toList
-                |> List.map
-                    (\indexedItem ->
-                        viewGlossaryItem
-                            { enableMathSupport = enableMathSupport
-                            , tabbable = tabbable
-                            , editable = editable
-                            , enableLastUpdatedDates = enableLastUpdatedDates
-                            , shownAsSingle = False
-                            }
-                            model
-                            model.errorWhileDeleting
-                            { previous = Nothing, item = Just indexedItem, next = Nothing }
-                    )
+                |> List.map viewIndexedItem
             )
+        , Extras.Html.showIf
+            ((not <| Array.isEmpty indexedGlossaryItems)
+                && (not <| Array.isEmpty otherIndexedGlossaryItems)
+            )
+          <|
+            Components.Dividers.withLabel
+                [ class "my-8" ]
+                "Other items"
+        , Extras.Html.showIf (not <| Array.isEmpty otherIndexedGlossaryItems) <|
+            Html.dl
+                []
+                (otherIndexedGlossaryItems
+                    |> Array.toList
+                    |> List.map viewIndexedItem
+                )
         , Components.SearchDialog.view
             (PageMsg.Internal << SearchDialogMsg)
             model.searchDialog.model
@@ -1279,7 +1300,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             , tabbable = tabbable
             , enableLastUpdatedDates = enableLastUpdatedDates
             }
-            indexedGlossaryItems
+            combinedGlossaryItems
           <|
             case ( model.layout, model.common.maybeIndex ) of
                 ( ShowSingleItem, Just index ) ->
@@ -2054,7 +2075,8 @@ view model =
 
                                                                 FocusedOn termId ->
                                                                     GlossaryItems.orderedFocusedOn termId
-                                                                        >> Maybe.withDefault Array.empty
+                                                                        >> Maybe.withDefault ( Array.empty, Array.empty )
+                                                                        >> (\( lhs, rhs ) -> Array.append lhs rhs)
                                                            )
                                                         |> itemWithPreviousAndNextForIndex index
                                             in
@@ -2166,13 +2188,15 @@ view model =
                                     |> (case model.common.orderItemsBy of
                                             Alphabetically ->
                                                 GlossaryItems.orderedAlphabetically
+                                                    >> (\lhs -> ( lhs, Array.empty ))
 
                                             MostMentionedFirst ->
                                                 GlossaryItems.orderedByMostMentionedFirst
+                                                    >> (\lhs -> ( lhs, Array.empty ))
 
                                             FocusedOn termId ->
                                                 GlossaryItems.orderedFocusedOn termId
-                                                    >> Maybe.withDefault Array.empty
+                                                    >> Maybe.withDefault ( Array.empty, Array.empty )
                                        )
                                     |> viewCards
                                         model
