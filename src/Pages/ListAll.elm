@@ -1889,54 +1889,53 @@ viewOrderItemsBy model numberOfItems enableMathSupport primaryTerms orderItemsFo
                         ]
                         [ text "most mentioned first" ]
                     ]
-                , Extras.Html.showIf enableFeaturesInProgress <|
-                    div
-                        [ class "flex items-center" ]
-                        [ Components.Button.radio
-                            "order-items-by"
-                            "order-items-focused-on"
-                            (case model.common.orderItemsBy of
-                                FocusedOn _ ->
-                                    True
+                , div
+                    [ class "flex items-center" ]
+                    [ Components.Button.radio
+                        "order-items-by"
+                        "order-items-focused-on"
+                        (case model.common.orderItemsBy of
+                            FocusedOn _ ->
+                                True
 
-                                _ ->
-                                    False
+                            _ ->
+                                False
+                        )
+                        tabbable
+                        [ id ElementIds.orderItemsFocusedOn
+                        , Extras.HtmlAttribute.showMaybe
+                            (\termId ->
+                                Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy <| FocusedOn termId
                             )
-                            tabbable
-                            [ id ElementIds.orderItemsFocusedOn
-                            , Extras.HtmlAttribute.showMaybe
-                                (\termId ->
-                                    Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy <| FocusedOn termId
-                                )
-                                model.mostRecentTermIdForOrderingItemsFocusedOn
-                            ]
-                        , label
-                            [ class "ml-3 inline-flex items-center font-medium text-gray-700 dark:text-gray-300 select-none"
-                            , for ElementIds.orderItemsFocusedOn
-                            ]
-                            [ span
-                                [ class "mr-2" ]
-                                [ text "focused on" ]
-                            , Components.SelectMenu.render
-                                [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect
-                                , Components.SelectMenu.ariaLabel "Focus on term"
-                                , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << TermId.fromString)
-                                ]
-                                (primaryTerms
-                                    |> List.map
-                                        (\primaryTerm ->
-                                            let
-                                                primaryTermId =
-                                                    Term.id primaryTerm
-                                            in
-                                            Components.SelectMenu.Choice
-                                                (TermId.toString primaryTermId)
-                                                [ text <| Term.inlineText primaryTerm ]
-                                                (model.mostRecentTermIdForOrderingItemsFocusedOn == Just primaryTermId)
-                                        )
-                                )
-                            ]
+                            model.mostRecentTermIdForOrderingItemsFocusedOn
                         ]
+                    , label
+                        [ class "ml-3 inline-flex items-center font-medium text-gray-700 dark:text-gray-300 select-none"
+                        , for ElementIds.orderItemsFocusedOn
+                        ]
+                        [ span
+                            [ class "mr-2" ]
+                            [ text "focused on" ]
+                        , Components.SelectMenu.render
+                            [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect
+                            , Components.SelectMenu.ariaLabel "Focus on term"
+                            , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << TermId.fromString)
+                            ]
+                            (primaryTerms
+                                |> List.map
+                                    (\primaryTerm ->
+                                        let
+                                            primaryTermId =
+                                                Term.id primaryTerm
+                                        in
+                                        Components.SelectMenu.Choice
+                                            (TermId.toString primaryTermId)
+                                            [ text <| Term.inlineText primaryTerm ]
+                                            (model.mostRecentTermIdForOrderingItemsFocusedOn == Just primaryTermId)
+                                    )
+                            )
+                        ]
+                    ]
                 ]
             ]
         , Extras.Html.showIf (model.common.orderItemsBy == MostMentionedFirst) <|
