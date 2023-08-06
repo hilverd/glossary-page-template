@@ -1948,7 +1948,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport primaryTerms orderItemsFo
                     [ class "mt-2 text-gray-700 dark:text-gray-300" ]
                     [ text "Items closely related to \""
                     , Term.view enableMathSupport [] term
-                    , text "\" are shown first."
+                    , text "\" are shown first. This is determined based on \"See also\" links."
                     ]
             )
             orderItemsFocusedOnTerm
