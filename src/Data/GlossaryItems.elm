@@ -1,11 +1,11 @@
-module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, primaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms, enableFocusingOn)
+module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, primaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms, primaryTermsWithDefinitions, enableFocusingOn)
 
 {-| A set of glossary items that make up a glossary.
 
 
 # Glossary Items
 
-@docs GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, primaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms, enableFocusingOn
+@docs GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, primaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms, primaryTermsWithDefinitions, enableFocusingOn
 
 -}
 
@@ -387,6 +387,23 @@ primaryTerms =
     orderedAlphabetically
         >> Array.toList
         >> List.concatMap (Tuple.second >> .terms >> List.take 1)
+
+
+{-| Similar to `primaryTerms` but only return those terms whose items have at least one definition.
+-}
+primaryTermsWithDefinitions : GlossaryItems -> List Term
+primaryTermsWithDefinitions =
+    orderedAlphabetically
+        >> Array.toList
+        >> List.filterMap
+            (\( _, item ) ->
+                if GlossaryItem.hasSomeDefinitions item then
+                    Just item
+
+                else
+                    Nothing
+            )
+        >> List.concatMap (.terms >> List.take 1)
 
 
 {-| Make it easy to retrieve the items ordered "focused on" a specific item (identified by the ID of that item's primary term).

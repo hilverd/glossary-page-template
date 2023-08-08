@@ -1206,9 +1206,9 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
         combinedGlossaryItems =
             Array.append indexedGlossaryItems otherIndexedGlossaryItems
 
-        primaryTerms : List Term
-        primaryTerms =
-            GlossaryItems.primaryTerms glossaryItems
+        primaryTermsWithDefinitions : List Term
+        primaryTermsWithDefinitions =
+            GlossaryItems.primaryTermsWithDefinitions glossaryItems
 
         orderItemsFocusedOnTerm : Maybe Term
         orderItemsFocusedOnTerm =
@@ -1262,7 +1262,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                 model
                 (Array.length combinedGlossaryItems)
                 enableMathSupport
-                primaryTerms
+                primaryTermsWithDefinitions
                 orderItemsFocusedOnTerm
         , Html.dl
             []
@@ -1833,7 +1833,7 @@ viewAllTopicFilters tabbable =
 
 
 viewOrderItemsBy : Model -> Int -> Bool -> List Term -> Maybe Term -> Html Msg
-viewOrderItemsBy model numberOfItems enableMathSupport primaryTerms orderItemsFocusedOnTerm =
+viewOrderItemsBy model numberOfItems enableMathSupport primaryTermsWithDefinitions orderItemsFocusedOnTerm =
     let
         tabbable : Bool
         tabbable =
@@ -1925,7 +1925,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport primaryTerms orderItemsFo
                             , Components.SelectMenu.ariaLabel "Focus on term"
                             , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << TermId.fromString)
                             ]
-                            (primaryTerms
+                            (primaryTermsWithDefinitions
                                 |> List.map
                                     (\primaryTerm ->
                                         let
