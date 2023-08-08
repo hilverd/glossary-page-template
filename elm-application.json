@@ -25,6 +25,6 @@
         "GlossaryItemForm.DefinitionField",
         "GlossaryItemForm.TermField",
         "MarkdownRenderers",
-        "UndirectedGraph"
+        "DirectedGraph"
     ]
 }

@@ -17,10 +17,10 @@ import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Dict exposing (Dict)
+import DirectedGraph exposing (DirectedGraph)
 import Extras.Regex
 import Regex
 import Set exposing (Set)
-import UndirectedGraph exposing (UndirectedGraph)
 
 
 {-| Glossary items constructed by the functions below.
@@ -414,15 +414,15 @@ enableFocusingOn termId glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             let
-                primaryTermsGraph : UndirectedGraph TermId
+                primaryTermsGraph : DirectedGraph TermId
                 primaryTermsGraph =
                     items.primaryTermIdsToIndexes
                         |> Dict.keys
                         |> List.foldl
-                            (TermId.fromString >> UndirectedGraph.insertVertex)
-                            (UndirectedGraph.empty TermId.toString TermId.fromString)
+                            (TermId.fromString >> DirectedGraph.insertVertex)
+                            (DirectedGraph.empty TermId.toString TermId.fromString)
 
-                relatedTermsGraph : UndirectedGraph TermId
+                relatedTermsGraph : DirectedGraph TermId
                 relatedTermsGraph =
                     items.orderedAlphabetically
                         |> Array.toList
@@ -445,7 +445,7 @@ enableFocusingOn termId glossaryItems =
                                             item.relatedTerms
                                                 |> List.foldl
                                                     (\relatedTerm graph_ ->
-                                                        UndirectedGraph.insertEdge
+                                                        DirectedGraph.insertEdge
                                                             (Term.id primaryTerm)
                                                             (RelatedTerm.idReference relatedTerm)
                                                             graph_
@@ -458,7 +458,7 @@ enableFocusingOn termId glossaryItems =
 
                 termIdsByDistance : ( List TermId, List TermId )
                 termIdsByDistance =
-                    UndirectedGraph.verticesByDistance termId relatedTermsGraph
+                    DirectedGraph.verticesByDistance termId relatedTermsGraph
 
                 termIdToIndexedItem : TermId -> Maybe ( GlossaryItemIndex, GlossaryItem )
                 termIdToIndexedItem termId_ =

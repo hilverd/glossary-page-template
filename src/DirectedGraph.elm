@@ -1,11 +1,11 @@
-module UndirectedGraph exposing (UndirectedGraph, empty, insertVertex, insertEdge, vertices, adjacentVertices, verticesByDistance)
+module DirectedGraph exposing (DirectedGraph, empty, insertVertex, insertEdge, vertices, outNeighbours, verticesByDistance)
 
-{-| An undirected graph.
+{-| A directed graph.
 
 
-# Undirected Graphs
+# Directed Graphs
 
-@docs UndirectedGraph, empty, insertVertex, insertEdge, vertices, adjacentVertices, verticesByDistance
+@docs DirectedGraph, empty, insertVertex, insertEdge, vertices, outNeighbours, verticesByDistance
 
 -}
 
@@ -14,10 +14,10 @@ import Dict exposing (Dict)
 import Set exposing (Set)
 
 
-{-| An opaque type representing an undirected graph.
+{-| An opaque type representing a directed graph.
 -}
-type UndirectedGraph a
-    = UndirectedGraph
+type DirectedGraph a
+    = DirectedGraph
         { vertexToString : a -> String
         , vertexFromString : String -> a
         , vertices_ : Set String
@@ -27,9 +27,9 @@ type UndirectedGraph a
 
 {-| An empty graph.
 -}
-empty : (a -> String) -> (String -> a) -> UndirectedGraph a
+empty : (a -> String) -> (String -> a) -> DirectedGraph a
 empty vertexToString vertexFromString =
-    UndirectedGraph
+    DirectedGraph
         { vertexToString = vertexToString
         , vertexFromString = vertexFromString
         , vertices_ = Set.empty
@@ -39,15 +39,15 @@ empty vertexToString vertexFromString =
 
 {-| Insert a vertex.
 -}
-insertVertex : a -> UndirectedGraph a -> UndirectedGraph a
+insertVertex : a -> DirectedGraph a -> DirectedGraph a
 insertVertex vertex graph =
     case graph of
-        UndirectedGraph { vertexToString, vertexFromString, vertices_, edges_ } ->
+        DirectedGraph { vertexToString, vertexFromString, vertices_, edges_ } ->
             let
                 vertexAsString =
                     vertexToString vertex
             in
-            UndirectedGraph
+            DirectedGraph
                 { vertexToString = vertexToString
                 , vertexFromString = vertexFromString
                 , vertices_ = Set.insert vertexAsString vertices_
@@ -58,7 +58,7 @@ insertVertex vertex graph =
 {-| Insert an edge.
 If one or both of the vertices that make up the edge are not in the graph, they are added.
 -}
-insertEdge : a -> a -> UndirectedGraph a -> UndirectedGraph a
+insertEdge : a -> a -> DirectedGraph a -> DirectedGraph a
 insertEdge vertex1 vertex2 graph =
     let
         graph1 =
@@ -67,7 +67,7 @@ insertEdge vertex1 vertex2 graph =
                 |> insertVertex vertex2
     in
     case graph1 of
-        UndirectedGraph { vertexToString, vertexFromString, vertices_, edges_ } ->
+        DirectedGraph { vertexToString, vertexFromString, vertices_, edges_ } ->
             let
                 vertex1AsString =
                     vertexToString vertex1
@@ -75,24 +75,17 @@ insertEdge vertex1 vertex2 graph =
                 vertex2AsString =
                     vertexToString vertex2
             in
-            UndirectedGraph
+            DirectedGraph
                 { vertexToString = vertexToString
                 , vertexFromString = vertexFromString
                 , vertices_ = vertices_
                 , edges_ =
                     edges_
                         |> Dict.update vertex1AsString
-                            (\existingNeighbours ->
-                                existingNeighbours
+                            (\existingOutNeighbours ->
+                                existingOutNeighbours
                                     |> Maybe.withDefault Set.empty
                                     |> Set.insert vertex2AsString
-                                    |> Just
-                            )
-                        |> Dict.update vertex2AsString
-                            (\existingNeighbours ->
-                                existingNeighbours
-                                    |> Maybe.withDefault Set.empty
-                                    |> Set.insert vertex1AsString
                                     |> Just
                             )
                 }
@@ -107,32 +100,33 @@ insertEdge vertex1 vertex2 graph =
     --> ["A", "B", "R"]
 
 -}
-vertices : UndirectedGraph a -> List a
+vertices : DirectedGraph a -> List a
 vertices graph =
     case graph of
-        UndirectedGraph { vertexFromString, vertices_ } ->
+        DirectedGraph { vertexFromString, vertices_ } ->
             vertices_
                 |> Set.toList
                 |> List.map vertexFromString
 
 
-{-| Return the list of vertices adjacent to a vertex.
+{-| Return the list of out-neighbours of a vertex.
 
     empty identity identity
     |> insertEdge "R" "A"
     |> insertEdge "A" "B"
-    |> adjacentVertices "A"
-    --> ["B", "R"]
+    |> insertEdge "A" "C"
+    |> outNeighbours "A"
+    --> ["B", "C"]
 
     empty identity identity
-    |> adjacentVertices "A"
+    |> outNeighbours "A"
     --> []
 
 -}
-adjacentVertices : a -> UndirectedGraph a -> List a
-adjacentVertices vertex graph =
+outNeighbours : a -> DirectedGraph a -> List a
+outNeighbours vertex graph =
     case graph of
-        UndirectedGraph { vertexToString, vertexFromString, edges_ } ->
+        DirectedGraph { vertexToString, vertexFromString, edges_ } ->
             edges_
                 |> Dict.get (vertexToString vertex)
                 |> Maybe.withDefault Set.empty
@@ -146,20 +140,20 @@ The result is separated into two lists --- the first contains items vertices rea
 
     empty identity identity
     |> insertEdge "R" "A"
-    |> insertEdge "B" "A"
+    |> insertEdge "A" "B"
     |> insertEdge "B" "R"
     |> insertEdge "R" "C"
-    |> insertEdge "C" "D"
-    |> insertEdge "C" "E"
+    |> insertEdge "D" "C"
+    |> insertEdge "E" "C"
     |> insertVertex "F"
     |> verticesByDistance "R"
-    --> (["R", "A", "B", "C", "D", "E"], ["F"])
+    --> (["R", "A", "C", "B"], ["D", "E", "F"])
 
 -}
-verticesByDistance : a -> UndirectedGraph a -> ( List a, List a )
+verticesByDistance : a -> DirectedGraph a -> ( List a, List a )
 verticesByDistance startingVertex graph =
     case graph of
-        UndirectedGraph { vertexToString, vertexFromString, vertices_ } ->
+        DirectedGraph { vertexToString, vertexFromString, vertices_ } ->
             let
                 f : AmortizedQueue ( a, Int ) -> Dict String Int -> Dict String Int
                 f queue distances =
@@ -168,19 +162,19 @@ verticesByDistance startingVertex graph =
                         Just ( ( vertex, distance ), tail ) ->
                             let
                                 ( queue1, distances1 ) =
-                                    adjacentVertices vertex graph
+                                    outNeighbours vertex graph
                                         |> List.foldl
-                                            (\adjacentVertex ( queue0, distances0 ) ->
+                                            (\outNeighbour ( queue0, distances0 ) ->
                                                 let
-                                                    adjacentVertexAsString =
-                                                        vertexToString adjacentVertex
+                                                    outNeighbourAsString =
+                                                        vertexToString outNeighbour
                                                 in
-                                                case Dict.get adjacentVertexAsString distances0 of
+                                                case Dict.get outNeighbourAsString distances0 of
                                                     Nothing ->
                                                         ( queue0
-                                                            |> AmortizedQueue.enqueue ( adjacentVertex, distance + 1 )
+                                                            |> AmortizedQueue.enqueue ( outNeighbour, distance + 1 )
                                                         , distances0
-                                                            |> Dict.insert adjacentVertexAsString (distance + 1)
+                                                            |> Dict.insert outNeighbourAsString (distance + 1)
                                                         )
 
                                                     _ ->
