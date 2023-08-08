@@ -1903,6 +1903,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport primaryTermsWithDefinitio
                         )
                         tabbable
                         [ id ElementIds.orderItemsFocusedOn
+                        , Html.Attributes.disabled <| model.mostRecentTermIdForOrderingItemsFocusedOn == Nothing
                         , Extras.HtmlAttribute.showMaybe
                             (\termId ->
                                 Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy <| FocusedOn termId

@@ -150,7 +150,7 @@ radio name_ value_ checked_ tabbable additionalAttributes =
         name_
         value_
         checked_
-        ([ class "h-4 w-4 dark:bg-gray-700 text-indigo-600 dark:text-amber-700 border-gray-300 dark:border-gray-500 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+        ([ class "h-4 w-4 disabled:bg-gray-200 dark:bg-gray-700 disabled:dark:bg-gray-800 text-indigo-600 dark:text-amber-700 border-gray-300 dark:border-gray-500 disabled:dark:border-gray-700 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
          , Accessibility.Key.tabbable tabbable
          ]
             ++ additionalAttributes
