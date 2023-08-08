@@ -1915,7 +1915,11 @@ viewOrderItemsBy model numberOfItems enableMathSupport primaryTerms orderItemsFo
                         ]
                         [ span
                             [ class "mr-2" ]
-                            [ text "focused on" ]
+                            [ text "focused on"
+                            , Html.sup
+                                [ class "ml-1.5 text-gray-600 dark:text-gray-400" ]
+                                [ text "BETA" ]
+                            ]
                         , Components.SelectMenu.render
                             [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect
                             , Components.SelectMenu.ariaLabel "Focus on term"
