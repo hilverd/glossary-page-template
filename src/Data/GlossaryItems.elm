@@ -305,6 +305,15 @@ remove indexWhenOrderedAlphabetically glossaryItems =
                     Just item
             )
         |> fromList
+        |> (case glossaryItems of
+                GlossaryItems items ->
+                    case items.orderedFocusedOn of
+                        Just ( termId, _ ) ->
+                            enableFocusingOn termId
+
+                        _ ->
+                            identity
+           )
 
 
 {-| Retrieve the glossary items ordered alphabetically.
