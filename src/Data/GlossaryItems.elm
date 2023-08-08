@@ -10,7 +10,7 @@ module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetical
 -}
 
 import Array exposing (Array)
-import Data.GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
@@ -409,7 +409,16 @@ enableFocusingOn termId glossaryItems =
                 relatedTermsGraph =
                     items.orderedAlphabetically
                         |> Array.toList
-                        |> List.map Tuple.second
+                        |> List.filterMap
+                            (Tuple.second
+                                >> (\item ->
+                                        if GlossaryItem.hasSomeDefinitions item then
+                                            Just item
+
+                                        else
+                                            Nothing
+                                   )
+                            )
                         |> List.foldl
                             (\item graph ->
                                 item.terms
