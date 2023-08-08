@@ -1276,7 +1276,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             )
           <|
             Components.Dividers.withLabel
-                [ class "my-8" ]
+                [ class "my-10" ]
                 "Other items"
         , Extras.Html.showIf (not <| Array.isEmpty otherIndexedGlossaryItems) <|
             Html.dl
