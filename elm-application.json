@@ -1,7 +1,7 @@
 {
     "name": "hilverd/glossary-page-template",
     "summary": "Create a glossary as a single HTML page hosted anywhere.",
-    "version": "3.5.2",
+    "version": "3.6.0",
     "exposed-modules": [
         "AmortizedQueue",
         "ApplicationShell",

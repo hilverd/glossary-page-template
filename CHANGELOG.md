@@ -12,6 +12,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [3.6.0] - 2023-08-09
+
+### Added
 
 - Allow ordering items "focused on" a particular term. Items that are closely related to this term (i.e. have a shorter path to the term's item via "See also" links) are shown earlier. For larger glossaries, this hopefully provides a way to focus on a certain topic by allowing the user to browse the items closely related to that topic, gradually moving towards topics that are further removed.
 
@@ -22,8 +29,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 
 - Fix minor layout bug for "This field can't be empty" message.
-
-### Removed
 
 ## [3.5.2] - 2023-07-11
 
@@ -535,7 +540,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.5.2...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.6.0...HEAD
+[3.6.0]: https://github.com/hilverd/glossary-page-template/compare/v3.5.2...v3.6.0
 [3.5.2]: https://github.com/hilverd/glossary-page-template/compare/v3.5.1...v3.5.2
 [3.5.1]: https://github.com/hilverd/glossary-page-template/compare/v3.5.0...v3.5.1
 [3.5.0]: https://github.com/hilverd/glossary-page-template/compare/v3.4.3...v3.5.0
