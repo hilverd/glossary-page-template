@@ -11,11 +11,11 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - uses: pnpm/action-setup@646cdf48217256a3d0b80361c5a50727664284f2
         with:
           version: 8.6.12
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: "18"
           cache: "pnpm"
