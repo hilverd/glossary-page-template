@@ -428,7 +428,7 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
                     [ div
                         [ class "sm:flex sm:flex-row sm:items-center" ]
                         [ Html.div
-                            [ class "relative block w-full min-w-0" ]
+                            [ class "block w-full min-w-0" ]
                             [ Components.Form.inputText
                                 (TermField.raw termField)
                                 showMarkdownBasedSyntaxEnabled

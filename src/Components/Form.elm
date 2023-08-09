@@ -38,22 +38,25 @@ inputText : String -> Bool -> Bool -> Bool -> Maybe String -> List (Attribute ms
 inputText value_ markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors validationError additionalAttributes =
     Accessibility.div []
         [ Extras.Html.showIf markdownBasedSyntaxEnabled <| markdownSupportedMessage mathSupportEnabled
-        , Accessibility.inputText value_
-            ([ if not showValidationErrors || validationError == Nothing then
-                class "w-full min-w-0 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+        , Accessibility.div
+            [ class "relative" ]
+            [ Accessibility.inputText value_
+                ([ if not showValidationErrors || validationError == Nothing then
+                    class "w-full min-w-0 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
 
-               else
-                class "w-full min-w-0 rounded-md border-red-300 dark:border-red-700 dark:bg-gray-700 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500"
-             , Accessibility.Aria.invalid <| validationError /= Nothing
-             ]
-                ++ additionalAttributes
-            )
-        , Extras.Html.showIf (showValidationErrors && validationError /= Nothing) <|
-            Accessibility.div
-                [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
-                [ Icons.exclamationCircle
-                    [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
-                ]
+                   else
+                    class "w-full min-w-0 rounded-md border-red-300 dark:border-red-700 dark:bg-gray-700 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-none focus:ring-red-500 focus:border-red-500"
+                 , Accessibility.Aria.invalid <| validationError /= Nothing
+                 ]
+                    ++ additionalAttributes
+                )
+            , Extras.Html.showIf (showValidationErrors && validationError /= Nothing) <|
+                Accessibility.div
+                    [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
+                    [ Icons.exclamationCircle
+                        [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
+                    ]
+            ]
         ]
 
 

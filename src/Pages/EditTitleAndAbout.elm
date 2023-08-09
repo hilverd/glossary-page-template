@@ -285,7 +285,7 @@ viewEditTitle enableMarkdownBasedSyntax mathSupportEnabled showValidationErrors 
                         [ div
                             [ class "sm:flex sm:flex-row sm:items-center" ]
                             [ Html.div
-                                [ class "relative block w-full min-w-0" ]
+                                [ class "block w-full min-w-0" ]
                                 [ Components.Form.inputText
                                     titleField.body
                                     enableMarkdownBasedSyntax
@@ -467,10 +467,10 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                     ]
                 , div
                     [ if not showValidationErrors || aboutLinkBody.validationError == Nothing then
-                        class "relative border border-gray-300 dark:border-gray-500 rounded-md rounded-t-none px-3 py-2 focus-within:z-10 focus-within:ring-1 focus-within:ring-indigo-600 focus-within:border-indigo-600"
+                        class "border border-gray-300 dark:border-gray-500 rounded-md rounded-t-none px-3 py-2 focus-within:z-10 focus-within:ring-1 focus-within:ring-indigo-600 focus-within:border-indigo-600"
 
                       else
-                        class "relative border border-red-300 dark:border-red-700 rounded-md rounded-t-none px-3 py-2 focus-within:z-10 focus-within:ring-1 focus-within:ring-red-500 focus-within:border-red-500"
+                        class "border border-red-300 dark:border-red-700 rounded-md rounded-t-none px-3 py-2 focus-within:z-10 focus-within:ring-1 focus-within:ring-red-500 focus-within:border-red-500"
                     ]
                     [ label
                         [ class "block text-sm font-semibold text-gray-500 dark:text-gray-300"

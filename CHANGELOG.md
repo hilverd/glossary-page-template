@@ -20,6 +20,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Upgrade KaTeX to version 0.16.8.
 
 ### Fixed
+
+- Fix minor layout bug for "This field can't be empty" message.
+
 ### Removed
 
 ## [3.5.2] - 2023-07-11
