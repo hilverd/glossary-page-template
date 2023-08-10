@@ -12,7 +12,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Add logo to home page.
+
 ### Changed
+
+- Use logo for favicons.
+
 ### Fixed
 ### Removed
 
