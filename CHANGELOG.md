@@ -12,15 +12,19 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [3.6.1] - 2023-08-10
+
+### Added
 
 - Add logo to home page.
 
 ### Changed
 
 - Use logo for favicons.
-
-### Fixed
-### Removed
 
 ## [3.6.0] - 2023-08-09
 
@@ -546,7 +550,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.6.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.6.1...HEAD
+[3.6.1]: https://github.com/hilverd/glossary-page-template/compare/v3.6.0...v3.6.1
 [3.6.0]: https://github.com/hilverd/glossary-page-template/compare/v3.5.2...v3.6.0
 [3.5.2]: https://github.com/hilverd/glossary-page-template/compare/v3.5.1...v3.5.2
 [3.5.1]: https://github.com/hilverd/glossary-page-template/compare/v3.5.0...v3.5.1
