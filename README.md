@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://glossary.page/template" target="_blank" rel="noopener noreferrer">
+    <img width="180" src="img/logo.svg" alt="An open book with the letters A and Z visible and a magnifying glass hovering on top">
+  </a>
+</p>
+
 # Glossary Page Template
 
 This project makes it easy to create a glossary as a single HTML page that can be hosted anywhere.
