@@ -1,6 +1,9 @@
 <p align="center">
   <a href="https://glossary.page/template" target="_blank" rel="noopener noreferrer">
-    <img width="180" src="img/logo.svg" alt="An open book with the letters A and Z visible and a magnifying glass hovering on top">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="img/logo-white.svg">
+      <img width="180" alt="An open book with the letters A and Z visible and a magnifying glass hovering on top" src="img/logo.svg">
+    </picture>
   </a>
 </p>
 
