@@ -13,6 +13,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+
+- Add button to easily copy command for running editor to clipboard.
+
 ### Fixed
 ### Removed
 

@@ -219,6 +219,17 @@ if (containerElement) {
         app.ports.receiveCurrentDateTimeForSaving.send(new Date().toISOString());
     });
 
+    app.ports.copyEditorCommandToClipboard.subscribe((textToCopy) => {
+        navigator.clipboard.writeText(textToCopy).then(
+            () => {
+                app.ports.attemptedToCopyEditorCommandToClipboard.send(true);
+            },
+            () => {
+                app.ports.attemptedToCopyEditorCommandToClipboard.send(false);
+            },
+        );
+    });
+
     function domReady(callback) {
         document.readyState === 'interactive' || document.readyState === 'complete' ?
             callback() : document.addEventListener('DOMContentLoaded', callback);

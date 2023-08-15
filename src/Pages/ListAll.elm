@@ -38,6 +38,7 @@ import Components.Button
 import Components.Copy
 import Components.Dividers
 import Components.DropdownMenu
+import Components.Form as Form
 import Components.GlossaryItemCard
 import Components.ModalDialog
 import Components.SearchDialog
@@ -69,7 +70,7 @@ import Extras.Http
 import Extras.Task
 import Extras.Url exposing (fragmentOnly)
 import Html
-import Html.Attributes exposing (class, for, href, id)
+import Html.Attributes exposing (class, for, href, id, readonly)
 import Html.Events
 import Http
 import Icons
@@ -123,6 +124,7 @@ type alias Model =
     , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
     , errorWhileChangingSettings : Maybe String
     , mostRecentTermIdForOrderingItemsFocusedOn : Maybe TermId
+    , resultOfAttemptingToCopyEditorCommandToClipboard : Maybe Bool
     }
 
 
@@ -157,6 +159,9 @@ type InternalMsg
     | FailedToChangeSettings Http.Error
     | DownloadMarkdown
     | DownloadAnki
+    | CopyEditorCommandToClipboard String
+    | AttemptedToCopyEditorCommandToClipboard Bool
+    | ClearResultOfAttemptingToCopyEditorCommandToClipboard
 
 
 type alias Msg =
@@ -195,6 +200,7 @@ init editorIsRunning commonModel =
 
                 _ ->
                     Nothing
+      , resultOfAttemptingToCopyEditorCommandToClipboard = Nothing
       }
     , case commonModel.maybeIndex of
         Just index ->
@@ -224,6 +230,12 @@ port changeOrderItemsBy : String -> Cmd msg
 
 
 port scrollElementIntoView : String -> Cmd msg
+
+
+port copyEditorCommandToClipboard : String -> Cmd msg
+
+
+port attemptedToCopyEditorCommandToClipboard : (Bool -> msg) -> Sub msg
 
 
 
@@ -660,6 +672,17 @@ update msg model =
                     Cmd.none
             )
 
+        CopyEditorCommandToClipboard textToCopy ->
+            ( model, copyEditorCommandToClipboard textToCopy )
+
+        AttemptedToCopyEditorCommandToClipboard success ->
+            ( { model | resultOfAttemptingToCopyEditorCommandToClipboard = Just success }
+            , Process.sleep 1000 |> Task.perform (always <| PageMsg.Internal ClearResultOfAttemptingToCopyEditorCommandToClipboard)
+            )
+
+        ClearResultOfAttemptingToCopyEditorCommandToClipboard ->
+            ( { model | resultOfAttemptingToCopyEditorCommandToClipboard = Nothing }, Cmd.none )
+
 
 giveFocusToOuter : Cmd Msg
 giveFocusToOuter =
@@ -755,8 +778,23 @@ scrollGlossaryItemIntoView =
 -- VIEW
 
 
-viewMakingChangesHelp : Maybe String -> Bool -> Html Msg
-viewMakingChangesHelp filename tabbable =
+viewMakingChangesHelp : Maybe Bool -> Maybe String -> Bool -> Html Msg
+viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename tabbable =
+    let
+        defaultFilename : String
+        defaultFilename =
+            "glossary.html"
+
+        command =
+            "sed -n '/START OF editor.js$/,$p' "
+                ++ Maybe.withDefault defaultFilename filename
+                ++ (if filename == Just defaultFilename then
+                        " | node"
+
+                    else
+                        " | FILE=" ++ (filename |> Maybe.withDefault defaultFilename) ++ " node"
+                   )
+    in
     div
         [ class "mb-5 rounded-md overflow-x-auto bg-amber-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 print:hidden"
         , class "pt-4 pr-4 pl-4 pb-2"
@@ -770,9 +808,9 @@ viewMakingChangesHelp filename tabbable =
                     [ text "How to Make Changes" ]
                 ]
             , div
-                [ class "mb-1" ]
+                [ class "mb-1 max-w-xl" ]
                 [ p
-                    [ class "mt-3 max-w-xl" ]
+                    [ class "mt-3" ]
                     [ text "This page includes a web interface for making changes that are saved back to the HTML file itself."
                     , text " This is meant to be used "
                     , span [ class "font-semibold" ] [ text "locally" ]
@@ -788,23 +826,31 @@ viewMakingChangesHelp filename tabbable =
                         , Accessibility.Key.tabbable tabbable
                         ]
                         [ text "Node.js" ]
-                    , text " installed, then just run"
+                    , text " installed, then run the following command."
                     ]
-                , pre
-                    [ class "mt-5" ]
-                    [ code [] <|
-                        let
-                            defaultFilename : String
-                            defaultFilename =
-                                "glossary.html"
-                        in
-                        [ text "sed -n '/START OF editor.js$/,$p' "
-                        , text <| Maybe.withDefault defaultFilename filename
-                        , if filename == Just defaultFilename then
-                            text " | node"
+                , div
+                    [ class "mt-3 flex rounded-md shadow-sm" ]
+                    [ div
+                        [ class "block w-full flex flex-grow items-stretch focus-within:z-10" ]
+                        [ Accessibility.inputText
+                            command
+                            [ class "w-full min-w-0 rounded-none rounded-l-md focus:ring-indigo-500 focus:border-indigo-500 focus:ring-inset border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 font-mono text-sm"
+                            , readonly True
+                            ]
+                        , Components.Button.white
+                            True
+                            [ class "rounded-none rounded-r-md border-l-0 focus:ring-2 focus:ring-inset"
+                            , Extras.HtmlAttribute.showIf (resultOfAttemptingToCopyEditorCommandToClipboard == Nothing) <|
+                                (Html.Events.onClick <| PageMsg.Internal <| CopyEditorCommandToClipboard command)
+                            ]
+                            [ if resultOfAttemptingToCopyEditorCommandToClipboard == Just True then
+                                Icons.tick
+                                    [ Svg.Attributes.class "h-5 w-5 text-green-700 dark:text-green-300" ]
 
-                          else
-                            text <| " | FILE=" ++ (filename |> Maybe.withDefault defaultFilename) ++ " node"
+                              else
+                                Icons.copy
+                                    [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-300" ]
+                            ]
                         ]
                     ]
                 , p
@@ -2170,7 +2216,7 @@ view model =
                                             ]
                                         ]
                                     ]
-                                , viewMakingChangesHelp model.common.filename noModalDialogShown_
+                                , viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
                                     |> Extras.Html.showIf showMakingChangesHelp
                                 , Extras.Html.showIf editable <| viewSettings glossary model
                                 , h1
@@ -2229,4 +2275,5 @@ subscriptions model =
             |> Sub.map (ThemeDropdownMenuMsg >> PageMsg.Internal)
         , Components.DropdownMenu.subscriptions model.exportDropdownMenu
             |> Sub.map (ExportDropdownMenuMsg >> PageMsg.Internal)
+        , attemptedToCopyEditorCommandToClipboard (AttemptedToCopyEditorCommandToClipboard >> PageMsg.Internal)
         ]

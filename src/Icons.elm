@@ -6,6 +6,7 @@ module Icons exposing
     , arrowsPointingOut
     , chevronDown
     , computerDesktop
+    , copy
     , documentDownload
     , exclamation
     , exclamationCircle
@@ -17,6 +18,7 @@ module Icons exposing
     , plus
     , search
     , sun
+    , tick
     , trash
     , viewGridAdd
     , window
@@ -24,7 +26,7 @@ module Icons exposing
     )
 
 import Html exposing (Html)
-import Svg exposing (circle, clipPath, defs, g, line, node, path, polyline, svg)
+import Svg exposing (circle, clipPath, defs, g, line, node, path, polyline, rect, svg)
 import Svg.Attributes
     exposing
         ( clipPathUnits
@@ -50,6 +52,7 @@ import Svg.Attributes
         , transform
         , viewBox
         , width
+        , x
         , x1
         , x2
         , y
@@ -146,6 +149,23 @@ plus =
         ]
         [ path
             [ d "M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" ]
+            []
+        ]
+
+
+tick : List (Html.Attribute msg) -> Html msg
+tick =
+    withAdditionalAttributes
+        [ stroke "currentColor"
+        , fill "none"
+        , viewBox "0 0 24 24"
+        , strokeWidth "2.5"
+        ]
+        [ path
+            [ strokeLinecap "round"
+            , strokeLinejoin "round"
+            , d "M4.5 12.75l6 6 9-13.5"
+            ]
             []
         ]
 
@@ -573,5 +593,39 @@ window =
             , strokeLinejoin "round"
             , d "M3 8.25V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18V8.25m-18 0V6a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 6v2.25m-18 0h18M5.25 6h.008v.008H5.25V6zM7.5 6h.008v.008H7.5V6zm2.25 0h.008v.008H9.75V6z"
             ]
+            []
+        ]
+
+
+copy : List (Html.Attribute msg) -> Html msg
+copy =
+    withAdditionalAttributes
+        [ fill "none"
+        , viewBox "0 0 24 24"
+        , strokeWidth "2"
+        , stroke "currentColor"
+        , strokeLinecap "round"
+        , strokeLinejoin "round"
+        ]
+        [ rect
+            [ width "8"
+            , height "4"
+            , x "8"
+            , y "2"
+            , rx "1"
+            , ry "1"
+            ]
+            []
+        , path
+            [ d "M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" ]
+            []
+        , path
+            [ d "M16 4h2a2 2 0 0 1 2 2v4" ]
+            []
+        , path
+            [ d "M21 14H11" ]
+            []
+        , path
+            [ d "m15 10-4 4 4 4" ]
             []
         ]
