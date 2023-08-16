@@ -1981,6 +1981,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport primaryTermsWithDefinitio
                             [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect
                             , Components.SelectMenu.ariaLabel "Focus on term"
                             , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << TermId.fromString)
+                            , Components.SelectMenu.enabled tabbable
                             ]
                             (primaryTermsWithDefinitions
                                 |> List.map
