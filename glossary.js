@@ -230,6 +230,10 @@ if (containerElement) {
         );
     });
 
+    app.ports.selectAllInTextFieldWithCommandToRunEditor.subscribe(() => {
+        document.getElementById("glossary-page-text-field-with-command-to-run-editor")?.select();
+    });
+
     function domReady(callback) {
         document.readyState === 'interactive' || document.readyState === 'complete' ?
             callback() : document.addEventListener('DOMContentLoaded', callback);

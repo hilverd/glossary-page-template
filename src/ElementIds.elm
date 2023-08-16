@@ -31,6 +31,7 @@ module ElementIds exposing
     , termIndexGroupLabel
     , termInputField
     , termsIndex
+    , textFieldWithCommandToRunEditor
     , themeDropdownButton
     , title
     , viewSingleItemModalTitle
@@ -234,3 +235,8 @@ showExportMenuLabel =
 showLastUpdatedDatesLabel : String
 showLastUpdatedDatesLabel =
     prefixed "show-last-updated-dates"
+
+
+textFieldWithCommandToRunEditor : String
+textFieldWithCommandToRunEditor =
+    prefixed "text-field-with-command-to-run-editor"

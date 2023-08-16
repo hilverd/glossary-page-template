@@ -159,6 +159,7 @@ type InternalMsg
     | FailedToChangeSettings Http.Error
     | DownloadMarkdown
     | DownloadAnki
+    | SelectAllInTextFieldWithCommandToRunEditor
     | CopyEditorCommandToClipboard String
     | AttemptedToCopyEditorCommandToClipboard Bool
     | ClearResultOfAttemptingToCopyEditorCommandToClipboard
@@ -236,6 +237,9 @@ port copyEditorCommandToClipboard : String -> Cmd msg
 
 
 port attemptedToCopyEditorCommandToClipboard : (Bool -> msg) -> Sub msg
+
+
+port selectAllInTextFieldWithCommandToRunEditor : () -> Cmd msg
 
 
 
@@ -672,6 +676,9 @@ update msg model =
                     Cmd.none
             )
 
+        SelectAllInTextFieldWithCommandToRunEditor ->
+            ( model, selectAllInTextFieldWithCommandToRunEditor () )
+
         CopyEditorCommandToClipboard textToCopy ->
             ( model, copyEditorCommandToClipboard textToCopy )
 
@@ -836,10 +843,13 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
                             command
                             [ class "w-full min-w-0 rounded-none rounded-l-md focus:ring-indigo-500 focus:border-indigo-500 focus:ring-inset border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 font-mono text-sm"
                             , readonly True
+                            , id ElementIds.textFieldWithCommandToRunEditor
+                            , Html.Events.onClick <| PageMsg.Internal SelectAllInTextFieldWithCommandToRunEditor
                             ]
                         , Components.Button.white
                             True
                             [ class "rounded-none rounded-r-md border-l-0 focus:ring-2 focus:ring-inset"
+                            , Accessibility.Aria.label "Copy to clipboard"
                             , Extras.HtmlAttribute.showIf (resultOfAttemptingToCopyEditorCommandToClipboard == Nothing) <|
                                 (Html.Events.onClick <| PageMsg.Internal <| CopyEditorCommandToClipboard command)
                             ]
