@@ -1,5 +1,6 @@
 module Components.DropdownMenu exposing
-    ( Choice
+    ( ButtonShape(..)
+    , Choice
     , Model
     , Msg
     , Property
@@ -139,6 +140,11 @@ type alias Config =
     }
 
 
+type ButtonShape parentMsg
+    = Ellipsis
+    | Chevron (List (Html parentMsg))
+
+
 type alias ChoiceIndex =
     Int
 
@@ -175,10 +181,10 @@ view :
     (Msg -> parentMsg)
     -> Model
     -> Bool
-    -> List (Html parentMsg)
+    -> ButtonShape parentMsg
     -> List (Choice parentMsg)
     -> Html parentMsg
-view toParentMsg model enabled body_ choices =
+view toParentMsg model enabled buttonShape choices =
     let
         model_ : { visibility : GradualVisibility, config : Config, activeChoice : Maybe ChoiceIndex }
         model_ =
@@ -187,107 +193,126 @@ view toParentMsg model enabled body_ choices =
         config : Config
         config =
             model_.config
+
+        buttonAttributes : List (Html.Attribute parentMsg)
+        buttonAttributes =
+            [ Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
+            , Accessibility.Aria.expanded <| model_.visibility == Visible
+            , Accessibility.Aria.hasMenuPopUp
+            , Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <|
+                toParentMsg <|
+                    case model_.visibility of
+                        Visible ->
+                            StartHiding
+
+                        Disappearing ->
+                            NoOp
+
+                        Invisible ->
+                            Show
+            , Html.Events.preventDefaultOn "keydown"
+                (Extras.HtmlEvents.preventDefaultOnDecoder
+                    (\event ->
+                        if event == Extras.HtmlEvents.enter then
+                            case model_.visibility of
+                                Visible ->
+                                    case model_.activeChoice of
+                                        Just active ->
+                                            choices
+                                                |> Array.fromList
+                                                |> Array.get active
+                                                |> Maybe.map
+                                                    (\choice_ ->
+                                                        case choice_ of
+                                                            Choice { onSelect } ->
+                                                                onSelect
+                                                    )
+                                                |> Maybe.map (\x -> ( x, True ))
+
+                                        Nothing ->
+                                            Just ( toParentMsg StartHiding, True )
+
+                                Disappearing ->
+                                    Nothing
+
+                                Invisible ->
+                                    Just ( toParentMsg Show, True )
+
+                        else if event == Extras.HtmlEvents.escape then
+                            Just ( toParentMsg StartHiding, True )
+
+                        else if event == Extras.HtmlEvents.downArrow then
+                            let
+                                numberOfChoices : Int
+                                numberOfChoices =
+                                    List.length choices
+                            in
+                            case model_.activeChoice of
+                                Just active ->
+                                    Just ( (active + 1) |> min (numberOfChoices - 1) |> max 0 |> MakeChoiceActive |> toParentMsg, True )
+
+                                Nothing ->
+                                    if numberOfChoices > 0 then
+                                        Just ( toParentMsg <| MakeChoiceActive 0, True )
+
+                                    else
+                                        Nothing
+
+                        else if event == Extras.HtmlEvents.upArrow then
+                            let
+                                numberOfChoices : Int
+                                numberOfChoices =
+                                    List.length choices
+                            in
+                            case model_.activeChoice of
+                                Just active ->
+                                    Just ( (active - 1) |> min (numberOfChoices - 1) |> max 0 |> MakeChoiceActive |> toParentMsg, True )
+
+                                Nothing ->
+                                    if numberOfChoices > 0 then
+                                        Just ( toParentMsg <| MakeChoiceActive <| numberOfChoices - 1, True )
+
+                                    else
+                                        Nothing
+
+                        else
+                            Nothing
+                    )
+                )
+            ]
     in
     div
         [ class "relative inline-block text-left" ]
-        [ div
+        [ let
+            openOptionsMessage =
+                Html.span
+                    [ class "sr-only" ]
+                    [ Html.text "Open options" ]
+          in
+          div
             []
-            [ Components.Button.white enabled
-                [ class "w-full"
-                , Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
-                , Accessibility.Aria.expanded <| model_.visibility == Visible
-                , Accessibility.Aria.hasMenuPopUp
-                , Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <|
-                    toParentMsg <|
-                        case model_.visibility of
-                            Visible ->
-                                StartHiding
+            [ case buttonShape of
+                Ellipsis ->
+                    Components.Button.roundedWithoutBorder enabled
+                        buttonAttributes
+                        [ openOptionsMessage
+                        , Icons.ellipsisVertical
+                            [ Svg.Attributes.class "h-6 w-6" ]
+                        ]
 
-                            Disappearing ->
-                                NoOp
-
-                            Invisible ->
-                                Show
-                , Html.Events.preventDefaultOn "keydown"
-                    (Extras.HtmlEvents.preventDefaultOnDecoder
-                        (\event ->
-                            if event == Extras.HtmlEvents.enter then
-                                case model_.visibility of
-                                    Visible ->
-                                        case model_.activeChoice of
-                                            Just active ->
-                                                choices
-                                                    |> Array.fromList
-                                                    |> Array.get active
-                                                    |> Maybe.map
-                                                        (\choice_ ->
-                                                            case choice_ of
-                                                                Choice { onSelect } ->
-                                                                    onSelect
-                                                        )
-                                                    |> Maybe.map (\x -> ( x, True ))
-
-                                            Nothing ->
-                                                Just ( toParentMsg StartHiding, True )
-
-                                    Disappearing ->
-                                        Nothing
-
-                                    Invisible ->
-                                        Just ( toParentMsg Show, True )
-
-                            else if event == Extras.HtmlEvents.escape then
-                                Just ( toParentMsg StartHiding, True )
-
-                            else if event == Extras.HtmlEvents.downArrow then
-                                let
-                                    numberOfChoices : Int
-                                    numberOfChoices =
-                                        List.length choices
-                                in
-                                case model_.activeChoice of
-                                    Just active ->
-                                        Just ( (active + 1) |> min (numberOfChoices - 1) |> max 0 |> MakeChoiceActive |> toParentMsg, True )
-
-                                    Nothing ->
-                                        if numberOfChoices > 0 then
-                                            Just ( toParentMsg <| MakeChoiceActive 0, True )
-
-                                        else
-                                            Nothing
-
-                            else if event == Extras.HtmlEvents.upArrow then
-                                let
-                                    numberOfChoices : Int
-                                    numberOfChoices =
-                                        List.length choices
-                                in
-                                case model_.activeChoice of
-                                    Just active ->
-                                        Just ( (active - 1) |> min (numberOfChoices - 1) |> max 0 |> MakeChoiceActive |> toParentMsg, True )
-
-                                    Nothing ->
-                                        if numberOfChoices > 0 then
-                                            Just ( toParentMsg <| MakeChoiceActive <| numberOfChoices - 1, True )
-
-                                        else
-                                            Nothing
-
-                            else
-                                Nothing
+                Chevron body_ ->
+                    Components.Button.white enabled
+                        (class "w-full" :: buttonAttributes)
+                        ((openOptionsMessage :: body_)
+                            ++ [ Icons.chevronDown
+                                    [ Svg.Attributes.class "-mr-1 ml-2 h-5 w-5" ]
+                               ]
                         )
-                    )
-                ]
-                (body_
-                    ++ [ Icons.chevronDown
-                            [ Svg.Attributes.class "-mr-1 ml-2 h-5 w-5" ]
-                       ]
-                )
             ]
         , div
             [ Extras.HtmlAttribute.showMaybe Accessibility.Aria.labelledBy config.id
             , Accessibility.Aria.orientationVertical
-            , class "origin-top-right absolute right-0 mt-2 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-600 ring-opacity-5 divide-y divide-gray-100 focus:outline-none"
+            , class "origin-top-right absolute right-0 z-10 mt-2 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-600 ring-opacity-5 divide-y divide-gray-100 focus:outline-none"
             , class "hidden" |> Extras.HtmlAttribute.showIf (model_.visibility == Invisible)
             , if model_.visibility == Visible then
                 class "transition motion-reduce:transition-none ease-out duration-100 transform motion-reduce:transform-none opacity-100 scale-100"

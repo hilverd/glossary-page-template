@@ -1,4 +1,4 @@
-module Components.Button exposing (emptyState, primary, radio, rounded, secondary, soft, softSmall, text, toggle, white)
+module Components.Button exposing (emptyState, primary, radio, rounded, roundedWithoutBorder, secondary, soft, softSmall, text, toggle, white)
 
 import Accessibility exposing (Attribute)
 import Accessibility.Aria
@@ -58,6 +58,20 @@ text : List (Attribute msg) -> List (Html msg) -> Html msg
 text =
     withAdditionalAttributes
         [ class "inline-flex items-center space-x-2 font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-400" ]
+
+
+roundedWithoutBorder : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
+roundedWithoutBorder enabled =
+    withAdditionalAttributes
+        [ class "flex items-center rounded-full text-gray-500 dark:text-gray-400"
+        , if enabled then
+            class "hover:text-black dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+
+          else
+            class "opacity-50"
+        , Html.Attributes.disabled <| not enabled
+        , Accessibility.Key.tabbable enabled
+        ]
 
 
 emptyState : List (Attribute msg) -> List (Html msg) -> Html msg

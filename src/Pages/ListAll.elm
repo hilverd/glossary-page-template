@@ -1626,9 +1626,11 @@ viewThemeButton enabled theme themeDropdownMenu =
         (PageMsg.Internal << ThemeDropdownMenuMsg)
         themeDropdownMenu
         enabled
-        [ themeIcon theme
-            [ Svg.Attributes.class "h-5 w-5" ]
-        ]
+        (Components.DropdownMenu.Chevron
+            [ themeIcon theme
+                [ Svg.Attributes.class "h-5 w-5" ]
+            ]
+        )
         [ Components.DropdownMenu.choice
             [ span
                 [ class "inline-flex items-center" ]
@@ -1665,10 +1667,12 @@ viewExportButton enabled exportDropdownMenu =
         (PageMsg.Internal << ExportDropdownMenuMsg)
         exportDropdownMenu
         enabled
-        [ Icons.documentDownload
-            [ Svg.Attributes.class "h-5 w-5 mr-2" ]
-        , text "Export"
-        ]
+        (Components.DropdownMenu.Chevron
+            [ Icons.documentDownload
+                [ Svg.Attributes.class "h-5 w-5 mr-2" ]
+            , text "Export"
+            ]
+        )
         [ Components.DropdownMenu.choice
             [ span
                 [ class "inline-flex items-center" ]

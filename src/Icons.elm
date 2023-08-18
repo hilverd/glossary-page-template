@@ -8,6 +8,7 @@ module Icons exposing
     , computerDesktop
     , copy
     , documentDownload
+    , ellipsisVertical
     , exclamation
     , exclamationCircle
     , markdown
@@ -575,6 +576,23 @@ arrowLongRight =
             [ strokeLinecap "round"
             , strokeLinejoin "round"
             , d "M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3"
+            ]
+            []
+        ]
+
+
+ellipsisVertical : List (Html.Attribute msg) -> Html msg
+ellipsisVertical =
+    withAdditionalAttributes
+        [ fill "none"
+        , viewBox "0 0 24 24"
+        , strokeWidth "1.5"
+        , stroke "currentColor"
+        ]
+        [ path
+            [ strokeLinecap "round"
+            , strokeLinejoin "round"
+            , d "M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"
             ]
             []
         ]
