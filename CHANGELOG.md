@@ -12,6 +12,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Make it easier to rearrange related items.
+
 ### Changed
 
 - Add button to easily copy command for running editor to clipboard.

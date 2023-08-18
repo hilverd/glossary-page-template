@@ -11,6 +11,8 @@ module GlossaryItemForm exposing
     , empty
     , fromGlossaryItem
     , hasValidationErrors
+    , moveRelatedTermDown
+    , moveRelatedTermUp
     , needsUpdating
     , relatedTermFields
     , selectRelatedTerm
@@ -559,6 +561,76 @@ deleteRelatedTerm index glossaryItemForm =
         GlossaryItemForm form ->
             GlossaryItemForm
                 { form | relatedTermFields = Extras.Array.delete (RelatedTermIndex.toInt index) form.relatedTermFields }
+                |> validate
+
+
+moveRelatedTermUp : RelatedTermIndex -> GlossaryItemForm -> GlossaryItemForm
+moveRelatedTermUp index glossaryItemForm =
+    case glossaryItemForm of
+        GlossaryItemForm form ->
+            let
+                relatedTermFields0 =
+                    form.relatedTermFields
+
+                indexInt =
+                    RelatedTermIndex.toInt index
+
+                maybeCurrentAtIndex : Maybe RelatedTermField
+                maybeCurrentAtIndex =
+                    Array.get indexInt form.relatedTermFields
+
+                maybeCurrentAtPreviousIndex : Maybe RelatedTermField
+                maybeCurrentAtPreviousIndex =
+                    Array.get (indexInt - 1) form.relatedTermFields
+            in
+            GlossaryItemForm
+                { form
+                    | relatedTermFields =
+                        Maybe.map2
+                            (\currentAtIndex currentAtPreviousIndex ->
+                                relatedTermFields0
+                                    |> Array.set (indexInt - 1) currentAtIndex
+                                    |> Array.set indexInt currentAtPreviousIndex
+                            )
+                            maybeCurrentAtIndex
+                            maybeCurrentAtPreviousIndex
+                            |> Maybe.withDefault relatedTermFields0
+                }
+                |> validate
+
+
+moveRelatedTermDown : RelatedTermIndex -> GlossaryItemForm -> GlossaryItemForm
+moveRelatedTermDown index glossaryItemForm =
+    case glossaryItemForm of
+        GlossaryItemForm form ->
+            let
+                relatedTermFields0 =
+                    form.relatedTermFields
+
+                indexInt =
+                    RelatedTermIndex.toInt index
+
+                maybeCurrentAtIndex : Maybe RelatedTermField
+                maybeCurrentAtIndex =
+                    Array.get indexInt form.relatedTermFields
+
+                maybeCurrentAtNextIndex : Maybe RelatedTermField
+                maybeCurrentAtNextIndex =
+                    Array.get (indexInt + 1) form.relatedTermFields
+            in
+            GlossaryItemForm
+                { form
+                    | relatedTermFields =
+                        Maybe.map2
+                            (\currentAtIndex currentAtNextIndex ->
+                                relatedTermFields0
+                                    |> Array.set (indexInt + 1) currentAtIndex
+                                    |> Array.set indexInt currentAtNextIndex
+                            )
+                            maybeCurrentAtIndex
+                            maybeCurrentAtNextIndex
+                            |> Maybe.withDefault relatedTermFields0
+                }
                 |> validate
 
 

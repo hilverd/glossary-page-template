@@ -10,6 +10,7 @@ import Components.Badge
 import Components.Button
 import Components.Copy
 import Components.Dividers
+import Components.DropdownMenu
 import Components.Form
 import Components.GlossaryItemCard
 import Components.SelectMenu
@@ -26,6 +27,7 @@ import Data.GlossaryTitle as GlossaryTitle
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
+import Dict exposing (Dict)
 import ElementIds
 import Extras.Html
 import Extras.HtmlEvents
@@ -55,6 +57,7 @@ type alias Model =
     , form : GlossaryItemForm
     , triedToSaveWhenFormInvalid : Bool
     , errorMessageWhileSaving : Maybe String
+    , dropdownMenusWithMoreOptionsForRelatedTerms : Dict Int Components.DropdownMenu.Model
     }
 
 
@@ -70,6 +73,9 @@ type InternalMsg
     | AddRelatedTerm (Maybe TermId)
     | SelectRelatedTerm RelatedTermIndex String
     | DeleteRelatedTerm RelatedTermIndex
+    | DropdownMenuWithMoreOptionsForRelatedTermMsg Int Components.DropdownMenu.Msg
+    | MoveRelatedTermUp RelatedTermIndex
+    | MoveRelatedTermDown RelatedTermIndex
     | ToggleNeedsUpdating
     | Save
     | ReceiveCurrentDateTimeForSaving String
@@ -121,9 +127,8 @@ init commonModel =
                 emptyForm : GlossaryItemForm
                 emptyForm =
                     Form.empty existingTerms existingPrimaryTerms itemsListingThisItemAsRelated
-            in
-            ( { common = commonModel
-              , form =
+
+                form =
                     Maybe.map
                         (\index ->
                             items
@@ -138,8 +143,13 @@ init commonModel =
                         )
                         commonModel.maybeIndex
                         |> Maybe.withDefault emptyForm
+            in
+            ( { common = commonModel
+              , form = form
               , triedToSaveWhenFormInvalid = False
               , errorMessageWhileSaving = Nothing
+              , dropdownMenusWithMoreOptionsForRelatedTerms =
+                    dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
             , if commonModel.maybeIndex == Nothing then
                 0 |> TermIndex.fromInt |> giveFocusToTermInputField
@@ -153,9 +163,27 @@ init commonModel =
               , form = Form.empty [] [] []
               , triedToSaveWhenFormInvalid = False
               , errorMessageWhileSaving = Nothing
+              , dropdownMenusWithMoreOptionsForRelatedTerms = Dict.empty
               }
             , Cmd.none
             )
+
+
+dropdownMenusWithMoreOptionsForRelatedTermsForForm : GlossaryItemForm -> Dict Int Components.DropdownMenu.Model
+dropdownMenusWithMoreOptionsForRelatedTermsForForm form =
+    form
+        |> Form.relatedTermFields
+        |> Array.indexedMap (\index _ -> index)
+        |> Array.foldl
+            (\index result ->
+                Dict.insert
+                    index
+                    (Components.DropdownMenu.init
+                        [ Components.DropdownMenu.id <| ElementIds.moreOptionsForRelatedTermDropdownMenu index ]
+                    )
+                    result
+            )
+            Dict.empty
 
 
 
@@ -231,7 +259,10 @@ update msg model =
                 latestRelatedTermIndex =
                     Array.length (Form.relatedTermFields form) - 1 |> RelatedTermIndex.fromInt
             in
-            ( { model | form = form }
+            ( { model
+                | form = form
+                , dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
+              }
             , giveFocusToSeeAlsoSelect latestRelatedTermIndex
             )
 
@@ -248,7 +279,70 @@ update msg model =
             ( { model | form = Form.selectRelatedTerm relatedTermIndex model.form relatedTermIdReference }, Cmd.none )
 
         DeleteRelatedTerm relatedTermIndex ->
-            ( { model | form = Form.deleteRelatedTerm relatedTermIndex model.form }, Cmd.none )
+            let
+                form =
+                    Form.deleteRelatedTerm relatedTermIndex model.form
+            in
+            ( { model
+                | form = form
+                , dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
+              }
+            , Cmd.none
+            )
+
+        DropdownMenuWithMoreOptionsForRelatedTermMsg relatedTermIndexInt msg_ ->
+            model.dropdownMenusWithMoreOptionsForRelatedTerms
+                |> Dict.get relatedTermIndexInt
+                |> Maybe.map
+                    (\dropdownMenu ->
+                        Components.DropdownMenu.update
+                            (\x ->
+                                let
+                                    dropdownMenusWithMoreOptionsForRelatedTerms1 =
+                                        Dict.map
+                                            (\relatedTermIndex_ dropdownMenu_ ->
+                                                if relatedTermIndex_ == relatedTermIndexInt then
+                                                    x
+
+                                                else
+                                                    Components.DropdownMenu.hidden dropdownMenu_
+                                            )
+                                            model.dropdownMenusWithMoreOptionsForRelatedTerms
+                                in
+                                { model
+                                    | dropdownMenusWithMoreOptionsForRelatedTerms =
+                                        dropdownMenusWithMoreOptionsForRelatedTerms1
+                                }
+                            )
+                            (PageMsg.Internal << DropdownMenuWithMoreOptionsForRelatedTermMsg relatedTermIndexInt)
+                            msg_
+                            dropdownMenu
+                    )
+                |> Maybe.withDefault ( model, Cmd.none )
+
+        MoveRelatedTermUp relatedTermIndexInt ->
+            let
+                form =
+                    Form.moveRelatedTermUp relatedTermIndexInt model.form
+            in
+            ( { model
+                | form = form
+                , dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
+              }
+            , Cmd.none
+            )
+
+        MoveRelatedTermDown relatedTermIndexInt ->
+            let
+                form =
+                    Form.moveRelatedTermDown relatedTermIndexInt model.form
+            in
+            ( { model
+                | form = form
+                , dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
+              }
+            , Cmd.none
+            )
 
         ToggleNeedsUpdating ->
             ( { model | form = Form.toggleNeedsUpdating model.form }, Cmd.none )
@@ -655,53 +749,121 @@ viewCreateDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportE
         ]
 
 
-viewCreateSeeAlsoSingle : Bool -> Set String -> List Term -> Int -> Form.RelatedTermField -> Html Msg
-viewCreateSeeAlsoSingle showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
-    viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms (RelatedTermIndex.fromInt index) relatedTerm
+viewCreateSeeAlsoSingle :
+    Bool
+    -> Set String
+    -> Int
+    -> List Term
+    -> Dict Int Components.DropdownMenu.Model
+    -> Int
+    -> Form.RelatedTermField
+    -> Html Msg
+viewCreateSeeAlsoSingle showValidationErrors relatedTermsIdReferences numberOfRelatedTerms allTerms dropdownMenusWithMoreOptionsForRelatedTerms index relatedTerm =
+    viewCreateSeeAlsoSingle1
+        showValidationErrors
+        relatedTermsIdReferences
+        numberOfRelatedTerms
+        allTerms
+        (Dict.get index dropdownMenusWithMoreOptionsForRelatedTerms)
+        (RelatedTermIndex.fromInt index)
+        relatedTerm
 
 
-viewCreateSeeAlsoSingle1 : Bool -> Set String -> List Term -> RelatedTermIndex -> Form.RelatedTermField -> Html Msg
-viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences allTerms index relatedTerm =
+viewCreateSeeAlsoSingle1 :
+    Bool
+    -> Set String
+    -> Int
+    -> List Term
+    -> Maybe Components.DropdownMenu.Model
+    -> RelatedTermIndex
+    -> Form.RelatedTermField
+    -> Html Msg
+viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfRelatedTerms allTerms maybeDropdownMenuWithMoreOptions index relatedTerm =
     div
         []
         [ div
-            [ class "sm:flex sm:flex-row sm:items-center" ]
-            [ div
-                [ class "flex-auto max-w-lg flex" ]
-                [ span
-                    [ class "inline-flex items-center" ]
-                    [ Components.Button.rounded True
-                        [ Accessibility.Aria.label "Delete"
-                        , Html.Events.onClick <| PageMsg.Internal <| DeleteRelatedTerm index
-                        ]
-                        [ Icons.trash
-                            [ Svg.Attributes.class "h-5 w-5" ]
-                        ]
+            [ class "flex-auto max-w-lg flex items-center" ]
+            [ span
+                [ class "inline-flex items-center" ]
+                [ Components.Button.rounded True
+                    [ Accessibility.Aria.label "Delete"
+                    , Html.Events.onClick <| PageMsg.Internal <| DeleteRelatedTerm index
                     ]
-                , Components.SelectMenu.render
-                    [ Components.SelectMenu.id <| ElementIds.seeAlsoSelect index
-                    , Components.SelectMenu.ariaLabel "Related term"
-                    , Components.SelectMenu.validationError relatedTerm.validationError
-                    , Components.SelectMenu.showValidationErrors showValidationErrors
-                    , Components.SelectMenu.onChange (PageMsg.Internal << SelectRelatedTerm index)
+                    [ Icons.trash
+                        [ Svg.Attributes.class "h-5 w-5" ]
                     ]
-                    (allTerms
-                        |> List.filter
-                            (\term ->
-                                (not <| Set.member (Term.id term |> TermId.toString) relatedTermsIdReferences)
-                                    || (Just (Term.id term) == relatedTerm.idReference)
-                            )
-                        |> List.map
-                            (\term ->
-                                Components.SelectMenu.Choice
-                                    (Term.id term |> TermId.toString)
-                                    [ text <| Term.inlineText term ]
-                                    (Just (Term.id term) == relatedTerm.idReference)
-                            )
-                    )
                 ]
+            , Components.SelectMenu.render
+                [ Components.SelectMenu.id <| ElementIds.seeAlsoSelect index
+                , Components.SelectMenu.ariaLabel "Related term"
+                , Components.SelectMenu.validationError relatedTerm.validationError
+                , Components.SelectMenu.showValidationErrors showValidationErrors
+                , Components.SelectMenu.onChange (PageMsg.Internal << SelectRelatedTerm index)
+                ]
+                (allTerms
+                    |> List.filter
+                        (\term ->
+                            (not <| Set.member (Term.id term |> TermId.toString) relatedTermsIdReferences)
+                                || (Just (Term.id term) == relatedTerm.idReference)
+                        )
+                    |> List.map
+                        (\term ->
+                            Components.SelectMenu.Choice
+                                (Term.id term |> TermId.toString)
+                                [ text <| Term.inlineText term ]
+                                (Just (Term.id term) == relatedTerm.idReference)
+                        )
+                )
+            , Extras.Html.showIf (numberOfRelatedTerms > 1) <|
+                Extras.Html.showMaybe
+                    (\dropdownMenuWithMoreOptions ->
+                        span
+                            [ class "ml-2" ]
+                            [ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownMenuWithMoreOptions ]
+                    )
+                    maybeDropdownMenuWithMoreOptions
             ]
         ]
+
+
+viewMoreOptionsForRelatedTermDropdownButton : Int -> RelatedTermIndex -> Components.DropdownMenu.Model -> Html Msg
+viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownMenuWithMoreOptionsForRelatedTerm =
+    let
+        indexInt =
+            RelatedTermIndex.toInt index
+    in
+    Components.DropdownMenu.view
+        (PageMsg.Internal << DropdownMenuWithMoreOptionsForRelatedTermMsg indexInt)
+        dropdownMenuWithMoreOptionsForRelatedTerm
+        True
+        Components.DropdownMenu.Ellipsis
+        (List.filterMap identity
+            [ if indexInt > 0 then
+                Just <|
+                    Components.DropdownMenu.choice
+                        [ span
+                            []
+                            [ text "Move up"
+                            ]
+                        ]
+                        (PageMsg.Internal <| MoveRelatedTermUp index)
+
+              else
+                Nothing
+            , if indexInt + 1 < numberOfRelatedTerms then
+                Just <|
+                    Components.DropdownMenu.choice
+                        [ span
+                            []
+                            [ text "Move down"
+                            ]
+                        ]
+                        (PageMsg.Internal <| MoveRelatedTermDown index)
+
+              else
+                Nothing
+            ]
+        )
 
 
 viewAddRelatedTermButton : Html Msg
@@ -730,9 +892,10 @@ viewCreateSeeAlso :
     -> GlossaryItems
     -> Array TermField
     -> Array Form.RelatedTermField
+    -> Dict Int Components.DropdownMenu.Model
     -> List Term
     -> Html Msg
-viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms relatedTermsArray suggestedRelatedTerms =
+viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms relatedTermsArray dropdownMenusWithMoreOptionsForRelatedTerms suggestedRelatedTerms =
     let
         termIdsSet : Set String
         termIdsSet =
@@ -768,7 +931,9 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
                         |> List.filterMap (.idReference >> Maybe.map TermId.toString)
                         |> Set.fromList
                     )
+                    (List.length relatedTermsList)
                     (List.filter (\term -> not <| Set.member (Term.id term |> TermId.toString) termIdsSet) allTerms)
+                    dropdownMenusWithMoreOptionsForRelatedTerms
                 )
                 relatedTermsList
             )
@@ -932,6 +1097,7 @@ view model =
                                             glossary.items
                                             terms
                                             relatedTerms
+                                            model.dropdownMenusWithMoreOptionsForRelatedTerms
                                             suggestedRelatedTerms
                                         , Components.Dividers.withLabel
                                             [ class "mt-8" ]
@@ -982,5 +1148,17 @@ view model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
-    receiveCurrentDateTimeForSaving ReceiveCurrentDateTimeForSaving |> Sub.map PageMsg.Internal
+subscriptions model =
+    Sub.batch
+        [ receiveCurrentDateTimeForSaving ReceiveCurrentDateTimeForSaving
+            |> Sub.map PageMsg.Internal
+        , model.dropdownMenusWithMoreOptionsForRelatedTerms
+            |> Dict.toList
+            |> List.map
+                (\( relatedTermIndex, dropdownModel ) ->
+                    dropdownModel
+                        |> Components.DropdownMenu.subscriptions
+                        |> Sub.map (DropdownMenuWithMoreOptionsForRelatedTermMsg relatedTermIndex >> PageMsg.Internal)
+                )
+            |> Sub.batch
+        ]

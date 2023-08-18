@@ -15,6 +15,7 @@ module ElementIds exposing
     , inputSyntaxMarkdownBased
     , inputSyntaxPlainText
     , items
+    , moreOptionsForRelatedTermDropdownMenu
     , needsUpdatingToggleLabel
     , orderItemsAlphabetically
     , orderItemsFocusedOn
@@ -39,6 +40,7 @@ module ElementIds exposing
 
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.DefinitionIndex as DefinitionIndex exposing (DefinitionIndex)
+import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
@@ -210,6 +212,11 @@ themeDropdownButton =
 exportDropdownButton : String
 exportDropdownButton =
     prefixed "export-dropdown-button"
+
+
+moreOptionsForRelatedTermDropdownMenu : Int -> String
+moreOptionsForRelatedTermDropdownMenu relatedTermIndexInt =
+    prefixed "more-options-for-related-term-" ++ String.fromInt relatedTermIndexInt ++ "-dropdown-menu"
 
 
 abbreviationLabel : TermIndex -> String
