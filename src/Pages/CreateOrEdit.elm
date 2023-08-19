@@ -818,7 +818,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfR
                 Extras.Html.showMaybe
                     (\dropdownMenuWithMoreOptions ->
                         span
-                            [ class "ml-2" ]
+                            [ class "ml-2 flex items-center" ]
                             [ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownMenuWithMoreOptions ]
                     )
                     maybeDropdownMenuWithMoreOptions
@@ -842,8 +842,10 @@ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownM
                 Just <|
                     Components.DropdownMenu.choice
                         [ span
-                            []
-                            [ text "Move up"
+                            [ class "inline-flex items-center" ]
+                            [ Icons.arrowUp
+                                [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" ]
+                            , text "Move up"
                             ]
                         ]
                         (PageMsg.Internal <| MoveRelatedTermUp index)
@@ -854,8 +856,10 @@ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownM
                 Just <|
                     Components.DropdownMenu.choice
                         [ span
-                            []
-                            [ text "Move down"
+                            [ class "inline-flex items-center" ]
+                            [ Icons.arrowDown
+                                [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" ]
+                            , text "Move down"
                             ]
                         ]
                         (PageMsg.Internal <| MoveRelatedTermDown index)
