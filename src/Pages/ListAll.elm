@@ -2272,6 +2272,27 @@ view model =
                                         }
                                         glossary.items
                                 ]
+                            , Html.footer
+                                []
+                                [ div
+                                    []
+                                    [ p []
+                                        [ text "Built using "
+                                        , a
+                                            [ Html.Attributes.target "_blank"
+                                            , href "https://glossary.page/template"
+                                            ]
+                                            [ span
+                                                [ class "font-semibold print:font-normal" ]
+                                                [ text "Glossary Page Template" ]
+                                            ]
+                                        , span
+                                            [ class "hidden print:inline" ]
+                                            [ text " (https://glossary.page/template)" ]
+                                        , text "."
+                                        ]
+                                    ]
+                                ]
                             ]
                         ]
                     ]

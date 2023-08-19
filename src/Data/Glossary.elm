@@ -86,4 +86,16 @@ toHtmlTree enableExportMenu enableHelpForMakingChanges { enableMarkdownBasedSynt
                     )
                 ]
             ]
+        , HtmlTree.Node "footer"
+            True
+            []
+            [ HtmlTree.Leaf "Built using"
+            , HtmlTree.Node "a"
+                False
+                [ HtmlTree.Attribute "target" "_blank"
+                , HtmlTree.Attribute "href" "https://glossary.page/template"
+                ]
+                [ HtmlTree.Leaf "Glossary Page Template" ]
+            , HtmlTree.Leaf "."
+            ]
         ]
