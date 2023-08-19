@@ -782,7 +782,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfR
     div
         []
         [ div
-            [ class "flex-auto max-w-lg flex items-center" ]
+            [ class "flex-auto max-w-xl flex items-center" ]
             [ span
                 [ class "inline-flex items-center" ]
                 [ Components.Button.rounded True
@@ -818,10 +818,28 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfR
                 Extras.Html.showMaybe
                     (\dropdownMenuWithMoreOptions ->
                         span
-                            [ class "ml-2 flex items-center" ]
+                            [ class "sm:hidden ml-2 flex items-center" ]
                             [ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownMenuWithMoreOptions ]
                     )
                     maybeDropdownMenuWithMoreOptions
+            , div
+                [ class "hidden sm:block sm:ml-2 flex items-center" ]
+                [ Components.Button.rounded (RelatedTermIndex.toInt index > 0)
+                    [ Accessibility.Aria.label "Move up"
+                    , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermUp index
+                    ]
+                    [ Icons.arrowUp
+                        [ Svg.Attributes.class "h-5 w-5" ]
+                    ]
+                , Components.Button.rounded (RelatedTermIndex.toInt index + 1 < numberOfRelatedTerms)
+                    [ Accessibility.Aria.label "Move down"
+                    , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermDown index
+                    , class ""
+                    ]
+                    [ Icons.arrowDown
+                        [ Svg.Attributes.class "h-5 w-5" ]
+                    ]
+                ]
             ]
         ]
 
