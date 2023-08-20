@@ -10,6 +10,7 @@ import Components.AboutSection
 import Components.Button
 import Components.Copy
 import Components.Form
+import Components.Spinner
 import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.AboutParagraph as AboutParagraph
@@ -565,7 +566,7 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                 [ text Components.Copy.sandboxModeMessage ]
         , div
-            [ class "flex justify-end" ]
+            [ class "flex items-center" ]
             [ Components.Button.white True
                 [ Html.Events.onClick <|
                     PageMsg.NavigateToListAll { common | glossary = updatedGlossary }
@@ -576,6 +577,9 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]
                 [ text "Save" ]
+            , Components.Spinner.view
+                [ Svg.Attributes.class "ml-3 w-8 h-8" ]
+                False
             ]
         ]
 

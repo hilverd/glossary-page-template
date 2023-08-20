@@ -14,6 +14,7 @@ import Components.DropdownMenu
 import Components.Form
 import Components.GlossaryItemCard
 import Components.SelectMenu
+import Components.Spinner
 import Data.DefinitionIndex as DefinitionIndex exposing (DefinitionIndex)
 import Data.FeatureFlag exposing (enableTopicsFeature)
 import Data.Glossary as Glossary
@@ -1043,7 +1044,7 @@ viewCreateFormFooter model =
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                 [ text Components.Copy.sandboxModeMessage ]
         , div
-            [ class "flex justify-end" ]
+            [ class "flex items-center" ]
             [ Components.Button.white True
                 [ Html.Events.onClick <|
                     PageMsg.NavigateToListAll common
@@ -1054,6 +1055,9 @@ viewCreateFormFooter model =
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]
                 [ text "Save" ]
+            , Components.Spinner.view
+                [ Svg.Attributes.class "ml-3 w-8 h-8" ]
+                False
             ]
         ]
 
