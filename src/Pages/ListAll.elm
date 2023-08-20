@@ -1528,7 +1528,7 @@ viewQuickSearchButtonAndLetterGrid staticSidebar tabbable indexOfTerms =
             [ class "h-7 bg-white dark:bg-slate-900" ]
             []
         , div
-            [ class "pr-4" ]
+            [ class "pr-4 bg-white dark:bg-slate-900" ]
             [ viewBackToTopLink True tabbable ]
         , viewQuickSearchButton tabbable
         , div
