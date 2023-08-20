@@ -27,6 +27,7 @@ import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
+import Data.Saving exposing (Saving(..))
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import Dict exposing (Dict)
 import ElementIds
@@ -57,7 +58,7 @@ type alias Model =
     { common : CommonModel
     , form : GlossaryItemForm
     , triedToSaveWhenFormInvalid : Bool
-    , errorMessageWhileSaving : Maybe String
+    , saving : Saving
     , dropdownMenusWithMoreOptionsForRelatedTerms : Dict Int Components.DropdownMenu.Model
     }
 
@@ -148,7 +149,7 @@ init commonModel =
             ( { common = commonModel
               , form = form
               , triedToSaveWhenFormInvalid = False
-              , errorMessageWhileSaving = Nothing
+              , saving = NotSaving
               , dropdownMenusWithMoreOptionsForRelatedTerms =
                     dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
@@ -163,7 +164,7 @@ init commonModel =
             ( { common = commonModel
               , form = Form.empty [] [] []
               , triedToSaveWhenFormInvalid = False
-              , errorMessageWhileSaving = Nothing
+              , saving = NotSaving
               , dropdownMenusWithMoreOptionsForRelatedTerms = Dict.empty
               }
             , Cmd.none
@@ -357,7 +358,7 @@ update msg model =
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
-                            , errorMessageWhileSaving = Nothing
+                            , saving = NotSaving
                           }
                         , Cmd.none
                         )
@@ -411,6 +412,7 @@ update msg model =
                                             | glossary = Ok <| { glossary | items = updatedGlossaryItemsWithFocusedOn }
                                             , maybeIndex = maybeIndex
                                         }
+                                    , saving = SavingInProgress
                                 }
                         in
                         ( model_
@@ -421,7 +423,7 @@ update msg model =
                     ( model, Cmd.none )
 
         FailedToSave error ->
-            ( { model | errorMessageWhileSaving = error |> Extras.Http.errorToHumanReadable |> Just }
+            ( { model | saving = SavingFailed <| Extras.Http.errorToHumanReadable <| error }
             , Cmd.none
             )
 
@@ -1020,10 +1022,13 @@ viewNeedsUpdating on =
 viewCreateFormFooter : Model -> Html Msg
 viewCreateFormFooter model =
     let
+        saving =
+            model.saving
+
         errorDiv : String -> Html msg
         errorDiv message =
             div
-                [ class "flex justify-end mb-2" ]
+                [ class "flex justify-end mt-2" ]
                 [ p
                     [ class "text-red-600 dark:text-red-400" ]
                     [ text message ]
@@ -1037,28 +1042,34 @@ viewCreateFormFooter model =
         [ class "pt-5 lg:border-t dark:border-gray-700 flex flex-col items-center" ]
         [ errorDiv "There are errors on this form — see above."
             |> Extras.Html.showIf (model.triedToSaveWhenFormInvalid && Form.hasValidationErrors model.form)
-        , model.errorMessageWhileSaving
-            |> Extras.Html.showMaybe (\errorMessage -> errorDiv <| "Failed to save — " ++ errorMessage ++ ".")
         , Extras.Html.showIf common.enableSavingChangesInMemory <|
             div
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                 [ text Components.Copy.sandboxModeMessage ]
         , div
             [ class "flex items-center" ]
-            [ Components.Button.white True
+            [ Components.Button.white
+                (saving /= SavingInProgress)
                 [ Html.Events.onClick <|
                     PageMsg.NavigateToListAll common
                 ]
                 [ text "Cancel" ]
-            , Components.Button.primary True
+            , Components.Button.primary
+                (saving /= SavingInProgress)
                 [ class "ml-3"
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]
                 [ text "Save" ]
             , Components.Spinner.view
                 [ Svg.Attributes.class "ml-3 w-8 h-8" ]
-                False
+                (saving == SavingInProgress)
             ]
+        , case saving of
+            SavingFailed errorMessage ->
+                errorDiv <| "Failed to save — " ++ errorMessage ++ "."
+
+            _ ->
+                Extras.Html.nothing
         ]
 
 
