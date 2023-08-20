@@ -555,7 +555,7 @@ viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossary
                     error
     in
     div
-        [ class "pt-5 lg:border-t dark:border-gray-700" ]
+        [ class "pt-5 lg:border-t dark:border-gray-700 flex flex-col items-center" ]
         [ errorDiv "There are errors on this form — see above."
             |> Extras.Html.showIf (showValidationErrors && Form.hasValidationErrors form)
         , errorMessageWhileSaving
@@ -596,7 +596,7 @@ view model =
             { title = GlossaryTitle.inlineText title1
             , body =
                 [ div
-                    [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
+                    [ class "container mx-auto px-6 pb-12 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
                     [ main_
                         []
                         [ h1
