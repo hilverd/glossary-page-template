@@ -1055,7 +1055,7 @@ viewCreateFormFooter model =
                 ]
                 [ text "Cancel" ]
             , Components.Button.primary
-                (saving /= SavingInProgress)
+                (saving /= SavingInProgress && not (model.triedToSaveWhenFormInvalid && Form.hasValidationErrors model.form))
                 [ class "ml-3"
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]

@@ -24,11 +24,12 @@ withAdditionalAttributes attributes additionalAttributes children =
 primary : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 primary enabled =
     withAdditionalAttributes
-        [ if enabled then
-            class "inline-flex justify-center items-center py-2 px-4 border border-transparent shadow-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+        [ class "inline-flex justify-center items-center py-2 px-4 border border-transparent shadow-sm font-medium rounded-md bg-indigo-600 text-white dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+        , if enabled then
+            class "hover:bg-indigo-700"
 
           else
-            class "inline-flex justify-center items-center py-2 px-4 border border-transparent shadow-sm font-medium rounded-md text-white dark:text-gray-400 bg-indigo-400 dark:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+            class "opacity-50"
         , Html.Attributes.disabled <| not enabled
         , Accessibility.Key.tabbable enabled
         ]

@@ -35,7 +35,6 @@ type Style msg
         , onClickRelatedTerm : RelatedTerm -> msg
         , editable : Bool
         , shownAsSingle : Bool
-        , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
         }
 
 
@@ -94,7 +93,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                             ++ viewGlossaryItemRelatedTerms enableMathSupport True tabbable itemHasSomeDefinitions Nothing glossaryItem.relatedTerms
                         )
 
-                Normal { tabbable, onClickViewFull, onClickEdit, onClickDelete, onClickItem, onClickRelatedTerm, editable, shownAsSingle, errorWhileDeleting } ->
+                Normal { tabbable, onClickViewFull, onClickEdit, onClickDelete, onClickItem, onClickRelatedTerm, editable, shownAsSingle } ->
                     let
                         itemHasSomeDefinitions : Bool
                         itemHasSomeDefinitions =
@@ -215,15 +214,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                             ]
                                         ]
                                     ]
-                                , errorWhileDeleting
-                                    |> Extras.Html.showMaybe
-                                        (\( indexOfItemBeingDeleted, errorMessage ) ->
-                                            if index == indexOfItemBeingDeleted then
-                                                errorDiv <| "Failed to save — " ++ errorMessage ++ "."
-
-                                            else
-                                                Extras.Html.nothing
-                                        )
                                 ]
                             ]
 
@@ -442,16 +432,6 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                 ]
         )
         glossaryItemWithPreviousAndNext.item
-
-
-errorDiv : String -> Html msg
-errorDiv message =
-    div
-        [ class "flex justify-end mt-2" ]
-        [ p
-            [ class "text-red-600" ]
-            [ text message ]
-        ]
 
 
 viewGlossaryTerm : { enableMathSupport : Bool, tabbable : Bool, showSilcrow : Bool } -> Term -> Html msg

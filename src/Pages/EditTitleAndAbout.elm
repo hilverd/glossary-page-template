@@ -582,7 +582,7 @@ viewCreateFormFooter model showValidationErrors glossaryItems =
                 ]
                 [ text "Cancel" ]
             , Components.Button.primary
-                (saving /= SavingInProgress)
+                (saving /= SavingInProgress && not (showValidationErrors && Form.hasValidationErrors form))
                 [ class "ml-3"
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]

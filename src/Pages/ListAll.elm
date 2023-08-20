@@ -43,6 +43,7 @@ import Components.GlossaryItemCard
 import Components.ModalDialog
 import Components.SearchDialog
 import Components.SelectMenu
+import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.FeatureFlag exposing (enableFeaturesInProgress, enableTopicsFeature)
 import Data.Glossary as Glossary exposing (Glossary)
@@ -56,6 +57,7 @@ import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
+import Data.Saving exposing (Saving(..))
 import Data.Theme exposing (Theme(..))
 import Dict
 import ElementIds
@@ -121,7 +123,7 @@ type alias Model =
     , searchDialog : SearchDialog
     , layout : Layout
     , confirmDeleteIndex : Maybe GlossaryItemIndex
-    , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
+    , deleting : Saving
     , errorWhileChangingSettings : Maybe String
     , mostRecentTermIdForOrderingItemsFocusedOn : Maybe TermId
     , resultOfAttemptingToCopyEditorCommandToClipboard : Maybe Bool
@@ -148,7 +150,7 @@ type InternalMsg
     | CancelDelete
     | Delete GlossaryItemIndex
     | Deleted GlossaryItems
-    | FailedToDelete GlossaryItemIndex Http.Error
+    | FailedToDelete Http.Error
     | JumpToTermIndexGroup Bool String
     | ChangeOrderItemsBy OrderItemsBy
     | ToggleMarkdownBasedSyntax
@@ -192,7 +194,7 @@ init editorIsRunning commonModel =
                     , Components.SearchDialog.onHide <| Extras.Task.messageToCommand <| PageMsg.Internal HideSearchDialog
                     ]
             }
-      , errorWhileDeleting = Nothing
+      , deleting = NotSaving
       , errorWhileChangingSettings = Nothing
       , mostRecentTermIdForOrderingItemsFocusedOn =
             case commonModel.orderItemsBy of
@@ -428,10 +430,15 @@ update msg model =
 
         CancelDelete ->
             if model.confirmDeleteIndex /= Nothing then
-                ( { model | confirmDeleteIndex = Nothing }, allowBackgroundScrolling () )
+                ( { model
+                    | confirmDeleteIndex = Nothing
+                    , deleting = NotSaving
+                  }
+                , allowBackgroundScrolling ()
+                )
 
             else
-                ( model, Cmd.none )
+                ( { model | deleting = NotSaving }, Cmd.none )
 
         Delete index ->
             case model.common.glossary of
@@ -441,15 +448,8 @@ update msg model =
                         updatedGlossaryItems =
                             GlossaryItems.remove index items
                     in
-                    ( { model
-                        | confirmDeleteIndex = Nothing
-                        , errorWhileDeleting = Nothing
-                      }
-                    , Cmd.batch
-                        [ patchHtmlFileAfterDeletingItem model.common index updatedGlossaryItems
-                        , allowBackgroundScrolling ()
-                        , giveFocusToOuter
-                        ]
+                    ( { model | deleting = SavingInProgress }
+                    , patchHtmlFileAfterDeletingItem model.common updatedGlossaryItems
                     )
 
                 _ ->
@@ -460,21 +460,28 @@ update msg model =
                 common : CommonModel
                 common =
                     model.common
+
+                cmd =
+                    Cmd.batch
+                        [ allowBackgroundScrolling ()
+                        , giveFocusToOuter
+                        ]
             in
             case common.glossary of
                 Ok glossary ->
-                    ( { model | common = { common | glossary = Ok { glossary | items = updatedGlossaryItems } } }
-                    , Cmd.none
+                    ( { model
+                        | common = { common | glossary = Ok { glossary | items = updatedGlossaryItems } }
+                        , confirmDeleteIndex = Nothing
+                        , deleting = NotSaving
+                      }
+                    , cmd
                     )
 
                 Err _ ->
-                    ( model, Cmd.none )
+                    ( { model | confirmDeleteIndex = Nothing }, cmd )
 
-        FailedToDelete indexOfItemBeingDeleted error ->
-            ( { model
-                | errorWhileDeleting =
-                    Just ( indexOfItemBeingDeleted, Extras.Http.errorToHumanReadable error )
-              }
+        FailedToDelete error ->
+            ( { model | deleting = SavingFailed <| Extras.Http.errorToHumanReadable error }
             , Cmd.none
             )
 
@@ -565,7 +572,7 @@ update msg model =
                     in
                     ( { model
                         | confirmDeleteIndex = Nothing
-                        , errorWhileDeleting = Nothing
+                        , deleting = NotSaving
                       }
                     , patchHtmlFileAfterChangingSettings model.common updatedGlossary
                     )
@@ -583,7 +590,7 @@ update msg model =
                     in
                     ( { model
                         | confirmDeleteIndex = Nothing
-                        , errorWhileDeleting = Nothing
+                        , deleting = NotSaving
                       }
                     , patchHtmlFileAfterChangingSettings model.common updatedGlossary
                     )
@@ -628,7 +635,7 @@ update msg model =
                     in
                     ( { model
                         | confirmDeleteIndex = Nothing
-                        , errorWhileDeleting = Nothing
+                        , deleting = NotSaving
                       }
                     , patchHtmlFileAfterChangingSettings model.common updatedGlossary
                     )
@@ -731,8 +738,8 @@ patchHtmlFileAfterChangingSettings common glossary =
             }
 
 
-patchHtmlFileAfterDeletingItem : CommonModel -> GlossaryItemIndex -> GlossaryItems -> Cmd Msg
-patchHtmlFileAfterDeletingItem common indexOfItemBeingDeleted glossaryItems =
+patchHtmlFileAfterDeletingItem : CommonModel -> GlossaryItems -> Cmd Msg
+patchHtmlFileAfterDeletingItem common glossaryItems =
     let
         msg : PageMsg InternalMsg
         msg =
@@ -766,7 +773,7 @@ patchHtmlFileAfterDeletingItem common indexOfItemBeingDeleted glossaryItems =
                                         msg
 
                                     Err error ->
-                                        PageMsg.Internal <| FailedToDelete indexOfItemBeingDeleted error
+                                        PageMsg.Internal <| FailedToDelete error
                             )
                     , timeout = Nothing
                     , tracker = Nothing
@@ -1006,10 +1013,9 @@ viewGlossaryItem :
     , shownAsSingle : Bool
     }
     -> Model
-    -> Maybe ( GlossaryItemIndex, String )
     -> GlossaryItemWithPreviousAndNext
     -> Html Msg
-viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle } model errorWhileDeleting itemWithPreviousAndNext =
+viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle } model itemWithPreviousAndNext =
     let
         common : CommonModel
         common =
@@ -1028,7 +1034,6 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
                     , onClickRelatedTerm = PageMsg.Internal << ShowRelatedTermAsSingle
                     , editable = editable
                     , shownAsSingle = shownAsSingle
-                    , errorWhileDeleting = errorWhileDeleting
                     }
                 )
                 itemWithPreviousAndNext
@@ -1094,7 +1099,6 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
                             , shownAsSingle = True
                             }
                             model
-                            model.errorWhileDeleting
                             itemWithPreviousAndNext
                         ]
                     ]
@@ -1112,8 +1116,8 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
             )
 
 
-viewConfirmDeleteModal : Bool -> Maybe GlossaryItemIndex -> Html Msg
-viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
+viewConfirmDeleteModal : Bool -> Maybe GlossaryItemIndex -> Saving -> Html Msg
+viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete deleting =
     Components.ModalDialog.view
         (PageMsg.Internal CancelDelete)
         ElementIds.confirmDeleteModalTitle
@@ -1149,21 +1153,41 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
                 div
                     [ class "mt-5 sm:mt-4 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                     [ text Components.Copy.sandboxModeMessage ]
+            , case deleting of
+                SavingFailed errorMessage ->
+                    div
+                        [ class "flex justify-end mt-2" ]
+                        [ p
+                            [ class "text-red-600 dark:text-red-400" ]
+                            [ text <| "Failed to save — " ++ errorMessage ++ "." ]
+                        ]
+
+                _ ->
+                    Extras.Html.nothing
             , div
-                [ class "mt-5 sm:mt-4 sm:flex sm:flex-row-reverse" ]
-                [ Components.Button.primary True
-                    [ class "w-full bg-red-600 dark:bg-red-400 hover:bg-red-700 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm dark:text-gray-800"
+                [ class "mt-5 sm:mt-4 sm:flex sm:flex-row-reverse sm:items-center" ]
+                [ Components.Button.primary
+                    (deleting /= SavingInProgress)
+                    [ class "w-full bg-red-600 dark:bg-red-400 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm dark:text-gray-800"
+                    , Extras.HtmlAttribute.showIf (deleting /= SavingInProgress) <| class "hover:bg-red-700 dark:hover:bg-red-600"
                     , Extras.HtmlAttribute.showMaybe
                         (Html.Events.onClick << PageMsg.Internal << Delete)
                         maybeIndexOfItemToDelete
                     ]
                     [ text "Delete" ]
-                , Components.Button.white True
+                , Components.Button.white
+                    (deleting /= SavingInProgress)
                     [ class "mt-3 w-full sm:mt-0 sm:w-auto sm:text-sm"
                     , Html.Events.onClick <| PageMsg.Internal CancelDelete
                     , Extras.HtmlEvents.onEnter <| PageMsg.Internal CancelDelete
                     ]
                     [ text "Cancel" ]
+                , span
+                    [ class "w-full sm:w-auto sm:order-last sm:mr-3 flex justify-center" ]
+                    [ Components.Spinner.view
+                        [ Svg.Attributes.class "mt-3 sm:mt-0 w-8 h-8" ]
+                        (deleting == SavingInProgress)
+                    ]
                 ]
             ]
         )
@@ -1292,7 +1316,6 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                 , shownAsSingle = False
                 }
                 model
-                model.errorWhileDeleting
                 { previous = Nothing, item = Just indexedItem, next = Nothing }
     in
     Html.article
@@ -1349,6 +1372,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
         , viewConfirmDeleteModal
             model.common.enableSavingChangesInMemory
             model.confirmDeleteIndex
+            model.deleting
         , viewSingleItemModalDialog
             model
             { enableMathSupport = enableMathSupport
