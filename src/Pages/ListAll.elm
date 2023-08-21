@@ -1920,12 +1920,9 @@ viewSelectCardWidth glossary model =
     in
     div
         []
-        [ label
-            [ class "font-medium text-gray-900 dark:text-gray-100" ]
-            [ text "Card width" ]
-        , fieldset [ class "mt-4" ]
+        [ fieldset []
             [ legend
-                [ class "sr-only" ]
+                [ class "mb-4 font-medium text-gray-900 dark:text-gray-100" ]
                 [ text "Card width" ]
             , div
                 [ class "space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6" ]
@@ -2023,20 +2020,17 @@ viewOrderItemsBy model numberOfItems enableMathSupport primaryTermsWithDefinitio
     in
     div
         [ class "print:hidden pt-4 pb-6" ]
-        [ label
-            [ class "font-medium text-gray-900 dark:text-gray-100" ]
-            [ text "Order items"
-            , span
-                [ class "ml-2 text-gray-500 dark:text-gray-400" ]
-                [ text "("
-                , text <| String.fromInt numberOfItems
-                , text ")"
-                ]
-            ]
-        , fieldset [ class "mt-4" ]
+        [ fieldset []
             [ legend
-                [ class "sr-only" ]
-                [ text "Sort order" ]
+                [ class "mb-4 font-medium text-gray-900 dark:text-gray-100" ]
+                [ text "Order items"
+                , span
+                    [ class "ml-2 text-gray-500 dark:text-gray-400" ]
+                    [ text "("
+                    , text <| String.fromInt numberOfItems
+                    , text ")"
+                    ]
+                ]
             , div
                 [ class "space-y-4 xl:flex xl:items-center xl:space-y-0 xl:space-x-6" ]
                 [ div

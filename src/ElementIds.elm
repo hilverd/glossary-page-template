@@ -153,7 +153,7 @@ seeAlsoSelect index =
 
 orderItemsFocusedOnSelect : String
 orderItemsFocusedOnSelect =
-    prefixed "order-items-focused-on"
+    prefixed "order-items-focused-on-select"
 
 
 termIndexGroupLabel : Bool -> String -> String
