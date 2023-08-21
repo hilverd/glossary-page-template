@@ -210,6 +210,7 @@ init flags =
         ( listAllModel, listAllCmd ) =
             Pages.ListAll.init
                 editorIsRunning
+                False
                 { filename = filename
                 , enableHelpForMakingChanges = enableHelpForMakingChanges
                 , theme = theme
@@ -288,7 +289,7 @@ update msg model =
         ( _, NavigateToListAll commonModel, _ ) ->
             let
                 ( listAllModel, listAllCmd ) =
-                    Pages.ListAll.init True commonModel
+                    Pages.ListAll.init True True commonModel
             in
             ( ListAll listAllModel
             , Cmd.map ListAllMsg listAllCmd

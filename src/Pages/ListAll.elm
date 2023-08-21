@@ -1,4 +1,4 @@
-port module Pages.ListAll exposing (InternalMsg, MakingChanges, MenuForMobileVisibility, Model, Msg, SearchDialog, init, subscriptions, update, view)
+port module Pages.ListAll exposing (InternalMsg, MenuForMobileVisibility, Model, Msg, SearchDialog, init, subscriptions, update, view)
 
 import Accessibility
     exposing
@@ -98,8 +98,13 @@ type alias MenuForMobileVisibility =
     GradualVisibility
 
 
-type alias MakingChanges =
-    Bool
+type Editability
+    = ReadOnly
+    | ReadOnlyWithHelpForMakingChanges
+    | CanEditInMemory
+    | EditingInMemory
+    | CanEditWithBackend
+    | EditingWithBackend
 
 
 type alias SearchDialog =
@@ -116,7 +121,7 @@ type Layout
 
 type alias Model =
     { common : CommonModel
-    , makingChanges : MakingChanges
+    , editability : Editability
     , menuForMobileVisibility : MenuForMobileVisibility
     , themeDropdownMenu : Components.DropdownMenu.Model
     , exportDropdownMenu : Components.DropdownMenu.Model
@@ -171,9 +176,53 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init : Bool -> CommonModel -> ( Model, Cmd Msg )
-init editorIsRunning commonModel =
-    ( { makingChanges = editorIsRunning
+init : Bool -> Bool -> CommonModel -> ( Model, Cmd Msg )
+init editorIsRunning currentlyEditing commonModel =
+    ( { editability =
+            case ( commonModel.enableHelpForMakingChanges, commonModel.enableSavingChangesInMemory, editorIsRunning ) of
+                ( False, False, False ) ->
+                    ReadOnly
+
+                ( False, False, True ) ->
+                    if currentlyEditing then
+                        EditingWithBackend
+
+                    else
+                        CanEditWithBackend
+
+                ( False, True, False ) ->
+                    ReadOnly
+
+                ( False, True, True ) ->
+                    if currentlyEditing then
+                        EditingInMemory
+
+                    else
+                        CanEditInMemory
+
+                ( True, False, False ) ->
+                    ReadOnlyWithHelpForMakingChanges
+
+                ( True, False, True ) ->
+                    if currentlyEditing then
+                        EditingWithBackend
+
+                    else
+                        CanEditWithBackend
+
+                ( True, True, False ) ->
+                    if currentlyEditing then
+                        EditingInMemory
+
+                    else
+                        CanEditInMemory
+
+                ( True, True, True ) ->
+                    if currentlyEditing then
+                        EditingWithBackend
+
+                    else
+                        CanEditWithBackend
       , common = commonModel
       , menuForMobileVisibility = Invisible
       , layout = ShowAllItems
@@ -255,7 +304,19 @@ update msg model =
             ( model, Cmd.none )
 
         MakeChanges ->
-            ( { model | makingChanges = True }, Cmd.none )
+            let
+                editability1 =
+                    case model.editability of
+                        CanEditInMemory ->
+                            EditingInMemory
+
+                        CanEditWithBackend ->
+                            EditingWithBackend
+
+                        _ ->
+                            model.editability
+            in
+            ( { model | editability = editability1 }, Cmd.none )
 
         ShowMenuForMobile ->
             ( { model | menuForMobileVisibility = Visible }
@@ -2128,6 +2189,32 @@ noModalDialogShown model =
             True
 
 
+editing : Editability -> Bool
+editing editability =
+    case editability of
+        EditingInMemory ->
+            True
+
+        EditingWithBackend ->
+            True
+
+        _ ->
+            False
+
+
+canEdit : Editability -> Bool
+canEdit editability =
+    case editability of
+        CanEditInMemory ->
+            True
+
+        CanEditWithBackend ->
+            True
+
+        _ ->
+            False
+
+
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
@@ -2138,10 +2225,6 @@ view model =
 
         Ok glossary ->
             let
-                editable : MakingChanges
-                editable =
-                    model.makingChanges
-
                 noModalDialogShown_ : Bool
                 noModalDialogShown_ =
                     noModalDialogShown model
@@ -2223,7 +2306,7 @@ view model =
                                         if event == Extras.HtmlEvents.controlK then
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show, True )
 
-                                        else if model.makingChanges && event == Extras.HtmlEvents.n then
+                                        else if editing model.editability && event == Extras.HtmlEvents.n then
                                             let
                                                 common_ : CommonModel
                                                 common_ =
@@ -2258,14 +2341,6 @@ view model =
                             ]
                             [ header [] <|
                                 let
-                                    showMakingChangesHelp : Bool
-                                    showMakingChangesHelp =
-                                        model.common.enableHelpForMakingChanges && not model.common.enableSavingChangesInMemory && not editable
-
-                                    showMakeChangesButton : Bool
-                                    showMakeChangesButton =
-                                        model.common.enableSavingChangesInMemory && not model.makingChanges
-
                                     showExportButton : Bool
                                     showExportButton =
                                         model.common.enableExportMenu
@@ -2274,7 +2349,7 @@ view model =
                                     [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
                                     [ div
                                         [ class "flex flex-row justify-start lg:justify-end" ]
-                                        [ Extras.Html.showIf showMakeChangesButton <|
+                                        [ Extras.Html.showIf (canEdit model.editability) <|
                                             div
                                                 [ class "flex-none" ]
                                                 [ viewMakeChangesButton model.common.enableSavingChangesInMemory noModalDialogShown_
@@ -2293,8 +2368,8 @@ view model =
                                         ]
                                     ]
                                 , viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
-                                    |> Extras.Html.showIf showMakingChangesHelp
-                                , Extras.Html.showIf editable <| viewSettings glossary model
+                                    |> Extras.Html.showIf (model.editability == ReadOnlyWithHelpForMakingChanges)
+                                , Extras.Html.showIf (editing model.editability) <| viewSettings glossary model
                                 , h1
                                     [ id ElementIds.title ]
                                     [ GlossaryTitle.view glossary.enableMathSupport glossary.title ]
@@ -2306,7 +2381,7 @@ view model =
                                     , modalDialogShown = not noModalDialogShown_
                                     }
                                     glossary.aboutSection
-                                , Extras.Html.showIf editable <|
+                                , Extras.Html.showIf (editing model.editability) <|
                                     div
                                         [ class "flex-none mt-2" ]
                                         [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
@@ -2327,7 +2402,7 @@ view model =
                                     |> viewCards
                                         model
                                         { enableMathSupport = glossary.enableMathSupport
-                                        , editable = editable
+                                        , editable = editing model.editability
                                         , tabbable = noModalDialogShown_
                                         , enableLastUpdatedDates = glossary.enableLastUpdatedDates
                                         }

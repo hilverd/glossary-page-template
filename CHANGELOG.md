@@ -17,6 +17,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Show spinner while saving changes.
 
 ### Changed
+
+- Show "Make changes" button when Node.js backend is running. This is to make it easier to see the glossary in "read-only" mode.
+
 ### Fixed
 ### Removed
 
