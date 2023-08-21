@@ -124,7 +124,7 @@ type alias Model =
     , layout : Layout
     , confirmDeleteIndex : Maybe GlossaryItemIndex
     , deleting : Saving
-    , errorWhileChangingSettings : Maybe String
+    , savingSettings : Saving
     , mostRecentTermIdForOrderingItemsFocusedOn : Maybe TermId
     , resultOfAttemptingToCopyEditorCommandToClipboard : Maybe Bool
     }
@@ -157,7 +157,7 @@ type InternalMsg
     | ChangeCardWidth CardWidth
     | ToggleEnableExportMenu
     | ToggleEnableLastUpdatedDates
-    | ChangedSettings Glossary
+    | ChangedSettings CommonModel
     | FailedToChangeSettings Http.Error
     | DownloadMarkdown
     | DownloadAnki
@@ -195,7 +195,7 @@ init editorIsRunning commonModel =
                     ]
             }
       , deleting = NotSaving
-      , errorWhileChangingSettings = Nothing
+      , savingSettings = NotSaving
       , mostRecentTermIdForOrderingItemsFocusedOn =
             case commonModel.orderItemsBy of
                 FocusedOn termId ->
@@ -448,7 +448,10 @@ update msg model =
                         updatedGlossaryItems =
                             GlossaryItems.remove index items
                     in
-                    ( { model | deleting = SavingInProgress }
+                    ( { model
+                        | deleting = SavingInProgress
+                        , savingSettings = NotSaving
+                      }
                     , patchHtmlFileAfterDeletingItem model.common updatedGlossaryItems
                     )
 
@@ -473,15 +476,25 @@ update msg model =
                         | common = { common | glossary = Ok { glossary | items = updatedGlossaryItems } }
                         , confirmDeleteIndex = Nothing
                         , deleting = NotSaving
+                        , savingSettings = NotSaving
                       }
                     , cmd
                     )
 
                 Err _ ->
-                    ( { model | confirmDeleteIndex = Nothing }, cmd )
+                    ( { model
+                        | confirmDeleteIndex = Nothing
+                        , deleting = NotSaving
+                        , savingSettings = NotSaving
+                      }
+                    , cmd
+                    )
 
         FailedToDelete error ->
-            ( { model | deleting = SavingFailed <| Extras.Http.errorToHumanReadable error }
+            ( { model
+                | deleting = SavingFailed <| Extras.Http.errorToHumanReadable error
+                , savingSettings = NotSaving
+              }
             , Cmd.none
             )
 
@@ -569,12 +582,16 @@ update msg model =
                         updatedGlossary : Glossary
                         updatedGlossary =
                             { glossary | enableMarkdownBasedSyntax = not glossary.enableMarkdownBasedSyntax }
+
+                        common0 =
+                            model.common
                     in
                     ( { model
                         | confirmDeleteIndex = Nothing
                         , deleting = NotSaving
+                        , savingSettings = SavingInProgress
                       }
-                    , patchHtmlFileAfterChangingSettings model.common updatedGlossary
+                    , patchHtmlFileAfterChangingSettings { common0 | glossary = Ok updatedGlossary }
                     )
 
                 _ ->
@@ -587,78 +604,75 @@ update msg model =
                         updatedGlossary : Glossary
                         updatedGlossary =
                             { glossary | cardWidth = cardWidth }
+
+                        common0 =
+                            model.common
+
+                        common1 =
+                            { common0 | glossary = Ok updatedGlossary }
                     in
                     ( { model
                         | confirmDeleteIndex = Nothing
                         , deleting = NotSaving
+                        , savingSettings = SavingInProgress
                       }
-                    , patchHtmlFileAfterChangingSettings model.common updatedGlossary
+                    , patchHtmlFileAfterChangingSettings common1
                     )
 
                 _ ->
                     ( model, Cmd.none )
 
         ToggleEnableExportMenu ->
-            case model.common.glossary of
-                Ok glossary ->
-                    let
-                        common0 : CommonModel
-                        common0 =
-                            model.common
+            let
+                common0 : CommonModel
+                common0 =
+                    model.common
 
-                        common1 : CommonModel
-                        common1 =
-                            { common0 | enableExportMenu = not common0.enableExportMenu }
-
-                        model1 : Model
-                        model1 =
-                            { model | common = common1 }
-                    in
-                    ( model1
-                    , patchHtmlFileAfterChangingSettings model1.common glossary
-                    )
-
-                _ ->
-                    ( model, Cmd.none )
+                common1 : CommonModel
+                common1 =
+                    { common0 | enableExportMenu = not common0.enableExportMenu }
+            in
+            ( { model | savingSettings = SavingInProgress }
+            , patchHtmlFileAfterChangingSettings common1
+            )
 
         ToggleEnableLastUpdatedDates ->
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        enableLastUpdatedDates0 : Bool
-                        enableLastUpdatedDates0 =
-                            glossary.enableLastUpdatedDates
-
                         updatedGlossary : Glossary
                         updatedGlossary =
-                            { glossary | enableLastUpdatedDates = not enableLastUpdatedDates0 }
+                            { glossary | enableLastUpdatedDates = not glossary.enableLastUpdatedDates }
+
+                        common0 =
+                            model.common
+
+                        common1 =
+                            { common0 | glossary = Ok updatedGlossary }
                     in
                     ( { model
                         | confirmDeleteIndex = Nothing
                         , deleting = NotSaving
+                        , savingSettings = SavingInProgress
                       }
-                    , patchHtmlFileAfterChangingSettings model.common updatedGlossary
+                    , patchHtmlFileAfterChangingSettings common1
                     )
 
                 _ ->
                     ( model, Cmd.none )
 
-        ChangedSettings glossary ->
-            if model.common.enableSavingChangesInMemory then
-                let
-                    common : CommonModel
-                    common =
-                        model.common
-                in
-                ( { model | common = { common | glossary = Ok glossary } }, Cmd.none )
+        ChangedSettings common ->
+            ( { model | common = common, savingSettings = NotSaving }
+            , if common.enableSavingChangesInMemory then
+                Cmd.none
 
-            else
-                ( model, Navigation.reload )
+              else
+                Navigation.reload
+            )
 
         FailedToChangeSettings error ->
             ( { model
-                | errorWhileChangingSettings =
-                    Just <| Extras.Http.errorToHumanReadable error
+                | savingSettings = SavingFailed <| Extras.Http.errorToHumanReadable error
               }
             , Cmd.none
             )
@@ -703,39 +717,45 @@ giveFocusToOuter =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.outer)
 
 
-patchHtmlFileAfterChangingSettings : CommonModel -> Glossary -> Cmd Msg
-patchHtmlFileAfterChangingSettings common glossary =
+patchHtmlFileAfterChangingSettings : CommonModel -> Cmd Msg
+patchHtmlFileAfterChangingSettings common =
     let
-        msg : PageMsg InternalMsg
-        msg =
-            PageMsg.Internal <| ChangedSettings glossary
+        okMsg : PageMsg InternalMsg
+        okMsg =
+            PageMsg.Internal <| ChangedSettings common
     in
     if common.enableSavingChangesInMemory then
-        Extras.Task.messageToCommand msg
+        Extras.Task.messageToCommand okMsg
 
     else
-        Http.request
-            { method = "PATCH"
-            , headers = []
-            , url = "/"
-            , body =
-                glossary
-                    |> Glossary.toHtmlTree common.enableExportMenu common.enableHelpForMakingChanges
-                    |> HtmlTree.toHtmlReplacementString
-                    |> Http.stringBody "text/html"
-            , expect =
-                Http.expectWhatever
-                    (\result ->
-                        case result of
-                            Ok _ ->
-                                msg
+        case common.glossary of
+            Ok glossary ->
+                Http.request
+                    { method = "PATCH"
+                    , headers = []
+                    , url = "/"
+                    , body =
+                        glossary
+                            |> Glossary.toHtmlTree common.enableExportMenu common.enableHelpForMakingChanges
+                            |> HtmlTree.toHtmlReplacementString
+                            |> Http.stringBody "text/html"
+                    , expect =
+                        Http.expectWhatever
+                            (\result ->
+                                case result of
+                                    Ok _ ->
+                                        okMsg
 
-                            Err error ->
-                                PageMsg.Internal <| FailedToChangeSettings error
-                    )
-            , timeout = Nothing
-            , tracker = Nothing
-            }
+                                    Err error ->
+                                        PageMsg.Internal <| FailedToChangeSettings error
+                            )
+                    , timeout = Nothing
+                    , tracker = Nothing
+                    }
+
+            _ ->
+                -- Should never happen
+                Extras.Task.messageToCommand okMsg
 
 
 patchHtmlFileAfterDeletingItem : CommonModel -> GlossaryItems -> Cmd Msg
@@ -902,54 +922,71 @@ viewSettings glossary model =
         , class "pt-4 pr-4 pl-4 pb-2"
         ]
         [ details
-            [ Accessibility.Key.tabbable <| noModalDialogShown model ]
-            [ summary
+            [ Accessibility.Key.tabbable <| noModalDialogShown model
+            , class "relative"
+            ]
+            [ Extras.Html.showIf (model.savingSettings == SavingInProgress) <|
+                div
+                    [ class "absolute top-1/2 bottom-1/2 left-1/2 right-1/2" ]
+                    [ Components.Spinner.view
+                        [ Svg.Attributes.class "w-12 h-12" ]
+                        (model.savingSettings == SavingInProgress)
+                    ]
+            , summary
                 [ class "mb-1 text-lg leading-6 items-center font-medium text-gray-900 dark:text-gray-100 select-none" ]
                 [ span
                     [ class "ml-2" ]
                     [ text "Settings" ]
                 ]
-            , Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
-                div
-                    [ class "mt-6" ]
-                    [ p
-                        [ class "mt-3 max-w-xl" ]
-                        [ text "These settings are updated in the HTML file when you change them, and the page will reload."
+            , div
+                [ Extras.HtmlAttribute.showIf (model.savingSettings == SavingInProgress) <|
+                    class "opacity-25"
+                ]
+                [ Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
+                    div
+                        [ class "mt-6" ]
+                        [ p
+                            [ class "mt-3 max-w-xl" ]
+                            [ text "These settings are updated in the HTML file when you change them, and the page will reload."
+                            ]
+                        ]
+                , Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
+                    div
+                        [ class "mt-6 pb-2" ]
+                        [ viewSelectInputSyntax glossary model ]
+                , div
+                    [ class "mt-6 pb-2" ]
+                    [ viewSelectCardWidth glossary model
+                    ]
+                , div
+                    [ class "mt-6 pb-2" ]
+                    [ Components.Button.toggle
+                        model.common.enableExportMenu
+                        ElementIds.showExportMenuLabel
+                        [ Html.Events.onClick <| PageMsg.Internal ToggleEnableExportMenu ]
+                        [ span
+                            [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                            [ text "Show \"Export\" menu" ]
                         ]
                     ]
-            , Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
-                div
+                , div
                     [ class "mt-6 pb-2" ]
-                    [ viewSelectInputSyntax glossary model ]
-            , div
-                [ class "mt-6 pb-2" ]
-                [ viewSelectCardWidth glossary model
-                ]
-            , div
-                [ class "mt-6 pb-2" ]
-                [ Components.Button.toggle
-                    model.common.enableExportMenu
-                    ElementIds.showExportMenuLabel
-                    [ Html.Events.onClick <| PageMsg.Internal ToggleEnableExportMenu ]
-                    [ span
-                        [ class "font-medium text-gray-900 dark:text-gray-300" ]
-                        [ text "Show \"Export\" menu" ]
+                    [ Components.Button.toggle
+                        glossary.enableLastUpdatedDates
+                        ElementIds.showLastUpdatedDatesLabel
+                        [ Html.Events.onClick <| PageMsg.Internal ToggleEnableLastUpdatedDates ]
+                        [ span
+                            [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                            [ text "Show last updated date for each item" ]
+                        ]
                     ]
+                , case model.savingSettings of
+                    SavingFailed errorMessage ->
+                        errorDiv <| "Failed to save — " ++ errorMessage ++ "."
+
+                    _ ->
+                        Extras.Html.nothing
                 ]
-            , div
-                [ class "mt-6 pb-2" ]
-                [ Components.Button.toggle
-                    glossary.enableLastUpdatedDates
-                    ElementIds.showLastUpdatedDatesLabel
-                    [ Html.Events.onClick <| PageMsg.Internal ToggleEnableLastUpdatedDates ]
-                    [ span
-                        [ class "font-medium text-gray-900 dark:text-gray-300" ]
-                        [ text "Show last updated date for each item" ]
-                    ]
-                ]
-            , model.errorWhileChangingSettings
-                |> Extras.Html.showMaybe
-                    (\errorMessage -> errorDiv <| "Failed to save — " ++ errorMessage ++ ".")
             ]
         ]
 
