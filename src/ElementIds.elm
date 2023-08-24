@@ -3,6 +3,7 @@ module ElementIds exposing
     , about
     , aboutLinkBody
     , aboutLinkHref
+    , aboutParagraphInputField
     , cardWidthCompact
     , cardWidthIntermediate
     , cardWidthWide
@@ -35,6 +36,7 @@ module ElementIds exposing
     , textFieldWithCommandToRunEditor
     , themeDropdownButton
     , title
+    , titleInputField
     , viewSingleItemModalTitle
     )
 
@@ -247,3 +249,13 @@ showLastUpdatedDatesLabel =
 textFieldWithCommandToRunEditor : String
 textFieldWithCommandToRunEditor =
     prefixed "text-field-with-command-to-run-editor"
+
+
+titleInputField : String
+titleInputField =
+    prefixed "title-input-field"
+
+
+aboutParagraphInputField : String
+aboutParagraphInputField =
+    prefixed "about-paragraph-input-field"

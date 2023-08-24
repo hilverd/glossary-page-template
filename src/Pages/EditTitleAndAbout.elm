@@ -299,6 +299,7 @@ viewEditTitle enableMarkdownBasedSyntax mathSupportEnabled showValidationErrors 
                                     titleField.validationError
                                     [ required True
                                     , Html.Attributes.autocomplete False
+                                    , Html.Attributes.id ElementIds.titleInputField
                                     , Accessibility.Aria.label "Title"
                                     , Accessibility.Aria.required True
                                     , Html.Events.onInput (PageMsg.Internal << UpdateTitle)
@@ -348,6 +349,7 @@ viewEditAboutParagraph showNewlineWarnings markdownBasedSyntaxEnabled mathSuppor
                         [ required True
                         , Accessibility.Aria.label "About"
                         , Accessibility.Aria.required True
+                        , Html.Attributes.id ElementIds.aboutParagraphInputField
                         , Html.Events.onInput (PageMsg.Internal << UpdateAboutParagraph)
                         ]
                     ]
