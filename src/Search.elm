@@ -2,6 +2,7 @@ module Search exposing (search)
 
 import Array
 import Components.SearchDialog as SearchDialog
+import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
@@ -31,10 +32,11 @@ search enableMathSupport searchString glossaryItems =
                     |> Array.toList
                     |> List.concatMap
                         (\( _, item ) ->
-                            item.terms
+                            item
+                                |> GlossaryItem.terms
                                 |> List.map
                                     (\term ->
-                                        ( term, List.head item.definitions )
+                                        ( term, item |> GlossaryItem.definitions |> List.head )
                                     )
                         )
         in

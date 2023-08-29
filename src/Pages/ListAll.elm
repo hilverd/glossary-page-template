@@ -38,16 +38,15 @@ import Components.Button
 import Components.Copy
 import Components.Dividers
 import Components.DropdownMenu
-import Components.Form as Form
 import Components.GlossaryItemCard
 import Components.ModalDialog
 import Components.SearchDialog
 import Components.SelectMenu
 import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
-import Data.FeatureFlag exposing (enableFeaturesInProgress, enableTopicsFeature)
+import Data.FeatureFlag exposing (enableTopicsFeature)
 import Data.Glossary as Glossary exposing (Glossary)
-import Data.GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -1399,7 +1398,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                                 Array.get (GlossaryItemIndex.toInt index)
                                     (GlossaryItems.orderedAlphabetically glossaryItems)
                             )
-                        |> Maybe.andThen (Tuple.second >> .terms >> List.head)
+                        |> Maybe.andThen (Tuple.second >> GlossaryItem.terms >> List.head)
 
                 _ ->
                     Nothing

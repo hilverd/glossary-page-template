@@ -18,7 +18,7 @@ import Components.Spinner
 import Data.DefinitionIndex as DefinitionIndex exposing (DefinitionIndex)
 import Data.FeatureFlag exposing (enableTopicsFeature)
 import Data.Glossary as Glossary
-import Data.GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -115,10 +115,12 @@ init commonModel =
                                                 |> List.map Tuple.second
                                                 |> List.filter
                                                     (\item ->
-                                                        item.relatedTerms
+                                                        item
+                                                            |> GlossaryItem.relatedTerms
                                                             |> List.any
                                                                 (\relatedTerm ->
-                                                                    currentItem.terms
+                                                                    currentItem
+                                                                        |> GlossaryItem.terms
                                                                         |> List.any (\term -> Term.id term == RelatedTerm.idReference relatedTerm)
                                                                 )
                                                     )
@@ -935,7 +937,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
                 |> Array.toList
-                |> List.filterMap (Tuple.second >> .terms >> List.head)
+                |> List.filterMap (Tuple.second >> GlossaryItem.terms >> List.head)
     in
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]

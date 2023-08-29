@@ -28,7 +28,7 @@ module GlossaryItemForm exposing
 
 import Array exposing (Array)
 import Data.DefinitionIndex as DefinitionIndex exposing (DefinitionIndex)
-import Data.GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
@@ -269,11 +269,12 @@ fromGlossaryItem existingTerms existingPreferredTerms withItemsListingThisTermAs
     let
         termFieldsForItem : List TermField
         termFieldsForItem =
-            List.map
-                (\term ->
-                    TermField.fromString (Term.raw term) (Term.isAbbreviation term)
-                )
-                item.terms
+            item
+                |> GlossaryItem.terms
+                |> List.map
+                    (\term ->
+                        TermField.fromString (Term.raw term) (Term.isAbbreviation term)
+                    )
 
         termIdsForItem : Set String
         termIdsForItem =
@@ -299,26 +300,28 @@ fromGlossaryItem existingTerms existingPreferredTerms withItemsListingThisTermAs
 
         definitionFieldsList : List DefinitionField
         definitionFieldsList =
-            List.map
-                (\definitionElem ->
-                    definitionElem
-                        |> Definition.raw
-                        |> DefinitionField.fromString
-                )
-                item.definitions
+            item
+                |> GlossaryItem.definitions
+                |> List.map
+                    (\definitionElem ->
+                        definitionElem
+                            |> Definition.raw
+                            |> DefinitionField.fromString
+                    )
     in
     GlossaryItemForm
         { termFields = Array.fromList termFieldsForItem
         , definitionFields = Array.fromList definitionFieldsList
         , relatedTermFields =
-            item.relatedTerms
+            item
+                |> GlossaryItem.relatedTerms
                 |> List.map (\term -> RelatedTermField (Just <| RelatedTerm.idReference term) Nothing)
                 |> Array.fromList
         , termsOutside = termsOutside1
         , preferredTermsOutside = preferredTermsOutside1
         , itemsListingThisItemAsRelated = withItemsListingThisTermAsRelated
-        , needsUpdating = item.needsUpdating
-        , lastUpdatedDate = item.lastUpdatedDate |> Maybe.withDefault ""
+        , needsUpdating = item |> GlossaryItem.needsUpdating
+        , lastUpdatedDate = item |> GlossaryItem.lastUpdatedDate |> Maybe.withDefault ""
         }
         |> validate
 
@@ -341,72 +344,79 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                         List.foldl
                             (\term -> Dict.update (Term.id term |> TermId.toString) (always <| Just <| Term.raw term))
                             result
-                            glossaryItem.terms
+                            (GlossaryItem.terms glossaryItem)
                     )
                     Dict.empty
-    in
-    { terms =
-        form
-            |> termFields
-            |> Array.toList
-            |> List.map
-                (\termField ->
-                    let
-                        raw : String
-                        raw =
-                            termField |> TermField.raw |> String.trim
 
-                        isAbbreviation =
-                            TermField.isAbbreviation termField
-                    in
-                    (if enableMarkdownBasedSyntax then
-                        Term.fromMarkdown
+        terms =
+            form
+                |> termFields
+                |> Array.toList
+                |> List.map
+                    (\termField ->
+                        let
+                            raw : String
+                            raw =
+                                termField |> TermField.raw |> String.trim
 
-                     else
-                        Term.fromPlaintext
+                            isAbbreviation =
+                                TermField.isAbbreviation termField
+                        in
+                        (if enableMarkdownBasedSyntax then
+                            Term.fromMarkdown
+
+                         else
+                            Term.fromPlaintext
+                        )
+                            raw
+                            isAbbreviation
                     )
-                        raw
-                        isAbbreviation
-                )
-    , definitions =
-        form
-            |> definitionFields
-            |> Array.toList
-            |> List.map
-                (DefinitionField.raw
-                    >> String.trim
-                    >> (if enableMarkdownBasedSyntax then
-                            Definition.fromMarkdown
 
-                        else
-                            Definition.fromPlaintext
-                       )
-                )
-    , relatedTerms =
-        form
-            |> relatedTermFields
-            |> Array.toList
-            |> List.filterMap
-                (\relatedTermField ->
-                    relatedTermField.idReference
-                        |> Maybe.map TermId.toString
-                        |> Maybe.andThen
-                            (\ref ->
-                                Dict.get ref bodyByIdReference
-                                    |> Maybe.map
-                                        ((if enableMarkdownBasedSyntax then
-                                            RelatedTerm.fromMarkdown
+        definitions =
+            form
+                |> definitionFields
+                |> Array.toList
+                |> List.map
+                    (DefinitionField.raw
+                        >> String.trim
+                        >> (if enableMarkdownBasedSyntax then
+                                Definition.fromMarkdown
 
-                                          else
-                                            RelatedTerm.fromPlaintext
-                                         )
-                                            (TermId.fromString ref)
-                                        )
-                            )
-                )
-    , needsUpdating = needsUpdating form
-    , lastUpdatedDate = dateTime
-    }
+                            else
+                                Definition.fromPlaintext
+                           )
+                    )
+
+        relatedTerms =
+            form
+                |> relatedTermFields
+                |> Array.toList
+                |> List.filterMap
+                    (\relatedTermField ->
+                        relatedTermField.idReference
+                            |> Maybe.map TermId.toString
+                            |> Maybe.andThen
+                                (\ref ->
+                                    Dict.get ref bodyByIdReference
+                                        |> Maybe.map
+                                            ((if enableMarkdownBasedSyntax then
+                                                RelatedTerm.fromMarkdown
+
+                                              else
+                                                RelatedTerm.fromPlaintext
+                                             )
+                                                (TermId.fromString ref)
+                                            )
+                                )
+                    )
+
+        needsUpdating_ =
+            needsUpdating form
+
+        lastUpdatedDate_ =
+            dateTime
+    in
+    GlossaryItem.init terms definitions relatedTerms needsUpdating_ lastUpdatedDate_
 
 
 addTerm : GlossaryItemForm -> GlossaryItemForm
@@ -667,7 +677,7 @@ suggestRelatedTerms glossaryItemForm =
         preferredTermIdsOfItemsListingThisItemAsRelated =
             glossaryItemForm
                 |> itemsListingThisTermAsRelated
-                |> List.filterMap (.terms >> List.head)
+                |> List.filterMap (GlossaryItem.terms >> List.head)
                 |> List.map (Term.id >> TermId.toString)
                 |> Set.fromList
     in

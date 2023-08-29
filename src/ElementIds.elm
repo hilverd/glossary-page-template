@@ -42,7 +42,6 @@ module ElementIds exposing
 
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.DefinitionIndex as DefinitionIndex exposing (DefinitionIndex)
-import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)

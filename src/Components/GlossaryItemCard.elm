@@ -1,6 +1,6 @@
 module Components.GlossaryItemCard exposing (Style(..), view)
 
-import Accessibility exposing (Html, div, p, span, text)
+import Accessibility exposing (Html, div, span, text)
 import Accessibility.Aria
 import Accessibility.Key
 import Components.Button
@@ -49,13 +49,29 @@ view :
 view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glossaryItemWithPreviousAndNext =
     Extras.Html.showMaybe
         (\( index, glossaryItem ) ->
+            let
+                terms =
+                    GlossaryItem.terms glossaryItem
+
+                itemHasSomeDefinitions : Bool
+                itemHasSomeDefinitions =
+                    GlossaryItem.hasSomeDefinitions glossaryItem
+
+                definitions =
+                    GlossaryItem.definitions glossaryItem
+
+                relatedTerms =
+                    GlossaryItem.relatedTerms glossaryItem
+
+                needsUpdating =
+                    GlossaryItem.needsUpdating glossaryItem
+
+                lastUpdatedDate =
+                    GlossaryItem.lastUpdatedDate glossaryItem
+            in
             case style of
                 Preview ->
                     let
-                        itemHasSomeDefinitions : Bool
-                        itemHasSomeDefinitions =
-                            GlossaryItem.hasSomeDefinitions glossaryItem
-
                         tabbable : Bool
                         tabbable =
                             True
@@ -69,8 +85,8 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                 , showSilcrow = False
                                 }
                             )
-                            glossaryItem.terms
-                            ++ (if glossaryItem.needsUpdating then
+                            terms
+                            ++ (if GlossaryItem.needsUpdating glossaryItem then
                                     [ Html.dd
                                         [ class "needs-updating" ]
                                         [ span
@@ -89,16 +105,17 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                     , topicsClickable = False
                                     }
                                 )
-                                glossaryItem.definitions
-                            ++ viewGlossaryItemRelatedTerms enableMathSupport True tabbable itemHasSomeDefinitions Nothing glossaryItem.relatedTerms
+                                definitions
+                            ++ viewGlossaryItemRelatedTerms
+                                enableMathSupport
+                                True
+                                tabbable
+                                itemHasSomeDefinitions
+                                Nothing
+                                relatedTerms
                         )
 
                 Normal { tabbable, onClickViewFull, onClickEdit, onClickDelete, onClickItem, onClickRelatedTerm, editable, shownAsSingle } ->
-                    let
-                        itemHasSomeDefinitions : Bool
-                        itemHasSomeDefinitions =
-                            GlossaryItem.hasSomeDefinitions glossaryItem
-                    in
                     if shownAsSingle then
                         div
                             [ Html.Attributes.style "max-height" "100%"
@@ -147,8 +164,8 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                             , showSilcrow = True
                                             }
                                         )
-                                        glossaryItem.terms
-                                        ++ (if glossaryItem.needsUpdating then
+                                        terms
+                                        ++ (if needsUpdating then
                                                 [ Html.dd
                                                     [ class "needs-updating" ]
                                                     [ span
@@ -167,24 +184,24 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                 , topicsClickable = makeLinksTabbable
                                                 }
                                             )
-                                            glossaryItem.definitions
-                                        ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDefinitions Nothing glossaryItem.relatedTerms
+                                            definitions
+                                        ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDefinitions Nothing relatedTerms
                                     )
                                 ]
                             , div
                                 [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
                                 [ Extras.Html.showIf enableLastUpdatedDates <|
                                     Extras.Html.showMaybe
-                                        (\lastUpdatedDate ->
+                                        (\lastUpdatedDate_ ->
                                             div
                                                 [ class "text-right text-sm mt-1.5 mb-2.5 text-gray-500 dark:text-gray-400" ]
                                                 [ text "Updated: "
                                                 , Html.node "last-updated"
-                                                    [ Html.Attributes.attribute "datetime" lastUpdatedDate ]
+                                                    [ Html.Attributes.attribute "datetime" lastUpdatedDate_ ]
                                                     []
                                                 ]
                                         )
-                                        glossaryItem.lastUpdatedDate
+                                        lastUpdatedDate
                                 , div
                                     [ class "flex justify-between" ]
                                     [ span
@@ -247,8 +264,8 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                             , showSilcrow = True
                                             }
                                         )
-                                        glossaryItem.terms
-                                        ++ (if glossaryItem.needsUpdating then
+                                        terms
+                                        ++ (if needsUpdating then
                                                 [ Html.dd
                                                     [ class "needs-updating" ]
                                                     [ span
@@ -267,28 +284,28 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                 , topicsClickable = makeLinksTabbable
                                                 }
                                             )
-                                            glossaryItem.definitions
+                                            definitions
                                         ++ viewGlossaryItemRelatedTerms
                                             enableMathSupport
                                             False
                                             tabbable
                                             itemHasSomeDefinitions
                                             Nothing
-                                            glossaryItem.relatedTerms
+                                            relatedTerms
                                     )
                                 ]
                             , Extras.Html.showIf enableLastUpdatedDates <|
                                 Extras.Html.showMaybe
-                                    (\lastUpdatedDate ->
+                                    (\lastUpdatedDate_ ->
                                         div
                                             [ class "text-right text-sm mt-1.5 text-gray-500 dark:text-gray-400" ]
                                             [ text "Updated: "
                                             , Html.node "last-updated"
-                                                [ Html.Attributes.attribute "datetime" lastUpdatedDate ]
+                                                [ Html.Attributes.attribute "datetime" lastUpdatedDate_ ]
                                                 []
                                             ]
                                     )
-                                    glossaryItem.lastUpdatedDate
+                                    lastUpdatedDate
                             ]
         )
         glossaryItemWithPreviousAndNext.item
@@ -306,7 +323,8 @@ viewAsSingle :
 viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRelatedTerm } glossaryItemWithPreviousAndNext =
     let
         preferredTermForPreviousOrNext glossaryItem =
-            glossaryItem.terms
+            glossaryItem
+                |> GlossaryItem.terms
                 |> List.take 1
                 |> List.map
                     (\term ->
@@ -326,6 +344,22 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
     in
     Extras.Html.showMaybe
         (\( _, glossaryItem ) ->
+            let
+                terms =
+                    GlossaryItem.terms glossaryItem
+
+                definitions =
+                    GlossaryItem.definitions glossaryItem
+
+                relatedTerms =
+                    GlossaryItem.relatedTerms glossaryItem
+
+                needsUpdating =
+                    GlossaryItem.needsUpdating glossaryItem
+
+                lastUpdatedDate =
+                    GlossaryItem.lastUpdatedDate glossaryItem
+            in
             Html.div []
                 [ Html.nav
                     [ class "flex items-start justify-between px-4 sm:px-0"
@@ -355,7 +389,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                                 , showSilcrow = False
                                 }
                             )
-                            glossaryItem.terms
+                            terms
                         )
                     , Html.div
                         [ class "-mt-px flex w-0 flex-1 justify-end" ]
@@ -382,11 +416,11 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                             , showSilcrow = False
                             }
                         )
-                        glossaryItem.terms
+                        terms
                     )
                 , Html.div
                     [ class "mt-4" ]
-                    ((if glossaryItem.needsUpdating then
+                    ((if needsUpdating then
                         [ Html.dd
                             [ class "needs-updating" ]
                             [ span
@@ -405,29 +439,29 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                                 , topicsClickable = False
                                 }
                             )
-                            glossaryItem.definitions
+                            definitions
                         ++ viewGlossaryItemRelatedTerms
                             enableMathSupport
                             False
                             True
                             (GlossaryItem.hasSomeDefinitions glossaryItem)
                             (Just onClickRelatedTerm)
-                            glossaryItem.relatedTerms
+                            relatedTerms
                     )
                 , div
                     [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
                     [ Extras.Html.showIf enableLastUpdatedDates <|
                         Extras.Html.showMaybe
-                            (\lastUpdatedDate ->
+                            (\lastUpdatedDate_ ->
                                 div
                                     [ class "text-right text-sm mt-1.5 mb-2.5 text-gray-500 dark:text-gray-400" ]
                                     [ text "Updated: "
                                     , Html.node "last-updated"
-                                        [ Html.Attributes.attribute "datetime" lastUpdatedDate ]
+                                        [ Html.Attributes.attribute "datetime" lastUpdatedDate_ ]
                                         []
                                     ]
                             )
-                            glossaryItem.lastUpdatedDate
+                            lastUpdatedDate
                     ]
                 ]
         )

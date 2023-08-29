@@ -1,5 +1,5 @@
 module Data.GlossaryItem exposing
-    ( GlossaryItem, decode, hasSomeDefinitions
+    ( GlossaryItem, init, decode, terms, hasSomeDefinitions, definitions, relatedTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
     , toHtmlTree
     )
 
@@ -8,7 +8,7 @@ module Data.GlossaryItem exposing
 
 # Glossary Items
 
-@docs GlossaryItem, decode, hasSomeDefinitions
+@docs GlossaryItem, init, decode, terms, hasSomeDefinitions, definitions, relatedTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
 
 
 # Converting to HTML
@@ -30,13 +30,27 @@ import Json.Decode as Decode exposing (Decoder)
 It's probably unusual to have multiple definitions for a term (e.g. "Apple" being a fruit as well as a company) because a glossary would typically be focused on a single domain.
 However, this is allowed in `<dl>` elements so it's also allowed here.
 -}
-type alias GlossaryItem =
-    { terms : List Term
-    , definitions : List Definition
-    , relatedTerms : List RelatedTerm
-    , needsUpdating : Bool
-    , lastUpdatedDate : Maybe String -- expected to be in ISO 8601 format
-    }
+type GlossaryItem
+    = GlossaryItem
+        { terms : List Term
+        , definitions : List Definition
+        , relatedTerms : List RelatedTerm
+        , needsUpdating : Bool
+        , lastUpdatedDate : Maybe String -- expected to be in ISO 8601 format
+        }
+
+
+{-| Create a glossary item.
+-}
+init : List Term -> List Definition -> List RelatedTerm -> Bool -> Maybe String -> GlossaryItem
+init terms_ definitions_ relatedTerms_ needsUpdating_ lastUpdatedDate_ =
+    GlossaryItem
+        { terms = terms_
+        , definitions = definitions_
+        , relatedTerms = relatedTerms_
+        , needsUpdating = needsUpdating_
+        , lastUpdatedDate = lastUpdatedDate_
+        }
 
 
 {-| Decode a glossary item from its JSON representation.
@@ -62,19 +76,31 @@ type alias GlossaryItem =
             , ( "needsUpdating", Encode.bool True )
             ]
 
+    expected : GlossaryItem
+    expected =
+        init
+            [ Term.fromPlaintext "Rain" False ]
+            [ Definition.fromPlaintext "Condensed moisture." ]
+            []
+            True
+            Nothing
+
     Decode.decodeValue (decode False) rain
-    --> Ok
-    -->     { terms = [ Term.fromPlaintext "Rain" False ]
-    -->     , definitions = [ Definition.fromPlaintext "Condensed moisture." ]
-    -->     , relatedTerms = []
-    -->     , needsUpdating = True
-    -->     , lastUpdatedDate = Nothing
-    -->     }
+    --> Ok expected
 
 -}
 decode : Bool -> Decoder GlossaryItem
 decode enableMarkdownBasedSyntax =
-    Decode.map5 GlossaryItem
+    Decode.map5
+        (\terms_ definitions_ relatedTerms_ needsUpdating_ lastUpdatedDate_ ->
+            GlossaryItem
+                { terms = terms_
+                , definitions = definitions_
+                , relatedTerms = relatedTerms_
+                , needsUpdating = needsUpdating_
+                , lastUpdatedDate = lastUpdatedDate_
+                }
+        )
         (Decode.field "terms" <| Decode.list <| Term.decode enableMarkdownBasedSyntax)
         (Decode.field "definitions" <|
             Decode.list <|
@@ -100,19 +126,75 @@ Some items may not contain any definitions and instead point to a related item t
 
     empty : GlossaryItem
     empty =
-        { terms = [ Term.emptyPlaintext ]
-        , definitions = []
-        , relatedTerms = []
-        , needsUpdating = False
-        , lastUpdatedDate = Nothing
-        }
+        init
+          [ Term.emptyPlaintext ]
+          []
+          []
+          False
+          Nothing
 
     hasSomeDefinitions empty --> False
 
 -}
 hasSomeDefinitions : GlossaryItem -> Bool
 hasSomeDefinitions glossaryItem =
-    not <| List.isEmpty glossaryItem.definitions
+    case glossaryItem of
+        GlossaryItem item ->
+            not <| List.isEmpty item.definitions
+
+
+{-| The terms in the glossary item.
+-}
+terms : GlossaryItem -> List Term
+terms glossaryItem =
+    case glossaryItem of
+        GlossaryItem item ->
+            item.terms
+
+
+{-| The definitions in the glossary item.
+-}
+definitions : GlossaryItem -> List Definition
+definitions glossaryItem =
+    case glossaryItem of
+        GlossaryItem item ->
+            item.definitions
+
+
+{-| The related terms in the glossary item.
+-}
+relatedTerms : GlossaryItem -> List RelatedTerm
+relatedTerms glossaryItem =
+    case glossaryItem of
+        GlossaryItem item ->
+            item.relatedTerms
+
+
+{-| Whether the glossary item is marked as needing updating.
+-}
+needsUpdating : GlossaryItem -> Bool
+needsUpdating glossaryItem =
+    case glossaryItem of
+        GlossaryItem item ->
+            item.needsUpdating
+
+
+{-| The last updated date of the glossary item, if present.
+-}
+lastUpdatedDate : GlossaryItem -> Maybe String
+lastUpdatedDate glossaryItem =
+    case glossaryItem of
+        GlossaryItem item ->
+            item.lastUpdatedDate
+
+
+{-| Update a glossary item's relatd terms.
+-}
+updateRelatedTerms : List RelatedTerm -> GlossaryItem -> GlossaryItem
+updateRelatedTerms newRelatedTerms glossaryItem =
+    case glossaryItem of
+        GlossaryItem item ->
+            GlossaryItem { item | relatedTerms = newRelatedTerms }
 
 
 termToHtmlTree : Term -> HtmlTree
@@ -160,7 +242,7 @@ relatedTermToHtmlTree relatedTerm =
 
 
 nonemptyRelatedTermsToHtmlTree : Bool -> List RelatedTerm -> HtmlTree
-nonemptyRelatedTermsToHtmlTree itemHasSomeDefinitions relatedTerms =
+nonemptyRelatedTermsToHtmlTree itemHasSomeDefinitions relatedTerms_ =
     HtmlTree.Node "dd"
         False
         [ HtmlTree.Attribute "class" "related-terms" ]
@@ -171,7 +253,7 @@ nonemptyRelatedTermsToHtmlTree itemHasSomeDefinitions relatedTerms =
              else
                 "See: "
             )
-            :: (relatedTerms
+            :: (relatedTerms_
                     |> List.map relatedTermToHtmlTree
                     |> List.intersperse (HtmlTree.Leaf ", ")
                )
@@ -182,41 +264,43 @@ nonemptyRelatedTermsToHtmlTree itemHasSomeDefinitions relatedTerms =
 -}
 toHtmlTree : GlossaryItem -> HtmlTree
 toHtmlTree glossaryItem =
-    HtmlTree.Node "div"
-        True
-        (glossaryItem.lastUpdatedDate
-            |> Maybe.map
-                (\lastUpdatedDate ->
-                    [ HtmlTree.Attribute "data-last-updated" lastUpdatedDate ]
+    case glossaryItem of
+        GlossaryItem item ->
+            HtmlTree.Node "div"
+                True
+                (item.lastUpdatedDate
+                    |> Maybe.map
+                        (\lastUpdatedDate_ ->
+                            [ HtmlTree.Attribute "data-last-updated" lastUpdatedDate_ ]
+                        )
+                    |> Maybe.withDefault []
                 )
-            |> Maybe.withDefault []
-        )
-        (List.map termToHtmlTree glossaryItem.terms
-            ++ (if glossaryItem.needsUpdating then
-                    [ HtmlTree.Node "dd"
-                        False
-                        [ HtmlTree.Attribute "class" "needs-updating" ]
-                        [ HtmlTree.Node "span"
-                            False
+                (List.map termToHtmlTree item.terms
+                    ++ (if item.needsUpdating then
+                            [ HtmlTree.Node "dd"
+                                False
+                                [ HtmlTree.Attribute "class" "needs-updating" ]
+                                [ HtmlTree.Node "span"
+                                    False
+                                    []
+                                    [ HtmlTree.Leaf "[Needs updating]" ]
+                                ]
+                            ]
+
+                        else
                             []
-                            [ HtmlTree.Leaf "[Needs updating]" ]
-                        ]
-                    ]
+                       )
+                    ++ List.map (Definition.raw >> definitionToHtmlTree) item.definitions
+                    ++ (if List.isEmpty item.relatedTerms then
+                            []
 
-                else
-                    []
-               )
-            ++ List.map (Definition.raw >> definitionToHtmlTree) glossaryItem.definitions
-            ++ (if List.isEmpty glossaryItem.relatedTerms then
-                    []
-
-                else
-                    [ nonemptyRelatedTermsToHtmlTree
-                        (hasSomeDefinitions glossaryItem)
-                        glossaryItem.relatedTerms
-                    ]
-               )
-        )
+                        else
+                            [ nonemptyRelatedTermsToHtmlTree
+                                (hasSomeDefinitions glossaryItem)
+                                item.relatedTerms
+                            ]
+                       )
+                )
 
 
 hrefToTerm : Term -> HtmlTree.Attribute

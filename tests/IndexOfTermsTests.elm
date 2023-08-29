@@ -1,6 +1,6 @@
 module IndexOfTermsTests exposing (suite)
 
-import Data.GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -19,48 +19,48 @@ glossaryItems =
     let
         one : GlossaryItem
         one =
-            { terms = [ termFromBody "Óne" ]
-            , definitions = [ Definition.fromPlaintext "Óne" ]
-            , relatedTerms = []
-            , needsUpdating = False
-            , lastUpdatedDate = Nothing
-            }
+            GlossaryItem.init
+                [ termFromBody "Óne" ]
+                [ Definition.fromPlaintext "Óne" ]
+                []
+                False
+                Nothing
 
         two : GlossaryItem
         two =
-            { terms = [ termFromBody "Two" ]
-            , definitions = [ Definition.fromPlaintext "Two" ]
-            , relatedTerms = []
-            , needsUpdating = False
-            , lastUpdatedDate = Nothing
-            }
+            GlossaryItem.init
+                [ termFromBody "Two" ]
+                [ Definition.fromPlaintext "Two" ]
+                []
+                False
+                Nothing
 
         three : GlossaryItem
         three =
-            { terms = [ termFromBody "3Three" ]
-            , definitions = [ Definition.fromPlaintext "3Three" ]
-            , relatedTerms = []
-            , needsUpdating = False
-            , lastUpdatedDate = Nothing
-            }
+            GlossaryItem.init
+                [ termFromBody "3Three" ]
+                [ Definition.fromPlaintext "3Three" ]
+                []
+                False
+                Nothing
 
         doubleOhSeven : GlossaryItem
         doubleOhSeven =
-            { terms = [ termFromBody "007" ]
-            , definitions = [ Definition.fromPlaintext "007" ]
-            , relatedTerms = []
-            , needsUpdating = False
-            , lastUpdatedDate = Nothing
-            }
+            GlossaryItem.init
+                [ termFromBody "007" ]
+                [ Definition.fromPlaintext "007" ]
+                []
+                False
+                Nothing
 
         future : GlossaryItem
         future =
-            { terms = [ termFromBody "_future_" ]
-            , definitions = [ Definition.fromPlaintext "_future_" ]
-            , relatedTerms = []
-            , needsUpdating = False
-            , lastUpdatedDate = Nothing
-            }
+            GlossaryItem.init
+                [ termFromBody "_future_" ]
+                [ Definition.fromPlaintext "_future_" ]
+                []
+                False
+                Nothing
     in
     GlossaryItems.fromList [ doubleOhSeven, one, two, three, future ]
 
