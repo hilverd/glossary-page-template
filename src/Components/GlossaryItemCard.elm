@@ -305,7 +305,7 @@ viewAsSingle :
     -> Html msg
 viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRelatedTerm } glossaryItemWithPreviousAndNext =
     let
-        primaryTermForPreviousOrNext glossaryItem =
+        preferredTermForPreviousOrNext glossaryItem =
             glossaryItem.terms
                 |> List.take 1
                 |> List.map
@@ -341,7 +341,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                                         [ Svg.Attributes.class "h-5 w-5" ]
                                     , span
                                         [ class "font-medium" ]
-                                        (primaryTermForPreviousOrNext previousItem)
+                                        (preferredTermForPreviousOrNext previousItem)
                                     ]
                             )
                             glossaryItemWithPreviousAndNext.previous
@@ -365,7 +365,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                                     [ Html.Events.onClick <| onClickItem nextItemIndex ]
                                     [ span
                                         [ class "font-medium" ]
-                                        (primaryTermForPreviousOrNext nextItem)
+                                        (preferredTermForPreviousOrNext nextItem)
                                     , Icons.arrowLongRight
                                         [ Svg.Attributes.class "h-5 w-5" ]
                                     ]

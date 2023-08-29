@@ -58,7 +58,7 @@ type GlossaryItemForm
         , definitionFields : Array DefinitionField
         , relatedTermFields : Array RelatedTermField
         , termsOutside : List Term
-        , primaryTermsOutside : List Term
+        , preferredTermsOutside : List Term
         , itemsListingThisItemAsRelated : List GlossaryItem
         , needsUpdating : Bool
         , lastUpdatedDate : String
@@ -93,11 +93,11 @@ termsOutside glossaryItemForm =
             form.termsOutside
 
 
-primaryTermsOutside : GlossaryItemForm -> List Term
-primaryTermsOutside glossaryItemForm =
+preferredTermsOutside : GlossaryItemForm -> List Term
+preferredTermsOutside glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
-            form.primaryTermsOutside
+            form.preferredTermsOutside
 
 
 itemsListingThisTermAsRelated : GlossaryItemForm -> List GlossaryItem
@@ -223,7 +223,7 @@ validate form =
         , definitionFields = validatedDefinitionFields
         , relatedTermFields = validatedRelatedTermFields
         , termsOutside = termsOutside form
-        , primaryTermsOutside = primaryTermsOutside form
+        , preferredTermsOutside = preferredTermsOutside form
         , itemsListingThisItemAsRelated = itemsListingThisTermAsRelated form
         , needsUpdating = needsUpdating form
         , lastUpdatedDate = lastUpdatedDate form
@@ -243,13 +243,13 @@ hasValidationErrors form =
 
 
 empty : List Term -> List Term -> List GlossaryItem -> GlossaryItemForm
-empty withTermsOutside withPrimaryTermsOutside withItemsListingThisTermAsRelated =
+empty withTermsOutside withPreferredTermsOutside withItemsListingThisTermAsRelated =
     GlossaryItemForm
         { termFields = Array.fromList [ TermField.empty ]
         , definitionFields = Array.empty
         , relatedTermFields = Array.empty
         , termsOutside = withTermsOutside
-        , primaryTermsOutside = withPrimaryTermsOutside
+        , preferredTermsOutside = withPreferredTermsOutside
         , itemsListingThisItemAsRelated = withItemsListingThisTermAsRelated
         , needsUpdating = True
         , lastUpdatedDate = ""
@@ -265,7 +265,7 @@ emptyRelatedTermField =
 
 
 fromGlossaryItem : List Term -> List Term -> List GlossaryItem -> GlossaryItem -> GlossaryItemForm
-fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRelated item =
+fromGlossaryItem existingTerms existingPreferredTerms withItemsListingThisTermAsRelated item =
     let
         termFieldsForItem : List TermField
         termFieldsForItem =
@@ -289,13 +289,13 @@ fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRe
                 )
                 existingTerms
 
-        primaryTermsOutside1 : List Term
-        primaryTermsOutside1 =
+        preferredTermsOutside1 : List Term
+        preferredTermsOutside1 =
             List.filter
                 (\existingTerm ->
                     not <| Set.member (Term.id existingTerm |> TermId.toString) termIdsForItem
                 )
-                existingPrimaryTerms
+                existingPreferredTerms
 
         definitionFieldsList : List DefinitionField
         definitionFieldsList =
@@ -315,7 +315,7 @@ fromGlossaryItem existingTerms existingPrimaryTerms withItemsListingThisTermAsRe
                 |> List.map (\term -> RelatedTermField (Just <| RelatedTerm.idReference term) Nothing)
                 |> Array.fromList
         , termsOutside = termsOutside1
-        , primaryTermsOutside = primaryTermsOutside1
+        , preferredTermsOutside = preferredTermsOutside1
         , itemsListingThisItemAsRelated = withItemsListingThisTermAsRelated
         , needsUpdating = item.needsUpdating
         , lastUpdatedDate = item.lastUpdatedDate |> Maybe.withDefault ""
@@ -652,7 +652,7 @@ suggestRelatedTerms glossaryItemForm =
         candidateTerms : List Term
         candidateTerms =
             glossaryItemForm
-                |> primaryTermsOutside
+                |> preferredTermsOutside
                 |> List.filter
                     (\term -> not <| Set.member (Term.id term |> TermId.toString) relatedTermIdsAlreadyInForm)
 
@@ -663,8 +663,8 @@ suggestRelatedTerms glossaryItemForm =
                 |> Array.toList
                 |> List.map (DefinitionField.raw >> String.toLower)
 
-        primaryTermIdsOfItemsListingThisItemAsRelated : Set String
-        primaryTermIdsOfItemsListingThisItemAsRelated =
+        preferredTermIdsOfItemsListingThisItemAsRelated : Set String
+        preferredTermIdsOfItemsListingThisItemAsRelated =
             glossaryItemForm
                 |> itemsListingThisTermAsRelated
                 |> List.filterMap (.terms >> List.head)
@@ -681,7 +681,7 @@ suggestRelatedTerms glossaryItemForm =
                             |> Regex.fromString
                             |> Maybe.withDefault Regex.never
                 in
-                Set.member (Term.id candidateTerm |> TermId.toString) primaryTermIdsOfItemsListingThisItemAsRelated
+                Set.member (Term.id candidateTerm |> TermId.toString) preferredTermIdsOfItemsListingThisItemAsRelated
                     || List.any
                         (\definitionFieldBody ->
                             Regex.contains candidateTermAsWord definitionFieldBody

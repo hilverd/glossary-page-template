@@ -97,9 +97,9 @@ init commonModel =
                 existingTerms =
                     GlossaryItems.terms items
 
-                existingPrimaryTerms : List Term
-                existingPrimaryTerms =
-                    GlossaryItems.primaryTerms items
+                existingPreferredTerms : List Term
+                existingPreferredTerms =
+                    GlossaryItems.preferredTerms items
 
                 itemsListingThisItemAsRelated : List GlossaryItem
                 itemsListingThisItemAsRelated =
@@ -128,7 +128,7 @@ init commonModel =
 
                 emptyForm : GlossaryItemForm
                 emptyForm =
-                    Form.empty existingTerms existingPrimaryTerms itemsListingThisItemAsRelated
+                    Form.empty existingTerms existingPreferredTerms itemsListingThisItemAsRelated
 
                 form =
                     Maybe.map
@@ -138,7 +138,7 @@ init commonModel =
                                 |> Maybe.map
                                     (Form.fromGlossaryItem
                                         existingTerms
-                                        existingPrimaryTerms
+                                        existingPreferredTerms
                                         itemsListingThisItemAsRelated
                                     )
                                 |> Maybe.withDefault emptyForm

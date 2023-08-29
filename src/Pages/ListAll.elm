@@ -461,7 +461,7 @@ update msg model =
                     case model.common.glossary of
                         Ok glossary ->
                             glossary.items
-                                |> GlossaryItems.primaryTermIdsToIndexes
+                                |> GlossaryItems.preferredTermIdsToIndexes
                                 |> Dict.get (relatedTerm |> RelatedTerm.idReference |> TermId.toString)
                                 |> Maybe.map
                                     (\index ->
@@ -1384,15 +1384,15 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
         combinedGlossaryItems =
             Array.append indexedGlossaryItems otherIndexedGlossaryItems
 
-        primaryTermsWithDefinitions : List Term
-        primaryTermsWithDefinitions =
-            GlossaryItems.primaryTermsWithDefinitions glossaryItems
+        preferredTermsWithDefinitions : List Term
+        preferredTermsWithDefinitions =
+            GlossaryItems.preferredTermsWithDefinitions glossaryItems
 
         orderItemsFocusedOnTerm : Maybe Term
         orderItemsFocusedOnTerm =
             case model.common.orderItemsBy of
                 FocusedOn termId ->
-                    GlossaryItems.primaryTermIdsToIndexes glossaryItems
+                    GlossaryItems.preferredTermIdsToIndexes glossaryItems
                         |> Dict.get (TermId.toString termId)
                         |> Maybe.andThen
                             (\index ->
@@ -1439,7 +1439,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                 model
                 (Array.length combinedGlossaryItems)
                 enableMathSupport
-                primaryTermsWithDefinitions
+                preferredTermsWithDefinitions
                 orderItemsFocusedOnTerm
         , Html.dl
             []
@@ -2012,7 +2012,7 @@ viewAllTopicFilters tabbable =
 
 
 viewOrderItemsBy : Model -> Int -> Bool -> List Term -> Maybe Term -> Html Msg
-viewOrderItemsBy model numberOfItems enableMathSupport primaryTermsWithDefinitions orderItemsFocusedOnTerm =
+viewOrderItemsBy model numberOfItems enableMathSupport preferredTermsWithDefinitions orderItemsFocusedOnTerm =
     let
         tabbable : Bool
         tabbable =
@@ -2103,17 +2103,17 @@ viewOrderItemsBy model numberOfItems enableMathSupport primaryTermsWithDefinitio
                             , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << TermId.fromString)
                             , Components.SelectMenu.enabled tabbable
                             ]
-                            (primaryTermsWithDefinitions
+                            (preferredTermsWithDefinitions
                                 |> List.map
-                                    (\primaryTerm ->
+                                    (\preferredTerm ->
                                         let
-                                            primaryTermId =
-                                                Term.id primaryTerm
+                                            preferredTermId =
+                                                Term.id preferredTerm
                                         in
                                         Components.SelectMenu.Choice
-                                            (TermId.toString primaryTermId)
-                                            [ text <| Term.inlineText primaryTerm ]
-                                            (model.mostRecentTermIdForOrderingItemsFocusedOn == Just primaryTermId)
+                                            (TermId.toString preferredTermId)
+                                            [ text <| Term.inlineText preferredTerm ]
+                                            (model.mostRecentTermIdForOrderingItemsFocusedOn == Just preferredTermId)
                                     )
                             )
                         ]
