@@ -42,10 +42,10 @@ type GlossaryItem
 
 {-| Create a glossary item.
 -}
-init : List Term -> List Definition -> List RelatedTerm -> Bool -> Maybe String -> GlossaryItem
-init terms_ definitions_ relatedTerms_ needsUpdating_ lastUpdatedDate_ =
+init : Maybe Term -> List Term -> List Definition -> List RelatedTerm -> Bool -> Maybe String -> GlossaryItem
+init preferredTerm_ alternativeTerms_ definitions_ relatedTerms_ needsUpdating_ lastUpdatedDate_ =
     GlossaryItem
-        { terms = terms_
+        { terms = (preferredTerm_ |> Maybe.map List.singleton |> Maybe.withDefault []) ++ alternativeTerms_
         , definitions = definitions_
         , relatedTerms = relatedTerms_
         , needsUpdating = needsUpdating_
@@ -63,14 +63,14 @@ init terms_ definitions_ relatedTerms_ needsUpdating_ lastUpdatedDate_ =
     rain : Encode.Value
     rain =
         Encode.object
-            [ ( "terms"
-            , Encode.list Encode.object
-                    [ [ ( "id", Encode.string "Rain" )
-                      , ( "isAbbreviation", Encode.bool False )
-                      , ( "body", Encode.string "Rain" )
-                    ]
+            [ ( "preferredTerm"
+            , Encode.object
+                    [ ( "id", Encode.string "Rain" )
+                    , ( "isAbbreviation", Encode.bool False )
+                    , ( "body", Encode.string "Rain" )
                     ]
             )
+            , ( "alternativeTerms", Encode.list Encode.object [] )
             , ( "definitions", Encode.list Encode.string [ "Condensed moisture." ] )
             , ( "relatedTerms", Encode.list Encode.object [] )
             , ( "needsUpdating", Encode.bool True )
@@ -79,7 +79,8 @@ init terms_ definitions_ relatedTerms_ needsUpdating_ lastUpdatedDate_ =
     expected : GlossaryItem
     expected =
         init
-            [ Term.fromPlaintext "Rain" False ]
+            (Just (Term.fromPlaintext "Rain" False))
+            []
             [ Definition.fromPlaintext "Condensed moisture." ]
             []
             True
@@ -91,17 +92,18 @@ init terms_ definitions_ relatedTerms_ needsUpdating_ lastUpdatedDate_ =
 -}
 decode : Bool -> Decoder GlossaryItem
 decode enableMarkdownBasedSyntax =
-    Decode.map5
-        (\terms_ definitions_ relatedTerms_ needsUpdating_ lastUpdatedDate_ ->
+    Decode.map6
+        (\preferredTerm_ alternativeTerms_ definitions_ relatedTerms_ needsUpdating_ lastUpdatedDate_ ->
             GlossaryItem
-                { terms = terms_
+                { terms = preferredTerm_ :: alternativeTerms_
                 , definitions = definitions_
                 , relatedTerms = relatedTerms_
                 , needsUpdating = needsUpdating_
                 , lastUpdatedDate = lastUpdatedDate_
                 }
         )
-        (Decode.field "terms" <| Decode.list <| Term.decode enableMarkdownBasedSyntax)
+        (Decode.field "preferredTerm" <| Term.decode enableMarkdownBasedSyntax)
+        (Decode.field "alternativeTerms" <| Decode.list <| Term.decode enableMarkdownBasedSyntax)
         (Decode.field "definitions" <|
             Decode.list <|
                 Decode.map
@@ -127,7 +129,8 @@ Some items may not contain any definitions and instead point to a related item t
     empty : GlossaryItem
     empty =
         init
-          [ Term.emptyPlaintext ]
+          (Just (Term.emptyPlaintext))
+          []
           []
           []
           False

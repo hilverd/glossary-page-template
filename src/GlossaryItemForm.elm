@@ -348,29 +348,38 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                     )
                     Dict.empty
 
+        termFieldToTerm : TermField -> Term
+        termFieldToTerm termField =
+            let
+                raw : String
+                raw =
+                    termField |> TermField.raw |> String.trim
+
+                isAbbreviation =
+                    TermField.isAbbreviation termField
+            in
+            (if enableMarkdownBasedSyntax then
+                Term.fromMarkdown
+
+             else
+                Term.fromPlaintext
+            )
+                raw
+                isAbbreviation
+
         terms =
             form
                 |> termFields
                 |> Array.toList
-                |> List.map
-                    (\termField ->
-                        let
-                            raw : String
-                            raw =
-                                termField |> TermField.raw |> String.trim
+                |> List.map termFieldToTerm
 
-                            isAbbreviation =
-                                TermField.isAbbreviation termField
-                        in
-                        (if enableMarkdownBasedSyntax then
-                            Term.fromMarkdown
+        preferredTerm : Maybe Term
+        preferredTerm =
+            List.head terms
 
-                         else
-                            Term.fromPlaintext
-                        )
-                            raw
-                            isAbbreviation
-                    )
+        alternativeTerms : List Term
+        alternativeTerms =
+            List.drop 1 terms
 
         definitions =
             form
@@ -416,7 +425,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
         lastUpdatedDate_ =
             dateTime
     in
-    GlossaryItem.init terms definitions relatedTerms needsUpdating_ lastUpdatedDate_
+    GlossaryItem.init preferredTerm alternativeTerms definitions relatedTerms needsUpdating_ lastUpdatedDate_
 
 
 addTerm : GlossaryItemForm -> GlossaryItemForm

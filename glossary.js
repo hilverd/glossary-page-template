@@ -46,6 +46,8 @@ if (containerElement) {
 
     function glossaryItemFromDivElement(glossaryItemDivElement) {
         const dtElements = Array.prototype.slice.apply(glossaryItemDivElement.querySelectorAll('dt'));
+        const preferredTermDtElement = dtElements[0];
+        const alternativeTermsDtElements = dtElements.slice(1);
         const ddElements = Array.prototype.slice.apply(glossaryItemDivElement.querySelectorAll('dd'));
         const relatedTermDdElements = ddElements.filter(ddElement => ddElement.getAttribute('class') === 'related-terms');
         const relatedTerms = (relatedTermDdElements.length > 0) ? glossaryItemRelatedTermFromDdElement(relatedTermDdElements[0]) : [];
@@ -53,7 +55,8 @@ if (containerElement) {
         const lastUpdatedDate = glossaryItemDivElement.dataset.lastUpdated;
 
         return {
-            terms: dtElements.map(glossaryItemTermFromDtElement),
+            preferredTerm: glossaryItemTermFromDtElement(preferredTermDtElement),
+            alternativeTerms: alternativeTermsDtElements.map(glossaryItemTermFromDtElement),
             definitions: ddElements
                 .filter(ddElement => ddElement.getAttribute('class') !== 'related-terms' && ddElement.getAttribute('class') !== 'needs-updating')
                 .map(ddElement => ddElement.textContent.trim()),

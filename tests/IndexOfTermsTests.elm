@@ -20,7 +20,8 @@ glossaryItems =
         one : GlossaryItem
         one =
             GlossaryItem.init
-                [ termFromBody "Óne" ]
+                (Just (termFromBody "Óne"))
+                []
                 [ Definition.fromPlaintext "Óne" ]
                 []
                 False
@@ -29,7 +30,8 @@ glossaryItems =
         two : GlossaryItem
         two =
             GlossaryItem.init
-                [ termFromBody "Two" ]
+                (Just (termFromBody "Two"))
+                []
                 [ Definition.fromPlaintext "Two" ]
                 []
                 False
@@ -38,7 +40,8 @@ glossaryItems =
         three : GlossaryItem
         three =
             GlossaryItem.init
-                [ termFromBody "3Three" ]
+                (Just (termFromBody "3Three"))
+                []
                 [ Definition.fromPlaintext "3Three" ]
                 []
                 False
@@ -47,7 +50,8 @@ glossaryItems =
         doubleOhSeven : GlossaryItem
         doubleOhSeven =
             GlossaryItem.init
-                [ termFromBody "007" ]
+                (Just (termFromBody "007"))
+                []
                 [ Definition.fromPlaintext "007" ]
                 []
                 False
@@ -56,7 +60,8 @@ glossaryItems =
         future : GlossaryItem
         future =
             GlossaryItem.init
-                [ termFromBody "_future_" ]
+                (Just (termFromBody "_future_"))
+                []
                 [ Definition.fromPlaintext "_future_" ]
                 []
                 False
