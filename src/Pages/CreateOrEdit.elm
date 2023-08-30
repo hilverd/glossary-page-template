@@ -537,6 +537,12 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
                                 [ id <| ElementIds.termInputField termIndex
                                 , required True
                                 , Html.Attributes.autocomplete False
+                                , Html.Attributes.placeholder <|
+                                    if TermIndex.toInt termIndex == 0 then
+                                        "Primary term"
+
+                                    else
+                                        "Alternative term"
                                 , Accessibility.Aria.label "Term"
                                 , Accessibility.Aria.required True
                                 , Html.Events.onInput (PageMsg.Internal << UpdateTerm termIndex)
