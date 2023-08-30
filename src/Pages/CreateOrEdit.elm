@@ -953,7 +953,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
                 [ text "See Also" ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
-                [ text "Point to any related terms the reader might want to look up." ]
+                [ text "Point to any related preferred terms the reader might want to look up." ]
             ]
         , div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
