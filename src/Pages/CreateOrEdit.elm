@@ -539,7 +539,7 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
                                 , Html.Attributes.autocomplete False
                                 , Html.Attributes.placeholder <|
                                     if TermIndex.toInt termIndex == 0 then
-                                        "Primary term"
+                                        "Preferred term"
 
                                     else
                                         "Alternative term"
