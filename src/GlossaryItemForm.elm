@@ -205,24 +205,7 @@ validate form =
 
         validatedDefinitionFields : Array DefinitionField
         validatedDefinitionFields =
-            form
-                |> definitionFields
-                |> Array.map
-                    (\definitionField ->
-                        let
-                            raw : String
-                            raw =
-                                DefinitionField.raw definitionField
-                        in
-                        definitionField
-                            |> DefinitionField.setValidationError
-                                (if String.isEmpty raw then
-                                    Just cannotBeEmptyMessage
-
-                                 else
-                                    Nothing
-                                )
-                    )
+            definitionFields form
 
         validatedRelatedTermFields : Array RelatedTermField
         validatedRelatedTermFields =
@@ -270,7 +253,7 @@ empty withTermsOutside withPreferredTermsOutside withItemsListingThisTermAsRelat
     GlossaryItemForm
         { preferredTermField = TermField.empty
         , alternativeTermFields = Array.empty
-        , definitionFields = Array.empty
+        , definitionFields = List.singleton DefinitionField.empty |> Array.fromList
         , relatedTermFields = Array.empty
         , termsOutside = withTermsOutside
         , preferredTermsOutside = withPreferredTermsOutside
@@ -343,6 +326,13 @@ fromGlossaryItem existingTerms existingPreferredTerms withItemsListingThisTermAs
                             |> Definition.raw
                             |> DefinitionField.fromString
                     )
+                |> (\fields ->
+                        if List.isEmpty fields then
+                            List.singleton DefinitionField.empty
+
+                        else
+                            fields
+                   )
     in
     GlossaryItemForm
         { preferredTermField = preferredTermFieldForItem
@@ -424,15 +414,14 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
             form
                 |> definitionFields
                 |> Array.toList
+                |> List.map (DefinitionField.raw >> String.trim)
+                |> List.filter (not << String.isEmpty)
                 |> List.map
-                    (DefinitionField.raw
-                        >> String.trim
-                        >> (if enableMarkdownBasedSyntax then
-                                Definition.fromMarkdown
+                    (if enableMarkdownBasedSyntax then
+                        Definition.fromMarkdown
 
-                            else
-                                Definition.fromPlaintext
-                           )
+                     else
+                        Definition.fromPlaintext
                     )
 
         relatedTerms =

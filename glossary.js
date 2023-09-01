@@ -49,6 +49,15 @@ if (containerElement) {
         const preferredTermDtElement = dtElements[0];
         const alternativeTermsDtElements = dtElements.slice(1);
         const ddElements = Array.prototype.slice.apply(glossaryItemDivElement.querySelectorAll('dd'));
+
+        const definitionDdElements = ddElements
+            .filter(ddElement => ddElement.getAttribute('class') !== 'related-terms' && ddElement.getAttribute('class') !== 'needs-updating');
+
+        /* The current implementation allows one definition per item.
+           Previous versions allowed multiple definitions, and for backwards compatibility these are being joined here.
+        */
+        const definition = definitionDdElements.map(ddElement => ddElement.textContent.trim()).join('\n\n');
+
         const relatedTermDdElements = ddElements.filter(ddElement => ddElement.getAttribute('class') === 'related-terms');
         const relatedTerms = (relatedTermDdElements.length > 0) ? glossaryItemRelatedTermFromDdElement(relatedTermDdElements[0]) : [];
         const needsUpdatingDdElements = ddElements.filter(ddElement => ddElement.getAttribute('class') === 'needs-updating');
@@ -57,9 +66,7 @@ if (containerElement) {
         return {
             preferredTerm: glossaryItemTermFromDtElement(preferredTermDtElement),
             alternativeTerms: alternativeTermsDtElements.map(glossaryItemTermFromDtElement),
-            definitions: ddElements
-                .filter(ddElement => ddElement.getAttribute('class') !== 'related-terms' && ddElement.getAttribute('class') !== 'needs-updating')
-                .map(ddElement => ddElement.textContent.trim()),
+            definitions: [definition],
             relatedTerms: relatedTerms,
             needsUpdating: needsUpdatingDdElements.length > 0,
             lastUpdatedDate: lastUpdatedDate

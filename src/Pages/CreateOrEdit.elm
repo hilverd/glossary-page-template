@@ -69,9 +69,7 @@ type InternalMsg
     | DeleteTerm TermIndex
     | UpdateTerm TermIndex String
     | ToggleAbbreviation TermIndex
-    | AddDefinition
     | UpdateDefinition DefinitionIndex String
-    | DeleteDefinition DefinitionIndex
     | AddRelatedTerm (Maybe TermId)
     | SelectRelatedTerm RelatedTermIndex String
     | DeleteRelatedTerm RelatedTermIndex
@@ -237,25 +235,8 @@ update msg model =
         ToggleAbbreviation termIndex ->
             ( { model | form = Form.toggleAbbreviation termIndex model.form }, Cmd.none )
 
-        AddDefinition ->
-            let
-                form : GlossaryItemForm
-                form =
-                    Form.addDefinition model.form
-
-                latestDefinitionIndex : DefinitionIndex
-                latestDefinitionIndex =
-                    Array.length (Form.definitionFields form) - 1 |> DefinitionIndex.fromInt
-            in
-            ( { model | form = form }
-            , giveFocusToDefinitionSingle latestDefinitionIndex
-            )
-
         UpdateDefinition definitionIndex body ->
             ( { model | form = Form.updateDefinition definitionIndex model.form body }, Cmd.none )
-
-        DeleteDefinition definitionIndex ->
-            ( { model | form = Form.deleteDefinition definitionIndex model.form }, Cmd.none )
 
         AddRelatedTerm maybeTermId ->
             let
@@ -641,16 +622,7 @@ viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathS
     div []
         [ div
             [ class "flex-auto max-w-3xl flex" ]
-            [ span [ class "inline-flex items-center" ]
-                [ Components.Button.rounded True
-                    [ Accessibility.Aria.label "Delete"
-                    , Html.Events.onClick <| PageMsg.Internal <| DeleteDefinition index
-                    ]
-                    [ Icons.trash
-                        [ Svg.Attributes.class "h-5 w-5" ]
-                    ]
-                ]
-            , div
+            [ div
                 [ class "relative block min-w-0 w-full" ]
                 [ Components.Form.textarea
                     raw
@@ -717,28 +689,6 @@ viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathS
         ]
 
 
-viewAddDefinitionButton : Html Msg
-viewAddDefinitionButton =
-    div []
-        [ Components.Button.secondary
-            [ Html.Events.onClick <| PageMsg.Internal AddDefinition ]
-            [ Icons.plus [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
-            , text "Add definition"
-            ]
-        ]
-
-
-viewAddDefinitionButtonForEmptyState : Html Msg
-viewAddDefinitionButtonForEmptyState =
-    Components.Button.emptyState
-        [ Html.Events.onClick <| PageMsg.Internal AddDefinition ]
-        [ Icons.plus [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
-        , span
-            [ class "mt-2 block font-medium text-gray-900 dark:text-gray-200" ]
-            [ text "Add definition" ]
-        ]
-
-
 viewCreateDefinition : Bool -> Bool -> Bool -> Bool -> Array DefinitionField -> Html Msg
 viewCreateDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionArray =
     let
@@ -751,21 +701,14 @@ viewCreateDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportE
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Definitions" ]
+                [ text "Definition" ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
-                [ text "Provide one or more definitions for this group of terms." ]
+                [ text "Provide a definition (optional) for this group of terms." ]
             ]
         , div
             [ class "space-y-6 sm:space-y-5" ]
-            (List.indexedMap (viewCreateDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors) definitions
-                ++ [ if List.isEmpty definitions then
-                        viewAddDefinitionButtonForEmptyState
-
-                     else
-                        viewAddDefinitionButton
-                   ]
-            )
+            (List.indexedMap (viewCreateDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors) definitions)
         ]
 
 
