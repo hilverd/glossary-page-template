@@ -1398,7 +1398,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                                 Array.get (GlossaryItemIndex.toInt index)
                                     (GlossaryItems.orderedAlphabetically glossaryItems)
                             )
-                        |> Maybe.andThen (Tuple.second >> GlossaryItem.terms >> List.head)
+                        |> Maybe.map (Tuple.second >> GlossaryItem.preferredTerm)
 
                 _ ->
                     Nothing

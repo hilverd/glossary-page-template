@@ -23,7 +23,7 @@ loadedGlossaryItems =
         one : GlossaryItem
         one =
             GlossaryItem.init
-                (Just (termFromBody "The term one"))
+                (termFromBody "The term one")
                 []
                 [ Definition.fromPlaintext "The term one" ]
                 [ RelatedTerm.fromPlaintext (TermId.fromString "Second_the_term") "Second the term" ]
@@ -33,7 +33,7 @@ loadedGlossaryItems =
         two : GlossaryItem
         two =
             GlossaryItem.init
-                (Just (termFromBody "Second the term"))
+                (termFromBody "Second the term")
                 []
                 [ Definition.fromPlaintext "Second the term" ]
                 []
@@ -43,7 +43,7 @@ loadedGlossaryItems =
         three : GlossaryItem
         three =
             GlossaryItem.init
-                (Just (termFromBody "The term three"))
+                (termFromBody "The term three")
                 []
                 [ Definition.fromPlaintext "The term three" ]
                 [ RelatedTerm.fromPlaintext (TermId.fromString "Second_the_term") "Second the term" ]

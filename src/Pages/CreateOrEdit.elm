@@ -109,7 +109,13 @@ init commonModel =
                                 items
                                     |> GlossaryItems.get index
                                     |> Maybe.map
-                                        (\currentItem ->
+                                        (\itemBeingEdited ->
+                                            let
+                                                preferredTermIdOfItemBeingEdited =
+                                                    itemBeingEdited
+                                                        |> GlossaryItem.preferredTerm
+                                                        |> Term.id
+                                            in
                                             GlossaryItems.orderedAlphabetically items
                                                 |> Array.toList
                                                 |> List.map Tuple.second
@@ -118,10 +124,8 @@ init commonModel =
                                                         item
                                                             |> GlossaryItem.relatedPreferredTerms
                                                             |> List.any
-                                                                (\relatedTerm ->
-                                                                    currentItem
-                                                                        |> GlossaryItem.terms
-                                                                        |> List.any (\term -> Term.id term == RelatedTerm.idReference relatedTerm)
+                                                                (RelatedTerm.idReference
+                                                                    >> (==) preferredTermIdOfItemBeingEdited
                                                                 )
                                                     )
                                         )
@@ -943,12 +947,12 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
         relatedTermsList =
             Array.toList relatedTermsArray
 
-        allTerms : List Term
-        allTerms =
+        allPreferredTerms : List Term
+        allPreferredTerms =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
                 |> Array.toList
-                |> List.filterMap (Tuple.second >> GlossaryItem.terms >> List.head)
+                |> List.map (Tuple.second >> GlossaryItem.preferredTerm)
     in
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
@@ -970,7 +974,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
                         |> Set.fromList
                     )
                     (List.length relatedTermsList)
-                    (List.filter (\term -> not <| Set.member (Term.id term |> TermId.toString) termIdsSet) allTerms)
+                    (List.filter (\term -> not <| Set.member (Term.id term |> TermId.toString) termIdsSet) allPreferredTerms)
                     dropdownMenusWithMoreOptionsForRelatedTerms
                 )
                 relatedTermsList

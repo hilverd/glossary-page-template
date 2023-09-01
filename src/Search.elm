@@ -33,7 +33,7 @@ search enableMathSupport searchString glossaryItems =
                     |> List.concatMap
                         (\( _, item ) ->
                             item
-                                |> GlossaryItem.terms
+                                |> GlossaryItem.allTerms
                                 |> List.map
                                     (\term ->
                                         ( term, item |> GlossaryItem.definitions |> List.head )

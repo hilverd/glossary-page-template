@@ -1,5 +1,5 @@
 module Data.GlossaryItem exposing
-    ( GlossaryItem, init, decode, terms, hasSomeDefinitions, definitions, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+    ( GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, hasSomeDefinitions, definitions, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
     , toHtmlTree
     )
 
@@ -8,7 +8,7 @@ module Data.GlossaryItem exposing
 
 # Glossary Items
 
-@docs GlossaryItem, init, decode, terms, hasSomeDefinitions, definitions, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+@docs GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, hasSomeDefinitions, definitions, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
 
 
 # Converting to HTML
@@ -32,7 +32,8 @@ However, this is allowed in `<dl>` elements so it's also allowed here.
 -}
 type GlossaryItem
     = GlossaryItem
-        { terms : List Term
+        { preferredTerm : Term
+        , alternativeTerms : List Term
         , definitions : List Definition
         , relatedPreferredTerms : List RelatedTerm
         , needsUpdating : Bool
@@ -42,10 +43,11 @@ type GlossaryItem
 
 {-| Create a glossary item.
 -}
-init : Maybe Term -> List Term -> List Definition -> List RelatedTerm -> Bool -> Maybe String -> GlossaryItem
+init : Term -> List Term -> List Definition -> List RelatedTerm -> Bool -> Maybe String -> GlossaryItem
 init preferredTerm_ alternativeTerms_ definitions_ relatedTerms_ needsUpdating_ lastUpdatedDate_ =
     GlossaryItem
-        { terms = (preferredTerm_ |> Maybe.map List.singleton |> Maybe.withDefault []) ++ alternativeTerms_
+        { preferredTerm = preferredTerm_
+        , alternativeTerms = alternativeTerms_
         , definitions = definitions_
         , relatedPreferredTerms = relatedTerms_
         , needsUpdating = needsUpdating_
@@ -79,7 +81,7 @@ init preferredTerm_ alternativeTerms_ definitions_ relatedTerms_ needsUpdating_ 
     expected : GlossaryItem
     expected =
         init
-            (Just (Term.fromPlaintext "Rain" False))
+            (Term.fromPlaintext "Rain" False)
             []
             [ Definition.fromPlaintext "Condensed moisture." ]
             []
@@ -95,7 +97,8 @@ decode enableMarkdownBasedSyntax =
     Decode.map6
         (\preferredTerm_ alternativeTerms_ definitions_ relatedTerms_ needsUpdating_ lastUpdatedDate_ ->
             GlossaryItem
-                { terms = preferredTerm_ :: alternativeTerms_
+                { preferredTerm = preferredTerm_
+                , alternativeTerms = alternativeTerms_
                 , definitions = definitions_
                 , relatedPreferredTerms = relatedTerms_
                 , needsUpdating = needsUpdating_
@@ -129,7 +132,7 @@ Some items may not contain any definitions and instead point to a related item t
     empty : GlossaryItem
     empty =
         init
-          (Just (Term.emptyPlaintext))
+          Term.emptyPlaintext
           []
           []
           []
@@ -146,13 +149,29 @@ hasSomeDefinitions glossaryItem =
             not <| List.isEmpty item.definitions
 
 
-{-| The terms in the glossary item.
+{-| The preferred term of the glossary item.
 -}
-terms : GlossaryItem -> List Term
-terms glossaryItem =
+preferredTerm : GlossaryItem -> Term
+preferredTerm glossaryItem =
     case glossaryItem of
         GlossaryItem item ->
-            item.terms
+            item.preferredTerm
+
+
+{-| The alternative terms of the glossary item.
+-}
+alternativeTerms : GlossaryItem -> List Term
+alternativeTerms glossaryItem =
+    case glossaryItem of
+        GlossaryItem item ->
+            item.alternativeTerms
+
+
+{-| The terms in the glossary item, both preferred and alternative.
+-}
+allTerms : GlossaryItem -> List Term
+allTerms glossaryItem =
+    preferredTerm glossaryItem :: alternativeTerms glossaryItem
 
 
 {-| The definitions in the glossary item.
@@ -278,7 +297,7 @@ toHtmlTree glossaryItem =
                         )
                     |> Maybe.withDefault []
                 )
-                (List.map termToHtmlTree item.terms
+                (List.map termToHtmlTree (allTerms glossaryItem)
                     ++ (if item.needsUpdating then
                             [ HtmlTree.Node "dd"
                                 False

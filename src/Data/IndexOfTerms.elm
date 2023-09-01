@@ -40,7 +40,7 @@ fromGlossaryItems glossaryItems =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
                 |> Array.toList
-                |> List.concatMap (Tuple.second >> GlossaryItem.terms)
+                |> List.concatMap (Tuple.second >> GlossaryItem.allTerms)
                 |> List.foldl
                     (\term result ->
                         let

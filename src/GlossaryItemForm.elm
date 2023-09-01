@@ -203,42 +203,6 @@ validate form =
         validatedAlternativeTermFields =
             form |> alternativeTermFields |> Array.map validateTermField
 
-        validatedTermFields : Array TermField
-        validatedTermFields =
-            form
-                |> termFields
-                |> Array.map
-                    (\termField ->
-                        let
-                            body : String
-                            body =
-                                TermField.raw termField
-                        in
-                        termField
-                            |> TermField.setValidationError
-                                (if String.isEmpty body then
-                                    Just cannotBeEmptyMessage
-
-                                 else
-                                    let
-                                        termId : String
-                                        termId =
-                                            termBodyToId body
-                                    in
-                                    if Set.member termId termIdsOutsideSet then
-                                        Just "This term already exists elsewhere"
-
-                                    else if (Dict.get termId termIdsInsideForm |> Maybe.withDefault 0) > 1 then
-                                        Just "This term occurs multiple times"
-
-                                    else if ElementIds.reserved termId then
-                                        Just "This term is reserved"
-
-                                    else
-                                        Nothing
-                                )
-                    )
-
         validatedDefinitionFields : Array DefinitionField
         validatedDefinitionFields =
             form
@@ -329,29 +293,27 @@ fromGlossaryItem existingTerms existingPreferredTerms withItemsListingThisTermAs
     let
         preferredTermFieldForItem : TermField
         preferredTermFieldForItem =
-            item
-                |> GlossaryItem.terms
-                |> List.head
-                |> Maybe.map
-                    (\term ->
-                        TermField.fromString (Term.raw term) (Term.isAbbreviation term)
-                    )
-                |> Maybe.withDefault TermField.empty
+            let
+                preferredTerm =
+                    GlossaryItem.preferredTerm item
+            in
+            TermField.fromString
+                (Term.raw preferredTerm)
+                (Term.isAbbreviation preferredTerm)
 
         alternativeTermFieldsForItem : List TermField
         alternativeTermFieldsForItem =
             item
-                |> GlossaryItem.terms
-                |> List.drop 1
+                |> GlossaryItem.alternativeTerms
                 |> List.map
-                    (\term ->
-                        TermField.fromString (Term.raw term) (Term.isAbbreviation term)
+                    (\alternativeTerms ->
+                        TermField.fromString (Term.raw alternativeTerms) (Term.isAbbreviation alternativeTerms)
                     )
 
         termIdsForItem : Set String
         termIdsForItem =
             item
-                |> GlossaryItem.terms
+                |> GlossaryItem.allTerms
                 |> List.map (Term.id >> TermId.toString)
                 |> Set.fromList
 
@@ -408,17 +370,21 @@ termBodyToId =
 toGlossaryItem : Bool -> GlossaryItems -> GlossaryItemForm -> Maybe String -> GlossaryItem
 toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
     let
-        bodyByIdReference : Dict String String
-        bodyByIdReference =
+        rawPreferredTermBodyByIdReference : Dict String String
+        rawPreferredTermBodyByIdReference =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
                 |> Array.toList
                 |> List.foldl
                     (\( _, glossaryItem ) result ->
-                        List.foldl
-                            (\term -> Dict.update (Term.id term |> TermId.toString) (always <| Just <| Term.raw term))
+                        let
+                            term =
+                                GlossaryItem.preferredTerm glossaryItem
+                        in
+                        Dict.insert
+                            (Term.id term |> TermId.toString)
+                            (Term.raw term)
                             result
-                            (GlossaryItem.terms glossaryItem)
                     )
                     Dict.empty
 
@@ -441,19 +407,18 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                 raw
                 isAbbreviation
 
-        terms =
-            form
-                |> termFields
-                |> Array.toList
-                |> List.map termFieldToTerm
-
-        preferredTerm : Maybe Term
+        preferredTerm : Term
         preferredTerm =
-            List.head terms
+            form
+                |> preferredTermField
+                |> termFieldToTerm
 
         alternativeTerms : List Term
         alternativeTerms =
-            List.drop 1 terms
+            form
+                |> alternativeTermFields
+                |> Array.toList
+                |> List.map termFieldToTerm
 
         definitions =
             form
@@ -480,7 +445,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                             |> Maybe.map TermId.toString
                             |> Maybe.andThen
                                 (\ref ->
-                                    Dict.get ref bodyByIdReference
+                                    Dict.get ref rawPreferredTermBodyByIdReference
                                         |> Maybe.map
                                             ((if enableMarkdownBasedSyntax then
                                                 RelatedTerm.fromMarkdown
@@ -788,7 +753,7 @@ suggestRelatedTerms glossaryItemForm =
         preferredTermIdsOfItemsListingThisItemAsRelated =
             glossaryItemForm
                 |> itemsListingThisTermAsRelated
-                |> List.filterMap (GlossaryItem.terms >> List.head)
+                |> List.map GlossaryItem.preferredTerm
                 |> List.map (Term.id >> TermId.toString)
                 |> Set.fromList
     in

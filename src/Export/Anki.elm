@@ -83,7 +83,7 @@ itemToAnki enableMathSupport glossaryItem =
         front : String
         front =
             glossaryItem
-                |> GlossaryItem.terms
+                |> GlossaryItem.allTerms
                 |> List.map (Term.htmlTreeForAnki enableMathSupport >> Extras.HtmlTree.toHtml >> escape)
                 |> htmlLines
                 |> quote

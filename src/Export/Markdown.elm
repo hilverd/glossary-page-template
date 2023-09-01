@@ -62,7 +62,7 @@ itemToMarkdown glossaryItem =
         termsString : String
         termsString =
             glossaryItem
-                |> GlossaryItem.terms
+                |> GlossaryItem.allTerms
                 |> List.map (Term.markdown >> bold)
                 |> lines
 

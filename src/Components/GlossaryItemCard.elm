@@ -51,7 +51,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
         (\( index, glossaryItem ) ->
             let
                 terms =
-                    GlossaryItem.terms glossaryItem
+                    GlossaryItem.allTerms glossaryItem
 
                 itemHasSomeDefinitions : Bool
                 itemHasSomeDefinitions =
@@ -322,31 +322,30 @@ viewAsSingle :
     -> Html msg
 viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRelatedTerm } glossaryItemWithPreviousAndNext =
     let
+        preferredTermForPreviousOrNext : GlossaryItem.GlossaryItem -> Html msg
         preferredTermForPreviousOrNext glossaryItem =
-            glossaryItem
-                |> GlossaryItem.terms
-                |> List.take 1
-                |> List.map
-                    (\term ->
-                        if Term.isAbbreviation term then
-                            Html.abbr []
-                                [ Term.view
-                                    enableMathSupport
-                                    [ class "text-sm" ]
-                                    term
-                                ]
+            let
+                preferredTerm =
+                    GlossaryItem.preferredTerm glossaryItem
+            in
+            if Term.isAbbreviation preferredTerm then
+                Html.abbr []
+                    [ Term.view
+                        enableMathSupport
+                        [ class "text-sm" ]
+                        preferredTerm
+                    ]
 
-                        else
-                            Term.view enableMathSupport
-                                [ class "text-sm" ]
-                                term
-                    )
+            else
+                Term.view enableMathSupport
+                    [ class "text-sm" ]
+                    preferredTerm
     in
     Extras.Html.showMaybe
         (\( _, glossaryItem ) ->
             let
                 terms =
-                    GlossaryItem.terms glossaryItem
+                    GlossaryItem.allTerms glossaryItem
 
                 definitions =
                     GlossaryItem.definitions glossaryItem
@@ -375,7 +374,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                                         [ Svg.Attributes.class "h-5 w-5" ]
                                     , span
                                         [ class "font-medium" ]
-                                        (preferredTermForPreviousOrNext previousItem)
+                                        [ preferredTermForPreviousOrNext previousItem ]
                                     ]
                             )
                             glossaryItemWithPreviousAndNext.previous
@@ -399,7 +398,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                                     [ Html.Events.onClick <| onClickItem nextItemIndex ]
                                     [ span
                                         [ class "font-medium" ]
-                                        (preferredTermForPreviousOrNext nextItem)
+                                        [ preferredTermForPreviousOrNext nextItem ]
                                     , Icons.arrowLongRight
                                         [ Svg.Attributes.class "h-5 w-5" ]
                                     ]
