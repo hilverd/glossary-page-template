@@ -4,6 +4,7 @@ module GlossaryItemForm exposing
     , addDefinition
     , addRelatedTerm
     , addTerm
+    , alternativeTermFields
     , definitionFields
     , deleteDefinition
     , deleteRelatedTerm
@@ -14,6 +15,7 @@ module GlossaryItemForm exposing
     , moveRelatedTermDown
     , moveRelatedTermUp
     , needsUpdating
+    , preferredTermField
     , relatedTermFields
     , selectRelatedTerm
     , suggestRelatedTerms
@@ -54,7 +56,8 @@ type alias RelatedTermField =
 
 type GlossaryItemForm
     = GlossaryItemForm
-        { termFields : Array TermField
+        { preferredTermField : TermField
+        , alternativeTermFields : Array TermField
         , definitionFields : Array DefinitionField
         , relatedTermFields : Array RelatedTermField
         , termsOutside : List Term
@@ -65,11 +68,27 @@ type GlossaryItemForm
         }
 
 
-termFields : GlossaryItemForm -> Array TermField
-termFields glossaryItemForm =
+preferredTermField : GlossaryItemForm -> TermField
+preferredTermField glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
-            form.termFields
+            form.preferredTermField
+
+
+alternativeTermFields : GlossaryItemForm -> Array TermField
+alternativeTermFields glossaryItemForm =
+    case glossaryItemForm of
+        GlossaryItemForm form ->
+            form.alternativeTermFields
+
+
+termFields : GlossaryItemForm -> Array TermField
+termFields form =
+    form
+        |> alternativeTermFields
+        |> Array.toList
+        |> (::) (preferredTermField form)
+        |> Array.fromList
 
 
 definitionFields : GlossaryItemForm -> Array DefinitionField
@@ -145,6 +164,45 @@ validate form =
                     )
                     Dict.empty
 
+        validateTermField : TermField -> TermField
+        validateTermField termField =
+            let
+                body : String
+                body =
+                    TermField.raw termField
+            in
+            termField
+                |> TermField.setValidationError
+                    (if String.isEmpty body then
+                        Just cannotBeEmptyMessage
+
+                     else
+                        let
+                            termId : String
+                            termId =
+                                termBodyToId body
+                        in
+                        if Set.member termId termIdsOutsideSet then
+                            Just "This term already exists elsewhere"
+
+                        else if (Dict.get termId termIdsInsideForm |> Maybe.withDefault 0) > 1 then
+                            Just "This term occurs multiple times"
+
+                        else if ElementIds.reserved termId then
+                            Just "This term is reserved"
+
+                        else
+                            Nothing
+                    )
+
+        validatedPreferredTermField : TermField
+        validatedPreferredTermField =
+            form |> preferredTermField |> validateTermField
+
+        validatedAlternativeTermFields : Array TermField
+        validatedAlternativeTermFields =
+            form |> alternativeTermFields |> Array.map validateTermField
+
         validatedTermFields : Array TermField
         validatedTermFields =
             form
@@ -219,7 +277,8 @@ validate form =
                     )
     in
     GlossaryItemForm
-        { termFields = validatedTermFields
+        { preferredTermField = validatedPreferredTermField
+        , alternativeTermFields = validatedAlternativeTermFields
         , definitionFields = validatedDefinitionFields
         , relatedTermFields = validatedRelatedTermFields
         , termsOutside = termsOutside form
@@ -245,7 +304,8 @@ hasValidationErrors form =
 empty : List Term -> List Term -> List GlossaryItem -> GlossaryItemForm
 empty withTermsOutside withPreferredTermsOutside withItemsListingThisTermAsRelated =
     GlossaryItemForm
-        { termFields = Array.fromList [ TermField.empty ]
+        { preferredTermField = TermField.empty
+        , alternativeTermFields = Array.empty
         , definitionFields = Array.empty
         , relatedTermFields = Array.empty
         , termsOutside = withTermsOutside
@@ -267,10 +327,22 @@ emptyRelatedTermField =
 fromGlossaryItem : List Term -> List Term -> List GlossaryItem -> GlossaryItem -> GlossaryItemForm
 fromGlossaryItem existingTerms existingPreferredTerms withItemsListingThisTermAsRelated item =
     let
-        termFieldsForItem : List TermField
-        termFieldsForItem =
+        preferredTermFieldForItem : TermField
+        preferredTermFieldForItem =
             item
                 |> GlossaryItem.terms
+                |> List.head
+                |> Maybe.map
+                    (\term ->
+                        TermField.fromString (Term.raw term) (Term.isAbbreviation term)
+                    )
+                |> Maybe.withDefault TermField.empty
+
+        alternativeTermFieldsForItem : List TermField
+        alternativeTermFieldsForItem =
+            item
+                |> GlossaryItem.terms
+                |> List.drop 1
                 |> List.map
                     (\term ->
                         TermField.fromString (Term.raw term) (Term.isAbbreviation term)
@@ -278,8 +350,9 @@ fromGlossaryItem existingTerms existingPreferredTerms withItemsListingThisTermAs
 
         termIdsForItem : Set String
         termIdsForItem =
-            termFieldsForItem
-                |> List.map (TermField.raw >> termBodyToId)
+            item
+                |> GlossaryItem.terms
+                |> List.map (Term.id >> TermId.toString)
                 |> Set.fromList
 
         termsOutside1 : List Term
@@ -310,7 +383,8 @@ fromGlossaryItem existingTerms existingPreferredTerms withItemsListingThisTermAs
                     )
     in
     GlossaryItemForm
-        { termFields = Array.fromList termFieldsForItem
+        { preferredTermField = preferredTermFieldForItem
+        , alternativeTermFields = Array.fromList alternativeTermFieldsForItem
         , definitionFields = Array.fromList definitionFieldsList
         , relatedTermFields =
             item
@@ -433,7 +507,7 @@ addTerm glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
-                { form | termFields = Array.push TermField.empty form.termFields }
+                { form | alternativeTermFields = Array.push TermField.empty form.alternativeTermFields }
                 |> validate
 
 
@@ -441,14 +515,20 @@ updateTerm : TermIndex -> GlossaryItemForm -> String -> GlossaryItemForm
 updateTerm termIndex glossaryItemForm body =
     case glossaryItemForm of
         GlossaryItemForm form ->
-            GlossaryItemForm
-                { form
-                    | termFields =
-                        Extras.Array.update
-                            (TermField.setBody body)
-                            (TermIndex.toInt termIndex)
-                            form.termFields
-                }
+            (if TermIndex.toInt termIndex == 0 then
+                GlossaryItemForm
+                    { form | preferredTermField = TermField.setBody body form.preferredTermField }
+
+             else
+                GlossaryItemForm
+                    { form
+                        | alternativeTermFields =
+                            Extras.Array.update
+                                (TermField.setBody body)
+                                (TermIndex.toInt termIndex - 1)
+                                form.alternativeTermFields
+                    }
+            )
                 |> validate
 
 
@@ -456,8 +536,20 @@ deleteTerm : TermIndex -> GlossaryItemForm -> GlossaryItemForm
 deleteTerm termIndex glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
-            GlossaryItemForm
-                { form | termFields = Extras.Array.delete (TermIndex.toInt termIndex) form.termFields }
+            (if TermIndex.toInt termIndex == 0 then
+                GlossaryItemForm
+                    { form
+                        | preferredTermField =
+                            form.alternativeTermFields
+                                |> Array.get 0
+                                |> Maybe.withDefault TermField.empty
+                        , alternativeTermFields = Extras.Array.delete 0 form.alternativeTermFields
+                    }
+
+             else
+                GlossaryItemForm
+                    { form | alternativeTermFields = Extras.Array.delete (TermIndex.toInt termIndex - 1) form.alternativeTermFields }
+            )
                 |> validate
 
 
@@ -466,17 +558,27 @@ toggleAbbreviation termIndex glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
-                { form
-                    | termFields =
-                        Extras.Array.update
-                            (\termField ->
-                                termField
-                                    |> TermField.setIsAbbreviation (not <| TermField.isAbbreviation termField)
-                                    |> TermField.setIsAbbreviationManuallyOverridden True
-                            )
-                            (TermIndex.toInt termIndex)
-                            form.termFields
-                }
+                (if TermIndex.toInt termIndex == 0 then
+                    { form
+                        | preferredTermField =
+                            form.preferredTermField
+                                |> TermField.setIsAbbreviation (not <| TermField.isAbbreviation form.preferredTermField)
+                                |> TermField.setIsAbbreviationManuallyOverridden True
+                    }
+
+                 else
+                    { form
+                        | alternativeTermFields =
+                            Extras.Array.update
+                                (\termField ->
+                                    termField
+                                        |> TermField.setIsAbbreviation (not <| TermField.isAbbreviation termField)
+                                        |> TermField.setIsAbbreviationManuallyOverridden True
+                                )
+                                (TermIndex.toInt termIndex - 1)
+                                form.alternativeTermFields
+                    }
+                )
                 |> validate
 
 
