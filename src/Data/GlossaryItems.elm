@@ -151,7 +151,7 @@ orderListByMostMentionedFirst indexedGlossaryItems =
                 score =
                     (glossaryItem |> GlossaryItem.terms |> List.map (Term.raw >> Regex.find termAsWord >> List.length) |> List.sum)
                         + (glossaryItem |> GlossaryItem.definitions |> List.map (Definition.raw >> Regex.find termAsWord >> List.length) |> List.sum)
-                        + (glossaryItem |> GlossaryItem.relatedTerms |> List.map RelatedTerm.raw |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
+                        + (glossaryItem |> GlossaryItem.relatedPreferredTerms |> List.map RelatedTerm.raw |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
             in
             if score > 0 then
                 1
@@ -237,7 +237,7 @@ sanitiseList glossaryItems =
             (\glossaryItem ->
                 GlossaryItem.updateRelatedTerms
                     (glossaryItem
-                        |> GlossaryItem.relatedTerms
+                        |> GlossaryItem.relatedPreferredTerms
                         |> List.filter
                             (\relatedTerm ->
                                 Set.member (relatedTerm |> RelatedTerm.idReference |> TermId.toString) preferredTermIdsSet
@@ -451,7 +451,7 @@ enableFocusingOn termId glossaryItems =
                                     |> Maybe.map
                                         (\preferredTerm ->
                                             item
-                                                |> GlossaryItem.relatedTerms
+                                                |> GlossaryItem.relatedPreferredTerms
                                                 |> List.foldl
                                                     (\relatedTerm graph_ ->
                                                         DirectedGraph.insertEdge

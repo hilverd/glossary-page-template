@@ -1,6 +1,7 @@
 module Data.GlossaryItem exposing
-    ( GlossaryItem, init, decode, terms, hasSomeDefinitions, definitions, relatedTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+    ( GlossaryItem, init, decode, terms, hasSomeDefinitions, definitions, needsUpdating, lastUpdatedDate, updateRelatedTerms
     , toHtmlTree
+    , relatedPreferredTerms
     )
 
 {-| An item in a glossary.
@@ -26,7 +27,7 @@ import Extras.Url exposing (fragmentOnly)
 import Json.Decode as Decode exposing (Decoder)
 
 
-{-| An item in a glossary, consisting of a list of terms (synonyms) being defined, a list of (alternative) definitions for those terms, and a list of related terms.
+{-| An item in a glossary, consisting of a list of terms (synonyms) being defined, a list of (alternative) definitions for those terms, and a list of related preferred terms.
 It's probably unusual to have multiple definitions for a term (e.g. "Apple" being a fruit as well as a company) because a glossary would typically be focused on a single domain.
 However, this is allowed in `<dl>` elements so it's also allowed here.
 -}
@@ -34,7 +35,7 @@ type GlossaryItem
     = GlossaryItem
         { terms : List Term
         , definitions : List Definition
-        , relatedTerms : List RelatedTerm
+        , relatedPreferredTerms : List RelatedTerm
         , needsUpdating : Bool
         , lastUpdatedDate : Maybe String -- expected to be in ISO 8601 format
         }
@@ -47,7 +48,7 @@ init preferredTerm_ alternativeTerms_ definitions_ relatedTerms_ needsUpdating_ 
     GlossaryItem
         { terms = (preferredTerm_ |> Maybe.map List.singleton |> Maybe.withDefault []) ++ alternativeTerms_
         , definitions = definitions_
-        , relatedTerms = relatedTerms_
+        , relatedPreferredTerms = relatedTerms_
         , needsUpdating = needsUpdating_
         , lastUpdatedDate = lastUpdatedDate_
         }
@@ -97,7 +98,7 @@ decode enableMarkdownBasedSyntax =
             GlossaryItem
                 { terms = preferredTerm_ :: alternativeTerms_
                 , definitions = definitions_
-                , relatedTerms = relatedTerms_
+                , relatedPreferredTerms = relatedTerms_
                 , needsUpdating = needsUpdating_
                 , lastUpdatedDate = lastUpdatedDate_
                 }
@@ -164,13 +165,13 @@ definitions glossaryItem =
             item.definitions
 
 
-{-| The related terms in the glossary item.
+{-| The related preferred terms in the glossary item.
 -}
-relatedTerms : GlossaryItem -> List RelatedTerm
-relatedTerms glossaryItem =
+relatedPreferredTerms : GlossaryItem -> List RelatedTerm
+relatedPreferredTerms glossaryItem =
     case glossaryItem of
         GlossaryItem item ->
-            item.relatedTerms
+            item.relatedPreferredTerms
 
 
 {-| Whether the glossary item is marked as needing updating.
@@ -197,7 +198,7 @@ updateRelatedTerms : List RelatedTerm -> GlossaryItem -> GlossaryItem
 updateRelatedTerms newRelatedTerms glossaryItem =
     case glossaryItem of
         GlossaryItem item ->
-            GlossaryItem { item | relatedTerms = newRelatedTerms }
+            GlossaryItem { item | relatedPreferredTerms = newRelatedTerms }
 
 
 termToHtmlTree : Term -> HtmlTree
@@ -294,13 +295,13 @@ toHtmlTree glossaryItem =
                             []
                        )
                     ++ List.map (Definition.raw >> definitionToHtmlTree) item.definitions
-                    ++ (if List.isEmpty item.relatedTerms then
+                    ++ (if List.isEmpty item.relatedPreferredTerms then
                             []
 
                         else
                             [ nonemptyRelatedTermsToHtmlTree
                                 (hasSomeDefinitions glossaryItem)
-                                item.relatedTerms
+                                item.relatedPreferredTerms
                             ]
                        )
                 )

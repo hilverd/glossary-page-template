@@ -1,6 +1,6 @@
 module Data.GlossaryItem.RelatedTerm exposing (RelatedTerm, fromPlaintext, fromMarkdown, decode, raw, idReference, markdown, view, htmlTreeForAnki)
 
-{-| A related term.
+{-| A related (preferred) term.
 
 
 # Related Terms

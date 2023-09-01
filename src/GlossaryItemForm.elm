@@ -314,7 +314,7 @@ fromGlossaryItem existingTerms existingPreferredTerms withItemsListingThisTermAs
         , definitionFields = Array.fromList definitionFieldsList
         , relatedTermFields =
             item
-                |> GlossaryItem.relatedTerms
+                |> GlossaryItem.relatedPreferredTerms
                 |> List.map (\term -> RelatedTermField (Just <| RelatedTerm.idReference term) Nothing)
                 |> Array.fromList
         , termsOutside = termsOutside1

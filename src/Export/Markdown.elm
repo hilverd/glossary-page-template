@@ -70,7 +70,7 @@ itemToMarkdown glossaryItem =
             GlossaryItem.definitions glossaryItem
 
         relatedTerms =
-            GlossaryItem.relatedTerms glossaryItem
+            GlossaryItem.relatedPreferredTerms glossaryItem
 
         definitionsString : String
         definitionsString =

@@ -116,7 +116,7 @@ init commonModel =
                                                 |> List.filter
                                                     (\item ->
                                                         item
-                                                            |> GlossaryItem.relatedTerms
+                                                            |> GlossaryItem.relatedPreferredTerms
                                                             |> List.any
                                                                 (\relatedTerm ->
                                                                     currentItem
@@ -596,7 +596,12 @@ viewCreateTerms markdownBasedSyntaxEnabled mathSupportEnabled showValidationErro
                 [ text "Terms" ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
-                [ text "List the group of terms being defined." ]
+                [ text "List the group of terms being defined. The first one is considered the "
+                , Html.em
+                    []
+                    [ text "preferred" ]
+                , text " term."
+                ]
             ]
         , div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
@@ -806,7 +811,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfR
                 ]
             , Components.SelectMenu.render
                 [ Components.SelectMenu.id <| ElementIds.seeAlsoSelect index
-                , Components.SelectMenu.ariaLabel "Related term"
+                , Components.SelectMenu.ariaLabel "Related preferred term"
                 , Components.SelectMenu.validationError relatedTerm.validationError
                 , Components.SelectMenu.showValidationErrors showValidationErrors
                 , Components.SelectMenu.onChange (PageMsg.Internal << SelectRelatedTerm index)
@@ -950,7 +955,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "See Also" ]
+                [ text "Related terms" ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
                 [ text "Point to any related preferred terms the reader might want to look up." ]

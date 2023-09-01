@@ -61,7 +61,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                     GlossaryItem.definitions glossaryItem
 
                 relatedTerms =
-                    GlossaryItem.relatedTerms glossaryItem
+                    GlossaryItem.relatedPreferredTerms glossaryItem
 
                 needsUpdating =
                     GlossaryItem.needsUpdating glossaryItem
@@ -352,7 +352,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                     GlossaryItem.definitions glossaryItem
 
                 relatedTerms =
-                    GlossaryItem.relatedTerms glossaryItem
+                    GlossaryItem.relatedPreferredTerms glossaryItem
 
                 needsUpdating =
                     GlossaryItem.needsUpdating glossaryItem

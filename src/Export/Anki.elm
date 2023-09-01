@@ -78,7 +78,7 @@ itemToAnki enableMathSupport glossaryItem =
             GlossaryItem.definitions glossaryItem
 
         relatedTerms =
-            GlossaryItem.relatedTerms glossaryItem
+            GlossaryItem.relatedPreferredTerms glossaryItem
 
         front : String
         front =
