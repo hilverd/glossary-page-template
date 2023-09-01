@@ -75,7 +75,9 @@ itemToAnki enableMathSupport glossaryItem =
             "\"" ++ string ++ "\""
 
         definitions =
-            GlossaryItem.definitions glossaryItem
+            GlossaryItem.definition glossaryItem
+                |> Maybe.map List.singleton
+                |> Maybe.withDefault []
 
         relatedTerms =
             GlossaryItem.relatedPreferredTerms glossaryItem

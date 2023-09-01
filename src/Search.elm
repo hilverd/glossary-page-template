@@ -36,7 +36,7 @@ search enableMathSupport searchString glossaryItems =
                                 |> GlossaryItem.allTerms
                                 |> List.map
                                     (\term ->
-                                        ( term, item |> GlossaryItem.definitions |> List.head )
+                                        ( term, item |> GlossaryItem.definition )
                                     )
                         )
         in

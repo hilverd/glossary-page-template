@@ -1,12 +1,10 @@
 module GlossaryItemForm exposing
     ( GlossaryItemForm
     , RelatedTermField
-    , addDefinition
     , addRelatedTerm
     , addTerm
     , alternativeTermFields
-    , definitionFields
-    , deleteDefinition
+    , definitionField
     , deleteRelatedTerm
     , deleteTerm
     , empty
@@ -29,7 +27,6 @@ module GlossaryItemForm exposing
     )
 
 import Array exposing (Array)
-import Data.DefinitionIndex as DefinitionIndex exposing (DefinitionIndex)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
@@ -58,7 +55,7 @@ type GlossaryItemForm
     = GlossaryItemForm
         { preferredTermField : TermField
         , alternativeTermFields : Array TermField
-        , definitionFields : Array DefinitionField
+        , definitionField : DefinitionField
         , relatedTermFields : Array RelatedTermField
         , termsOutside : List Term
         , preferredTermsOutside : List Term
@@ -91,11 +88,11 @@ termFields form =
         |> Array.fromList
 
 
-definitionFields : GlossaryItemForm -> Array DefinitionField
-definitionFields glossaryItemForm =
+definitionField : GlossaryItemForm -> DefinitionField
+definitionField glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
-            form.definitionFields
+            form.definitionField
 
 
 relatedTermFields : GlossaryItemForm -> Array RelatedTermField
@@ -203,9 +200,9 @@ validate form =
         validatedAlternativeTermFields =
             form |> alternativeTermFields |> Array.map validateTermField
 
-        validatedDefinitionFields : Array DefinitionField
-        validatedDefinitionFields =
-            definitionFields form
+        validatedDefinitionField : DefinitionField
+        validatedDefinitionField =
+            definitionField form
 
         validatedRelatedTermFields : Array RelatedTermField
         validatedRelatedTermFields =
@@ -226,7 +223,7 @@ validate form =
     GlossaryItemForm
         { preferredTermField = validatedPreferredTermField
         , alternativeTermFields = validatedAlternativeTermFields
-        , definitionFields = validatedDefinitionFields
+        , definitionField = validatedDefinitionField
         , relatedTermFields = validatedRelatedTermFields
         , termsOutside = termsOutside form
         , preferredTermsOutside = preferredTermsOutside form
@@ -244,7 +241,7 @@ hasValidationErrors form =
             Array.toList >> List.any (f >> (/=) Nothing)
     in
     (form |> termFields |> hasErrors TermField.validationError)
-        || (form |> definitionFields |> hasErrors DefinitionField.validationError)
+        || (form |> definitionField |> DefinitionField.validationError |> (/=) Nothing)
         || (form |> relatedTermFields |> hasErrors .validationError)
 
 
@@ -253,7 +250,7 @@ empty withTermsOutside withPreferredTermsOutside withItemsListingThisTermAsRelat
     GlossaryItemForm
         { preferredTermField = TermField.empty
         , alternativeTermFields = Array.empty
-        , definitionFields = List.singleton DefinitionField.empty |> Array.fromList
+        , definitionField = DefinitionField.empty
         , relatedTermFields = Array.empty
         , termsOutside = withTermsOutside
         , preferredTermsOutside = withPreferredTermsOutside
@@ -316,28 +313,22 @@ fromGlossaryItem existingTerms existingPreferredTerms withItemsListingThisTermAs
                 )
                 existingPreferredTerms
 
-        definitionFieldsList : List DefinitionField
-        definitionFieldsList =
+        definitionField_ : DefinitionField
+        definitionField_ =
             item
-                |> GlossaryItem.definitions
-                |> List.map
+                |> GlossaryItem.definition
+                |> Maybe.map
                     (\definitionElem ->
                         definitionElem
                             |> Definition.raw
                             |> DefinitionField.fromString
                     )
-                |> (\fields ->
-                        if List.isEmpty fields then
-                            List.singleton DefinitionField.empty
-
-                        else
-                            fields
-                   )
+                |> Maybe.withDefault DefinitionField.empty
     in
     GlossaryItemForm
         { preferredTermField = preferredTermFieldForItem
         , alternativeTermFields = Array.fromList alternativeTermFieldsForItem
-        , definitionFields = Array.fromList definitionFieldsList
+        , definitionField = definitionField_
         , relatedTermFields =
             item
                 |> GlossaryItem.relatedPreferredTerms
@@ -410,13 +401,19 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                 |> Array.toList
                 |> List.map termFieldToTerm
 
-        definitions =
+        definition =
             form
-                |> definitionFields
-                |> Array.toList
-                |> List.map (DefinitionField.raw >> String.trim)
-                |> List.filter (not << String.isEmpty)
-                |> List.map
+                |> definitionField
+                |> DefinitionField.raw
+                |> String.trim
+                |> (\definitionString ->
+                        if String.isEmpty definitionString then
+                            Nothing
+
+                        else
+                            Just definitionString
+                   )
+                |> Maybe.map
                     (if enableMarkdownBasedSyntax then
                         Definition.fromMarkdown
 
@@ -453,7 +450,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
         lastUpdatedDate_ =
             dateTime
     in
-    GlossaryItem.init preferredTerm alternativeTerms definitions relatedTerms needsUpdating_ lastUpdatedDate_
+    GlossaryItem.init preferredTerm alternativeTerms definition relatedTerms needsUpdating_ lastUpdatedDate_
 
 
 addTerm : GlossaryItemForm -> GlossaryItemForm
@@ -536,48 +533,12 @@ toggleAbbreviation termIndex glossaryItemForm =
                 |> validate
 
 
-addDefinition : GlossaryItemForm -> GlossaryItemForm
-addDefinition glossaryItemForm =
-    case glossaryItemForm of
-        GlossaryItemForm form ->
-            let
-                needsUpdating1 : Bool
-                needsUpdating1 =
-                    if not (formHasDefinitionsOrRelatedTerms glossaryItemForm) && form.needsUpdating then
-                        False
-
-                    else
-                        form.needsUpdating
-            in
-            GlossaryItemForm
-                { form
-                    | definitionFields = form.definitionFields |> Array.push DefinitionField.empty
-                    , needsUpdating = needsUpdating1
-                }
-                |> validate
-
-
-updateDefinition : DefinitionIndex -> GlossaryItemForm -> String -> GlossaryItemForm
-updateDefinition definitionIndex glossaryItemForm body =
+updateDefinition : GlossaryItemForm -> String -> GlossaryItemForm
+updateDefinition glossaryItemForm body =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
-                { form
-                    | definitionFields =
-                        Extras.Array.update
-                            (always <| DefinitionField.fromString body)
-                            (DefinitionIndex.toInt definitionIndex)
-                            form.definitionFields
-                }
-                |> validate
-
-
-deleteDefinition : DefinitionIndex -> GlossaryItemForm -> GlossaryItemForm
-deleteDefinition index glossaryItemForm =
-    case glossaryItemForm of
-        GlossaryItemForm form ->
-            GlossaryItemForm
-                { form | definitionFields = Extras.Array.delete (DefinitionIndex.toInt index) form.definitionFields }
+                { form | definitionField = DefinitionField.fromString body }
                 |> validate
 
 
@@ -585,7 +546,7 @@ formHasDefinitionsOrRelatedTerms : GlossaryItemForm -> Bool
 formHasDefinitionsOrRelatedTerms glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
-            form.definitionFields /= Array.empty || form.relatedTermFields /= Array.empty
+            form.definitionField /= DefinitionField.empty
 
 
 addRelatedTerm : Maybe TermId -> GlossaryItemForm -> GlossaryItemForm
@@ -731,12 +692,12 @@ suggestRelatedTerms glossaryItemForm =
                 |> List.filter
                     (\term -> not <| Set.member (Term.id term |> TermId.toString) relatedTermIdsAlreadyInForm)
 
-        definitionFieldBodies : List String
-        definitionFieldBodies =
+        definitionFieldBody : String
+        definitionFieldBody =
             glossaryItemForm
-                |> definitionFields
-                |> Array.toList
-                |> List.map (DefinitionField.raw >> String.toLower)
+                |> definitionField
+                |> DefinitionField.raw
+                |> String.toLower
 
         preferredTermIdsOfItemsListingThisItemAsRelated : Set String
         preferredTermIdsOfItemsListingThisItemAsRelated =
@@ -757,11 +718,7 @@ suggestRelatedTerms glossaryItemForm =
                             |> Maybe.withDefault Regex.never
                 in
                 Set.member (Term.id candidateTerm |> TermId.toString) preferredTermIdsOfItemsListingThisItemAsRelated
-                    || List.any
-                        (\definitionFieldBody ->
-                            Regex.contains candidateTermAsWord definitionFieldBody
-                        )
-                        definitionFieldBodies
+                    || Regex.contains candidateTermAsWord definitionFieldBody
             )
 
 

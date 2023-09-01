@@ -67,7 +67,9 @@ itemToMarkdown glossaryItem =
                 |> lines
 
         definitions =
-            GlossaryItem.definitions glossaryItem
+            GlossaryItem.definition glossaryItem
+                |> Maybe.map List.singleton
+                |> Maybe.withDefault []
 
         relatedTerms =
             GlossaryItem.relatedPreferredTerms glossaryItem

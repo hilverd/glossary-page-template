@@ -58,7 +58,9 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                     GlossaryItem.hasADefinition glossaryItem
 
                 definitions =
-                    GlossaryItem.definitions glossaryItem
+                    GlossaryItem.definition glossaryItem
+                        |> Maybe.map List.singleton
+                        |> Maybe.withDefault []
 
                 relatedTerms =
                     GlossaryItem.relatedPreferredTerms glossaryItem
@@ -348,7 +350,9 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                     GlossaryItem.allTerms glossaryItem
 
                 definitions =
-                    GlossaryItem.definitions glossaryItem
+                    GlossaryItem.definition glossaryItem
+                        |> Maybe.map List.singleton
+                        |> Maybe.withDefault []
 
                 relatedTerms =
                     GlossaryItem.relatedPreferredTerms glossaryItem

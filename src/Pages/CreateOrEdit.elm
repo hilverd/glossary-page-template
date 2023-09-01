@@ -15,7 +15,6 @@ import Components.Form
 import Components.GlossaryItemCard
 import Components.SelectMenu
 import Components.Spinner
-import Data.DefinitionIndex as DefinitionIndex exposing (DefinitionIndex)
 import Data.FeatureFlag exposing (enableTopicsFeature)
 import Data.Glossary as Glossary
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
@@ -69,7 +68,7 @@ type InternalMsg
     | DeleteTerm TermIndex
     | UpdateTerm TermIndex String
     | ToggleAbbreviation TermIndex
-    | UpdateDefinition DefinitionIndex String
+    | UpdateDefinition String
     | AddRelatedTerm (Maybe TermId)
     | SelectRelatedTerm RelatedTermIndex String
     | DeleteRelatedTerm RelatedTermIndex
@@ -235,8 +234,8 @@ update msg model =
         ToggleAbbreviation termIndex ->
             ( { model | form = Form.toggleAbbreviation termIndex model.form }, Cmd.none )
 
-        UpdateDefinition definitionIndex body ->
-            ( { model | form = Form.updateDefinition definitionIndex model.form body }, Cmd.none )
+        UpdateDefinition body ->
+            ( { model | form = Form.updateDefinition model.form body }, Cmd.none )
 
         AddRelatedTerm maybeTermId ->
             let
@@ -464,11 +463,6 @@ giveFocusToTermInputField termIndex =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.termInputField termIndex)
 
 
-giveFocusToDefinitionSingle : DefinitionIndex -> Cmd Msg
-giveFocusToDefinitionSingle index =
-    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.definitionSingle index)
-
-
 giveFocusToSeeAlsoSelect : RelatedTermIndex -> Cmd Msg
 giveFocusToSeeAlsoSelect index =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.seeAlsoSelect index)
@@ -603,13 +597,13 @@ viewCreateTerms markdownBasedSyntaxEnabled mathSupportEnabled showValidationErro
         ]
 
 
-viewCreateDefinitionSingle : Bool -> Bool -> Bool -> Bool -> Int -> DefinitionField -> Html Msg
-viewCreateDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors index definitionSingle =
-    viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors (DefinitionIndex.fromInt index) definitionSingle
+viewCreateDefinitionSingle : Bool -> Bool -> Bool -> Bool -> DefinitionField -> Html Msg
+viewCreateDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionSingle =
+    viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionSingle
 
 
-viewCreateDefinitionSingle1 : Bool -> Bool -> Bool -> Bool -> DefinitionIndex -> DefinitionField -> Html Msg
-viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors index definitionSingle =
+viewCreateDefinitionSingle1 : Bool -> Bool -> Bool -> Bool -> DefinitionField -> Html Msg
+viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionSingle =
     let
         raw : String
         raw =
@@ -626,15 +620,15 @@ viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathS
                 [ class "relative block min-w-0 w-full" ]
                 [ Components.Form.textarea
                     raw
-                    (markdownBasedSyntaxEnabled && DefinitionIndex.toInt index == 0)
+                    markdownBasedSyntaxEnabled
                     mathSupportEnabled
                     showValidationErrors
                     validationError
                     [ required True
                     , Accessibility.Aria.label "Definition"
                     , Accessibility.Aria.required True
-                    , id <| ElementIds.definitionSingle index
-                    , Html.Events.onInput (PageMsg.Internal << UpdateDefinition index)
+                    , id ElementIds.definition
+                    , Html.Events.onInput (PageMsg.Internal << UpdateDefinition)
                     ]
                 ]
             ]
@@ -689,13 +683,8 @@ viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathS
         ]
 
 
-viewCreateDefinition : Bool -> Bool -> Bool -> Bool -> Array DefinitionField -> Html Msg
-viewCreateDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionArray =
-    let
-        definitions : List DefinitionField
-        definitions =
-            Array.toList definitionArray
-    in
+viewCreateDefinition : Bool -> Bool -> Bool -> Bool -> DefinitionField -> Html Msg
+viewCreateDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionField =
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
@@ -708,7 +697,7 @@ viewCreateDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportE
             ]
         , div
             [ class "space-y-6 sm:space-y-5" ]
-            (List.indexedMap (viewCreateDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors) definitions)
+            [ viewCreateDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionField ]
         ]
 
 
@@ -1042,9 +1031,9 @@ view model =
                 terms =
                     Form.termFields model.form
 
-                definitionArray : Array DefinitionField
+                definitionArray : DefinitionField
                 definitionArray =
-                    Form.definitionFields model.form
+                    Form.definitionField model.form
 
                 relatedTerms : Array Form.RelatedTermField
                 relatedTerms =

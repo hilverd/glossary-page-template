@@ -1,5 +1,5 @@
 module Data.GlossaryItem exposing
-    ( GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, hasADefinition, definitions, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+    ( GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
     , toHtmlTree
     )
 
@@ -8,7 +8,7 @@ module Data.GlossaryItem exposing
 
 # Glossary Items
 
-@docs GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, hasADefinition, definitions, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+@docs GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
 
 
 # Converting to HTML
@@ -34,7 +34,7 @@ type GlossaryItem
     = GlossaryItem
         { preferredTerm : Term
         , alternativeTerms : List Term
-        , definitions : List Definition
+        , definition : Maybe Definition
         , relatedPreferredTerms : List RelatedTerm
         , needsUpdating : Bool
         , lastUpdatedDateAsIso8601 : Maybe String
@@ -43,12 +43,12 @@ type GlossaryItem
 
 {-| Create a glossary item.
 -}
-init : Term -> List Term -> List Definition -> List RelatedTerm -> Bool -> Maybe String -> GlossaryItem
-init preferredTerm_ alternativeTerms_ definitions_ relatedTerms_ needsUpdating_ lastUpdatedDate_ =
+init : Term -> List Term -> Maybe Definition -> List RelatedTerm -> Bool -> Maybe String -> GlossaryItem
+init preferredTerm_ alternativeTerms_ definition_ relatedTerms_ needsUpdating_ lastUpdatedDate_ =
     GlossaryItem
         { preferredTerm = preferredTerm_
         , alternativeTerms = alternativeTerms_
-        , definitions = definitions_
+        , definition = definition_
         , relatedPreferredTerms = relatedTerms_
         , needsUpdating = needsUpdating_
         , lastUpdatedDateAsIso8601 = lastUpdatedDate_
@@ -73,7 +73,7 @@ init preferredTerm_ alternativeTerms_ definitions_ relatedTerms_ needsUpdating_ 
                     ]
             )
             , ( "alternativeTerms", Encode.list Encode.object [] )
-            , ( "definitions", Encode.list Encode.string [ "Condensed moisture." ] )
+            , ( "definition", Encode.string "Condensed moisture." )
             , ( "relatedTerms", Encode.list Encode.object [] )
             , ( "needsUpdating", Encode.bool True )
             ]
@@ -83,7 +83,7 @@ init preferredTerm_ alternativeTerms_ definitions_ relatedTerms_ needsUpdating_ 
         init
             (Term.fromPlaintext "Rain" False)
             []
-            [ Definition.fromPlaintext "Condensed moisture." ]
+            (Just <| Definition.fromPlaintext "Condensed moisture.")
             []
             True
             Nothing
@@ -95,11 +95,11 @@ init preferredTerm_ alternativeTerms_ definitions_ relatedTerms_ needsUpdating_ 
 decode : Bool -> Decoder GlossaryItem
 decode enableMarkdownBasedSyntax =
     Decode.map6
-        (\preferredTerm_ alternativeTerms_ definitions_ relatedTerms_ needsUpdating_ lastUpdatedDate_ ->
+        (\preferredTerm_ alternativeTerms_ definition_ relatedTerms_ needsUpdating_ lastUpdatedDate_ ->
             GlossaryItem
                 { preferredTerm = preferredTerm_
                 , alternativeTerms = alternativeTerms_
-                , definitions = definitions_
+                , definition = definition_
                 , relatedPreferredTerms = relatedTerms_
                 , needsUpdating = needsUpdating_
                 , lastUpdatedDateAsIso8601 = lastUpdatedDate_
@@ -107,8 +107,8 @@ decode enableMarkdownBasedSyntax =
         )
         (Decode.field "preferredTerm" <| Term.decode enableMarkdownBasedSyntax)
         (Decode.field "alternativeTerms" <| Decode.list <| Term.decode enableMarkdownBasedSyntax)
-        (Decode.field "definitions" <|
-            Decode.list <|
+        (Decode.field "definition" <|
+            Decode.nullable <|
                 Decode.map
                     (if enableMarkdownBasedSyntax then
                         Definition.fromMarkdown
@@ -134,19 +134,19 @@ Some items may not have one and instead point to a related item that is preferre
         init
           Term.emptyPlaintext
           []
-          []
+          Nothing
           []
           False
           Nothing
 
-    hasSomeADefinition empty --> False
+    hasADefinition empty --> False
 
 -}
 hasADefinition : GlossaryItem -> Bool
 hasADefinition glossaryItem =
     case glossaryItem of
         GlossaryItem item ->
-            not <| List.isEmpty item.definitions
+            item.definition /= Nothing
 
 
 {-| The preferred term of the glossary item.
@@ -167,23 +167,23 @@ alternativeTerms glossaryItem =
             item.alternativeTerms
 
 
-{-| The terms in the glossary item, both preferred and alternative.
+{-| The terms of the glossary item, both preferred and alternative.
 -}
 allTerms : GlossaryItem -> List Term
 allTerms glossaryItem =
     preferredTerm glossaryItem :: alternativeTerms glossaryItem
 
 
-{-| The definitions in the glossary item.
+{-| The definition of the glossary item.
 -}
-definitions : GlossaryItem -> List Definition
-definitions glossaryItem =
+definition : GlossaryItem -> Maybe Definition
+definition glossaryItem =
     case glossaryItem of
         GlossaryItem item ->
-            item.definitions
+            item.definition
 
 
-{-| The related preferred terms in the glossary item.
+{-| The related preferred terms of the glossary item.
 -}
 relatedPreferredTerms : GlossaryItem -> List RelatedTerm
 relatedPreferredTerms glossaryItem =
@@ -248,11 +248,11 @@ termToHtmlTree term =
 
 
 definitionToHtmlTree : String -> HtmlTree
-definitionToHtmlTree definition =
+definitionToHtmlTree definition_ =
     HtmlTree.Node "dd"
         False
         []
-        [ HtmlTree.Leaf definition ]
+        [ HtmlTree.Leaf definition_ ]
 
 
 relatedTermToHtmlTree : RelatedTerm -> HtmlTree
@@ -312,7 +312,9 @@ toHtmlTree glossaryItem =
                         else
                             []
                        )
-                    ++ List.map (Definition.raw >> definitionToHtmlTree) item.definitions
+                    ++ List.map
+                        (Definition.raw >> definitionToHtmlTree)
+                        (item.definition |> Maybe.map List.singleton |> Maybe.withDefault [])
                     ++ (if List.isEmpty item.relatedPreferredTerms then
                             []
 

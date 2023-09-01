@@ -58,7 +58,7 @@ compareForSortingAlphabetically item1 item2 =
     item1 = GlossaryItem.init
               (Term.fromMarkdown "\\_\\_slots\\_\\_" False)
               []
-              []
+              Nothing
               []
               False
               Nothing
@@ -67,7 +67,7 @@ compareForSortingAlphabetically item1 item2 =
     item2 = GlossaryItem.init
               (Term.fromMarkdown "Situation" False)
               []
-              []
+              Nothing
               []
               False
               Nothing
@@ -76,7 +76,7 @@ compareForSortingAlphabetically item1 item2 =
     item3 = GlossaryItem.init
               (Term.fromMarkdown "strong" False)
               []
-              []
+              Nothing
               []
               False
               Nothing
@@ -147,7 +147,7 @@ orderListByMostMentionedFirst indexedGlossaryItems =
                 score : Int
                 score =
                     (glossaryItem |> GlossaryItem.allTerms |> List.map (Term.raw >> Regex.find termAsWord >> List.length) |> List.sum)
-                        + (glossaryItem |> GlossaryItem.definitions |> List.map (Definition.raw >> Regex.find termAsWord >> List.length) |> List.sum)
+                        + (glossaryItem |> GlossaryItem.definition |> Maybe.map (Definition.raw >> Regex.find termAsWord >> List.length) |> Maybe.withDefault 0)
                         + (glossaryItem |> GlossaryItem.relatedPreferredTerms |> List.map RelatedTerm.raw |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
             in
             if score > 0 then

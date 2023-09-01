@@ -66,7 +66,7 @@ if (containerElement) {
         return {
             preferredTerm: glossaryItemTermFromDtElement(preferredTermDtElement),
             alternativeTerms: alternativeTermsDtElements.map(glossaryItemTermFromDtElement),
-            definitions: [definition],
+            definition: definition || null,
             relatedTerms: relatedTerms,
             needsUpdating: needsUpdatingDdElements.length > 0,
             lastUpdatedDate: lastUpdatedDate
