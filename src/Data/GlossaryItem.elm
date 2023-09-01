@@ -1,7 +1,6 @@
 module Data.GlossaryItem exposing
-    ( GlossaryItem, init, decode, terms, hasSomeDefinitions, definitions, needsUpdating, lastUpdatedDate, updateRelatedTerms
+    ( GlossaryItem, init, decode, terms, hasSomeDefinitions, definitions, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
     , toHtmlTree
-    , relatedPreferredTerms
     )
 
 {-| An item in a glossary.
@@ -9,7 +8,7 @@ module Data.GlossaryItem exposing
 
 # Glossary Items
 
-@docs GlossaryItem, init, decode, terms, hasSomeDefinitions, definitions, relatedTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+@docs GlossaryItem, init, decode, terms, hasSomeDefinitions, definitions, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
 
 
 # Converting to HTML
