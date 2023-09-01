@@ -55,7 +55,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
 
                 itemHasSomeDefinitions : Bool
                 itemHasSomeDefinitions =
-                    GlossaryItem.hasSomeDefinitions glossaryItem
+                    GlossaryItem.hasADefinition glossaryItem
 
                 definitions =
                     GlossaryItem.definitions glossaryItem
@@ -443,7 +443,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                             enableMathSupport
                             False
                             True
-                            (GlossaryItem.hasSomeDefinitions glossaryItem)
+                            (GlossaryItem.hasADefinition glossaryItem)
                             (Just onClickRelatedTerm)
                             relatedTerms
                     )

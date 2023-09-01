@@ -400,7 +400,7 @@ preferredTermsWithDefinitions =
         >> Array.toList
         >> List.filterMap
             (\( _, item ) ->
-                if GlossaryItem.hasSomeDefinitions item then
+                if GlossaryItem.hasADefinition item then
                     Just item
 
                 else
@@ -432,7 +432,7 @@ enableFocusingOn termId glossaryItems =
                         |> List.filterMap
                             (Tuple.second
                                 >> (\item ->
-                                        if GlossaryItem.hasSomeDefinitions item then
+                                        if GlossaryItem.hasADefinition item then
                                             Just item
 
                                         else

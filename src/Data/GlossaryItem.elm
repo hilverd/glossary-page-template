@@ -1,5 +1,5 @@
 module Data.GlossaryItem exposing
-    ( GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, hasSomeDefinitions, definitions, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+    ( GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, hasADefinition, definitions, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
     , toHtmlTree
     )
 
@@ -8,7 +8,7 @@ module Data.GlossaryItem exposing
 
 # Glossary Items
 
-@docs GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, hasSomeDefinitions, definitions, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+@docs GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, hasADefinition, definitions, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
 
 
 # Converting to HTML
@@ -124,8 +124,8 @@ decode enableMarkdownBasedSyntax =
         (Decode.maybe <| Decode.field "lastUpdatedDate" Decode.string)
 
 
-{-| Whether or not the glossary item has any definitions.
-Some items may not contain any definitions and instead point to a related item that is preferred.
+{-| Whether or not the glossary item has a definition.
+Some items may not have one and instead point to a related item that is preferred.
 
     import Data.GlossaryItem.Term as Term exposing (Term)
 
@@ -139,11 +139,11 @@ Some items may not contain any definitions and instead point to a related item t
           False
           Nothing
 
-    hasSomeDefinitions empty --> False
+    hasSomeADefinition empty --> False
 
 -}
-hasSomeDefinitions : GlossaryItem -> Bool
-hasSomeDefinitions glossaryItem =
+hasADefinition : GlossaryItem -> Bool
+hasADefinition glossaryItem =
     case glossaryItem of
         GlossaryItem item ->
             not <| List.isEmpty item.definitions
@@ -264,12 +264,12 @@ relatedTermToHtmlTree relatedTerm =
 
 
 nonemptyRelatedTermsToHtmlTree : Bool -> List RelatedTerm -> HtmlTree
-nonemptyRelatedTermsToHtmlTree itemHasSomeDefinitions relatedTerms_ =
+nonemptyRelatedTermsToHtmlTree itemHasSomeADefinition relatedTerms_ =
     HtmlTree.Node "dd"
         False
         [ HtmlTree.Attribute "class" "related-terms" ]
         (HtmlTree.Leaf
-            (if itemHasSomeDefinitions then
+            (if itemHasSomeADefinition then
                 "See also: "
 
              else
@@ -318,7 +318,7 @@ toHtmlTree glossaryItem =
 
                         else
                             [ nonemptyRelatedTermsToHtmlTree
-                                (hasSomeDefinitions glossaryItem)
+                                (hasADefinition glossaryItem)
                                 item.relatedPreferredTerms
                             ]
                        )
