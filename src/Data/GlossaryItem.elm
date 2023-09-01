@@ -37,7 +37,7 @@ type GlossaryItem
         , definitions : List Definition
         , relatedPreferredTerms : List RelatedTerm
         , needsUpdating : Bool
-        , lastUpdatedDate : Maybe String -- expected to be in ISO 8601 format
+        , lastUpdatedDateAsIso8601 : Maybe String
         }
 
 
@@ -50,7 +50,7 @@ init preferredTerm_ alternativeTerms_ definitions_ relatedTerms_ needsUpdating_ 
         , definitions = definitions_
         , relatedPreferredTerms = relatedTerms_
         , needsUpdating = needsUpdating_
-        , lastUpdatedDate = lastUpdatedDate_
+        , lastUpdatedDateAsIso8601 = lastUpdatedDate_
         }
 
 
@@ -100,7 +100,7 @@ decode enableMarkdownBasedSyntax =
                 , definitions = definitions_
                 , relatedPreferredTerms = relatedTerms_
                 , needsUpdating = needsUpdating_
-                , lastUpdatedDate = lastUpdatedDate_
+                , lastUpdatedDateAsIso8601 = lastUpdatedDate_
                 }
         )
         (Decode.field "preferredTerm" <| Term.decode enableMarkdownBasedSyntax)
@@ -189,7 +189,7 @@ lastUpdatedDate : GlossaryItem -> Maybe String
 lastUpdatedDate glossaryItem =
     case glossaryItem of
         GlossaryItem item ->
-            item.lastUpdatedDate
+            item.lastUpdatedDateAsIso8601
 
 
 {-| Update a glossary item's relatd terms.
@@ -272,7 +272,7 @@ toHtmlTree glossaryItem =
         GlossaryItem item ->
             HtmlTree.Node "div"
                 True
-                (item.lastUpdatedDate
+                (item.lastUpdatedDateAsIso8601
                     |> Maybe.map
                         (\lastUpdatedDate_ ->
                             [ HtmlTree.Attribute "data-last-updated" lastUpdatedDate_ ]
