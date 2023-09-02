@@ -50,8 +50,13 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
     Extras.Html.showMaybe
         (\( index, glossaryItem ) ->
             let
-                terms =
-                    GlossaryItem.allTerms glossaryItem
+                preferredTerm : Term
+                preferredTerm =
+                    GlossaryItem.preferredTerm glossaryItem
+
+                alternativeTerms : List Term
+                alternativeTerms =
+                    GlossaryItem.alternativeTerms glossaryItem
 
                 itemHasSomeDefinitions : Bool
                 itemHasSomeDefinitions =
@@ -80,14 +85,20 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                     in
                     div
                         [ Html.Attributes.style "max-height" "100%" ]
-                        (List.map
-                            (viewGlossaryTerm
-                                { enableMathSupport = enableMathSupport
-                                , tabbable = tabbable
-                                , showSilcrow = False
-                                }
-                            )
-                            terms
+                        (viewGlossaryTerm
+                            { enableMathSupport = enableMathSupport
+                            , tabbable = tabbable
+                            , showSilcrow = False
+                            }
+                            preferredTerm
+                            :: List.map
+                                (viewGlossaryTerm
+                                    { enableMathSupport = enableMathSupport
+                                    , tabbable = tabbable
+                                    , showSilcrow = False
+                                    }
+                                )
+                                alternativeTerms
                             ++ (if GlossaryItem.needsUpdating glossaryItem then
                                     [ Html.dd
                                         [ class "needs-updating" ]
@@ -159,14 +170,20 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                         ]
                                 , div
                                     []
-                                    (List.map
-                                        (viewGlossaryTerm
-                                            { enableMathSupport = enableMathSupport
-                                            , tabbable = tabbable
-                                            , showSilcrow = True
-                                            }
-                                        )
-                                        terms
+                                    (viewGlossaryTerm
+                                        { enableMathSupport = enableMathSupport
+                                        , tabbable = tabbable
+                                        , showSilcrow = True
+                                        }
+                                        preferredTerm
+                                        :: List.map
+                                            (viewGlossaryTerm
+                                                { enableMathSupport = enableMathSupport
+                                                , tabbable = tabbable
+                                                , showSilcrow = False
+                                                }
+                                            )
+                                            alternativeTerms
                                         ++ (if needsUpdating then
                                                 [ Html.dd
                                                     [ class "needs-updating" ]
@@ -259,14 +276,20 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                         ]
                                     ]
                                 , div []
-                                    (List.map
-                                        (viewGlossaryTerm
-                                            { enableMathSupport = enableMathSupport
-                                            , tabbable = tabbable
-                                            , showSilcrow = True
-                                            }
-                                        )
-                                        terms
+                                    (viewGlossaryTerm
+                                        { enableMathSupport = enableMathSupport
+                                        , tabbable = tabbable
+                                        , showSilcrow = True
+                                        }
+                                        preferredTerm
+                                        :: List.map
+                                            (viewGlossaryTerm
+                                                { enableMathSupport = enableMathSupport
+                                                , tabbable = tabbable
+                                                , showSilcrow = False
+                                                }
+                                            )
+                                            alternativeTerms
                                         ++ (if needsUpdating then
                                                 [ Html.dd
                                                     [ class "needs-updating" ]
@@ -479,7 +502,7 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow } term =
             [ class "group" ]
             [ span [ class "mr-1.5 hidden print:inline" ] [ text "➢" ]
             , Html.dfn
-                [ Html.Attributes.id <| TermId.toString <| Term.id term ]
+                [ Extras.HtmlAttribute.showIf showSilcrow <| Html.Attributes.id <| TermId.toString <| Term.id term ]
                 [ if Term.isAbbreviation term then
                     Html.abbr [] [ Term.view enableMathSupport [] term ]
 
