@@ -8,6 +8,7 @@ module Icons exposing
     , chevronDown
     , computerDesktop
     , copy
+    , cornerDownRight
     , documentDownload
     , ellipsisVertical
     , exclamation
@@ -663,5 +664,24 @@ copy =
             []
         , path
             [ d "m15 10-4 4 4 4" ]
+            []
+        ]
+
+
+cornerDownRight : List (Html.Attribute msg) -> Html msg
+cornerDownRight =
+    withAdditionalAttributes
+        [ fill "none"
+        , viewBox "0 0 24 24"
+        , strokeWidth "2"
+        , stroke "currentColor"
+        , strokeLinecap "round"
+        , strokeLinejoin "round"
+        ]
+        [ polyline
+            [ points "15 10 20 15 15 20" ]
+            []
+        , path
+            [ d "M4 4v7a4 4 0 0 0 4 4h12" ]
             []
         ]

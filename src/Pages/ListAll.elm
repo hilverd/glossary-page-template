@@ -46,7 +46,7 @@ import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.FeatureFlag exposing (enableTopicsFeature)
 import Data.Glossary as Glossary exposing (Glossary)
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem, preferredTerm)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -57,6 +57,7 @@ import Data.GlossaryTitle as GlossaryTitle
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Saving exposing (Saving(..))
+import Data.TermIndex exposing (TermIndex)
 import Data.Theme exposing (Theme(..))
 import Dict
 import ElementIds
@@ -1051,21 +1052,51 @@ viewSettings glossary model =
         ]
 
 
-viewTermIndexItem : Bool -> Bool -> Term -> Html Msg
-viewTermIndexItem enableMathSupport tabbable term =
-    li []
-        [ Html.a
-            [ class "block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
-            , Html.Attributes.href <| fragmentOnly <| TermId.toString <| Term.id term
-            , Accessibility.Key.tabbable tabbable
-            , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
+viewTermIndexItem : Bool -> Bool -> IndexOfTerms.Entry -> List (Html Msg)
+viewTermIndexItem enableMathSupport tabbable entry =
+    case entry of
+        IndexOfTerms.PreferredTerm term ->
+            [ li []
+                [ Html.a
+                    [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
+                    , Html.Attributes.href <| fragmentOnly <| TermId.toString <| Term.id term
+                    , Accessibility.Key.tabbable tabbable
+                    , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
+                    ]
+                    [ Term.view enableMathSupport [] term ]
+                ]
             ]
-            [ Term.view enableMathSupport [] term ]
-        ]
+
+        IndexOfTerms.AlternativeTerm term preferredTerms ->
+            li []
+                [ Html.span
+                    [ class "block border-l pl-4 -ml-px border-transparent text-slate-700 dark:text-slate-400 select-none" ]
+                    [ Term.view enableMathSupport [] term ]
+                ]
+                :: List.map
+                    (\preferredTerm ->
+                        li []
+                            [ Html.a
+                                [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
+                                , Html.Attributes.href <| fragmentOnly <| TermId.toString <| Term.id preferredTerm
+                                , Accessibility.Key.tabbable tabbable
+                                , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
+                                ]
+                                [ span
+                                    [ class "inline-flex items-center group-hover:underline" ]
+                                    [ Icons.cornerDownRight
+                                        [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300"
+                                        ]
+                                    , Term.view enableMathSupport [] preferredTerm
+                                    ]
+                                ]
+                            ]
+                    )
+                    preferredTerms
 
 
 viewTermIndexGroup : Bool -> Bool -> Bool -> TermGroup -> Html Msg
-viewTermIndexGroup enableMathSupport tabbable staticSidebar { label, terms } =
+viewTermIndexGroup enableMathSupport tabbable staticSidebar { label, entries } =
     li
         [ id <| ElementIds.termIndexGroupLabel staticSidebar label
         , class "mt-6"
@@ -1075,7 +1106,7 @@ viewTermIndexGroup enableMathSupport tabbable staticSidebar { label, terms } =
             [ text label ]
         , ul
             [ class "space-y-6 lg:space-y-2 border-l border-slate-200 dark:border-slate-600" ]
-            (List.map (viewTermIndexItem enableMathSupport tabbable) terms)
+            (List.concatMap (viewTermIndexItem enableMathSupport tabbable) entries)
         ]
 
 
@@ -1092,7 +1123,7 @@ viewIndexOfTerms enableMathSupport tabbable staticSidebar indexOfTerms =
         ]
         (List.filterMap
             (\termIndexGroup ->
-                if List.isEmpty termIndexGroup.terms then
+                if List.isEmpty termIndexGroup.entries then
                     Nothing
 
                 else
@@ -1633,7 +1664,7 @@ viewTermIndexFirstCharacterGrid staticSidebar tabbable indexOfTerms =
                     staticSidebar
                     tabbable
                     termIndexGroup.label
-                    (not <| List.isEmpty termIndexGroup.terms)
+                    (not <| List.isEmpty termIndexGroup.entries)
             )
             termGroups
         )

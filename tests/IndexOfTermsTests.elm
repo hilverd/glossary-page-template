@@ -79,33 +79,38 @@ suite =
                     |> IndexOfTerms.fromGlossaryItems
                     |> IndexOfTerms.termGroups
                     |> Expect.equal
-                        [ { label = "A", terms = [] }
-                        , { label = "B", terms = [] }
-                        , { label = "C", terms = [] }
-                        , { label = "D", terms = [] }
-                        , { label = "E", terms = [] }
-                        , { label = "F", terms = [ termFromBody "_future_" ] }
-                        , { label = "G", terms = [] }
-                        , { label = "H", terms = [] }
-                        , { label = "I", terms = [] }
-                        , { label = "J", terms = [] }
-                        , { label = "K", terms = [] }
-                        , { label = "L", terms = [] }
-                        , { label = "M", terms = [] }
-                        , { label = "N", terms = [] }
-                        , { label = "O", terms = [ termFromBody "Óne" ] }
-                        , { label = "P", terms = [] }
-                        , { label = "Q", terms = [] }
-                        , { label = "R", terms = [] }
-                        , { label = "S", terms = [] }
-                        , { label = "T", terms = [ termFromBody "3Three", termFromBody "Two" ] }
-                        , { label = "U", terms = [] }
-                        , { label = "V", terms = [] }
-                        , { label = "W", terms = [] }
-                        , { label = "X", terms = [] }
-                        , { label = "Y", terms = [] }
-                        , { label = "Z", terms = [] }
-                        , { label = "…", terms = [ termFromBody "007" ] }
+                        [ { label = "A", entries = [] }
+                        , { label = "B", entries = [] }
+                        , { label = "C", entries = [] }
+                        , { label = "D", entries = [] }
+                        , { label = "E", entries = [] }
+                        , { label = "F", entries = [ IndexOfTerms.PreferredTerm <| termFromBody "_future_" ] }
+                        , { label = "G", entries = [] }
+                        , { label = "H", entries = [] }
+                        , { label = "I", entries = [] }
+                        , { label = "J", entries = [] }
+                        , { label = "K", entries = [] }
+                        , { label = "L", entries = [] }
+                        , { label = "M", entries = [] }
+                        , { label = "N", entries = [] }
+                        , { label = "O", entries = [ IndexOfTerms.PreferredTerm <| termFromBody "Óne" ] }
+                        , { label = "P", entries = [] }
+                        , { label = "Q", entries = [] }
+                        , { label = "R", entries = [] }
+                        , { label = "S", entries = [] }
+                        , { label = "T"
+                          , entries =
+                                [ IndexOfTerms.PreferredTerm <| termFromBody "3Three"
+                                , IndexOfTerms.PreferredTerm <| termFromBody "Two"
+                                ]
+                          }
+                        , { label = "U", entries = [] }
+                        , { label = "V", entries = [] }
+                        , { label = "W", entries = [] }
+                        , { label = "X", entries = [] }
+                        , { label = "Y", entries = [] }
+                        , { label = "Z", entries = [] }
+                        , { label = "…", entries = [ IndexOfTerms.PreferredTerm <| termFromBody "007" ] }
                         ]
         , test "doesn't include ellipsis if not needed" <|
             \_ ->
@@ -114,31 +119,31 @@ suite =
                     |> IndexOfTerms.fromGlossaryItems
                     |> IndexOfTerms.termGroups
                     |> Expect.equal
-                        [ { label = "A", terms = [] }
-                        , { label = "B", terms = [] }
-                        , { label = "C", terms = [] }
-                        , { label = "D", terms = [] }
-                        , { label = "E", terms = [] }
-                        , { label = "F", terms = [] }
-                        , { label = "G", terms = [] }
-                        , { label = "H", terms = [] }
-                        , { label = "I", terms = [] }
-                        , { label = "J", terms = [] }
-                        , { label = "K", terms = [] }
-                        , { label = "L", terms = [] }
-                        , { label = "M", terms = [] }
-                        , { label = "N", terms = [] }
-                        , { label = "O", terms = [] }
-                        , { label = "P", terms = [] }
-                        , { label = "Q", terms = [] }
-                        , { label = "R", terms = [] }
-                        , { label = "S", terms = [] }
-                        , { label = "T", terms = [] }
-                        , { label = "U", terms = [] }
-                        , { label = "V", terms = [] }
-                        , { label = "W", terms = [] }
-                        , { label = "X", terms = [] }
-                        , { label = "Y", terms = [] }
-                        , { label = "Z", terms = [] }
+                        [ { label = "A", entries = [] }
+                        , { label = "B", entries = [] }
+                        , { label = "C", entries = [] }
+                        , { label = "D", entries = [] }
+                        , { label = "E", entries = [] }
+                        , { label = "F", entries = [] }
+                        , { label = "G", entries = [] }
+                        , { label = "H", entries = [] }
+                        , { label = "I", entries = [] }
+                        , { label = "J", entries = [] }
+                        , { label = "K", entries = [] }
+                        , { label = "L", entries = [] }
+                        , { label = "M", entries = [] }
+                        , { label = "N", entries = [] }
+                        , { label = "O", entries = [] }
+                        , { label = "P", entries = [] }
+                        , { label = "Q", entries = [] }
+                        , { label = "R", entries = [] }
+                        , { label = "S", entries = [] }
+                        , { label = "T", entries = [] }
+                        , { label = "U", entries = [] }
+                        , { label = "V", entries = [] }
+                        , { label = "W", entries = [] }
+                        , { label = "X", entries = [] }
+                        , { label = "Y", entries = [] }
+                        , { label = "Z", entries = [] }
                         ]
         ]
