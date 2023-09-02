@@ -2092,9 +2092,6 @@ viewOrderItemsBy model numberOfItems enableMathSupport preferredTermsWithDefinit
                         [ span
                             [ class "mr-2" ]
                             [ text "focused on"
-                            , Html.sup
-                                [ class "ml-1.5 text-gray-600 dark:text-gray-400" ]
-                                [ text "BETA" ]
                             ]
                         , Components.SelectMenu.render
                             [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect
