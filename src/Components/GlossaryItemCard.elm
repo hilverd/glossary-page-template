@@ -4,7 +4,7 @@ import Accessibility exposing (Html, div, span, text)
 import Accessibility.Aria
 import Accessibility.Key
 import Components.Button
-import Data.FeatureFlag exposing (enableTopicsFeature)
+import Data.FeatureFlag exposing (enableTagsFeature)
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
@@ -115,7 +115,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                 (viewGlossaryItemDefinition
                                     { enableMathSupport = enableMathSupport
                                     , tabbable = makeLinksTabbable
-                                    , topicsClickable = False
+                                    , tagsClickable = False
                                     }
                                 )
                                 definitions
@@ -200,7 +200,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                             (viewGlossaryItemDefinition
                                                 { enableMathSupport = enableMathSupport
                                                 , tabbable = makeLinksTabbable
-                                                , topicsClickable = makeLinksTabbable
+                                                , tagsClickable = makeLinksTabbable
                                                 }
                                             )
                                             definitions
@@ -306,7 +306,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                             (viewGlossaryItemDefinition
                                                 { enableMathSupport = enableMathSupport
                                                 , tabbable = makeLinksTabbable
-                                                , topicsClickable = makeLinksTabbable
+                                                , tagsClickable = makeLinksTabbable
                                                 }
                                             )
                                             definitions
@@ -462,7 +462,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                             (viewGlossaryItemDefinition
                                 { enableMathSupport = enableMathSupport
                                 , tabbable = True
-                                , topicsClickable = False
+                                , tagsClickable = False
                                 }
                             )
                             definitions
@@ -522,20 +522,20 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow } term =
         ]
 
 
-viewGlossaryItemDefinition : { enableMathSupport : Bool, tabbable : Bool, topicsClickable : Bool } -> Definition -> Html msg
-viewGlossaryItemDefinition { enableMathSupport, tabbable, topicsClickable } definition =
+viewGlossaryItemDefinition : { enableMathSupport : Bool, tabbable : Bool, tagsClickable : Bool } -> Definition -> Html msg
+viewGlossaryItemDefinition { enableMathSupport, tabbable, tagsClickable } definition =
     Html.dd
         []
         [ Definition.view { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable } definition
-        , Extras.Html.showIf enableTopicsFeature <|
+        , Extras.Html.showIf enableTagsFeature <|
             Html.div
                 [ class "mt-4" ]
                 [ Components.Button.softSmall
-                    topicsClickable
+                    tagsClickable
                     [ class "mr-2 mb-2"
-                    , Html.Attributes.title "Topic: First Topic"
+                    , Html.Attributes.title "Tag: First Tag"
                     ]
-                    [ text "First Topic" ]
+                    [ text "First Tag" ]
                 ]
         ]
 

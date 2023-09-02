@@ -15,7 +15,7 @@ import Components.Form
 import Components.GlossaryItemCard
 import Components.SelectMenu
 import Components.Spinner
-import Data.FeatureFlag exposing (enableTopicsFeature)
+import Data.FeatureFlag exposing (enableTagsFeature)
 import Data.Glossary as Glossary
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
@@ -648,36 +648,36 @@ viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathS
             p
                 [ class "mt-2 text-red-800 dark:text-red-200" ]
                 [ text "This will be turned into a single paragraph — line breaks are automatically converted to spaces" ]
-        , Extras.Html.showIf enableTopicsFeature <|
+        , Extras.Html.showIf enableTagsFeature <|
             div
                 [ class "mt-4" ]
                 [ Components.Badge.withCheckbox
                     True
-                    "First Topic"
+                    "First Tag"
                     [ class "mr-2 mb-2" ]
                 , Components.Badge.withCheckbox
                     True
-                    "Second Topic"
+                    "Second Tag"
                     [ class "mr-2 mb-2" ]
                 , Components.Badge.withCheckbox
                     True
-                    "First Topic"
+                    "First Tag"
                     [ class "mr-2 mb-2" ]
                 , Components.Badge.withCheckbox
                     True
-                    "First Topic"
+                    "First Tag"
                     [ class "mr-2 mb-2" ]
                 , Components.Badge.withCheckbox
                     True
-                    "First Topic"
+                    "First Tag"
                     [ class "mr-2 mb-2" ]
                 , Components.Badge.withCheckbox
                     True
-                    "First Topic"
+                    "First Tag"
                     [ class "mr-2 mb-2" ]
                 , Components.Badge.withCheckbox
                     True
-                    "First Topic"
+                    "First Tag"
                     [ class "mr-2 mb-2" ]
                 ]
         ]
