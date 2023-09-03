@@ -673,7 +673,7 @@ cornerDownRight =
     withAdditionalAttributes
         [ fill "none"
         , viewBox "0 0 24 24"
-        , strokeWidth "2"
+        , strokeWidth "1.5"
         , stroke "currentColor"
         , strokeLinecap "round"
         , strokeLinejoin "round"
