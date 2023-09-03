@@ -13,14 +13,14 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 
-- Add a small "Built using Glossary Page Template" footer to the list page.
 - Show spinner while saving changes.
+- Add a small "Built using Glossary Page Template" footer to the list page.
 
 ### Changed
 
-- Show "Make changes" button when Node.js backend is running. This is to make it easier to see the glossary in "read-only" mode.
 - Make the concept of a _preferred term_ (and _alternative terms_) clearer in the UI.
-- Only allow one definition per item.
+- Only allow one definition per item, but allow items to have alternative terms in common.
+- Show "Make changes" button when Node.js backend is running. This is to make it easier to see the glossary in "read-only" mode.
 
 ### Fixed
 ### Removed
