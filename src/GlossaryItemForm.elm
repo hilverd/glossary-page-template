@@ -161,8 +161,8 @@ validate form =
                     )
                     Dict.empty
 
-        validateTermField : TermField -> TermField
-        validateTermField termField =
+        validateTermField : Bool -> TermField -> TermField
+        validateTermField isPreferredTerm termField =
             let
                 body : String
                 body =
@@ -179,7 +179,7 @@ validate form =
                             termId =
                                 termBodyToId body
                         in
-                        if Set.member termId termIdsOutsideSet then
+                        if isPreferredTerm && Set.member termId termIdsOutsideSet then
                             Just "This term already exists elsewhere"
 
                         else if (Dict.get termId termIdsInsideForm |> Maybe.withDefault 0) > 1 then
@@ -194,11 +194,11 @@ validate form =
 
         validatedPreferredTermField : TermField
         validatedPreferredTermField =
-            form |> preferredTermField |> validateTermField
+            form |> preferredTermField |> validateTermField True
 
         validatedAlternativeTermFields : Array TermField
         validatedAlternativeTermFields =
-            form |> alternativeTermFields |> Array.map validateTermField
+            form |> alternativeTermFields |> Array.map (validateTermField False)
 
         validatedDefinitionField : DefinitionField
         validatedDefinitionField =
