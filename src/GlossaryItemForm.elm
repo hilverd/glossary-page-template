@@ -537,16 +537,28 @@ updateDefinition : GlossaryItemForm -> String -> GlossaryItemForm
 updateDefinition glossaryItemForm body =
     case glossaryItemForm of
         GlossaryItemForm form ->
+            let
+                needsUpdating1 : Bool
+                needsUpdating1 =
+                    if not (formHasDefinitionOrRelatedTerms glossaryItemForm) && form.needsUpdating then
+                        False
+
+                    else
+                        form.needsUpdating
+            in
             GlossaryItemForm
-                { form | definitionField = DefinitionField.fromString body }
+                { form
+                    | definitionField = DefinitionField.fromString body
+                    , needsUpdating = needsUpdating1
+                }
                 |> validate
 
 
-formHasDefinitionsOrRelatedTerms : GlossaryItemForm -> Bool
-formHasDefinitionsOrRelatedTerms glossaryItemForm =
+formHasDefinitionOrRelatedTerms : GlossaryItemForm -> Bool
+formHasDefinitionOrRelatedTerms glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
-            form.definitionField /= DefinitionField.empty
+            form.definitionField /= DefinitionField.empty || form.relatedTermFields /= Array.empty
 
 
 addRelatedTerm : Maybe TermId -> GlossaryItemForm -> GlossaryItemForm
@@ -562,7 +574,7 @@ addRelatedTerm maybeTermId glossaryItemForm =
 
                 needsUpdating1 : Bool
                 needsUpdating1 =
-                    if not (formHasDefinitionsOrRelatedTerms glossaryItemForm) && form.needsUpdating then
+                    if not (formHasDefinitionOrRelatedTerms glossaryItemForm) && form.needsUpdating then
                         False
 
                     else
