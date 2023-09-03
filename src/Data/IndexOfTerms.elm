@@ -47,34 +47,7 @@ fromGlossaryItems glossaryItems =
     let
         preferredTermsByAlternativeTermId : Dict String (List Term)
         preferredTermsByAlternativeTermId =
-            glossaryItems
-                |> GlossaryItems.orderedAlphabetically
-                |> Array.map Tuple.second
-                |> Array.foldl
-                    (\item result ->
-                        let
-                            preferredTerm =
-                                GlossaryItem.preferredTerm item
-
-                            alternativeTerms_ =
-                                GlossaryItem.alternativeTerms item
-                        in
-                        alternativeTerms_
-                            |> List.foldl
-                                (\alternativeTerm result_ ->
-                                    Dict.update
-                                        (alternativeTerm |> Term.id |> TermId.toString)
-                                        (\preferredTerms_ ->
-                                            preferredTerms_
-                                                |> Maybe.map (\terms -> preferredTerm :: terms)
-                                                |> Maybe.withDefault [ preferredTerm ]
-                                                |> Just
-                                        )
-                                        result_
-                                )
-                                result
-                    )
-                    Dict.empty
+            GlossaryItems.preferredTermsByAlternativeTermId glossaryItems
 
         preferredTerms : List Term
         preferredTerms =
@@ -85,23 +58,7 @@ fromGlossaryItems glossaryItems =
 
         alternativeTerms : List Term
         alternativeTerms =
-            glossaryItems
-                |> GlossaryItems.orderedAlphabetically
-                |> Array.map Tuple.second
-                |> Array.foldl
-                    (\item result ->
-                        item
-                            |> GlossaryItem.alternativeTerms
-                            |> List.foldl
-                                (\alternativeTerm ->
-                                    Dict.insert
-                                        (alternativeTerm |> Term.id |> TermId.toString)
-                                        alternativeTerm
-                                )
-                                result
-                    )
-                    Dict.empty
-                |> Dict.values
+            GlossaryItems.alternativeTerms glossaryItems
 
         entryListsByFirstAlphabeticCharacterOrEllpisis : Dict String (List Entry)
         entryListsByFirstAlphabeticCharacterOrEllpisis =

@@ -1,11 +1,11 @@
-module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, preferredTermIdsToIndexes, get, insert, update, remove, terms, preferredTerms, preferredTermsWithDefinitions, enableFocusingOn)
+module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, preferredTermIdsToIndexes, get, insert, update, remove, terms, preferredTerms, preferredTermsWithDefinitions, enableFocusingOn, preferredTermsByAlternativeTermId, alternativeTerms)
 
 {-| A set of glossary items that make up a glossary.
 
 
 # Glossary Items
 
-@docs GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, preferredTermIdsToIndexes, get, insert, update, remove, terms, preferredTerms, preferredTermsWithDefinitions, enableFocusingOn
+@docs GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, preferredTermIdsToIndexes, get, insert, update, remove, terms, preferredTerms, preferredTermsWithDefinitions, enableFocusingOn, preferredTermsByAlternativeTermId, alternativeTerms
 
 -}
 
@@ -484,3 +484,58 @@ enableFocusingOn termId glossaryItems =
                             )
             in
             GlossaryItems { items | orderedFocusedOn = Just ( termId, itemsByDistance ) }
+
+
+{-| Retrieve a dict mapping the ID of each alternative term to a list of all preferred terms that occur an an item together with the alternative term.
+-}
+preferredTermsByAlternativeTermId : GlossaryItems -> Dict String (List Term)
+preferredTermsByAlternativeTermId =
+    orderedAlphabetically
+        >> Array.map Tuple.second
+        >> Array.foldl
+            (\item result ->
+                let
+                    preferredTerm =
+                        GlossaryItem.preferredTerm item
+
+                    alternativeTerms_ =
+                        GlossaryItem.alternativeTerms item
+                in
+                alternativeTerms_
+                    |> List.foldl
+                        (\alternativeTerm result_ ->
+                            Dict.update
+                                (alternativeTerm |> Term.id |> TermId.toString)
+                                (\preferredTerms_ ->
+                                    preferredTerms_
+                                        |> Maybe.map (\terms_ -> preferredTerm :: terms_)
+                                        |> Maybe.withDefault [ preferredTerm ]
+                                        |> Just
+                                )
+                                result_
+                        )
+                        result
+            )
+            Dict.empty
+
+
+{-| A list of all alternative terms in the items, with duplicates removed.
+-}
+alternativeTerms : GlossaryItems -> List Term
+alternativeTerms =
+    orderedAlphabetically
+        >> Array.map Tuple.second
+        >> Array.foldl
+            (\item result ->
+                item
+                    |> GlossaryItem.alternativeTerms
+                    |> List.foldl
+                        (\alternativeTerm ->
+                            Dict.insert
+                                (alternativeTerm |> Term.id |> TermId.toString)
+                                alternativeTerm
+                        )
+                        result
+            )
+            Dict.empty
+        >> Dict.values
