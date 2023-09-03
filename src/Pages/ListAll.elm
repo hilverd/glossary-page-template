@@ -1070,7 +1070,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
         IndexOfTerms.AlternativeTerm term preferredTerms ->
             li []
                 [ Html.span
-                    [ class "block border-l pl-4 -ml-px border-transparent text-slate-700 dark:text-slate-400 select-none" ]
+                    [ class "block border-l pl-4 -ml-px border-transparent text-slate-600 dark:text-slate-400 font-light select-none" ]
                     [ Term.view enableMathSupport [] term ]
                 ]
                 :: List.map
