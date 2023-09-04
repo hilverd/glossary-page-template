@@ -965,13 +965,18 @@ viewAddSuggestedSeeAlso enableMathSupport suggestedRelatedTerms =
         ]
 
 
-viewNeedsUpdating :
+viewMiscellaneous :
     Bool
     -> Html Msg
-viewNeedsUpdating on =
+viewMiscellaneous on =
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
-        [ Components.Button.toggle
+        [ div []
+            [ h2
+                [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
+                [ text "Miscellaneous" ]
+            ]
+        , Components.Button.toggle
             on
             ElementIds.needsUpdatingToggleLabel
             [ Html.Events.onClick <| PageMsg.Internal <| ToggleNeedsUpdating ]
@@ -1091,21 +1096,15 @@ view model =
                                         definitionArray
                                     , Extras.Html.showIf enableTagsFeature <|
                                         viewTags
-                                    , div
-                                        []
-                                        [ viewCreateSeeAlso
-                                            glossary.enableMathSupport
-                                            model.triedToSaveWhenFormInvalid
-                                            glossary.items
-                                            terms
-                                            relatedTerms
-                                            model.dropdownMenusWithMoreOptionsForRelatedTerms
-                                            suggestedRelatedTerms
-                                        , Components.Dividers.withLabel
-                                            [ class "mt-8" ]
-                                            "Miscellaneous"
-                                        , viewNeedsUpdating <| Form.needsUpdating model.form
-                                        ]
+                                    , viewCreateSeeAlso
+                                        glossary.enableMathSupport
+                                        model.triedToSaveWhenFormInvalid
+                                        glossary.items
+                                        terms
+                                        relatedTerms
+                                        model.dropdownMenusWithMoreOptionsForRelatedTerms
+                                        suggestedRelatedTerms
+                                    , viewMiscellaneous <| Form.needsUpdating model.form
                                     ]
                                 , div
                                     [ class "mt-8 lg:w-1/2 lg:mt-0 max-w-4xl text-gray-900 dark:text-gray-100" ]
