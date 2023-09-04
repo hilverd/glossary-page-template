@@ -89,6 +89,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                             { enableMathSupport = enableMathSupport
                             , tabbable = tabbable
                             , showSilcrow = False
+                            , isPreferred = True
                             }
                             preferredTerm
                             :: List.map
@@ -96,6 +97,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                     { enableMathSupport = enableMathSupport
                                     , tabbable = tabbable
                                     , showSilcrow = False
+                                    , isPreferred = False
                                     }
                                 )
                                 alternativeTerms
@@ -174,6 +176,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                         { enableMathSupport = enableMathSupport
                                         , tabbable = tabbable
                                         , showSilcrow = True
+                                        , isPreferred = True
                                         }
                                         preferredTerm
                                         :: List.map
@@ -181,6 +184,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                 { enableMathSupport = enableMathSupport
                                                 , tabbable = tabbable
                                                 , showSilcrow = False
+                                                , isPreferred = False
                                                 }
                                             )
                                             alternativeTerms
@@ -280,6 +284,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                         { enableMathSupport = enableMathSupport
                                         , tabbable = tabbable
                                         , showSilcrow = True
+                                        , isPreferred = True
                                         }
                                         preferredTerm
                                         :: List.map
@@ -287,6 +292,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                 { enableMathSupport = enableMathSupport
                                                 , tabbable = tabbable
                                                 , showSilcrow = False
+                                                , isPreferred = False
                                                 }
                                             )
                                             alternativeTerms
@@ -369,8 +375,11 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
     Extras.Html.showMaybe
         (\( _, glossaryItem ) ->
             let
-                terms =
-                    GlossaryItem.allTerms glossaryItem
+                preferredTerm =
+                    GlossaryItem.preferredTerm glossaryItem
+
+                alternativeTerms =
+                    GlossaryItem.alternativeTerms glossaryItem
 
                 definitions =
                     GlossaryItem.definition glossaryItem
@@ -408,14 +417,22 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                         ]
                     , Html.div
                         [ class "hidden md:-mt-px md:flex md:flex-col px-3" ]
-                        (List.map
-                            (viewGlossaryTerm
-                                { enableMathSupport = enableMathSupport
-                                , tabbable = True
-                                , showSilcrow = False
-                                }
-                            )
-                            terms
+                        (viewGlossaryTerm
+                            { enableMathSupport = enableMathSupport
+                            , tabbable = True
+                            , showSilcrow = False
+                            , isPreferred = True
+                            }
+                            preferredTerm
+                            :: List.map
+                                (viewGlossaryTerm
+                                    { enableMathSupport = enableMathSupport
+                                    , tabbable = True
+                                    , showSilcrow = False
+                                    , isPreferred = False
+                                    }
+                                )
+                                alternativeTerms
                         )
                     , Html.div
                         [ class "-mt-px flex w-0 flex-1 justify-end" ]
@@ -435,14 +452,22 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                     ]
                 , Html.div
                     [ class "md:hidden mt-4" ]
-                    (List.map
-                        (viewGlossaryTerm
-                            { enableMathSupport = enableMathSupport
-                            , tabbable = True
-                            , showSilcrow = False
-                            }
-                        )
-                        terms
+                    (viewGlossaryTerm
+                        { enableMathSupport = enableMathSupport
+                        , tabbable = True
+                        , showSilcrow = False
+                        , isPreferred = True
+                        }
+                        preferredTerm
+                        :: List.map
+                            (viewGlossaryTerm
+                                { enableMathSupport = enableMathSupport
+                                , tabbable = True
+                                , showSilcrow = False
+                                , isPreferred = False
+                                }
+                            )
+                            alternativeTerms
                     )
                 , Html.div
                     [ class "mt-4" ]
@@ -494,8 +519,25 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
         glossaryItemWithPreviousAndNext.item
 
 
-viewGlossaryTerm : { enableMathSupport : Bool, tabbable : Bool, showSilcrow : Bool } -> Term -> Html msg
-viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow } term =
+viewGlossaryTerm :
+    { enableMathSupport : Bool, tabbable : Bool, showSilcrow : Bool, isPreferred : Bool }
+    -> Term
+    -> Html msg
+viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term =
+    let
+        viewTerm =
+            if isPreferred then
+                Term.view enableMathSupport [] term
+
+            else
+                span
+                    [ class "inline-flex items-center" ]
+                    [ Icons.cornerLeftUp
+                        [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-1 mr-1.5 text-gray-400 dark:text-gray-400"
+                        ]
+                    , Term.view enableMathSupport [] term
+                    ]
+    in
     div
         [ class "flex justify-between" ]
         [ Html.dt
@@ -504,10 +546,11 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow } term =
             , Html.dfn
                 [ Extras.HtmlAttribute.showIf showSilcrow <| Html.Attributes.id <| TermId.toString <| Term.id term ]
                 [ if Term.isAbbreviation term then
-                    Html.abbr [] [ Term.view enableMathSupport [] term ]
+                    Html.abbr []
+                        [ viewTerm ]
 
                   else
-                    Term.view enableMathSupport [] term
+                    viewTerm
                 ]
             , Extras.Html.showIf showSilcrow <|
                 span
