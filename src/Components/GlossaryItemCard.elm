@@ -526,10 +526,9 @@ viewGlossaryItemDefinition : { enableMathSupport : Bool, tabbable : Bool, tagsCl
 viewGlossaryItemDefinition { enableMathSupport, tabbable, tagsClickable } definition =
     Html.dd
         []
-        [ Definition.view { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable } definition
-        , Extras.Html.showIf enableTagsFeature <|
+        [ Extras.Html.showIf enableTagsFeature <|
             Html.div
-                [ class "mt-4" ]
+                [ class "mb-4" ]
                 [ Components.Button.softSmall
                     tagsClickable
                     [ class "mr-2 mb-2"
@@ -537,6 +536,7 @@ viewGlossaryItemDefinition { enableMathSupport, tabbable, tagsClickable } defini
                     ]
                     [ text "First Tag" ]
                 ]
+        , Definition.view { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable } definition
         ]
 
 
