@@ -597,13 +597,13 @@ viewCreateTerms markdownBasedSyntaxEnabled mathSupportEnabled showValidationErro
         ]
 
 
-viewCreateDefinitionSingle : Bool -> Bool -> Bool -> Bool -> DefinitionField -> Html Msg
-viewCreateDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionSingle =
-    viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionSingle
+viewDefinitionSingle : Bool -> Bool -> Bool -> Bool -> DefinitionField -> Html Msg
+viewDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionSingle =
+    viewDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionSingle
 
 
-viewCreateDefinitionSingle1 : Bool -> Bool -> Bool -> Bool -> DefinitionField -> Html Msg
-viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionSingle =
+viewDefinitionSingle1 : Bool -> Bool -> Bool -> Bool -> DefinitionField -> Html Msg
+viewDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionSingle =
     let
         raw : String
         raw =
@@ -683,8 +683,8 @@ viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathS
         ]
 
 
-viewCreateDefinition : Bool -> Bool -> Bool -> Bool -> DefinitionField -> Html Msg
-viewCreateDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionField =
+viewDefinition : Bool -> Bool -> Bool -> Bool -> DefinitionField -> Html Msg
+viewDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionField =
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
@@ -697,7 +697,7 @@ viewCreateDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportE
             ]
         , div
             [ class "space-y-6 sm:space-y-5" ]
-            [ viewCreateDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionField ]
+            [ viewDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionField ]
         ]
 
 
@@ -1069,7 +1069,7 @@ view model =
                                 [ div
                                     [ class "lg:w-1/2" ]
                                     [ viewCreateTerms glossary.enableMarkdownBasedSyntax glossary.enableMathSupport model.triedToSaveWhenFormInvalid terms
-                                    , viewCreateDefinition
+                                    , viewDefinition
                                         (not glossary.enableMarkdownBasedSyntax)
                                         glossary.enableMarkdownBasedSyntax
                                         glossary.enableMathSupport
