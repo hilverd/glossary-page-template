@@ -2018,7 +2018,7 @@ viewCurrentTagFilter tabbable =
         [ class "print:hidden pt-4 font-medium text-gray-900 dark:text-gray-100" ]
         [ span
             [ class "mr-2" ]
-            [ text "Only showing selected tag:" ]
+            [ text "Only showing items for tag:" ]
         , Components.Badge.withBorderAndRemoveButton
             tabbable
             [ class "mt-2" ]
