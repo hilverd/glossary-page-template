@@ -648,38 +648,6 @@ viewDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupport
             p
                 [ class "mt-2 text-red-800 dark:text-red-200" ]
                 [ text "This will be turned into a single paragraph — line breaks are automatically converted to spaces" ]
-        , Extras.Html.showIf enableTagsFeature <|
-            div
-                [ class "mt-4" ]
-                [ Components.Badge.withCheckbox
-                    True
-                    "First Tag"
-                    [ class "mr-2 mb-2" ]
-                , Components.Badge.withCheckbox
-                    True
-                    "Second Tag"
-                    [ class "mr-2 mb-2" ]
-                , Components.Badge.withCheckbox
-                    True
-                    "First Tag"
-                    [ class "mr-2 mb-2" ]
-                , Components.Badge.withCheckbox
-                    True
-                    "First Tag"
-                    [ class "mr-2 mb-2" ]
-                , Components.Badge.withCheckbox
-                    True
-                    "First Tag"
-                    [ class "mr-2 mb-2" ]
-                , Components.Badge.withCheckbox
-                    True
-                    "First Tag"
-                    [ class "mr-2 mb-2" ]
-                , Components.Badge.withCheckbox
-                    True
-                    "First Tag"
-                    [ class "mr-2 mb-2" ]
-                ]
         ]
 
 
@@ -698,6 +666,52 @@ viewDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled
         , div
             [ class "space-y-6 sm:space-y-5" ]
             [ viewDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionField ]
+        ]
+
+
+viewTags : Html Msg
+viewTags =
+    div
+        [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
+        [ div []
+            [ h2
+                [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
+                [ text "Tags" ]
+            , p
+                [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
+                [ text "Select any tags that apply to this item." ]
+            ]
+        , div
+            []
+            [ Components.Badge.withCheckbox
+                True
+                "First Tag"
+                [ class "mr-2 mb-2" ]
+            , Components.Badge.withCheckbox
+                True
+                "Second Tag"
+                [ class "mr-2 mb-2" ]
+            , Components.Badge.withCheckbox
+                True
+                "First Tag"
+                [ class "mr-2 mb-2" ]
+            , Components.Badge.withCheckbox
+                True
+                "First Tag"
+                [ class "mr-2 mb-2" ]
+            , Components.Badge.withCheckbox
+                True
+                "First Tag"
+                [ class "mr-2 mb-2" ]
+            , Components.Badge.withCheckbox
+                True
+                "First Tag"
+                [ class "mr-2 mb-2" ]
+            , Components.Badge.withCheckbox
+                True
+                "First Tag"
+                [ class "mr-2 mb-2" ]
+            ]
         ]
 
 
@@ -1075,6 +1089,8 @@ view model =
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
                                         definitionArray
+                                    , Extras.Html.showIf enableTagsFeature <|
+                                        viewTags
                                     , div
                                         []
                                         [ viewCreateSeeAlso
