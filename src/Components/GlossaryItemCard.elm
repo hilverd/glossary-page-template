@@ -539,7 +539,9 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term 
                     ]
     in
     div
-        [ class "flex justify-between" ]
+        [ class "flex justify-between"
+        , Extras.HtmlAttribute.showIf isPreferred <| class "mb-1"
+        ]
         [ Html.dt
             [ class "group" ]
             [ span [ class "mr-1.5 hidden print:inline" ] [ text "➢" ]
