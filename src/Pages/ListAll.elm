@@ -2440,6 +2440,7 @@ view model =
                                         [ text "Built using "
                                         , a
                                             [ Html.Attributes.target "_blank"
+                                            , Accessibility.Key.tabbable noModalDialogShown_
                                             , href "https://glossary.page/template"
                                             ]
                                             [ span
