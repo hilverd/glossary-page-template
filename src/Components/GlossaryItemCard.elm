@@ -579,7 +579,7 @@ viewGlossaryItemDefinition { enableMathSupport, tabbable, tagsClickable } defini
                     [ class "mr-2 mb-2"
                     , Html.Attributes.title "Tag: First Tag"
                     ]
-                    [ text "First Tag" ]
+                    [ text "Preferred vs alternative terms" ]
                 ]
         , Definition.view { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable } definition
         ]

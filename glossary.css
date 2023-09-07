@@ -56,6 +56,18 @@
     @apply text-3xl font-bold leading-tight;
   }
 
+  #glossary-page-tags > p {
+    @apply mb-4;
+  }
+
+  #glossary-page-tags > p > button {
+    @apply rounded-full bg-indigo-100 dark:bg-indigo-900 px-2 py-1 text-indigo-700 dark:text-indigo-100 shadow-sm ml-2 mb-2 cursor-default;
+  }
+
+  div#glossary-page-container[data-enable-markdown-based-syntax="true"]:not([data-markdown-rendered="true"]) #glossary-page-tags > p > button {
+    @apply font-mono whitespace-pre-wrap;
+  }
+
   article#glossary-page-items dl {
     @apply grid print:block print:space-y-5 gap-5;
   }
