@@ -1,4 +1,4 @@
-module Components.Badge exposing (withBorderAndRemoveButton, withCheckbox)
+module Components.Badge exposing (indigoWithBorderAndRemoveButton, indigoWithCheckbox)
 
 import Accessibility exposing (Attribute, Html, button, checkbox, span, text)
 import Accessibility.Key
@@ -7,8 +7,8 @@ import Icons
 import Svg.Attributes
 
 
-withBorderAndRemoveButton : Bool -> List (Attribute Never) -> String -> Html msg
-withBorderAndRemoveButton tabbable additionalAttributes label =
+indigoWithBorderAndRemoveButton : Bool -> List (Attribute Never) -> String -> Html msg
+indigoWithBorderAndRemoveButton tabbable additionalAttributes label =
     span
         (class "inline-flex items-center gap-x-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 px-2 py-1 font-medium text-indigo-800 dark:text-indigo-100" :: additionalAttributes)
         [ span
@@ -31,8 +31,8 @@ withBorderAndRemoveButton tabbable additionalAttributes label =
         ]
 
 
-withCheckbox : Bool -> String -> List (Attribute Never) -> Html msg
-withCheckbox tabbable label additionalAttributes =
+indigoWithCheckbox : Bool -> String -> List (Attribute Never) -> Html msg
+indigoWithCheckbox tabbable label additionalAttributes =
     span
         (class "inline-flex items-center gap-x-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 px-1 font-medium text-indigo-800 dark:text-indigo-100" :: additionalAttributes)
         [ span

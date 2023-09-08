@@ -683,31 +683,31 @@ viewTags =
             ]
         , div
             []
-            [ Components.Badge.withCheckbox
+            [ Components.Badge.indigoWithCheckbox
                 True
                 "First Tag"
                 [ class "mr-2 mb-2" ]
-            , Components.Badge.withCheckbox
+            , Components.Badge.indigoWithCheckbox
                 True
                 "Second Tag"
                 [ class "mr-2 mb-2" ]
-            , Components.Badge.withCheckbox
+            , Components.Badge.indigoWithCheckbox
                 True
                 "First Tag"
                 [ class "mr-2 mb-2" ]
-            , Components.Badge.withCheckbox
+            , Components.Badge.indigoWithCheckbox
                 True
                 "First Tag"
                 [ class "mr-2 mb-2" ]
-            , Components.Badge.withCheckbox
+            , Components.Badge.indigoWithCheckbox
                 True
                 "First Tag"
                 [ class "mr-2 mb-2" ]
-            , Components.Badge.withCheckbox
+            , Components.Badge.indigoWithCheckbox
                 True
                 "First Tag"
                 [ class "mr-2 mb-2" ]
-            , Components.Badge.withCheckbox
+            , Components.Badge.indigoWithCheckbox
                 True
                 "First Tag"
                 [ class "mr-2 mb-2" ]

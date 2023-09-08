@@ -1,4 +1,4 @@
-module Components.Button exposing (emptyState, primary, radio, rounded, roundedWithoutBorder, secondary, soft, softSmall, text, toggle, white)
+module Components.Button exposing (emptyState, primary, radio, rounded, roundedWithoutBorder, secondary, soft, softIndigo, softSmall, softSmallIndigo, text, toggle, white)
 
 import Accessibility exposing (Attribute)
 import Accessibility.Aria
@@ -95,8 +95,8 @@ rounded enabled =
         ]
 
 
-softSmall : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
-softSmall enabled =
+softSmallIndigo : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
+softSmallIndigo enabled =
     withAdditionalAttributes
         [ class "rounded-full bg-indigo-50 dark:bg-indigo-900 px-2 py-1 text-sm text-indigo-700 dark:text-indigo-100 shadow-sm"
         , Extras.HtmlAttribute.showIf enabled <| class "hover:bg-indigo-100 dark:hover:bg-indigo-700"
@@ -105,12 +105,40 @@ softSmall enabled =
         ]
 
 
-soft : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
-soft enabled =
+softIndigo : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
+softIndigo enabled =
     withAdditionalAttributes
         [ class "rounded-full bg-indigo-100 dark:bg-indigo-900 px-2 py-1 text-indigo-700 dark:text-indigo-100 shadow-sm"
         , if enabled then
             class "hover:bg-indigo-200 dark:hover:bg-indigo-700"
+
+          else
+            class "opacity-50"
+        , Html.Attributes.disabled <| not enabled
+        , Accessibility.Key.tabbable enabled
+        ]
+
+
+softSmall : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
+softSmall enabled =
+    withAdditionalAttributes
+        [ class "rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-700 dark:text-gray-100 shadow-sm"
+        , if enabled then
+            class "hover:bg-gray-100 dark:hover:bg-gray-700"
+
+          else
+            class "opacity-50"
+        , Html.Attributes.disabled <| not enabled
+        , Accessibility.Key.tabbable enabled
+        ]
+
+
+soft : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
+soft enabled =
+    withAdditionalAttributes
+        [ class "rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-2 py-1 text-gray-700 dark:text-gray-200 shadow-sm"
+        , if enabled then
+            class "hover:bg-gray-100 dark:hover:bg-gray-800"
 
           else
             class "opacity-50"

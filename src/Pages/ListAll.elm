@@ -1617,7 +1617,7 @@ viewQuickSearchButton tabbable =
             [ class "bg-gray-50 dark:bg-slate-900 relative pointer-events-auto" ]
             [ button
                 [ Html.Attributes.type_ "button"
-                , class "hidden w-full lg:flex items-center text-sm leading-6 text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-600 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800"
+                , class "hidden w-full lg:flex items-center text-sm leading-6 text-slate-500 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-600 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800"
                 , Html.Events.onClick <| PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show
                 , Accessibility.Aria.hidden True
                 , Accessibility.Key.tabbable tabbable
@@ -2019,7 +2019,7 @@ viewCurrentTagFilter tabbable =
         [ span
             [ class "mr-2" ]
             [ text "Only showing items for tag:" ]
-        , Components.Badge.withBorderAndRemoveButton
+        , Components.Badge.indigoWithBorderAndRemoveButton
             tabbable
             [ class "mt-2" ]
             "First Tag"
