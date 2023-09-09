@@ -28,6 +28,9 @@ if (containerElement) {
     const aboutLiElements = Array.prototype.slice.apply(aboutUlElement.querySelectorAll('li'));
     const aboutLinks = aboutLiElements.map(aboutLinkFromLiElement);
 
+    const tagElements = Array.prototype.slice.apply(document.querySelectorAll('#glossary-page-tags > p > button'));
+    const tags = tagElements.map(tagElement => tagElement.textContent.trim());
+
     const dlElement = glossaryElement.querySelector('dl');
     const glossaryItemDivElements = Array.prototype.slice.apply(dlElement.querySelectorAll('div'));
     const glossaryItems = glossaryItemDivElements.map(glossaryItemFromDivElement);
@@ -112,6 +115,7 @@ if (containerElement) {
             titleString: normaliseWhitespace(titleElement.textContent),
             aboutParagraph: aboutParagraph,
             aboutLinks: aboutLinks,
+            tags: tags,
             glossaryItems: glossaryItems,
             editorIsRunning: editorIsRunning,
             enableHelpForMakingChanges: enableHelpForMakingChanges,

@@ -48,6 +48,7 @@ import Data.FeatureFlag exposing (enableTagsFeature)
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem, preferredTerm)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
+import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
@@ -1408,10 +1409,11 @@ viewCreateGlossaryItemButton tabbable common =
 viewCards :
     Model
     -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
+    -> List Tag
     -> GlossaryItems
     -> ( Array ( GlossaryItemIndex, GlossaryItem ), Array ( GlossaryItemIndex, GlossaryItem ) )
     -> Html Msg
-viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } tags glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
         combinedGlossaryItems : Array ( GlossaryItemIndex, GlossaryItem )
         combinedGlossaryItems =
@@ -1466,7 +1468,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
         , Extras.Html.showIf enableTagsFeature <|
             viewCurrentTagFilter tabbable
         , Extras.Html.showIf enableTagsFeature <|
-            viewAllTagFilters tabbable
+            viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
         , Extras.Html.showIf (not <| Array.isEmpty combinedGlossaryItems) <|
             viewOrderItemsBy
                 model
@@ -2026,22 +2028,24 @@ viewCurrentTagFilter tabbable =
         ]
 
 
-viewAllTagFilters : Bool -> Html Msg
-viewAllTagFilters tabbable =
-    div
-        [ class "print:hidden pt-4 font-medium text-gray-900 dark:text-gray-100" ]
-        [ span
-            [ class "mr-2" ]
-            [ text "Tags:" ]
-        , Components.Button.soft
-            tabbable
-            [ class "mr-2 mb-2" ]
-            [ text "First Tag (4)" ]
-        , Components.Button.soft
-            tabbable
-            [ class "mr-2 mb-2" ]
-            [ text "Second Tag (1)" ]
-        ]
+viewAllTagFilters : { enableMathSupport : Bool, tabbable : Bool } -> List Tag -> Html Msg
+viewAllTagFilters { enableMathSupport, tabbable } tags =
+    Extras.Html.showIf (not <| List.isEmpty tags) <|
+        div
+            [ class "print:hidden pt-4 font-medium text-gray-900 dark:text-gray-100" ]
+            (span
+                [ class "mr-2" ]
+                [ text "Tags:" ]
+                :: (tags
+                        |> List.map
+                            (\tag ->
+                                Components.Button.soft
+                                    tabbable
+                                    [ class "mr-2 mb-2" ]
+                                    [ Tag.view enableMathSupport [] tag ]
+                            )
+                   )
+            )
 
 
 viewOrderItemsBy : Model -> Int -> Bool -> List Term -> Maybe Term -> Html Msg
@@ -2430,6 +2434,7 @@ view model =
                                         , tabbable = noModalDialogShown_
                                         , enableLastUpdatedDates = glossary.enableLastUpdatedDates
                                         }
+                                        glossary.tags
                                         glossary.items
                                 ]
                             , Html.footer

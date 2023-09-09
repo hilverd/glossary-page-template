@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Tag exposing (Tag, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, raw, inlineText, markdown, view)
+module Data.GlossaryItem.Tag exposing (Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, id, raw, inlineText, markdown, view)
 
 {-| A tag for a glossary item.
 This can be in either plain text or Markdown.
@@ -8,7 +8,7 @@ The `body` is the actual tag.
 
 # Tags
 
-@docs Tag, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, raw, inlineText, markdown, view
+@docs Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, id, raw, inlineText, markdown, view
 
 -}
 
@@ -82,62 +82,18 @@ fromMarkdown body =
         }
 
 
-{-| Construct a tag from a plain text string and an ID.
-
-    import Data.GlossaryItem.TagId as TagId
-
-    fromPlaintextWithId "Hello" (TagId.fromString "id1")
-    |> id
-    |> TagId.toString
-    --> "id1"
-
--}
-fromPlaintextWithId : String -> TagId -> Tag
-fromPlaintextWithId body id0 =
-    PlaintextTag
-        { id = id0
-        , body = body
-        }
-
-
-{-| Construct a tag from a Markdown string and an ID.
-
-    import Data.GlossaryItem.TagId as TagId
-
-    fromMarkdownWithId "The _ideal_ case" (TagId.fromString "id1")
-    |> id
-    |> TagId.toString
-    --> "id1"
-
--}
-fromMarkdownWithId : String -> TagId -> Tag
-fromMarkdownWithId body id0 =
-    let
-        result0 : Tag
-        result0 =
-            fromMarkdown body
-    in
-    case result0 of
-        PlaintextTag _ ->
-            result0
-
-        MarkdownTag t ->
-            MarkdownTag { t | id = id0 }
-
-
 {-| Decode a tag from its JSON representation.
 -}
 decode : Bool -> Decoder Tag
 decode enableMarkdownBasedSyntax =
-    Decode.map2
+    Decode.map
         (if enableMarkdownBasedSyntax then
-            fromMarkdownWithId
+            fromMarkdown
 
          else
-            fromPlaintextWithId
+            fromPlaintext
         )
-        (Decode.field "body" Decode.string)
-        (Decode.field "id" <| Decode.map TagId.fromString <| Decode.string)
+        Decode.string
 
 
 {-| Retrieve the ID of a tag.

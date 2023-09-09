@@ -16,6 +16,7 @@ import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Glossary exposing (Glossary)
+import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItems as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems exposing (LoadedGlossaryItems)
@@ -179,14 +180,20 @@ init flags =
                                             AboutParagraph.fromPlaintext
                                        )
 
-                            aboutSection : AboutSection
-                            aboutSection =
-                                { paragraph = aboutParagraph, links = aboutLinks }
-
                             aboutLinks : List AboutLink
                             aboutLinks =
                                 flags
                                     |> Decode.decodeValue (Decode.field "aboutLinks" <| Decode.list AboutLink.decode)
+                                    |> Result.withDefault []
+
+                            aboutSection : AboutSection
+                            aboutSection =
+                                { paragraph = aboutParagraph, links = aboutLinks }
+
+                            tags : List Tag
+                            tags =
+                                flags
+                                    |> Decode.decodeValue (Decode.field "tags" <| Decode.list <| Tag.decode enableMarkdownBasedSyntax)
                                     |> Result.withDefault []
 
                             items1 =
@@ -203,6 +210,7 @@ init flags =
                         , cardWidth = cardWidth
                         , title = title
                         , aboutSection = aboutSection
+                        , tags = tags
                         , items = items1
                         }
                     )

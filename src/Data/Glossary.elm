@@ -6,6 +6,7 @@ import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.GlossaryItem as GlossaryItem
+import Data.GlossaryItem.Tag exposing (Tag)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import ElementIds
@@ -19,6 +20,7 @@ type alias Glossary =
     , cardWidth : CardWidth
     , title : GlossaryTitle
     , aboutSection : AboutSection
+    , tags : List Tag
     , items : GlossaryItems
     }
 
