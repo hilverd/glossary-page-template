@@ -407,7 +407,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                                 Components.Button.text
                                     [ Html.Events.onClick <| onClickItem previousItemIndex ]
                                     [ Icons.arrowLongLeft
-                                        [ Svg.Attributes.class "h-5 w-5" ]
+                                        [ Svg.Attributes.class "h-5 w-5 shrink-0" ]
                                     , span
                                         [ class "font-medium" ]
                                         [ preferredTermForPreviousOrNext previousItem ]
@@ -444,7 +444,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                                         [ class "font-medium" ]
                                         [ preferredTermForPreviousOrNext nextItem ]
                                     , Icons.arrowLongRight
-                                        [ Svg.Attributes.class "h-5 w-5" ]
+                                        [ Svg.Attributes.class "h-5 w-5 shrink-0" ]
                                     ]
                             )
                             glossaryItemWithPreviousAndNext.next
