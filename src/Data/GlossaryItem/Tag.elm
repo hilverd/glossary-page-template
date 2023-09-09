@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Tag exposing (Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, id, raw, inlineText, markdown, view)
+module Data.GlossaryItem.Tag exposing (Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, view)
 
 {-| A tag for a glossary item.
 This can be in either plain text or Markdown.
@@ -8,11 +8,10 @@ The `body` is the actual tag.
 
 # Tags
 
-@docs Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, id, raw, inlineText, markdown, view
+@docs Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, view
 
 -}
 
-import Data.GlossaryItem.TagId as TagId exposing (TagId)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.String
 import Html exposing (Attribute, Html, text)
@@ -27,12 +26,10 @@ import MarkdownRenderers
 -}
 type Tag
     = PlaintextTag
-        { id : TagId
-        , body : String
+        { body : String
         }
     | MarkdownTag
-        { id : TagId
-        , body : MarkdownFragment
+        { body : MarkdownFragment
         , inlineText : String
         }
 
@@ -46,14 +43,13 @@ emptyPlaintext =
 
 {-| Construct a tag from a plain text string and a Boolean indicating whether the tag is an abbreviation.
 
-    fromPlaintext "NA" True |> raw --> "NA"
+    fromPlaintext "NA" |> raw --> "NA"
 
 -}
 fromPlaintext : String -> Tag
 fromPlaintext body =
     PlaintextTag
-        { id = body |> String.replace " " "_" |> TagId.fromString
-        , body = body
+        { body = body
         }
 
 
@@ -76,8 +72,7 @@ fromMarkdown body =
                 |> Result.withDefault body
     in
     MarkdownTag
-        { id = body |> String.replace " " "_" |> TagId.fromString
-        , body = fragment
+        { body = fragment
         , inlineText = inlineTextConcatenated
         }
 
@@ -96,26 +91,6 @@ decode enableMarkdownBasedSyntax =
         Decode.string
 
 
-{-| Retrieve the ID of a tag.
-
-    import Data.GlossaryItem.TagId as TagId
-
-    fromPlaintext "Hi there"
-    |> id
-    |> TagId.toString
-    --> "Hi_there"
-
--}
-id : Tag -> TagId
-id tag =
-    case tag of
-        PlaintextTag t ->
-            t.id
-
-        MarkdownTag t ->
-            t.id
-
-
 {-| Retrieve the raw body of a tag.
 -}
 raw : Tag -> String
@@ -130,7 +105,7 @@ raw tag =
 
 {-| Retrieve the concatenated inline text of a tag.
 
-    fromMarkdown "*Hello* _there_" False
+    fromMarkdown "*Hello* _there_"
     |> inlineText
     --> "Hello there"
 
