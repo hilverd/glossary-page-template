@@ -30,6 +30,7 @@ module ElementIds exposing
     , showExportMenuLabel
     , showLastUpdatedDatesLabel
     , staticSidebarForDesktop
+    , tags
     , termIndexGroupLabel
     , termInputField
     , termsIndex
@@ -79,6 +80,11 @@ outer =
 about : String
 about =
     prefixed "about"
+
+
+tags : String
+tags =
+    prefixed "tags"
 
 
 items : String
