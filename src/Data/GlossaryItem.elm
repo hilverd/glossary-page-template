@@ -26,9 +26,7 @@ import Extras.Url exposing (fragmentOnly)
 import Json.Decode as Decode exposing (Decoder)
 
 
-{-| An item in a glossary, consisting of a list of terms (synonyms) being defined, a list of (alternative) definitions for those terms, and a list of related preferred terms.
-It's probably unusual to have multiple definitions for a term (e.g. "Apple" being a fruit as well as a company) because a glossary would typically be focused on a single domain.
-However, this is allowed in `<dl>` elements so it's also allowed here.
+{-| An item in a glossary, consisting of a list of terms (synonyms) being defined, a definition for those terms, and a list of related preferred terms.
 -}
 type GlossaryItem
     = GlossaryItem
