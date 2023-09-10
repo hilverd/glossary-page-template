@@ -44,7 +44,6 @@ import Components.SearchDialog
 import Components.SelectMenu
 import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
-import Data.FeatureFlag exposing (enableTagsFeature)
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem, preferredTerm)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
@@ -133,6 +132,7 @@ type alias Model =
     , savingSettings : Saving
     , mostRecentTermIdForOrderingItemsFocusedOn : Maybe TermId
     , resultOfAttemptingToCopyEditorCommandToClipboard : Maybe Bool
+    , tagBeingFilteredBy : Maybe Tag
     }
 
 
@@ -171,6 +171,8 @@ type InternalMsg
     | CopyEditorCommandToClipboard String
     | AttemptedToCopyEditorCommandToClipboard Bool
     | ClearResultOfAttemptingToCopyEditorCommandToClipboard
+    | FilterByTag Tag
+    | DoNotFilterByTag
 
 
 type alias Msg =
@@ -254,6 +256,7 @@ init editorIsRunning currentlyEditing commonModel =
                 _ ->
                     Nothing
       , resultOfAttemptingToCopyEditorCommandToClipboard = Nothing
+      , tagBeingFilteredBy = Nothing
       }
     , case commonModel.maybeIndex of
         Just index ->
@@ -773,6 +776,12 @@ update msg model =
         ClearResultOfAttemptingToCopyEditorCommandToClipboard ->
             ( { model | resultOfAttemptingToCopyEditorCommandToClipboard = Nothing }, Cmd.none )
 
+        FilterByTag tag ->
+            ( { model | tagBeingFilteredBy = Just tag }, Cmd.none )
+
+        DoNotFilterByTag ->
+            ( { model | tagBeingFilteredBy = Nothing }, Cmd.none )
+
 
 giveFocusToOuter : Cmd Msg
 giveFocusToOuter =
@@ -1162,6 +1171,7 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
                     , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle index
                     , onClickEdit = PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
                     , onClickDelete = PageMsg.Internal <| ConfirmDelete index
+                    , onClickTag = PageMsg.Internal << FilterByTag
                     , onClickItem = PageMsg.Internal << ChangeLayoutToShowSingle
                     , onClickRelatedTerm = PageMsg.Internal << ShowRelatedTermAsSingle
                     , editable = editable
@@ -1465,9 +1475,10 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                         viewCreateGlossaryItemButton tabbable model.common
                     ]
             ]
-        , Extras.Html.showIf enableTagsFeature <|
-            viewCurrentTagFilter tabbable
-        , Extras.Html.showIf enableTagsFeature <|
+        , Extras.Html.showMaybe
+            (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
+            model.tagBeingFilteredBy
+        , Extras.Html.showIf (model.tagBeingFilteredBy == Nothing) <|
             viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
         , Extras.Html.showIf (not <| Array.isEmpty combinedGlossaryItems) <|
             viewOrderItemsBy
@@ -2014,8 +2025,8 @@ viewSelectCardWidth glossary model =
         ]
 
 
-viewCurrentTagFilter : Bool -> Html Msg
-viewCurrentTagFilter tabbable =
+viewCurrentTagFilter : { enableMathSupport : Bool, tabbable : Bool } -> Tag -> Html Msg
+viewCurrentTagFilter { enableMathSupport, tabbable } tag =
     div
         [ class "print:hidden pt-4 font-medium text-gray-900 dark:text-gray-100" ]
         [ span
@@ -2023,8 +2034,9 @@ viewCurrentTagFilter tabbable =
             [ text "Only showing items for tag:" ]
         , Components.Badge.indigoWithBorderAndRemoveButton
             tabbable
-            [ class "mt-2" ]
-            "First Tag"
+            []
+            (PageMsg.Internal DoNotFilterByTag)
+            [ Tag.view enableMathSupport [] tag ]
         ]
 
 
@@ -2041,7 +2053,9 @@ viewAllTagFilters { enableMathSupport, tabbable } tags =
                             (\tag ->
                                 Components.Button.soft
                                     tabbable
-                                    [ class "mr-2 mb-2" ]
+                                    [ class "mr-2 mb-2"
+                                    , Html.Events.onClick <| PageMsg.Internal <| FilterByTag tag
+                                    ]
                                     [ Tag.view enableMathSupport [] tag ]
                             )
                    )

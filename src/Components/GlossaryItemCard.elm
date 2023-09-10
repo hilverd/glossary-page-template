@@ -4,7 +4,6 @@ import Accessibility exposing (Html, div, span, text)
 import Accessibility.Aria
 import Accessibility.Key
 import Components.Button
-import Data.FeatureFlag exposing (enableTagsFeature)
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
@@ -33,6 +32,7 @@ type Style msg
         , onClickEdit : msg
         , onClickDelete : msg
         , onClickItem : GlossaryItemIndex -> msg
+        , onClickTag : Tag -> msg
         , onClickRelatedTerm : RelatedTerm -> msg
         , editable : Bool
         , shownAsSingle : Bool
@@ -122,7 +122,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                 (viewGlossaryItemDefinition
                                     { enableMathSupport = enableMathSupport
                                     , tabbable = makeLinksTabbable
-                                    , tagsClickable = False
+                                    , onClickTag = Nothing
                                     }
                                     tags
                                 )
@@ -136,7 +136,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                 relatedTerms
                         )
 
-                Normal { tabbable, onClickViewFull, onClickEdit, onClickDelete, onClickItem, onClickRelatedTerm, editable, shownAsSingle } ->
+                Normal { tabbable, onClickViewFull, onClickEdit, onClickDelete, onClickTag, onClickItem, onClickRelatedTerm, editable, shownAsSingle } ->
                     if shownAsSingle then
                         div
                             [ Html.Attributes.style "max-height" "100%"
@@ -210,7 +210,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                             (viewGlossaryItemDefinition
                                                 { enableMathSupport = enableMathSupport
                                                 , tabbable = makeLinksTabbable
-                                                , tagsClickable = makeLinksTabbable
+                                                , onClickTag = Just onClickTag
                                                 }
                                                 tags
                                             )
@@ -319,7 +319,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                             (viewGlossaryItemDefinition
                                                 { enableMathSupport = enableMathSupport
                                                 , tabbable = makeLinksTabbable
-                                                , tagsClickable = makeLinksTabbable
+                                                , onClickTag = Just onClickTag
                                                 }
                                                 tags
                                             )
@@ -499,7 +499,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                             (viewGlossaryItemDefinition
                                 { enableMathSupport = enableMathSupport
                                 , tabbable = True
-                                , tagsClickable = False
+                                , onClickTag = Nothing
                                 }
                                 tags
                             )
@@ -580,24 +580,24 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term 
         ]
 
 
-viewGlossaryItemDefinition : { enableMathSupport : Bool, tabbable : Bool, tagsClickable : Bool } -> List Tag -> Definition -> Html msg
-viewGlossaryItemDefinition { enableMathSupport, tabbable, tagsClickable } tags definition =
+viewGlossaryItemDefinition : { enableMathSupport : Bool, tabbable : Bool, onClickTag : Maybe (Tag -> msg) } -> List Tag -> Definition -> Html msg
+viewGlossaryItemDefinition { enableMathSupport, tabbable, onClickTag } tags definition =
     Html.dd
         []
-        [ Extras.Html.showIf enableTagsFeature <|
-            Html.div
-                [ class "mb-4" ]
-                (List.map
-                    (\tag ->
-                        Components.Button.softSmall
-                            tagsClickable
-                            [ class "mr-2 mb-2"
-                            , Html.Attributes.title <| "Tag: " ++ Tag.raw tag
-                            ]
-                            [ Tag.view enableMathSupport [] tag ]
-                    )
-                    tags
+        [ Html.div
+            [ class "mb-4" ]
+            (List.map
+                (\tag ->
+                    Components.Button.softSmall
+                        (onClickTag /= Nothing)
+                        [ class "mr-2 mb-2"
+                        , Html.Attributes.title <| "Tag: " ++ Tag.raw tag
+                        , Extras.HtmlAttribute.showMaybe (\onClickTag_ -> Html.Events.onClick <| onClickTag_ tag) onClickTag
+                        ]
+                        [ Tag.view enableMathSupport [] tag ]
                 )
+                tags
+            )
         , Definition.view { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable } definition
         ]
 

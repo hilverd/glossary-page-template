@@ -15,7 +15,6 @@ import Components.Form
 import Components.GlossaryItemCard
 import Components.SelectMenu
 import Components.Spinner
-import Data.FeatureFlag exposing (enableTagsFeature)
 import Data.Glossary as Glossary
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
@@ -1094,8 +1093,7 @@ view model =
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
                                         definitionArray
-                                    , Extras.Html.showIf enableTagsFeature <|
-                                        viewTags
+                                    , viewTags
                                     , viewCreateSeeAlso
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
