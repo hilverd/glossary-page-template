@@ -5,6 +5,8 @@ This can be in either plain text or Markdown.
 A tag's `id` is used to be able to refer to this tag.
 The `body` is the actual tag.
 
+Tags can be used to group items together that belong in the same "context" or share some important property. They should probably be used sparingly as too many tags could be an indication of a glossary trying to focus on too many different topics at once.
+
 
 # Tags
 
