@@ -2441,6 +2441,28 @@ view model =
                                                 GlossaryItems.orderedFocusedOn termId
                                                     >> Maybe.withDefault ( Array.empty, Array.empty )
                                        )
+                                    |> (\( indexedGlossaryItems, otherIndexedGlossaryItems ) ->
+                                            case model.tagBeingFilteredBy of
+                                                Just tagBeingFilteredBy ->
+                                                    ( indexedGlossaryItems
+                                                        |> Array.filter
+                                                            (\( _, item ) ->
+                                                                item
+                                                                    |> GlossaryItem.tags
+                                                                    |> List.any ((==) tagBeingFilteredBy)
+                                                            )
+                                                    , otherIndexedGlossaryItems
+                                                        |> Array.filter
+                                                            (\( _, item ) ->
+                                                                item
+                                                                    |> GlossaryItem.tags
+                                                                    |> List.any ((==) tagBeingFilteredBy)
+                                                            )
+                                                    )
+
+                                                Nothing ->
+                                                    ( indexedGlossaryItems, otherIndexedGlossaryItems )
+                                       )
                                     |> viewCards
                                         model
                                         { enableMathSupport = glossary.enableMathSupport
