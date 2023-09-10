@@ -327,6 +327,24 @@ toHtmlTree glossaryItem =
                         else
                             []
                        )
+                    ++ (if List.isEmpty item.tags then
+                            []
+
+                        else
+                            [ HtmlTree.Node "dd"
+                                True
+                                [ HtmlTree.Attribute "class" "tags" ]
+                                (List.map
+                                    (\tag ->
+                                        HtmlTree.Node "button"
+                                            False
+                                            [ HtmlTree.Attribute "type" "button" ]
+                                            [ HtmlTree.Leaf <| Tag.raw tag ]
+                                    )
+                                    item.tags
+                                )
+                            ]
+                       )
                     ++ List.map
                         (Definition.raw >> definitionToHtmlTree)
                         (item.definition |> Maybe.map List.singleton |> Maybe.withDefault [])
