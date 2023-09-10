@@ -30,6 +30,7 @@ import Array exposing (Array)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
+import Data.GlossaryItem.Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -401,6 +402,10 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                 |> Array.toList
                 |> List.map termFieldToTerm
 
+        tags : List Tag
+        tags =
+            []
+
         definition =
             form
                 |> definitionField
@@ -450,7 +455,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
         lastUpdatedDate_ =
             dateTime
     in
-    GlossaryItem.init preferredTerm alternativeTerms definition relatedTerms needsUpdating_ lastUpdatedDate_
+    GlossaryItem.init preferredTerm alternativeTerms tags definition relatedTerms needsUpdating_ lastUpdatedDate_
 
 
 addTerm : GlossaryItemForm -> GlossaryItemForm

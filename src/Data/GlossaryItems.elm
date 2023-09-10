@@ -58,6 +58,7 @@ compareForSortingAlphabetically item1 item2 =
     item1 = GlossaryItem.init
               (Term.fromMarkdown "\\_\\_slots\\_\\_" False)
               []
+              []
               Nothing
               []
               False
@@ -67,6 +68,7 @@ compareForSortingAlphabetically item1 item2 =
     item2 = GlossaryItem.init
               (Term.fromMarkdown "Situation" False)
               []
+              []
               Nothing
               []
               False
@@ -75,6 +77,7 @@ compareForSortingAlphabetically item1 item2 =
     item3 : GlossaryItem
     item3 = GlossaryItem.init
               (Term.fromMarkdown "strong" False)
+              []
               []
               Nothing
               []

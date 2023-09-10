@@ -1,5 +1,5 @@
 module Data.GlossaryItem exposing
-    ( GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+    ( GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, tags, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
     , toHtmlTree
     )
 
@@ -8,7 +8,7 @@ module Data.GlossaryItem exposing
 
 # Glossary Items
 
-@docs GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+@docs GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, tags, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
 
 
 # Converting to HTML
@@ -19,6 +19,7 @@ module Data.GlossaryItem exposing
 
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
+import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
@@ -26,12 +27,13 @@ import Extras.Url exposing (fragmentOnly)
 import Json.Decode as Decode exposing (Decoder)
 
 
-{-| An item in a glossary, consisting of a list of terms (synonyms) being defined, a definition for those terms, and a list of related preferred terms.
+{-| An item in a glossary, consisting mainly of a list of terms (synonyms) being defined and a definition for those terms.
 -}
 type GlossaryItem
     = GlossaryItem
         { preferredTerm : Term
         , alternativeTerms : List Term
+        , tags : List Tag
         , definition : Maybe Definition
         , relatedPreferredTerms : List RelatedTerm
         , needsUpdating : Bool
@@ -41,11 +43,12 @@ type GlossaryItem
 
 {-| Create a glossary item.
 -}
-init : Term -> List Term -> Maybe Definition -> List RelatedTerm -> Bool -> Maybe String -> GlossaryItem
-init preferredTerm_ alternativeTerms_ definition_ relatedTerms_ needsUpdating_ lastUpdatedDate_ =
+init : Term -> List Term -> List Tag -> Maybe Definition -> List RelatedTerm -> Bool -> Maybe String -> GlossaryItem
+init preferredTerm_ alternativeTerms_ tags_ definition_ relatedTerms_ needsUpdating_ lastUpdatedDate_ =
     GlossaryItem
         { preferredTerm = preferredTerm_
         , alternativeTerms = alternativeTerms_
+        , tags = tags_
         , definition = definition_
         , relatedPreferredTerms = relatedTerms_
         , needsUpdating = needsUpdating_
@@ -71,6 +74,7 @@ init preferredTerm_ alternativeTerms_ definition_ relatedTerms_ needsUpdating_ l
                     ]
             )
             , ( "alternativeTerms", Encode.list Encode.object [] )
+            , ( "tags", Encode.list Encode.object [] )
             , ( "definition", Encode.string "Condensed moisture." )
             , ( "relatedTerms", Encode.list Encode.object [] )
             , ( "needsUpdating", Encode.bool True )
@@ -80,6 +84,7 @@ init preferredTerm_ alternativeTerms_ definition_ relatedTerms_ needsUpdating_ l
     expected =
         init
             (Term.fromPlaintext "Rain" False)
+            []
             []
             (Just <| Definition.fromPlaintext "Condensed moisture.")
             []
@@ -92,11 +97,12 @@ init preferredTerm_ alternativeTerms_ definition_ relatedTerms_ needsUpdating_ l
 -}
 decode : Bool -> Decoder GlossaryItem
 decode enableMarkdownBasedSyntax =
-    Decode.map6
-        (\preferredTerm_ alternativeTerms_ definition_ relatedTerms_ needsUpdating_ lastUpdatedDate_ ->
+    Decode.map7
+        (\preferredTerm_ alternativeTerms_ tags_ definition_ relatedTerms_ needsUpdating_ lastUpdatedDate_ ->
             GlossaryItem
                 { preferredTerm = preferredTerm_
                 , alternativeTerms = alternativeTerms_
+                , tags = tags_
                 , definition = definition_
                 , relatedPreferredTerms = relatedTerms_
                 , needsUpdating = needsUpdating_
@@ -105,6 +111,7 @@ decode enableMarkdownBasedSyntax =
         )
         (Decode.field "preferredTerm" <| Term.decode enableMarkdownBasedSyntax)
         (Decode.field "alternativeTerms" <| Decode.list <| Term.decode enableMarkdownBasedSyntax)
+        (Decode.field "tags" <| Decode.list <| Tag.decode enableMarkdownBasedSyntax)
         (Decode.field "definition" <|
             Decode.nullable <|
                 Decode.map
@@ -131,6 +138,7 @@ Some items may not have one and instead point to a related item that is preferre
     empty =
         init
           Term.emptyPlaintext
+          []
           []
           Nothing
           []
@@ -170,6 +178,15 @@ alternativeTerms glossaryItem =
 allTerms : GlossaryItem -> List Term
 allTerms glossaryItem =
     preferredTerm glossaryItem :: alternativeTerms glossaryItem
+
+
+{-| The tags of the glossary item.
+-}
+tags : GlossaryItem -> List Tag
+tags glossaryItem =
+    case glossaryItem of
+        GlossaryItem item ->
+            item.tags
 
 
 {-| The definition of the glossary item.

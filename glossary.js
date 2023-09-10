@@ -54,21 +54,30 @@ if (containerElement) {
         const ddElements = Array.prototype.slice.apply(glossaryItemDivElement.querySelectorAll('dd'));
 
         const definitionDdElements = ddElements
-            .filter(ddElement => ddElement.getAttribute('class') !== 'related-terms' && ddElement.getAttribute('class') !== 'needs-updating');
+            .filter(ddElement =>
+                ddElement.getAttribute('class') !== 'tags' &&
+                ddElement.getAttribute('class') !== 'needs-updating' &&
+                ddElement.getAttribute('class') !== 'related-terms'
+            );
 
         /* The current implementation allows one definition per item.
            Previous versions allowed multiple definitions, and for backwards compatibility these are being joined here.
         */
         const definition = definitionDdElements.map(ddElement => ddElement.textContent.trim()).join('\n\n');
 
+        const tagsDdElement = ddElements.filter(ddElement => ddElement.getAttribute('class') === 'tags')[0];
+        const tagElements = Array.prototype.slice.apply(tagsDdElement?.querySelectorAll('button') || []);
+        const tags = tagElements.map(tagElement => tagElement.textContent.trim());
+
+        const needsUpdatingDdElements = ddElements.filter(ddElement => ddElement.getAttribute('class') === 'needs-updating');
         const relatedTermDdElements = ddElements.filter(ddElement => ddElement.getAttribute('class') === 'related-terms');
         const relatedTerms = (relatedTermDdElements.length > 0) ? glossaryItemRelatedTermFromDdElement(relatedTermDdElements[0]) : [];
-        const needsUpdatingDdElements = ddElements.filter(ddElement => ddElement.getAttribute('class') === 'needs-updating');
         const lastUpdatedDate = glossaryItemDivElement.dataset.lastUpdated;
 
         return {
             preferredTerm: glossaryItemTermFromDtElement(preferredTermDtElement),
             alternativeTerms: alternativeTermsDtElements.map(glossaryItemTermFromDtElement),
+            tags: tags,
             definition: definition || null,
             relatedTerms: relatedTerms,
             needsUpdating: needsUpdatingDdElements.length > 0,

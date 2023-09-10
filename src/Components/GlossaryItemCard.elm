@@ -8,6 +8,7 @@ import Data.FeatureFlag exposing (enableTagsFeature)
 import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
+import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
@@ -57,6 +58,10 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                 alternativeTerms : List Term
                 alternativeTerms =
                     GlossaryItem.alternativeTerms glossaryItem
+
+                tags : List Tag
+                tags =
+                    GlossaryItem.tags glossaryItem
 
                 itemHasSomeDefinitions : Bool
                 itemHasSomeDefinitions =
@@ -119,6 +124,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                     , tabbable = makeLinksTabbable
                                     , tagsClickable = False
                                     }
+                                    tags
                                 )
                                 definitions
                             ++ viewGlossaryItemRelatedTerms
@@ -206,6 +212,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                 , tabbable = makeLinksTabbable
                                                 , tagsClickable = makeLinksTabbable
                                                 }
+                                                tags
                                             )
                                             definitions
                                         ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDefinitions Nothing relatedTerms
@@ -314,6 +321,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                 , tabbable = makeLinksTabbable
                                                 , tagsClickable = makeLinksTabbable
                                                 }
+                                                tags
                                             )
                                             definitions
                                         ++ viewGlossaryItemRelatedTerms
@@ -380,6 +388,10 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
 
                 alternativeTerms =
                     GlossaryItem.alternativeTerms glossaryItem
+
+                tags : List Tag
+                tags =
+                    GlossaryItem.tags glossaryItem
 
                 definitions =
                     GlossaryItem.definition glossaryItem
@@ -489,6 +501,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                                 , tabbable = True
                                 , tagsClickable = False
                                 }
+                                tags
                             )
                             definitions
                         ++ viewGlossaryItemRelatedTerms
@@ -567,20 +580,24 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term 
         ]
 
 
-viewGlossaryItemDefinition : { enableMathSupport : Bool, tabbable : Bool, tagsClickable : Bool } -> Definition -> Html msg
-viewGlossaryItemDefinition { enableMathSupport, tabbable, tagsClickable } definition =
+viewGlossaryItemDefinition : { enableMathSupport : Bool, tabbable : Bool, tagsClickable : Bool } -> List Tag -> Definition -> Html msg
+viewGlossaryItemDefinition { enableMathSupport, tabbable, tagsClickable } tags definition =
     Html.dd
         []
         [ Extras.Html.showIf enableTagsFeature <|
             Html.div
                 [ class "mb-4" ]
-                [ Components.Button.softSmall
-                    tagsClickable
-                    [ class "mr-2 mb-2"
-                    , Html.Attributes.title "Tag: First Tag"
-                    ]
-                    [ text "Preferred vs alternative terms" ]
-                ]
+                (List.map
+                    (\tag ->
+                        Components.Button.softSmall
+                            tagsClickable
+                            [ class "mr-2 mb-2"
+                            , Html.Attributes.title <| "Tag: " ++ Tag.raw tag
+                            ]
+                            [ Tag.view enableMathSupport [] tag ]
+                    )
+                    tags
+                )
         , Definition.view { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable } definition
         ]
 

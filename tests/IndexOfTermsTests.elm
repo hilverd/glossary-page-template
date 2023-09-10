@@ -22,6 +22,7 @@ glossaryItems =
             GlossaryItem.init
                 (termFromBody "Óne")
                 []
+                []
                 (Just (Definition.fromPlaintext "Óne"))
                 []
                 False
@@ -31,6 +32,7 @@ glossaryItems =
         two =
             GlossaryItem.init
                 (termFromBody "Two")
+                []
                 []
                 (Just (Definition.fromPlaintext "Two"))
                 []
@@ -42,6 +44,7 @@ glossaryItems =
             GlossaryItem.init
                 (termFromBody "3Three")
                 []
+                []
                 (Just (Definition.fromPlaintext "3Three"))
                 []
                 False
@@ -52,6 +55,7 @@ glossaryItems =
             GlossaryItem.init
                 (termFromBody "007")
                 []
+                []
                 (Just (Definition.fromPlaintext "007"))
                 []
                 False
@@ -61,6 +65,7 @@ glossaryItems =
         future =
             GlossaryItem.init
                 (termFromBody "_future_")
+                []
                 []
                 (Just (Definition.fromPlaintext "_future_"))
                 []
