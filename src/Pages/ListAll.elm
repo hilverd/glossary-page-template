@@ -132,7 +132,7 @@ type alias Model =
     , savingSettings : Saving
     , mostRecentTermIdForOrderingItemsFocusedOn : Maybe TermId
     , resultOfAttemptingToCopyEditorCommandToClipboard : Maybe Bool
-    , tagBeingFilteredBy : Maybe Tag
+    , itemsFilteredByTag : Maybe ( Tag, GlossaryItems )
     }
 
 
@@ -256,7 +256,7 @@ init editorIsRunning currentlyEditing commonModel =
                 _ ->
                     Nothing
       , resultOfAttemptingToCopyEditorCommandToClipboard = Nothing
-      , tagBeingFilteredBy = Nothing
+      , itemsFilteredByTag = Nothing
       }
     , case commonModel.maybeIndex of
         Just index ->
@@ -408,7 +408,12 @@ update msg model =
                 results =
                     case model.common.glossary of
                         Ok { enableMathSupport, items } ->
-                            Search.search enableMathSupport searchString items
+                            Search.search enableMathSupport
+                                searchString
+                                (model.itemsFilteredByTag
+                                    |> Maybe.map Tuple.second
+                                    |> Maybe.withDefault items
+                                )
 
                         Err _ ->
                             Search.search False searchString <| GlossaryItems.fromList []
@@ -777,10 +782,20 @@ update msg model =
             ( { model | resultOfAttemptingToCopyEditorCommandToClipboard = Nothing }, Cmd.none )
 
         FilterByTag tag ->
-            ( { model | tagBeingFilteredBy = Just tag }, Cmd.none )
+            case model.common.glossary of
+                Ok glossary ->
+                    ( { model
+                        | itemsFilteredByTag =
+                            Just ( tag, GlossaryItems.filterByTag tag glossary.items )
+                      }
+                    , Cmd.none
+                    )
+
+                _ ->
+                    ( { model | itemsFilteredByTag = Nothing }, Cmd.none )
 
         DoNotFilterByTag ->
-            ( { model | tagBeingFilteredBy = Nothing }, Cmd.none )
+            ( { model | itemsFilteredByTag = Nothing }, Cmd.none )
 
 
 giveFocusToOuter : Cmd Msg
@@ -1477,8 +1492,8 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             ]
         , Extras.Html.showMaybe
             (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
-            model.tagBeingFilteredBy
-        , Extras.Html.showIf (model.tagBeingFilteredBy == Nothing) <|
+            (model.itemsFilteredByTag |> Maybe.map Tuple.first)
+        , Extras.Html.showIf (model.itemsFilteredByTag == Nothing) <|
             viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
         , Extras.Html.showIf (not <| Array.isEmpty combinedIndexedGlossaryItems) <|
             viewOrderItemsBy
@@ -2272,12 +2287,9 @@ view model =
                     noModalDialogShown model
 
                 items =
-                    case model.tagBeingFilteredBy of
-                        Just tag ->
-                            GlossaryItems.filterByTag tag glossary.items
-
-                        Nothing ->
-                            glossary.items
+                    model.itemsFilteredByTag
+                        |> Maybe.map Tuple.second
+                        |> Maybe.withDefault glossary.items
 
                 indexOfTerms : IndexOfTerms
                 indexOfTerms =
