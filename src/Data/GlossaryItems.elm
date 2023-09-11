@@ -330,8 +330,8 @@ filterByTag tag glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             let
-                transformedItemByIndex : Dict Int GlossaryItem
-                transformedItemByIndex =
+                filteredItemByIndex : Dict Int GlossaryItem
+                filteredItemByIndex =
                     items.orderedAlphabetically
                         |> Array.foldl
                             (\( index, item ) result ->
@@ -345,8 +345,6 @@ filterByTag tag glossaryItems =
                                             |> List.any ((==) tag)
                                 in
                                 if itemMatchesTag then
-                                    -- TODO: also transform item here.
-                                    -- This means removing any related terms that correspond to items that don't match the tag.
                                     Dict.insert indexInt item result
 
                                 else
@@ -354,9 +352,43 @@ filterByTag tag glossaryItems =
                             )
                             Dict.empty
 
+                termIdsAfterFiltering : Set String
+                termIdsAfterFiltering =
+                    filteredItemByIndex
+                        |> Dict.values
+                        |> List.map
+                            (GlossaryItem.preferredTerm
+                                >> Term.id
+                                >> TermId.toString
+                            )
+                        |> Set.fromList
+
+                transformedItemByIndex : Dict Int GlossaryItem
+                transformedItemByIndex =
+                    filteredItemByIndex
+                        |> Dict.map
+                            (\_ item ->
+                                let
+                                    relatedPreferredTerms =
+                                        item
+                                            |> GlossaryItem.relatedPreferredTerms
+                                            |> List.filter
+                                                (\relatedPreferredTerm ->
+                                                    Set.member
+                                                        (relatedPreferredTerm |> RelatedTerm.idReference |> TermId.toString)
+                                                        termIdsAfterFiltering
+                                                )
+                                in
+                                GlossaryItem.updateRelatedTerms
+                                    relatedPreferredTerms
+                                    item
+                            )
+
                 itemIndexesAfterFiltering : Set Int
                 itemIndexesAfterFiltering =
-                    Set.empty
+                    filteredItemByIndex
+                        |> Dict.keys
+                        |> Set.fromList
 
                 filterAndTransform : Array ( GlossaryItemIndex, GlossaryItem ) -> Array ( GlossaryItemIndex, GlossaryItem )
                 filterAndTransform =
