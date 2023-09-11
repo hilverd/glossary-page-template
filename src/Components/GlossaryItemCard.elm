@@ -594,7 +594,10 @@ viewGlossaryItemDefinition { enableMathSupport, tabbable, onClickTag } tags defi
                         , Html.Attributes.title <| "Tag: " ++ Tag.raw tag
                         , Extras.HtmlAttribute.showMaybe (\onClickTag_ -> Html.Events.onClick <| onClickTag_ tag) onClickTag
                         ]
-                        [ Tag.view enableMathSupport [] tag ]
+                        [ Tag.view enableMathSupport
+                            [ class "text-sm" ]
+                            tag
+                        ]
                 )
                 tags
             )
