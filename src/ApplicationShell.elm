@@ -28,6 +28,7 @@ import PageMsg exposing (PageMsg(..))
 import Pages.CreateOrEdit
 import Pages.EditTitleAndAbout
 import Pages.ListAll
+import Pages.ManageTags
 import Task
 import Url
 
