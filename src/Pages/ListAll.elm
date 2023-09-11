@@ -1425,8 +1425,8 @@ viewCards :
     -> Html Msg
 viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } tags glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
-        combinedGlossaryItems : Array ( GlossaryItemIndex, GlossaryItem )
-        combinedGlossaryItems =
+        combinedIndexedGlossaryItems : Array ( GlossaryItemIndex, GlossaryItem )
+        combinedIndexedGlossaryItems =
             Array.append indexedGlossaryItems otherIndexedGlossaryItems
 
         preferredTermsWithDefinitions : List Term
@@ -1468,7 +1468,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             [ Extras.Html.showIf editable <|
                 div
                     [ class "pt-2" ]
-                    [ if Array.isEmpty combinedGlossaryItems then
+                    [ if Array.isEmpty combinedIndexedGlossaryItems then
                         viewCreateGlossaryItemButtonForEmptyState tabbable model.common
 
                       else
@@ -1480,10 +1480,10 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             model.tagBeingFilteredBy
         , Extras.Html.showIf (model.tagBeingFilteredBy == Nothing) <|
             viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
-        , Extras.Html.showIf (not <| Array.isEmpty combinedGlossaryItems) <|
+        , Extras.Html.showIf (not <| Array.isEmpty combinedIndexedGlossaryItems) <|
             viewOrderItemsBy
                 model
-                (Array.length combinedGlossaryItems)
+                (Array.length combinedIndexedGlossaryItems)
                 enableMathSupport
                 preferredTermsWithDefinitions
                 orderItemsFocusedOnTerm
@@ -1524,7 +1524,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             , tabbable = tabbable
             , enableLastUpdatedDates = enableLastUpdatedDates
             }
-            combinedGlossaryItems
+            combinedIndexedGlossaryItems
           <|
             case ( model.layout, model.common.maybeIndex ) of
                 ( ShowSingleItem, Just index ) ->
@@ -2271,9 +2271,17 @@ view model =
                 noModalDialogShown_ =
                     noModalDialogShown model
 
+                items =
+                    case model.tagBeingFilteredBy of
+                        Just tag ->
+                            GlossaryItems.filterByTag tag glossary.items
+
+                        Nothing ->
+                            glossary.items
+
                 indexOfTerms : IndexOfTerms
                 indexOfTerms =
-                    IndexOfTerms.fromGlossaryItems glossary.items
+                    IndexOfTerms.fromGlossaryItems items
             in
             { title = GlossaryTitle.inlineText glossary.title
             , body =
@@ -2316,7 +2324,7 @@ view model =
                                         else
                                             let
                                                 itemWithPreviousAndNext =
-                                                    glossary.items
+                                                    items
                                                         |> (case model.common.orderItemsBy of
                                                                 Alphabetically ->
                                                                     GlossaryItems.orderedAlphabetically
@@ -2427,7 +2435,7 @@ view model =
                                     div
                                         [ class "flex-none mt-2" ]
                                         [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
-                                , glossary.items
+                                , items
                                     |> (case model.common.orderItemsBy of
                                             Alphabetically ->
                                                 GlossaryItems.orderedAlphabetically
@@ -2441,28 +2449,6 @@ view model =
                                                 GlossaryItems.orderedFocusedOn termId
                                                     >> Maybe.withDefault ( Array.empty, Array.empty )
                                        )
-                                    |> (\( indexedGlossaryItems, otherIndexedGlossaryItems ) ->
-                                            case model.tagBeingFilteredBy of
-                                                Just tagBeingFilteredBy ->
-                                                    ( indexedGlossaryItems
-                                                        |> Array.filter
-                                                            (\( _, item ) ->
-                                                                item
-                                                                    |> GlossaryItem.tags
-                                                                    |> List.any ((==) tagBeingFilteredBy)
-                                                            )
-                                                    , otherIndexedGlossaryItems
-                                                        |> Array.filter
-                                                            (\( _, item ) ->
-                                                                item
-                                                                    |> GlossaryItem.tags
-                                                                    |> List.any ((==) tagBeingFilteredBy)
-                                                            )
-                                                    )
-
-                                                Nothing ->
-                                                    ( indexedGlossaryItems, otherIndexedGlossaryItems )
-                                       )
                                     |> viewCards
                                         model
                                         { enableMathSupport = glossary.enableMathSupport
@@ -2471,7 +2457,7 @@ view model =
                                         , enableLastUpdatedDates = glossary.enableLastUpdatedDates
                                         }
                                         glossary.tags
-                                        glossary.items
+                                        items
                                 ]
                             , Html.footer
                                 []

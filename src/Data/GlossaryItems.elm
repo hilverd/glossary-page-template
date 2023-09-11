@@ -1,11 +1,11 @@
-module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, preferredTermIdsToIndexes, get, insert, update, remove, terms, preferredTerms, preferredTermsWithDefinitions, enableFocusingOn, preferredTermsByAlternativeTermId, alternativeTerms)
+module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, preferredTermIdsToIndexes, get, insert, update, remove, filterByTag, terms, preferredTerms, preferredTermsWithDefinitions, enableFocusingOn, preferredTermsByAlternativeTermId, alternativeTerms)
 
 {-| A set of glossary items that make up a glossary.
 
 
 # Glossary Items
 
-@docs GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, preferredTermIdsToIndexes, get, insert, update, remove, terms, preferredTerms, preferredTermsWithDefinitions, enableFocusingOn, preferredTermsByAlternativeTermId, alternativeTerms
+@docs GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, preferredTermIdsToIndexes, get, insert, update, remove, filterByTag, terms, preferredTerms, preferredTermsWithDefinitions, enableFocusingOn, preferredTermsByAlternativeTermId, alternativeTerms
 
 -}
 
@@ -13,6 +13,7 @@ import Array exposing (Array)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
+import Data.GlossaryItem.Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
@@ -320,6 +321,92 @@ remove indexWhenOrderedAlphabetically glossaryItems =
                         _ ->
                             identity
            )
+
+
+{-| Filter the glossary items by a tag.
+-}
+filterByTag : Tag -> GlossaryItems -> GlossaryItems
+filterByTag tag glossaryItems =
+    case glossaryItems of
+        GlossaryItems items ->
+            let
+                transformedItemByIndex : Dict Int GlossaryItem
+                transformedItemByIndex =
+                    items.orderedAlphabetically
+                        |> Array.foldl
+                            (\( index, item ) result ->
+                                let
+                                    indexInt =
+                                        GlossaryItemIndex.toInt index
+
+                                    itemMatchesTag =
+                                        item
+                                            |> GlossaryItem.tags
+                                            |> List.any ((==) tag)
+                                in
+                                if itemMatchesTag then
+                                    -- TODO: also transform item here.
+                                    -- This means removing any related terms that correspond to items that don't match the tag.
+                                    Dict.insert indexInt item result
+
+                                else
+                                    result
+                            )
+                            Dict.empty
+
+                itemIndexesAfterFiltering : Set Int
+                itemIndexesAfterFiltering =
+                    Set.empty
+
+                filterAndTransform : Array ( GlossaryItemIndex, GlossaryItem ) -> Array ( GlossaryItemIndex, GlossaryItem )
+                filterAndTransform =
+                    Array.toList
+                        >> List.filterMap
+                            (\( index, _ ) ->
+                                Dict.get (GlossaryItemIndex.toInt index) transformedItemByIndex
+                                    |> Maybe.map
+                                        (Tuple.pair index)
+                            )
+                        >> Array.fromList
+
+                orderedAlphabetically_ =
+                    filterAndTransform items.orderedAlphabetically
+
+                orderedByMostMentionedFirst_ =
+                    filterAndTransform items.orderedByMostMentionedFirst
+
+                orderedFocusedOn_ =
+                    items.orderedFocusedOn
+                        |> Maybe.map
+                            (\( termId, ( indexedGlossaryItems, otherIndexedGlossaryItems ) ) ->
+                                let
+                                    indexedGlossaryItems_ =
+                                        indexedGlossaryItems
+
+                                    otherIndexedGlossaryItems_ =
+                                        otherIndexedGlossaryItems
+                                in
+                                ( termId
+                                , ( filterAndTransform indexedGlossaryItems_
+                                  , filterAndTransform otherIndexedGlossaryItems_
+                                  )
+                                )
+                            )
+
+                preferredTermIdsToIndexes_ =
+                    items.preferredTermIdsToIndexes
+                        |> Dict.filter
+                            (\_ index ->
+                                Set.member (GlossaryItemIndex.toInt index) itemIndexesAfterFiltering
+                            )
+            in
+            GlossaryItems
+                { items
+                    | orderedAlphabetically = orderedAlphabetically_
+                    , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
+                    , orderedFocusedOn = orderedFocusedOn_
+                    , preferredTermIdsToIndexes = preferredTermIdsToIndexes_
+                }
 
 
 {-| Retrieve the glossary items ordered alphabetically.
