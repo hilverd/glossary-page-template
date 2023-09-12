@@ -18,6 +18,7 @@ import Components.Spinner
 import Data.Glossary as Glossary
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
+import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemIndex as GlossaryItemIndex
@@ -67,6 +68,7 @@ type InternalMsg
     | DeleteTerm TermIndex
     | UpdateTerm TermIndex String
     | ToggleAbbreviation TermIndex
+    | ToggleTagCheckbox Tag
     | UpdateDefinition String
     | AddRelatedTerm (Maybe TermId)
     | SelectRelatedTerm RelatedTermIndex String
@@ -87,7 +89,7 @@ type alias Msg =
 init : CommonModel -> ( Model, Cmd Msg )
 init commonModel =
     case commonModel.glossary of
-        Ok { items } ->
+        Ok { items, tags } ->
             let
                 existingTerms : List Term
                 existingTerms =
@@ -130,7 +132,7 @@ init commonModel =
 
                 emptyForm : GlossaryItemForm
                 emptyForm =
-                    Form.empty existingTerms existingPreferredTerms itemsListingThisItemAsRelated
+                    Form.empty existingTerms existingPreferredTerms tags itemsListingThisItemAsRelated
 
                 form =
                     Maybe.map
@@ -141,6 +143,7 @@ init commonModel =
                                     (Form.fromGlossaryItem
                                         existingTerms
                                         existingPreferredTerms
+                                        tags
                                         itemsListingThisItemAsRelated
                                     )
                                 |> Maybe.withDefault emptyForm
@@ -164,7 +167,7 @@ init commonModel =
 
         Err _ ->
             ( { common = commonModel
-              , form = Form.empty [] [] []
+              , form = Form.empty [] [] [] []
               , triedToSaveWhenFormInvalid = False
               , saving = NotSaving
               , dropdownMenusWithMoreOptionsForRelatedTerms = Dict.empty
@@ -232,6 +235,9 @@ update msg model =
 
         ToggleAbbreviation termIndex ->
             ( { model | form = Form.toggleAbbreviation termIndex model.form }, Cmd.none )
+
+        ToggleTagCheckbox tag ->
+            ( { model | form = Form.toggleTagCheckbox tag model.form }, Cmd.none )
 
         UpdateDefinition body ->
             ( { model | form = Form.updateDefinition model.form body }, Cmd.none )
@@ -668,8 +674,8 @@ viewDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled
         ]
 
 
-viewTags : Html Msg
-viewTags =
+viewTags : Bool -> List ( Tag, Bool ) -> Html Msg
+viewTags enableMathSupport tagCheckboxes =
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
@@ -682,35 +688,17 @@ viewTags =
             ]
         , div
             []
-            [ Components.Badge.indigoWithCheckbox
-                True
-                "First Tag"
-                [ class "mr-2 mb-2" ]
-            , Components.Badge.indigoWithCheckbox
-                True
-                "Second Tag"
-                [ class "mr-2 mb-2" ]
-            , Components.Badge.indigoWithCheckbox
-                True
-                "First Tag"
-                [ class "mr-2 mb-2" ]
-            , Components.Badge.indigoWithCheckbox
-                True
-                "First Tag"
-                [ class "mr-2 mb-2" ]
-            , Components.Badge.indigoWithCheckbox
-                True
-                "First Tag"
-                [ class "mr-2 mb-2" ]
-            , Components.Badge.indigoWithCheckbox
-                True
-                "First Tag"
-                [ class "mr-2 mb-2" ]
-            , Components.Badge.indigoWithCheckbox
-                True
-                "First Tag"
-                [ class "mr-2 mb-2" ]
-            ]
+            (tagCheckboxes
+                |> List.map
+                    (\( tag, checked ) ->
+                        Components.Badge.indigoWithCheckbox
+                            { tabbable = True, checked = checked }
+                            (Tag.id tag)
+                            (PageMsg.Internal <| ToggleTagCheckbox tag)
+                            [ class "mr-2 mb-2" ]
+                            [ Tag.view enableMathSupport [] tag ]
+                    )
+            )
         ]
 
 
@@ -1093,7 +1081,7 @@ view model =
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
                                         definitionArray
-                                    , viewTags
+                                    , viewTags glossary.enableMathSupport <| Form.tagCheckboxes model.form
                                     , viewCreateSeeAlso
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid

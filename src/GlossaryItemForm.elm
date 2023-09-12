@@ -17,11 +17,13 @@ module GlossaryItemForm exposing
     , relatedTermFields
     , selectRelatedTerm
     , suggestRelatedTerms
+    , tagCheckboxes
     , termBodyToId
     , termFields
     , toGlossaryItem
     , toggleAbbreviation
     , toggleNeedsUpdating
+    , toggleTagCheckbox
     , updateDefinition
     , updateTerm
     )
@@ -56,6 +58,7 @@ type GlossaryItemForm
     = GlossaryItemForm
         { preferredTermField : TermField
         , alternativeTermFields : Array TermField
+        , tagCheckboxes : List ( Tag, Bool )
         , definitionField : DefinitionField
         , relatedTermFields : Array RelatedTermField
         , termsOutside : List Term
@@ -87,6 +90,13 @@ termFields form =
         |> Array.toList
         |> (::) (preferredTermField form)
         |> Array.fromList
+
+
+tagCheckboxes : GlossaryItemForm -> List ( Tag, Bool )
+tagCheckboxes glossaryItemForm =
+    case glossaryItemForm of
+        GlossaryItemForm form ->
+            form.tagCheckboxes
 
 
 definitionField : GlossaryItemForm -> DefinitionField
@@ -224,6 +234,7 @@ validate form =
     GlossaryItemForm
         { preferredTermField = validatedPreferredTermField
         , alternativeTermFields = validatedAlternativeTermFields
+        , tagCheckboxes = tagCheckboxes form
         , definitionField = validatedDefinitionField
         , relatedTermFields = validatedRelatedTermFields
         , termsOutside = termsOutside form
@@ -246,11 +257,12 @@ hasValidationErrors form =
         || (form |> relatedTermFields |> hasErrors .validationError)
 
 
-empty : List Term -> List Term -> List GlossaryItem -> GlossaryItemForm
-empty withTermsOutside withPreferredTermsOutside withItemsListingThisTermAsRelated =
+empty : List Term -> List Term -> List Tag -> List GlossaryItem -> GlossaryItemForm
+empty withTermsOutside withPreferredTermsOutside allTags withItemsListingThisTermAsRelated =
     GlossaryItemForm
         { preferredTermField = TermField.empty
         , alternativeTermFields = Array.empty
+        , tagCheckboxes = List.map (\tag -> ( tag, False )) allTags
         , definitionField = DefinitionField.empty
         , relatedTermFields = Array.empty
         , termsOutside = withTermsOutside
@@ -269,9 +281,13 @@ emptyRelatedTermField =
     }
 
 
-fromGlossaryItem : List Term -> List Term -> List GlossaryItem -> GlossaryItem -> GlossaryItemForm
-fromGlossaryItem existingTerms existingPreferredTerms withItemsListingThisTermAsRelated item =
+fromGlossaryItem : List Term -> List Term -> List Tag -> List GlossaryItem -> GlossaryItem -> GlossaryItemForm
+fromGlossaryItem existingTerms existingPreferredTerms allTags withItemsListingThisTermAsRelated item =
     let
+        itemTags : List Tag
+        itemTags =
+            GlossaryItem.tags item
+
         preferredTermFieldForItem : TermField
         preferredTermFieldForItem =
             let
@@ -329,6 +345,9 @@ fromGlossaryItem existingTerms existingPreferredTerms withItemsListingThisTermAs
     GlossaryItemForm
         { preferredTermField = preferredTermFieldForItem
         , alternativeTermFields = Array.fromList alternativeTermFieldsForItem
+        , tagCheckboxes =
+            allTags
+                |> List.map (\tag -> ( tag, List.member tag itemTags ))
         , definitionField = definitionField_
         , relatedTermFields =
             item
@@ -404,7 +423,16 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
 
         tags : List Tag
         tags =
-            []
+            form
+                |> tagCheckboxes
+                |> List.filterMap
+                    (\( tag, checked ) ->
+                        if checked then
+                            Just tag
+
+                        else
+                            Nothing
+                    )
 
         definition =
             form
@@ -536,6 +564,26 @@ toggleAbbreviation termIndex glossaryItemForm =
                     }
                 )
                 |> validate
+
+
+toggleTagCheckbox : Tag -> GlossaryItemForm -> GlossaryItemForm
+toggleTagCheckbox tag glossaryItemForm =
+    case glossaryItemForm of
+        GlossaryItemForm form ->
+            let
+                tagCheckboxes_ =
+                    form.tagCheckboxes
+                        |> List.map
+                            (\( tag_, checked ) ->
+                                if tag_ == tag then
+                                    ( tag_, not checked )
+
+                                else
+                                    ( tag_, checked )
+                            )
+            in
+            GlossaryItemForm
+                { form | tagCheckboxes = tagCheckboxes_ }
 
 
 updateDefinition : GlossaryItemForm -> String -> GlossaryItemForm

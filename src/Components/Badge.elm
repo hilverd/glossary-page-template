@@ -33,23 +33,30 @@ indigoWithBorderAndRemoveButton tabbable additionalAttributes onClick children =
         ]
 
 
-indigoWithCheckbox : Bool -> String -> List (Attribute Never) -> Html msg
-indigoWithCheckbox tabbable label additionalAttributes =
+indigoWithCheckbox :
+    { tabbable : Bool, checked : Bool }
+    -> String
+    -> msg
+    -> List (Attribute Never)
+    -> List (Html msg)
+    -> Html msg
+indigoWithCheckbox { tabbable, checked } id_ onClick additionalAttributes children =
     span
         (class "inline-flex items-center gap-x-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 px-1 font-medium text-indigo-800 dark:text-indigo-100" :: additionalAttributes)
         [ span
             [ class "inline-flex items-center px-2 py-2" ]
             [ checkbox
                 "select"
-                (Just False)
+                (Just checked)
                 [ class "h-4 w-4 text-indigo-600 focus:ring-indigo-500"
-                , id "TODO"
+                , id id_
+                , Html.Events.onClick onClick
                 , Accessibility.Key.tabbable tabbable
                 ]
             ]
         , Accessibility.label
             [ class "-ml-px block w-full py-1.5 pr-3 text-indigo-600 focus:ring-indigo-600 leading-6"
-            , for "TODO"
+            , for id_
             ]
-            [ text label ]
+            children
         ]
