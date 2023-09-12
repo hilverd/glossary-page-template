@@ -31,6 +31,7 @@ import Data.TermIndex as TermIndex exposing (TermIndex)
 import Dict exposing (Dict)
 import ElementIds
 import Extras.Html
+import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree
 import Extras.Http
@@ -497,7 +498,9 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
             [ div
                 [ class "flex-auto max-w-2xl flex" ]
                 [ span
-                    [ class "inline-flex items-center" ]
+                    [ class "inline-flex items-center"
+                    , Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:pt-6"
+                    ]
                     [ Components.Button.rounded canBeDeleted
                         [ Accessibility.Aria.label "Delete"
                         , Html.Events.onClick <| PageMsg.Internal <| DeleteTerm termIndex
@@ -534,7 +537,9 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
                                 ]
                             ]
                         , div
-                            [ class "flex-auto mt-2 sm:mt-0 relative flex items-baseline" ]
+                            [ class "flex-auto mt-2 sm:mt-0 relative flex items-baseline"
+                            , Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:pt-6"
+                            ]
                             [ div
                                 [ class "sm:ml-5" ]
                                 [ Components.Button.toggle
