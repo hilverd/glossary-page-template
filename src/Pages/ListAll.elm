@@ -1362,8 +1362,12 @@ viewMakeChangesButton showSandboxModeMessage tabbable =
             [ Icons.pencil
                 [ Svg.Attributes.class "h-5 w-5" ]
             , span
-                [ class "ml-2" ]
-                [ text "Make changes" ]
+                [ class "ml-2 inline-flex items-center" ]
+                [ text "Make changes"
+                , Html.kbd
+                    [ class "ml-2 inline-flex items-center rounded border border-gray-700 dark:border-gray-300 px-1 font-sans text-xs" ]
+                    [ text "e" ]
+                ]
             ]
         , Extras.Html.showIf showSandboxModeMessage <|
             div
@@ -2367,6 +2371,9 @@ view model =
                                     NoMenuOrDialogShown ->
                                         if event == Extras.HtmlEvents.controlK then
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show, True )
+
+                                        else if canEdit model.editability && event == Extras.HtmlEvents.e then
+                                            Just <| ( PageMsg.Internal MakeChanges, True )
 
                                         else if editing model.editability && event == Extras.HtmlEvents.n then
                                             let

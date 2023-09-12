@@ -15,6 +15,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 - Show spinner while saving changes.
 - Add a small "Built using Glossary Page Template" footer to the list page.
+- Add keyboard shortcut "e" for making changes.
 
 ### Changed
 
