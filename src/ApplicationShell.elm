@@ -59,6 +59,7 @@ type Page
     = ListAll Pages.ListAll.Model
     | CreateOrEdit Pages.CreateOrEdit.Model
     | EditTitleAndAbout Pages.EditTitleAndAbout.Model
+    | ManageTags Pages.ManageTags.Model
 
 
 {-| A model for the application.
@@ -243,6 +244,7 @@ type Msg
     | ListAllMsg Pages.ListAll.Msg
     | CreateOrEditMsg Pages.CreateOrEdit.Msg
     | EditTitleAndAboutMsg Pages.EditTitleAndAbout.Msg
+    | ManageTagsMsg Pages.ManageTags.Msg
 
 
 
@@ -261,6 +263,9 @@ withoutInternal msg =
         ListAllMsg (NavigateToEditTitleAndAbout commonModel) ->
             PageMsg.NavigateToEditTitleAndAbout commonModel
 
+        ListAllMsg (NavigateToManageTags commonModel) ->
+            PageMsg.NavigateToManageTags commonModel
+
         ListAllMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
@@ -272,6 +277,9 @@ withoutInternal msg =
 
         CreateOrEditMsg (NavigateToEditTitleAndAbout commonModel) ->
             PageMsg.NavigateToEditTitleAndAbout commonModel
+
+        CreateOrEditMsg (NavigateToManageTags commonModel) ->
+            PageMsg.NavigateToManageTags commonModel
 
         CreateOrEditMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
@@ -285,7 +293,25 @@ withoutInternal msg =
         EditTitleAndAboutMsg (NavigateToEditTitleAndAbout commonModel) ->
             PageMsg.NavigateToEditTitleAndAbout commonModel
 
+        EditTitleAndAboutMsg (NavigateToManageTags commonModel) ->
+            PageMsg.NavigateToManageTags commonModel
+
         EditTitleAndAboutMsg (PageMsg.Internal _) ->
+            PageMsg.Internal ()
+
+        ManageTagsMsg (NavigateToListAll commonModel) ->
+            PageMsg.NavigateToListAll commonModel
+
+        ManageTagsMsg (NavigateToCreateOrEdit commonModel) ->
+            PageMsg.NavigateToCreateOrEdit commonModel
+
+        ManageTagsMsg (NavigateToEditTitleAndAbout commonModel) ->
+            PageMsg.NavigateToEditTitleAndAbout commonModel
+
+        ManageTagsMsg (NavigateToManageTags commonModel) ->
+            PageMsg.NavigateToManageTags commonModel
+
+        ManageTagsMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
         NoOp ->
@@ -322,6 +348,15 @@ update msg model =
             , Cmd.batch [ resetViewport, Cmd.map EditTitleAndAboutMsg editTitleAndAboutCmd ]
             )
 
+        ( _, NavigateToManageTags commonModel, _ ) ->
+            let
+                ( manageTagsModel, manageTagsCmd ) =
+                    Pages.ManageTags.init commonModel
+            in
+            ( ManageTags manageTagsModel
+            , Cmd.batch [ resetViewport, Cmd.map ManageTagsMsg manageTagsCmd ]
+            )
+
         ( ListAllMsg (PageMsg.Internal msg_), _, ListAll listAllModel ) ->
             let
                 ( listAllModel_, listAllCmd ) =
@@ -342,6 +377,13 @@ update msg model =
                     Pages.EditTitleAndAbout.update msg_ editTitleAndAboutModel
             in
             ( EditTitleAndAbout editTitleAndAboutModel_, editTitleAndAboutCmd |> Cmd.map EditTitleAndAboutMsg )
+
+        ( ManageTagsMsg (PageMsg.Internal msg_), _, ManageTags manageTagsModel ) ->
+            let
+                ( manageTagsModel_, manageTagsCmd ) =
+                    Pages.ManageTags.update msg_ manageTagsModel
+            in
+            ( ManageTags manageTagsModel_, manageTagsCmd |> Cmd.map ManageTagsMsg )
 
         _ ->
             ( model, Cmd.none )
@@ -375,6 +417,9 @@ view model =
         EditTitleAndAbout page ->
             page |> Pages.EditTitleAndAbout.view |> mapDocument EditTitleAndAboutMsg
 
+        ManageTags page ->
+            page |> Pages.ManageTags.view |> mapDocument ManageTagsMsg
+
 
 
 -- SUBSCRIPTIONS
@@ -391,3 +436,6 @@ subscriptions model =
 
         EditTitleAndAbout page ->
             page |> Pages.EditTitleAndAbout.subscriptions |> Sub.map EditTitleAndAboutMsg
+
+        ManageTags page ->
+            page |> Pages.ManageTags.subscriptions |> Sub.map ManageTagsMsg

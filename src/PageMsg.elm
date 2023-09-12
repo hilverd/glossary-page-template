@@ -7,4 +7,5 @@ type PageMsg a
     = NavigateToListAll CommonModel
     | NavigateToCreateOrEdit CommonModel
     | NavigateToEditTitleAndAbout CommonModel
+    | NavigateToManageTags CommonModel
     | Internal a

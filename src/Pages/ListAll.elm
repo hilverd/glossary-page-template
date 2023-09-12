@@ -1503,6 +1503,10 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             (model.itemsFilteredByTag |> Maybe.map Tuple.first)
         , Extras.Html.showIf (model.itemsFilteredByTag == Nothing) <|
             viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
+        , Extras.Html.showIf (editing model.editability) <|
+            div
+                [ class "flex-none mt-3" ]
+                [ viewManageTagsButton tabbable model.common ]
         , Extras.Html.showIf (not <| Array.isEmpty combinedIndexedGlossaryItems) <|
             viewOrderItemsBy
                 model
@@ -2083,6 +2087,23 @@ viewAllTagFilters { enableMathSupport, tabbable } tags =
                             )
                    )
             )
+
+
+viewManageTagsButton : Bool -> CommonModel -> Html Msg
+viewManageTagsButton tabbable common =
+    div
+        [ class "pb-3 print:hidden" ]
+        [ Components.Button.text
+            [ Html.Events.onClick <| PageMsg.NavigateToManageTags { common | maybeIndex = Nothing }
+            , Accessibility.Key.tabbable tabbable
+            ]
+            [ Icons.pencil
+                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
+            , span
+                [ class "ml-2" ]
+                [ text "Manage tags" ]
+            ]
+        ]
 
 
 viewOrderItemsBy : Model -> Int -> Bool -> List Term -> Maybe Term -> Html Msg
