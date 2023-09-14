@@ -1495,7 +1495,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
         , Extras.Html.showIf (editing model.editability) <|
             div
-                [ class "flex-none mt-3" ]
+                [ class "flex-none mt-2" ]
                 [ viewManageTagsButton tabbable model.common ]
         , div
             []
