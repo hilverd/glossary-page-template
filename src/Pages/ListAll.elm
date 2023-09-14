@@ -1485,9 +1485,20 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                 { previous = Nothing, item = Just indexedItem, next = Nothing }
     in
     Html.article
-        [ Html.Attributes.id ElementIds.items ]
-        [ div
-            [ class "pt-2 border-t border-gray-300 dark:border-gray-700" ]
+        [ Html.Attributes.id ElementIds.items
+        , class "pt-2 border-t border-gray-300 dark:border-gray-700"
+        ]
+        [ Extras.Html.showMaybe
+            (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
+            (model.itemsFilteredByTag |> Maybe.map Tuple.first)
+        , Extras.Html.showIf (model.itemsFilteredByTag == Nothing) <|
+            viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
+        , Extras.Html.showIf (editing model.editability) <|
+            div
+                [ class "flex-none mt-3" ]
+                [ viewManageTagsButton tabbable model.common ]
+        , div
+            []
             [ Extras.Html.showIf editable <|
                 div
                     [ class "pt-2" ]
@@ -1498,15 +1509,6 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                         viewCreateGlossaryItemButton tabbable model.common
                     ]
             ]
-        , Extras.Html.showMaybe
-            (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
-            (model.itemsFilteredByTag |> Maybe.map Tuple.first)
-        , Extras.Html.showIf (model.itemsFilteredByTag == Nothing) <|
-            viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
-        , Extras.Html.showIf (editing model.editability) <|
-            div
-                [ class "flex-none mt-3" ]
-                [ viewManageTagsButton tabbable model.common ]
         , Extras.Html.showIf (not <| Array.isEmpty combinedIndexedGlossaryItems) <|
             viewOrderItemsBy
                 model
