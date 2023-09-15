@@ -1086,7 +1086,9 @@ view model =
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
                                         definitionArray
-                                    , viewTags glossary.enableMathSupport <| Form.tagCheckboxes model.form
+                                    , Extras.Html.showIf (not <| List.isEmpty <| Form.tagCheckboxes model.form) <|
+                                        viewTags glossary.enableMathSupport <|
+                                            Form.tagCheckboxes model.form
                                     , viewCreateSeeAlso
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid

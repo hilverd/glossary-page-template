@@ -5,8 +5,10 @@ import Array exposing (Array)
 import Browser exposing (Document)
 import CommonModel exposing (CommonModel)
 import Components.Button
+import Components.Copy
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.Saving exposing (Saving(..))
+import Extras.Html
 import Html.Attributes exposing (class)
 import Html.Events
 import Icons
@@ -128,6 +130,24 @@ viewEditTags { enableMathSupport, tabbable } tagsArray =
         ]
 
 
+viewFooter : Model -> Html Msg
+viewFooter model =
+    div
+        [ class "pt-5 lg:border-t dark:border-gray-700 flex flex-col items-center" ]
+        [ Extras.Html.showIf model.common.enableSavingChangesInMemory <|
+            div
+                [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
+                [ text Components.Copy.sandboxModeMessage ]
+        , div
+            [ class "flex items-center" ]
+            [ Components.Button.white
+                True
+                [ Html.Events.onClick <| PageMsg.NavigateToListAll model.common ]
+                [ text "Finished editing" ]
+            ]
+        ]
+
+
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
@@ -153,6 +173,9 @@ view model =
                                         |> viewEditTags { enableMathSupport = enableMathSupport, tabbable = True }
                                     ]
                                 ]
+                            , div
+                                [ class "mt-4 lg:mt-8" ]
+                                [ viewFooter model ]
                             ]
                         ]
                     ]
