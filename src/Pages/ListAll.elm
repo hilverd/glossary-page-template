@@ -1098,7 +1098,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
                 [ Html.span
                     [ class "block border-l pl-4 -ml-px border-transparent select-none" ]
                     [ Term.view enableMathSupport
-                        [ class "text-slate-400 dark:text-slate-600 contrast-more:text-slate-600 contrast-more:dark:text-slate-400 contrast-more:font-light" ]
+                        [ class "text-slate-400 dark:text-slate-500 contrast-more:text-slate-600 contrast-more:dark:text-slate-400 contrast-more:font-light" ]
                         term
                     ]
                 ]
@@ -1107,6 +1107,10 @@ viewTermIndexItem enableMathSupport tabbable entry =
                         li
                             [ Extras.HtmlAttribute.showIf (index + 1 == List.length preferredTerms) <|
                                 Html.Attributes.attribute "style" "margin-bottom: 1rem"
+                            , Extras.HtmlAttribute.showIf (index == 0) <|
+                                Html.Attributes.attribute "style" "margin-top: 0.25rem"
+                            , Extras.HtmlAttribute.showIf (index /= 0) <|
+                                Html.Attributes.attribute "style" "margin-top: 0rem"
                             ]
                             [ Html.a
                                 [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
