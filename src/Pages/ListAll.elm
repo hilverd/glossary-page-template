@@ -1499,7 +1499,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
         , Extras.Html.showIf (editing model.editability) <|
             div
-                [ class "flex-none mt-2" ]
+                [ class "flex-none mt-4" ]
                 [ viewManageTagsButton tabbable model.common ]
         , div
             []
@@ -2061,13 +2061,13 @@ viewSelectCardWidth glossary model =
 viewCurrentTagFilter : { enableMathSupport : Bool, tabbable : Bool } -> Tag -> Html Msg
 viewCurrentTagFilter { enableMathSupport, tabbable } tag =
     div
-        [ class "print:hidden pt-4" ]
+        [ class "print:hidden pt-3" ]
         [ span
             [ class "mr-2 font-medium text-gray-900 dark:text-gray-100" ]
             [ text "Only showing items for tag:" ]
         , Components.Badge.indigoWithBorderAndRemoveButton
             tabbable
-            []
+            [ class "mt-2" ]
             (PageMsg.Internal DoNotFilterByTag)
             [ Tag.view enableMathSupport [] tag ]
         ]
@@ -2077,7 +2077,7 @@ viewAllTagFilters : { enableMathSupport : Bool, tabbable : Bool } -> List Tag ->
 viewAllTagFilters { enableMathSupport, tabbable } tags =
     Extras.Html.showIf (not <| List.isEmpty tags) <|
         div
-            [ class "print:hidden pt-4" ]
+            [ class "print:hidden pt-3" ]
             (span
                 [ class "mr-2 font-medium text-gray-900 dark:text-gray-100" ]
                 [ text "Tags:" ]
@@ -2086,7 +2086,7 @@ viewAllTagFilters { enableMathSupport, tabbable } tags =
                             (\tag ->
                                 Components.Button.soft
                                     tabbable
-                                    [ class "mr-2 mb-2"
+                                    [ class "mr-2 mt-2"
                                     , Html.Events.onClick <| PageMsg.Internal <| FilterByTag tag
                                     ]
                                     [ Tag.view enableMathSupport [] tag ]
@@ -2145,7 +2145,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport preferredTermsWithDefinit
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy Alphabetically
                         ]
                     , label
-                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
+                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300  -none"
                         , for ElementIds.orderItemsAlphabetically
                         ]
                         [ text "alphabetically" ]

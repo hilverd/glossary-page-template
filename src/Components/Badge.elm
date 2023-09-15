@@ -13,7 +13,7 @@ indigoWithBorderAndRemoveButton tabbable additionalAttributes onClick children =
     span
         (class "inline-flex items-center gap-x-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 px-2 py-1 text-indigo-800 dark:text-indigo-100" :: additionalAttributes)
         [ span
-            [ class "mr-0.5" ]
+            [ class "mr-0.5 whitespace-nowrap" ]
             children
         , button
             [ Html.Attributes.type_ "button"
@@ -55,7 +55,7 @@ indigoWithCheckbox { tabbable, checked } id_ onClick additionalAttributes childr
                 ]
             ]
         , Accessibility.label
-            [ class "-ml-px block w-full py-1.5 pr-3 text-indigo-600 focus:ring-indigo-600 leading-6"
+            [ class "-ml-px block w-full py-1.5 pr-3 text-indigo-600 focus:ring-indigo-600 leading-6 whitespace-nowrap"
             , for id_
             ]
             children

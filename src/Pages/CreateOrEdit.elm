@@ -689,7 +689,7 @@ viewTags enableMathSupport tagCheckboxes =
                 [ text "Tags" ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
-                [ text "Select any tags that apply to this item." ]
+                [ text "Select all tags that apply to this item." ]
             ]
         , div
             []

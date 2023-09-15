@@ -15,8 +15,10 @@ withAdditionalAttributes :
     -> Html msg
 withAdditionalAttributes attributes additionalAttributes children =
     Accessibility.button
-        (Html.Attributes.type_ "button"
-            :: (attributes ++ additionalAttributes)
+        ([ Html.Attributes.type_ "button"
+         , class "whitespace-nowrap"
+         ]
+            ++ (attributes ++ additionalAttributes)
         )
         children
 
