@@ -4,6 +4,7 @@ import Accessibility exposing (Html, div, form, h1, main_, span, text)
 import Array exposing (Array)
 import Browser exposing (Document)
 import CommonModel exposing (CommonModel)
+import Components.Badge
 import Components.Button
 import Components.Copy
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
@@ -72,11 +73,10 @@ update msg model =
 -- VIEW
 
 
-viewEditTag : { enableMathSupport : Bool, tabbable : Bool } -> Int -> Tag -> Html Msg
-viewEditTag { enableMathSupport, tabbable } _ tag =
+viewEditTag : { enableMathSupport : Bool } -> Int -> Tag -> Html Msg
+viewEditTag { enableMathSupport } _ tag =
     div []
-        [ Components.Button.soft
-            tabbable
+        [ Components.Badge.pill
             []
             [ Tag.view enableMathSupport [] tag ]
         ]
@@ -119,7 +119,7 @@ viewEditTags { enableMathSupport, tabbable } tagsArray =
         [ div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
             (List.indexedMap
-                (viewEditTag { enableMathSupport = enableMathSupport, tabbable = tabbable })
+                (viewEditTag { enableMathSupport = enableMathSupport })
                 tags
             )
         , if List.isEmpty tags then
