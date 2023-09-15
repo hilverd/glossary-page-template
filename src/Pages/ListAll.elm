@@ -2061,9 +2061,9 @@ viewSelectCardWidth glossary model =
 viewCurrentTagFilter : { enableMathSupport : Bool, tabbable : Bool } -> Tag -> Html Msg
 viewCurrentTagFilter { enableMathSupport, tabbable } tag =
     div
-        [ class "print:hidden pt-4 font-medium text-gray-900 dark:text-gray-100" ]
+        [ class "print:hidden pt-4" ]
         [ span
-            [ class "mr-2" ]
+            [ class "mr-2 font-medium text-gray-900 dark:text-gray-100" ]
             [ text "Only showing items for tag:" ]
         , Components.Badge.indigoWithBorderAndRemoveButton
             tabbable
@@ -2077,9 +2077,9 @@ viewAllTagFilters : { enableMathSupport : Bool, tabbable : Bool } -> List Tag ->
 viewAllTagFilters { enableMathSupport, tabbable } tags =
     Extras.Html.showIf (not <| List.isEmpty tags) <|
         div
-            [ class "print:hidden pt-4 font-medium text-gray-900 dark:text-gray-100" ]
+            [ class "print:hidden pt-4" ]
             (span
-                [ class "mr-2" ]
+                [ class "mr-2 font-medium text-gray-900 dark:text-gray-100" ]
                 [ text "Tags:" ]
                 :: (tags
                         |> List.map
