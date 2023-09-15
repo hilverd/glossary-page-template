@@ -1,6 +1,8 @@
 module Pages.ManageTags exposing (InternalMsg, Model, Msg, init, subscriptions, update, view)
 
 import Accessibility exposing (Html, div, form, h1, main_, span, text)
+import Accessibility.Aria
+import Accessibility.Key
 import Array exposing (Array)
 import Browser exposing (Document)
 import CommonModel exposing (CommonModel)
@@ -73,13 +75,82 @@ update msg model =
 -- VIEW
 
 
-viewEditTag : { enableMathSupport : Bool } -> Int -> Tag -> Html Msg
-viewEditTag { enableMathSupport } _ tag =
-    div []
-        [ Components.Badge.pill
-            []
-            [ Tag.view enableMathSupport [] tag ]
+viewRenameTagButton : Bool -> Html Msg
+viewRenameTagButton tabbable =
+    Components.Button.text
+        [ -- Html.Events.onClick <| PageMsg.Internal RenameTag
+          Accessibility.Key.tabbable tabbable
         ]
+        [ Icons.pencil
+            [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
+        , span
+            [ class "ml-2" ]
+            [ text "Rename tag" ]
+        ]
+
+
+viewEditTag : { enableMathSupport : Bool, tabbable : Bool } -> Int -> Int -> Tag -> Html Msg
+viewEditTag { enableMathSupport, tabbable } numberOfTags index tag =
+    div
+        []
+        [ div
+            [ class "flex-auto max-w-xl flex items-center" ]
+            [ span
+                [ class "inline-flex items-center" ]
+                [ Components.Button.rounded True
+                    [ Accessibility.Aria.label "Delete"
+
+                    -- , Html.Events.onClick <| PageMsg.Internal <| DeleteTag index
+                    ]
+                    [ Icons.trash
+                        [ Svg.Attributes.class "h-5 w-5" ]
+                    ]
+                ]
+            , div []
+                [ Tag.view enableMathSupport [] tag
+                ]
+
+            -- , Extras.Html.showIf (numberOfRelatedTerms > 1) <|
+            --     Extras.Html.showMaybe
+            --         (\dropdownMenuWithMoreOptions ->
+            --             span
+            --                 [ class "sm:hidden ml-2 flex items-center" ]
+            --                 [ viewMoreOptionsForTagDropdownButton numberOfTags index dropdownMenuWithMoreOptions ]
+            --         )
+            --         maybeDropdownMenuWithMoreOptions
+            , div
+                [ class "hidden sm:block sm:ml-2 flex items-center" ]
+                [ Components.Button.rounded (index > 0)
+                    [ Accessibility.Aria.label "Move up"
+
+                    -- , Html.Events.onClick <| PageMsg.Internal <| MoveTagUp index
+                    ]
+                    [ Icons.arrowUp
+                        [ Svg.Attributes.class "h-5 w-5" ]
+                    ]
+                , Components.Button.rounded (index + 1 < numberOfTags)
+                    [ Accessibility.Aria.label "Move down"
+
+                    -- , Html.Events.onClick <| PageMsg.Internal <| MoveTagDown index
+                    , class ""
+                    ]
+                    [ Icons.arrowDown
+                        [ Svg.Attributes.class "h-5 w-5" ]
+                    ]
+                , span
+                    [ class "ml-2" ]
+                    [ viewRenameTagButton tabbable ]
+                ]
+            ]
+        ]
+
+
+
+-- div []
+--     [ Components.Badge.pill
+--         []
+--         [ Tag.view enableMathSupport [] tag ]
+--     ]
 
 
 viewAddTagButtonForEmptyState : Html Msg
@@ -111,6 +182,9 @@ viewAddTagButton =
 viewEditTags : { enableMathSupport : Bool, tabbable : Bool } -> Array Tag -> Html Msg
 viewEditTags { enableMathSupport, tabbable } tagsArray =
     let
+        numberOfTags =
+            Array.length tagsArray
+
         tags =
             Array.toList tagsArray
     in
@@ -119,7 +193,7 @@ viewEditTags { enableMathSupport, tabbable } tagsArray =
         [ div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
             (List.indexedMap
-                (viewEditTag { enableMathSupport = enableMathSupport })
+                (viewEditTag { enableMathSupport = enableMathSupport, tabbable = tabbable } numberOfTags)
                 tags
             )
         , if List.isEmpty tags then
