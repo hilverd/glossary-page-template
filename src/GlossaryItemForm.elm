@@ -295,7 +295,7 @@ fromGlossaryItem existingTerms existingPreferredTerms allTags withItemsListingTh
         preferredTermFieldForItem =
             let
                 preferredTerm =
-                    GlossaryItem.preferredTerm item
+                    GlossaryItem.nonDisambiguatedPreferredTerm item
             in
             TermField.fromString
                 (Term.raw preferredTerm)

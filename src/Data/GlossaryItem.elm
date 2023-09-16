@@ -1,5 +1,5 @@
 module Data.GlossaryItem exposing
-    ( GlossaryItem, init, decode, preferredTerm, disambiguatedPreferredTerm, alternativeTerms, allTerms, tags, disambiguationTag, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+    ( GlossaryItem, init, decode, preferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, tags, disambiguationTag, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
     , toHtmlTree
     )
 
@@ -8,7 +8,7 @@ module Data.GlossaryItem exposing
 
 # Glossary Items
 
-@docs GlossaryItem, init, decode, preferredTerm, disambiguatedPreferredTerm, alternativeTerms, allTerms, tags, disambiguationTag, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+@docs GlossaryItem, init, decode, preferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, tags, disambiguationTag, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
 
 
 # Converting to HTML
@@ -32,7 +32,7 @@ import Json.Decode as Decode exposing (Decoder)
 -}
 type GlossaryItem
     = GlossaryItem
-        { preferredTerm : Term
+        { nonDisambiguatedPreferredTerm : Term
         , disambiguatedPreferredTerm : Term
         , alternativeTerms : List Term
         , tags : List TagInItem
@@ -60,7 +60,7 @@ init preferredTerm_ alternativeTerms_ tags_ definition_ relatedTerms_ needsUpdat
                 |> Maybe.withDefault preferredTerm_
     in
     GlossaryItem
-        { preferredTerm = preferredTerm_
+        { nonDisambiguatedPreferredTerm = preferredTerm_
         , disambiguatedPreferredTerm = disambiguatedPreferredTerm_
         , alternativeTerms = alternativeTerms_
         , tags = tags_
@@ -183,24 +183,24 @@ hasADefinition glossaryItem =
             item.definition /= Nothing
 
 
-{-| The preferred term of the glossary item.
+{-| The disambiguated preferred term of the glossary item.
+If the item has no disambiguation tag then this is just the preferred term.
+Otherwise, it is the preferred term followed by the disambiguation tag in parenthesis.
 -}
 preferredTerm : GlossaryItem -> Term
 preferredTerm glossaryItem =
     case glossaryItem of
         GlossaryItem item ->
-            item.preferredTerm
+            item.disambiguatedPreferredTerm
 
 
-{-| The disambiguated preferred term of the glossary item.
-If the item has no disambiguation tag then this is just the preferred term.
-Otherwise, it is the preferred term followed by the disambiguation tag in parenthesis.
+{-| The non-disambiguated preferred term of the glossary item.
 -}
-disambiguatedPreferredTerm : GlossaryItem -> Term
-disambiguatedPreferredTerm glossaryItem =
+nonDisambiguatedPreferredTerm : GlossaryItem -> Term
+nonDisambiguatedPreferredTerm glossaryItem =
     case glossaryItem of
         GlossaryItem item ->
-            item.disambiguatedPreferredTerm
+            item.nonDisambiguatedPreferredTerm
 
 
 {-| The alternative terms of the glossary item.
