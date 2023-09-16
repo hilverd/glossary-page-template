@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, htmlTreeForAnki)
+module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, updateRaw, htmlTreeForAnki)
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -9,7 +9,7 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, htmlTreeForAnki
+@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, updateRaw, htmlTreeForAnki
 
 -}
 
@@ -344,6 +344,21 @@ compareAlphabetically term1 term2 =
                     |> preserveOnlyAlphaNumChars
                     |> String.toUpper
                 )
+
+
+{-| Update the raw body of a term.
+-}
+updateRaw : (String -> String) -> Term -> Term
+updateRaw f term =
+    case term of
+        PlaintextTerm t ->
+            fromPlaintextWithId (f t.body) t.id t.isAbbreviation
+
+        MarkdownTerm t ->
+            fromMarkdownWithId
+                (t.body |> MarkdownFragment.raw |> f)
+                t.id
+                t.isAbbreviation
 
 
 {-| Convert a term to an HtmlTree for Anki.

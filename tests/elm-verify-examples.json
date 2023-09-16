@@ -7,6 +7,7 @@
         "Data.GlossaryItem.Definition",
         "Data.GlossaryItem.RelatedTerm",
         "Data.GlossaryItem.Tag",
+        "Data.GlossaryItem.TagInItem",
         "Data.GlossaryItem.Term",
         "Data.GlossaryItem",
         "Data.GlossaryItemIndex",
@@ -14,6 +15,7 @@
         "Data.GlossaryTitle",
         "Data.IndexOfTerms",
         "Data.MarkdownFragment",
+        "DirectedGraph",
         "Export.Anki",
         "Export.Markdown",
         "Extras.Array",
@@ -22,7 +24,6 @@
         "Extras.Url",
         "GlossaryItemForm.DefinitionField",
         "GlossaryItemForm.TermField",
-        "MarkdownRenderers",
-        "DirectedGraph"
+        "MarkdownRenderers"
     ]
 }

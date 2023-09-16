@@ -8,6 +8,7 @@ import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
+import Data.GlossaryItem.TagInItem as TagInItem exposing (TagInItem)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
@@ -61,7 +62,9 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
 
                 tags : List Tag
                 tags =
-                    GlossaryItem.tags glossaryItem
+                    glossaryItem
+                        |> GlossaryItem.tags
+                        |> List.map TagInItem.tag
 
                 itemHasSomeDefinitions : Bool
                 itemHasSomeDefinitions =
@@ -400,7 +403,9 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
 
                 tags : List Tag
                 tags =
-                    GlossaryItem.tags glossaryItem
+                    glossaryItem
+                        |> GlossaryItem.tags
+                        |> List.map TagInItem.tag
 
                 definitions =
                     GlossaryItem.definition glossaryItem

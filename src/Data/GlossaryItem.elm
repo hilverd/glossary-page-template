@@ -1,5 +1,5 @@
 module Data.GlossaryItem exposing
-    ( GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, tags, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+    ( GlossaryItem, init, decode, preferredTerm, disambiguatedPreferredTerm, alternativeTerms, allTerms, tags, disambiguationTag, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
     , toHtmlTree
     )
 
@@ -8,7 +8,7 @@ module Data.GlossaryItem exposing
 
 # Glossary Items
 
-@docs GlossaryItem, init, decode, preferredTerm, alternativeTerms, allTerms, tags, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+@docs GlossaryItem, init, decode, preferredTerm, disambiguatedPreferredTerm, alternativeTerms, allTerms, tags, disambiguationTag, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
 
 
 # Converting to HTML
@@ -20,6 +20,7 @@ module Data.GlossaryItem exposing
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
+import Data.GlossaryItem.TagInItem as TagInItem exposing (TagInItem(..))
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
@@ -32,8 +33,9 @@ import Json.Decode as Decode exposing (Decoder)
 type GlossaryItem
     = GlossaryItem
         { preferredTerm : Term
+        , disambiguatedPreferredTerm : Term
         , alternativeTerms : List Term
-        , tags : List Tag
+        , tags : List TagInItem
         , definition : Maybe Definition
         , relatedPreferredTerms : List RelatedTerm
         , needsUpdating : Bool
@@ -43,10 +45,23 @@ type GlossaryItem
 
 {-| Create a glossary item.
 -}
-init : Term -> List Term -> List Tag -> Maybe Definition -> List RelatedTerm -> Bool -> Maybe String -> GlossaryItem
+init : Term -> List Term -> List TagInItem -> Maybe Definition -> List RelatedTerm -> Bool -> Maybe String -> GlossaryItem
 init preferredTerm_ alternativeTerms_ tags_ definition_ relatedTerms_ needsUpdating_ lastUpdatedDate_ =
+    let
+        disambiguatedPreferredTerm_ =
+            tags_
+                |> disambiguationTagFromItemTags
+                |> Maybe.map
+                    (\disambiguationTag_ ->
+                        preferredTerm_
+                            |> Term.updateRaw
+                                (\raw0 -> raw0 ++ " (" ++ Tag.raw disambiguationTag_ ++ ")")
+                    )
+                |> Maybe.withDefault preferredTerm_
+    in
     GlossaryItem
         { preferredTerm = preferredTerm_
+        , disambiguatedPreferredTerm = disambiguatedPreferredTerm_
         , alternativeTerms = alternativeTerms_
         , tags = tags_
         , definition = definition_
@@ -98,20 +113,10 @@ init preferredTerm_ alternativeTerms_ tags_ definition_ relatedTerms_ needsUpdat
 decode : Bool -> Decoder GlossaryItem
 decode enableMarkdownBasedSyntax =
     Decode.map7
-        (\preferredTerm_ alternativeTerms_ tags_ definition_ relatedTerms_ needsUpdating_ lastUpdatedDate_ ->
-            GlossaryItem
-                { preferredTerm = preferredTerm_
-                , alternativeTerms = alternativeTerms_
-                , tags = tags_
-                , definition = definition_
-                , relatedPreferredTerms = relatedTerms_
-                , needsUpdating = needsUpdating_
-                , lastUpdatedDateAsIso8601 = lastUpdatedDate_
-                }
-        )
+        init
         (Decode.field "preferredTerm" <| Term.decode enableMarkdownBasedSyntax)
         (Decode.field "alternativeTerms" <| Decode.list <| Term.decode enableMarkdownBasedSyntax)
-        (Decode.field "tags" <| Decode.list <| Tag.decode enableMarkdownBasedSyntax)
+        (Decode.field "tags" <| Decode.list <| TagInItem.decode enableMarkdownBasedSyntax)
         (Decode.field "definition" <|
             Decode.nullable <|
                 Decode.map
@@ -127,6 +132,29 @@ decode enableMarkdownBasedSyntax =
         (Decode.field "relatedTerms" <| Decode.list <| RelatedTerm.decode enableMarkdownBasedSyntax)
         (Decode.field "needsUpdating" Decode.bool)
         (Decode.maybe <| Decode.field "lastUpdatedDate" Decode.string)
+
+
+disambiguationTagFromItemTags : List TagInItem -> Maybe Tag
+disambiguationTagFromItemTags =
+    List.filterMap
+        (\tagInItem ->
+            case tagInItem of
+                DisambiguationTag tag ->
+                    Just tag
+
+                NormalTag _ ->
+                    Nothing
+        )
+        >> List.head
+
+
+{-| The disambiguation tag for an item, if it has one.
+-}
+disambiguationTag : GlossaryItem -> Maybe Tag
+disambiguationTag glossaryItem =
+    case glossaryItem of
+        GlossaryItem item ->
+            item.tags |> disambiguationTagFromItemTags
 
 
 {-| Whether or not the glossary item has a definition.
@@ -164,6 +192,17 @@ preferredTerm glossaryItem =
             item.preferredTerm
 
 
+{-| The disambiguated preferred term of the glossary item.
+If the item has no disambiguation tag then this is just the preferred term.
+Otherwise, it is the preferred term followed by the disambiguation tag in parenthesis.
+-}
+disambiguatedPreferredTerm : GlossaryItem -> Term
+disambiguatedPreferredTerm glossaryItem =
+    case glossaryItem of
+        GlossaryItem item ->
+            item.disambiguatedPreferredTerm
+
+
 {-| The alternative terms of the glossary item.
 -}
 alternativeTerms : GlossaryItem -> List Term
@@ -182,7 +221,7 @@ allTerms glossaryItem =
 
 {-| The tags of the glossary item.
 -}
-tags : GlossaryItem -> List Tag
+tags : GlossaryItem -> List TagInItem
 tags glossaryItem =
     case glossaryItem of
         GlossaryItem item ->
@@ -335,11 +374,11 @@ toHtmlTree glossaryItem =
                                 True
                                 [ HtmlTree.Attribute "class" "tags" ]
                                 (List.map
-                                    (\tag ->
+                                    (\tagInItem ->
                                         HtmlTree.Node "button"
                                             False
                                             [ HtmlTree.Attribute "type" "button" ]
-                                            [ HtmlTree.Leaf <| Tag.raw tag ]
+                                            [ HtmlTree.Leaf <| Tag.raw <| TagInItem.tag tagInItem ]
                                     )
                                     item.tags
                                 )

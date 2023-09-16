@@ -33,6 +33,7 @@ import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Tag exposing (Tag)
+import Data.GlossaryItem.TagInItem as TagInItem exposing (TagInItem(..))
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -286,7 +287,9 @@ fromGlossaryItem existingTerms existingPreferredTerms allTags withItemsListingTh
     let
         itemTags : List Tag
         itemTags =
-            GlossaryItem.tags item
+            item
+                |> GlossaryItem.tags
+                |> List.map TagInItem.tag
 
         preferredTermFieldForItem : TermField
         preferredTermFieldForItem =
@@ -421,14 +424,14 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                 |> Array.toList
                 |> List.map termFieldToTerm
 
-        tags : List Tag
-        tags =
+        tagsInItem : List TagInItem
+        tagsInItem =
             form
                 |> tagCheckboxes
                 |> List.filterMap
                     (\( tag, checked ) ->
                         if checked then
-                            Just tag
+                            Just (NormalTag tag)
 
                         else
                             Nothing
@@ -483,7 +486,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
         lastUpdatedDate_ =
             dateTime
     in
-    GlossaryItem.init preferredTerm alternativeTerms tags definition relatedTerms needsUpdating_ lastUpdatedDate_
+    GlossaryItem.init preferredTerm alternativeTerms tagsInItem definition relatedTerms needsUpdating_ lastUpdatedDate_
 
 
 addTerm : GlossaryItemForm -> GlossaryItemForm

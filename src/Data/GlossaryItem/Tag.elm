@@ -1,6 +1,6 @@
 module Data.GlossaryItem.Tag exposing (Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, id, view)
 
-{-| A tag for a glossary item.
+{-| A tag that can be used in glossary items.
 This can be in either plain text or Markdown.
 A tag's `id` is used to be able to refer to this tag.
 The `body` is the actual tag.

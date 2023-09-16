@@ -47,6 +47,15 @@ if (containerElement) {
         }
     }
 
+    function tagInItemFromButtonElement(buttonElement) {
+        const tag = buttonElement?.textContent?.trim();
+
+        return {
+            isDisambiguationTag: buttonElement.className === 'disambiguation',
+            tag: tag
+        };
+    }
+
     function glossaryItemFromDivElement(glossaryItemDivElement) {
         const dtElements = Array.prototype.slice.apply(glossaryItemDivElement.querySelectorAll('dt'));
         const preferredTermDtElement = dtElements[0];
@@ -67,7 +76,7 @@ if (containerElement) {
 
         const tagsDdElement = ddElements.filter(ddElement => ddElement.className === 'tags')[0];
         const tagElements = Array.prototype.slice.apply(tagsDdElement?.querySelectorAll('button') || []);
-        const tags = tagElements.map(tagElement => tagElement.textContent.trim());
+        const tags = tagElements.map(tagElement => tagInItemFromButtonElement(tagElement));
 
         const needsUpdatingDdElements = ddElements.filter(ddElement => ddElement.className === 'needs-updating');
         const relatedTermDdElements = ddElements.filter(ddElement => ddElement.className === 'related-terms');
