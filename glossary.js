@@ -55,9 +55,9 @@ if (containerElement) {
 
         const definitionDdElements = ddElements
             .filter(ddElement =>
-                ddElement.getAttribute('class') !== 'tags' &&
-                ddElement.getAttribute('class') !== 'needs-updating' &&
-                ddElement.getAttribute('class') !== 'related-terms'
+                ddElement.className !== 'tags' &&
+                ddElement.className !== 'needs-updating' &&
+                ddElement.className !== 'related-terms'
             );
 
         /* The current implementation allows one definition per item.
@@ -65,12 +65,12 @@ if (containerElement) {
         */
         const definition = definitionDdElements.map(ddElement => ddElement.textContent.trim()).join('\n\n');
 
-        const tagsDdElement = ddElements.filter(ddElement => ddElement.getAttribute('class') === 'tags')[0];
+        const tagsDdElement = ddElements.filter(ddElement => ddElement.className === 'tags')[0];
         const tagElements = Array.prototype.slice.apply(tagsDdElement?.querySelectorAll('button') || []);
         const tags = tagElements.map(tagElement => tagElement.textContent.trim());
 
-        const needsUpdatingDdElements = ddElements.filter(ddElement => ddElement.getAttribute('class') === 'needs-updating');
-        const relatedTermDdElements = ddElements.filter(ddElement => ddElement.getAttribute('class') === 'related-terms');
+        const needsUpdatingDdElements = ddElements.filter(ddElement => ddElement.className === 'needs-updating');
+        const relatedTermDdElements = ddElements.filter(ddElement => ddElement.className === 'related-terms');
         const relatedTerms = (relatedTermDdElements.length > 0) ? glossaryItemRelatedTermFromDdElement(relatedTermDdElements[0]) : [];
         const lastUpdatedDate = glossaryItemDivElement.dataset.lastUpdated;
 
