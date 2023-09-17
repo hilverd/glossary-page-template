@@ -352,12 +352,11 @@ updateRaw : (String -> String) -> Term -> Term
 updateRaw f term =
     case term of
         PlaintextTerm t ->
-            fromPlaintextWithId (f t.body) t.id t.isAbbreviation
+            fromPlaintext (f t.body) t.isAbbreviation
 
         MarkdownTerm t ->
-            fromMarkdownWithId
+            fromMarkdown
                 (t.body |> MarkdownFragment.raw |> f)
-                t.id
                 t.isAbbreviation
 
 
