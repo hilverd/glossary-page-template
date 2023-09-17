@@ -14,7 +14,7 @@ import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Tag exposing (Tag)
-import Data.GlossaryItem.TagInItem as TagInItem exposing (TagInItem)
+import Data.GlossaryItem.TagInItem as TagInItem exposing (TagInItem(..))
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
@@ -371,6 +371,11 @@ filterByTag tag glossaryItems =
                         |> Dict.map
                             (\_ item ->
                                 let
+                                    tags =
+                                        item
+                                            |> GlossaryItem.tags
+                                            |> List.filter (TagInItem.tag >> (/=) tag)
+
                                     relatedPreferredTerms =
                                         item
                                             |> GlossaryItem.relatedPreferredTerms
@@ -381,9 +386,9 @@ filterByTag tag glossaryItems =
                                                         termIdsAfterFiltering
                                                 )
                                 in
-                                GlossaryItem.updateRelatedTerms
-                                    relatedPreferredTerms
-                                    item
+                                item
+                                    |> GlossaryItem.updateRelatedTerms relatedPreferredTerms
+                                    |> GlossaryItem.updateTags tags
                             )
 
                 itemIndexesAfterFiltering : Set Int

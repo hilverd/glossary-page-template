@@ -1,5 +1,5 @@
 module Data.GlossaryItem exposing
-    ( GlossaryItem, init, decode, preferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, tags, disambiguationTag, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+    ( GlossaryItem, init, decode, preferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, tags, disambiguationTag, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms, updateTags
     , toHtmlTree
     )
 
@@ -8,7 +8,7 @@ module Data.GlossaryItem exposing
 
 # Glossary Items
 
-@docs GlossaryItem, init, decode, preferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, tags, disambiguationTag, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms
+@docs GlossaryItem, init, decode, preferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, tags, disambiguationTag, hasADefinition, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDate, updateRelatedTerms, updateTags
 
 
 # Converting to HTML
@@ -264,13 +264,36 @@ lastUpdatedDate glossaryItem =
             item.lastUpdatedDateAsIso8601
 
 
-{-| Update a glossary item's relatd terms.
+{-| Update a glossary item's tags.
+-}
+updateTags : List TagInItem -> GlossaryItem -> GlossaryItem
+updateTags newTags glossaryItem =
+    case glossaryItem of
+        GlossaryItem item ->
+            init
+                item.nonDisambiguatedPreferredTerm
+                item.alternativeTerms
+                newTags
+                item.definition
+                item.relatedPreferredTerms
+                item.needsUpdating
+                item.lastUpdatedDateAsIso8601
+
+
+{-| Update a glossary item's related terms.
 -}
 updateRelatedTerms : List RelatedTerm -> GlossaryItem -> GlossaryItem
 updateRelatedTerms newRelatedTerms glossaryItem =
     case glossaryItem of
         GlossaryItem item ->
-            GlossaryItem { item | relatedPreferredTerms = newRelatedTerms }
+            init
+                item.nonDisambiguatedPreferredTerm
+                item.alternativeTerms
+                item.tags
+                item.definition
+                newRelatedTerms
+                item.needsUpdating
+                item.lastUpdatedDateAsIso8601
 
 
 termToHtmlTree : Term -> HtmlTree
