@@ -30,15 +30,10 @@ This is done using an opaque type that supports efficiently retrieving the items
 -}
 type GlossaryItems
     = GlossaryItems
-        { orderedAlphabetically : Array ( GlossaryItemIndex, GlossaryItem )
-        , orderedByMostMentionedFirst : Array ( GlossaryItemIndex, GlossaryItem )
-        , orderedFocusedOn :
-            Maybe
-                ( TermId
-                , ( Array ( GlossaryItemIndex, GlossaryItem )
-                  , Array ( GlossaryItemIndex, GlossaryItem )
-                  )
-                )
+        { itemByIndex : Dict Int GlossaryItem
+        , orderedAlphabetically : Array GlossaryItemIndex
+        , orderedByMostMentionedFirst : Array GlossaryItemIndex
+        , orderedFocusedOn : Maybe ( TermId, ( Array GlossaryItemIndex, Array GlossaryItemIndex ) )
         , preferredTermIdsToIndexes : Dict String GlossaryItemIndex
         }
 
@@ -106,6 +101,13 @@ fromList glossaryItems =
                 |> List.sortWith compareForSortingAlphabetically
                 |> zipListWithIndexes
 
+        itemByIndex : Dict Int GlossaryItem
+        itemByIndex =
+            alphabetically
+                |> List.foldl
+                    (\( index, item ) -> Dict.insert (GlossaryItemIndex.toInt index) item)
+                    Dict.empty
+
         byMostMentionedFirst : List ( GlossaryItemIndex, GlossaryItem )
         byMostMentionedFirst =
             orderListByMostMentionedFirst alphabetically
@@ -123,8 +125,9 @@ fromList glossaryItems =
                 Dict.empty
     in
     GlossaryItems <|
-        { orderedAlphabetically = Array.fromList alphabetically
-        , orderedByMostMentionedFirst = Array.fromList byMostMentionedFirst
+        { itemByIndex = itemByIndex
+        , orderedAlphabetically = alphabetically |> List.map Tuple.first |> Array.fromList
+        , orderedByMostMentionedFirst = byMostMentionedFirst |> List.map Tuple.first |> Array.fromList
         , orderedFocusedOn = Nothing
         , preferredTermIdsToIndexes = preferredTermIdsToIndexes1 alphabetically
         }
@@ -333,7 +336,8 @@ filterByTag tag glossaryItems =
             let
                 filteredItemByIndex : Dict Int GlossaryItem
                 filteredItemByIndex =
-                    items.orderedAlphabetically
+                    glossaryItems
+                        |> orderedAlphabetically
                         |> Array.foldl
                             (\( index, item ) result ->
                                 let
@@ -403,34 +407,18 @@ filterByTag tag glossaryItems =
                         >> List.filterMap
                             (\( index, _ ) ->
                                 Dict.get (GlossaryItemIndex.toInt index) transformedItemByIndex
-                                    |> Maybe.map
-                                        (Tuple.pair index)
+                                    |> Maybe.map (Tuple.pair index)
                             )
                         >> Array.fromList
 
-                orderedAlphabetically_ =
-                    filterAndTransform items.orderedAlphabetically
-
-                orderedByMostMentionedFirst_ =
-                    filterAndTransform items.orderedByMostMentionedFirst
-
-                orderedFocusedOn_ =
-                    items.orderedFocusedOn
-                        |> Maybe.map
-                            (\( termId, ( indexedGlossaryItems, otherIndexedGlossaryItems ) ) ->
-                                let
-                                    indexedGlossaryItems_ =
-                                        indexedGlossaryItems
-
-                                    otherIndexedGlossaryItems_ =
-                                        otherIndexedGlossaryItems
-                                in
-                                ( termId
-                                , ( filterAndTransform indexedGlossaryItems_
-                                  , filterAndTransform otherIndexedGlossaryItems_
-                                  )
-                                )
-                            )
+                itemByIndex_ : Dict Int GlossaryItem
+                itemByIndex_ =
+                    glossaryItems
+                        |> orderedAlphabetically
+                        |> filterAndTransform
+                        |> Array.foldl
+                            (\( index, item ) -> Dict.insert (GlossaryItemIndex.toInt index) item)
+                            Dict.empty
 
                 preferredTermIdsToIndexes_ =
                     items.preferredTermIdsToIndexes
@@ -441,9 +429,7 @@ filterByTag tag glossaryItems =
             in
             GlossaryItems
                 { items
-                    | orderedAlphabetically = orderedAlphabetically_
-                    , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
-                    , orderedFocusedOn = orderedFocusedOn_
+                    | itemByIndex = itemByIndex_
                     , preferredTermIdsToIndexes = preferredTermIdsToIndexes_
                 }
 
@@ -455,6 +441,14 @@ orderedAlphabetically glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             items.orderedAlphabetically
+                |> Array.toList
+                |> List.filterMap
+                    (\index ->
+                        items.itemByIndex
+                            |> Dict.get (GlossaryItemIndex.toInt index)
+                            |> Maybe.map (Tuple.pair index)
+                    )
+                |> Array.fromList
 
 
 {-| Retrieve the glossary items ordered by most mentioned first.
@@ -464,6 +458,14 @@ orderedByMostMentionedFirst glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             items.orderedByMostMentionedFirst
+                |> Array.toList
+                |> List.filterMap
+                    (\index ->
+                        items.itemByIndex
+                            |> Dict.get (GlossaryItemIndex.toInt index)
+                            |> Maybe.map (Tuple.pair index)
+                    )
+                |> Array.fromList
 
 
 {-| Retrieve the glossary items ordered "focused on" a specific item, identified by its preferred term.
@@ -480,9 +482,34 @@ orderedFocusedOn termId glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             case items.orderedFocusedOn of
-                Just ( termIdFocusedOn, indexedItems ) ->
+                Just ( termIdFocusedOn, ( indexes, otherIndexes ) ) ->
                     if termIdFocusedOn == termId then
-                        Just indexedItems
+                        let
+                            indexedGlossaryItems : Array ( GlossaryItemIndex, GlossaryItem )
+                            indexedGlossaryItems =
+                                indexes
+                                    |> Array.toList
+                                    |> List.filterMap
+                                        (\index ->
+                                            items.itemByIndex
+                                                |> Dict.get (GlossaryItemIndex.toInt index)
+                                                |> Maybe.map (Tuple.pair index)
+                                        )
+                                    |> Array.fromList
+
+                            otherIndexedGlossaryItems : Array ( GlossaryItemIndex, GlossaryItem )
+                            otherIndexedGlossaryItems =
+                                otherIndexes
+                                    |> Array.toList
+                                    |> List.filterMap
+                                        (\index ->
+                                            items.itemByIndex
+                                                |> Dict.get (GlossaryItemIndex.toInt index)
+                                                |> Maybe.map (Tuple.pair index)
+                                        )
+                                    |> Array.fromList
+                        in
+                        Just ( indexedGlossaryItems, otherIndexedGlossaryItems )
 
                     else
                         Nothing
@@ -554,9 +581,14 @@ enableFocusingOn termId glossaryItems =
                             (TermId.fromString >> DirectedGraph.insertVertex)
                             (DirectedGraph.empty TermId.toString TermId.fromString)
 
+                orderedAlphabetically_ : Array ( GlossaryItemIndex, GlossaryItem )
+                orderedAlphabetically_ =
+                    glossaryItems
+                        |> orderedAlphabetically
+
                 relatedTermsGraph : DirectedGraph TermId
                 relatedTermsGraph =
-                    items.orderedAlphabetically
+                    orderedAlphabetically_
                         |> Array.toList
                         |> List.filterMap
                             (Tuple.second
@@ -593,22 +625,24 @@ enableFocusingOn termId glossaryItems =
                         |> Dict.get (TermId.toString termId_)
                         |> Maybe.andThen
                             (\index ->
-                                Array.get (GlossaryItemIndex.toInt index) items.orderedAlphabetically
+                                Array.get (GlossaryItemIndex.toInt index) orderedAlphabetically_
                             )
 
                 itemsByDistance :
-                    ( Array ( GlossaryItemIndex, GlossaryItem )
-                    , Array ( GlossaryItemIndex, GlossaryItem )
+                    ( Array GlossaryItemIndex
+                    , Array GlossaryItemIndex
                     )
                 itemsByDistance =
                     termIdsByDistance
                         |> Tuple.mapBoth
                             (List.filterMap
                                 termIdToIndexedItem
+                                >> List.map Tuple.first
                                 >> Array.fromList
                             )
                             (List.filterMap
                                 termIdToIndexedItem
+                                >> List.map Tuple.first
                                 >> Array.fromList
                             )
             in
