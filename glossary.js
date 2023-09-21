@@ -48,12 +48,7 @@ if (containerElement) {
     }
 
     function tagInItemFromButtonElement(buttonElement) {
-        const tag = buttonElement?.textContent?.trim();
-
-        return {
-            isDisambiguationTag: buttonElement.className === 'disambiguation',
-            tag: tag
-        };
+        return buttonElement?.textContent?.trim();
     }
 
     function glossaryItemFromDivElement(glossaryItemDivElement) {
@@ -77,6 +72,7 @@ if (containerElement) {
         const tagsDdElement = ddElements.filter(ddElement => ddElement.className === 'tags')[0];
         const tagElements = Array.prototype.slice.apply(tagsDdElement?.querySelectorAll('button') || []);
         const tags = tagElements.map(tagElement => tagInItemFromButtonElement(tagElement));
+        const hasDisambiguationTag = preferredTermDtElement.querySelector('dfn span.disambiguation') !== null;
 
         const needsUpdatingDdElements = ddElements.filter(ddElement => ddElement.className === 'needs-updating');
         const relatedTermDdElements = ddElements.filter(ddElement => ddElement.className === 'related-terms');
@@ -86,7 +82,8 @@ if (containerElement) {
         return {
             preferredTerm: glossaryItemTermFromDtElement(preferredTermDtElement),
             alternativeTerms: alternativeTermsDtElements.map(glossaryItemTermFromDtElement),
-            tags: tags,
+            disambiguationTag: hasDisambiguationTag ? tags[0] : null,
+            normalTags: hasDisambiguationTag ? tags.slice(1) : tags,
             definition: definition || null,
             relatedTerms: relatedTerms,
             needsUpdating: needsUpdatingDdElements.length > 0,
@@ -98,7 +95,8 @@ if (containerElement) {
         const dfnElement = dtElement.querySelector('dfn');
         const id = dfnElement.id || null;
         const isAbbreviation = Boolean(dfnElement.querySelector('abbr'));
-        const body = dfnElement.textContent;
+        const dfnElementWithoutDisambiguationTag = dfnElement.querySelector('span') || dfnElement;
+        const body = dfnElementWithoutDisambiguationTag.textContent;
 
         return {
             id: normaliseWhitespace(id),

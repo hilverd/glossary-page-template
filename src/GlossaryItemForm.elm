@@ -287,9 +287,7 @@ fromGlossaryItem existingTerms existingPreferredTerms allTags withItemsListingTh
     let
         itemTags : List Tag
         itemTags =
-            item
-                |> GlossaryItem.tags
-                |> List.map TagInItem.tag
+            GlossaryItem.tags item
 
         preferredTermFieldForItem : TermField
         preferredTermFieldForItem =
@@ -424,14 +422,14 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                 |> Array.toList
                 |> List.map termFieldToTerm
 
-        tagsInItem : List TagInItem
-        tagsInItem =
+        normalTags : List Tag
+        normalTags =
             form
                 |> tagCheckboxes
                 |> List.filterMap
                     (\( tag, checked ) ->
                         if checked then
-                            Just (NormalTag tag)
+                            Just tag
 
                         else
                             Nothing
@@ -486,7 +484,16 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
         lastUpdatedDate_ =
             dateTime
     in
-    GlossaryItem.init preferredTerm alternativeTerms tagsInItem definition relatedTerms needsUpdating_ lastUpdatedDate_
+    GlossaryItem.init preferredTerm
+        alternativeTerms
+        (Nothing
+         -- TODO
+        )
+        normalTags
+        definition
+        relatedTerms
+        needsUpdating_
+        lastUpdatedDate_
 
 
 addTerm : GlossaryItemForm -> GlossaryItemForm

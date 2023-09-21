@@ -62,9 +62,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
 
                 tags : List Tag
                 tags =
-                    glossaryItem
-                        |> GlossaryItem.tags
-                        |> List.map TagInItem.tag
+                    GlossaryItem.tags glossaryItem
 
                 itemHasSomeDefinitions : Bool
                 itemHasSomeDefinitions =
@@ -403,9 +401,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
 
                 tags : List Tag
                 tags =
-                    glossaryItem
-                        |> GlossaryItem.tags
-                        |> List.map TagInItem.tag
+                    GlossaryItem.tags glossaryItem
 
                 definitions =
                     GlossaryItem.definition glossaryItem

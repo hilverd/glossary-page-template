@@ -55,6 +55,7 @@ compareForSortingAlphabetically item1 item2 =
     item1 = GlossaryItem.init
               (Term.fromMarkdown "\\_\\_slots\\_\\_" False)
               []
+              Nothing
               []
               Nothing
               []
@@ -65,6 +66,7 @@ compareForSortingAlphabetically item1 item2 =
     item2 = GlossaryItem.init
               (Term.fromMarkdown "Situation" False)
               []
+              Nothing
               []
               Nothing
               []
@@ -75,6 +77,7 @@ compareForSortingAlphabetically item1 item2 =
     item3 = GlossaryItem.init
               (Term.fromMarkdown "strong" False)
               []
+              Nothing
               []
               Nothing
               []
@@ -347,7 +350,6 @@ filterByTag tag glossaryItems =
                                     itemMatchesTag =
                                         item
                                             |> GlossaryItem.tags
-                                            |> List.map TagInItem.tag
                                             |> List.any ((==) tag)
                                 in
                                 if itemMatchesTag then
@@ -378,7 +380,7 @@ filterByTag tag glossaryItems =
                                     tags =
                                         item
                                             |> GlossaryItem.tags
-                                            |> List.filter (TagInItem.tag >> (/=) tag)
+                                            |> List.filter ((/=) tag)
 
                                     relatedPreferredTerms =
                                         item
@@ -392,7 +394,7 @@ filterByTag tag glossaryItems =
                                 in
                                 item
                                     |> GlossaryItem.updateRelatedTerms relatedPreferredTerms
-                                    |> GlossaryItem.updateTags tags
+                                    |> GlossaryItem.updateNormalTags tags
                             )
 
                 itemIndexesAfterFiltering : Set Int
