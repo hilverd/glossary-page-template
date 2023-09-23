@@ -24,6 +24,7 @@
         "Data.IncubatingGlossaryItems",
         "Data.IndexOfTerms",
         "Data.MarkdownFragment",
+        "Data.TagId",
         "DirectedGraph",
         "Export.Anki",
         "Export.Markdown",

@@ -38,11 +38,6 @@ type IncubatingGlossaryItems
         }
 
 
-
--- TODO: copy the Tag module to the top level.
--- TODO: create a TagId module.
-
-
 {-| Convert a list of glossary items into a `GlossaryItems`.
 -}
 fromList : List GlossaryItemForHtml -> IncubatingGlossaryItems
