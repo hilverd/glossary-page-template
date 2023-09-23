@@ -25,6 +25,7 @@
         "Data.IndexOfTerms",
         "Data.MarkdownFragment",
         "Data.TagId",
+        "Data.TagIdDict",
         "DirectedGraph",
         "Export.Anki",
         "Export.Markdown",
