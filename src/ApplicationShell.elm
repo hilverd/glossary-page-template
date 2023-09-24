@@ -19,6 +19,7 @@ import Data.Glossary exposing (Glossary)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItems as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
+import Data.IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Data.OrderItemsBy as OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Theme as Theme exposing (Theme)
@@ -139,6 +140,10 @@ init flags =
         loadedGlossaryItems : LoadedGlossaryItems
         loadedGlossaryItems =
             LoadedGlossaryItems.decodeFromFlags enableMarkdownBasedSyntax flags
+
+        loadedIncubatingGlossaryItems : Result Decode.Error IncubatingGlossaryItems
+        loadedIncubatingGlossaryItems =
+            LoadedGlossaryItems.decodeIncubatingFromFlags enableMarkdownBasedSyntax flags
 
         glossary : Result Decode.Error Glossary
         glossary =

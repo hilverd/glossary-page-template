@@ -17,15 +17,13 @@ module Data.IncubatingGlossaryItems exposing
 
 -}
 
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
-import Data.GlossaryItem.TermId as TermId exposing (TermId)
+import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
-import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.IncubatingGlossaryItem as IncubatingGlossaryItem exposing (IncubatingGlossaryItem)
 import Data.TagId as TagId
 import Data.TagIdDict as TagIdDict exposing (TagIdDict)
@@ -39,27 +37,40 @@ type IncubatingGlossaryItems
     = IncubatingGlossaryItems
         { itemById : GlossaryItemIdDict IncubatingGlossaryItem
         , tagById : TagIdDict Tag
-
-        -- , disambiguationTagByItemId : GlossaryItemIdDict (Maybe Tag)
-        -- , normalTagsByItemId : GlossaryItemIdDict (List Tag)
-        -- , relatedItemIdsById : GlossaryItemIdDict (List GlossaryItemId)
+        , disambiguationTagByItemId : GlossaryItemIdDict (Maybe Tag)
+        , normalTagsByItemId : GlossaryItemIdDict (List Tag)
+        , relatedItemIdsById : GlossaryItemIdDict (List GlossaryItemId)
         }
 
 
 {-| Convert a list of glossary items into a `GlossaryItems`.
 -}
 fromList : List GlossaryItemForHtml -> IncubatingGlossaryItems
-fromList glossaryItemForHtmlList =
+fromList glossaryItemsForHtml =
     let
-        ( itemById, tagById ) =
-            glossaryItemForHtmlList
-                |> List.indexedMap Tuple.pair
-                |> List.foldl
-                    (\( index, glossaryItemForHtml ) { itemById_, tagById_, allRawTags, nextTagIdInt } ->
-                        let
-                            itemId =
-                                GlossaryItemId.create index
+        indexedGlossaryItemsForHtml : List ( GlossaryItemId, GlossaryItemForHtml )
+        indexedGlossaryItemsForHtml =
+            List.indexedMap (GlossaryItemId.create >> Tuple.pair) glossaryItemsForHtml
 
+        itemIdByPreferredTermId : Dict String GlossaryItemId
+        itemIdByPreferredTermId =
+            indexedGlossaryItemsForHtml
+                |> List.foldl
+                    (\( itemId, item ) ->
+                        Dict.insert
+                            (GlossaryItemForHtml.preferredTerm item
+                                |> Term.id
+                                |> TermId.toString
+                            )
+                            itemId
+                    )
+                    Dict.empty
+
+        ( itemById, tagById ) =
+            indexedGlossaryItemsForHtml
+                |> List.foldl
+                    (\( itemId, glossaryItemForHtml ) { itemById_, tagById_, allRawTags, nextTagIdInt } ->
+                        let
                             glossaryItem : IncubatingGlossaryItem
                             glossaryItem =
                                 IncubatingGlossaryItem.init
@@ -114,8 +125,38 @@ fromList glossaryItemForHtmlList =
                     , nextTagIdInt = 0
                     }
                 |> (\{ itemById_, tagById_ } -> ( itemById_, tagById_ ))
+
+        ( disambiguationTagByItemId, normalTagsByItemId ) =
+            indexedGlossaryItemsForHtml
+                |> List.foldl
+                    (\( id, item ) ( disambiguationTagByItemId_, normalTagsByItemId_ ) ->
+                        ( GlossaryItemIdDict.insert id (GlossaryItemForHtml.disambiguationTag item) disambiguationTagByItemId_
+                        , GlossaryItemIdDict.insert id (GlossaryItemForHtml.normalTags item) normalTagsByItemId_
+                        )
+                    )
+                    ( GlossaryItemIdDict.empty, GlossaryItemIdDict.empty )
+
+        relatedItemIdsById : GlossaryItemIdDict (List GlossaryItemId)
+        relatedItemIdsById =
+            indexedGlossaryItemsForHtml
+                |> List.foldl
+                    (\( id, item ) ->
+                        item
+                            |> GlossaryItemForHtml.relatedPreferredTerms
+                            |> List.filterMap
+                                (\relatedPreferredTerm ->
+                                    Dict.get
+                                        (relatedPreferredTerm |> RelatedTerm.idReference |> TermId.toString)
+                                        itemIdByPreferredTermId
+                                )
+                            |> GlossaryItemIdDict.insert id
+                    )
+                    GlossaryItemIdDict.empty
     in
     IncubatingGlossaryItems
         { itemById = itemById
         , tagById = tagById
+        , disambiguationTagByItemId = disambiguationTagByItemId
+        , normalTagsByItemId = normalTagsByItemId
+        , relatedItemIdsById = relatedItemIdsById
         }
