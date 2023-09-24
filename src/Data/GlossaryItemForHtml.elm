@@ -31,7 +31,7 @@ It is not the representation used by the editor UI when the application is runni
 
 -}
 
-import Data.GlossaryItem exposing (GlossaryItem, preferredTerm)
+import Data.GlossaryItem exposing (preferredTerm)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
@@ -40,7 +40,7 @@ import Data.GlossaryItem.TermId as TermId
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Extras.Url exposing (fragmentOnly)
 import Json.Decode as Decode exposing (Decoder)
-import List exposing (all)
+import List
 
 
 {-| A glossary item from/for HTML.

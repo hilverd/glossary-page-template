@@ -1,6 +1,7 @@
 module Data.IncubatingGlossaryItems exposing
     ( IncubatingGlossaryItems
     , fromList
+    , toList
     )
 
 {-| The glossary items that make up a glossary.
@@ -14,6 +15,11 @@ module Data.IncubatingGlossaryItems exposing
 # Build
 
 @docs fromList
+
+
+# Export
+
+@docs toList
 
 -}
 
@@ -160,3 +166,11 @@ fromList glossaryItemsForHtml =
         , normalTagsByItemId = normalTagsByItemId
         , relatedItemIdsById = relatedItemIdsById
         }
+
+
+{-| Convert a `GlossaryItems` into a list of glossary items for HTML.
+-}
+toList : IncubatingGlossaryItems -> List GlossaryItemForHtml
+toList glossaryItems =
+    -- TODO
+    []
