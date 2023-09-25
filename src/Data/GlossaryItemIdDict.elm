@@ -2,8 +2,8 @@ module Data.GlossaryItemIdDict exposing
     ( GlossaryItemIdDict
     , empty, insert
     , get
-    , fromList
-    , map
+    , keys, fromList
+    , map, foldl
     )
 
 {-| A dictionary mapping glossary item IDs to values.
@@ -26,12 +26,12 @@ module Data.GlossaryItemIdDict exposing
 
 # Lists
 
-@docs fromList
+@docs keys, fromList
 
 
 # Transform
 
-@docs map
+@docs map, foldl
 
 -}
 
@@ -75,6 +75,17 @@ get glossaryItemId glossaryItemIdDict =
                 |> Dict.get (GlossaryItemId.toInt glossaryItemId)
 
 
+{-| Get all of the keys in a dictionary, sorted from lowest to highest.
+-}
+keys : GlossaryItemIdDict v -> List GlossaryItemId
+keys glossaryItemIdDict =
+    case glossaryItemIdDict of
+        GlossaryItemIdDict dict ->
+            dict
+                |> Dict.keys
+                |> List.map GlossaryItemId.create
+
+
 {-| Convert an association list into a dictionary.
 -}
 fromList : List ( GlossaryItemId, v ) -> GlossaryItemIdDict v
@@ -97,3 +108,12 @@ map f glossaryItemIdDict =
             dict
                 |> Dict.map (GlossaryItemId.create >> f)
                 |> GlossaryItemIdDict
+
+
+{-| Fold over the key-value pairs in a dictionary from lowest key to highest key.
+-}
+foldl : (GlossaryItemId -> v -> b -> b) -> b -> GlossaryItemIdDict v -> b
+foldl func acc glossaryItemIdDict =
+    case glossaryItemIdDict of
+        GlossaryItemIdDict dict ->
+            Dict.foldl (GlossaryItemId.create >> func) acc dict

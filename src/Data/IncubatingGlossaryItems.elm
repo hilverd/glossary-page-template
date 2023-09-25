@@ -1,7 +1,8 @@
 module Data.IncubatingGlossaryItems exposing
     ( IncubatingGlossaryItems
     , fromList
-    , toList
+    , enableFocusingOn
+    , orderedAlphabetically
     )
 
 {-| The glossary items that make up a glossary.
@@ -17,9 +18,14 @@ module Data.IncubatingGlossaryItems exposing
 @docs fromList
 
 
+# Preparing to Export
+
+@docs enableFocusingOn
+
+
 # Export
 
-@docs toList
+@docs orderedAlphabetically
 
 -}
 
@@ -31,11 +37,11 @@ import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
-import Data.GlossaryItems exposing (orderedAlphabetically)
 import Data.IncubatingGlossaryItem as IncubatingGlossaryItem exposing (IncubatingGlossaryItem)
 import Data.TagId as TagId exposing (TagId)
 import Data.TagIdDict as TagIdDict exposing (TagIdDict)
 import Dict exposing (Dict)
+import DirectedGraph exposing (DirectedGraph)
 import Extras.Regex
 import Regex
 import Set
@@ -52,6 +58,7 @@ type IncubatingGlossaryItems
         , relatedItemIdsById : GlossaryItemIdDict (List GlossaryItemId)
         , orderedAlphabetically : List GlossaryItemId
         , orderedByMostMentionedFirst : List GlossaryItemId
+        , orderedFocusedOn : Maybe ( GlossaryItemId, ( List GlossaryItemId, List GlossaryItemId ) )
         }
 
 
@@ -292,8 +299,8 @@ fromList glossaryItemsForHtml =
                     )
                     GlossaryItemIdDict.empty
 
-        orderedAlphabetically : List GlossaryItemId
-        orderedAlphabetically =
+        orderedAlphabetically_ : List GlossaryItemId
+        orderedAlphabetically_ =
             sortAlphabetically indexedGlossaryItemsForHtml
 
         orderedByMostMentionedFirst =
@@ -305,12 +312,68 @@ fromList glossaryItemsForHtml =
         , disambiguationTagIdByItemId = disambiguationTagIdByItemId
         , normalTagIdsByItemId = normalTagIdsByItemId
         , relatedItemIdsById = relatedItemIdsById
-        , orderedAlphabetically = orderedAlphabetically
+        , orderedAlphabetically = orderedAlphabetically_
         , orderedByMostMentionedFirst = orderedByMostMentionedFirst
+        , orderedFocusedOn = Nothing
         }
 
 
+{-| Make it easy to retrieve the items ordered "focused on" a specific item.
+Returns an updated `GlossaryItems` where the necessary computations have been done.
+-}
+enableFocusingOn : GlossaryItemId -> IncubatingGlossaryItems -> IncubatingGlossaryItems
+enableFocusingOn itemId glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            let
+                itemIdsGraph : DirectedGraph GlossaryItemId
+                itemIdsGraph =
+                    items.itemById
+                        |> GlossaryItemIdDict.keys
+                        |> List.foldl
+                            DirectedGraph.insertVertex
+                            (DirectedGraph.empty
+                                (GlossaryItemId.toInt >> String.fromInt)
+                                (String.toInt >> Maybe.withDefault 0 >> GlossaryItemId.create)
+                            )
+
+                relatedItemsGraph : DirectedGraph GlossaryItemId
+                relatedItemsGraph =
+                    items.relatedItemIdsById
+                        |> GlossaryItemIdDict.foldl
+                            (\id relatedItemIds result ->
+                                let
+                                    itemHasDefinition =
+                                        items.itemById
+                                            |> GlossaryItemIdDict.get id
+                                            |> Maybe.map (IncubatingGlossaryItem.definition >> (/=) Nothing)
+                                            |> Maybe.withDefault False
+                                in
+                                if itemHasDefinition then
+                                    List.foldl
+                                        (DirectedGraph.insertEdge id)
+                                        result
+                                        relatedItemIds
+
+                                else
+                                    result
+                            )
+                            itemIdsGraph
+
+                itemIdsByDistance : ( List GlossaryItemId, List GlossaryItemId )
+                itemIdsByDistance =
+                    DirectedGraph.verticesByDistance itemId relatedItemsGraph
+            in
+            IncubatingGlossaryItems
+                { items
+                    | orderedFocusedOn = Just ( itemId, itemIdsByDistance )
+                }
+
+
 {-| Convert a `GlossaryItems` into a list of glossary items for HTML.
+TODO: this should probably take a list of glossary item IDs to determine the order.
+Then this becomes an internal function and there will be public functions
+for retrieving the items in alphabetical order etc.
 -}
 toList : IncubatingGlossaryItems -> List GlossaryItemForHtml
 toList glossaryItems =
@@ -318,5 +381,10 @@ toList glossaryItems =
     []
 
 
-
--- How to deal with ordering items focused on an item?
+{-| Retrieve the glossary items ordered alphabetically.
+-}
+orderedAlphabetically : IncubatingGlossaryItems -> List ( GlossaryItemId, GlossaryItemForHtml )
+orderedAlphabetically glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            []
