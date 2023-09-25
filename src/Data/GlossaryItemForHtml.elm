@@ -1,7 +1,7 @@
 module Data.GlossaryItemForHtml exposing
     ( GlossaryItemForHtml
     , decode
-    , preferredTerm, disambiguatedPreferredTerm, alternativeTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601
+    , preferredTerm, disambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601
     , toHtmlTree
     )
 
@@ -22,7 +22,7 @@ It is not the representation used by the editor UI when the application is runni
 
 # Query
 
-@docs preferredTerm, disambiguatedPreferredTerm, alternativeTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601
+@docs preferredTerm, disambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601
 
 
 # Converting to HTML

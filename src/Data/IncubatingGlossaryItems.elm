@@ -23,17 +23,21 @@ module Data.IncubatingGlossaryItems exposing
 
 -}
 
+import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
-import Data.GlossaryItem.Term as Term
+import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
+import Data.GlossaryItems exposing (orderedAlphabetically)
 import Data.IncubatingGlossaryItem as IncubatingGlossaryItem exposing (IncubatingGlossaryItem)
 import Data.TagId as TagId exposing (TagId)
 import Data.TagIdDict as TagIdDict exposing (TagIdDict)
 import Dict exposing (Dict)
+import Extras.Regex
+import Regex
 import Set
 
 
@@ -46,7 +50,111 @@ type IncubatingGlossaryItems
         , disambiguationTagIdByItemId : GlossaryItemIdDict (Maybe TagId)
         , normalTagIdsByItemId : GlossaryItemIdDict (List TagId)
         , relatedItemIdsById : GlossaryItemIdDict (List GlossaryItemId)
+        , orderedAlphabetically : List GlossaryItemId
+        , orderedByMostMentionedFirst : List GlossaryItemId
         }
+
+
+sortAlphabetically : List ( GlossaryItemId, GlossaryItemForHtml ) -> List GlossaryItemId
+sortAlphabetically =
+    List.sortWith
+        (\( _, item1 ) ( _, item2 ) ->
+            Term.compareAlphabetically
+                (GlossaryItemForHtml.preferredTerm item1)
+                (GlossaryItemForHtml.preferredTerm item2)
+        )
+        >> List.map Tuple.first
+
+
+sortByMostMentionedFirst : List ( GlossaryItemId, GlossaryItemForHtml ) -> List GlossaryItemId
+sortByMostMentionedFirst indexedGlossaryItemsForHtml =
+    let
+        -- Maps a term to a score based on whether or not it occurs in glossaryItem.
+        -- This is done in a primitive way. A more sophisticated solution could use stemming
+        -- or other techniques.
+        termScoreInItem : Term -> GlossaryItemForHtml -> Int
+        termScoreInItem term glossaryItem =
+            let
+                termAsWord : Regex.Regex
+                termAsWord =
+                    ("\\b" ++ Extras.Regex.escapeStringForUseInRegex (Term.raw term) ++ "\\b")
+                        |> Regex.fromString
+                        |> Maybe.withDefault Regex.never
+
+                score : Int
+                score =
+                    (glossaryItem |> GlossaryItemForHtml.allTerms |> List.map (Term.raw >> Regex.find termAsWord >> List.length) |> List.sum)
+                        + (glossaryItem |> GlossaryItemForHtml.definition |> Maybe.map (Definition.raw >> Regex.find termAsWord >> List.length) |> Maybe.withDefault 0)
+                        + (glossaryItem |> GlossaryItemForHtml.relatedPreferredTerms |> List.map RelatedTerm.raw |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
+            in
+            if score > 0 then
+                1
+
+            else
+                0
+
+        -- Maps a term to a score based on how often it occurs in glossaryItems.
+        termScore : Term -> GlossaryItemId -> Int
+        termScore term exceptId =
+            indexedGlossaryItemsForHtml
+                |> List.foldl
+                    (\( id, glossaryItem ) result ->
+                        result
+                            + (if id == exceptId then
+                                0
+
+                               else
+                                termScoreInItem term glossaryItem
+                              )
+                    )
+                    0
+
+        termBodyScores : Dict String Int
+        termBodyScores =
+            indexedGlossaryItemsForHtml
+                |> List.concatMap
+                    (\( id, glossaryItem ) ->
+                        glossaryItem
+                            |> GlossaryItemForHtml.allTerms
+                            |> List.map (Tuple.pair id)
+                    )
+                |> List.foldl
+                    (\( glossaryItemId, term ) result ->
+                        Dict.insert
+                            (Term.raw term)
+                            (termScore term glossaryItemId)
+                            result
+                    )
+                    Dict.empty
+    in
+    indexedGlossaryItemsForHtml
+        |> List.sortWith
+            (\( _, item1 ) ( _, item2 ) ->
+                let
+                    itemScore : GlossaryItemForHtml -> Int
+                    itemScore =
+                        GlossaryItemForHtml.allTerms
+                            >> List.map
+                                (\term ->
+                                    termBodyScores
+                                        |> Dict.get (Term.raw term)
+                                        |> Maybe.withDefault 0
+                                )
+                            >> List.sum
+                in
+                case compare (itemScore item1) (itemScore item2) of
+                    LT ->
+                        GT
+
+                    EQ ->
+                        compare
+                            (item1 |> GlossaryItemForHtml.preferredTerm |> Term.raw |> String.toUpper)
+                            (item2 |> GlossaryItemForHtml.preferredTerm |> Term.raw |> String.toUpper)
+
+                    GT ->
+                        LT
+            )
+        |> List.map Tuple.first
 
 
 {-| Convert a list of glossary items for/from HTML into a `GlossaryItems`.
@@ -183,6 +291,13 @@ fromList glossaryItemsForHtml =
                             |> GlossaryItemIdDict.insert id
                     )
                     GlossaryItemIdDict.empty
+
+        orderedAlphabetically : List GlossaryItemId
+        orderedAlphabetically =
+            sortAlphabetically indexedGlossaryItemsForHtml
+
+        orderedByMostMentionedFirst =
+            sortByMostMentionedFirst indexedGlossaryItemsForHtml
     in
     IncubatingGlossaryItems
         { itemById = itemById
@@ -190,6 +305,8 @@ fromList glossaryItemsForHtml =
         , disambiguationTagIdByItemId = disambiguationTagIdByItemId
         , normalTagIdsByItemId = normalTagIdsByItemId
         , relatedItemIdsById = relatedItemIdsById
+        , orderedAlphabetically = orderedAlphabetically
+        , orderedByMostMentionedFirst = orderedByMostMentionedFirst
         }
 
 
@@ -199,3 +316,7 @@ toList : IncubatingGlossaryItems -> List GlossaryItemForHtml
 toList glossaryItems =
     -- TODO
     []
+
+
+
+-- How to deal with ordering items focused on an item?
