@@ -100,7 +100,7 @@ sortByMostMentionedFirst indexedGlossaryItemsForHtml =
             else
                 0
 
-        -- Maps a term to a score based on how often it occurs in glossaryItems.
+        -- Maps a term to a score based on how often it occurs in indexedGlossaryItemsForHtml.
         termScore : Term -> GlossaryItemId -> Int
         termScore term exceptId =
             indexedGlossaryItemsForHtml
@@ -370,15 +370,18 @@ enableFocusingOn itemId glossaryItems =
                 }
 
 
-{-| Convert a `GlossaryItems` into a list of glossary items for HTML.
-TODO: this should probably take a list of glossary item IDs to determine the order.
-Then this becomes an internal function and there will be public functions
-for retrieving the items in alphabetical order etc.
--}
-toList : IncubatingGlossaryItems -> List GlossaryItemForHtml
-toList glossaryItems =
-    -- TODO
-    []
+toList : IncubatingGlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml )
+toList glossaryItems itemIds =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            -- itemIds
+            -- |> List.filterMap
+            -- (\itemId ->
+            --     GlossaryItemIdDict.get itemId items.itemById
+            --     |> Maybe.map (\item ->
+            --     )
+            -- )
+            []
 
 
 {-| Retrieve the glossary items ordered alphabetically.
@@ -387,4 +390,4 @@ orderedAlphabetically : IncubatingGlossaryItems -> List ( GlossaryItemId, Glossa
 orderedAlphabetically glossaryItems =
     case glossaryItems of
         IncubatingGlossaryItems items ->
-            []
+            toList glossaryItems items.orderedAlphabetically

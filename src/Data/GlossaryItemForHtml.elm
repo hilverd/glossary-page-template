@@ -1,6 +1,6 @@
 module Data.GlossaryItemForHtml exposing
     ( GlossaryItemForHtml
-    , decode
+    , create, decode
     , preferredTerm, disambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601
     , toHtmlTree
     )
@@ -17,7 +17,7 @@ It is not the representation used by the editor UI when the application is runni
 
 # Build
 
-@docs decode
+@docs create, decode
 
 
 # Query
@@ -55,6 +55,22 @@ type GlossaryItemForHtml
         , relatedPreferredTerms : List RelatedTerm
         , needsUpdating : Bool
         , lastUpdatedDateAsIso8601 : Maybe String
+        }
+
+
+{-| Create a glossary item from its parts.
+-}
+create : Term -> List Term -> Maybe Tag -> List Tag -> Maybe Definition -> List RelatedTerm -> Bool -> Maybe String -> GlossaryItemForHtml
+create preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ definition_ relatedPreferredTerms_ needsUpdating_ lastUpdatedDateAsIso8601_ =
+    GlossaryItemForHtml
+        { preferredTerm = preferredTerm_
+        , alternativeTerms = alternativeTerms_
+        , disambiguationTag = disambiguationTag_
+        , normalTags = normalTags_
+        , definition = definition_
+        , relatedPreferredTerms = relatedPreferredTerms_
+        , needsUpdating = needsUpdating_
+        , lastUpdatedDateAsIso8601 = lastUpdatedDateAsIso8601_
         }
 
 
