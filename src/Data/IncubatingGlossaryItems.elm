@@ -31,7 +31,7 @@ import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemFor
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
 import Data.IncubatingGlossaryItem as IncubatingGlossaryItem exposing (IncubatingGlossaryItem)
-import Data.TagId as TagId
+import Data.TagId as TagId exposing (TagId)
 import Data.TagIdDict as TagIdDict exposing (TagIdDict)
 import Dict exposing (Dict)
 import Set
@@ -43,13 +43,13 @@ type IncubatingGlossaryItems
     = IncubatingGlossaryItems
         { itemById : GlossaryItemIdDict IncubatingGlossaryItem
         , tagById : TagIdDict Tag
-        , disambiguationTagByItemId : GlossaryItemIdDict (Maybe Tag)
-        , normalTagsByItemId : GlossaryItemIdDict (List Tag)
+        , disambiguationTagIdByItemId : GlossaryItemIdDict (Maybe TagId)
+        , normalTagIdsByItemId : GlossaryItemIdDict (List TagId)
         , relatedItemIdsById : GlossaryItemIdDict (List GlossaryItemId)
         }
 
 
-{-| Convert a list of glossary items into a `GlossaryItems`.
+{-| Convert a list of glossary items for/from HTML into a `GlossaryItems`.
 -}
 fromList : List GlossaryItemForHtml -> IncubatingGlossaryItems
 fromList glossaryItemsForHtml =
@@ -132,12 +132,37 @@ fromList glossaryItemsForHtml =
                     }
                 |> (\{ itemById_, tagById_ } -> ( itemById_, tagById_ ))
 
-        ( disambiguationTagByItemId, normalTagsByItemId ) =
+        tagIdByRawTag : Dict String TagId
+        tagIdByRawTag =
+            TagIdDict.foldl
+                (\tagId tag ->
+                    Dict.insert (Tag.raw tag) tagId
+                )
+                Dict.empty
+                tagById
+
+        ( disambiguationTagIdByItemId, normalTagIdsByItemId ) =
             indexedGlossaryItemsForHtml
                 |> List.foldl
                     (\( id, item ) ( disambiguationTagByItemId_, normalTagsByItemId_ ) ->
-                        ( GlossaryItemIdDict.insert id (GlossaryItemForHtml.disambiguationTag item) disambiguationTagByItemId_
-                        , GlossaryItemIdDict.insert id (GlossaryItemForHtml.normalTags item) normalTagsByItemId_
+                        ( GlossaryItemIdDict.insert id
+                            (item
+                                |> GlossaryItemForHtml.disambiguationTag
+                                |> Maybe.andThen
+                                    (\disambiguationTag ->
+                                        Dict.get (Tag.raw disambiguationTag) tagIdByRawTag
+                                    )
+                            )
+                            disambiguationTagByItemId_
+                        , GlossaryItemIdDict.insert id
+                            (item
+                                |> GlossaryItemForHtml.normalTags
+                                |> List.filterMap
+                                    (\tag ->
+                                        Dict.get (Tag.raw tag) tagIdByRawTag
+                                    )
+                            )
+                            normalTagsByItemId_
                         )
                     )
                     ( GlossaryItemIdDict.empty, GlossaryItemIdDict.empty )
@@ -162,8 +187,8 @@ fromList glossaryItemsForHtml =
     IncubatingGlossaryItems
         { itemById = itemById
         , tagById = tagById
-        , disambiguationTagByItemId = disambiguationTagByItemId
-        , normalTagsByItemId = normalTagsByItemId
+        , disambiguationTagIdByItemId = disambiguationTagIdByItemId
+        , normalTagIdsByItemId = normalTagIdsByItemId
         , relatedItemIdsById = relatedItemIdsById
         }
 

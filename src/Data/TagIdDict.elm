@@ -3,7 +3,7 @@ module Data.TagIdDict exposing
     , empty, insert
     , get
     , fromList
-    , map
+    , map, foldl
     )
 
 {-| A dictionary mapping tag IDs to values.
@@ -31,7 +31,7 @@ module Data.TagIdDict exposing
 
 # Transform
 
-@docs map
+@docs map, foldl
 
 -}
 
@@ -97,3 +97,12 @@ map f tagIdDict =
             dict
                 |> Dict.map (TagId.create >> f)
                 |> TagIdDict
+
+
+{-| Fold over the key-value pairs in a dictionary from lowest key to highest key.
+-}
+foldl : (TagId -> v -> b -> b) -> b -> TagIdDict v -> b
+foldl func acc tagIdDict =
+    case tagIdDict of
+        TagIdDict dict ->
+            Dict.foldl (TagId.create >> func) acc dict
