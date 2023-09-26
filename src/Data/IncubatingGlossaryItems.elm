@@ -2,7 +2,7 @@ module Data.IncubatingGlossaryItems exposing
     ( IncubatingGlossaryItems
     , fromList
     , enableFocusingOn
-    , orderedAlphabetically
+    , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
 
 {-| The glossary items that make up a glossary.
@@ -25,24 +25,24 @@ module Data.IncubatingGlossaryItems exposing
 
 # Export
 
-@docs orderedAlphabetically
+@docs orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
 
 -}
 
-import Data.GlossaryItem.Definition as Definition
-import Data.GlossaryItem.RelatedTerm as RelatedTerm
+import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml, relatedPreferredTerms)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
-import Data.IncubatingGlossaryItem as IncubatingGlossaryItem exposing (IncubatingGlossaryItem)
+import Data.IncubatingGlossaryItem as IncubatingGlossaryItem exposing (IncubatingGlossaryItem, alternativeTerms, lastUpdatedDateAsIso8601)
 import Data.TagId as TagId exposing (TagId)
 import Data.TagIdDict as TagIdDict exposing (TagIdDict)
 import Dict exposing (Dict)
 import DirectedGraph exposing (DirectedGraph)
 import Extras.Regex
+import Maybe
 import Regex
 import Set
 
@@ -92,7 +92,7 @@ sortByMostMentionedFirst indexedGlossaryItemsForHtml =
                 score =
                     (glossaryItem |> GlossaryItemForHtml.allTerms |> List.map (Term.raw >> Regex.find termAsWord >> List.length) |> List.sum)
                         + (glossaryItem |> GlossaryItemForHtml.definition |> Maybe.map (Definition.raw >> Regex.find termAsWord >> List.length) |> Maybe.withDefault 0)
-                        + (glossaryItem |> GlossaryItemForHtml.relatedPreferredTerms |> List.map RelatedTerm.raw |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
+                        + (glossaryItem |> GlossaryItemForHtml.relatedPreferredTerms |> List.map Term.raw |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
             in
             if score > 0 then
                 1
@@ -292,7 +292,7 @@ fromList glossaryItemsForHtml =
                             |> List.filterMap
                                 (\relatedPreferredTerm ->
                                     Dict.get
-                                        (relatedPreferredTerm |> RelatedTerm.idReference |> TermId.toString)
+                                        (relatedPreferredTerm |> Term.id |> TermId.toString)
                                         itemIdByPreferredTermId
                                 )
                             |> GlossaryItemIdDict.insert id
@@ -303,7 +303,7 @@ fromList glossaryItemsForHtml =
         orderedAlphabetically_ =
             sortAlphabetically indexedGlossaryItemsForHtml
 
-        orderedByMostMentionedFirst =
+        orderedByMostMentionedFirst_ =
             sortByMostMentionedFirst indexedGlossaryItemsForHtml
     in
     IncubatingGlossaryItems
@@ -313,7 +313,7 @@ fromList glossaryItemsForHtml =
         , normalTagIdsByItemId = normalTagIdsByItemId
         , relatedItemIdsById = relatedItemIdsById
         , orderedAlphabetically = orderedAlphabetically_
-        , orderedByMostMentionedFirst = orderedByMostMentionedFirst
+        , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
         , orderedFocusedOn = Nothing
         }
 
@@ -374,14 +374,86 @@ toList : IncubatingGlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId
 toList glossaryItems itemIds =
     case glossaryItems of
         IncubatingGlossaryItems items ->
-            -- itemIds
-            -- |> List.filterMap
-            -- (\itemId ->
-            --     GlossaryItemIdDict.get itemId items.itemById
-            --     |> Maybe.map (\item ->
-            --     )
-            -- )
-            []
+            itemIds
+                |> List.filterMap
+                    (\itemId ->
+                        GlossaryItemIdDict.get itemId items.itemById
+                            |> Maybe.map
+                                (\item ->
+                                    let
+                                        preferredTerm : Term
+                                        preferredTerm =
+                                            IncubatingGlossaryItem.preferredTerm item
+
+                                        alternativeTerms =
+                                            IncubatingGlossaryItem.alternativeTerms item
+
+                                        disambiguationTag =
+                                            items.disambiguationTagIdByItemId
+                                                |> GlossaryItemIdDict.get itemId
+                                                |> Maybe.andThen identity
+                                                |> Maybe.andThen
+                                                    (\disambiguationTagId ->
+                                                        TagIdDict.get disambiguationTagId items.tagById
+                                                    )
+
+                                        normalTags =
+                                            items.normalTagIdsByItemId
+                                                |> GlossaryItemIdDict.get itemId
+                                                |> Maybe.map
+                                                    (List.filterMap
+                                                        (\normalTagId ->
+                                                            TagIdDict.get normalTagId items.tagById
+                                                        )
+                                                    )
+                                                |> Maybe.withDefault []
+
+                                        definition : Maybe Definition
+                                        definition =
+                                            IncubatingGlossaryItem.definition item
+
+                                        relatedPreferredTerms : List Term
+                                        relatedPreferredTerms =
+                                            items.relatedItemIdsById
+                                                |> GlossaryItemIdDict.get itemId
+                                                |> Maybe.map
+                                                    (\relatedItemIds ->
+                                                        relatedItemIds
+                                                            |> List.filterMap
+                                                                (\relatedItemId ->
+                                                                    items.itemById
+                                                                        |> GlossaryItemIdDict.get relatedItemId
+                                                                        |> Maybe.map
+                                                                            (\relatedItem ->
+                                                                                let
+                                                                                    preferredTerm_ =
+                                                                                        IncubatingGlossaryItem.preferredTerm relatedItem
+                                                                                in
+                                                                                preferredTerm_
+                                                                            )
+                                                                )
+                                                    )
+                                                |> Maybe.withDefault []
+
+                                        needsUpdating =
+                                            IncubatingGlossaryItem.needsUpdating item
+
+                                        lastUpdatedDateAsIso8601 =
+                                            IncubatingGlossaryItem.lastUpdatedDateAsIso8601 item
+                                    in
+                                    ( itemId
+                                    , GlossaryItemForHtml.create
+                                        preferredTerm
+                                        alternativeTerms
+                                        disambiguationTag
+                                        normalTags
+                                        definition
+                                        relatedPreferredTerms
+                                        needsUpdating
+                                        lastUpdatedDateAsIso8601
+                                    )
+                                )
+                    )
 
 
 {-| Retrieve the glossary items ordered alphabetically.
@@ -391,3 +463,27 @@ orderedAlphabetically glossaryItems =
     case glossaryItems of
         IncubatingGlossaryItems items ->
             toList glossaryItems items.orderedAlphabetically
+
+
+{-| Retrieve the glossary items ordered by most mentioned first.
+-}
+orderedByMostMentionedFirst : IncubatingGlossaryItems -> List ( GlossaryItemId, GlossaryItemForHtml )
+orderedByMostMentionedFirst glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            toList glossaryItems items.orderedByMostMentionedFirst
+
+
+{-| Retrieve the glossary items ordered "focused on" a specific item.
+-}
+orderedFocusedOn :
+    GlossaryItemId
+    -> IncubatingGlossaryItems
+    ->
+        Maybe
+            ( List ( GlossaryItemId, GlossaryItemForHtml )
+            , List ( GlossaryItemId, GlossaryItemForHtml )
+            )
+orderedFocusedOn glossaryItemId glossaryItems =
+    -- TODO
+    Nothing

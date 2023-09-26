@@ -110,7 +110,8 @@ if (containerElement) {
             const hrefAttribute = aElement.getAttribute('href');
 
             return {
-                idReference: hrefAttribute.substring(1),
+                id: hrefAttribute.substring(1),
+                isAbbreviation: false, // ignored
                 body: normaliseWhitespace(aElement.textContent)
             };
         });

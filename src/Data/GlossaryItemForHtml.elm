@@ -52,7 +52,7 @@ type GlossaryItemForHtml
         , disambiguationTag : Maybe Tag
         , normalTags : List Tag
         , definition : Maybe Definition
-        , relatedPreferredTerms : List RelatedTerm
+        , relatedPreferredTerms : List Term
         , needsUpdating : Bool
         , lastUpdatedDateAsIso8601 : Maybe String
         }
@@ -60,7 +60,7 @@ type GlossaryItemForHtml
 
 {-| Create a glossary item from its parts.
 -}
-create : Term -> List Term -> Maybe Tag -> List Tag -> Maybe Definition -> List RelatedTerm -> Bool -> Maybe String -> GlossaryItemForHtml
+create : Term -> List Term -> Maybe Tag -> List Tag -> Maybe Definition -> List Term -> Bool -> Maybe String -> GlossaryItemForHtml
 create preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ definition_ relatedPreferredTerms_ needsUpdating_ lastUpdatedDateAsIso8601_ =
     GlossaryItemForHtml
         { preferredTerm = preferredTerm_
@@ -107,7 +107,7 @@ decode enableMarkdownBasedSyntax =
                 <|
                     Decode.string
         )
-        (Decode.field "relatedTerms" <| Decode.list <| RelatedTerm.decode enableMarkdownBasedSyntax)
+        (Decode.field "relatedTerms" <| Decode.list <| Term.decode enableMarkdownBasedSyntax)
         (Decode.field "needsUpdating" Decode.bool)
         (Decode.maybe <| Decode.field "lastUpdatedDate" Decode.string)
 
@@ -203,7 +203,7 @@ definition glossaryItemForHtml =
 
 {-| The related preferred terms for this glossary item.
 -}
-relatedPreferredTerms : GlossaryItemForHtml -> List RelatedTerm
+relatedPreferredTerms : GlossaryItemForHtml -> List Term
 relatedPreferredTerms glossaryItemForHtml =
     case glossaryItemForHtml of
         GlossaryItemForHtml item ->
@@ -264,15 +264,15 @@ definitionToHtmlTree definition_ =
         [ HtmlTree.Leaf definition_ ]
 
 
-relatedTermToHtmlTree : RelatedTerm -> HtmlTree
-relatedTermToHtmlTree relatedTerm =
+relatedTermToHtmlTree : Term -> HtmlTree
+relatedTermToHtmlTree term =
     HtmlTree.Node "a"
         True
-        [ hrefFromRelatedTerm relatedTerm ]
-        [ HtmlTree.Leaf <| RelatedTerm.raw relatedTerm ]
+        [ hrefFromRelatedTerm term ]
+        [ HtmlTree.Leaf <| Term.raw term ]
 
 
-nonemptyRelatedTermsToHtmlTree : Bool -> List RelatedTerm -> HtmlTree
+nonemptyRelatedTermsToHtmlTree : Bool -> List Term -> HtmlTree
 nonemptyRelatedTermsToHtmlTree itemHasSomeADefinition relatedTerms_ =
     HtmlTree.Node "dd"
         False
@@ -296,9 +296,9 @@ hrefToTerm term =
     HtmlTree.Attribute "href" <| fragmentOnly <| TermId.toString <| Term.id term
 
 
-hrefFromRelatedTerm : RelatedTerm -> HtmlTree.Attribute
-hrefFromRelatedTerm relatedTerm =
-    HtmlTree.Attribute "href" <| fragmentOnly <| TermId.toString <| RelatedTerm.idReference relatedTerm
+hrefFromRelatedTerm : Term -> HtmlTree.Attribute
+hrefFromRelatedTerm term =
+    HtmlTree.Attribute "href" <| fragmentOnly <| TermId.toString <| Term.id term
 
 
 {-| Represent this glossary item as an HTML tree, ready for writing back to the glossary's HTML file.
