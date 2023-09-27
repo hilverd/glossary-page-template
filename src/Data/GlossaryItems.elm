@@ -14,7 +14,6 @@ import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Tag exposing (Tag)
-import Data.GlossaryItem.TagInItem as TagInItem exposing (TagInItem(..))
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)

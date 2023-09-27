@@ -370,90 +370,94 @@ enableFocusingOn itemId glossaryItems =
                 }
 
 
-toList : IncubatingGlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml )
-toList glossaryItems itemIds =
+glossaryItemForHtmlFromId : GlossaryItemId -> IncubatingGlossaryItems -> Maybe GlossaryItemForHtml
+glossaryItemForHtmlFromId itemId glossaryItems =
     case glossaryItems of
         IncubatingGlossaryItems items ->
-            itemIds
-                |> List.filterMap
-                    (\itemId ->
-                        GlossaryItemIdDict.get itemId items.itemById
-                            |> Maybe.map
-                                (\item ->
-                                    let
-                                        preferredTerm : Term
-                                        preferredTerm =
-                                            IncubatingGlossaryItem.preferredTerm item
+            GlossaryItemIdDict.get itemId items.itemById
+                |> Maybe.map
+                    (\item ->
+                        let
+                            preferredTerm : Term
+                            preferredTerm =
+                                IncubatingGlossaryItem.preferredTerm item
 
-                                        alternativeTerms =
-                                            IncubatingGlossaryItem.alternativeTerms item
+                            alternativeTerms =
+                                IncubatingGlossaryItem.alternativeTerms item
 
-                                        disambiguationTag =
-                                            items.disambiguationTagIdByItemId
-                                                |> GlossaryItemIdDict.get itemId
-                                                |> Maybe.andThen identity
-                                                |> Maybe.andThen
-                                                    (\disambiguationTagId ->
-                                                        TagIdDict.get disambiguationTagId items.tagById
-                                                    )
+                            disambiguationTag =
+                                items.disambiguationTagIdByItemId
+                                    |> GlossaryItemIdDict.get itemId
+                                    |> Maybe.andThen identity
+                                    |> Maybe.andThen
+                                        (\disambiguationTagId ->
+                                            TagIdDict.get disambiguationTagId items.tagById
+                                        )
 
-                                        normalTags =
-                                            items.normalTagIdsByItemId
-                                                |> GlossaryItemIdDict.get itemId
-                                                |> Maybe.map
-                                                    (List.filterMap
-                                                        (\normalTagId ->
-                                                            TagIdDict.get normalTagId items.tagById
-                                                        )
-                                                    )
-                                                |> Maybe.withDefault []
+                            normalTags =
+                                items.normalTagIdsByItemId
+                                    |> GlossaryItemIdDict.get itemId
+                                    |> Maybe.map
+                                        (List.filterMap
+                                            (\normalTagId ->
+                                                TagIdDict.get normalTagId items.tagById
+                                            )
+                                        )
+                                    |> Maybe.withDefault []
 
-                                        definition : Maybe Definition
-                                        definition =
-                                            IncubatingGlossaryItem.definition item
+                            definition : Maybe Definition
+                            definition =
+                                IncubatingGlossaryItem.definition item
 
-                                        relatedPreferredTerms : List Term
-                                        relatedPreferredTerms =
-                                            items.relatedItemIdsById
-                                                |> GlossaryItemIdDict.get itemId
-                                                |> Maybe.map
-                                                    (\relatedItemIds ->
-                                                        relatedItemIds
-                                                            |> List.filterMap
-                                                                (\relatedItemId ->
-                                                                    items.itemById
-                                                                        |> GlossaryItemIdDict.get relatedItemId
-                                                                        |> Maybe.map
-                                                                            (\relatedItem ->
-                                                                                let
-                                                                                    preferredTerm_ =
-                                                                                        IncubatingGlossaryItem.preferredTerm relatedItem
-                                                                                in
-                                                                                preferredTerm_
-                                                                            )
+                            relatedPreferredTerms : List Term
+                            relatedPreferredTerms =
+                                items.relatedItemIdsById
+                                    |> GlossaryItemIdDict.get itemId
+                                    |> Maybe.map
+                                        (\relatedItemIds ->
+                                            relatedItemIds
+                                                |> List.filterMap
+                                                    (\relatedItemId ->
+                                                        items.itemById
+                                                            |> GlossaryItemIdDict.get relatedItemId
+                                                            |> Maybe.map
+                                                                (\relatedItem ->
+                                                                    let
+                                                                        preferredTerm_ =
+                                                                            IncubatingGlossaryItem.preferredTerm relatedItem
+                                                                    in
+                                                                    preferredTerm_
                                                                 )
                                                     )
-                                                |> Maybe.withDefault []
+                                        )
+                                    |> Maybe.withDefault []
 
-                                        needsUpdating =
-                                            IncubatingGlossaryItem.needsUpdating item
+                            needsUpdating =
+                                IncubatingGlossaryItem.needsUpdating item
 
-                                        lastUpdatedDateAsIso8601 =
-                                            IncubatingGlossaryItem.lastUpdatedDateAsIso8601 item
-                                    in
-                                    ( itemId
-                                    , GlossaryItemForHtml.create
-                                        preferredTerm
-                                        alternativeTerms
-                                        disambiguationTag
-                                        normalTags
-                                        definition
-                                        relatedPreferredTerms
-                                        needsUpdating
-                                        lastUpdatedDateAsIso8601
-                                    )
-                                )
+                            lastUpdatedDateAsIso8601 =
+                                IncubatingGlossaryItem.lastUpdatedDateAsIso8601 item
+                        in
+                        GlossaryItemForHtml.create
+                            preferredTerm
+                            alternativeTerms
+                            disambiguationTag
+                            normalTags
+                            definition
+                            relatedPreferredTerms
+                            needsUpdating
+                            lastUpdatedDateAsIso8601
                     )
+
+
+toList : IncubatingGlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml )
+toList glossaryItems =
+    List.filterMap
+        (\itemId ->
+            glossaryItems
+                |> glossaryItemForHtmlFromId itemId
+                |> Maybe.map (Tuple.pair itemId)
+        )
 
 
 {-| Retrieve the glossary items ordered alphabetically.
@@ -485,5 +489,14 @@ orderedFocusedOn :
             , List ( GlossaryItemId, GlossaryItemForHtml )
             )
 orderedFocusedOn glossaryItemId glossaryItems =
-    -- TODO
-    Nothing
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            items.orderedFocusedOn
+                |> Maybe.andThen
+                    (\( itemIdFocusedOn, ( ids, otherIds ) ) ->
+                        if itemIdFocusedOn == glossaryItemId then
+                            Just ( toList glossaryItems ids, toList glossaryItems otherIds )
+
+                        else
+                            Nothing
+                    )
