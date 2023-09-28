@@ -228,15 +228,30 @@ lastUpdatedDateAsIso8601 glossaryItemForHtml =
             item.lastUpdatedDateAsIso8601
 
 
-termToHtmlTree : Term -> HtmlTree
-termToHtmlTree term =
+termToHtmlTree : Maybe Tag -> Term -> HtmlTree
+termToHtmlTree disambiguationTag_ term =
     HtmlTree.Node "dt"
         True
         []
         [ HtmlTree.Node "dfn"
             True
             [ HtmlTree.Attribute "id" <| TermId.toString <| Term.id term ]
-            [ HtmlTree.Leaf (Term.raw term)
+            [ (disambiguationTag_
+                |> Maybe.map
+                    (\disambiguationTag0 ->
+                        [ HtmlTree.Node "span"
+                            True
+                            []
+                            [ HtmlTree.Leaf <| Term.raw term ]
+                        , HtmlTree.Node "span"
+                            True
+                            [ HtmlTree.Attribute "class" "disambiguation" ]
+                            [ HtmlTree.Leaf <| Tag.raw disambiguationTag0 ]
+                        ]
+                    )
+                |> Maybe.withDefault
+                    [ HtmlTree.Leaf (Term.raw term) ]
+              )
                 |> (\inner ->
                         let
                             linkedTerm : HtmlTree
@@ -244,7 +259,7 @@ termToHtmlTree term =
                                 HtmlTree.Node "a"
                                     True
                                     [ hrefToTerm term ]
-                                    [ inner ]
+                                    inner
                         in
                         if Term.isAbbreviation term then
                             HtmlTree.Node "abbr" True [] [ linkedTerm ]
@@ -320,11 +335,8 @@ toHtmlTree glossaryItem =
                         )
                     |> Maybe.withDefault []
                 )
-                -- TODO: treat preferred terms differently -- write separate span for disambiguation tag if there is one
-                ((preferredTerm glossaryItem
-                    |> termToHtmlTree
-                 )
-                    :: List.map termToHtmlTree (allTerms glossaryItem)
+                (termToHtmlTree item.disambiguationTag item.preferredTerm
+                    :: List.map (termToHtmlTree Nothing) item.alternativeTerms
                     ++ (if item.needsUpdating then
                             [ HtmlTree.Node "dd"
                                 False
