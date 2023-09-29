@@ -68,8 +68,8 @@ type IncubatingGlossaryItems
         }
 
 
-sortAlphabetically : List ( GlossaryItemId, GlossaryItemForHtml ) -> List GlossaryItemId
-sortAlphabetically =
+orderAlphabetically : List ( GlossaryItemId, GlossaryItemForHtml ) -> List GlossaryItemId
+orderAlphabetically =
     List.sortWith
         (\( _, item1 ) ( _, item2 ) ->
             Term.compareAlphabetically
@@ -79,8 +79,8 @@ sortAlphabetically =
         >> List.map Tuple.first
 
 
-sortByMostMentionedFirst : List ( GlossaryItemId, GlossaryItemForHtml ) -> List GlossaryItemId
-sortByMostMentionedFirst indexedGlossaryItemsForHtml =
+orderByMostMentionedFirst : List ( GlossaryItemId, GlossaryItemForHtml ) -> List GlossaryItemId
+orderByMostMentionedFirst indexedGlossaryItemsForHtml =
     let
         -- Maps a term to a score based on whether or not it occurs in glossaryItem.
         -- This is done in a primitive way. A more sophisticated solution could use stemming
@@ -307,10 +307,10 @@ fromList glossaryItemsForHtml =
 
         orderedAlphabetically_ : List GlossaryItemId
         orderedAlphabetically_ =
-            sortAlphabetically indexedGlossaryItemsForHtml
+            orderAlphabetically indexedGlossaryItemsForHtml
 
         orderedByMostMentionedFirst_ =
-            sortByMostMentionedFirst indexedGlossaryItemsForHtml
+            orderByMostMentionedFirst indexedGlossaryItemsForHtml
     in
     IncubatingGlossaryItems
         { itemById = itemById
