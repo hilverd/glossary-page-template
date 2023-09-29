@@ -1,6 +1,6 @@
 module Data.GlossaryItemIdDict exposing
     ( GlossaryItemIdDict
-    , empty, insert
+    , empty, insert, update
     , get
     , keys, fromList
     , map, foldl
@@ -16,7 +16,7 @@ module Data.GlossaryItemIdDict exposing
 
 # Build
 
-@docs empty, insert
+@docs empty, insert, update
 
 
 # Query
@@ -60,6 +60,17 @@ insert glossaryItemId value glossaryItemIdDict =
         GlossaryItemIdDict dict ->
             dict
                 |> Dict.insert (GlossaryItemId.toInt glossaryItemId) value
+                |> GlossaryItemIdDict
+
+
+{-| Update the value of a dictionary for a specific key with a given function.
+-}
+update : GlossaryItemId -> (Maybe v -> Maybe v) -> GlossaryItemIdDict v -> GlossaryItemIdDict v
+update glossaryItemId f glossaryItemIdDict =
+    case glossaryItemIdDict of
+        GlossaryItemIdDict dict ->
+            dict
+                |> Dict.update (GlossaryItemId.toInt glossaryItemId) f
                 |> GlossaryItemIdDict
 
 

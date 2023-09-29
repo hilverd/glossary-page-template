@@ -61,6 +61,7 @@ type IncubatingGlossaryItems
         , tagById : TagIdDict Tag
         , disambiguationTagIdByItemId : GlossaryItemIdDict (Maybe TagId)
         , normalTagIdsByItemId : GlossaryItemIdDict (List TagId)
+        , itemIdsByTagId : TagIdDict (List GlossaryItemId)
         , relatedItemIdsById : GlossaryItemIdDict (List GlossaryItemId)
         , orderedAlphabetically : List GlossaryItemId
         , orderedByMostMentionedFirst : List GlossaryItemId
@@ -288,6 +289,48 @@ fromList glossaryItemsForHtml =
                     )
                     ( GlossaryItemIdDict.empty, GlossaryItemIdDict.empty )
 
+        itemIdsByTagId_ : TagIdDict (List GlossaryItemId)
+        itemIdsByTagId_ =
+            let
+                result0 =
+                    disambiguationTagIdByItemId
+                        |> GlossaryItemIdDict.foldl
+                            (\itemId disambiguationTagId result ->
+                                disambiguationTagId
+                                    |> Maybe.map
+                                        (\disambiguationTagId_ ->
+                                            TagIdDict.update disambiguationTagId_
+                                                (\itemIds ->
+                                                    itemIds
+                                                        |> Maybe.map ((::) itemId)
+                                                        |> Maybe.withDefault [ itemId ]
+                                                        |> Just
+                                                )
+                                                result
+                                        )
+                                    |> Maybe.withDefault result
+                            )
+                            TagIdDict.empty
+            in
+            normalTagIdsByItemId
+                |> GlossaryItemIdDict.foldl
+                    (\itemId normalTagIds result ->
+                        normalTagIds
+                            |> List.foldl
+                                (\normalTagId result_ ->
+                                    TagIdDict.update normalTagId
+                                        (\itemIds ->
+                                            itemIds
+                                                |> Maybe.map ((::) itemId)
+                                                |> Maybe.withDefault [ itemId ]
+                                                |> Just
+                                        )
+                                        result_
+                                )
+                                result
+                    )
+                    result0
+
         relatedItemIdsById : GlossaryItemIdDict (List GlossaryItemId)
         relatedItemIdsById =
             indexedGlossaryItemsForHtml
@@ -317,6 +360,7 @@ fromList glossaryItemsForHtml =
         , tagById = tagById
         , disambiguationTagIdByItemId = disambiguationTagIdByItemId
         , normalTagIdsByItemId = normalTagIdsByItemId
+        , itemIdsByTagId = itemIdsByTagId_
         , relatedItemIdsById = relatedItemIdsById
         , orderedAlphabetically = orderedAlphabetically_
         , orderedByMostMentionedFirst = orderedByMostMentionedFirst_

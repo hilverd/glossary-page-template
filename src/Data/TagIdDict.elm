@@ -1,6 +1,6 @@
 module Data.TagIdDict exposing
     ( TagIdDict
-    , empty, insert, insertWithNextTagId
+    , empty, insert, insertWithNextTagId, update
     , get
     , fromList
     , map, foldl
@@ -16,7 +16,7 @@ module Data.TagIdDict exposing
 
 # Build
 
-@docs empty, insert, insertWithNextTagId
+@docs empty, insert, insertWithNextTagId, update
 
 
 # Query
@@ -80,6 +80,17 @@ insertWithNextTagId value tagIdDict =
             in
             dict
                 |> Dict.insert tagIdInt value
+                |> TagIdDict
+
+
+{-| Update the value of a dictionary for a specific key with a given function.
+-}
+update : TagId -> (Maybe v -> Maybe v) -> TagIdDict v -> TagIdDict v
+update tagId f tagIdDict =
+    case tagIdDict of
+        TagIdDict dict ->
+            dict
+                |> Dict.update (TagId.toInt tagId) f
                 |> TagIdDict
 
 
