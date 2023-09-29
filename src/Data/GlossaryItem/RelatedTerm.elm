@@ -112,7 +112,11 @@ decode enableMarkdownBasedSyntax =
          else
             fromPlaintext
         )
-        (Decode.field "idReference" <| Decode.map TermId.fromString <| Decode.string)
+        (Decode.oneOf
+            [ Decode.field "idReference" <| Decode.map TermId.fromString <| Decode.string
+            , Decode.field "id" <| Decode.map TermId.fromString <| Decode.string
+            ]
+        )
         (Decode.field "body" Decode.string)
 
 

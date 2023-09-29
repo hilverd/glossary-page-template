@@ -159,7 +159,11 @@ decode enableMarkdownBasedSyntax =
             fromPlaintextWithId
         )
         (Decode.field "body" Decode.string)
-        (Decode.field "id" <| Decode.map TermId.fromString <| Decode.string)
+        (Decode.oneOf
+            [ Decode.field "idReference" <| Decode.map TermId.fromString <| Decode.string -- for backwards compatibility
+            , Decode.field "id" <| Decode.map TermId.fromString <| Decode.string
+            ]
+        )
         (Decode.field "isAbbreviation" Decode.bool)
 
 
