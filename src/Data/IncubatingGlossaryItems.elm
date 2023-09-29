@@ -1,6 +1,6 @@
 module Data.IncubatingGlossaryItems exposing
     ( IncubatingGlossaryItems
-    , fromList
+    , fromList, insertTag
     , get
     , enableFocusingOn
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
@@ -16,7 +16,7 @@ module Data.IncubatingGlossaryItems exposing
 
 # Build
 
-@docs fromList
+@docs fromList, insertTag
 
 
 # Query
@@ -324,7 +324,22 @@ fromList glossaryItemsForHtml =
         }
 
 
-{-| Get the item associated with an ID. If the key is not found, return `Nothing`.
+{-| Insert a tag.
+-}
+insertTag : Tag -> IncubatingGlossaryItems -> IncubatingGlossaryItems
+insertTag tag glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            let
+                tagById_ : TagIdDict Tag
+                tagById_ =
+                    items.tagById
+                        |> TagIdDict.insertWithNextTagId tag
+            in
+            IncubatingGlossaryItems { items | tagById = tagById_ }
+
+
+{-| Get the item associated with an ID. If the ID is not found, return `Nothing`.
 -}
 get : GlossaryItemId -> IncubatingGlossaryItems -> Maybe GlossaryItemForHtml
 get itemId glossaryItems =

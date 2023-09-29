@@ -1,6 +1,6 @@
 module Data.TagIdDict exposing
     ( TagIdDict
-    , empty, insert
+    , empty, insert, insertWithNextTagId
     , get
     , fromList
     , map, foldl
@@ -16,7 +16,7 @@ module Data.TagIdDict exposing
 
 # Build
 
-@docs empty, insert
+@docs empty, insert, insertWithNextTagId
 
 
 # Query
@@ -37,6 +37,7 @@ module Data.TagIdDict exposing
 
 import Data.TagId as TagId exposing (TagId)
 import Dict exposing (Dict)
+import Json.Decode exposing (dict)
 
 
 {-| A dictionary of tag IDs and values.
@@ -60,6 +61,25 @@ insert tagId value tagIdDict =
         TagIdDict dict ->
             dict
                 |> Dict.insert (TagId.toInt tagId) value
+                |> TagIdDict
+
+
+{-| Insert a key-value pair where the tag ID is automatically picked.
+-}
+insertWithNextTagId : v -> TagIdDict v -> TagIdDict v
+insertWithNextTagId value tagIdDict =
+    case tagIdDict of
+        TagIdDict dict ->
+            let
+                tagIdInt =
+                    dict
+                        |> Dict.keys
+                        |> List.maximum
+                        |> Maybe.map ((+) 1)
+                        |> Maybe.withDefault 0
+            in
+            dict
+                |> Dict.insert tagIdInt value
                 |> TagIdDict
 
 
