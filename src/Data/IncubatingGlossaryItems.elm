@@ -1,6 +1,7 @@
 module Data.IncubatingGlossaryItems exposing
     ( IncubatingGlossaryItems
     , fromList
+    , get
     , enableFocusingOn
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
@@ -18,7 +19,12 @@ module Data.IncubatingGlossaryItems exposing
 @docs fromList
 
 
-# Preparing to Export
+# Query
+
+@docs get
+
+
+# Prepare to Export
 
 @docs enableFocusingOn
 
@@ -318,60 +324,10 @@ fromList glossaryItemsForHtml =
         }
 
 
-{-| Make it easy to retrieve the items ordered "focused on" a specific item.
-Returns an updated `GlossaryItems` where the necessary computations have been done.
+{-| Get the item associated with an ID. If the key is not found, return `Nothing`.
 -}
-enableFocusingOn : GlossaryItemId -> IncubatingGlossaryItems -> IncubatingGlossaryItems
-enableFocusingOn itemId glossaryItems =
-    case glossaryItems of
-        IncubatingGlossaryItems items ->
-            let
-                itemIdsGraph : DirectedGraph GlossaryItemId
-                itemIdsGraph =
-                    items.itemById
-                        |> GlossaryItemIdDict.keys
-                        |> List.foldl
-                            DirectedGraph.insertVertex
-                            (DirectedGraph.empty
-                                (GlossaryItemId.toInt >> String.fromInt)
-                                (String.toInt >> Maybe.withDefault 0 >> GlossaryItemId.create)
-                            )
-
-                relatedItemsGraph : DirectedGraph GlossaryItemId
-                relatedItemsGraph =
-                    items.relatedItemIdsById
-                        |> GlossaryItemIdDict.foldl
-                            (\id relatedItemIds result ->
-                                let
-                                    itemHasDefinition =
-                                        items.itemById
-                                            |> GlossaryItemIdDict.get id
-                                            |> Maybe.map (IncubatingGlossaryItem.definition >> (/=) Nothing)
-                                            |> Maybe.withDefault False
-                                in
-                                if itemHasDefinition then
-                                    List.foldl
-                                        (DirectedGraph.insertEdge id)
-                                        result
-                                        relatedItemIds
-
-                                else
-                                    result
-                            )
-                            itemIdsGraph
-
-                itemIdsByDistance : ( List GlossaryItemId, List GlossaryItemId )
-                itemIdsByDistance =
-                    DirectedGraph.verticesByDistance itemId relatedItemsGraph
-            in
-            IncubatingGlossaryItems
-                { items
-                    | orderedFocusedOn = Just ( itemId, itemIdsByDistance )
-                }
-
-
-glossaryItemForHtmlFromId : GlossaryItemId -> IncubatingGlossaryItems -> Maybe GlossaryItemForHtml
-glossaryItemForHtmlFromId itemId glossaryItems =
+get : GlossaryItemId -> IncubatingGlossaryItems -> Maybe GlossaryItemForHtml
+get itemId glossaryItems =
     case glossaryItems of
         IncubatingGlossaryItems items ->
             GlossaryItemIdDict.get itemId items.itemById
@@ -450,12 +406,64 @@ glossaryItemForHtmlFromId itemId glossaryItems =
                     )
 
 
+{-| Make it easy to retrieve the items ordered "focused on" a specific item.
+Returns an updated `GlossaryItems` where the necessary computations have been done.
+-}
+enableFocusingOn : GlossaryItemId -> IncubatingGlossaryItems -> IncubatingGlossaryItems
+enableFocusingOn itemId glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            let
+                itemIdsGraph : DirectedGraph GlossaryItemId
+                itemIdsGraph =
+                    items.itemById
+                        |> GlossaryItemIdDict.keys
+                        |> List.foldl
+                            DirectedGraph.insertVertex
+                            (DirectedGraph.empty
+                                (GlossaryItemId.toInt >> String.fromInt)
+                                (String.toInt >> Maybe.withDefault 0 >> GlossaryItemId.create)
+                            )
+
+                relatedItemsGraph : DirectedGraph GlossaryItemId
+                relatedItemsGraph =
+                    items.relatedItemIdsById
+                        |> GlossaryItemIdDict.foldl
+                            (\id relatedItemIds result ->
+                                let
+                                    itemHasDefinition =
+                                        items.itemById
+                                            |> GlossaryItemIdDict.get id
+                                            |> Maybe.map (IncubatingGlossaryItem.definition >> (/=) Nothing)
+                                            |> Maybe.withDefault False
+                                in
+                                if itemHasDefinition then
+                                    List.foldl
+                                        (DirectedGraph.insertEdge id)
+                                        result
+                                        relatedItemIds
+
+                                else
+                                    result
+                            )
+                            itemIdsGraph
+
+                itemIdsByDistance : ( List GlossaryItemId, List GlossaryItemId )
+                itemIdsByDistance =
+                    DirectedGraph.verticesByDistance itemId relatedItemsGraph
+            in
+            IncubatingGlossaryItems
+                { items
+                    | orderedFocusedOn = Just ( itemId, itemIdsByDistance )
+                }
+
+
 toList : IncubatingGlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml )
 toList glossaryItems =
     List.filterMap
         (\itemId ->
             glossaryItems
-                |> glossaryItemForHtmlFromId itemId
+                |> get itemId
                 |> Maybe.map (Tuple.pair itemId)
         )
 
