@@ -2,7 +2,7 @@ module Data.TagIdDict exposing
     ( TagIdDict
     , empty, insert, update
     , get, nextTagId
-    , fromList
+    , values, fromList
     , map, foldl
     )
 
@@ -16,7 +16,7 @@ module Data.TagIdDict exposing
 
 # Build
 
-@docs empty, insert, insertWithNextTagId, update
+@docs empty, insert, update
 
 
 # Query
@@ -26,7 +26,7 @@ module Data.TagIdDict exposing
 
 # Lists
 
-@docs fromList
+@docs values, fromList
 
 
 # Transform
@@ -99,6 +99,15 @@ nextTagId tagIdDict =
                 |> Maybe.map ((+) 1)
                 |> Maybe.withDefault 0
                 |> TagId.create
+
+
+{-| Get all of the values in a dictionary, in the order of their keys.
+-}
+values : TagIdDict v -> List v
+values tagIdDict =
+    case tagIdDict of
+        TagIdDict dict ->
+            Dict.values dict
 
 
 {-| Convert an association list into a dictionary.

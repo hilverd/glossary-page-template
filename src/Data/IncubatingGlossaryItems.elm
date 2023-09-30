@@ -256,7 +256,7 @@ fromList tags glossaryItemsForHtml =
                     )
                     { itemById_ = GlossaryItemIdDict.empty
                     , tagById_ = tagById0
-                    , allRawTags = Set.empty
+                    , allRawTags = tagById0 |> TagIdDict.values |> List.map Tag.raw |> Set.fromList
                     , nextTagIdInt = tagById0 |> TagIdDict.nextTagId |> TagId.toInt
                     }
                 |> (\{ itemById_, tagById_ } -> ( itemById_, tagById_ ))
