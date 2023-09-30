@@ -1,7 +1,7 @@
 module Data.TagIdDict exposing
     ( TagIdDict
-    , empty, insert, insertWithNextTagId, update
-    , get
+    , empty, insert, update
+    , get, nextTagId
     , fromList
     , map, foldl
     )
@@ -21,7 +21,7 @@ module Data.TagIdDict exposing
 
 # Query
 
-@docs get
+@docs get, nextTagId
 
 
 # Lists
@@ -64,25 +64,6 @@ insert tagId value tagIdDict =
                 |> TagIdDict
 
 
-{-| Insert a key-value pair where the tag ID is automatically picked.
--}
-insertWithNextTagId : v -> TagIdDict v -> TagIdDict v
-insertWithNextTagId value tagIdDict =
-    case tagIdDict of
-        TagIdDict dict ->
-            let
-                tagIdInt =
-                    dict
-                        |> Dict.keys
-                        |> List.maximum
-                        |> Maybe.map ((+) 1)
-                        |> Maybe.withDefault 0
-            in
-            dict
-                |> Dict.insert tagIdInt value
-                |> TagIdDict
-
-
 {-| Update the value of a dictionary for a specific key with a given function.
 -}
 update : TagId -> (Maybe v -> Maybe v) -> TagIdDict v -> TagIdDict v
@@ -104,6 +85,20 @@ get tagId tagIdDict =
         TagIdDict dict ->
             dict
                 |> Dict.get (TagId.toInt tagId)
+
+
+{-| Compute the next tag ID to be used for inserting a new item.
+-}
+nextTagId : TagIdDict v -> TagId
+nextTagId tagIdDict =
+    case tagIdDict of
+        TagIdDict dict ->
+            dict
+                |> Dict.keys
+                |> List.maximum
+                |> Maybe.map ((+) 1)
+                |> Maybe.withDefault 0
+                |> TagId.create
 
 
 {-| Convert an association list into a dictionary.

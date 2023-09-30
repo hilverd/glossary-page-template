@@ -59,6 +59,7 @@ type IncubatingGlossaryItems
     = IncubatingGlossaryItems
         { itemById : GlossaryItemIdDict IncubatingGlossaryItem
         , tagById : TagIdDict Tag
+        , tagIdByRawTag : Dict String TagId
         , disambiguationTagIdByItemId : GlossaryItemIdDict (Maybe TagId)
         , normalTagIdsByItemId : GlossaryItemIdDict (List TagId)
         , itemIdsByTagId : TagIdDict (List GlossaryItemId)
@@ -173,8 +174,8 @@ orderByMostMentionedFirst indexedGlossaryItemsForHtml =
 
 {-| Convert a list of glossary items for/from HTML into a `GlossaryItems`.
 -}
-fromList : List GlossaryItemForHtml -> IncubatingGlossaryItems
-fromList glossaryItemsForHtml =
+fromList : List Tag -> List GlossaryItemForHtml -> IncubatingGlossaryItems
+fromList tags glossaryItemsForHtml =
     let
         indexedGlossaryItemsForHtml : List ( GlossaryItemId, GlossaryItemForHtml )
         indexedGlossaryItemsForHtml =
@@ -193,6 +194,12 @@ fromList glossaryItemsForHtml =
                             itemId
                     )
                     Dict.empty
+
+        tagById0 : TagIdDict Tag
+        tagById0 =
+            tags
+                |> List.indexedMap (TagId.create >> Tuple.pair)
+                |> TagIdDict.fromList
 
         ( itemById, tagById ) =
             indexedGlossaryItemsForHtml
@@ -248,9 +255,9 @@ fromList glossaryItemsForHtml =
                         }
                     )
                     { itemById_ = GlossaryItemIdDict.empty
-                    , tagById_ = TagIdDict.empty
+                    , tagById_ = tagById0
                     , allRawTags = Set.empty
-                    , nextTagIdInt = 0
+                    , nextTagIdInt = tagById0 |> TagIdDict.nextTagId |> TagId.toInt
                     }
                 |> (\{ itemById_, tagById_ } -> ( itemById_, tagById_ ))
 
@@ -358,6 +365,7 @@ fromList glossaryItemsForHtml =
     IncubatingGlossaryItems
         { itemById = itemById
         , tagById = tagById
+        , tagIdByRawTag = tagIdByRawTag
         , disambiguationTagIdByItemId = disambiguationTagIdByItemId
         , normalTagIdsByItemId = normalTagIdsByItemId
         , itemIdsByTagId = itemIdsByTagId_
@@ -368,19 +376,40 @@ fromList glossaryItemsForHtml =
         }
 
 
-{-| Insert a tag.
+{-| Insert a tag. Does nothing if the tag already exists.
 -}
 insertTag : Tag -> IncubatingGlossaryItems -> IncubatingGlossaryItems
 insertTag tag glossaryItems =
     case glossaryItems of
         IncubatingGlossaryItems items ->
             let
-                tagById_ : TagIdDict Tag
-                tagById_ =
-                    items.tagById
-                        |> TagIdDict.insertWithNextTagId tag
+                rawTag =
+                    Tag.raw tag
             in
-            IncubatingGlossaryItems { items | tagById = tagById_ }
+            if Dict.get rawTag items.tagIdByRawTag == Nothing then
+                let
+                    nextTagId : TagId
+                    nextTagId =
+                        TagIdDict.nextTagId items.tagById
+
+                    tagById_ : TagIdDict Tag
+                    tagById_ =
+                        items.tagById
+                            |> TagIdDict.insert nextTagId tag
+
+                    tagIdByRawTag_ : Dict String TagId
+                    tagIdByRawTag_ =
+                        items.tagIdByRawTag
+                            |> Dict.insert rawTag nextTagId
+                in
+                IncubatingGlossaryItems
+                    { items
+                        | tagById = tagById_
+                        , tagIdByRawTag = tagIdByRawTag_
+                    }
+
+            else
+                glossaryItems
 
 
 {-| Get the item associated with an ID. If the ID is not found, return `Nothing`.

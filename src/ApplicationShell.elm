@@ -19,6 +19,7 @@ import Data.Glossary exposing (Glossary)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItems as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
+import Data.IncubatingGlossary exposing (IncubatingGlossary)
 import Data.IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Data.OrderItemsBy as OrderItemsBy exposing (OrderItemsBy(..))
@@ -197,12 +198,6 @@ init flags =
                             aboutSection =
                                 { paragraph = aboutParagraph, links = aboutLinks }
 
-                            tags : List Tag
-                            tags =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "tags" <| Decode.list <| Tag.decode enableMarkdownBasedSyntax)
-                                    |> Result.withDefault []
-
                             items1 =
                                 case orderItemsBy of
                                     FocusedOn termId ->
@@ -217,8 +212,73 @@ init flags =
                         , cardWidth = cardWidth
                         , title = title
                         , aboutSection = aboutSection
-                        , tags = tags
+                        , tags =
+                            flags
+                                |> Decode.decodeValue (Decode.field "tags" <| Decode.list <| Tag.decode enableMarkdownBasedSyntax)
+                                |> Result.withDefault []
                         , items = items1
+                        }
+                    )
+
+        incubatingGlossary : Result Decode.Error IncubatingGlossary
+        incubatingGlossary =
+            loadedIncubatingGlossaryItems
+                |> Result.map
+                    (\items ->
+                        let
+                            katexIsAvailable : Bool
+                            katexIsAvailable =
+                                flags
+                                    |> Decode.decodeValue (Decode.field "katexIsAvailable" Decode.bool)
+                                    |> Result.withDefault False
+
+                            cardWidth : CardWidth
+                            cardWidth =
+                                flags
+                                    |> Decode.decodeValue CardWidth.decode
+                                    |> Result.withDefault CardWidth.Compact
+
+                            title : GlossaryTitle
+                            title =
+                                flags
+                                    |> Decode.decodeValue (Decode.field "titleString" Decode.string)
+                                    |> Result.withDefault "Element not found"
+                                    |> (if enableMarkdownBasedSyntax then
+                                            GlossaryTitle.fromMarkdown
+
+                                        else
+                                            GlossaryTitle.fromPlaintext
+                                       )
+
+                            aboutParagraph : AboutParagraph
+                            aboutParagraph =
+                                flags
+                                    |> Decode.decodeValue (Decode.field "aboutParagraph" Decode.string)
+                                    |> Result.withDefault "Element not found"
+                                    |> (if enableMarkdownBasedSyntax then
+                                            AboutParagraph.fromMarkdown
+
+                                        else
+                                            AboutParagraph.fromPlaintext
+                                       )
+
+                            aboutLinks : List AboutLink
+                            aboutLinks =
+                                flags
+                                    |> Decode.decodeValue (Decode.field "aboutLinks" <| Decode.list AboutLink.decode)
+                                    |> Result.withDefault []
+
+                            aboutSection : AboutSection
+                            aboutSection =
+                                { paragraph = aboutParagraph, links = aboutLinks }
+                        in
+                        { enableMarkdownBasedSyntax = enableMarkdownBasedSyntax
+                        , enableMathSupport = enableMarkdownBasedSyntax && katexIsAvailable
+                        , enableLastUpdatedDates = enableLastUpdatedDates
+                        , cardWidth = cardWidth
+                        , title = title
+                        , aboutSection = aboutSection
+                        , items = items
                         }
                     )
 
