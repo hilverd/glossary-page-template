@@ -295,6 +295,7 @@ init flags =
                 , maybeIndex = Nothing
                 , fragment = fragment
                 , glossary = glossary
+                , incubatingGlossary = incubatingGlossary
                 }
     in
     ( ListAll listAllModel

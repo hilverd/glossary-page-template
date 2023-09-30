@@ -2,6 +2,7 @@ module CommonModel exposing (CommonModel)
 
 import Data.Glossary exposing (Glossary)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
+import Data.IncubatingGlossary exposing (IncubatingGlossary)
 import Data.OrderItemsBy exposing (OrderItemsBy)
 import Data.Theme exposing (Theme)
 import Json.Decode as Decode
@@ -17,4 +18,5 @@ type alias CommonModel =
     , maybeIndex : Maybe GlossaryItemIndex
     , fragment : Maybe String
     , glossary : Result Decode.Error Glossary
+    , incubatingGlossary : Result Decode.Error IncubatingGlossary
     }

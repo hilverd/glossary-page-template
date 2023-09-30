@@ -2309,13 +2309,8 @@ canEdit editability =
 
 view : Model -> Document Msg
 view model =
-    case model.common.glossary of
-        Err error ->
-            { title = "Glossary"
-            , body = [ pre [] [ text <| Decode.errorToString error ] ]
-            }
-
-        Ok glossary ->
+    case ( model.common.glossary, model.common.incubatingGlossary ) of
+        ( Ok glossary, Ok incubatingGlossary ) ->
             let
                 noModalDialogShown_ : Bool
                 noModalDialogShown_ =
@@ -2535,6 +2530,16 @@ view model =
                         ]
                     ]
                 ]
+            }
+
+        ( Err error, _ ) ->
+            { title = "Glossary"
+            , body = [ pre [] [ text <| Decode.errorToString error ] ]
+            }
+
+        ( _, Err error ) ->
+            { title = "Glossary"
+            , body = [ pre [] [ text <| Decode.errorToString error ] ]
             }
 
 
