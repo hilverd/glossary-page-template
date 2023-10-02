@@ -2,7 +2,7 @@ module Data.GlossaryItemIdDict exposing
     ( GlossaryItemIdDict
     , empty, insert, update
     , get
-    , keys, fromList
+    , keys, values, fromList
     , map, foldl
     )
 
@@ -26,7 +26,7 @@ module Data.GlossaryItemIdDict exposing
 
 # Lists
 
-@docs keys, fromList
+@docs keys, values, fromList
 
 
 # Transform
@@ -95,6 +95,16 @@ keys glossaryItemIdDict =
             dict
                 |> Dict.keys
                 |> List.map GlossaryItemId.create
+
+
+{-| Get all of the values in a dictionary, in the order of their keys.
+-}
+values : GlossaryItemIdDict v -> List v
+values glossaryItemIdDict =
+    case glossaryItemIdDict of
+        GlossaryItemIdDict dict ->
+            dict
+                |> Dict.values
 
 
 {-| Convert an association list into a dictionary.

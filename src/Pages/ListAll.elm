@@ -54,6 +54,7 @@ import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
+import Data.IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Saving exposing (Saving(..))
@@ -2321,9 +2322,13 @@ view model =
                         |> Maybe.map Tuple.second
                         |> Maybe.withDefault glossary.items
 
-                indexOfTerms : IndexOfTerms
-                indexOfTerms =
-                    IndexOfTerms.fromGlossaryItems items
+                incubatingItems : IncubatingGlossaryItems
+                incubatingItems =
+                    incubatingGlossary.items
+
+                incubatingIndexOfTerms : IndexOfTerms
+                incubatingIndexOfTerms =
+                    IndexOfTerms.fromIncubatingGlossaryItems incubatingItems
             in
             { title = GlossaryTitle.inlineText glossary.title
             , body =
@@ -2414,8 +2419,8 @@ view model =
                             )
                         )
                     ]
-                    [ viewMenuForMobile model glossary.enableMathSupport noModalDialogShown_ indexOfTerms
-                    , viewStaticSidebarForDesktop glossary.enableMathSupport noModalDialogShown_ indexOfTerms
+                    [ viewMenuForMobile model glossary.enableMathSupport noModalDialogShown_ incubatingIndexOfTerms
+                    , viewStaticSidebarForDesktop glossary.enableMathSupport noModalDialogShown_ incubatingIndexOfTerms
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar noModalDialogShown_

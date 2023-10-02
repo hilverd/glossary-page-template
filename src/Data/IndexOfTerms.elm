@@ -1,11 +1,11 @@
-module Data.IndexOfTerms exposing (Entry(..), TermGroup, IndexOfTerms, fromGlossaryItems, termGroups)
+module Data.IndexOfTerms exposing (Entry(..), TermGroup, IndexOfTerms, fromGlossaryItems, fromIncubatingGlossaryItems, termGroups)
 
 {-| An index of terms, grouped in alphabetical order by their first character.
 
 
 # Indexes of Terms
 
-@docs Entry, TermGroup, IndexOfTerms, fromGlossaryItems, termGroups
+@docs Entry, TermGroup, IndexOfTerms, fromGlossaryItems, fromIncubatingGlossaryItems, termGroups
 
 -}
 
@@ -14,6 +14,7 @@ import Data.GlossaryItem as GlossaryItem exposing (alternativeTerms, preferredTe
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Dict exposing (Dict)
 
 
@@ -94,6 +95,116 @@ fromGlossaryItems glossaryItems =
 
                             entry =
                                 AlternativeTerm alternativeTerm preferredTermsForThisAlternativeTerm
+                        in
+                        Dict.update
+                            (Term.indexGroupCharacter alternativeTerm)
+                            (\entries ->
+                                entries
+                                    |> Maybe.map (\entries_ -> entry :: entries_)
+                                    |> Maybe.withDefault [ entry ]
+                                    |> Just
+                            )
+                            result
+                    )
+                    resultAfterAddingPreferredTerms
+
+        alphabetAndEllipsis : List String
+        alphabetAndEllipsis =
+            (List.range (Char.toCode 'A') (Char.toCode 'Z')
+                |> List.map (Char.fromCode >> String.fromChar)
+            )
+                ++ [ "…" ]
+
+        entryListsByFirstCharacterIncludingAlphabetAndEllipsis : Dict String (List Entry)
+        entryListsByFirstCharacterIncludingAlphabetAndEllipsis =
+            List.foldl
+                (\letter result ->
+                    Dict.update letter
+                        (\maybeTermList ->
+                            if maybeTermList == Nothing then
+                                Just []
+
+                            else
+                                maybeTermList
+                        )
+                        result
+                )
+                entryListsByFirstAlphabeticCharacterOrEllpisis
+                alphabetAndEllipsis
+
+        termForEntry : Entry -> Term
+        termForEntry entry =
+            case entry of
+                PreferredTerm term ->
+                    term
+
+                AlternativeTerm term _ ->
+                    term
+
+        termIndexGroups : List TermGroup
+        termIndexGroups =
+            entryListsByFirstCharacterIncludingAlphabetAndEllipsis
+                |> (\d ->
+                        if Dict.get "…" d == Just [] then
+                            Dict.remove "…" d
+
+                        else
+                            d
+                   )
+                |> Dict.toList
+                |> List.map
+                    (Tuple.mapSecond <|
+                        List.sortWith
+                            (\entry1 entry2 ->
+                                Term.compareAlphabetically (termForEntry entry1) (termForEntry entry2)
+                            )
+                    )
+                |> List.map (\( label, entries ) -> TermGroup label entries)
+    in
+    IndexOfTerms termIndexGroups
+
+
+{-| Create an index of terms from glossary items.
+-}
+fromIncubatingGlossaryItems : IncubatingGlossaryItems -> IndexOfTerms
+fromIncubatingGlossaryItems glossaryItems =
+    let
+        preferredTerms =
+            IncubatingGlossaryItems.disambiguatedPreferredTerms glossaryItems
+
+        preferredTermsByAlternativeTerm =
+            IncubatingGlossaryItems.disambiguatedPreferredTermsByAlternativeTerm glossaryItems
+
+        entryListsByFirstAlphabeticCharacterOrEllpisis : Dict String (List Entry)
+        entryListsByFirstAlphabeticCharacterOrEllpisis =
+            let
+                resultAfterAddingPreferredTerms : Dict String (List Entry)
+                resultAfterAddingPreferredTerms =
+                    preferredTerms
+                        |> List.foldl
+                            (\preferredTerm result ->
+                                Dict.update
+                                    (Term.indexGroupCharacter preferredTerm)
+                                    (\termList ->
+                                        termList
+                                            |> Maybe.map (\terms -> PreferredTerm preferredTerm :: terms)
+                                            |> Maybe.withDefault [ PreferredTerm preferredTerm ]
+                                            |> Just
+                                    )
+                                    result
+                            )
+                            Dict.empty
+            in
+            preferredTermsByAlternativeTerm
+                |> List.foldl
+                    (\( alternativeTerm, preferredTerms_ ) result ->
+                        let
+                            sortedPreferredTerms =
+                                preferredTerms_
+                                    |> List.sortWith Term.compareAlphabetically
+
+                            entry =
+                                AlternativeTerm alternativeTerm sortedPreferredTerms
                         in
                         Dict.update
                             (Term.indexGroupCharacter alternativeTerm)
