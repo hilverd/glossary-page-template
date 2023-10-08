@@ -169,7 +169,7 @@ fromGlossaryItems glossaryItems =
 fromIncubatingGlossaryItems : IncubatingGlossaryItems -> IndexOfTerms
 fromIncubatingGlossaryItems glossaryItems =
     let
-        preferredTerms =
+        disambiguatedPreferredTerms =
             IncubatingGlossaryItems.disambiguatedPreferredTerms glossaryItems
 
         preferredTermsByAlternativeTerm =
@@ -180,7 +180,7 @@ fromIncubatingGlossaryItems glossaryItems =
             let
                 resultAfterAddingPreferredTerms : Dict String (List Entry)
                 resultAfterAddingPreferredTerms =
-                    preferredTerms
+                    disambiguatedPreferredTerms
                         |> List.foldl
                             (\preferredTerm result ->
                                 Dict.update

@@ -1,7 +1,7 @@
 module Data.IncubatingGlossaryItems exposing
     ( IncubatingGlossaryItems
-    , fromList, insertTag
-    , get, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm
+    , fromList, insertTag, remove
+    , get, tags, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
     , enableFocusingOn
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
@@ -16,12 +16,12 @@ module Data.IncubatingGlossaryItems exposing
 
 # Build
 
-@docs fromList, insertTag
+@docs fromList, insertTag, remove
 
 
 # Query
 
-@docs get, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm
+@docs get, tags, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
 
 
 # Prepare to Export
@@ -39,7 +39,7 @@ import Data.GlossaryItem exposing (alternativeTerms, disambiguationTag)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItem.TermId as TermId
+import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml, relatedPreferredTerms)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
@@ -64,6 +64,7 @@ type IncubatingGlossaryItems
         , disambiguationTagIdByItemId : GlossaryItemIdDict (Maybe TagId)
         , normalTagIdsByItemId : GlossaryItemIdDict (List TagId)
         , itemIdsByTagId : TagIdDict (List GlossaryItemId)
+        , itemIdByPreferredTermId : Dict String GlossaryItemId
         , relatedItemIdsById : GlossaryItemIdDict (List GlossaryItemId)
         , orderedAlphabetically : List GlossaryItemId
         , orderedByMostMentionedFirst : List GlossaryItemId
@@ -76,8 +77,8 @@ orderAlphabetically =
     List.sortWith
         (\( _, item1 ) ( _, item2 ) ->
             Term.compareAlphabetically
-                (GlossaryItemForHtml.preferredTerm item1)
-                (GlossaryItemForHtml.preferredTerm item2)
+                (GlossaryItemForHtml.disambiguatedPreferredTerm item1)
+                (GlossaryItemForHtml.disambiguatedPreferredTerm item2)
         )
         >> List.map Tuple.first
 
@@ -164,8 +165,8 @@ orderByMostMentionedFirst indexedGlossaryItemsForHtml =
 
                     EQ ->
                         compare
-                            (item1 |> GlossaryItemForHtml.preferredTerm |> Term.raw |> String.toUpper)
-                            (item2 |> GlossaryItemForHtml.preferredTerm |> Term.raw |> String.toUpper)
+                            (item1 |> GlossaryItemForHtml.disambiguatedPreferredTerm |> Term.raw |> String.toUpper)
+                            (item2 |> GlossaryItemForHtml.disambiguatedPreferredTerm |> Term.raw |> String.toUpper)
 
                     GT ->
                         LT
@@ -176,19 +177,19 @@ orderByMostMentionedFirst indexedGlossaryItemsForHtml =
 {-| Convert a list of glossary items for/from HTML into a `GlossaryItems`.
 -}
 fromList : List Tag -> List GlossaryItemForHtml -> IncubatingGlossaryItems
-fromList tags glossaryItemsForHtml =
+fromList tags_ glossaryItemsForHtml =
     let
         indexedGlossaryItemsForHtml : List ( GlossaryItemId, GlossaryItemForHtml )
         indexedGlossaryItemsForHtml =
             List.indexedMap (GlossaryItemId.create >> Tuple.pair) glossaryItemsForHtml
 
-        itemIdByPreferredTermId : Dict String GlossaryItemId
-        itemIdByPreferredTermId =
+        itemIdByDisambiguatedPreferredTermId_ : Dict String GlossaryItemId
+        itemIdByDisambiguatedPreferredTermId_ =
             indexedGlossaryItemsForHtml
                 |> List.foldl
                     (\( itemId, item ) ->
                         Dict.insert
-                            (GlossaryItemForHtml.preferredTerm item
+                            (GlossaryItemForHtml.disambiguatedPreferredTerm item
                                 |> Term.id
                                 |> TermId.toString
                             )
@@ -198,7 +199,7 @@ fromList tags glossaryItemsForHtml =
 
         tagById0 : TagIdDict Tag
         tagById0 =
-            tags
+            tags_
                 |> List.indexedMap (TagId.create >> Tuple.pair)
                 |> TagIdDict.fromList
 
@@ -210,7 +211,7 @@ fromList tags glossaryItemsForHtml =
                             glossaryItem : IncubatingGlossaryItem
                             glossaryItem =
                                 IncubatingGlossaryItem.init
-                                    (GlossaryItemForHtml.preferredTerm glossaryItemForHtml)
+                                    (GlossaryItemForHtml.nonDisambiguatedPreferredTerm glossaryItemForHtml)
                                     (GlossaryItemForHtml.alternativeTerms glossaryItemForHtml)
                                     (GlossaryItemForHtml.definition glossaryItemForHtml)
                                     (GlossaryItemForHtml.needsUpdating glossaryItemForHtml)
@@ -350,7 +351,7 @@ fromList tags glossaryItemsForHtml =
                                 (\relatedPreferredTerm ->
                                     Dict.get
                                         (relatedPreferredTerm |> Term.id |> TermId.toString)
-                                        itemIdByPreferredTermId
+                                        itemIdByDisambiguatedPreferredTermId_
                                 )
                             |> GlossaryItemIdDict.insert id
                     )
@@ -370,6 +371,7 @@ fromList tags glossaryItemsForHtml =
         , disambiguationTagIdByItemId = disambiguationTagIdByItemId
         , normalTagIdsByItemId = normalTagIdsByItemId
         , itemIdsByTagId = itemIdsByTagId_
+        , itemIdByPreferredTermId = itemIdByDisambiguatedPreferredTermId_
         , relatedItemIdsById = relatedItemIdsById
         , orderedAlphabetically = orderedAlphabetically_
         , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
@@ -411,6 +413,14 @@ insertTag tag glossaryItems =
 
             else
                 glossaryItems
+
+
+{-| Remove the item associated with an ID. Does nothing if the ID is not found.
+-}
+remove : GlossaryItemId -> IncubatingGlossaryItems -> IncubatingGlossaryItems
+remove itemId glossaryItems =
+    -- TODO
+    glossaryItems
 
 
 {-| Get the item associated with an ID. If the ID is not found, return `Nothing`.
@@ -495,14 +505,27 @@ get itemId glossaryItems =
                     )
 
 
-disambiguatedPreferredTerm : GlossaryItemId -> IncubatingGlossaryItem -> IncubatingGlossaryItems -> Term
-disambiguatedPreferredTerm itemId item glossaryItems =
+{-| The tags for these glossary items. Tags can exist without being used in any items.
+-}
+tags : IncubatingGlossaryItems -> List Tag
+tags glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            TagIdDict.values items.tagById
+
+
+{-| The disambiguated preferred term for the given item with given ID.
+-}
+disambiguatedPreferredTerm : GlossaryItemId -> IncubatingGlossaryItems -> Maybe Term
+disambiguatedPreferredTerm itemId glossaryItems =
     case glossaryItems of
         IncubatingGlossaryItems items ->
             let
-                preferredTerm : Term
-                preferredTerm =
-                    IncubatingGlossaryItem.preferredTerm item
+                maybePreferredTerm : Maybe Term
+                maybePreferredTerm =
+                    items.itemById
+                        |> GlossaryItemIdDict.get itemId
+                        |> Maybe.map IncubatingGlossaryItem.preferredTerm
 
                 disambiguationTagId : Maybe TagId
                 disambiguationTagId =
@@ -519,14 +542,18 @@ disambiguatedPreferredTerm itemId item glossaryItems =
                                     |> TagIdDict.get disambiguationTagId_
                             )
             in
-            disambiguationTag
+            maybePreferredTerm
                 |> Maybe.map
-                    (\disambiguationTag_ ->
-                        preferredTerm
-                            |> Term.updateRaw
-                                (\raw0 -> raw0 ++ " (" ++ Tag.raw disambiguationTag_ ++ ")")
+                    (\preferredTerm_ ->
+                        disambiguationTag
+                            |> Maybe.map
+                                (\disambiguationTag_ ->
+                                    preferredTerm_
+                                        |> Term.updateRaw
+                                            (\raw0 -> raw0 ++ " (" ++ Tag.raw disambiguationTag_ ++ ")")
+                                )
+                            |> Maybe.withDefault preferredTerm_
                     )
-                |> Maybe.withDefault preferredTerm
 
 
 {-| All the disambiguated preferred terms in these glossary items.
@@ -537,8 +564,74 @@ disambiguatedPreferredTerms glossaryItems =
         IncubatingGlossaryItems items ->
             items.itemById
                 |> GlossaryItemIdDict.foldl
-                    (\itemId item result ->
-                        disambiguatedPreferredTerm itemId item glossaryItems :: result
+                    (\itemId _ result ->
+                        case disambiguatedPreferredTerm itemId glossaryItems of
+                            Just disambiguated ->
+                                disambiguated :: result
+
+                            _ ->
+                                result
+                    )
+                    []
+
+
+{-| Look up the ID of the item whose preferred term has the given ID.
+-}
+itemIdFromPreferredTermId : TermId -> IncubatingGlossaryItems -> Maybe GlossaryItemId
+itemIdFromPreferredTermId termId glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            items.itemIdByPreferredTermId
+                |> Dict.get (TermId.toString termId)
+
+
+{-| Look up the preferred term of the item whose preferred term has the given ID.
+-}
+preferredTermFromId : TermId -> IncubatingGlossaryItems -> Maybe Term
+preferredTermFromId termId glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            items.itemIdByPreferredTermId
+                |> Dict.get (TermId.toString termId)
+                |> Maybe.andThen
+                    (\itemId ->
+                        GlossaryItemIdDict.get itemId items.itemById
+                            |> Maybe.map IncubatingGlossaryItem.preferredTerm
+                    )
+
+
+{-| All of the preferred terms which have a definition.
+-}
+disambiguatedPreferredTermsWhichHaveDefinitions : IncubatingGlossaryItems -> List Term
+disambiguatedPreferredTermsWhichHaveDefinitions glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            items.itemById
+                |> GlossaryItemIdDict.toList
+                |> List.filterMap
+                    (\( itemId, item ) ->
+                        if IncubatingGlossaryItem.definition item /= Nothing then
+                            disambiguatedPreferredTerm itemId glossaryItems
+
+                        else
+                            Nothing
+                    )
+
+
+{-| The IDs of the items that list this item as a related one.
+-}
+relatedForWhichItems : GlossaryItemId -> IncubatingGlossaryItems -> List GlossaryItemId
+relatedForWhichItems itemId glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            items.relatedItemIdsById
+                |> GlossaryItemIdDict.foldl
+                    (\otherItemId relatedItemIds result ->
+                        if List.any ((==) itemId) relatedItemIds then
+                            otherItemId :: result
+
+                        else
+                            result
                     )
                     []
 
@@ -554,31 +647,30 @@ disambiguatedPreferredTermsByAlternativeTerm glossaryItems =
                     items.itemById
                         |> GlossaryItemIdDict.foldl
                             (\itemId item ( alternativeTermByRaw_, preferredTermsByRawAlternativeTerm_ ) ->
-                                let
-                                    preferredTerm =
-                                        disambiguatedPreferredTerm itemId item glossaryItems
-
-                                    alternativeTerms =
-                                        IncubatingGlossaryItem.alternativeTerms item
-                                in
-                                alternativeTerms
-                                    |> List.foldl
-                                        (\alternativeTerm ( alternativeTermByRaw1, preferredTermsByRawAlternativeTerm1 ) ->
-                                            let
-                                                raw =
-                                                    Term.raw alternativeTerm
-                                            in
-                                            ( Dict.insert raw alternativeTerm alternativeTermByRaw1
-                                            , Dict.update raw
-                                                (\preferredTerms_ ->
-                                                    preferredTerms_
-                                                        |> Maybe.map ((::) preferredTerm)
-                                                        |> Maybe.withDefault [ preferredTerm ]
-                                                        |> Just
+                                case disambiguatedPreferredTerm itemId glossaryItems of
+                                    Just disambiguatedPreferredTerm_ ->
+                                        item
+                                            |> IncubatingGlossaryItem.alternativeTerms
+                                            |> List.foldl
+                                                (\alternativeTerm ( alternativeTermByRaw1, preferredTermsByRawAlternativeTerm1 ) ->
+                                                    let
+                                                        raw =
+                                                            Term.raw alternativeTerm
+                                                    in
+                                                    ( Dict.insert raw alternativeTerm alternativeTermByRaw1
+                                                    , Dict.update raw
+                                                        (\preferredTerms_ ->
+                                                            preferredTerms_
+                                                                |> Maybe.map ((::) disambiguatedPreferredTerm_)
+                                                                |> Maybe.withDefault [ disambiguatedPreferredTerm_ ]
+                                                                |> Just
+                                                        )
+                                                        preferredTermsByRawAlternativeTerm1
+                                                    )
                                                 )
-                                                preferredTermsByRawAlternativeTerm1
-                                            )
-                                        )
+                                                ( alternativeTermByRaw_, preferredTermsByRawAlternativeTerm_ )
+
+                                    Nothing ->
                                         ( alternativeTermByRaw_, preferredTermsByRawAlternativeTerm_ )
                             )
                             ( Dict.empty, Dict.empty )

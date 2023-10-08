@@ -1,7 +1,7 @@
 module Data.GlossaryItemForHtml exposing
     ( GlossaryItemForHtml
     , create, decode
-    , preferredTerm, disambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601
+    , disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601
     , toHtmlTree
     )
 
@@ -22,7 +22,7 @@ It is not the representation used by the editor UI when the application is runni
 
 # Query
 
-@docs preferredTerm, disambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601
+@docs disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601
 
 
 # Converting to HTML
@@ -31,9 +31,7 @@ It is not the representation used by the editor UI when the application is runni
 
 -}
 
-import Data.GlossaryItem exposing (preferredTerm)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
-import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
@@ -79,18 +77,7 @@ create preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ definitio
 decode : Bool -> Decoder GlossaryItemForHtml
 decode enableMarkdownBasedSyntax =
     Decode.map8
-        (\preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ definition_ relatedPreferredTerms_ needsUpdating_ lastUpdatedDateAsIso8601_ ->
-            GlossaryItemForHtml
-                { preferredTerm = preferredTerm_
-                , alternativeTerms = alternativeTerms_
-                , disambiguationTag = disambiguationTag_
-                , normalTags = normalTags_
-                , definition = definition_
-                , relatedPreferredTerms = relatedPreferredTerms_
-                , needsUpdating = needsUpdating_
-                , lastUpdatedDateAsIso8601 = lastUpdatedDateAsIso8601_
-                }
-        )
+        create
         (Decode.field "preferredTerm" <| Term.decode enableMarkdownBasedSyntax)
         (Decode.field "alternativeTerms" <| Decode.list <| Term.decode enableMarkdownBasedSyntax)
         (Decode.field "disambiguationTag" <| Decode.nullable <| Tag.decode enableMarkdownBasedSyntax)
@@ -112,15 +99,6 @@ decode enableMarkdownBasedSyntax =
         (Decode.maybe <| Decode.field "lastUpdatedDate" Decode.string)
 
 
-{-| The preferred term for this glossary item.
--}
-preferredTerm : GlossaryItemForHtml -> Term
-preferredTerm glossaryItemForHtml =
-    case glossaryItemForHtml of
-        GlossaryItemForHtml item ->
-            item.preferredTerm
-
-
 {-| The disambiguated preferred term for this glossary item.
 -}
 disambiguatedPreferredTerm : GlossaryItemForHtml -> Term
@@ -137,6 +115,15 @@ disambiguatedPreferredTerm glossaryItemForHtml =
                 |> Maybe.withDefault item.preferredTerm
 
 
+{-| The (non-disambiguated) preferred term for this glossary item.
+-}
+nonDisambiguatedPreferredTerm : GlossaryItemForHtml -> Term
+nonDisambiguatedPreferredTerm glossaryItemForHtml =
+    case glossaryItemForHtml of
+        GlossaryItemForHtml item ->
+            item.preferredTerm
+
+
 {-| The alternative terms for this glossary item.
 -}
 alternativeTerms : GlossaryItemForHtml -> List Term
@@ -146,11 +133,11 @@ alternativeTerms glossaryItemForHtml =
             item.alternativeTerms
 
 
-{-| The terms of the glossary item, both preferred and alternative.
+{-| The terms of the glossary item, both (disambiguated) preferred and alternative.
 -}
 allTerms : GlossaryItemForHtml -> List Term
 allTerms glossaryItemForHtml =
-    preferredTerm glossaryItemForHtml :: alternativeTerms glossaryItemForHtml
+    disambiguatedPreferredTerm glossaryItemForHtml :: alternativeTerms glossaryItemForHtml
 
 
 {-| The disambiguation tag for this glossary item.

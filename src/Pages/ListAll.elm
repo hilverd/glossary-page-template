@@ -50,11 +50,14 @@ import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
+import Data.GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
-import Data.IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
+import Data.IncubatingGlossary as IncubatingGlossary exposing (IncubatingGlossary)
+import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Saving exposing (Saving(..))
@@ -128,7 +131,7 @@ type alias Model =
     , exportDropdownMenu : Components.DropdownMenu.Model
     , searchDialog : SearchDialog
     , layout : Layout
-    , confirmDeleteIndex : Maybe GlossaryItemIndex
+    , confirmDeleteId : Maybe GlossaryItemId
     , deleting : Saving
     , savingSettings : Saving
     , mostRecentTermIdForOrderingItemsFocusedOn : Maybe TermId
@@ -150,13 +153,13 @@ type InternalMsg
     | HideSearchDialog
     | UpdateSearchString String
     | ChangeTheme Theme
-    | ChangeLayoutToShowSingle GlossaryItemIndex
-    | ShowRelatedTermAsSingle RelatedTerm
+    | ChangeLayoutToShowSingle GlossaryItemId
+    | ShowRelatedTermAsSingle Term
     | ChangeLayoutToShowAll
-    | ConfirmDelete GlossaryItemIndex
+    | ConfirmDelete GlossaryItemId
     | CancelDelete
-    | Delete GlossaryItemIndex
-    | Deleted GlossaryItems
+    | Delete GlossaryItemId
+    | Deleted IncubatingGlossaryItems
     | FailedToDelete Http.Error
     | JumpToTermIndexGroup Bool String
     | ChangeOrderItemsBy OrderItemsBy
@@ -230,7 +233,7 @@ init editorIsRunning currentlyEditing commonModel =
       , common = commonModel
       , menuForMobileVisibility = Invisible
       , layout = ShowAllItems
-      , confirmDeleteIndex = Nothing
+      , confirmDeleteId = Nothing
       , themeDropdownMenu =
             Components.DropdownMenu.init
                 [ Components.DropdownMenu.id ElementIds.themeDropdownButton ]
@@ -259,9 +262,9 @@ init editorIsRunning currentlyEditing commonModel =
       , resultOfAttemptingToCopyEditorCommandToClipboard = Nothing
       , itemsFilteredByTag = Nothing
       }
-    , case commonModel.maybeIndex of
-        Just index ->
-            scrollGlossaryItemIntoView index
+    , case commonModel.maybeId of
+        Just id ->
+            scrollGlossaryItemIntoView id
 
         Nothing ->
             commonModel.fragment
@@ -456,7 +459,7 @@ update msg model =
                     model.common
             in
             ( { model
-                | common = { common0 | maybeIndex = Just index }
+                | common = { common0 | maybeId = Just index }
                 , layout = ShowSingleItem
               }
             , preventBackgroundScrolling ()
@@ -468,15 +471,14 @@ update msg model =
                     model.common
 
                 model1 =
-                    case model.common.glossary of
+                    case model.common.incubatingGlossary of
                         Ok glossary ->
                             glossary.items
-                                |> GlossaryItems.preferredTermIdsToIndexes
-                                |> Dict.get (relatedTerm |> RelatedTerm.idReference |> TermId.toString)
+                                |> IncubatingGlossaryItems.itemIdFromPreferredTermId (Term.id relatedTerm)
                                 |> Maybe.map
                                     (\index ->
                                         { model
-                                            | common = { common0 | maybeIndex = Just index }
+                                            | common = { common0 | maybeId = Just index }
                                         }
                                     )
                                 |> Maybe.withDefault model
@@ -490,19 +492,19 @@ update msg model =
             ( { model | layout = ShowAllItems }
             , Cmd.batch
                 [ allowBackgroundScrolling ()
-                , model.common.maybeIndex
+                , model.common.maybeId
                     |> Maybe.map (ElementIds.glossaryItemDiv >> scrollElementIntoView)
                     |> Maybe.withDefault Cmd.none
                 ]
             )
 
         ConfirmDelete index ->
-            ( { model | confirmDeleteIndex = Just index }, preventBackgroundScrolling () )
+            ( { model | confirmDeleteId = Just index }, preventBackgroundScrolling () )
 
         CancelDelete ->
-            if model.confirmDeleteIndex /= Nothing then
+            if model.confirmDeleteId /= Nothing then
                 ( { model
-                    | confirmDeleteIndex = Nothing
+                    | confirmDeleteId = Nothing
                     , deleting = NotSaving
                   }
                 , allowBackgroundScrolling ()
@@ -511,13 +513,13 @@ update msg model =
             else
                 ( { model | deleting = NotSaving }, Cmd.none )
 
-        Delete index ->
-            case model.common.glossary of
+        Delete id ->
+            case model.common.incubatingGlossary of
                 Ok { items } ->
                     let
-                        updatedGlossaryItems : GlossaryItems
+                        updatedGlossaryItems : IncubatingGlossaryItems
                         updatedGlossaryItems =
-                            GlossaryItems.remove index items
+                            IncubatingGlossaryItems.remove id items
                     in
                     ( { model
                         | deleting = SavingInProgress
@@ -541,11 +543,11 @@ update msg model =
                         , giveFocusToOuter
                         ]
             in
-            case common.glossary of
+            case common.incubatingGlossary of
                 Ok glossary ->
                     ( { model
-                        | common = { common | glossary = Ok { glossary | items = updatedGlossaryItems } }
-                        , confirmDeleteIndex = Nothing
+                        | common = { common | incubatingGlossary = Ok { glossary | items = updatedGlossaryItems } }
+                        , confirmDeleteId = Nothing
                         , deleting = NotSaving
                         , savingSettings = NotSaving
                       }
@@ -554,7 +556,7 @@ update msg model =
 
                 Err _ ->
                     ( { model
-                        | confirmDeleteIndex = Nothing
+                        | confirmDeleteId = Nothing
                         , deleting = NotSaving
                         , savingSettings = NotSaving
                       }
@@ -630,6 +632,7 @@ update msg model =
                 common1 =
                     case ( orderItemsBy, common.glossary ) of
                         ( FocusedOn termId, Ok glossary ) ->
+                            -- TODO: change incubating items instead
                             let
                                 glossary1 =
                                     { glossary | items = GlossaryItems.enableFocusingOn termId glossary.items }
@@ -658,7 +661,7 @@ update msg model =
                             model.common
                     in
                     ( { model
-                        | confirmDeleteIndex = Nothing
+                        | confirmDeleteId = Nothing
                         , deleting = NotSaving
                         , savingSettings = SavingInProgress
                       }
@@ -683,7 +686,7 @@ update msg model =
                             { common0 | glossary = Ok updatedGlossary }
                     in
                     ( { model
-                        | confirmDeleteIndex = Nothing
+                        | confirmDeleteId = Nothing
                         , deleting = NotSaving
                         , savingSettings = SavingInProgress
                       }
@@ -722,7 +725,7 @@ update msg model =
                             { common0 | glossary = Ok updatedGlossary }
                     in
                     ( { model
-                        | confirmDeleteIndex = Nothing
+                        | confirmDeleteId = Nothing
                         , deleting = NotSaving
                         , savingSettings = SavingInProgress
                       }
@@ -845,7 +848,7 @@ patchHtmlFileAfterChangingSettings common =
                 Extras.Task.messageToCommand okMsg
 
 
-patchHtmlFileAfterDeletingItem : CommonModel -> GlossaryItems -> Cmd Msg
+patchHtmlFileAfterDeletingItem : CommonModel -> IncubatingGlossaryItems -> Cmd Msg
 patchHtmlFileAfterDeletingItem common glossaryItems =
     let
         msg : PageMsg InternalMsg
@@ -856,10 +859,10 @@ patchHtmlFileAfterDeletingItem common glossaryItems =
         Extras.Task.messageToCommand msg
 
     else
-        case common.glossary of
+        case common.incubatingGlossary of
             Ok glossary0 ->
                 let
-                    glossary : Glossary
+                    glossary : IncubatingGlossary
                     glossary =
                         { glossary0 | items = glossaryItems }
                 in
@@ -869,7 +872,7 @@ patchHtmlFileAfterDeletingItem common glossaryItems =
                     , url = "/"
                     , body =
                         glossary
-                            |> Glossary.toHtmlTree common.enableExportMenu common.enableHelpForMakingChanges
+                            |> IncubatingGlossary.toHtmlTree common.enableExportMenu common.enableHelpForMakingChanges
                             |> HtmlTree.toHtmlReplacementString
                             |> Http.stringBody "text/html"
                     , expect =
@@ -890,7 +893,7 @@ patchHtmlFileAfterDeletingItem common glossaryItems =
                 Cmd.none
 
 
-scrollGlossaryItemIntoView : GlossaryItemIndex -> Cmd Msg
+scrollGlossaryItemIntoView : GlossaryItemId -> Cmd Msg
 scrollGlossaryItemIntoView =
     ElementIds.glossaryItemDiv >> (Extras.BrowserDom.scrollElementIntoView <| PageMsg.Internal NoOp)
 
@@ -1187,14 +1190,14 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
             model.common
     in
     Extras.Html.showMaybe
-        (\( index, _ ) ->
+        (\( id, _ ) ->
             Components.GlossaryItemCard.view
                 { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable, enableLastUpdatedDates = enableLastUpdatedDates }
                 (Components.GlossaryItemCard.Normal
                     { tabbable = tabbable
-                    , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle index
-                    , onClickEdit = PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
-                    , onClickDelete = PageMsg.Internal <| ConfirmDelete index
+                    , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle id
+                    , onClickEdit = PageMsg.NavigateToCreateOrEdit { common | maybeId = Just id }
+                    , onClickDelete = PageMsg.Internal <| ConfirmDelete id
                     , onClickTag = PageMsg.Internal << FilterByTag
                     , onClickItem = PageMsg.Internal << ChangeLayoutToShowSingle
                     , onClickRelatedTerm = PageMsg.Internal << ShowRelatedTermAsSingle
@@ -1207,16 +1210,22 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
         itemWithPreviousAndNext.item
 
 
-itemWithPreviousAndNextForIndex : GlossaryItemIndex -> Array ( GlossaryItemIndex, GlossaryItem ) -> GlossaryItemWithPreviousAndNext
-itemWithPreviousAndNextForIndex index indexedGlossaryItems =
-    indexedGlossaryItems
-        |> Array.toIndexedList
-        |> List.foldl
-            (\( artificialIndex, ( index0, item0 ) ) { previous, item, next } ->
-                if index0 == index then
-                    { previous = Array.get (artificialIndex - 1) indexedGlossaryItems
-                    , item = Just ( index0, item0 )
-                    , next = Array.get (artificialIndex + 1) indexedGlossaryItems
+itemWithPreviousAndNextForId : GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml ) -> GlossaryItemWithPreviousAndNext
+itemWithPreviousAndNextForId id indexedGlossaryItems =
+    let
+        indexedGlossaryItemsArray =
+            Array.fromList indexedGlossaryItems
+
+        indexed =
+            Array.indexedMap Tuple.pair indexedGlossaryItemsArray
+    in
+    indexed
+        |> Array.foldl
+            (\( artificialIndex, ( id0, item0 ) ) { previous, item, next } ->
+                if id == id0 then
+                    { previous = Array.get (artificialIndex - 1) indexedGlossaryItemsArray
+                    , item = Just ( id0, item0 )
+                    , next = Array.get (artificialIndex + 1) indexedGlossaryItemsArray
                     }
 
                 else
@@ -1228,15 +1237,15 @@ itemWithPreviousAndNextForIndex index indexedGlossaryItems =
 viewSingleItemModalDialog :
     Model
     -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
-    -> Array ( GlossaryItemIndex, GlossaryItem )
-    -> Maybe GlossaryItemIndex
+    -> List ( GlossaryItemId, GlossaryItemForHtml )
+    -> Maybe GlossaryItemId
     -> Html Msg
 viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } indexedGlossaryItems =
     Maybe.map
-        (\index ->
+        (\id ->
             let
                 itemWithPreviousAndNext =
-                    itemWithPreviousAndNextForIndex index indexedGlossaryItems
+                    itemWithPreviousAndNextForId id indexedGlossaryItems
             in
             Components.ModalDialog.view
                 (PageMsg.Internal ChangeLayoutToShowAll)
@@ -1282,8 +1291,8 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
             )
 
 
-viewConfirmDeleteModal : Bool -> Maybe GlossaryItemIndex -> Saving -> Html Msg
-viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete deleting =
+viewConfirmDeleteModal : Bool -> Maybe GlossaryItemId -> Saving -> Html Msg
+viewConfirmDeleteModal enableSavingChangesInMemory maybeIdOfItemToDelete deleting =
     Components.ModalDialog.view
         (PageMsg.Internal CancelDelete)
         ElementIds.confirmDeleteModalTitle
@@ -1338,7 +1347,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete dele
                     , Extras.HtmlAttribute.showIf (deleting /= SavingInProgress) <| class "hover:bg-red-700 dark:hover:bg-red-600"
                     , Extras.HtmlAttribute.showMaybe
                         (Html.Events.onClick << PageMsg.Internal << Delete)
-                        maybeIndexOfItemToDelete
+                        maybeIdOfItemToDelete
                     ]
                     [ text "Delete" ]
                 , Components.Button.white
@@ -1357,7 +1366,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete dele
                 ]
             ]
         )
-        (maybeIndexOfItemToDelete /= Nothing)
+        (maybeIdOfItemToDelete /= Nothing)
 
 
 viewMakeChangesButton : Bool -> Bool -> Html Msg
@@ -1390,7 +1399,7 @@ viewEditTitleAndAboutButton tabbable common =
     div
         [ class "pb-3 print:hidden" ]
         [ Components.Button.text
-            [ Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout { common | maybeIndex = Nothing }
+            [ Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout { common | maybeId = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.pencil
@@ -1408,7 +1417,7 @@ viewCreateGlossaryItemButtonForEmptyState tabbable common =
         [ class "pt-4 print:hidden" ]
         [ Components.Button.emptyState
             [ class "p-9"
-            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
+            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeId = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.viewGridAdd
@@ -1425,7 +1434,7 @@ viewCreateGlossaryItemButton tabbable common =
     div
         [ class "pb-2 print:hidden" ]
         [ Components.Button.secondary
-            [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
+            [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeId = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.viewGridAdd
@@ -1448,36 +1457,29 @@ viewCards :
     Model
     -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
     -> List Tag
-    -> GlossaryItems
-    -> ( Array ( GlossaryItemIndex, GlossaryItem ), Array ( GlossaryItemIndex, GlossaryItem ) )
+    -> IncubatingGlossaryItems
+    -> ( List ( GlossaryItemId, GlossaryItemForHtml ), List ( GlossaryItemId, GlossaryItemForHtml ) )
     -> Html Msg
 viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } tags glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
-        combinedIndexedGlossaryItems : Array ( GlossaryItemIndex, GlossaryItem )
+        combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForHtml )
         combinedIndexedGlossaryItems =
-            Array.append indexedGlossaryItems otherIndexedGlossaryItems
+            List.append indexedGlossaryItems otherIndexedGlossaryItems
 
-        preferredTermsWithDefinitions : List Term
-        preferredTermsWithDefinitions =
-            GlossaryItems.preferredTermsWithDefinitions glossaryItems
+        disambiguatedPreferredTermsWithDefinitions : List Term
+        disambiguatedPreferredTermsWithDefinitions =
+            IncubatingGlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions glossaryItems
 
         orderItemsFocusedOnTerm : Maybe Term
         orderItemsFocusedOnTerm =
             case model.common.orderItemsBy of
                 FocusedOn termId ->
-                    GlossaryItems.preferredTermIdsToIndexes glossaryItems
-                        |> Dict.get (TermId.toString termId)
-                        |> Maybe.andThen
-                            (\index ->
-                                Array.get (GlossaryItemIndex.toInt index)
-                                    (GlossaryItems.orderedAlphabetically glossaryItems)
-                            )
-                        |> Maybe.map (Tuple.second >> GlossaryItem.preferredTerm)
+                    IncubatingGlossaryItems.preferredTermFromId termId glossaryItems
 
                 _ ->
                     Nothing
 
-        viewIndexedItem : ( GlossaryItemIndex, GlossaryItem ) -> Html Msg
+        viewIndexedItem : ( GlossaryItemId, GlossaryItemForHtml ) -> Html Msg
         viewIndexedItem indexedItem =
             viewGlossaryItem
                 { enableMathSupport = enableMathSupport
@@ -1507,41 +1509,35 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             [ Extras.Html.showIf editable <|
                 div
                     [ class "pt-2" ]
-                    [ if Array.isEmpty combinedIndexedGlossaryItems then
+                    [ if List.isEmpty combinedIndexedGlossaryItems then
                         viewCreateGlossaryItemButtonForEmptyState tabbable model.common
 
                       else
                         viewCreateGlossaryItemButton tabbable model.common
                     ]
             ]
-        , Extras.Html.showIf (not <| Array.isEmpty combinedIndexedGlossaryItems) <|
+        , Extras.Html.showIf (not <| List.isEmpty combinedIndexedGlossaryItems) <|
             viewOrderItemsBy
                 model
-                (Array.length combinedIndexedGlossaryItems)
+                (List.length combinedIndexedGlossaryItems)
                 enableMathSupport
-                preferredTermsWithDefinitions
+                disambiguatedPreferredTermsWithDefinitions
                 orderItemsFocusedOnTerm
         , Html.dl
             []
-            (indexedGlossaryItems
-                |> Array.toList
-                |> List.map viewIndexedItem
-            )
+            (List.map viewIndexedItem indexedGlossaryItems)
         , Extras.Html.showIf
-            ((not <| Array.isEmpty indexedGlossaryItems)
-                && (not <| Array.isEmpty otherIndexedGlossaryItems)
+            ((not <| List.isEmpty indexedGlossaryItems)
+                && (not <| List.isEmpty otherIndexedGlossaryItems)
             )
           <|
             Components.Dividers.withLabel
                 [ class "my-10" ]
                 "Other items"
-        , Extras.Html.showIf (not <| Array.isEmpty otherIndexedGlossaryItems) <|
+        , Extras.Html.showIf (not <| List.isEmpty otherIndexedGlossaryItems) <|
             Html.dl
                 []
-                (otherIndexedGlossaryItems
-                    |> Array.toList
-                    |> List.map viewIndexedItem
-                )
+                (List.map viewIndexedItem otherIndexedGlossaryItems)
         , Components.SearchDialog.view
             (PageMsg.Internal << SearchDialogMsg)
             model.searchDialog.model
@@ -1549,7 +1545,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             model.searchDialog.results
         , viewConfirmDeleteModal
             model.common.enableSavingChangesInMemory
-            model.confirmDeleteIndex
+            model.confirmDeleteId
             model.deleting
         , viewSingleItemModalDialog
             model
@@ -1560,9 +1556,9 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             }
             combinedIndexedGlossaryItems
           <|
-            case ( model.layout, model.common.maybeIndex ) of
-                ( ShowSingleItem, Just index ) ->
-                    Just index
+            case ( model.layout, model.common.maybeId ) of
+                ( ShowSingleItem, Just id ) ->
+                    Just id
 
                 _ ->
                     Nothing
@@ -2101,7 +2097,7 @@ viewManageTagsButton tabbable common =
     div
         [ class "pb-3 print:hidden" ]
         [ Components.Button.text
-            [ Html.Events.onClick <| PageMsg.NavigateToManageTags { common | maybeIndex = Nothing }
+            [ Html.Events.onClick <| PageMsg.NavigateToManageTags { common | maybeId = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.pencil
@@ -2114,7 +2110,7 @@ viewManageTagsButton tabbable common =
 
 
 viewOrderItemsBy : Model -> Int -> Bool -> List Term -> Maybe Term -> Html Msg
-viewOrderItemsBy model numberOfItems enableMathSupport preferredTermsWithDefinitions orderItemsFocusedOnTerm =
+viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTermsWithDefinitions orderItemsFocusedOnTerm =
     let
         tabbable : Bool
         tabbable =
@@ -2202,16 +2198,16 @@ viewOrderItemsBy model numberOfItems enableMathSupport preferredTermsWithDefinit
                             , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << TermId.fromString)
                             , Components.SelectMenu.enabled tabbable
                             ]
-                            (preferredTermsWithDefinitions
+                            (disambiguatedPreferredTermsWithDefinitions
                                 |> List.map
-                                    (\preferredTerm ->
+                                    (\disambiguatedPreferredTerm ->
                                         let
                                             preferredTermId =
-                                                Term.id preferredTerm
+                                                Term.id disambiguatedPreferredTerm
                                         in
                                         Components.SelectMenu.Choice
                                             (TermId.toString preferredTermId)
-                                            [ text <| Term.inlineText preferredTerm ]
+                                            [ text <| Term.inlineText disambiguatedPreferredTerm ]
                                             (model.mostRecentTermIdForOrderingItemsFocusedOn == Just preferredTermId)
                                     )
                             )
@@ -2239,8 +2235,8 @@ viewOrderItemsBy model numberOfItems enableMathSupport preferredTermsWithDefinit
 type MenuOrDialogShown
     = MenuForMobileShown
     | SearchDialogShown
-    | ConfirmDeleteModalDialogShown GlossaryItemIndex
-    | ViewSingleItemModalDialogShown GlossaryItemIndex
+    | ConfirmDeleteModalDialogShown GlossaryItemId
+    | ViewSingleItemModalDialogShown GlossaryItemId
     | NoMenuOrDialogShown
 
 
@@ -2253,12 +2249,12 @@ menuOrDialogShown model =
         MenuForMobileShown
 
     else if model.layout == ShowSingleItem then
-        model.common.maybeIndex
+        model.common.maybeId
             |> Maybe.map ViewSingleItemModalDialogShown
             |> Maybe.withDefault NoMenuOrDialogShown
 
     else
-        model.confirmDeleteIndex
+        model.confirmDeleteId
             |> Maybe.map ConfirmDeleteModalDialogShown
             |> Maybe.withDefault NoMenuOrDialogShown
 
@@ -2364,27 +2360,30 @@ view model =
                                         else
                                             Nothing
 
-                                    ViewSingleItemModalDialogShown index ->
+                                    ViewSingleItemModalDialogShown id ->
                                         if event == Extras.HtmlEvents.escape then
                                             Just <| ( PageMsg.Internal ChangeLayoutToShowAll, True )
 
                                         else
                                             let
                                                 itemWithPreviousAndNext =
-                                                    items
+                                                    incubatingItems
                                                         |> (case model.common.orderItemsBy of
                                                                 Alphabetically ->
-                                                                    GlossaryItems.orderedAlphabetically
+                                                                    IncubatingGlossaryItems.orderedAlphabetically
 
                                                                 MostMentionedFirst ->
-                                                                    GlossaryItems.orderedByMostMentionedFirst
+                                                                    IncubatingGlossaryItems.orderedByMostMentionedFirst
 
                                                                 FocusedOn termId ->
-                                                                    GlossaryItems.orderedFocusedOn termId
-                                                                        >> Maybe.withDefault ( Array.empty, Array.empty )
-                                                                        >> (\( lhs, rhs ) -> Array.append lhs rhs)
+                                                                    \items_ ->
+                                                                        IncubatingGlossaryItems.itemIdFromPreferredTermId termId items_
+                                                                            |> Maybe.andThen
+                                                                                (\itemId -> IncubatingGlossaryItems.orderedFocusedOn itemId items_)
+                                                                            |> Maybe.withDefault ( [], [] )
+                                                                            |> (\( lhs, rhs ) -> List.append lhs rhs)
                                                            )
-                                                        |> itemWithPreviousAndNextForIndex index
+                                                        |> itemWithPreviousAndNextForId id
                                             in
                                             if event == Extras.HtmlEvents.leftArrow then
                                                 itemWithPreviousAndNext.previous
@@ -2412,7 +2411,7 @@ view model =
                                                 common_ =
                                                     model.common
                                             in
-                                            Just <| ( PageMsg.NavigateToCreateOrEdit { common_ | maybeIndex = Nothing }, True )
+                                            Just <| ( PageMsg.NavigateToCreateOrEdit { common_ | maybeId = Nothing }, True )
 
                                         else
                                             Nothing
@@ -2485,19 +2484,29 @@ view model =
                                     div
                                         [ class "flex-none mt-2" ]
                                         [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
-                                , items
+                                , incubatingItems
                                     |> (case model.common.orderItemsBy of
                                             Alphabetically ->
-                                                GlossaryItems.orderedAlphabetically
-                                                    >> (\lhs -> ( lhs, Array.empty ))
+                                                IncubatingGlossaryItems.orderedAlphabetically
+                                                    >> (\lhs -> ( lhs, [] ))
 
                                             MostMentionedFirst ->
-                                                GlossaryItems.orderedByMostMentionedFirst
-                                                    >> (\lhs -> ( lhs, Array.empty ))
+                                                IncubatingGlossaryItems.orderedByMostMentionedFirst
+                                                    >> (\lhs -> ( lhs, [] ))
 
                                             FocusedOn termId ->
-                                                GlossaryItems.orderedFocusedOn termId
-                                                    >> Maybe.withDefault ( Array.empty, Array.empty )
+                                                let
+                                                    itemId : Maybe GlossaryItemId
+                                                    itemId =
+                                                        IncubatingGlossaryItems.itemIdFromPreferredTermId termId incubatingItems
+                                                in
+                                                case itemId of
+                                                    Just itemId_ ->
+                                                        IncubatingGlossaryItems.orderedFocusedOn itemId_
+                                                            >> Maybe.withDefault ( [], [] )
+
+                                                    Nothing ->
+                                                        always ( [], [] )
                                        )
                                     |> viewCards
                                         model
@@ -2507,7 +2516,7 @@ view model =
                                         , enableLastUpdatedDates = glossary.enableLastUpdatedDates
                                         }
                                         glossary.tags
-                                        items
+                                        incubatingItems
                                 ]
                             , Html.footer
                                 []

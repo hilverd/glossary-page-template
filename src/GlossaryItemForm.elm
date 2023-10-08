@@ -36,7 +36,10 @@ import Data.GlossaryItem.Tag exposing (Tag)
 import Data.GlossaryItem.TagInItem as TagInItem exposing (TagInItem(..))
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import Dict exposing (Dict)
@@ -55,16 +58,22 @@ type alias RelatedTermField =
     }
 
 
+type alias IncubatingRelatedTermField =
+    { itemId : Maybe GlossaryItemId
+    , validationError : Maybe String
+    }
+
+
 type GlossaryItemForm
     = GlossaryItemForm
         { preferredTermField : TermField
         , alternativeTermFields : Array TermField
         , tagCheckboxes : List ( Tag, Bool )
         , definitionField : DefinitionField
-        , relatedTermFields : Array RelatedTermField
+        , relatedTermFields : Array IncubatingRelatedTermField
         , termsOutside : List Term
         , preferredTermsOutside : List Term
-        , itemsListingThisItemAsRelated : List GlossaryItem
+        , preferredTermsOfItemsListingThisItemAsRelated : List Term
         , needsUpdating : Bool
         , lastUpdatedDate : String
         }
@@ -107,7 +116,7 @@ definitionField glossaryItemForm =
             form.definitionField
 
 
-relatedTermFields : GlossaryItemForm -> Array RelatedTermField
+relatedTermFields : GlossaryItemForm -> Array IncubatingRelatedTermField
 relatedTermFields glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
@@ -128,11 +137,11 @@ preferredTermsOutside glossaryItemForm =
             form.preferredTermsOutside
 
 
-itemsListingThisTermAsRelated : GlossaryItemForm -> List GlossaryItem
-itemsListingThisTermAsRelated glossaryItemForm =
+preferredTermsOfItemsListingThisItemAsRelated : GlossaryItemForm -> List Term
+preferredTermsOfItemsListingThisItemAsRelated glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
-            form.itemsListingThisItemAsRelated
+            form.preferredTermsOfItemsListingThisItemAsRelated
 
 
 needsUpdating : GlossaryItemForm -> Bool
@@ -216,7 +225,7 @@ validate form =
         validatedDefinitionField =
             definitionField form
 
-        validatedRelatedTermFields : Array RelatedTermField
+        validatedRelatedTermFields : Array IncubatingRelatedTermField
         validatedRelatedTermFields =
             form
                 |> relatedTermFields
@@ -224,7 +233,7 @@ validate form =
                     (\relatedTermField ->
                         { relatedTermField
                             | validationError =
-                                if relatedTermField.idReference == Nothing then
+                                if relatedTermField.itemId == Nothing then
                                     Just "Please select an item"
 
                                 else
@@ -240,7 +249,7 @@ validate form =
         , relatedTermFields = validatedRelatedTermFields
         , termsOutside = termsOutside form
         , preferredTermsOutside = preferredTermsOutside form
-        , itemsListingThisItemAsRelated = itemsListingThisTermAsRelated form
+        , preferredTermsOfItemsListingThisItemAsRelated = preferredTermsOfItemsListingThisItemAsRelated form
         , needsUpdating = needsUpdating form
         , lastUpdatedDate = lastUpdatedDate form
         }
@@ -258,8 +267,8 @@ hasValidationErrors form =
         || (form |> relatedTermFields |> hasErrors .validationError)
 
 
-empty : List Term -> List Term -> List Tag -> List GlossaryItem -> GlossaryItemForm
-empty withTermsOutside withPreferredTermsOutside allTags withItemsListingThisTermAsRelated =
+empty : List Term -> List Term -> List Tag -> List Term -> GlossaryItemForm
+empty withTermsOutside withPreferredTermsOutside allTags preferredTermsOfItemsListingThisItemAsRelated_ =
     GlossaryItemForm
         { preferredTermField = TermField.empty
         , alternativeTermFields = Array.empty
@@ -268,7 +277,7 @@ empty withTermsOutside withPreferredTermsOutside allTags withItemsListingThisTer
         , relatedTermFields = Array.empty
         , termsOutside = withTermsOutside
         , preferredTermsOutside = withPreferredTermsOutside
-        , itemsListingThisItemAsRelated = withItemsListingThisTermAsRelated
+        , preferredTermsOfItemsListingThisItemAsRelated = preferredTermsOfItemsListingThisItemAsRelated_
         , needsUpdating = True
         , lastUpdatedDate = ""
         }
@@ -282,18 +291,25 @@ emptyRelatedTermField =
     }
 
 
-fromGlossaryItem : List Term -> List Term -> List Tag -> List GlossaryItem -> GlossaryItem -> GlossaryItemForm
-fromGlossaryItem existingTerms existingPreferredTerms allTags withItemsListingThisTermAsRelated item =
+fromGlossaryItem :
+    List Term
+    -> List Term
+    -> List Tag
+    -> List Term
+    -> List GlossaryItemId
+    -> GlossaryItemForHtml
+    -> GlossaryItemForm
+fromGlossaryItem existingTerms existingPreferredTerms allTags preferredTermsOfItemsListingThisItemAsRelated_ relatedItemIds item =
     let
         itemTags : List Tag
         itemTags =
-            GlossaryItem.tags item
+            GlossaryItemForHtml.allTags item
 
         preferredTermFieldForItem : TermField
         preferredTermFieldForItem =
             let
                 preferredTerm =
-                    GlossaryItem.nonDisambiguatedPreferredTerm item
+                    GlossaryItemForHtml.nonDisambiguatedPreferredTerm item
             in
             TermField.fromString
                 (Term.raw preferredTerm)
@@ -302,7 +318,7 @@ fromGlossaryItem existingTerms existingPreferredTerms allTags withItemsListingTh
         alternativeTermFieldsForItem : List TermField
         alternativeTermFieldsForItem =
             item
-                |> GlossaryItem.alternativeTerms
+                |> GlossaryItemForHtml.alternativeTerms
                 |> List.map
                     (\alternativeTerms ->
                         TermField.fromString (Term.raw alternativeTerms) (Term.isAbbreviation alternativeTerms)
@@ -311,7 +327,7 @@ fromGlossaryItem existingTerms existingPreferredTerms allTags withItemsListingTh
         termIdsForItem : Set String
         termIdsForItem =
             item
-                |> GlossaryItem.allTerms
+                |> GlossaryItemForHtml.allTerms
                 |> List.map (Term.id >> TermId.toString)
                 |> Set.fromList
 
@@ -334,7 +350,7 @@ fromGlossaryItem existingTerms existingPreferredTerms allTags withItemsListingTh
         definitionField_ : DefinitionField
         definitionField_ =
             item
-                |> GlossaryItem.definition
+                |> GlossaryItemForHtml.definition
                 |> Maybe.map
                     (\definitionElem ->
                         definitionElem
@@ -351,15 +367,14 @@ fromGlossaryItem existingTerms existingPreferredTerms allTags withItemsListingTh
                 |> List.map (\tag -> ( tag, List.member tag itemTags ))
         , definitionField = definitionField_
         , relatedTermFields =
-            item
-                |> GlossaryItem.relatedPreferredTerms
-                |> List.map (\term -> RelatedTermField (Just <| RelatedTerm.idReference term) Nothing)
+            relatedItemIds
+                |> List.map (\itemId -> IncubatingRelatedTermField (Just itemId) Nothing)
                 |> Array.fromList
         , termsOutside = termsOutside1
         , preferredTermsOutside = preferredTermsOutside1
-        , itemsListingThisItemAsRelated = withItemsListingThisTermAsRelated
-        , needsUpdating = item |> GlossaryItem.needsUpdating
-        , lastUpdatedDate = item |> GlossaryItem.lastUpdatedDate |> Maybe.withDefault ""
+        , preferredTermsOfItemsListingThisItemAsRelated = preferredTermsOfItemsListingThisItemAsRelated_
+        , needsUpdating = item |> GlossaryItemForHtml.needsUpdating
+        , lastUpdatedDate = item |> GlossaryItemForHtml.lastUpdatedDateAsIso8601 |> Maybe.withDefault ""
         }
         |> validate
 
@@ -369,27 +384,9 @@ termBodyToId =
     String.replace " " "_"
 
 
-toGlossaryItem : Bool -> GlossaryItems -> GlossaryItemForm -> Maybe String -> GlossaryItem
+toGlossaryItem : Bool -> IncubatingGlossaryItems -> GlossaryItemForm -> Maybe String -> GlossaryItemForHtml
 toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
     let
-        rawPreferredTermBodyByIdReference : Dict String String
-        rawPreferredTermBodyByIdReference =
-            glossaryItems
-                |> GlossaryItems.orderedAlphabetically
-                |> Array.toList
-                |> List.foldl
-                    (\( _, glossaryItem ) result ->
-                        let
-                            term =
-                                GlossaryItem.preferredTerm glossaryItem
-                        in
-                        Dict.insert
-                            (Term.id term |> TermId.toString)
-                            (Term.raw term)
-                            result
-                    )
-                    Dict.empty
-
         termFieldToTerm : TermField -> Term
         termFieldToTerm termField =
             let
@@ -455,26 +452,17 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                         Definition.fromPlaintext
                     )
 
+        relatedTerms : List Term
         relatedTerms =
             form
                 |> relatedTermFields
                 |> Array.toList
                 |> List.filterMap
                     (\relatedTermField ->
-                        relatedTermField.idReference
-                            |> Maybe.map TermId.toString
+                        relatedTermField.itemId
                             |> Maybe.andThen
-                                (\ref ->
-                                    Dict.get ref rawPreferredTermBodyByIdReference
-                                        |> Maybe.map
-                                            ((if enableMarkdownBasedSyntax then
-                                                RelatedTerm.fromMarkdown
-
-                                              else
-                                                RelatedTerm.fromPlaintext
-                                             )
-                                                (TermId.fromString ref)
-                                            )
+                                (\itemId ->
+                                    IncubatingGlossaryItems.disambiguatedPreferredTerm itemId glossaryItems
                                 )
                     )
 
@@ -484,7 +472,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
         lastUpdatedDate_ =
             dateTime
     in
-    GlossaryItem.init preferredTerm
+    GlossaryItemForHtml.create preferredTerm
         alternativeTerms
         (Nothing
          -- TODO
@@ -643,27 +631,31 @@ addRelatedTerm maybeTermId glossaryItemForm =
                     else
                         form.needsUpdating
             in
-            GlossaryItemForm
-                { form
-                    | relatedTermFields = Array.push relatedTermField form.relatedTermFields
-                    , needsUpdating = needsUpdating1
-                }
-                |> validate
+            -- TODO
+            -- GlossaryItemForm
+            --     { form
+            --         | relatedTermFields = Array.push relatedTermField form.relatedTermFields
+            --         , needsUpdating = needsUpdating1
+            --     }
+            --     |> validate
+            glossaryItemForm
 
 
 selectRelatedTerm : RelatedTermIndex -> GlossaryItemForm -> Maybe TermId -> GlossaryItemForm
 selectRelatedTerm index glossaryItemForm relatedTermIdReference =
-    case glossaryItemForm of
-        GlossaryItemForm form ->
-            GlossaryItemForm
-                { form
-                    | relatedTermFields =
-                        Extras.Array.update
-                            (always <| RelatedTermField relatedTermIdReference Nothing)
-                            (RelatedTermIndex.toInt index)
-                            form.relatedTermFields
-                }
-                |> validate
+    -- TODO
+    -- case glossaryItemForm of
+    --     GlossaryItemForm form ->
+    --         GlossaryItemForm
+    --             { form
+    --                 | relatedTermFields =
+    --                     Extras.Array.update
+    --                         (always <| RelatedTermField relatedTermIdReference Nothing)
+    --                         (RelatedTermIndex.toInt index)
+    --                         form.relatedTermFields
+    --             }
+    --             |> validate
+    glossaryItemForm
 
 
 deleteRelatedTerm : RelatedTermIndex -> GlossaryItemForm -> GlossaryItemForm
@@ -677,124 +669,120 @@ deleteRelatedTerm index glossaryItemForm =
 
 moveRelatedTermUp : RelatedTermIndex -> GlossaryItemForm -> GlossaryItemForm
 moveRelatedTermUp index glossaryItemForm =
-    case glossaryItemForm of
-        GlossaryItemForm form ->
-            let
-                relatedTermFields0 =
-                    form.relatedTermFields
-
-                indexInt =
-                    RelatedTermIndex.toInt index
-
-                maybeCurrentAtIndex : Maybe RelatedTermField
-                maybeCurrentAtIndex =
-                    Array.get indexInt form.relatedTermFields
-
-                maybeCurrentAtPreviousIndex : Maybe RelatedTermField
-                maybeCurrentAtPreviousIndex =
-                    Array.get (indexInt - 1) form.relatedTermFields
-            in
-            GlossaryItemForm
-                { form
-                    | relatedTermFields =
-                        Maybe.map2
-                            (\currentAtIndex currentAtPreviousIndex ->
-                                relatedTermFields0
-                                    |> Array.set (indexInt - 1) currentAtIndex
-                                    |> Array.set indexInt currentAtPreviousIndex
-                            )
-                            maybeCurrentAtIndex
-                            maybeCurrentAtPreviousIndex
-                            |> Maybe.withDefault relatedTermFields0
-                }
-                |> validate
+    -- TODO
+    -- case glossaryItemForm of
+    --     GlossaryItemForm form ->
+    --         let
+    --             relatedTermFields0 =
+    --                 form.relatedTermFields
+    --             indexInt =
+    --                 RelatedTermIndex.toInt index
+    --             maybeCurrentAtIndex : Maybe RelatedTermField
+    --             maybeCurrentAtIndex =
+    --                 Array.get indexInt form.relatedTermFields
+    --             maybeCurrentAtPreviousIndex : Maybe RelatedTermField
+    --             maybeCurrentAtPreviousIndex =
+    --                 Array.get (indexInt - 1) form.relatedTermFields
+    --         in
+    --         GlossaryItemForm
+    --             { form
+    --                 | relatedTermFields =
+    --                     Maybe.map2
+    --                         (\currentAtIndex currentAtPreviousIndex ->
+    --                             relatedTermFields0
+    --                                 |> Array.set (indexInt - 1) currentAtIndex
+    --                                 |> Array.set indexInt currentAtPreviousIndex
+    --                         )
+    --                         maybeCurrentAtIndex
+    --                         maybeCurrentAtPreviousIndex
+    --                         |> Maybe.withDefault relatedTermFields0
+    --             }
+    --             |> validate
+    glossaryItemForm
 
 
 moveRelatedTermDown : RelatedTermIndex -> GlossaryItemForm -> GlossaryItemForm
 moveRelatedTermDown index glossaryItemForm =
-    case glossaryItemForm of
-        GlossaryItemForm form ->
-            let
-                relatedTermFields0 =
-                    form.relatedTermFields
-
-                indexInt =
-                    RelatedTermIndex.toInt index
-
-                maybeCurrentAtIndex : Maybe RelatedTermField
-                maybeCurrentAtIndex =
-                    Array.get indexInt form.relatedTermFields
-
-                maybeCurrentAtNextIndex : Maybe RelatedTermField
-                maybeCurrentAtNextIndex =
-                    Array.get (indexInt + 1) form.relatedTermFields
-            in
-            GlossaryItemForm
-                { form
-                    | relatedTermFields =
-                        Maybe.map2
-                            (\currentAtIndex currentAtNextIndex ->
-                                relatedTermFields0
-                                    |> Array.set (indexInt + 1) currentAtIndex
-                                    |> Array.set indexInt currentAtNextIndex
-                            )
-                            maybeCurrentAtIndex
-                            maybeCurrentAtNextIndex
-                            |> Maybe.withDefault relatedTermFields0
-                }
-                |> validate
+    -- TODO
+    -- case glossaryItemForm of
+    --     GlossaryItemForm form ->
+    --         let
+    --             relatedTermFields0 =
+    --                 form.relatedTermFields
+    --             indexInt =
+    --                 RelatedTermIndex.toInt index
+    --             maybeCurrentAtIndex : Maybe RelatedTermField
+    --             maybeCurrentAtIndex =
+    --                 Array.get indexInt form.relatedTermFields
+    --             maybeCurrentAtNextIndex : Maybe RelatedTermField
+    --             maybeCurrentAtNextIndex =
+    --                 Array.get (indexInt + 1) form.relatedTermFields
+    --         in
+    --         GlossaryItemForm
+    --             { form
+    --                 | relatedTermFields =
+    --                     Maybe.map2
+    --                         (\currentAtIndex currentAtNextIndex ->
+    --                             relatedTermFields0
+    --                                 |> Array.set (indexInt + 1) currentAtIndex
+    --                                 |> Array.set indexInt currentAtNextIndex
+    --                         )
+    --                         maybeCurrentAtIndex
+    --                         maybeCurrentAtNextIndex
+    --                         |> Maybe.withDefault relatedTermFields0
+    --             }
+    --             |> validate
+    glossaryItemForm
 
 
 suggestRelatedTerms : GlossaryItemForm -> List Term
 suggestRelatedTerms glossaryItemForm =
-    let
-        relatedTermIdsAlreadyInForm : Set String
-        relatedTermIdsAlreadyInForm =
-            glossaryItemForm
-                |> relatedTermFields
-                |> Array.foldl
-                    (\relatedTermField result ->
-                        relatedTermField.idReference
-                            |> Maybe.map (\idReference -> Set.insert (TermId.toString idReference) result)
-                            |> Maybe.withDefault result
-                    )
-                    Set.empty
-
-        candidateTerms : List Term
-        candidateTerms =
-            glossaryItemForm
-                |> preferredTermsOutside
-                |> List.filter
-                    (\term -> not <| Set.member (Term.id term |> TermId.toString) relatedTermIdsAlreadyInForm)
-
-        definitionFieldBody : String
-        definitionFieldBody =
-            glossaryItemForm
-                |> definitionField
-                |> DefinitionField.raw
-                |> String.toLower
-
-        preferredTermIdsOfItemsListingThisItemAsRelated : Set String
-        preferredTermIdsOfItemsListingThisItemAsRelated =
-            glossaryItemForm
-                |> itemsListingThisTermAsRelated
-                |> List.map GlossaryItem.preferredTerm
-                |> List.map (Term.id >> TermId.toString)
-                |> Set.fromList
-    in
-    candidateTerms
-        |> List.filter
-            (\candidateTerm ->
-                let
-                    candidateTermAsWord : Regex.Regex
-                    candidateTermAsWord =
-                        ("(\\b| )" ++ Extras.Regex.escapeStringForUseInRegex (String.toLower (Term.raw candidateTerm)) ++ "(\\b| )")
-                            |> Regex.fromString
-                            |> Maybe.withDefault Regex.never
-                in
-                Set.member (Term.id candidateTerm |> TermId.toString) preferredTermIdsOfItemsListingThisItemAsRelated
-                    || Regex.contains candidateTermAsWord definitionFieldBody
-            )
+    -- TODO
+    -- let
+    --     relatedTermIdsAlreadyInForm : Set String
+    --     relatedTermIdsAlreadyInForm =
+    --         glossaryItemForm
+    --             |> relatedTermFields
+    --             |> Array.foldl
+    --                 (\relatedTermField result ->
+    --                     relatedTermField.idReference
+    --                         |> Maybe.map (\idReference -> Set.insert (TermId.toString idReference) result)
+    --                         |> Maybe.withDefault result
+    --                 )
+    --                 Set.empty
+    --     candidateTerms : List Term
+    --     candidateTerms =
+    --         glossaryItemForm
+    --             |> preferredTermsOutside
+    --             |> List.filter
+    --                 (\term -> not <| Set.member (Term.id term |> TermId.toString) relatedTermIdsAlreadyInForm)
+    --     definitionFieldBody : String
+    --     definitionFieldBody =
+    --         glossaryItemForm
+    --             |> definitionField
+    --             |> DefinitionField.raw
+    --             |> String.toLower
+    --     preferredTermIdsOfItemsListingThisItemAsRelated : Set String
+    --     preferredTermIdsOfItemsListingThisItemAsRelated =
+    --         glossaryItemForm
+    --             |> preferredTermsOfItemsListingThisItemAsRelated
+    --             |> List.map (Term.id >> TermId.toString)
+    --             |> Set.fromList
+    -- in
+    -- candidateTerms
+    --     |> List.filter
+    --         (\candidateTerm ->
+    --             let
+    --                 candidateTermAsWord : Regex.Regex
+    --                 candidateTermAsWord =
+    --                     ("(\\b| )" ++ Extras.Regex.escapeStringForUseInRegex (String.toLower (Term.raw candidateTerm)) ++ "(\\b| )")
+    --                         |> Regex.fromString
+    --                         |> Maybe.withDefault Regex.never
+    --             in
+    --             Set.member (Term.id candidateTerm |> TermId.toString) preferredTermIdsOfItemsListingThisItemAsRelated
+    --                 || Regex.contains candidateTermAsWord definitionFieldBody
+    --         )
+    []
 
 
 toggleNeedsUpdating : GlossaryItemForm -> GlossaryItemForm

@@ -4,13 +4,14 @@ import Accessibility exposing (Html, div, span, text)
 import Accessibility.Aria
 import Accessibility.Key
 import Components.Button
-import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.TagInItem as TagInItem exposing (TagInItem)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import ElementIds
@@ -32,9 +33,9 @@ type Style msg
         , onClickViewFull : msg
         , onClickEdit : msg
         , onClickDelete : msg
-        , onClickItem : GlossaryItemIndex -> msg
+        , onClickItem : GlossaryItemId -> msg
         , onClickTag : Tag -> msg
-        , onClickRelatedTerm : RelatedTerm -> msg
+        , onClickRelatedTerm : Term -> msg
         , editable : Bool
         , shownAsSingle : Bool
         }
@@ -52,35 +53,35 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
     Extras.Html.showMaybe
         (\( index, glossaryItem ) ->
             let
-                preferredTerm : Term
-                preferredTerm =
-                    GlossaryItem.preferredTerm glossaryItem
+                disambiguatedPreferredTerm : Term
+                disambiguatedPreferredTerm =
+                    GlossaryItemForHtml.disambiguatedPreferredTerm glossaryItem
 
                 alternativeTerms : List Term
                 alternativeTerms =
-                    GlossaryItem.alternativeTerms glossaryItem
+                    GlossaryItemForHtml.alternativeTerms glossaryItem
 
                 tags : List Tag
                 tags =
-                    GlossaryItem.tags glossaryItem
+                    GlossaryItemForHtml.allTags glossaryItem
 
                 itemHasSomeDefinitions : Bool
                 itemHasSomeDefinitions =
-                    GlossaryItem.hasADefinition glossaryItem
+                    GlossaryItemForHtml.definition glossaryItem /= Nothing
 
                 definitions =
-                    GlossaryItem.definition glossaryItem
+                    GlossaryItemForHtml.definition glossaryItem
                         |> Maybe.map List.singleton
                         |> Maybe.withDefault []
 
                 relatedTerms =
-                    GlossaryItem.relatedPreferredTerms glossaryItem
+                    GlossaryItemForHtml.relatedPreferredTerms glossaryItem
 
                 needsUpdating =
-                    GlossaryItem.needsUpdating glossaryItem
+                    GlossaryItemForHtml.needsUpdating glossaryItem
 
                 lastUpdatedDate =
-                    GlossaryItem.lastUpdatedDate glossaryItem
+                    GlossaryItemForHtml.lastUpdatedDateAsIso8601 glossaryItem
             in
             case style of
                 Preview ->
@@ -97,7 +98,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                             , showSilcrow = False
                             , isPreferred = True
                             }
-                            preferredTerm
+                            disambiguatedPreferredTerm
                             :: List.map
                                 (viewGlossaryTerm
                                     { enableMathSupport = enableMathSupport
@@ -107,7 +108,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                     }
                                 )
                                 alternativeTerms
-                            ++ (if GlossaryItem.needsUpdating glossaryItem then
+                            ++ (if needsUpdating then
                                     [ Html.dd
                                         [ class "needs-updating" ]
                                         [ span
@@ -188,7 +189,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                         , showSilcrow = True
                                         , isPreferred = True
                                         }
-                                        preferredTerm
+                                        disambiguatedPreferredTerm
                                         :: List.map
                                             (viewGlossaryTerm
                                                 { enableMathSupport = enableMathSupport
@@ -300,7 +301,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                         , showSilcrow = True
                                         , isPreferred = True
                                         }
-                                        preferredTerm
+                                        disambiguatedPreferredTerm
                                         :: List.map
                                             (viewGlossaryTerm
                                                 { enableMathSupport = enableMathSupport
@@ -364,18 +365,18 @@ viewAsSingle :
     { enableMathSupport : Bool
     , makeLinksTabbable : Bool
     , enableLastUpdatedDates : Bool
-    , onClickItem : GlossaryItemIndex -> msg
-    , onClickRelatedTerm : RelatedTerm -> msg
+    , onClickItem : GlossaryItemId -> msg
+    , onClickRelatedTerm : Term -> msg
     }
     -> GlossaryItemWithPreviousAndNext
     -> Html msg
 viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRelatedTerm } glossaryItemWithPreviousAndNext =
     let
-        preferredTermForPreviousOrNext : GlossaryItem.GlossaryItem -> Html msg
-        preferredTermForPreviousOrNext glossaryItem =
+        disambiguatedPreferredTermForPreviousOrNext : GlossaryItemForHtml -> Html msg
+        disambiguatedPreferredTermForPreviousOrNext glossaryItem =
             let
                 preferredTerm =
-                    GlossaryItem.preferredTerm glossaryItem
+                    GlossaryItemForHtml.disambiguatedPreferredTerm glossaryItem
             in
             if Term.isAbbreviation preferredTerm then
                 Html.abbr []
@@ -393,29 +394,29 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
     Extras.Html.showMaybe
         (\( _, glossaryItem ) ->
             let
-                preferredTerm =
-                    GlossaryItem.preferredTerm glossaryItem
+                disambiguatedPreferredTerm =
+                    GlossaryItemForHtml.disambiguatedPreferredTerm glossaryItem
 
                 alternativeTerms =
-                    GlossaryItem.alternativeTerms glossaryItem
+                    GlossaryItemForHtml.alternativeTerms glossaryItem
 
                 tags : List Tag
                 tags =
-                    GlossaryItem.tags glossaryItem
+                    GlossaryItemForHtml.allTags glossaryItem
 
                 definitions =
-                    GlossaryItem.definition glossaryItem
+                    GlossaryItemForHtml.definition glossaryItem
                         |> Maybe.map List.singleton
                         |> Maybe.withDefault []
 
                 relatedTerms =
-                    GlossaryItem.relatedPreferredTerms glossaryItem
+                    GlossaryItemForHtml.relatedPreferredTerms glossaryItem
 
                 needsUpdating =
-                    GlossaryItem.needsUpdating glossaryItem
+                    GlossaryItemForHtml.needsUpdating glossaryItem
 
                 lastUpdatedDate =
-                    GlossaryItem.lastUpdatedDate glossaryItem
+                    GlossaryItemForHtml.lastUpdatedDateAsIso8601 glossaryItem
             in
             Html.div []
                 [ Html.nav
@@ -432,7 +433,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                                         [ Svg.Attributes.class "h-5 w-5 shrink-0" ]
                                     , span
                                         [ class "font-medium" ]
-                                        [ preferredTermForPreviousOrNext previousItem ]
+                                        [ disambiguatedPreferredTermForPreviousOrNext previousItem ]
                                     ]
                             )
                             glossaryItemWithPreviousAndNext.previous
@@ -445,7 +446,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                             , showSilcrow = False
                             , isPreferred = True
                             }
-                            preferredTerm
+                            disambiguatedPreferredTerm
                             :: List.map
                                 (viewGlossaryTerm
                                     { enableMathSupport = enableMathSupport
@@ -464,7 +465,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                                     [ Html.Events.onClick <| onClickItem nextItemIndex ]
                                     [ span
                                         [ class "font-medium" ]
-                                        [ preferredTermForPreviousOrNext nextItem ]
+                                        [ disambiguatedPreferredTermForPreviousOrNext nextItem ]
                                     , Icons.arrowLongRight
                                         [ Svg.Attributes.class "h-5 w-5 shrink-0" ]
                                     ]
@@ -480,7 +481,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                         , showSilcrow = False
                         , isPreferred = True
                         }
-                        preferredTerm
+                        disambiguatedPreferredTerm
                         :: List.map
                             (viewGlossaryTerm
                                 { enableMathSupport = enableMathSupport
@@ -521,7 +522,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                             enableMathSupport
                             False
                             True
-                            (GlossaryItem.hasADefinition glossaryItem)
+                            (GlossaryItemForHtml.definition glossaryItem /= Nothing)
                             (Just onClickRelatedTerm)
                             relatedTerms
                     )
@@ -622,7 +623,7 @@ viewGlossaryItemDefinition { enableMathSupport, tabbable } definition =
         ]
 
 
-viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Bool -> Maybe (RelatedTerm -> msg) -> List RelatedTerm -> List (Html msg)
+viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Bool -> Maybe (Term -> msg) -> List Term -> List (Html msg)
 viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDefinitions onClick relatedTerms =
     if List.isEmpty relatedTerms then
         []
@@ -645,7 +646,7 @@ viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDefin
                                         "#"
 
                                        else
-                                        relatedTerm |> RelatedTerm.idReference |> TermId.toString |> fragmentOnly
+                                        relatedTerm |> Term.id |> TermId.toString |> fragmentOnly
                                       )
                                         |> Html.Attributes.href
                                     , Accessibility.Key.tabbable tabbable
@@ -655,7 +656,7 @@ viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDefin
                                         )
                                         onClick
                                     ]
-                                    [ RelatedTerm.view enableMathSupport relatedTerm ]
+                                    [ Term.view enableMathSupport [] relatedTerm ]
                             )
                         |> List.intersperse (text ", ")
                    )

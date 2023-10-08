@@ -24,6 +24,7 @@ import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemIndex as GlossaryItemIndex
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
+import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.Saving exposing (Saving(..))
@@ -89,67 +90,54 @@ type alias Msg =
 
 init : CommonModel -> ( Model, Cmd Msg )
 init commonModel =
-    case commonModel.glossary of
-        Ok { items, tags } ->
+    case commonModel.incubatingGlossary of
+        Ok { items } ->
             let
+                tags : List Tag
+                tags =
+                    IncubatingGlossaryItems.tags items
+
                 existingTerms : List Term
                 existingTerms =
-                    GlossaryItems.terms items
+                    -- TODO: should this be all terms, with the preferred ones disambiguated?
+                    IncubatingGlossaryItems.disambiguatedPreferredTerms items
 
-                existingPreferredTerms : List Term
-                existingPreferredTerms =
-                    GlossaryItems.preferredTerms items
+                existingDisambiguatedPreferredTerms : List Term
+                existingDisambiguatedPreferredTerms =
+                    IncubatingGlossaryItems.disambiguatedPreferredTerms items
 
-                itemsListingThisItemAsRelated : List GlossaryItem
-                itemsListingThisItemAsRelated =
-                    commonModel.maybeIndex
-                        |> Maybe.andThen
-                            (\index ->
+                preferredTermsOfItemsListingThisItemAsRelated : List Term
+                preferredTermsOfItemsListingThisItemAsRelated =
+                    commonModel.maybeId
+                        |> Maybe.map
+                            (\id ->
                                 items
-                                    |> GlossaryItems.get index
-                                    |> Maybe.map
-                                        (\itemBeingEdited ->
-                                            let
-                                                preferredTermIdOfItemBeingEdited =
-                                                    itemBeingEdited
-                                                        |> GlossaryItem.preferredTerm
-                                                        |> Term.id
-                                            in
-                                            GlossaryItems.orderedAlphabetically items
-                                                |> Array.toList
-                                                |> List.map Tuple.second
-                                                |> List.filter
-                                                    (\item ->
-                                                        item
-                                                            |> GlossaryItem.relatedPreferredTerms
-                                                            |> List.any
-                                                                (RelatedTerm.idReference
-                                                                    >> (==) preferredTermIdOfItemBeingEdited
-                                                                )
-                                                    )
-                                        )
+                                    |> IncubatingGlossaryItems.relatedForWhichItems id
+                                    |> List.filterMap (\id_ -> IncubatingGlossaryItems.disambiguatedPreferredTerm id_ items)
                             )
                         |> Maybe.withDefault []
 
                 emptyForm : GlossaryItemForm
                 emptyForm =
-                    Form.empty existingTerms existingPreferredTerms tags itemsListingThisItemAsRelated
+                    Form.empty existingTerms existingDisambiguatedPreferredTerms tags preferredTermsOfItemsListingThisItemAsRelated
 
                 form =
                     Maybe.map
-                        (\index ->
+                        (\id ->
                             items
-                                |> GlossaryItems.get index
+                                |> IncubatingGlossaryItems.get id
                                 |> Maybe.map
                                     (Form.fromGlossaryItem
                                         existingTerms
-                                        existingPreferredTerms
+                                        existingDisambiguatedPreferredTerms
                                         tags
-                                        itemsListingThisItemAsRelated
+                                        preferredTermsOfItemsListingThisItemAsRelated
+                                        -- TODO
+                                        []
                                     )
                                 |> Maybe.withDefault emptyForm
                         )
-                        commonModel.maybeIndex
+                        commonModel.maybeId
                         |> Maybe.withDefault emptyForm
             in
             ( { common = commonModel
@@ -159,7 +147,7 @@ init commonModel =
               , dropdownMenusWithMoreOptionsForRelatedTerms =
                     dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
-            , if commonModel.maybeIndex == Nothing then
+            , if commonModel.maybeId == Nothing then
                 0 |> TermIndex.fromInt |> giveFocusToTermInputField
 
               else
@@ -357,35 +345,40 @@ update msg model =
 
                     else
                         let
-                            newOrUpdatedGlossaryItem : GlossaryItem
-                            newOrUpdatedGlossaryItem =
-                                Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form <| Just dateTime
-
+                            -- newOrUpdatedGlossaryItem : GlossaryItem
+                            -- newOrUpdatedGlossaryItem =
+                            --     Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form <| Just dateTime
                             common : CommonModel
                             common =
                                 model.common
 
-                            ( updatedGlossaryItems, maybeIndex ) =
-                                case common.maybeIndex of
-                                    Just index ->
-                                        ( GlossaryItems.update index newOrUpdatedGlossaryItem glossary.items
-                                        , Just index
+                            ( updatedGlossaryItems, maybeId ) =
+                                case common.maybeId of
+                                    Just id ->
+                                        ( -- GlossaryItems.update id newOrUpdatedGlossaryItem glossary.items
+                                          -- TODO
+                                          glossary.items
+                                        , Just id
                                         )
 
                                     Nothing ->
-                                        let
-                                            updated : GlossaryItems
-                                            updated =
-                                                GlossaryItems.insert newOrUpdatedGlossaryItem glossary.items
-                                        in
-                                        ( updated
+                                        -- let
+                                        --     updated : GlossaryItems
+                                        --     updated =
+                                        --         GlossaryItems.insert newOrUpdatedGlossaryItem glossary.items
+                                        -- in
+                                        ( glossary.items
+                                          -- TODO
+                                          -- updated
                                         , -- Find index of newly inserted item
-                                          updated
-                                            |> GlossaryItems.orderedAlphabetically
-                                            |> Array.toList
-                                            |> List.filter (Tuple.second >> (==) newOrUpdatedGlossaryItem)
-                                            |> List.head
-                                            |> Maybe.map Tuple.first
+                                          -- TODO
+                                          --   updated
+                                          --     |> GlossaryItems.orderedAlphabetically
+                                          --     |> Array.toList
+                                          --     |> List.filter (Tuple.second >> (==) newOrUpdatedGlossaryItem)
+                                          --     |> List.head
+                                          --     |> Maybe.map Tuple.first
+                                          Nothing
                                         )
 
                             updatedGlossaryItemsWithFocusedOn =
@@ -402,7 +395,7 @@ update msg model =
                                     | common =
                                         { common
                                             | glossary = Ok <| { glossary | items = updatedGlossaryItemsWithFocusedOn }
-                                            , maybeIndex = maybeIndex
+                                            , maybeId = maybeId
                                         }
                                     , saving = SavingInProgress
                                 }
@@ -1048,15 +1041,17 @@ view model =
 
                 relatedTerms : Array Form.RelatedTermField
                 relatedTerms =
-                    Form.relatedTermFields model.form
+                    -- TODO
+                    -- Form.relatedTermFields model.form
+                    Array.empty
 
                 suggestedRelatedTerms : List Term
                 suggestedRelatedTerms =
                     Form.suggestRelatedTerms model.form
 
-                newOrUpdatedGlossaryItem : GlossaryItem
-                newOrUpdatedGlossaryItem =
-                    Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form Nothing
+                -- newOrUpdatedGlossaryItem : GlossaryItem
+                -- newOrUpdatedGlossaryItem =
+                --     Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form Nothing
             in
             { title = GlossaryTitle.inlineText glossary.title
             , body =
@@ -1067,7 +1062,7 @@ view model =
                         [ h1
                             [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
                             [ text <|
-                                if model.common.maybeIndex == Nothing then
+                                if model.common.maybeId == Nothing then
                                     "Create a New Glossary Item"
 
                                 else
@@ -1113,8 +1108,13 @@ view model =
                                                 [ Components.GlossaryItemCard.view
                                                     { enableMathSupport = glossary.enableMathSupport, makeLinksTabbable = True, enableLastUpdatedDates = False }
                                                     Components.GlossaryItemCard.Preview
+                                                    -- TODO
+                                                    -- { previous = Nothing
+                                                    -- , item = Just ( GlossaryItemIndex.fromInt -1, newOrUpdatedGlossaryItem )
+                                                    -- , next = Nothing
+                                                    -- }
                                                     { previous = Nothing
-                                                    , item = Just ( GlossaryItemIndex.fromInt -1, newOrUpdatedGlossaryItem )
+                                                    , item = Nothing
                                                     , next = Nothing
                                                     }
                                                 ]
