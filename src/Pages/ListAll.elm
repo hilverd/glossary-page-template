@@ -474,7 +474,7 @@ update msg model =
                     case model.common.incubatingGlossary of
                         Ok glossary ->
                             glossary.items
-                                |> IncubatingGlossaryItems.itemIdFromPreferredTermId (Term.id relatedTerm)
+                                |> IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId (Term.id relatedTerm)
                                 |> Maybe.map
                                     (\index ->
                                         { model
@@ -630,14 +630,19 @@ update msg model =
                             model.mostRecentTermIdForOrderingItemsFocusedOn
 
                 common1 =
-                    case ( orderItemsBy, common.glossary ) of
+                    case ( orderItemsBy, common.incubatingGlossary ) of
                         ( FocusedOn termId, Ok glossary ) ->
-                            -- TODO: change incubating items instead
                             let
-                                glossary1 =
-                                    { glossary | items = GlossaryItems.enableFocusingOn termId glossary.items }
+                                glosssaryItems_ =
+                                    glossary.items
+                                        |> IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId termId
+                                        |> Maybe.map
+                                            (\itemId ->
+                                                IncubatingGlossaryItems.enableFocusingOn itemId glossary.items
+                                            )
+                                        |> Maybe.withDefault glossary.items
                             in
-                            { common | glossary = Ok glossary1 }
+                            { common | incubatingGlossary = Ok { glossary | items = glosssaryItems_ } }
 
                         _ ->
                             common
@@ -2377,7 +2382,7 @@ view model =
 
                                                                 FocusedOn termId ->
                                                                     \items_ ->
-                                                                        IncubatingGlossaryItems.itemIdFromPreferredTermId termId items_
+                                                                        IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId termId items_
                                                                             |> Maybe.andThen
                                                                                 (\itemId -> IncubatingGlossaryItems.orderedFocusedOn itemId items_)
                                                                             |> Maybe.withDefault ( [], [] )
@@ -2498,15 +2503,23 @@ view model =
                                                 let
                                                     itemId : Maybe GlossaryItemId
                                                     itemId =
-                                                        IncubatingGlossaryItems.itemIdFromPreferredTermId termId incubatingItems
+                                                        IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId termId incubatingItems
                                                 in
                                                 case itemId of
                                                     Just itemId_ ->
                                                         IncubatingGlossaryItems.orderedFocusedOn itemId_
-                                                            >> Maybe.withDefault ( [], [] )
+                                                            >> Maybe.withDefault
+                                                                (incubatingItems
+                                                                    |> IncubatingGlossaryItems.orderedAlphabetically
+                                                                    |> (\lhs -> ( lhs, [] ))
+                                                                )
 
                                                     Nothing ->
-                                                        always ( [], [] )
+                                                        always
+                                                            (incubatingItems
+                                                                |> IncubatingGlossaryItems.orderedAlphabetically
+                                                                |> (\lhs -> ( lhs, [] ))
+                                                            )
                                        )
                                     |> viewCards
                                         model

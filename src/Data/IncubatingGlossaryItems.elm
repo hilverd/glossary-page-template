@@ -1,9 +1,10 @@
 module Data.IncubatingGlossaryItems exposing
     ( IncubatingGlossaryItems
     , fromList, insertTag, remove
-    , get, tags, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+    , get, tags, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
     , enableFocusingOn
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
+    , itemIdFromDisambiguatedPreferredTermId
     )
 
 {-| The glossary items that make up a glossary.
@@ -64,7 +65,7 @@ type IncubatingGlossaryItems
         , disambiguationTagIdByItemId : GlossaryItemIdDict (Maybe TagId)
         , normalTagIdsByItemId : GlossaryItemIdDict (List TagId)
         , itemIdsByTagId : TagIdDict (List GlossaryItemId)
-        , itemIdByPreferredTermId : Dict String GlossaryItemId
+        , itemIdByDisambiguatedPreferredTermId : Dict String GlossaryItemId
         , relatedItemIdsById : GlossaryItemIdDict (List GlossaryItemId)
         , orderedAlphabetically : List GlossaryItemId
         , orderedByMostMentionedFirst : List GlossaryItemId
@@ -371,7 +372,7 @@ fromList tags_ glossaryItemsForHtml =
         , disambiguationTagIdByItemId = disambiguationTagIdByItemId
         , normalTagIdsByItemId = normalTagIdsByItemId
         , itemIdsByTagId = itemIdsByTagId_
-        , itemIdByPreferredTermId = itemIdByDisambiguatedPreferredTermId_
+        , itemIdByDisambiguatedPreferredTermId = itemIdByDisambiguatedPreferredTermId_
         , relatedItemIdsById = relatedItemIdsById
         , orderedAlphabetically = orderedAlphabetically_
         , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
@@ -577,11 +578,11 @@ disambiguatedPreferredTerms glossaryItems =
 
 {-| Look up the ID of the item whose preferred term has the given ID.
 -}
-itemIdFromPreferredTermId : TermId -> IncubatingGlossaryItems -> Maybe GlossaryItemId
-itemIdFromPreferredTermId termId glossaryItems =
+itemIdFromDisambiguatedPreferredTermId : TermId -> IncubatingGlossaryItems -> Maybe GlossaryItemId
+itemIdFromDisambiguatedPreferredTermId termId glossaryItems =
     case glossaryItems of
         IncubatingGlossaryItems items ->
-            items.itemIdByPreferredTermId
+            items.itemIdByDisambiguatedPreferredTermId
                 |> Dict.get (TermId.toString termId)
 
 
@@ -591,7 +592,7 @@ preferredTermFromId : TermId -> IncubatingGlossaryItems -> Maybe Term
 preferredTermFromId termId glossaryItems =
     case glossaryItems of
         IncubatingGlossaryItems items ->
-            items.itemIdByPreferredTermId
+            items.itemIdByDisambiguatedPreferredTermId
                 |> Dict.get (TermId.toString termId)
                 |> Maybe.andThen
                     (\itemId ->
