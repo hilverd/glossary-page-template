@@ -12,6 +12,7 @@ type alias CommonModel =
     , enableHelpForMakingChanges : Bool
     , theme : Theme
     , enableExportMenu : Bool
+    , enableOrderItemsButtons : Bool
     , enableSavingChangesInMemory : Bool
     , orderItemsBy : OrderItemsBy
     , maybeIndex : Maybe GlossaryItemIndex

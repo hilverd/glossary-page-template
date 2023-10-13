@@ -121,6 +121,12 @@ init flags =
                 |> Decode.decodeValue (Decode.field "enableExportMenu" Decode.bool)
                 |> Result.withDefault True
 
+        enableOrderItemsButtons : Bool
+        enableOrderItemsButtons =
+            flags
+                |> Decode.decodeValue (Decode.field "enableOrderItemsButtons" Decode.bool)
+                |> Result.withDefault True
+
         enableLastUpdatedDates : Bool
         enableLastUpdatedDates =
             flags
@@ -214,6 +220,7 @@ init flags =
                 , enableHelpForMakingChanges = enableHelpForMakingChanges
                 , theme = theme
                 , enableExportMenu = enableExportMenu
+                , enableOrderItemsButtons = enableOrderItemsButtons
                 , enableSavingChangesInMemory = enableSavingChangesInMemory
                 , orderItemsBy = orderItemsBy
                 , maybeIndex = Nothing

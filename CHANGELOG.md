@@ -12,6 +12,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Allow hiding "Order items" buttons in Settings.
+
 ### Changed
 
 - Show terms beginning with 0-9 before those starting with a letter, and group them under "0–9" in the index.

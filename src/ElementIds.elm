@@ -28,6 +28,7 @@ module ElementIds exposing
     , seeAlsoSelect
     , showExportMenuLabel
     , showLastUpdatedDatesLabel
+    , showOrderItemsButtons
     , staticSidebarForDesktop
     , termIndexGroupLabel
     , termInputField
@@ -237,6 +238,11 @@ searchDialog =
 showExportMenuLabel : String
 showExportMenuLabel =
     prefixed "show-export-menu"
+
+
+showOrderItemsButtons : String
+showOrderItemsButtons =
+    prefixed "show-order-items-buttons"
 
 
 showLastUpdatedDatesLabel : String

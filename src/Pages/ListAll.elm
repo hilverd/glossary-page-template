@@ -154,6 +154,7 @@ type InternalMsg
     | ToggleMarkdownBasedSyntax
     | ChangeCardWidth CardWidth
     | ToggleEnableExportMenu
+    | ToggleEnableOrderItemsButtons
     | ToggleEnableLastUpdatedDates
     | ChangedSettings Glossary
     | FailedToChangeSettings Http.Error
@@ -614,6 +615,29 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        ToggleEnableOrderItemsButtons ->
+            case model.common.glossary of
+                Ok glossary ->
+                    let
+                        common0 : CommonModel
+                        common0 =
+                            model.common
+
+                        common1 : CommonModel
+                        common1 =
+                            { common0 | enableOrderItemsButtons = not common0.enableOrderItemsButtons }
+
+                        model1 : Model
+                        model1 =
+                            { model | common = common1 }
+                    in
+                    ( model1
+                    , patchHtmlFileAfterChangingSettings model1.common glossary
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
         ToggleEnableLastUpdatedDates ->
             case model.common.glossary of
                 Ok glossary ->
@@ -713,7 +737,7 @@ patchHtmlFileAfterChangingSettings common glossary =
             , url = "/"
             , body =
                 glossary
-                    |> Glossary.toHtmlTree common.enableExportMenu common.enableHelpForMakingChanges
+                    |> Glossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
                     |> HtmlTree.toHtmlReplacementString
                     |> Http.stringBody "text/html"
             , expect =
@@ -755,7 +779,7 @@ patchHtmlFileAfterDeletingItem common indexOfItemBeingDeleted glossaryItems =
                     , url = "/"
                     , body =
                         glossary
-                            |> Glossary.toHtmlTree common.enableExportMenu common.enableHelpForMakingChanges
+                            |> Glossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
                             |> HtmlTree.toHtmlReplacementString
                             |> Http.stringBody "text/html"
                     , expect =
@@ -927,6 +951,17 @@ viewSettings glossary model =
                     [ span
                         [ class "font-medium text-gray-900 dark:text-gray-300" ]
                         [ text "Show \"Export\" menu" ]
+                    ]
+                ]
+            , div
+                [ class "mt-6 pb-2" ]
+                [ Components.Button.toggle
+                    model.common.enableOrderItemsButtons
+                    ElementIds.showOrderItemsButtons
+                    [ Html.Events.onClick <| PageMsg.Internal ToggleEnableOrderItemsButtons ]
+                    [ span
+                        [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                        [ text "Show \"Order items\" buttons" ]
                     ]
                 ]
             , div
@@ -1298,7 +1333,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
     Html.article
         [ Html.Attributes.id ElementIds.items ]
         [ div
-            [ class "pt-2 border-t border-gray-300 dark:border-gray-700" ]
+            [ Extras.HtmlAttribute.showIf model.common.enableOrderItemsButtons <| class "mt-3 pt-2 border-t border-gray-300 dark:border-gray-700" ]
             [ Extras.Html.showIf editable <|
                 div
                     [ class "pt-2" ]
@@ -1313,7 +1348,11 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             viewCurrentTopicFilter tabbable
         , Extras.Html.showIf enableTopicsFeature <|
             viewAllTopicFilters tabbable
-        , Extras.Html.showIf (not <| Array.isEmpty combinedGlossaryItems) <|
+        , Extras.Html.showIf
+            (model.common.enableOrderItemsButtons
+                && (not <| Array.isEmpty combinedGlossaryItems)
+            )
+          <|
             viewOrderItemsBy
                 model
                 (Array.length combinedGlossaryItems)
@@ -1321,7 +1360,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                 primaryTermsWithDefinitions
                 orderItemsFocusedOnTerm
         , Html.dl
-            []
+            [ class "mt-4" ]
             (indexedGlossaryItems
                 |> Array.toList
                 |> List.map viewIndexedItem
@@ -1900,7 +1939,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport primaryTermsWithDefinitio
             noModalDialogShown model
     in
     div
-        [ class "print:hidden pt-4 pb-6" ]
+        [ class "print:hidden pt-4 pb-2" ]
         [ label
             [ class "font-medium text-gray-900 dark:text-gray-100" ]
             [ text "Order items"

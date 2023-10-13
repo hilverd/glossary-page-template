@@ -13,6 +13,7 @@ if (containerElement) {
     const enableSavingChangesInMemory = containerDataset.enableSavingChangesInMemory === 'true';
     const enableMarkdownBasedSyntax = containerDataset.enableMarkdownBasedSyntax === 'true';
     const enableExportMenu = containerDataset.enableExportMenu !== 'false';
+    const enableOrderItemsButtons = containerDataset.enableOrderItemsButtons !== 'false';
     const cardWidth = containerDataset.cardWidth;
     const enableLastUpdatedDates = containerDataset.enableLastUpdatedDates === 'true';
     const editorIsRunning = containerDataset.editorIsRunning === 'true';
@@ -107,10 +108,11 @@ if (containerElement) {
             enableHelpForMakingChanges: enableHelpForMakingChanges,
             enableSavingChangesInMemory: enableSavingChangesInMemory,
             enableExportMenu: enableExportMenu,
+            enableOrderItemsButtons: enableOrderItemsButtons,
             enableMarkdownBasedSyntax: enableMarkdownBasedSyntax,
             enableLastUpdatedDates: enableLastUpdatedDates,
             theme: localStorage.glossaryPageTheme || 'system',
-            orderItemsBy: localStorage.orderItemsBy || 'alphabetically',
+            orderItemsBy: (enableOrderItemsButtons && localStorage.orderItemsBy) || 'alphabetically',
             cardWidth: cardWidth,
             katexIsAvailable: katexIsAvailable
         }
