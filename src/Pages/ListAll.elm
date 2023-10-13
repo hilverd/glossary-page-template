@@ -717,27 +717,18 @@ update msg model =
             )
 
         ToggleEnableOrderItemsButtons ->
-            case model.common.glossary of
-                Ok glossary ->
-                    let
-                        common0 : CommonModel
-                        common0 =
-                            model.common
+            let
+                common0 : CommonModel
+                common0 =
+                    model.common
 
-                        common1 : CommonModel
-                        common1 =
-                            { common0 | enableOrderItemsButtons = not common0.enableOrderItemsButtons }
-
-                        model1 : Model
-                        model1 =
-                            { model | common = common1 }
-                    in
-                    ( model1
-                    , patchHtmlFileAfterChangingSettings model1.common glossary
-                    )
-
-                _ ->
-                    ( model, Cmd.none )
+                common1 : CommonModel
+                common1 =
+                    { common0 | enableOrderItemsButtons = not common0.enableOrderItemsButtons }
+            in
+            ( { model | savingSettings = SavingInProgress }
+            , patchHtmlFileAfterChangingSettings common1
+            )
 
         ToggleEnableLastUpdatedDates ->
             case model.common.glossary of
@@ -1086,6 +1077,17 @@ viewSettings glossary model =
                         [ span
                             [ class "font-medium text-gray-900 dark:text-gray-300" ]
                             [ text "Show \"Export\" menu" ]
+                        ]
+                    ]
+                , div
+                    [ class "mt-6 pb-2" ]
+                    [ Components.Button.toggle
+                        model.common.enableOrderItemsButtons
+                        ElementIds.showOrderItemsButtons
+                        [ Html.Events.onClick <| PageMsg.Internal ToggleEnableOrderItemsButtons ]
+                        [ span
+                            [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                            [ text "Show \"Order items\" buttons" ]
                         ]
                     ]
                 , div
@@ -1522,7 +1524,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
     in
     Html.article
         [ Html.Attributes.id ElementIds.items
-        , class "pt-2 border-t border-gray-300 dark:border-gray-700"
+        , Extras.HtmlAttribute.showIf model.common.enableOrderItemsButtons <| class "mt-3 pt-2 border-t border-gray-300 dark:border-gray-700"
         ]
         [ Extras.Html.showMaybe
             (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
@@ -1545,7 +1547,11 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                         viewCreateGlossaryItemButton tabbable model.common
                     ]
             ]
-        , Extras.Html.showIf (not <| List.isEmpty combinedIndexedGlossaryItems) <|
+        , Extras.Html.showIf
+            (model.common.enableOrderItemsButtons
+                && (not <| List.isEmpty combinedIndexedGlossaryItems)
+            )
+          <|
             viewOrderItemsBy
                 model
                 (List.length combinedIndexedGlossaryItems)
@@ -1553,7 +1559,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                 disambiguatedPreferredTermsWithDefinitions
                 orderItemsFocusedOnTerm
         , Html.dl
-            []
+            [ class "mt-4" ]
             (List.map viewIndexedItem indexedGlossaryItems)
         , Extras.Html.showIf
             ((not <| List.isEmpty indexedGlossaryItems)
@@ -2146,7 +2152,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
             noModalDialogShown model
     in
     div
-        [ class "print:hidden pt-4 pb-6" ]
+        [ class "print:hidden pt-4 pb-2" ]
         [ fieldset []
             [ legend
                 [ class "mb-4 font-medium text-gray-900 dark:text-gray-100" ]

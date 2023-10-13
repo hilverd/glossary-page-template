@@ -70,7 +70,7 @@ fromGlossaryItems glossaryItems =
                         |> List.foldl
                             (\preferredTerm result ->
                                 Dict.update
-                                    (Term.indexGroupCharacter preferredTerm)
+                                    (Term.indexGroupString preferredTerm)
                                     (\termList ->
                                         termList
                                             |> Maybe.map (\terms -> PreferredTerm preferredTerm :: terms)
@@ -97,7 +97,7 @@ fromGlossaryItems glossaryItems =
                                 AlternativeTerm alternativeTerm preferredTermsForThisAlternativeTerm
                         in
                         Dict.update
-                            (Term.indexGroupCharacter alternativeTerm)
+                            (Term.indexGroupString alternativeTerm)
                             (\entries ->
                                 entries
                                     |> Maybe.map (\entries_ -> entry :: entries_)
@@ -184,7 +184,7 @@ fromIncubatingGlossaryItems glossaryItems =
                         |> List.foldl
                             (\preferredTerm result ->
                                 Dict.update
-                                    (Term.indexGroupCharacter preferredTerm)
+                                    (Term.indexGroupString preferredTerm)
                                     (\termList ->
                                         termList
                                             |> Maybe.map (\terms -> PreferredTerm preferredTerm :: terms)
@@ -207,7 +207,7 @@ fromIncubatingGlossaryItems glossaryItems =
                                 AlternativeTerm alternativeTerm sortedPreferredTerms
                         in
                         Dict.update
-                            (Term.indexGroupCharacter alternativeTerm)
+                            (Term.indexGroupString alternativeTerm)
                             (\entries ->
                                 entries
                                     |> Maybe.map (\entries_ -> entry :: entries_)

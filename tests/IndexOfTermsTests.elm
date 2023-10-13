@@ -43,12 +43,15 @@ glossaryItems =
 
         thirtyFourty : GlossaryItem
         thirtyFourty =
-            { terms = [ termFromBody "3040" ]
-            , definitions = [ Definition.fromPlaintext "3040" ]
-            , relatedTerms = []
-            , needsUpdating = False
-            , lastUpdatedDate = Nothing
-            }
+            GlossaryItem.init
+                (termFromBody "3040")
+                []
+                Nothing
+                []
+                (Just (Definition.fromPlaintext "3040"))
+                []
+                False
+                Nothing
 
         three : GlossaryItem
         three =
@@ -76,12 +79,15 @@ glossaryItems =
 
         omega : GlossaryItem
         omega =
-            { terms = [ termFromBody "Ω" ]
-            , definitions = [ Definition.fromPlaintext "Ω" ]
-            , relatedTerms = []
-            , needsUpdating = False
-            , lastUpdatedDate = Nothing
-            }
+            GlossaryItem.init
+                (termFromBody "Ω")
+                []
+                Nothing
+                []
+                (Just (Definition.fromPlaintext "Ω"))
+                []
+                False
+                Nothing
 
         future : GlossaryItem
         future =
@@ -107,7 +113,14 @@ suite =
                     |> IndexOfTerms.fromGlossaryItems
                     |> IndexOfTerms.termGroups
                     |> Expect.equal
-                        [ { label = "A", entries = [] }
+                        [ { label = "0–9"
+                          , entries =
+                                [ IndexOfTerms.PreferredTerm <| termFromBody "007"
+                                , IndexOfTerms.PreferredTerm <| termFromBody "3040"
+                                , IndexOfTerms.PreferredTerm <| termFromBody "3Three"
+                                ]
+                          }
+                        , { label = "A", entries = [] }
                         , { label = "B", entries = [] }
                         , { label = "C", entries = [] }
                         , { label = "D", entries = [] }
@@ -126,19 +139,14 @@ suite =
                         , { label = "Q", entries = [] }
                         , { label = "R", entries = [] }
                         , { label = "S", entries = [] }
-                        , { label = "T"
-                          , entries =
-                                [ IndexOfTerms.PreferredTerm <| termFromBody "3Three"
-                                , IndexOfTerms.PreferredTerm <| termFromBody "Two"
-                                ]
-                          }
+                        , { label = "T", entries = [ IndexOfTerms.PreferredTerm <| termFromBody "Two" ] }
                         , { label = "U", entries = [] }
                         , { label = "V", entries = [] }
                         , { label = "W", entries = [] }
                         , { label = "X", entries = [] }
                         , { label = "Y", entries = [] }
                         , { label = "Z", entries = [] }
-                        , { label = "…", entries = [ IndexOfTerms.PreferredTerm <| termFromBody "007" ] }
+                        , { label = "…", entries = [ IndexOfTerms.PreferredTerm <| termFromBody "Ω" ] }
                         ]
         , test "doesn't include ellipsis if not needed" <|
             \_ ->

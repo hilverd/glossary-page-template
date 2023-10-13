@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, updateRaw, htmlTreeForAnki)
+module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki)
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -9,7 +9,7 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, updateRaw, htmlTreeForAnki
+@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki
 
 -}
 

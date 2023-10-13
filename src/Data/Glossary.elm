@@ -27,8 +27,8 @@ type alias Glossary =
 
 {-| Represent these glossary items as an HTML tree, ready for writing back to the glossary's HTML file.
 -}
-toHtmlTree : Bool -> Bool -> Glossary -> HtmlTree
-toHtmlTree enableExportMenu enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, title, aboutSection, enableLastUpdatedDates, tags, items } =
+toHtmlTree : Bool -> Bool -> Bool -> Glossary -> HtmlTree
+toHtmlTree enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, title, aboutSection, enableLastUpdatedDates, tags, items } =
     HtmlTree.Node "div"
         True
         [ HtmlTree.Attribute "id" ElementIds.container
