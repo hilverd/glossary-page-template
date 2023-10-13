@@ -12,15 +12,19 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [3.8.0] - 2023-10-13
+
+### Added
 
 - Allow hiding "Order items" buttons in Settings.
 
 ### Changed
 
 - Show terms beginning with 0-9 before those starting with a letter, and group them under "0–9" in the index.
-
-### Fixed
-### Removed
 
 ## [3.7.0] - 2023-08-19
 
@@ -566,7 +570,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.7.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.8.0...HEAD
+[3.8.0]: https://github.com/hilverd/glossary-page-template/compare/v3.7.0...v3.8.0
 [3.7.0]: https://github.com/hilverd/glossary-page-template/compare/v3.6.1...v3.7.0
 [3.6.1]: https://github.com/hilverd/glossary-page-template/compare/v3.6.0...v3.6.1
 [3.6.0]: https://github.com/hilverd/glossary-page-template/compare/v3.5.2...v3.6.0
