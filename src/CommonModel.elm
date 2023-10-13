@@ -2,9 +2,9 @@ module CommonModel exposing (CommonModel)
 
 import Data.Glossary exposing (Glossary)
 import Data.GlossaryItemId exposing (GlossaryItemId)
-import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.IncubatingGlossary exposing (IncubatingGlossary)
 import Data.OrderItemsBy exposing (OrderItemsBy)
+import Data.TagId exposing (TagId)
 import Data.Theme exposing (Theme)
 import Json.Decode as Decode
 
@@ -16,6 +16,7 @@ type alias CommonModel =
     , enableExportMenu : Bool
     , enableOrderItemsButtons : Bool
     , enableSavingChangesInMemory : Bool
+    , filterByTag : Maybe TagId
     , orderItemsBy : OrderItemsBy
     , maybeId : Maybe GlossaryItemId
     , fragment : Maybe String

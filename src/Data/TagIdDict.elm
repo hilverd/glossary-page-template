@@ -2,7 +2,7 @@ module Data.TagIdDict exposing
     ( TagIdDict
     , empty, insert, update
     , get, nextTagId
-    , values, fromList
+    , values, toList, fromList
     , map, foldl
     )
 
@@ -26,7 +26,7 @@ module Data.TagIdDict exposing
 
 # Lists
 
-@docs values, fromList
+@docs values, toList, fromList
 
 
 # Transform
@@ -108,6 +108,20 @@ values tagIdDict =
     case tagIdDict of
         TagIdDict dict ->
             Dict.values dict
+
+
+{-| Convert a dictionary into an association list of key-value pairs, sorted by keys.
+-}
+toList : TagIdDict v -> List ( TagId, v )
+toList tagIdDict =
+    case tagIdDict of
+        TagIdDict dict ->
+            dict
+                |> Dict.toList
+                |> List.map
+                    (\( tagIdInt, val ) ->
+                        ( TagId.create tagIdInt, val )
+                    )
 
 
 {-| Convert an association list into a dictionary.

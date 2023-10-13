@@ -103,7 +103,7 @@ toHtmlTree enableExportMenu enableHelpForMakingChanges { enableMarkdownBasedSynt
                     True
                     []
                     (items
-                        |> IncubatingGlossaryItems.orderedAlphabetically
+                        |> IncubatingGlossaryItems.orderedAlphabetically Nothing
                         |> List.map (Tuple.second >> GlossaryItemForHtml.toHtmlTree)
                     )
                 ]

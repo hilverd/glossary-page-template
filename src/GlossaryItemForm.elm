@@ -8,7 +8,7 @@ module GlossaryItemForm exposing
     , deleteRelatedTerm
     , deleteTerm
     , empty
-    , fromGlossaryItem
+    , fromGlossaryItemForHtml
     , hasValidationErrors
     , moveRelatedTermDown
     , moveRelatedTermUp
@@ -291,7 +291,7 @@ emptyRelatedTermField =
     }
 
 
-fromGlossaryItem :
+fromGlossaryItemForHtml :
     List Term
     -> List Term
     -> List Tag
@@ -299,7 +299,7 @@ fromGlossaryItem :
     -> List GlossaryItemId
     -> GlossaryItemForHtml
     -> GlossaryItemForm
-fromGlossaryItem existingTerms existingPreferredTerms allTags preferredTermsOfItemsListingThisItemAsRelated_ relatedItemIds item =
+fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTermsOfItemsListingThisItemAsRelated_ relatedItemIds item =
     let
         itemTags : List Tag
         itemTags =

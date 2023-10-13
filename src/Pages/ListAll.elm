@@ -61,6 +61,7 @@ import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (Incubat
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Saving exposing (Saving(..))
+import Data.TagId exposing (TagId)
 import Data.TermIndex exposing (TermIndex)
 import Data.Theme exposing (Theme(..))
 import Dict
@@ -806,20 +807,30 @@ update msg model =
             ( { model | resultOfAttemptingToCopyEditorCommandToClipboard = Nothing }, Cmd.none )
 
         FilterByTag tag ->
-            case model.common.glossary of
-                Ok glossary ->
-                    ( { model
-                        | itemsFilteredByTag =
-                            Just ( tag, GlossaryItems.filterByTag tag glossary.items )
-                      }
-                    , Cmd.none
-                    )
+            let
+                filterByTag : Maybe TagId
+                filterByTag =
+                    case model.common.incubatingGlossary of
+                        Ok glossary ->
+                            glossary.items
+                                |> IncubatingGlossaryItems.tagIdFromTag tag
 
-                _ ->
-                    ( { model | itemsFilteredByTag = Nothing }, Cmd.none )
+                        _ ->
+                            Nothing
+
+                common0 : CommonModel
+                common0 =
+                    model.common
+            in
+            ( { model | common = { common0 | filterByTag = filterByTag } }, Cmd.none )
 
         DoNotFilterByTag ->
-            ( { model | itemsFilteredByTag = Nothing }, Cmd.none )
+            let
+                common0 : CommonModel
+                common0 =
+                    model.common
+            in
+            ( { model | common = { common0 | filterByTag = Nothing } }, Cmd.none )
 
 
 giveFocusToOuter : Cmd Msg
@@ -1521,6 +1532,12 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                 }
                 model
                 { previous = Nothing, item = Just indexedItem, next = Nothing }
+
+        filterByTag : Maybe Tag
+        filterByTag =
+            model.common.filterByTag
+                |> Maybe.andThen
+                    (\tagId -> IncubatingGlossaryItems.tagFromId tagId glossaryItems)
     in
     Html.article
         [ Html.Attributes.id ElementIds.items
@@ -1528,8 +1545,8 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
         ]
         [ Extras.Html.showMaybe
             (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
-            (model.itemsFilteredByTag |> Maybe.map Tuple.first)
-        , Extras.Html.showIf (model.itemsFilteredByTag == Nothing) <|
+            filterByTag
+        , Extras.Html.showIf (filterByTag == Nothing) <|
             viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
         , Extras.Html.showIf (editing model.editability) <|
             div
@@ -2360,6 +2377,11 @@ view model =
                 incubatingIndexOfTerms : IndexOfTerms
                 incubatingIndexOfTerms =
                     IndexOfTerms.fromIncubatingGlossaryItems incubatingItems
+
+                filterByTag : Maybe TagId
+                -- TODO
+                filterByTag =
+                    model.common.filterByTag
             in
             { title = GlossaryTitle.inlineText glossary.title
             , body =
@@ -2405,16 +2427,16 @@ view model =
                                                     incubatingItems
                                                         |> (case model.common.orderItemsBy of
                                                                 Alphabetically ->
-                                                                    IncubatingGlossaryItems.orderedAlphabetically
+                                                                    IncubatingGlossaryItems.orderedAlphabetically filterByTag
 
                                                                 MostMentionedFirst ->
-                                                                    IncubatingGlossaryItems.orderedByMostMentionedFirst
+                                                                    IncubatingGlossaryItems.orderedByMostMentionedFirst filterByTag
 
                                                                 FocusedOn termId ->
                                                                     \items_ ->
                                                                         IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId termId items_
                                                                             |> Maybe.andThen
-                                                                                (\itemId -> IncubatingGlossaryItems.orderedFocusedOn itemId items_)
+                                                                                (\itemId -> IncubatingGlossaryItems.orderedFocusedOn filterByTag itemId items_)
                                                                             |> Maybe.withDefault ( [], [] )
                                                                             |> (\( lhs, rhs ) -> List.append lhs rhs)
                                                            )
@@ -2522,11 +2544,11 @@ view model =
                                 , incubatingItems
                                     |> (case model.common.orderItemsBy of
                                             Alphabetically ->
-                                                IncubatingGlossaryItems.orderedAlphabetically
+                                                IncubatingGlossaryItems.orderedAlphabetically filterByTag
                                                     >> (\lhs -> ( lhs, [] ))
 
                                             MostMentionedFirst ->
-                                                IncubatingGlossaryItems.orderedByMostMentionedFirst
+                                                IncubatingGlossaryItems.orderedByMostMentionedFirst filterByTag
                                                     >> (\lhs -> ( lhs, [] ))
 
                                             FocusedOn termId ->
@@ -2537,17 +2559,17 @@ view model =
                                                 in
                                                 case itemId of
                                                     Just itemId_ ->
-                                                        IncubatingGlossaryItems.orderedFocusedOn itemId_
+                                                        IncubatingGlossaryItems.orderedFocusedOn filterByTag itemId_
                                                             >> Maybe.withDefault
                                                                 (incubatingItems
-                                                                    |> IncubatingGlossaryItems.orderedAlphabetically
+                                                                    |> IncubatingGlossaryItems.orderedAlphabetically filterByTag
                                                                     |> (\lhs -> ( lhs, [] ))
                                                                 )
 
                                                     Nothing ->
                                                         always
                                                             (incubatingItems
-                                                                |> IncubatingGlossaryItems.orderedAlphabetically
+                                                                |> IncubatingGlossaryItems.orderedAlphabetically filterByTag
                                                                 |> (\lhs -> ( lhs, [] ))
                                                             )
                                        )

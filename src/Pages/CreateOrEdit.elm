@@ -127,7 +127,7 @@ init commonModel =
                             items
                                 |> IncubatingGlossaryItems.get id
                                 |> Maybe.map
-                                    (Form.fromGlossaryItem
+                                    (Form.fromGlossaryItemForHtml
                                         existingTerms
                                         existingDisambiguatedPreferredTerms
                                         tags

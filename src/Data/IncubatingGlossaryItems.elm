@@ -1,7 +1,7 @@
 module Data.IncubatingGlossaryItems exposing
     ( IncubatingGlossaryItems
     , fromList, insertTag, remove
-    , get, tags, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+    , get, tags, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
     , enableFocusingOn
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     , itemIdFromDisambiguatedPreferredTermId
@@ -22,7 +22,7 @@ module Data.IncubatingGlossaryItems exposing
 
 # Query
 
-@docs get, tags, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+@docs get, tags, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
 
 
 # Prepare to Export
@@ -52,7 +52,7 @@ import DirectedGraph exposing (DirectedGraph)
 import Extras.Regex
 import Maybe
 import Regex
-import Set
+import Set exposing (Set)
 
 
 {-| A set of glossary items.
@@ -515,6 +515,21 @@ tags glossaryItems =
             TagIdDict.values items.tagById
 
 
+tagIdFromTag : Tag -> IncubatingGlossaryItems -> Maybe TagId
+tagIdFromTag tag glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            Dict.get (Tag.raw tag) items.tagIdByRawTag
+
+
+tagFromId : TagId -> IncubatingGlossaryItems -> Maybe Tag
+tagFromId tagId glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            items.tagById
+                |> TagIdDict.get tagId
+
+
 {-| The disambiguated preferred term for the given item with given ID.
 -}
 disambiguatedPreferredTerm : GlossaryItemId -> IncubatingGlossaryItems -> Maybe Term
@@ -738,52 +753,80 @@ enableFocusingOn itemId glossaryItems =
                 }
 
 
-toList : IncubatingGlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml )
-toList glossaryItems =
-    List.filterMap
-        (\itemId ->
-            glossaryItems
-                |> get itemId
-                |> Maybe.map (Tuple.pair itemId)
-        )
+toList : Maybe TagId -> IncubatingGlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml )
+toList filterByTagId glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            let
+                itemIdsMatchingTagFilter : Maybe (Set Int)
+                itemIdsMatchingTagFilter =
+                    filterByTagId
+                        |> Maybe.andThen
+                            (\tagId ->
+                                items.itemIdsByTagId
+                                    |> TagIdDict.get tagId
+                                    |> Maybe.map (List.map GlossaryItemId.toInt >> Set.fromList)
+                            )
+            in
+            List.filterMap
+                (\itemId ->
+                    glossaryItems
+                        |> get itemId
+                        |> Maybe.andThen
+                            (\glossaryItemForHtml ->
+                                if
+                                    itemIdsMatchingTagFilter
+                                        |> Maybe.map (Set.member (GlossaryItemId.toInt itemId))
+                                        |> Maybe.withDefault True
+                                then
+                                    Just <| Tuple.pair itemId glossaryItemForHtml
+
+                                else
+                                    Nothing
+                            )
+                )
 
 
 {-| Retrieve the glossary items ordered alphabetically.
 -}
-orderedAlphabetically : IncubatingGlossaryItems -> List ( GlossaryItemId, GlossaryItemForHtml )
-orderedAlphabetically glossaryItems =
+orderedAlphabetically : Maybe TagId -> IncubatingGlossaryItems -> List ( GlossaryItemId, GlossaryItemForHtml )
+orderedAlphabetically filterByTagId glossaryItems =
     case glossaryItems of
         IncubatingGlossaryItems items ->
-            toList glossaryItems items.orderedAlphabetically
+            toList filterByTagId glossaryItems items.orderedAlphabetically
 
 
 {-| Retrieve the glossary items ordered by most mentioned first.
 -}
-orderedByMostMentionedFirst : IncubatingGlossaryItems -> List ( GlossaryItemId, GlossaryItemForHtml )
-orderedByMostMentionedFirst glossaryItems =
+orderedByMostMentionedFirst : Maybe TagId -> IncubatingGlossaryItems -> List ( GlossaryItemId, GlossaryItemForHtml )
+orderedByMostMentionedFirst filterByTagId glossaryItems =
     case glossaryItems of
         IncubatingGlossaryItems items ->
-            toList glossaryItems items.orderedByMostMentionedFirst
+            toList filterByTagId glossaryItems items.orderedByMostMentionedFirst
 
 
 {-| Retrieve the glossary items ordered "focused on" a specific item.
 -}
 orderedFocusedOn :
-    GlossaryItemId
+    Maybe TagId
+    -> GlossaryItemId
     -> IncubatingGlossaryItems
     ->
         Maybe
             ( List ( GlossaryItemId, GlossaryItemForHtml )
             , List ( GlossaryItemId, GlossaryItemForHtml )
             )
-orderedFocusedOn glossaryItemId glossaryItems =
+orderedFocusedOn filterByTagId glossaryItemId glossaryItems =
     case glossaryItems of
         IncubatingGlossaryItems items ->
             items.orderedFocusedOn
                 |> Maybe.andThen
                     (\( itemIdFocusedOn, ( ids, otherIds ) ) ->
                         if itemIdFocusedOn == glossaryItemId then
-                            Just ( toList glossaryItems ids, toList glossaryItems otherIds )
+                            Just
+                                ( toList filterByTagId glossaryItems ids
+                                , toList filterByTagId glossaryItems otherIds
+                                )
 
                         else
                             Nothing

@@ -298,6 +298,7 @@ init flags =
                 , enableExportMenu = enableExportMenu
                 , enableOrderItemsButtons = enableOrderItemsButtons
                 , enableSavingChangesInMemory = enableSavingChangesInMemory
+                , filterByTag = Nothing
                 , orderItemsBy = orderItemsBy
                 , maybeId = Nothing
                 , fragment = fragment
