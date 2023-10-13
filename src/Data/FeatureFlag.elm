@@ -1,11 +1,6 @@
-module Data.FeatureFlag exposing (enableFeaturesInProgress, enableTopicsFeature)
+module Data.FeatureFlag exposing (enableFeaturesInProgress)
 
 
 enableFeaturesInProgress : Bool
 enableFeaturesInProgress =
-    False
-
-
-enableTopicsFeature : Bool
-enableTopicsFeature =
     False

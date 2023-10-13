@@ -13,7 +13,7 @@ This project makes it easy to create a glossary as a single HTML page that can b
 
 ## Features
 
-* Includes integrated (single-user) editor UI that saves changes back to the HTML file.
+* Includes integrated (single-user) editor UI that saves changes back to the HTML file — requires [Node.js](https://nodejs.org).
 * Represents a glossary as a standard [`dl`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dl) element for accessibility and portability.
 * Supports different screen sizes using responsive design and includes dark mode support.
 * Write in either plain text or a Markdown-based syntax.
@@ -25,18 +25,18 @@ Download `glossary.html` from the [latest release](https://github.com/hilverd/gl
 
 ### Static assets
 
-The `glossary.html` file points to `glstatic.net` for static assets hosted using Cloudflare:
+The HTML file points to `glstatic.net` for static assets hosted using Cloudflare:
 
 ```
 https://glstatic.net/glossary-page-template@3/glossary.min.js
 https://glstatic.net/glossary-page-template@3/glossary.min.css
 ```
 
-These files are cached for 24 hours and get updated with any releases with a [major version number](https://semver.org/) of `3`. Alternatively you can change the URL to point to e.g. `@3.5` which gets all patch releases with version numbers of the form `3.5.x`. You can also use a specific version such as `3.5.1` -- these are cached forever.
+The above assets are cached for 24 hours and get updated with any releases with a [major version number](https://semver.org/) of `3`. Alternatively you can change the URL to point to e.g. `@3.5` which gets all patch releases with version numbers of the form `3.5.x`. You can also use a specific version such as `3.5.1` — these are cached forever.
 
 #### Security considerations
 
-The [safest option](https://css-tricks.com/potential-dangers-of-third-party-javascript/) would be to either host the static assets yourself or use [Subresource Integrity](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity) (SRI) by specifying hashes for the static assets.
+The approach above is the easiest one, but the [safest option](https://css-tricks.com/potential-dangers-of-third-party-javascript/) would be to either host the static assets yourself and/or use [Subresource Integrity](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity) (SRI) by specifying hashes for the static assets.
 
 To host the static assets yourself, you can get them from the `.tar.gz` package in a release, which also contains a glossary template file that uses them.
 
@@ -48,6 +48,16 @@ To use SRI, change the two lines at the end of the `<head>` element so they
 
 You can get the `hash-here` values from the [release notes](https://github.com/hilverd/glossary-page-template/releases/latest).
 
-## Limitations
+### Known limitations
 
 * The integrated editor UI is meant to be run and used by a single local user only. It is not designed to be exposed to untrusted users.
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## Acknowledgments
+
+This project is mainly written in [Elm](https://elm-lang.org/) and relies on [elm-markdown](https://github.com/dillonkearns/elm-markdown) for parsing and rendering Markdown. The UI is based on components from [Tailwind UI](https://tailwindui.com/). Most icons are from either [Heroicons](https://heroicons.com/) or [Lucide](https://lucide.dev/).
+
+Thanks to everyone who contributed suggestions for improvements.

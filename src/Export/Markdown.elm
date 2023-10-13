@@ -10,7 +10,7 @@ import Array
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
-import Data.GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term
@@ -57,13 +57,22 @@ paragraphs =
 
 
 itemToMarkdown : GlossaryItem -> String
-itemToMarkdown { terms, definitions, relatedTerms } =
+itemToMarkdown glossaryItem =
     let
         termsString : String
         termsString =
-            terms
+            glossaryItem
+                |> GlossaryItem.allTerms
                 |> List.map (Term.markdown >> bold)
                 |> lines
+
+        definitions =
+            GlossaryItem.definition glossaryItem
+                |> Maybe.map List.singleton
+                |> Maybe.withDefault []
+
+        relatedTerms =
+            GlossaryItem.relatedPreferredTerms glossaryItem
 
         definitionsString : String
         definitionsString =

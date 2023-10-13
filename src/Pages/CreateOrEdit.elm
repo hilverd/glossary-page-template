@@ -14,22 +14,25 @@ import Components.DropdownMenu
 import Components.Form
 import Components.GlossaryItemCard
 import Components.SelectMenu
-import Data.DefinitionIndex as DefinitionIndex exposing (DefinitionIndex)
-import Data.FeatureFlag exposing (enableTopicsFeature)
+import Components.Spinner
 import Data.Glossary as Glossary
-import Data.GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
+import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemIndex as GlossaryItemIndex
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
+import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
+import Data.Saving exposing (Saving(..))
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import Dict exposing (Dict)
 import ElementIds
 import Extras.Html
+import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree
 import Extras.Http
@@ -56,7 +59,7 @@ type alias Model =
     { common : CommonModel
     , form : GlossaryItemForm
     , triedToSaveWhenFormInvalid : Bool
-    , errorMessageWhileSaving : Maybe String
+    , saving : Saving
     , dropdownMenusWithMoreOptionsForRelatedTerms : Dict Int Components.DropdownMenu.Model
     }
 
@@ -67,9 +70,8 @@ type InternalMsg
     | DeleteTerm TermIndex
     | UpdateTerm TermIndex String
     | ToggleAbbreviation TermIndex
-    | AddDefinition
-    | UpdateDefinition DefinitionIndex String
-    | DeleteDefinition DefinitionIndex
+    | ToggleTagCheckbox Tag
+    | UpdateDefinition String
     | AddRelatedTerm (Maybe TermId)
     | SelectRelatedTerm RelatedTermIndex String
     | DeleteRelatedTerm RelatedTermIndex
@@ -88,70 +90,64 @@ type alias Msg =
 
 init : CommonModel -> ( Model, Cmd Msg )
 init commonModel =
-    case commonModel.glossary of
+    case commonModel.incubatingGlossary of
         Ok { items } ->
             let
+                tags : List Tag
+                tags =
+                    IncubatingGlossaryItems.tags items
+
                 existingTerms : List Term
                 existingTerms =
-                    GlossaryItems.terms items
+                    -- TODO: should this be all terms, with the preferred ones disambiguated?
+                    IncubatingGlossaryItems.disambiguatedPreferredTerms items
 
-                existingPrimaryTerms : List Term
-                existingPrimaryTerms =
-                    GlossaryItems.primaryTerms items
+                existingDisambiguatedPreferredTerms : List Term
+                existingDisambiguatedPreferredTerms =
+                    IncubatingGlossaryItems.disambiguatedPreferredTerms items
 
-                itemsListingThisItemAsRelated : List GlossaryItem
-                itemsListingThisItemAsRelated =
-                    commonModel.maybeIndex
-                        |> Maybe.andThen
-                            (\index ->
+                preferredTermsOfItemsListingThisItemAsRelated : List Term
+                preferredTermsOfItemsListingThisItemAsRelated =
+                    commonModel.maybeId
+                        |> Maybe.map
+                            (\id ->
                                 items
-                                    |> GlossaryItems.get index
-                                    |> Maybe.map
-                                        (\currentItem ->
-                                            GlossaryItems.orderedAlphabetically items
-                                                |> Array.toList
-                                                |> List.map Tuple.second
-                                                |> List.filter
-                                                    (\item ->
-                                                        item.relatedTerms
-                                                            |> List.any
-                                                                (\relatedTerm ->
-                                                                    currentItem.terms
-                                                                        |> List.any (\term -> Term.id term == RelatedTerm.idReference relatedTerm)
-                                                                )
-                                                    )
-                                        )
+                                    |> IncubatingGlossaryItems.relatedForWhichItems id
+                                    |> List.filterMap (\id_ -> IncubatingGlossaryItems.disambiguatedPreferredTerm id_ items)
                             )
                         |> Maybe.withDefault []
 
                 emptyForm : GlossaryItemForm
                 emptyForm =
-                    Form.empty existingTerms existingPrimaryTerms itemsListingThisItemAsRelated
+                    Form.empty existingTerms existingDisambiguatedPreferredTerms tags preferredTermsOfItemsListingThisItemAsRelated
 
                 form =
                     Maybe.map
-                        (\index ->
+                        (\id ->
                             items
-                                |> GlossaryItems.get index
+                                |> IncubatingGlossaryItems.get id
                                 |> Maybe.map
                                     (Form.fromGlossaryItem
                                         existingTerms
-                                        existingPrimaryTerms
-                                        itemsListingThisItemAsRelated
+                                        existingDisambiguatedPreferredTerms
+                                        tags
+                                        preferredTermsOfItemsListingThisItemAsRelated
+                                        -- TODO
+                                        []
                                     )
                                 |> Maybe.withDefault emptyForm
                         )
-                        commonModel.maybeIndex
+                        commonModel.maybeId
                         |> Maybe.withDefault emptyForm
             in
             ( { common = commonModel
               , form = form
               , triedToSaveWhenFormInvalid = False
-              , errorMessageWhileSaving = Nothing
+              , saving = NotSaving
               , dropdownMenusWithMoreOptionsForRelatedTerms =
                     dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
-            , if commonModel.maybeIndex == Nothing then
+            , if commonModel.maybeId == Nothing then
                 0 |> TermIndex.fromInt |> giveFocusToTermInputField
 
               else
@@ -160,9 +156,9 @@ init commonModel =
 
         Err _ ->
             ( { common = commonModel
-              , form = Form.empty [] [] []
+              , form = Form.empty [] [] [] []
               , triedToSaveWhenFormInvalid = False
-              , errorMessageWhileSaving = Nothing
+              , saving = NotSaving
               , dropdownMenusWithMoreOptionsForRelatedTerms = Dict.empty
               }
             , Cmd.none
@@ -229,25 +225,11 @@ update msg model =
         ToggleAbbreviation termIndex ->
             ( { model | form = Form.toggleAbbreviation termIndex model.form }, Cmd.none )
 
-        AddDefinition ->
-            let
-                form : GlossaryItemForm
-                form =
-                    Form.addDefinition model.form
+        ToggleTagCheckbox tag ->
+            ( { model | form = Form.toggleTagCheckbox tag model.form }, Cmd.none )
 
-                latestDefinitionIndex : DefinitionIndex
-                latestDefinitionIndex =
-                    Array.length (Form.definitionFields form) - 1 |> DefinitionIndex.fromInt
-            in
-            ( { model | form = form }
-            , giveFocusToDefinitionSingle latestDefinitionIndex
-            )
-
-        UpdateDefinition definitionIndex body ->
-            ( { model | form = Form.updateDefinition definitionIndex model.form body }, Cmd.none )
-
-        DeleteDefinition definitionIndex ->
-            ( { model | form = Form.deleteDefinition definitionIndex model.form }, Cmd.none )
+        UpdateDefinition body ->
+            ( { model | form = Form.updateDefinition model.form body }, Cmd.none )
 
         AddRelatedTerm maybeTermId ->
             let
@@ -356,42 +338,47 @@ update msg model =
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
-                            , errorMessageWhileSaving = Nothing
+                            , saving = NotSaving
                           }
                         , Cmd.none
                         )
 
                     else
                         let
-                            newOrUpdatedGlossaryItem : GlossaryItem
-                            newOrUpdatedGlossaryItem =
-                                Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form <| Just dateTime
-
+                            -- newOrUpdatedGlossaryItem : GlossaryItem
+                            -- newOrUpdatedGlossaryItem =
+                            --     Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form <| Just dateTime
                             common : CommonModel
                             common =
                                 model.common
 
-                            ( updatedGlossaryItems, maybeIndex ) =
-                                case common.maybeIndex of
-                                    Just index ->
-                                        ( GlossaryItems.update index newOrUpdatedGlossaryItem glossary.items
-                                        , Just index
+                            ( updatedGlossaryItems, maybeId ) =
+                                case common.maybeId of
+                                    Just id ->
+                                        ( -- GlossaryItems.update id newOrUpdatedGlossaryItem glossary.items
+                                          -- TODO
+                                          glossary.items
+                                        , Just id
                                         )
 
                                     Nothing ->
-                                        let
-                                            updated : GlossaryItems
-                                            updated =
-                                                GlossaryItems.insert newOrUpdatedGlossaryItem glossary.items
-                                        in
-                                        ( updated
+                                        -- let
+                                        --     updated : GlossaryItems
+                                        --     updated =
+                                        --         GlossaryItems.insert newOrUpdatedGlossaryItem glossary.items
+                                        -- in
+                                        ( glossary.items
+                                          -- TODO
+                                          -- updated
                                         , -- Find index of newly inserted item
-                                          updated
-                                            |> GlossaryItems.orderedAlphabetically
-                                            |> Array.toList
-                                            |> List.filter (Tuple.second >> (==) newOrUpdatedGlossaryItem)
-                                            |> List.head
-                                            |> Maybe.map Tuple.first
+                                          -- TODO
+                                          --   updated
+                                          --     |> GlossaryItems.orderedAlphabetically
+                                          --     |> Array.toList
+                                          --     |> List.filter (Tuple.second >> (==) newOrUpdatedGlossaryItem)
+                                          --     |> List.head
+                                          --     |> Maybe.map Tuple.first
+                                          Nothing
                                         )
 
                             updatedGlossaryItemsWithFocusedOn =
@@ -408,8 +395,9 @@ update msg model =
                                     | common =
                                         { common
                                             | glossary = Ok <| { glossary | items = updatedGlossaryItemsWithFocusedOn }
-                                            , maybeIndex = maybeIndex
+                                            , maybeId = maybeId
                                         }
+                                    , saving = SavingInProgress
                                 }
                         in
                         ( model_
@@ -420,7 +408,7 @@ update msg model =
                     ( model, Cmd.none )
 
         FailedToSave error ->
-            ( { model | errorMessageWhileSaving = error |> Extras.Http.errorToHumanReadable |> Just }
+            ( { model | saving = SavingFailed <| Extras.Http.errorToHumanReadable <| error }
             , Cmd.none
             )
 
@@ -474,11 +462,6 @@ giveFocusToTermInputField termIndex =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.termInputField termIndex)
 
 
-giveFocusToDefinitionSingle : DefinitionIndex -> Cmd Msg
-giveFocusToDefinitionSingle index =
-    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.definitionSingle index)
-
-
 giveFocusToSeeAlsoSelect : RelatedTermIndex -> Cmd Msg
 giveFocusToSeeAlsoSelect index =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.seeAlsoSelect index)
@@ -508,7 +491,9 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
             [ div
                 [ class "flex-auto max-w-2xl flex" ]
                 [ span
-                    [ class "inline-flex items-center" ]
+                    [ class "inline-flex items-center"
+                    , Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:pt-6"
+                    ]
                     [ Components.Button.rounded canBeDeleted
                         [ Accessibility.Aria.label "Delete"
                         , Html.Events.onClick <| PageMsg.Internal <| DeleteTerm termIndex
@@ -532,6 +517,12 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
                                 [ id <| ElementIds.termInputField termIndex
                                 , required True
                                 , Html.Attributes.autocomplete False
+                                , Html.Attributes.placeholder <|
+                                    if TermIndex.toInt termIndex == 0 then
+                                        "Preferred term"
+
+                                    else
+                                        "Alternative term"
                                 , Accessibility.Aria.label "Term"
                                 , Accessibility.Aria.required True
                                 , Html.Events.onInput (PageMsg.Internal << UpdateTerm termIndex)
@@ -539,7 +530,9 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
                                 ]
                             ]
                         , div
-                            [ class "flex-auto mt-2 sm:mt-0 relative flex items-baseline" ]
+                            [ class "flex-auto mt-2 sm:mt-0 relative flex items-baseline"
+                            , Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:pt-6"
+                            ]
                             [ div
                                 [ class "sm:ml-5" ]
                                 [ Components.Button.toggle
@@ -585,7 +578,12 @@ viewCreateTerms markdownBasedSyntaxEnabled mathSupportEnabled showValidationErro
                 [ text "Terms" ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
-                [ text "List the group of terms being defined." ]
+                [ text "List the group of terms being defined. The first one is considered the "
+                , Html.em
+                    []
+                    [ text "preferred" ]
+                , text " term."
+                ]
             ]
         , div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
@@ -602,13 +600,13 @@ viewCreateTerms markdownBasedSyntaxEnabled mathSupportEnabled showValidationErro
         ]
 
 
-viewCreateDefinitionSingle : Bool -> Bool -> Bool -> Bool -> Int -> DefinitionField -> Html Msg
-viewCreateDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors index definitionSingle =
-    viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors (DefinitionIndex.fromInt index) definitionSingle
+viewDefinitionSingle : Bool -> Bool -> Bool -> Bool -> DefinitionField -> Html Msg
+viewDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionSingle =
+    viewDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionSingle
 
 
-viewCreateDefinitionSingle1 : Bool -> Bool -> Bool -> Bool -> DefinitionIndex -> DefinitionField -> Html Msg
-viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors index definitionSingle =
+viewDefinitionSingle1 : Bool -> Bool -> Bool -> Bool -> DefinitionField -> Html Msg
+viewDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionSingle =
     let
         raw : String
         raw =
@@ -621,28 +619,19 @@ viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathS
     div []
         [ div
             [ class "flex-auto max-w-3xl flex" ]
-            [ span [ class "inline-flex items-center" ]
-                [ Components.Button.rounded True
-                    [ Accessibility.Aria.label "Delete"
-                    , Html.Events.onClick <| PageMsg.Internal <| DeleteDefinition index
-                    ]
-                    [ Icons.trash
-                        [ Svg.Attributes.class "h-5 w-5" ]
-                    ]
-                ]
-            , div
+            [ div
                 [ class "relative block min-w-0 w-full" ]
                 [ Components.Form.textarea
                     raw
-                    (markdownBasedSyntaxEnabled && DefinitionIndex.toInt index == 0)
+                    markdownBasedSyntaxEnabled
                     mathSupportEnabled
                     showValidationErrors
                     validationError
                     [ required True
                     , Accessibility.Aria.label "Definition"
                     , Accessibility.Aria.required True
-                    , id <| ElementIds.definitionSingle index
-                    , Html.Events.onInput (PageMsg.Internal << UpdateDefinition index)
+                    , id ElementIds.definition
+                    , Html.Events.onInput (PageMsg.Internal << UpdateDefinition)
                     ]
                 ]
             ]
@@ -662,89 +651,51 @@ viewCreateDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathS
             p
                 [ class "mt-2 text-red-800 dark:text-red-200" ]
                 [ text "This will be turned into a single paragraph — line breaks are automatically converted to spaces" ]
-        , Extras.Html.showIf enableTopicsFeature <|
-            div
-                [ class "mt-4" ]
-                [ Components.Badge.withCheckbox
-                    True
-                    "First Topic"
-                    [ class "mr-2 mb-2" ]
-                , Components.Badge.withCheckbox
-                    True
-                    "Second Topic"
-                    [ class "mr-2 mb-2" ]
-                , Components.Badge.withCheckbox
-                    True
-                    "First Topic"
-                    [ class "mr-2 mb-2" ]
-                , Components.Badge.withCheckbox
-                    True
-                    "First Topic"
-                    [ class "mr-2 mb-2" ]
-                , Components.Badge.withCheckbox
-                    True
-                    "First Topic"
-                    [ class "mr-2 mb-2" ]
-                , Components.Badge.withCheckbox
-                    True
-                    "First Topic"
-                    [ class "mr-2 mb-2" ]
-                , Components.Badge.withCheckbox
-                    True
-                    "First Topic"
-                    [ class "mr-2 mb-2" ]
-                ]
         ]
 
 
-viewAddDefinitionButton : Html Msg
-viewAddDefinitionButton =
-    div []
-        [ Components.Button.secondary
-            [ Html.Events.onClick <| PageMsg.Internal AddDefinition ]
-            [ Icons.plus [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
-            , text "Add definition"
-            ]
-        ]
-
-
-viewAddDefinitionButtonForEmptyState : Html Msg
-viewAddDefinitionButtonForEmptyState =
-    Components.Button.emptyState
-        [ Html.Events.onClick <| PageMsg.Internal AddDefinition ]
-        [ Icons.plus [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
-        , span
-            [ class "mt-2 block font-medium text-gray-900 dark:text-gray-200" ]
-            [ text "Add definition" ]
-        ]
-
-
-viewCreateDefinition : Bool -> Bool -> Bool -> Bool -> Array DefinitionField -> Html Msg
-viewCreateDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionArray =
-    let
-        definitions : List DefinitionField
-        definitions =
-            Array.toList definitionArray
-    in
+viewDefinition : Bool -> Bool -> Bool -> Bool -> DefinitionField -> Html Msg
+viewDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionField =
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Definitions" ]
+                [ text "Definition" ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
-                [ text "Provide one or more definitions for this group of terms." ]
+                [ text "Provide a definition (optional) for this group of terms." ]
             ]
         , div
             [ class "space-y-6 sm:space-y-5" ]
-            (List.indexedMap (viewCreateDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors) definitions
-                ++ [ if List.isEmpty definitions then
-                        viewAddDefinitionButtonForEmptyState
+            [ viewDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionField ]
+        ]
 
-                     else
-                        viewAddDefinitionButton
-                   ]
+
+viewTags : Bool -> List ( Tag, Bool ) -> Html Msg
+viewTags enableMathSupport tagCheckboxes =
+    div
+        [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
+        [ div []
+            [ h2
+                [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
+                [ text "Tags" ]
+            , p
+                [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
+                [ text "Select all tags that apply to this item." ]
+            ]
+        , div
+            []
+            (tagCheckboxes
+                |> List.map
+                    (\( tag, checked ) ->
+                        Components.Badge.indigoWithCheckbox
+                            { tabbable = True, checked = checked }
+                            (Tag.id tag)
+                            (PageMsg.Internal <| ToggleTagCheckbox tag)
+                            [ class "mr-2 mb-2" ]
+                            [ Tag.view enableMathSupport [] tag ]
+                    )
             )
         ]
 
@@ -795,7 +746,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfR
                 ]
             , Components.SelectMenu.render
                 [ Components.SelectMenu.id <| ElementIds.seeAlsoSelect index
-                , Components.SelectMenu.ariaLabel "Related term"
+                , Components.SelectMenu.ariaLabel "Related preferred term"
                 , Components.SelectMenu.validationError relatedTerm.validationError
                 , Components.SelectMenu.showValidationErrors showValidationErrors
                 , Components.SelectMenu.onChange (PageMsg.Internal << SelectRelatedTerm index)
@@ -927,22 +878,22 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
         relatedTermsList =
             Array.toList relatedTermsArray
 
-        allTerms : List Term
-        allTerms =
+        allPreferredTerms : List Term
+        allPreferredTerms =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically
                 |> Array.toList
-                |> List.filterMap (Tuple.second >> .terms >> List.head)
+                |> List.map (Tuple.second >> GlossaryItem.preferredTerm)
     in
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "See Also" ]
+                [ text "Related terms" ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
-                [ text "Point to any related terms the reader might want to look up." ]
+                [ text "Point to any related preferred terms the reader might want to look up." ]
             ]
         , div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
@@ -954,7 +905,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
                         |> Set.fromList
                     )
                     (List.length relatedTermsList)
-                    (List.filter (\term -> not <| Set.member (Term.id term |> TermId.toString) termIdsSet) allTerms)
+                    (List.filter (\term -> not <| Set.member (Term.id term |> TermId.toString) termIdsSet) allPreferredTerms)
                     dropdownMenusWithMoreOptionsForRelatedTerms
                 )
                 relatedTermsList
@@ -999,13 +950,18 @@ viewAddSuggestedSeeAlso enableMathSupport suggestedRelatedTerms =
         ]
 
 
-viewNeedsUpdating :
+viewMiscellaneous :
     Bool
     -> Html Msg
-viewNeedsUpdating on =
+viewMiscellaneous on =
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
-        [ Components.Button.toggle
+        [ div []
+            [ h2
+                [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
+                [ text "Miscellaneous" ]
+            ]
+        , Components.Button.toggle
             on
             ElementIds.needsUpdatingToggleLabel
             [ Html.Events.onClick <| PageMsg.Internal <| ToggleNeedsUpdating ]
@@ -1019,10 +975,13 @@ viewNeedsUpdating on =
 viewCreateFormFooter : Model -> Html Msg
 viewCreateFormFooter model =
     let
+        saving =
+            model.saving
+
         errorDiv : String -> Html msg
         errorDiv message =
             div
-                [ class "flex justify-end mb-2" ]
+                [ class "flex justify-end mt-2" ]
                 [ p
                     [ class "text-red-600 dark:text-red-400" ]
                     [ text message ]
@@ -1033,28 +992,37 @@ viewCreateFormFooter model =
             model.common
     in
     div
-        [ class "pt-5 lg:border-t dark:border-gray-700" ]
+        [ class "pt-5 lg:border-t dark:border-gray-700 flex flex-col items-center" ]
         [ errorDiv "There are errors on this form — see above."
             |> Extras.Html.showIf (model.triedToSaveWhenFormInvalid && Form.hasValidationErrors model.form)
-        , model.errorMessageWhileSaving
-            |> Extras.Html.showMaybe (\errorMessage -> errorDiv <| "Failed to save — " ++ errorMessage ++ ".")
         , Extras.Html.showIf common.enableSavingChangesInMemory <|
             div
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                 [ text Components.Copy.sandboxModeMessage ]
         , div
-            [ class "flex justify-end" ]
-            [ Components.Button.white True
+            [ class "flex items-center" ]
+            [ Components.Button.white
+                (saving /= SavingInProgress)
                 [ Html.Events.onClick <|
                     PageMsg.NavigateToListAll common
                 ]
                 [ text "Cancel" ]
-            , Components.Button.primary True
+            , Components.Button.primary
+                (saving /= SavingInProgress && not (model.triedToSaveWhenFormInvalid && Form.hasValidationErrors model.form))
                 [ class "ml-3"
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]
                 [ text "Save" ]
+            , Components.Spinner.view
+                [ Svg.Attributes.class "ml-3 w-8 h-8" ]
+                (saving == SavingInProgress)
             ]
+        , case saving of
+            SavingFailed errorMessage ->
+                errorDiv <| "Failed to save — " ++ errorMessage ++ "."
+
+            _ ->
+                Extras.Html.nothing
         ]
 
 
@@ -1067,32 +1035,34 @@ view model =
                 terms =
                     Form.termFields model.form
 
-                definitionArray : Array DefinitionField
+                definitionArray : DefinitionField
                 definitionArray =
-                    Form.definitionFields model.form
+                    Form.definitionField model.form
 
                 relatedTerms : Array Form.RelatedTermField
                 relatedTerms =
-                    Form.relatedTermFields model.form
+                    -- TODO
+                    -- Form.relatedTermFields model.form
+                    Array.empty
 
                 suggestedRelatedTerms : List Term
                 suggestedRelatedTerms =
                     Form.suggestRelatedTerms model.form
 
-                newOrUpdatedGlossaryItem : GlossaryItem
-                newOrUpdatedGlossaryItem =
-                    Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form Nothing
+                -- newOrUpdatedGlossaryItem : GlossaryItem
+                -- newOrUpdatedGlossaryItem =
+                --     Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form Nothing
             in
             { title = GlossaryTitle.inlineText glossary.title
             , body =
                 [ div
-                    [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
+                    [ class "container mx-auto px-6 pb-16 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
                     [ Html.main_
                         []
                         [ h1
                             [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
                             [ text <|
-                                if model.common.maybeIndex == Nothing then
+                                if model.common.maybeId == Nothing then
                                     "Create a New Glossary Item"
 
                                 else
@@ -1103,29 +1073,26 @@ view model =
                             [ div
                                 [ class "lg:flex lg:space-x-8" ]
                                 [ div
-                                    [ class "lg:w-1/2 space-y-8 divide-y divide-gray-300 dark:divide-gray-600 sm:space-y-5" ]
+                                    [ class "lg:w-1/2" ]
                                     [ viewCreateTerms glossary.enableMarkdownBasedSyntax glossary.enableMathSupport model.triedToSaveWhenFormInvalid terms
-                                    , viewCreateDefinition
+                                    , viewDefinition
                                         (not glossary.enableMarkdownBasedSyntax)
                                         glossary.enableMarkdownBasedSyntax
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
                                         definitionArray
-                                    , div
-                                        []
-                                        [ viewCreateSeeAlso
-                                            glossary.enableMathSupport
-                                            model.triedToSaveWhenFormInvalid
-                                            glossary.items
-                                            terms
-                                            relatedTerms
-                                            model.dropdownMenusWithMoreOptionsForRelatedTerms
-                                            suggestedRelatedTerms
-                                        , Components.Dividers.withLabel
-                                            [ class "mt-8" ]
-                                            "Miscellaneous"
-                                        , viewNeedsUpdating <| Form.needsUpdating model.form
-                                        ]
+                                    , Extras.Html.showIf (not <| List.isEmpty <| Form.tagCheckboxes model.form) <|
+                                        viewTags glossary.enableMathSupport <|
+                                            Form.tagCheckboxes model.form
+                                    , viewCreateSeeAlso
+                                        glossary.enableMathSupport
+                                        model.triedToSaveWhenFormInvalid
+                                        glossary.items
+                                        terms
+                                        relatedTerms
+                                        model.dropdownMenusWithMoreOptionsForRelatedTerms
+                                        suggestedRelatedTerms
+                                    , viewMiscellaneous <| Form.needsUpdating model.form
                                     ]
                                 , div
                                     [ class "mt-8 lg:w-1/2 lg:mt-0 max-w-4xl text-gray-900 dark:text-gray-100" ]
@@ -1141,8 +1108,13 @@ view model =
                                                 [ Components.GlossaryItemCard.view
                                                     { enableMathSupport = glossary.enableMathSupport, makeLinksTabbable = True, enableLastUpdatedDates = False }
                                                     Components.GlossaryItemCard.Preview
+                                                    -- TODO
+                                                    -- { previous = Nothing
+                                                    -- , item = Just ( GlossaryItemIndex.fromInt -1, newOrUpdatedGlossaryItem )
+                                                    -- , next = Nothing
+                                                    -- }
                                                     { previous = Nothing
-                                                    , item = Just ( GlossaryItemIndex.fromInt -1, newOrUpdatedGlossaryItem )
+                                                    , item = Nothing
                                                     , next = Nothing
                                                     }
                                                 ]

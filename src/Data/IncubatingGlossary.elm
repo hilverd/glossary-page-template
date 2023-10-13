@@ -1,40 +1,41 @@
-module Data.Glossary exposing (Glossary, toHtmlTree)
+module Data.IncubatingGlossary exposing (IncubatingGlossary, toHtmlTree)
 
-import Array
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
-import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
+import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 
 
-type alias Glossary =
+type alias IncubatingGlossary =
     { enableMarkdownBasedSyntax : Bool
     , enableMathSupport : Bool
     , enableLastUpdatedDates : Bool
     , cardWidth : CardWidth
     , title : GlossaryTitle
     , aboutSection : AboutSection
-    , tags : List Tag
-    , items : GlossaryItems
+    , items : IncubatingGlossaryItems
     }
 
 
 {-| Represent these glossary items as an HTML tree, ready for writing back to the glossary's HTML file.
 -}
-toHtmlTree : Bool -> Bool -> Glossary -> HtmlTree
-toHtmlTree enableExportMenu enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, title, aboutSection, enableLastUpdatedDates, tags, items } =
+toHtmlTree : Bool -> Bool -> IncubatingGlossary -> HtmlTree
+toHtmlTree enableExportMenu enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, title, aboutSection, enableLastUpdatedDates, items } =
+    let
+        tags =
+            IncubatingGlossaryItems.tags items
+    in
     HtmlTree.Node "div"
         True
         [ HtmlTree.Attribute "id" ElementIds.container
         , HtmlTree.boolAttribute "data-enable-help-for-making-changes" enableHelpForMakingChanges
         , HtmlTree.boolAttribute "data-enable-export-menu" enableExportMenu
-        , HtmlTree.boolAttribute "data-enable-order-items-buttons" enableOrderItemsButtons
         , HtmlTree.boolAttribute "data-enable-markdown-based-syntax" enableMarkdownBasedSyntax
         , HtmlTree.boolAttribute "data-enable-last-updated-dates" enableLastUpdatedDates
         , cardWidth |> CardWidth.toHtmlTreeAttribute
@@ -102,9 +103,8 @@ toHtmlTree enableExportMenu enableHelpForMakingChanges { enableMarkdownBasedSynt
                     True
                     []
                     (items
-                        |> GlossaryItems.orderedAlphabetically
-                        |> Array.toList
-                        |> List.map (Tuple.second >> GlossaryItem.toHtmlTree)
+                        |> IncubatingGlossaryItems.orderedAlphabetically
+                        |> List.map (Tuple.second >> GlossaryItemForHtml.toHtmlTree)
                     )
                 ]
             ]

@@ -25,7 +25,7 @@ type AboutLink
 -}
 decode : Decoder AboutLink
 decode =
-    Decode.map2 (\href0 body0 -> AboutLink { href = href0, body = body0 })
+    Decode.map2 create
         (Decode.field "href" <| Decode.string)
         (Decode.field "body" <| Decode.string)
 
