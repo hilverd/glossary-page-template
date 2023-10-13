@@ -2379,7 +2379,6 @@ view model =
                     IndexOfTerms.fromIncubatingGlossaryItems incubatingItems
 
                 filterByTag : Maybe TagId
-                -- TODO
                 filterByTag =
                     model.common.filterByTag
             in
