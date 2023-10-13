@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, htmlTreeForAnki)
+module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, htmlTreeForAnki)
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -9,7 +9,7 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, htmlTreeForAnki
+@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, htmlTreeForAnki
 
 -}
 
@@ -34,13 +34,13 @@ type Term
         { id : TermId
         , isAbbreviation : Bool
         , body : String
-        , indexGroupCharacter : String
+        , indexGroupString : String
         }
     | MarkdownTerm
         { id : TermId
         , isAbbreviation : Bool
         , body : MarkdownFragment
-        , indexGroupCharacter : String
+        , indexGroupString : String
         , inlineText : String
         }
 
@@ -52,12 +52,19 @@ emptyPlaintext =
     fromPlaintext "" False
 
 
-stringToIndexGroupCharacter : String -> String
-stringToIndexGroupCharacter =
+stringToIndexGroupString : String -> String
+stringToIndexGroupString =
     String.Normalize.removeDiacritics
         >> String.toUpper
-        >> Extras.String.firstAlphabeticCharacter
+        >> Extras.String.firstAlphaNumericCharacter
         >> Maybe.withDefault "…"
+        >> (\result ->
+                if List.member result [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ] then
+                    "0–9"
+
+                else
+                    result
+           )
 
 
 {-| Construct a term from a plain text string and a Boolean indicating whether the term is an abbreviation.
@@ -71,7 +78,7 @@ fromPlaintext body isAbbreviation0 =
         { id = body |> String.replace " " "_" |> TermId.fromString
         , isAbbreviation = isAbbreviation0
         , body = body
-        , indexGroupCharacter = stringToIndexGroupCharacter body
+        , indexGroupString = stringToIndexGroupString body
         }
 
 
@@ -97,7 +104,7 @@ fromMarkdown body isAbbreviation0 =
         { id = body |> String.replace " " "_" |> TermId.fromString
         , isAbbreviation = isAbbreviation0
         , body = fragment
-        , indexGroupCharacter = inlineTextConcatenated |> stringToIndexGroupCharacter
+        , indexGroupString = inlineTextConcatenated |> stringToIndexGroupString
         , inlineText = inlineTextConcatenated
         }
 
@@ -118,7 +125,7 @@ fromPlaintextWithId body id0 isAbbreviation0 =
         { id = id0
         , isAbbreviation = isAbbreviation0
         , body = body
-        , indexGroupCharacter = stringToIndexGroupCharacter body
+        , indexGroupString = stringToIndexGroupString body
         }
 
 
@@ -289,22 +296,26 @@ view enableMathSupport additionalAttributes term =
 {-| The _index group character_ of a term is the character it will be listed under in the index.
 
     fromMarkdown "__future__" False
-    |> indexGroupCharacter
+    |> indexGroupString
     --> "F"
 
     fromMarkdown "123" False
-    |> indexGroupCharacter
+    |> indexGroupString
+    --> "0–9"
+
+    fromMarkdown "Ω" False
+    |> indexGroupString
     --> "…"
 
 -}
-indexGroupCharacter : Term -> String
-indexGroupCharacter term =
+indexGroupString : Term -> String
+indexGroupString term =
     case term of
         PlaintextTerm t ->
-            t.indexGroupCharacter
+            t.indexGroupString
 
         MarkdownTerm t ->
-            t.indexGroupCharacter
+            t.indexGroupString
 
 
 preserveOnlyAlphaNumChars : String -> String
@@ -323,7 +334,7 @@ preserveOnlyAlphaNumChars =
 -}
 compareAlphabetically : Term -> Term -> Order
 compareAlphabetically term1 term2 =
-    case compare (indexGroupCharacter term1) (indexGroupCharacter term2) of
+    case compare (indexGroupString term1) (indexGroupString term2) of
         LT ->
             LT
 

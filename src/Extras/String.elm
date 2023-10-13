@@ -1,11 +1,11 @@
-module Extras.String exposing (escapeForMarkdown, firstAlphabeticCharacter)
+module Extras.String exposing (escapeForMarkdown, firstAlphaNumericCharacter)
 
 {-| Extra functionality for strings.
 
 
 # Strings
 
-@docs escapeForMarkdown, firstAlphabeticCharacter
+@docs escapeForMarkdown, firstAlphaNumericCharacter
 
 -}
 
@@ -30,19 +30,21 @@ escapeForMarkdown string =
 
 {-| Returns the first alphabetic character occurring in a given string.
 
-    firstAlphabeticCharacter "Word" --> Just "W"
+    firstAlphaNumericCharacter "Word" --> Just "W"
 
-    firstAlphabeticCharacter "1 Word" --> Just "W"
+    firstAlphaNumericCharacter "1 Word" --> Just "1"
 
-    firstAlphabeticCharacter "123" --> Nothing
+    firstAlphaNumericCharacter ".5" --> Just "5"
+
+    firstAlphaNumericCharacter "Ω" --> Nothing
 
 -}
-firstAlphabeticCharacter : String -> Maybe String
-firstAlphabeticCharacter string =
+firstAlphaNumericCharacter : String -> Maybe String
+firstAlphaNumericCharacter string =
     let
         regex : Regex.Regex
         regex =
-            "[A-Za-z]"
+            "[a-zA-Z0-9]"
                 |> Regex.fromString
                 |> Maybe.withDefault Regex.never
     in

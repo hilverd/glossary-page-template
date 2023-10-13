@@ -35,6 +35,15 @@ glossaryItems =
             , lastUpdatedDate = Nothing
             }
 
+        thirtyFourty : GlossaryItem
+        thirtyFourty =
+            { terms = [ termFromBody "3040" ]
+            , definitions = [ Definition.fromPlaintext "3040" ]
+            , relatedTerms = []
+            , needsUpdating = False
+            , lastUpdatedDate = Nothing
+            }
+
         three : GlossaryItem
         three =
             { terms = [ termFromBody "3Three" ]
@@ -53,6 +62,15 @@ glossaryItems =
             , lastUpdatedDate = Nothing
             }
 
+        omega : GlossaryItem
+        omega =
+            { terms = [ termFromBody "Ω" ]
+            , definitions = [ Definition.fromPlaintext "Ω" ]
+            , relatedTerms = []
+            , needsUpdating = False
+            , lastUpdatedDate = Nothing
+            }
+
         future : GlossaryItem
         future =
             { terms = [ termFromBody "_future_" ]
@@ -62,7 +80,7 @@ glossaryItems =
             , lastUpdatedDate = Nothing
             }
     in
-    GlossaryItems.fromList [ doubleOhSeven, one, two, three, future ]
+    GlossaryItems.fromList [ doubleOhSeven, one, two, thirtyFourty, three, omega, future ]
 
 
 suite : Test
@@ -74,7 +92,8 @@ suite =
                     |> IndexOfTerms.fromGlossaryItems
                     |> IndexOfTerms.termGroups
                     |> Expect.equal
-                        [ { label = "A", terms = [] }
+                        [ { label = "0–9", terms = [ termFromBody "007", termFromBody "3040", termFromBody "3Three" ] }
+                        , { label = "A", terms = [] }
                         , { label = "B", terms = [] }
                         , { label = "C", terms = [] }
                         , { label = "D", terms = [] }
@@ -93,14 +112,14 @@ suite =
                         , { label = "Q", terms = [] }
                         , { label = "R", terms = [] }
                         , { label = "S", terms = [] }
-                        , { label = "T", terms = [ termFromBody "3Three", termFromBody "Two" ] }
+                        , { label = "T", terms = [ termFromBody "Two" ] }
                         , { label = "U", terms = [] }
                         , { label = "V", terms = [] }
                         , { label = "W", terms = [] }
                         , { label = "X", terms = [] }
                         , { label = "Y", terms = [] }
                         , { label = "Z", terms = [] }
-                        , { label = "…", terms = [ termFromBody "007" ] }
+                        , { label = "…", terms = [ termFromBody "Ω" ] }
                         ]
         , test "doesn't include ellipsis if not needed" <|
             \_ ->
