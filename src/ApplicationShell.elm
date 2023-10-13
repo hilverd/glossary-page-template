@@ -16,11 +16,8 @@ import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Glossary exposing (Glossary)
-import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItems as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
-import Data.IncubatingGlossary exposing (IncubatingGlossary)
-import Data.IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems exposing (LoadedGlossaryItems)
 import Data.OrderItemsBy as OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Theme as Theme exposing (Theme)
@@ -30,7 +27,6 @@ import PageMsg exposing (PageMsg(..))
 import Pages.CreateOrEdit
 import Pages.EditTitleAndAbout
 import Pages.ListAll
-import Pages.ManageTags
 import Task
 import Url
 
@@ -61,7 +57,6 @@ type Page
     = ListAll Pages.ListAll.Model
     | CreateOrEdit Pages.CreateOrEdit.Model
     | EditTitleAndAbout Pages.EditTitleAndAbout.Model
-    | ManageTags Pages.ManageTags.Model
 
 
 {-| A model for the application.
@@ -142,10 +137,6 @@ init flags =
         loadedGlossaryItems =
             LoadedGlossaryItems.decodeFromFlags enableMarkdownBasedSyntax flags
 
-        loadedIncubatingGlossaryItems : Result Decode.Error IncubatingGlossaryItems
-        loadedIncubatingGlossaryItems =
-            LoadedGlossaryItems.decodeIncubatingFromFlags enableMarkdownBasedSyntax flags
-
         glossary : Result Decode.Error Glossary
         glossary =
             loadedGlossaryItems
@@ -188,15 +179,15 @@ init flags =
                                             AboutParagraph.fromPlaintext
                                        )
 
+                            aboutSection : AboutSection
+                            aboutSection =
+                                { paragraph = aboutParagraph, links = aboutLinks }
+
                             aboutLinks : List AboutLink
                             aboutLinks =
                                 flags
                                     |> Decode.decodeValue (Decode.field "aboutLinks" <| Decode.list AboutLink.decode)
                                     |> Result.withDefault []
-
-                            aboutSection : AboutSection
-                            aboutSection =
-                                { paragraph = aboutParagraph, links = aboutLinks }
 
                             items1 =
                                 case orderItemsBy of
@@ -212,90 +203,22 @@ init flags =
                         , cardWidth = cardWidth
                         , title = title
                         , aboutSection = aboutSection
-                        , tags =
-                            flags
-                                |> Decode.decodeValue (Decode.field "tags" <| Decode.list <| Tag.decode enableMarkdownBasedSyntax)
-                                |> Result.withDefault []
                         , items = items1
-                        }
-                    )
-
-        incubatingGlossary : Result Decode.Error IncubatingGlossary
-        incubatingGlossary =
-            loadedIncubatingGlossaryItems
-                |> Result.map
-                    (\items ->
-                        let
-                            katexIsAvailable : Bool
-                            katexIsAvailable =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "katexIsAvailable" Decode.bool)
-                                    |> Result.withDefault False
-
-                            cardWidth : CardWidth
-                            cardWidth =
-                                flags
-                                    |> Decode.decodeValue CardWidth.decode
-                                    |> Result.withDefault CardWidth.Compact
-
-                            title : GlossaryTitle
-                            title =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "titleString" Decode.string)
-                                    |> Result.withDefault "Element not found"
-                                    |> (if enableMarkdownBasedSyntax then
-                                            GlossaryTitle.fromMarkdown
-
-                                        else
-                                            GlossaryTitle.fromPlaintext
-                                       )
-
-                            aboutParagraph : AboutParagraph
-                            aboutParagraph =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "aboutParagraph" Decode.string)
-                                    |> Result.withDefault "Element not found"
-                                    |> (if enableMarkdownBasedSyntax then
-                                            AboutParagraph.fromMarkdown
-
-                                        else
-                                            AboutParagraph.fromPlaintext
-                                       )
-
-                            aboutLinks : List AboutLink
-                            aboutLinks =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "aboutLinks" <| Decode.list AboutLink.decode)
-                                    |> Result.withDefault []
-
-                            aboutSection : AboutSection
-                            aboutSection =
-                                { paragraph = aboutParagraph, links = aboutLinks }
-                        in
-                        { enableMarkdownBasedSyntax = enableMarkdownBasedSyntax
-                        , enableMathSupport = enableMarkdownBasedSyntax && katexIsAvailable
-                        , enableLastUpdatedDates = enableLastUpdatedDates
-                        , cardWidth = cardWidth
-                        , title = title
-                        , aboutSection = aboutSection
-                        , items = items
                         }
                     )
 
         ( listAllModel, listAllCmd ) =
             Pages.ListAll.init
                 editorIsRunning
-                False
                 { filename = filename
                 , enableHelpForMakingChanges = enableHelpForMakingChanges
                 , theme = theme
                 , enableExportMenu = enableExportMenu
                 , enableSavingChangesInMemory = enableSavingChangesInMemory
                 , orderItemsBy = orderItemsBy
-                , maybeId = Nothing
+                , maybeIndex = Nothing
                 , fragment = fragment
                 , glossary = glossary
-                , incubatingGlossary = incubatingGlossary
                 }
     in
     ( ListAll listAllModel
@@ -310,7 +233,6 @@ type Msg
     | ListAllMsg Pages.ListAll.Msg
     | CreateOrEditMsg Pages.CreateOrEdit.Msg
     | EditTitleAndAboutMsg Pages.EditTitleAndAbout.Msg
-    | ManageTagsMsg Pages.ManageTags.Msg
 
 
 
@@ -329,9 +251,6 @@ withoutInternal msg =
         ListAllMsg (NavigateToEditTitleAndAbout commonModel) ->
             PageMsg.NavigateToEditTitleAndAbout commonModel
 
-        ListAllMsg (NavigateToManageTags commonModel) ->
-            PageMsg.NavigateToManageTags commonModel
-
         ListAllMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
@@ -343,9 +262,6 @@ withoutInternal msg =
 
         CreateOrEditMsg (NavigateToEditTitleAndAbout commonModel) ->
             PageMsg.NavigateToEditTitleAndAbout commonModel
-
-        CreateOrEditMsg (NavigateToManageTags commonModel) ->
-            PageMsg.NavigateToManageTags commonModel
 
         CreateOrEditMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
@@ -359,25 +275,7 @@ withoutInternal msg =
         EditTitleAndAboutMsg (NavigateToEditTitleAndAbout commonModel) ->
             PageMsg.NavigateToEditTitleAndAbout commonModel
 
-        EditTitleAndAboutMsg (NavigateToManageTags commonModel) ->
-            PageMsg.NavigateToManageTags commonModel
-
         EditTitleAndAboutMsg (PageMsg.Internal _) ->
-            PageMsg.Internal ()
-
-        ManageTagsMsg (NavigateToListAll commonModel) ->
-            PageMsg.NavigateToListAll commonModel
-
-        ManageTagsMsg (NavigateToCreateOrEdit commonModel) ->
-            PageMsg.NavigateToCreateOrEdit commonModel
-
-        ManageTagsMsg (NavigateToEditTitleAndAbout commonModel) ->
-            PageMsg.NavigateToEditTitleAndAbout commonModel
-
-        ManageTagsMsg (NavigateToManageTags commonModel) ->
-            PageMsg.NavigateToManageTags commonModel
-
-        ManageTagsMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
         NoOp ->
@@ -390,7 +288,7 @@ update msg model =
         ( _, NavigateToListAll commonModel, _ ) ->
             let
                 ( listAllModel, listAllCmd ) =
-                    Pages.ListAll.init True True commonModel
+                    Pages.ListAll.init True commonModel
             in
             ( ListAll listAllModel
             , Cmd.map ListAllMsg listAllCmd
@@ -414,15 +312,6 @@ update msg model =
             , Cmd.batch [ resetViewport, Cmd.map EditTitleAndAboutMsg editTitleAndAboutCmd ]
             )
 
-        ( _, NavigateToManageTags commonModel, _ ) ->
-            let
-                ( manageTagsModel, manageTagsCmd ) =
-                    Pages.ManageTags.init commonModel
-            in
-            ( ManageTags manageTagsModel
-            , Cmd.batch [ resetViewport, Cmd.map ManageTagsMsg manageTagsCmd ]
-            )
-
         ( ListAllMsg (PageMsg.Internal msg_), _, ListAll listAllModel ) ->
             let
                 ( listAllModel_, listAllCmd ) =
@@ -443,13 +332,6 @@ update msg model =
                     Pages.EditTitleAndAbout.update msg_ editTitleAndAboutModel
             in
             ( EditTitleAndAbout editTitleAndAboutModel_, editTitleAndAboutCmd |> Cmd.map EditTitleAndAboutMsg )
-
-        ( ManageTagsMsg (PageMsg.Internal msg_), _, ManageTags manageTagsModel ) ->
-            let
-                ( manageTagsModel_, manageTagsCmd ) =
-                    Pages.ManageTags.update msg_ manageTagsModel
-            in
-            ( ManageTags manageTagsModel_, manageTagsCmd |> Cmd.map ManageTagsMsg )
 
         _ ->
             ( model, Cmd.none )
@@ -483,9 +365,6 @@ view model =
         EditTitleAndAbout page ->
             page |> Pages.EditTitleAndAbout.view |> mapDocument EditTitleAndAboutMsg
 
-        ManageTags page ->
-            page |> Pages.ManageTags.view |> mapDocument ManageTagsMsg
-
 
 
 -- SUBSCRIPTIONS
@@ -502,6 +381,3 @@ subscriptions model =
 
         EditTitleAndAbout page ->
             page |> Pages.EditTitleAndAbout.subscriptions |> Sub.map EditTitleAndAboutMsg
-
-        ManageTags page ->
-            page |> Pages.ManageTags.subscriptions |> Sub.map ManageTagsMsg

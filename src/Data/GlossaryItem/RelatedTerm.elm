@@ -1,6 +1,6 @@
 module Data.GlossaryItem.RelatedTerm exposing (RelatedTerm, fromPlaintext, fromMarkdown, decode, raw, idReference, markdown, view, htmlTreeForAnki)
 
-{-| A related (preferred) term.
+{-| A related term.
 
 
 # Related Terms
@@ -112,11 +112,7 @@ decode enableMarkdownBasedSyntax =
          else
             fromPlaintext
         )
-        (Decode.oneOf
-            [ Decode.field "idReference" <| Decode.map TermId.fromString <| Decode.string
-            , Decode.field "id" <| Decode.map TermId.fromString <| Decode.string
-            ]
-        )
+        (Decode.field "idReference" <| Decode.map TermId.fromString <| Decode.string)
         (Decode.field "body" Decode.string)
 
 

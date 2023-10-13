@@ -13,23 +13,11 @@
   }
 
   div#glossary-page-container {
-    @apply flex flex-col min-h-screen text-gray-900 dark:text-gray-100 print:text-black;
+    @apply min-h-screen mb-10 print:mb-0 text-gray-900 dark:text-gray-100 print:text-black;
   }
 
   div#glossary-page-container header {
-    @apply pt-6 pb-4 px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-full;
-  }
-
-  div#glossary-page-container footer {
-    @apply px-6 lg:px-8 print:px-0 pt-16 pb-6 mt-auto;
-  }
-
-  div#glossary-page-container footer > div {
-    @apply border-t border-gray-300 dark:border-gray-700 pt-6 w-full flex justify-center text-sm text-gray-600 dark:text-gray-300 print:text-black;
-  }
-
-  div#glossary-page-container footer a {
-    @apply hover:underline print:text-black;
+    @apply pt-6 pb-4 mx-auto px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-full;
   }
 
   div#glossary-page-about {
@@ -37,7 +25,7 @@
   }
 
   div#glossary-page-container main {
-    @apply px-6 lg:px-8 print:px-0 print:max-w-full;
+    @apply mx-auto px-6 lg:px-8 print:px-0 print:max-w-full;
   }
 
   div#glossary-page-about:not([data-enable-markdown-based-syntax="true"]) div#glossary-page-about > p {
@@ -54,18 +42,6 @@
 
   h1#glossary-page-title  {
     @apply text-3xl font-bold leading-tight;
-  }
-
-  #glossary-page-tags > p {
-    @apply mb-4;
-  }
-
-  #glossary-page-tags > p > button {
-    @apply rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-2 py-1 text-gray-700 dark:text-gray-200 shadow-sm cursor-default mr-2 mb-2;
-  }
-
-  div#glossary-page-container[data-enable-markdown-based-syntax="true"]:not([data-markdown-rendered="true"]) #glossary-page-tags > p > button {
-    @apply font-mono whitespace-pre-wrap;
   }
 
   article#glossary-page-items dl {
@@ -112,14 +88,6 @@
 
   article#glossary-page-items dl dd {
     @apply mt-1 print:mt-0 py-2 print:py-0 text-gray-600 dark:text-gray-300 print:text-black;
-  }
-
-  article#glossary-page-items dl dd.tags {
-    @apply mt-2 flex items-start;
-  }
-
-  article#glossary-page-items dl dd.tags > button {
-    @apply rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-700 dark:text-gray-100 shadow-sm cursor-default mr-2 mb-2;
   }
 
   article#glossary-page-items dl dd.needs-updating {
@@ -182,6 +150,10 @@
 
   dt span.silcrow a {
     @apply text-inherit no-underline text-gray-500 dark:text-gray-400 font-normal;
+  }
+
+  article#glossary-page-items dl dd:not(.needs-updating) + dd:not(.related-terms) {
+    @apply border-t border-b-0 border-dashed border-gray-300 dark:border-gray-600 mt-3 pt-4;
   }
 
   /* Start of trick for autogrowing textareas

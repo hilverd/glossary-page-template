@@ -10,7 +10,6 @@ import Components.AboutSection
 import Components.Button
 import Components.Copy
 import Components.Form
-import Components.Spinner
 import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.AboutParagraph as AboutParagraph
@@ -18,7 +17,6 @@ import Data.AboutSection exposing (AboutSection)
 import Data.Glossary as Glossary
 import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
-import Data.Saving exposing (Saving(..))
 import ElementIds
 import Extras.Html
 import Extras.HtmlEvents
@@ -45,7 +43,7 @@ type alias Model =
     { common : CommonModel
     , form : TitleAndAboutForm
     , triedToSaveWhenFormInvalid : Bool
-    , saving : Saving
+    , errorMessageWhileSaving : Maybe String
     }
 
 
@@ -72,7 +70,7 @@ init common =
             ( { common = common
               , form = Form.create title aboutSection
               , triedToSaveWhenFormInvalid = False
-              , saving = NotSaving
+              , errorMessageWhileSaving = Nothing
               }
             , Cmd.none
             )
@@ -85,7 +83,7 @@ init common =
                         , links = []
                         }
               , triedToSaveWhenFormInvalid = False
-              , saving = NotSaving
+              , errorMessageWhileSaving = Nothing
               }
             , Cmd.none
             )
@@ -140,7 +138,7 @@ update msg model =
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
-                            , saving = NotSaving
+                            , errorMessageWhileSaving = Nothing
                           }
                         , Cmd.none
                         )
@@ -164,10 +162,7 @@ update msg model =
 
                             model1 : Model
                             model1 =
-                                { model
-                                    | common = common1
-                                    , saving = SavingInProgress
-                                }
+                                { model | common = common1 }
                         in
                         ( model1
                         , patchHtmlFile model1.common glossary0.items
@@ -177,7 +172,7 @@ update msg model =
                     ( model, Cmd.none )
 
         FailedToSave error ->
-            ( { model | saving = SavingFailed <| Extras.Http.errorToHumanReadable <| error }
+            ( { model | errorMessageWhileSaving = error |> Extras.Http.errorToHumanReadable |> Just }
             , Cmd.none
             )
 
@@ -299,7 +294,6 @@ viewEditTitle enableMarkdownBasedSyntax mathSupportEnabled showValidationErrors 
                                     titleField.validationError
                                     [ required True
                                     , Html.Attributes.autocomplete False
-                                    , Html.Attributes.id ElementIds.titleInputField
                                     , Accessibility.Aria.label "Title"
                                     , Accessibility.Aria.required True
                                     , Html.Events.onInput (PageMsg.Internal << UpdateTitle)
@@ -349,7 +343,6 @@ viewEditAboutParagraph showNewlineWarnings markdownBasedSyntaxEnabled mathSuppor
                         [ required True
                         , Accessibility.Aria.label "About"
                         , Accessibility.Aria.required True
-                        , Html.Attributes.id ElementIds.aboutParagraphInputField
                         , Html.Events.onInput (PageMsg.Internal << UpdateAboutParagraph)
                         ]
                     ]
@@ -536,19 +529,13 @@ orMaybe first second =
             second
 
 
-viewCreateFormFooter : Model -> Bool -> GlossaryItems -> Html Msg
-viewCreateFormFooter model showValidationErrors glossaryItems =
+viewCreateFormFooter : Model -> Bool -> Maybe String -> GlossaryItems -> TitleAndAboutForm -> Html Msg
+viewCreateFormFooter model showValidationErrors errorMessageWhileSaving glossaryItems form =
     let
-        form =
-            model.form
-
-        saving =
-            model.saving
-
         errorDiv : String -> Html msg
         errorDiv message =
             div
-                [ class "flex justify-end mt-2" ]
+                [ class "flex justify-end mb-2" ]
                 [ p
                     [ class "text-red-600 dark:text-red-400" ]
                     [ text message ]
@@ -568,37 +555,28 @@ viewCreateFormFooter model showValidationErrors glossaryItems =
                     error
     in
     div
-        [ class "pt-5 lg:border-t dark:border-gray-700 flex flex-col items-center" ]
+        [ class "pt-5 lg:border-t dark:border-gray-700" ]
         [ errorDiv "There are errors on this form — see above."
             |> Extras.Html.showIf (showValidationErrors && Form.hasValidationErrors form)
+        , errorMessageWhileSaving
+            |> Extras.Html.showMaybe (\errorMessage -> errorDiv <| "Failed to save — " ++ errorMessage ++ ".")
         , Extras.Html.showIf model.common.enableSavingChangesInMemory <|
             div
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                 [ text Components.Copy.sandboxModeMessage ]
         , div
-            [ class "flex items-center" ]
-            [ Components.Button.white
-                (saving /= SavingInProgress)
+            [ class "flex justify-end" ]
+            [ Components.Button.white True
                 [ Html.Events.onClick <|
                     PageMsg.NavigateToListAll { common | glossary = updatedGlossary }
                 ]
                 [ text "Cancel" ]
-            , Components.Button.primary
-                (saving /= SavingInProgress && not (showValidationErrors && Form.hasValidationErrors form))
+            , Components.Button.primary True
                 [ class "ml-3"
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]
                 [ text "Save" ]
-            , Components.Spinner.view
-                [ Svg.Attributes.class "ml-3 w-8 h-8" ]
-                (saving == SavingInProgress)
             ]
-        , case saving of
-            SavingFailed errorMessage ->
-                errorDiv <| "Failed to save — " ++ errorMessage ++ "."
-
-            _ ->
-                Extras.Html.nothing
         ]
 
 
@@ -618,7 +596,7 @@ view model =
             { title = GlossaryTitle.inlineText title1
             , body =
                 [ div
-                    [ class "container mx-auto px-6 pb-12 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
+                    [ class "container mx-auto px-6 pb-10 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
                     [ main_
                         []
                         [ h1
@@ -655,7 +633,7 @@ view model =
                                 ]
                             , div
                                 [ class "mt-4 lg:mt-8" ]
-                                [ viewCreateFormFooter model model.triedToSaveWhenFormInvalid items ]
+                                [ viewCreateFormFooter model model.triedToSaveWhenFormInvalid model.errorMessageWhileSaving items model.form ]
                             ]
                         ]
                     ]

@@ -6,7 +6,6 @@ import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.GlossaryItem as GlossaryItem
-import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import ElementIds
@@ -20,7 +19,6 @@ type alias Glossary =
     , cardWidth : CardWidth
     , title : GlossaryTitle
     , aboutSection : AboutSection
-    , tags : List Tag
     , items : GlossaryItems
     }
 
@@ -28,7 +26,7 @@ type alias Glossary =
 {-| Represent these glossary items as an HTML tree, ready for writing back to the glossary's HTML file.
 -}
 toHtmlTree : Bool -> Bool -> Glossary -> HtmlTree
-toHtmlTree enableExportMenu enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, title, aboutSection, enableLastUpdatedDates, tags, items } =
+toHtmlTree enableExportMenu enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, title, aboutSection, enableLastUpdatedDates, items } =
     HtmlTree.Node "div"
         True
         [ HtmlTree.Attribute "id" ElementIds.container
@@ -78,26 +76,7 @@ toHtmlTree enableExportMenu enableHelpForMakingChanges { enableMarkdownBasedSynt
             , HtmlTree.Node "article"
                 True
                 [ HtmlTree.Attribute "id" ElementIds.items ]
-                [ HtmlTree.showIf (not <| List.isEmpty tags) <|
-                    HtmlTree.Node
-                        "div"
-                        True
-                        [ HtmlTree.Attribute "id" ElementIds.tags ]
-                        [ HtmlTree.Node "p"
-                            True
-                            []
-                            (HtmlTree.Leaf "Tags:"
-                                :: List.map
-                                    (\tag ->
-                                        HtmlTree.Node "button"
-                                            False
-                                            [ HtmlTree.Attribute "type" "button" ]
-                                            [ HtmlTree.Leaf <| Tag.raw tag ]
-                                    )
-                                    tags
-                            )
-                        ]
-                , HtmlTree.Node "dl"
+                [ HtmlTree.Node "dl"
                     True
                     []
                     (items
@@ -106,17 +85,5 @@ toHtmlTree enableExportMenu enableHelpForMakingChanges { enableMarkdownBasedSynt
                         |> List.map (Tuple.second >> GlossaryItem.toHtmlTree)
                     )
                 ]
-            ]
-        , HtmlTree.Node "footer"
-            True
-            []
-            [ HtmlTree.Leaf "Built using"
-            , HtmlTree.Node "a"
-                False
-                [ HtmlTree.Attribute "target" "_blank"
-                , HtmlTree.Attribute "href" "https://glossary.page/template"
-                ]
-                [ HtmlTree.Leaf "Glossary Page Template" ]
-            , HtmlTree.Leaf "."
             ]
         ]

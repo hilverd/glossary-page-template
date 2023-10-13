@@ -1,4 +1,4 @@
-port module Pages.ListAll exposing (InternalMsg, MenuForMobileVisibility, Model, Msg, SearchDialog, init, subscriptions, update, view)
+port module Pages.ListAll exposing (InternalMsg, MakingChanges, MenuForMobileVisibility, Model, Msg, SearchDialog, init, subscriptions, update, view)
 
 import Accessibility
     exposing
@@ -38,30 +38,24 @@ import Components.Button
 import Components.Copy
 import Components.Dividers
 import Components.DropdownMenu
+import Components.Form as Form
 import Components.GlossaryItemCard
 import Components.ModalDialog
 import Components.SearchDialog
 import Components.SelectMenu
-import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.FeatureFlag exposing (enableFeaturesInProgress, enableTopicsFeature)
 import Data.Glossary as Glossary exposing (Glossary)
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem, preferredTerm)
+import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
-import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
-import Data.GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
-import Data.IncubatingGlossary as IncubatingGlossary exposing (IncubatingGlossary)
-import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
-import Data.Saving exposing (Saving(..))
-import Data.TermIndex exposing (TermIndex)
 import Data.Theme exposing (Theme(..))
 import Dict
 import ElementIds
@@ -102,13 +96,8 @@ type alias MenuForMobileVisibility =
     GradualVisibility
 
 
-type Editability
-    = ReadOnly
-    | ReadOnlyWithHelpForMakingChanges
-    | CanEditInMemory
-    | EditingInMemory
-    | CanEditWithBackend
-    | EditingWithBackend
+type alias MakingChanges =
+    Bool
 
 
 type alias SearchDialog =
@@ -125,18 +114,17 @@ type Layout
 
 type alias Model =
     { common : CommonModel
-    , editability : Editability
+    , makingChanges : MakingChanges
     , menuForMobileVisibility : MenuForMobileVisibility
     , themeDropdownMenu : Components.DropdownMenu.Model
     , exportDropdownMenu : Components.DropdownMenu.Model
     , searchDialog : SearchDialog
     , layout : Layout
-    , confirmDeleteId : Maybe GlossaryItemId
-    , deleting : Saving
-    , savingSettings : Saving
+    , confirmDeleteIndex : Maybe GlossaryItemIndex
+    , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
+    , errorWhileChangingSettings : Maybe String
     , mostRecentTermIdForOrderingItemsFocusedOn : Maybe TermId
     , resultOfAttemptingToCopyEditorCommandToClipboard : Maybe Bool
-    , itemsFilteredByTag : Maybe ( Tag, GlossaryItems )
     }
 
 
@@ -153,21 +141,21 @@ type InternalMsg
     | HideSearchDialog
     | UpdateSearchString String
     | ChangeTheme Theme
-    | ChangeLayoutToShowSingle GlossaryItemId
-    | ShowRelatedTermAsSingle Term
+    | ChangeLayoutToShowSingle GlossaryItemIndex
+    | ShowRelatedTermAsSingle RelatedTerm
     | ChangeLayoutToShowAll
-    | ConfirmDelete GlossaryItemId
+    | ConfirmDelete GlossaryItemIndex
     | CancelDelete
-    | Delete GlossaryItemId
-    | Deleted IncubatingGlossaryItems
-    | FailedToDelete Http.Error
+    | Delete GlossaryItemIndex
+    | Deleted GlossaryItems
+    | FailedToDelete GlossaryItemIndex Http.Error
     | JumpToTermIndexGroup Bool String
     | ChangeOrderItemsBy OrderItemsBy
     | ToggleMarkdownBasedSyntax
     | ChangeCardWidth CardWidth
     | ToggleEnableExportMenu
     | ToggleEnableLastUpdatedDates
-    | ChangedSettings CommonModel
+    | ChangedSettings Glossary
     | FailedToChangeSettings Http.Error
     | DownloadMarkdown
     | DownloadAnki
@@ -175,65 +163,19 @@ type InternalMsg
     | CopyEditorCommandToClipboard String
     | AttemptedToCopyEditorCommandToClipboard Bool
     | ClearResultOfAttemptingToCopyEditorCommandToClipboard
-    | FilterByTag Tag
-    | DoNotFilterByTag
 
 
 type alias Msg =
     PageMsg InternalMsg
 
 
-init : Bool -> Bool -> CommonModel -> ( Model, Cmd Msg )
-init editorIsRunning currentlyEditing commonModel =
-    ( { editability =
-            case ( commonModel.enableHelpForMakingChanges, commonModel.enableSavingChangesInMemory, editorIsRunning ) of
-                ( False, False, False ) ->
-                    ReadOnly
-
-                ( False, False, True ) ->
-                    if currentlyEditing then
-                        EditingWithBackend
-
-                    else
-                        CanEditWithBackend
-
-                ( False, True, False ) ->
-                    ReadOnly
-
-                ( False, True, True ) ->
-                    if currentlyEditing then
-                        EditingInMemory
-
-                    else
-                        CanEditInMemory
-
-                ( True, False, False ) ->
-                    ReadOnlyWithHelpForMakingChanges
-
-                ( True, False, True ) ->
-                    if currentlyEditing then
-                        EditingWithBackend
-
-                    else
-                        CanEditWithBackend
-
-                ( True, True, False ) ->
-                    if currentlyEditing then
-                        EditingInMemory
-
-                    else
-                        CanEditInMemory
-
-                ( True, True, True ) ->
-                    if currentlyEditing then
-                        EditingWithBackend
-
-                    else
-                        CanEditWithBackend
+init : Bool -> CommonModel -> ( Model, Cmd Msg )
+init editorIsRunning commonModel =
+    ( { makingChanges = editorIsRunning
       , common = commonModel
       , menuForMobileVisibility = Invisible
       , layout = ShowAllItems
-      , confirmDeleteId = Nothing
+      , confirmDeleteIndex = Nothing
       , themeDropdownMenu =
             Components.DropdownMenu.init
                 [ Components.DropdownMenu.id ElementIds.themeDropdownButton ]
@@ -250,8 +192,8 @@ init editorIsRunning currentlyEditing commonModel =
                     , Components.SearchDialog.onHide <| Extras.Task.messageToCommand <| PageMsg.Internal HideSearchDialog
                     ]
             }
-      , deleting = NotSaving
-      , savingSettings = NotSaving
+      , errorWhileDeleting = Nothing
+      , errorWhileChangingSettings = Nothing
       , mostRecentTermIdForOrderingItemsFocusedOn =
             case commonModel.orderItemsBy of
                 FocusedOn termId ->
@@ -260,11 +202,10 @@ init editorIsRunning currentlyEditing commonModel =
                 _ ->
                     Nothing
       , resultOfAttemptingToCopyEditorCommandToClipboard = Nothing
-      , itemsFilteredByTag = Nothing
       }
-    , case commonModel.maybeId of
-        Just id ->
-            scrollGlossaryItemIntoView id
+    , case commonModel.maybeIndex of
+        Just index ->
+            scrollGlossaryItemIntoView index
 
         Nothing ->
             commonModel.fragment
@@ -312,19 +253,7 @@ update msg model =
             ( model, Cmd.none )
 
         MakeChanges ->
-            let
-                editability1 =
-                    case model.editability of
-                        CanEditInMemory ->
-                            EditingInMemory
-
-                        CanEditWithBackend ->
-                            EditingWithBackend
-
-                        _ ->
-                            model.editability
-            in
-            ( { model | editability = editability1 }, Cmd.none )
+            ( { model | makingChanges = True }, Cmd.none )
 
         ShowMenuForMobile ->
             ( { model | menuForMobileVisibility = Visible }
@@ -412,12 +341,7 @@ update msg model =
                 results =
                     case model.common.glossary of
                         Ok { enableMathSupport, items } ->
-                            Search.search enableMathSupport
-                                searchString
-                                (model.itemsFilteredByTag
-                                    |> Maybe.map Tuple.second
-                                    |> Maybe.withDefault items
-                                )
+                            Search.search enableMathSupport searchString items
 
                         Err _ ->
                             Search.search False searchString <| GlossaryItems.fromList []
@@ -459,7 +383,7 @@ update msg model =
                     model.common
             in
             ( { model
-                | common = { common0 | maybeId = Just index }
+                | common = { common0 | maybeIndex = Just index }
                 , layout = ShowSingleItem
               }
             , preventBackgroundScrolling ()
@@ -471,14 +395,15 @@ update msg model =
                     model.common
 
                 model1 =
-                    case model.common.incubatingGlossary of
+                    case model.common.glossary of
                         Ok glossary ->
                             glossary.items
-                                |> IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId (Term.id relatedTerm)
+                                |> GlossaryItems.primaryTermIdsToIndexes
+                                |> Dict.get (relatedTerm |> RelatedTerm.idReference |> TermId.toString)
                                 |> Maybe.map
                                     (\index ->
                                         { model
-                                            | common = { common0 | maybeId = Just index }
+                                            | common = { common0 | maybeIndex = Just index }
                                         }
                                     )
                                 |> Maybe.withDefault model
@@ -492,40 +417,39 @@ update msg model =
             ( { model | layout = ShowAllItems }
             , Cmd.batch
                 [ allowBackgroundScrolling ()
-                , model.common.maybeId
+                , model.common.maybeIndex
                     |> Maybe.map (ElementIds.glossaryItemDiv >> scrollElementIntoView)
                     |> Maybe.withDefault Cmd.none
                 ]
             )
 
         ConfirmDelete index ->
-            ( { model | confirmDeleteId = Just index }, preventBackgroundScrolling () )
+            ( { model | confirmDeleteIndex = Just index }, preventBackgroundScrolling () )
 
         CancelDelete ->
-            if model.confirmDeleteId /= Nothing then
-                ( { model
-                    | confirmDeleteId = Nothing
-                    , deleting = NotSaving
-                  }
-                , allowBackgroundScrolling ()
-                )
+            if model.confirmDeleteIndex /= Nothing then
+                ( { model | confirmDeleteIndex = Nothing }, allowBackgroundScrolling () )
 
             else
-                ( { model | deleting = NotSaving }, Cmd.none )
+                ( model, Cmd.none )
 
-        Delete id ->
-            case model.common.incubatingGlossary of
+        Delete index ->
+            case model.common.glossary of
                 Ok { items } ->
                     let
-                        updatedGlossaryItems : IncubatingGlossaryItems
+                        updatedGlossaryItems : GlossaryItems
                         updatedGlossaryItems =
-                            IncubatingGlossaryItems.remove id items
+                            GlossaryItems.remove index items
                     in
                     ( { model
-                        | deleting = SavingInProgress
-                        , savingSettings = NotSaving
+                        | confirmDeleteIndex = Nothing
+                        , errorWhileDeleting = Nothing
                       }
-                    , patchHtmlFileAfterDeletingItem model.common updatedGlossaryItems
+                    , Cmd.batch
+                        [ patchHtmlFileAfterDeletingItem model.common index updatedGlossaryItems
+                        , allowBackgroundScrolling ()
+                        , giveFocusToOuter
+                        ]
                     )
 
                 _ ->
@@ -536,37 +460,20 @@ update msg model =
                 common : CommonModel
                 common =
                     model.common
-
-                cmd =
-                    Cmd.batch
-                        [ allowBackgroundScrolling ()
-                        , giveFocusToOuter
-                        ]
             in
-            case common.incubatingGlossary of
+            case common.glossary of
                 Ok glossary ->
-                    ( { model
-                        | common = { common | incubatingGlossary = Ok { glossary | items = updatedGlossaryItems } }
-                        , confirmDeleteId = Nothing
-                        , deleting = NotSaving
-                        , savingSettings = NotSaving
-                      }
-                    , cmd
+                    ( { model | common = { common | glossary = Ok { glossary | items = updatedGlossaryItems } } }
+                    , Cmd.none
                     )
 
                 Err _ ->
-                    ( { model
-                        | confirmDeleteId = Nothing
-                        , deleting = NotSaving
-                        , savingSettings = NotSaving
-                      }
-                    , cmd
-                    )
+                    ( model, Cmd.none )
 
-        FailedToDelete error ->
+        FailedToDelete indexOfItemBeingDeleted error ->
             ( { model
-                | deleting = SavingFailed <| Extras.Http.errorToHumanReadable error
-                , savingSettings = NotSaving
+                | errorWhileDeleting =
+                    Just ( indexOfItemBeingDeleted, Extras.Http.errorToHumanReadable error )
               }
             , Cmd.none
             )
@@ -630,19 +537,13 @@ update msg model =
                             model.mostRecentTermIdForOrderingItemsFocusedOn
 
                 common1 =
-                    case ( orderItemsBy, common.incubatingGlossary ) of
+                    case ( orderItemsBy, common.glossary ) of
                         ( FocusedOn termId, Ok glossary ) ->
                             let
-                                glosssaryItems_ =
-                                    glossary.items
-                                        |> IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId termId
-                                        |> Maybe.map
-                                            (\itemId ->
-                                                IncubatingGlossaryItems.enableFocusingOn itemId glossary.items
-                                            )
-                                        |> Maybe.withDefault glossary.items
+                                glossary1 =
+                                    { glossary | items = GlossaryItems.enableFocusingOn termId glossary.items }
                             in
-                            { common | incubatingGlossary = Ok { glossary | items = glosssaryItems_ } }
+                            { common | glossary = Ok glossary1 }
 
                         _ ->
                             common
@@ -661,16 +562,12 @@ update msg model =
                         updatedGlossary : Glossary
                         updatedGlossary =
                             { glossary | enableMarkdownBasedSyntax = not glossary.enableMarkdownBasedSyntax }
-
-                        common0 =
-                            model.common
                     in
                     ( { model
-                        | confirmDeleteId = Nothing
-                        , deleting = NotSaving
-                        , savingSettings = SavingInProgress
+                        | confirmDeleteIndex = Nothing
+                        , errorWhileDeleting = Nothing
                       }
-                    , patchHtmlFileAfterChangingSettings { common0 | glossary = Ok updatedGlossary }
+                    , patchHtmlFileAfterChangingSettings model.common updatedGlossary
                     )
 
                 _ ->
@@ -683,75 +580,78 @@ update msg model =
                         updatedGlossary : Glossary
                         updatedGlossary =
                             { glossary | cardWidth = cardWidth }
-
-                        common0 =
-                            model.common
-
-                        common1 =
-                            { common0 | glossary = Ok updatedGlossary }
                     in
                     ( { model
-                        | confirmDeleteId = Nothing
-                        , deleting = NotSaving
-                        , savingSettings = SavingInProgress
+                        | confirmDeleteIndex = Nothing
+                        , errorWhileDeleting = Nothing
                       }
-                    , patchHtmlFileAfterChangingSettings common1
+                    , patchHtmlFileAfterChangingSettings model.common updatedGlossary
                     )
 
                 _ ->
                     ( model, Cmd.none )
 
         ToggleEnableExportMenu ->
-            let
-                common0 : CommonModel
-                common0 =
-                    model.common
-
-                common1 : CommonModel
-                common1 =
-                    { common0 | enableExportMenu = not common0.enableExportMenu }
-            in
-            ( { model | savingSettings = SavingInProgress }
-            , patchHtmlFileAfterChangingSettings common1
-            )
-
-        ToggleEnableLastUpdatedDates ->
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        updatedGlossary : Glossary
-                        updatedGlossary =
-                            { glossary | enableLastUpdatedDates = not glossary.enableLastUpdatedDates }
-
+                        common0 : CommonModel
                         common0 =
                             model.common
 
+                        common1 : CommonModel
                         common1 =
-                            { common0 | glossary = Ok updatedGlossary }
+                            { common0 | enableExportMenu = not common0.enableExportMenu }
+
+                        model1 : Model
+                        model1 =
+                            { model | common = common1 }
                     in
-                    ( { model
-                        | confirmDeleteId = Nothing
-                        , deleting = NotSaving
-                        , savingSettings = SavingInProgress
-                      }
-                    , patchHtmlFileAfterChangingSettings common1
+                    ( model1
+                    , patchHtmlFileAfterChangingSettings model1.common glossary
                     )
 
                 _ ->
                     ( model, Cmd.none )
 
-        ChangedSettings common ->
-            ( { model | common = common, savingSettings = NotSaving }
-            , if common.enableSavingChangesInMemory then
-                Cmd.none
+        ToggleEnableLastUpdatedDates ->
+            case model.common.glossary of
+                Ok glossary ->
+                    let
+                        enableLastUpdatedDates0 : Bool
+                        enableLastUpdatedDates0 =
+                            glossary.enableLastUpdatedDates
 
-              else
-                Navigation.reload
-            )
+                        updatedGlossary : Glossary
+                        updatedGlossary =
+                            { glossary | enableLastUpdatedDates = not enableLastUpdatedDates0 }
+                    in
+                    ( { model
+                        | confirmDeleteIndex = Nothing
+                        , errorWhileDeleting = Nothing
+                      }
+                    , patchHtmlFileAfterChangingSettings model.common updatedGlossary
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        ChangedSettings glossary ->
+            if model.common.enableSavingChangesInMemory then
+                let
+                    common : CommonModel
+                    common =
+                        model.common
+                in
+                ( { model | common = { common | glossary = Ok glossary } }, Cmd.none )
+
+            else
+                ( model, Navigation.reload )
 
         FailedToChangeSettings error ->
             ( { model
-                | savingSettings = SavingFailed <| Extras.Http.errorToHumanReadable error
+                | errorWhileChangingSettings =
+                    Just <| Extras.Http.errorToHumanReadable error
               }
             , Cmd.none
             )
@@ -790,41 +690,65 @@ update msg model =
         ClearResultOfAttemptingToCopyEditorCommandToClipboard ->
             ( { model | resultOfAttemptingToCopyEditorCommandToClipboard = Nothing }, Cmd.none )
 
-        FilterByTag tag ->
-            case model.common.glossary of
-                Ok glossary ->
-                    ( { model
-                        | itemsFilteredByTag =
-                            Just ( tag, GlossaryItems.filterByTag tag glossary.items )
-                      }
-                    , Cmd.none
-                    )
-
-                _ ->
-                    ( { model | itemsFilteredByTag = Nothing }, Cmd.none )
-
-        DoNotFilterByTag ->
-            ( { model | itemsFilteredByTag = Nothing }, Cmd.none )
-
 
 giveFocusToOuter : Cmd Msg
 giveFocusToOuter =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.outer)
 
 
-patchHtmlFileAfterChangingSettings : CommonModel -> Cmd Msg
-patchHtmlFileAfterChangingSettings common =
+patchHtmlFileAfterChangingSettings : CommonModel -> Glossary -> Cmd Msg
+patchHtmlFileAfterChangingSettings common glossary =
     let
-        okMsg : PageMsg InternalMsg
-        okMsg =
-            PageMsg.Internal <| ChangedSettings common
+        msg : PageMsg InternalMsg
+        msg =
+            PageMsg.Internal <| ChangedSettings glossary
     in
     if common.enableSavingChangesInMemory then
-        Extras.Task.messageToCommand okMsg
+        Extras.Task.messageToCommand msg
+
+    else
+        Http.request
+            { method = "PATCH"
+            , headers = []
+            , url = "/"
+            , body =
+                glossary
+                    |> Glossary.toHtmlTree common.enableExportMenu common.enableHelpForMakingChanges
+                    |> HtmlTree.toHtmlReplacementString
+                    |> Http.stringBody "text/html"
+            , expect =
+                Http.expectWhatever
+                    (\result ->
+                        case result of
+                            Ok _ ->
+                                msg
+
+                            Err error ->
+                                PageMsg.Internal <| FailedToChangeSettings error
+                    )
+            , timeout = Nothing
+            , tracker = Nothing
+            }
+
+
+patchHtmlFileAfterDeletingItem : CommonModel -> GlossaryItemIndex -> GlossaryItems -> Cmd Msg
+patchHtmlFileAfterDeletingItem common indexOfItemBeingDeleted glossaryItems =
+    let
+        msg : PageMsg InternalMsg
+        msg =
+            PageMsg.Internal <| Deleted glossaryItems
+    in
+    if common.enableSavingChangesInMemory then
+        Extras.Task.messageToCommand msg
 
     else
         case common.glossary of
-            Ok glossary ->
+            Ok glossary0 ->
+                let
+                    glossary : Glossary
+                    glossary =
+                        { glossary0 | items = glossaryItems }
+                in
                 Http.request
                     { method = "PATCH"
                     , headers = []
@@ -839,56 +763,10 @@ patchHtmlFileAfterChangingSettings common =
                             (\result ->
                                 case result of
                                     Ok _ ->
-                                        okMsg
-
-                                    Err error ->
-                                        PageMsg.Internal <| FailedToChangeSettings error
-                            )
-                    , timeout = Nothing
-                    , tracker = Nothing
-                    }
-
-            _ ->
-                -- Should never happen
-                Extras.Task.messageToCommand okMsg
-
-
-patchHtmlFileAfterDeletingItem : CommonModel -> IncubatingGlossaryItems -> Cmd Msg
-patchHtmlFileAfterDeletingItem common glossaryItems =
-    let
-        msg : PageMsg InternalMsg
-        msg =
-            PageMsg.Internal <| Deleted glossaryItems
-    in
-    if common.enableSavingChangesInMemory then
-        Extras.Task.messageToCommand msg
-
-    else
-        case common.incubatingGlossary of
-            Ok glossary0 ->
-                let
-                    glossary : IncubatingGlossary
-                    glossary =
-                        { glossary0 | items = glossaryItems }
-                in
-                Http.request
-                    { method = "PATCH"
-                    , headers = []
-                    , url = "/"
-                    , body =
-                        glossary
-                            |> IncubatingGlossary.toHtmlTree common.enableExportMenu common.enableHelpForMakingChanges
-                            |> HtmlTree.toHtmlReplacementString
-                            |> Http.stringBody "text/html"
-                    , expect =
-                        Http.expectWhatever
-                            (\result ->
-                                case result of
-                                    Ok _ ->
                                         msg
 
                                     Err error ->
-                                        PageMsg.Internal <| FailedToDelete error
+                                        PageMsg.Internal <| FailedToDelete indexOfItemBeingDeleted error
                             )
                     , timeout = Nothing
                     , tracker = Nothing
@@ -898,7 +776,7 @@ patchHtmlFileAfterDeletingItem common glossaryItems =
                 Cmd.none
 
 
-scrollGlossaryItemIntoView : GlossaryItemId -> Cmd Msg
+scrollGlossaryItemIntoView : GlossaryItemIndex -> Cmd Msg
 scrollGlossaryItemIntoView =
     ElementIds.glossaryItemDiv >> (Extras.BrowserDom.scrollElementIntoView <| PageMsg.Internal NoOp)
 
@@ -1017,131 +895,73 @@ viewSettings glossary model =
         , class "pt-4 pr-4 pl-4 pb-2"
         ]
         [ details
-            [ Accessibility.Key.tabbable <| noModalDialogShown model
-            , class "relative"
-            ]
-            [ Extras.Html.showIf (model.savingSettings == SavingInProgress) <|
-                div
-                    [ class "absolute top-1/2 bottom-1/2 left-1/2 right-1/2" ]
-                    [ Components.Spinner.view
-                        [ Svg.Attributes.class "w-12 h-12" ]
-                        (model.savingSettings == SavingInProgress)
-                    ]
-            , summary
+            [ Accessibility.Key.tabbable <| noModalDialogShown model ]
+            [ summary
                 [ class "mb-1 text-lg leading-6 items-center font-medium text-gray-900 dark:text-gray-100 select-none" ]
                 [ span
                     [ class "ml-2" ]
                     [ text "Settings" ]
                 ]
+            , Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
+                div
+                    [ class "mt-6" ]
+                    [ p
+                        [ class "mt-3 max-w-xl" ]
+                        [ text "These settings are updated in the HTML file when you change them, and the page will reload."
+                        ]
+                    ]
+            , Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
+                div
+                    [ class "mt-6 pb-2" ]
+                    [ viewSelectInputSyntax glossary model ]
             , div
-                [ Extras.HtmlAttribute.showIf (model.savingSettings == SavingInProgress) <|
-                    class "opacity-25"
+                [ class "mt-6 pb-2" ]
+                [ viewSelectCardWidth glossary model
                 ]
-                [ Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
-                    div
-                        [ class "mt-6" ]
-                        [ p
-                            [ class "mt-3 max-w-xl" ]
-                            [ text "These settings are updated in the HTML file when you change them, and the page will reload."
-                            ]
-                        ]
-                , Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
-                    div
-                        [ class "mt-6 pb-2" ]
-                        [ viewSelectInputSyntax glossary model ]
-                , div
-                    [ class "mt-6 pb-2" ]
-                    [ viewSelectCardWidth glossary model
+            , div
+                [ class "mt-6 pb-2" ]
+                [ Components.Button.toggle
+                    model.common.enableExportMenu
+                    ElementIds.showExportMenuLabel
+                    [ Html.Events.onClick <| PageMsg.Internal ToggleEnableExportMenu ]
+                    [ span
+                        [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                        [ text "Show \"Export\" menu" ]
                     ]
-                , div
-                    [ class "mt-6 pb-2" ]
-                    [ Components.Button.toggle
-                        model.common.enableExportMenu
-                        ElementIds.showExportMenuLabel
-                        [ Html.Events.onClick <| PageMsg.Internal ToggleEnableExportMenu ]
-                        [ span
-                            [ class "font-medium text-gray-900 dark:text-gray-300" ]
-                            [ text "Show \"Export\" menu" ]
-                        ]
-                    ]
-                , div
-                    [ class "mt-6 pb-2" ]
-                    [ Components.Button.toggle
-                        glossary.enableLastUpdatedDates
-                        ElementIds.showLastUpdatedDatesLabel
-                        [ Html.Events.onClick <| PageMsg.Internal ToggleEnableLastUpdatedDates ]
-                        [ span
-                            [ class "font-medium text-gray-900 dark:text-gray-300" ]
-                            [ text "Show last updated date for each item" ]
-                        ]
-                    ]
-                , case model.savingSettings of
-                    SavingFailed errorMessage ->
-                        errorDiv <| "Failed to save — " ++ errorMessage ++ "."
-
-                    _ ->
-                        Extras.Html.nothing
                 ]
+            , div
+                [ class "mt-6 pb-2" ]
+                [ Components.Button.toggle
+                    glossary.enableLastUpdatedDates
+                    ElementIds.showLastUpdatedDatesLabel
+                    [ Html.Events.onClick <| PageMsg.Internal ToggleEnableLastUpdatedDates ]
+                    [ span
+                        [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                        [ text "Show last updated date for each item" ]
+                    ]
+                ]
+            , model.errorWhileChangingSettings
+                |> Extras.Html.showMaybe
+                    (\errorMessage -> errorDiv <| "Failed to save — " ++ errorMessage ++ ".")
             ]
         ]
 
 
-viewTermIndexItem : Bool -> Bool -> IndexOfTerms.Entry -> List (Html Msg)
-viewTermIndexItem enableMathSupport tabbable entry =
-    case entry of
-        IndexOfTerms.PreferredTerm term ->
-            [ li []
-                [ Html.a
-                    [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
-                    , Html.Attributes.href <| fragmentOnly <| TermId.toString <| Term.id term
-                    , Accessibility.Key.tabbable tabbable
-                    , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
-                    ]
-                    [ Term.view enableMathSupport [] term ]
-                ]
+viewTermIndexItem : Bool -> Bool -> Term -> Html Msg
+viewTermIndexItem enableMathSupport tabbable term =
+    li []
+        [ Html.a
+            [ class "block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
+            , Html.Attributes.href <| fragmentOnly <| TermId.toString <| Term.id term
+            , Accessibility.Key.tabbable tabbable
+            , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
             ]
-
-        IndexOfTerms.AlternativeTerm term preferredTerms ->
-            li
-                [ Html.Attributes.attribute "style" "margin-top: 1rem" ]
-                [ Html.span
-                    [ class "block border-l pl-4 -ml-px border-transparent select-none" ]
-                    [ Term.view enableMathSupport
-                        [ class "text-slate-400 dark:text-slate-500 contrast-more:text-slate-600 contrast-more:dark:text-slate-400 contrast-more:font-light" ]
-                        term
-                    ]
-                ]
-                :: List.indexedMap
-                    (\index preferredTerm ->
-                        li
-                            [ Extras.HtmlAttribute.showIf (index + 1 == List.length preferredTerms) <|
-                                Html.Attributes.attribute "style" "margin-bottom: 1rem"
-                            , Extras.HtmlAttribute.showIf (index == 0) <|
-                                Html.Attributes.attribute "style" "margin-top: 0.25rem"
-                            , Extras.HtmlAttribute.showIf (index /= 0) <|
-                                Html.Attributes.attribute "style" "margin-top: 0rem"
-                            ]
-                            [ Html.a
-                                [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
-                                , Html.Attributes.href <| fragmentOnly <| TermId.toString <| Term.id preferredTerm
-                                , Accessibility.Key.tabbable tabbable
-                                , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
-                                ]
-                                [ span
-                                    [ class "inline-flex items-center group-hover:underline" ]
-                                    [ Icons.cornerDownRight
-                                        [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300"
-                                        ]
-                                    , Term.view enableMathSupport [] preferredTerm
-                                    ]
-                                ]
-                            ]
-                    )
-                    preferredTerms
+            [ Term.view enableMathSupport [] term ]
+        ]
 
 
 viewTermIndexGroup : Bool -> Bool -> Bool -> TermGroup -> Html Msg
-viewTermIndexGroup enableMathSupport tabbable staticSidebar { label, entries } =
+viewTermIndexGroup enableMathSupport tabbable staticSidebar { label, terms } =
     li
         [ id <| ElementIds.termIndexGroupLabel staticSidebar label
         , class "mt-6"
@@ -1151,7 +971,7 @@ viewTermIndexGroup enableMathSupport tabbable staticSidebar { label, entries } =
             [ text label ]
         , ul
             [ class "space-y-6 lg:space-y-2 border-l border-slate-200 dark:border-slate-600" ]
-            (List.concatMap (viewTermIndexItem enableMathSupport tabbable) entries)
+            (List.map (viewTermIndexItem enableMathSupport tabbable) terms)
         ]
 
 
@@ -1168,7 +988,7 @@ viewIndexOfTerms enableMathSupport tabbable staticSidebar indexOfTerms =
         ]
         (List.filterMap
             (\termIndexGroup ->
-                if List.isEmpty termIndexGroup.entries then
+                if List.isEmpty termIndexGroup.terms then
                     Nothing
 
                 else
@@ -1186,28 +1006,29 @@ viewGlossaryItem :
     , shownAsSingle : Bool
     }
     -> Model
+    -> Maybe ( GlossaryItemIndex, String )
     -> GlossaryItemWithPreviousAndNext
     -> Html Msg
-viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle } model itemWithPreviousAndNext =
+viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle } model errorWhileDeleting itemWithPreviousAndNext =
     let
         common : CommonModel
         common =
             model.common
     in
     Extras.Html.showMaybe
-        (\( id, _ ) ->
+        (\( index, _ ) ->
             Components.GlossaryItemCard.view
                 { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable, enableLastUpdatedDates = enableLastUpdatedDates }
                 (Components.GlossaryItemCard.Normal
                     { tabbable = tabbable
-                    , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle id
-                    , onClickEdit = PageMsg.NavigateToCreateOrEdit { common | maybeId = Just id }
-                    , onClickDelete = PageMsg.Internal <| ConfirmDelete id
-                    , onClickTag = PageMsg.Internal << FilterByTag
+                    , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle index
+                    , onClickEdit = PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Just index }
+                    , onClickDelete = PageMsg.Internal <| ConfirmDelete index
                     , onClickItem = PageMsg.Internal << ChangeLayoutToShowSingle
                     , onClickRelatedTerm = PageMsg.Internal << ShowRelatedTermAsSingle
                     , editable = editable
                     , shownAsSingle = shownAsSingle
+                    , errorWhileDeleting = errorWhileDeleting
                     }
                 )
                 itemWithPreviousAndNext
@@ -1215,22 +1036,16 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
         itemWithPreviousAndNext.item
 
 
-itemWithPreviousAndNextForId : GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml ) -> GlossaryItemWithPreviousAndNext
-itemWithPreviousAndNextForId id indexedGlossaryItems =
-    let
-        indexedGlossaryItemsArray =
-            Array.fromList indexedGlossaryItems
-
-        indexed =
-            Array.indexedMap Tuple.pair indexedGlossaryItemsArray
-    in
-    indexed
-        |> Array.foldl
-            (\( artificialIndex, ( id0, item0 ) ) { previous, item, next } ->
-                if id == id0 then
-                    { previous = Array.get (artificialIndex - 1) indexedGlossaryItemsArray
-                    , item = Just ( id0, item0 )
-                    , next = Array.get (artificialIndex + 1) indexedGlossaryItemsArray
+itemWithPreviousAndNextForIndex : GlossaryItemIndex -> Array ( GlossaryItemIndex, GlossaryItem ) -> GlossaryItemWithPreviousAndNext
+itemWithPreviousAndNextForIndex index indexedGlossaryItems =
+    indexedGlossaryItems
+        |> Array.toIndexedList
+        |> List.foldl
+            (\( artificialIndex, ( index0, item0 ) ) { previous, item, next } ->
+                if index0 == index then
+                    { previous = Array.get (artificialIndex - 1) indexedGlossaryItems
+                    , item = Just ( index0, item0 )
+                    , next = Array.get (artificialIndex + 1) indexedGlossaryItems
                     }
 
                 else
@@ -1242,15 +1057,15 @@ itemWithPreviousAndNextForId id indexedGlossaryItems =
 viewSingleItemModalDialog :
     Model
     -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
-    -> List ( GlossaryItemId, GlossaryItemForHtml )
-    -> Maybe GlossaryItemId
+    -> Array ( GlossaryItemIndex, GlossaryItem )
+    -> Maybe GlossaryItemIndex
     -> Html Msg
 viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } indexedGlossaryItems =
     Maybe.map
-        (\id ->
+        (\index ->
             let
                 itemWithPreviousAndNext =
-                    itemWithPreviousAndNextForId id indexedGlossaryItems
+                    itemWithPreviousAndNextForIndex index indexedGlossaryItems
             in
             Components.ModalDialog.view
                 (PageMsg.Internal ChangeLayoutToShowAll)
@@ -1279,6 +1094,7 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
                             , shownAsSingle = True
                             }
                             model
+                            model.errorWhileDeleting
                             itemWithPreviousAndNext
                         ]
                     ]
@@ -1296,8 +1112,8 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
             )
 
 
-viewConfirmDeleteModal : Bool -> Maybe GlossaryItemId -> Saving -> Html Msg
-viewConfirmDeleteModal enableSavingChangesInMemory maybeIdOfItemToDelete deleting =
+viewConfirmDeleteModal : Bool -> Maybe GlossaryItemIndex -> Html Msg
+viewConfirmDeleteModal enableSavingChangesInMemory maybeIndexOfItemToDelete =
     Components.ModalDialog.view
         (PageMsg.Internal CancelDelete)
         ElementIds.confirmDeleteModalTitle
@@ -1333,45 +1149,25 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIdOfItemToDelete deletin
                 div
                     [ class "mt-5 sm:mt-4 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                     [ text Components.Copy.sandboxModeMessage ]
-            , case deleting of
-                SavingFailed errorMessage ->
-                    div
-                        [ class "flex justify-end mt-2" ]
-                        [ p
-                            [ class "text-red-600 dark:text-red-400" ]
-                            [ text <| "Failed to save — " ++ errorMessage ++ "." ]
-                        ]
-
-                _ ->
-                    Extras.Html.nothing
             , div
-                [ class "mt-5 sm:mt-4 sm:flex sm:flex-row-reverse sm:items-center" ]
-                [ Components.Button.primary
-                    (deleting /= SavingInProgress)
-                    [ class "w-full bg-red-600 dark:bg-red-400 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm dark:text-gray-800"
-                    , Extras.HtmlAttribute.showIf (deleting /= SavingInProgress) <| class "hover:bg-red-700 dark:hover:bg-red-600"
+                [ class "mt-5 sm:mt-4 sm:flex sm:flex-row-reverse" ]
+                [ Components.Button.primary True
+                    [ class "w-full bg-red-600 dark:bg-red-400 hover:bg-red-700 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm dark:text-gray-800"
                     , Extras.HtmlAttribute.showMaybe
                         (Html.Events.onClick << PageMsg.Internal << Delete)
-                        maybeIdOfItemToDelete
+                        maybeIndexOfItemToDelete
                     ]
                     [ text "Delete" ]
-                , Components.Button.white
-                    (deleting /= SavingInProgress)
+                , Components.Button.white True
                     [ class "mt-3 w-full sm:mt-0 sm:w-auto sm:text-sm"
                     , Html.Events.onClick <| PageMsg.Internal CancelDelete
                     , Extras.HtmlEvents.onEnter <| PageMsg.Internal CancelDelete
                     ]
                     [ text "Cancel" ]
-                , span
-                    [ class "w-full sm:w-auto sm:order-last sm:mr-3 flex justify-center" ]
-                    [ Components.Spinner.view
-                        [ Svg.Attributes.class "mt-3 sm:mt-0 w-8 h-8" ]
-                        (deleting == SavingInProgress)
-                    ]
                 ]
             ]
         )
-        (maybeIdOfItemToDelete /= Nothing)
+        (maybeIndexOfItemToDelete /= Nothing)
 
 
 viewMakeChangesButton : Bool -> Bool -> Html Msg
@@ -1385,12 +1181,8 @@ viewMakeChangesButton showSandboxModeMessage tabbable =
             [ Icons.pencil
                 [ Svg.Attributes.class "h-5 w-5" ]
             , span
-                [ class "ml-2 inline-flex items-center" ]
-                [ text "Make changes"
-                , Html.kbd
-                    [ class "ml-2 inline-flex items-center rounded border border-gray-700 dark:border-gray-300 px-1 font-sans text-xs" ]
-                    [ text "e" ]
-                ]
+                [ class "ml-2" ]
+                [ text "Make changes" ]
             ]
         , Extras.Html.showIf showSandboxModeMessage <|
             div
@@ -1404,7 +1196,7 @@ viewEditTitleAndAboutButton tabbable common =
     div
         [ class "pb-3 print:hidden" ]
         [ Components.Button.text
-            [ Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout { common | maybeId = Nothing }
+            [ Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout { common | maybeIndex = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.pencil
@@ -1422,7 +1214,7 @@ viewCreateGlossaryItemButtonForEmptyState tabbable common =
         [ class "pt-4 print:hidden" ]
         [ Components.Button.emptyState
             [ class "p-9"
-            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeId = Nothing }
+            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.viewGridAdd
@@ -1439,7 +1231,7 @@ viewCreateGlossaryItemButton tabbable common =
     div
         [ class "pb-2 print:hidden" ]
         [ Components.Button.secondary
-            [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeId = Nothing }
+            [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeIndex = Nothing }
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.viewGridAdd
@@ -1461,30 +1253,36 @@ viewCreateGlossaryItemButton tabbable common =
 viewCards :
     Model
     -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
-    -> List Tag
-    -> IncubatingGlossaryItems
-    -> ( List ( GlossaryItemId, GlossaryItemForHtml ), List ( GlossaryItemId, GlossaryItemForHtml ) )
+    -> GlossaryItems
+    -> ( Array ( GlossaryItemIndex, GlossaryItem ), Array ( GlossaryItemIndex, GlossaryItem ) )
     -> Html Msg
-viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } tags glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
-        combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForHtml )
-        combinedIndexedGlossaryItems =
-            List.append indexedGlossaryItems otherIndexedGlossaryItems
+        combinedGlossaryItems : Array ( GlossaryItemIndex, GlossaryItem )
+        combinedGlossaryItems =
+            Array.append indexedGlossaryItems otherIndexedGlossaryItems
 
-        disambiguatedPreferredTermsWithDefinitions : List Term
-        disambiguatedPreferredTermsWithDefinitions =
-            IncubatingGlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions glossaryItems
+        primaryTermsWithDefinitions : List Term
+        primaryTermsWithDefinitions =
+            GlossaryItems.primaryTermsWithDefinitions glossaryItems
 
         orderItemsFocusedOnTerm : Maybe Term
         orderItemsFocusedOnTerm =
             case model.common.orderItemsBy of
                 FocusedOn termId ->
-                    IncubatingGlossaryItems.preferredTermFromId termId glossaryItems
+                    GlossaryItems.primaryTermIdsToIndexes glossaryItems
+                        |> Dict.get (TermId.toString termId)
+                        |> Maybe.andThen
+                            (\index ->
+                                Array.get (GlossaryItemIndex.toInt index)
+                                    (GlossaryItems.orderedAlphabetically glossaryItems)
+                            )
+                        |> Maybe.andThen (Tuple.second >> .terms >> List.head)
 
                 _ ->
                     Nothing
 
-        viewIndexedItem : ( GlossaryItemId, GlossaryItemForHtml ) -> Html Msg
+        viewIndexedItem : ( GlossaryItemIndex, GlossaryItem ) -> Html Msg
         viewIndexedItem indexedItem =
             viewGlossaryItem
                 { enableMathSupport = enableMathSupport
@@ -1494,55 +1292,55 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                 , shownAsSingle = False
                 }
                 model
+                model.errorWhileDeleting
                 { previous = Nothing, item = Just indexedItem, next = Nothing }
     in
     Html.article
-        [ Html.Attributes.id ElementIds.items
-        , class "pt-2 border-t border-gray-300 dark:border-gray-700"
-        ]
-        [ Extras.Html.showMaybe
-            (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
-            (model.itemsFilteredByTag |> Maybe.map Tuple.first)
-        , Extras.Html.showIf (model.itemsFilteredByTag == Nothing) <|
-            viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
-        , Extras.Html.showIf (editing model.editability) <|
-            div
-                [ class "flex-none mt-4" ]
-                [ viewManageTagsButton tabbable model.common ]
-        , div
-            []
+        [ Html.Attributes.id ElementIds.items ]
+        [ div
+            [ class "pt-2 border-t border-gray-300 dark:border-gray-700" ]
             [ Extras.Html.showIf editable <|
                 div
                     [ class "pt-2" ]
-                    [ if List.isEmpty combinedIndexedGlossaryItems then
+                    [ if Array.isEmpty combinedGlossaryItems then
                         viewCreateGlossaryItemButtonForEmptyState tabbable model.common
 
                       else
                         viewCreateGlossaryItemButton tabbable model.common
                     ]
             ]
-        , Extras.Html.showIf (not <| List.isEmpty combinedIndexedGlossaryItems) <|
+        , Extras.Html.showIf enableTopicsFeature <|
+            viewCurrentTopicFilter tabbable
+        , Extras.Html.showIf enableTopicsFeature <|
+            viewAllTopicFilters tabbable
+        , Extras.Html.showIf (not <| Array.isEmpty combinedGlossaryItems) <|
             viewOrderItemsBy
                 model
-                (List.length combinedIndexedGlossaryItems)
+                (Array.length combinedGlossaryItems)
                 enableMathSupport
-                disambiguatedPreferredTermsWithDefinitions
+                primaryTermsWithDefinitions
                 orderItemsFocusedOnTerm
         , Html.dl
             []
-            (List.map viewIndexedItem indexedGlossaryItems)
+            (indexedGlossaryItems
+                |> Array.toList
+                |> List.map viewIndexedItem
+            )
         , Extras.Html.showIf
-            ((not <| List.isEmpty indexedGlossaryItems)
-                && (not <| List.isEmpty otherIndexedGlossaryItems)
+            ((not <| Array.isEmpty indexedGlossaryItems)
+                && (not <| Array.isEmpty otherIndexedGlossaryItems)
             )
           <|
             Components.Dividers.withLabel
                 [ class "my-10" ]
                 "Other items"
-        , Extras.Html.showIf (not <| List.isEmpty otherIndexedGlossaryItems) <|
+        , Extras.Html.showIf (not <| Array.isEmpty otherIndexedGlossaryItems) <|
             Html.dl
                 []
-                (List.map viewIndexedItem otherIndexedGlossaryItems)
+                (otherIndexedGlossaryItems
+                    |> Array.toList
+                    |> List.map viewIndexedItem
+                )
         , Components.SearchDialog.view
             (PageMsg.Internal << SearchDialogMsg)
             model.searchDialog.model
@@ -1550,8 +1348,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             model.searchDialog.results
         , viewConfirmDeleteModal
             model.common.enableSavingChangesInMemory
-            model.confirmDeleteId
-            model.deleting
+            model.confirmDeleteIndex
         , viewSingleItemModalDialog
             model
             { enableMathSupport = enableMathSupport
@@ -1559,11 +1356,11 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             , tabbable = tabbable
             , enableLastUpdatedDates = enableLastUpdatedDates
             }
-            combinedIndexedGlossaryItems
+            combinedGlossaryItems
           <|
-            case ( model.layout, model.common.maybeId ) of
-                ( ShowSingleItem, Just id ) ->
-                    Just id
+            case ( model.layout, model.common.maybeIndex ) of
+                ( ShowSingleItem, Just index ) ->
+                    Just index
 
                 _ ->
                     Nothing
@@ -1665,7 +1462,7 @@ viewQuickSearchButton tabbable =
             [ class "bg-gray-50 dark:bg-slate-900 relative pointer-events-auto" ]
             [ button
                 [ Html.Attributes.type_ "button"
-                , class "hidden w-full lg:flex items-center text-sm leading-6 text-slate-500 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-600 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800"
+                , class "hidden w-full lg:flex items-center text-sm leading-6 text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-600 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800"
                 , Html.Events.onClick <| PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show
                 , Accessibility.Aria.hidden True
                 , Accessibility.Key.tabbable tabbable
@@ -1715,7 +1512,7 @@ viewTermIndexFirstCharacterGrid staticSidebar tabbable indexOfTerms =
                     staticSidebar
                     tabbable
                     termIndexGroup.label
-                    (not <| List.isEmpty termIndexGroup.entries)
+                    (not <| List.isEmpty termIndexGroup.terms)
             )
             termGroups
         )
@@ -1731,7 +1528,7 @@ viewQuickSearchButtonAndLetterGrid staticSidebar tabbable indexOfTerms =
             [ class "h-7 bg-white dark:bg-slate-900" ]
             []
         , div
-            [ class "pr-4 bg-white dark:bg-slate-900" ]
+            [ class "pr-4" ]
             [ viewBackToTopLink True tabbable ]
         , viewQuickSearchButton tabbable
         , div
@@ -2001,9 +1798,12 @@ viewSelectCardWidth glossary model =
     in
     div
         []
-        [ fieldset []
+        [ label
+            [ class "font-medium text-gray-900 dark:text-gray-100" ]
+            [ text "Card width" ]
+        , fieldset [ class "mt-4" ]
             [ legend
-                [ class "mb-4 font-medium text-gray-900 dark:text-gray-100" ]
+                [ class "sr-only" ]
                 [ text "Card width" ]
             , div
                 [ class "space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6" ]
@@ -2060,62 +1860,40 @@ viewSelectCardWidth glossary model =
         ]
 
 
-viewCurrentTagFilter : { enableMathSupport : Bool, tabbable : Bool } -> Tag -> Html Msg
-viewCurrentTagFilter { enableMathSupport, tabbable } tag =
+viewCurrentTopicFilter : Bool -> Html Msg
+viewCurrentTopicFilter tabbable =
     div
-        [ class "print:hidden pt-3" ]
+        [ class "print:hidden pt-4 font-medium text-gray-900 dark:text-gray-100" ]
         [ span
-            [ class "mr-2 font-medium text-gray-900 dark:text-gray-100" ]
-            [ text "Only showing items for tag:" ]
-        , Components.Badge.indigoWithBorderAndRemoveButton
+            [ class "mr-2" ]
+            [ text "Only showing selected topic:" ]
+        , Components.Badge.withBorderAndRemoveButton
             tabbable
             [ class "mt-2" ]
-            (PageMsg.Internal DoNotFilterByTag)
-            [ Tag.view enableMathSupport [] tag ]
+            "First Topic"
         ]
 
 
-viewAllTagFilters : { enableMathSupport : Bool, tabbable : Bool } -> List Tag -> Html Msg
-viewAllTagFilters { enableMathSupport, tabbable } tags =
-    Extras.Html.showIf (not <| List.isEmpty tags) <|
-        div
-            [ class "print:hidden pt-3" ]
-            (span
-                [ class "mr-2 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Tags:" ]
-                :: (tags
-                        |> List.map
-                            (\tag ->
-                                Components.Button.soft
-                                    tabbable
-                                    [ class "mr-2 mt-2"
-                                    , Html.Events.onClick <| PageMsg.Internal <| FilterByTag tag
-                                    ]
-                                    [ Tag.view enableMathSupport [] tag ]
-                            )
-                   )
-            )
-
-
-viewManageTagsButton : Bool -> CommonModel -> Html Msg
-viewManageTagsButton tabbable common =
+viewAllTopicFilters : Bool -> Html Msg
+viewAllTopicFilters tabbable =
     div
-        [ class "pb-3 print:hidden" ]
-        [ Components.Button.text
-            [ Html.Events.onClick <| PageMsg.NavigateToManageTags { common | maybeId = Nothing }
-            , Accessibility.Key.tabbable tabbable
-            ]
-            [ Icons.pencil
-                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
-            , span
-                [ class "ml-2" ]
-                [ text "Manage tags" ]
-            ]
+        [ class "print:hidden pt-4 font-medium text-gray-900 dark:text-gray-100" ]
+        [ span
+            [ class "mr-2" ]
+            [ text "Topics:" ]
+        , Components.Button.soft
+            tabbable
+            [ class "mr-2 mb-2" ]
+            [ text "First Topic (4)" ]
+        , Components.Button.soft
+            tabbable
+            [ class "mr-2 mb-2" ]
+            [ text "Second Topic (1)" ]
         ]
 
 
 viewOrderItemsBy : Model -> Int -> Bool -> List Term -> Maybe Term -> Html Msg
-viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTermsWithDefinitions orderItemsFocusedOnTerm =
+viewOrderItemsBy model numberOfItems enableMathSupport primaryTermsWithDefinitions orderItemsFocusedOnTerm =
     let
         tabbable : Bool
         tabbable =
@@ -2123,17 +1901,20 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
     in
     div
         [ class "print:hidden pt-4 pb-6" ]
-        [ fieldset []
-            [ legend
-                [ class "mb-4 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Order items"
-                , span
-                    [ class "ml-2 text-gray-500 dark:text-gray-400" ]
-                    [ text "("
-                    , text <| String.fromInt numberOfItems
-                    , text ")"
-                    ]
+        [ label
+            [ class "font-medium text-gray-900 dark:text-gray-100" ]
+            [ text "Order items"
+            , span
+                [ class "ml-2 text-gray-500 dark:text-gray-400" ]
+                [ text "("
+                , text <| String.fromInt numberOfItems
+                , text ")"
                 ]
+            ]
+        , fieldset [ class "mt-4" ]
+            [ legend
+                [ class "sr-only" ]
+                [ text "Sort order" ]
             , div
                 [ class "space-y-4 xl:flex xl:items-center xl:space-y-0 xl:space-x-6" ]
                 [ div
@@ -2147,7 +1928,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy Alphabetically
                         ]
                     , label
-                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300  -none"
+                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
                         , for ElementIds.orderItemsAlphabetically
                         ]
                         [ text "alphabetically" ]
@@ -2196,6 +1977,9 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                         [ span
                             [ class "mr-2" ]
                             [ text "focused on"
+                            , Html.sup
+                                [ class "ml-1.5 text-gray-600 dark:text-gray-400" ]
+                                [ text "BETA" ]
                             ]
                         , Components.SelectMenu.render
                             [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect
@@ -2203,17 +1987,17 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                             , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << TermId.fromString)
                             , Components.SelectMenu.enabled tabbable
                             ]
-                            (disambiguatedPreferredTermsWithDefinitions
+                            (primaryTermsWithDefinitions
                                 |> List.map
-                                    (\disambiguatedPreferredTerm ->
+                                    (\primaryTerm ->
                                         let
-                                            preferredTermId =
-                                                Term.id disambiguatedPreferredTerm
+                                            primaryTermId =
+                                                Term.id primaryTerm
                                         in
                                         Components.SelectMenu.Choice
-                                            (TermId.toString preferredTermId)
-                                            [ text <| Term.inlineText disambiguatedPreferredTerm ]
-                                            (model.mostRecentTermIdForOrderingItemsFocusedOn == Just preferredTermId)
+                                            (TermId.toString primaryTermId)
+                                            [ text <| Term.inlineText primaryTerm ]
+                                            (model.mostRecentTermIdForOrderingItemsFocusedOn == Just primaryTermId)
                                     )
                             )
                         ]
@@ -2240,8 +2024,8 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
 type MenuOrDialogShown
     = MenuForMobileShown
     | SearchDialogShown
-    | ConfirmDeleteModalDialogShown GlossaryItemId
-    | ViewSingleItemModalDialogShown GlossaryItemId
+    | ConfirmDeleteModalDialogShown GlossaryItemIndex
+    | ViewSingleItemModalDialogShown GlossaryItemIndex
     | NoMenuOrDialogShown
 
 
@@ -2254,12 +2038,12 @@ menuOrDialogShown model =
         MenuForMobileShown
 
     else if model.layout == ShowSingleItem then
-        model.common.maybeId
+        model.common.maybeIndex
             |> Maybe.map ViewSingleItemModalDialogShown
             |> Maybe.withDefault NoMenuOrDialogShown
 
     else
-        model.confirmDeleteId
+        model.confirmDeleteIndex
             |> Maybe.map ConfirmDeleteModalDialogShown
             |> Maybe.withDefault NoMenuOrDialogShown
 
@@ -2283,53 +2067,27 @@ noModalDialogShown model =
             True
 
 
-editing : Editability -> Bool
-editing editability =
-    case editability of
-        EditingInMemory ->
-            True
-
-        EditingWithBackend ->
-            True
-
-        _ ->
-            False
-
-
-canEdit : Editability -> Bool
-canEdit editability =
-    case editability of
-        CanEditInMemory ->
-            True
-
-        CanEditWithBackend ->
-            True
-
-        _ ->
-            False
-
-
 view : Model -> Document Msg
 view model =
-    case ( model.common.glossary, model.common.incubatingGlossary ) of
-        ( Ok glossary, Ok incubatingGlossary ) ->
+    case model.common.glossary of
+        Err error ->
+            { title = "Glossary"
+            , body = [ pre [] [ text <| Decode.errorToString error ] ]
+            }
+
+        Ok glossary ->
             let
+                editable : MakingChanges
+                editable =
+                    model.makingChanges
+
                 noModalDialogShown_ : Bool
                 noModalDialogShown_ =
                     noModalDialogShown model
 
-                items =
-                    model.itemsFilteredByTag
-                        |> Maybe.map Tuple.second
-                        |> Maybe.withDefault glossary.items
-
-                incubatingItems : IncubatingGlossaryItems
-                incubatingItems =
-                    incubatingGlossary.items
-
-                incubatingIndexOfTerms : IndexOfTerms
-                incubatingIndexOfTerms =
-                    IndexOfTerms.fromIncubatingGlossaryItems incubatingItems
+                indexOfTerms : IndexOfTerms
+                indexOfTerms =
+                    IndexOfTerms.fromGlossaryItems glossary.items
             in
             { title = GlossaryTitle.inlineText glossary.title
             , body =
@@ -2365,30 +2123,27 @@ view model =
                                         else
                                             Nothing
 
-                                    ViewSingleItemModalDialogShown id ->
+                                    ViewSingleItemModalDialogShown index ->
                                         if event == Extras.HtmlEvents.escape then
                                             Just <| ( PageMsg.Internal ChangeLayoutToShowAll, True )
 
                                         else
                                             let
                                                 itemWithPreviousAndNext =
-                                                    incubatingItems
+                                                    glossary.items
                                                         |> (case model.common.orderItemsBy of
                                                                 Alphabetically ->
-                                                                    IncubatingGlossaryItems.orderedAlphabetically
+                                                                    GlossaryItems.orderedAlphabetically
 
                                                                 MostMentionedFirst ->
-                                                                    IncubatingGlossaryItems.orderedByMostMentionedFirst
+                                                                    GlossaryItems.orderedByMostMentionedFirst
 
                                                                 FocusedOn termId ->
-                                                                    \items_ ->
-                                                                        IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId termId items_
-                                                                            |> Maybe.andThen
-                                                                                (\itemId -> IncubatingGlossaryItems.orderedFocusedOn itemId items_)
-                                                                            |> Maybe.withDefault ( [], [] )
-                                                                            |> (\( lhs, rhs ) -> List.append lhs rhs)
+                                                                    GlossaryItems.orderedFocusedOn termId
+                                                                        >> Maybe.withDefault ( Array.empty, Array.empty )
+                                                                        >> (\( lhs, rhs ) -> Array.append lhs rhs)
                                                            )
-                                                        |> itemWithPreviousAndNextForId id
+                                                        |> itemWithPreviousAndNextForIndex index
                                             in
                                             if event == Extras.HtmlEvents.leftArrow then
                                                 itemWithPreviousAndNext.previous
@@ -2407,24 +2162,21 @@ view model =
                                         if event == Extras.HtmlEvents.controlK then
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show, True )
 
-                                        else if canEdit model.editability && event == Extras.HtmlEvents.e then
-                                            Just <| ( PageMsg.Internal MakeChanges, True )
-
-                                        else if editing model.editability && event == Extras.HtmlEvents.n then
+                                        else if model.makingChanges && event == Extras.HtmlEvents.n then
                                             let
                                                 common_ : CommonModel
                                                 common_ =
                                                     model.common
                                             in
-                                            Just <| ( PageMsg.NavigateToCreateOrEdit { common_ | maybeId = Nothing }, True )
+                                            Just <| ( PageMsg.NavigateToCreateOrEdit { common_ | maybeIndex = Nothing }, True )
 
                                         else
                                             Nothing
                             )
                         )
                     ]
-                    [ viewMenuForMobile model glossary.enableMathSupport noModalDialogShown_ incubatingIndexOfTerms
-                    , viewStaticSidebarForDesktop glossary.enableMathSupport noModalDialogShown_ incubatingIndexOfTerms
+                    [ viewMenuForMobile model glossary.enableMathSupport noModalDialogShown_ indexOfTerms
+                    , viewStaticSidebarForDesktop glossary.enableMathSupport noModalDialogShown_ indexOfTerms
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar noModalDialogShown_
@@ -2445,6 +2197,14 @@ view model =
                             ]
                             [ header [] <|
                                 let
+                                    showMakingChangesHelp : Bool
+                                    showMakingChangesHelp =
+                                        model.common.enableHelpForMakingChanges && not model.common.enableSavingChangesInMemory && not editable
+
+                                    showMakeChangesButton : Bool
+                                    showMakeChangesButton =
+                                        model.common.enableSavingChangesInMemory && not model.makingChanges
+
                                     showExportButton : Bool
                                     showExportButton =
                                         model.common.enableExportMenu
@@ -2453,7 +2213,7 @@ view model =
                                     [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
                                     [ div
                                         [ class "flex flex-row justify-start lg:justify-end" ]
-                                        [ Extras.Html.showIf (canEdit model.editability) <|
+                                        [ Extras.Html.showIf showMakeChangesButton <|
                                             div
                                                 [ class "flex-none" ]
                                                 [ viewMakeChangesButton model.common.enableSavingChangesInMemory noModalDialogShown_
@@ -2472,8 +2232,8 @@ view model =
                                         ]
                                     ]
                                 , viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
-                                    |> Extras.Html.showIf (model.editability == ReadOnlyWithHelpForMakingChanges)
-                                , Extras.Html.showIf (editing model.editability) <| viewSettings glossary model
+                                    |> Extras.Html.showIf showMakingChangesHelp
+                                , Extras.Html.showIf editable <| viewSettings glossary model
                                 , h1
                                     [ id ElementIds.title ]
                                     [ GlossaryTitle.view glossary.enableMathSupport glossary.title ]
@@ -2485,88 +2245,37 @@ view model =
                                     , modalDialogShown = not noModalDialogShown_
                                     }
                                     glossary.aboutSection
-                                , Extras.Html.showIf (editing model.editability) <|
+                                , Extras.Html.showIf editable <|
                                     div
                                         [ class "flex-none mt-2" ]
                                         [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
-                                , incubatingItems
+                                , glossary.items
                                     |> (case model.common.orderItemsBy of
                                             Alphabetically ->
-                                                IncubatingGlossaryItems.orderedAlphabetically
-                                                    >> (\lhs -> ( lhs, [] ))
+                                                GlossaryItems.orderedAlphabetically
+                                                    >> (\lhs -> ( lhs, Array.empty ))
 
                                             MostMentionedFirst ->
-                                                IncubatingGlossaryItems.orderedByMostMentionedFirst
-                                                    >> (\lhs -> ( lhs, [] ))
+                                                GlossaryItems.orderedByMostMentionedFirst
+                                                    >> (\lhs -> ( lhs, Array.empty ))
 
                                             FocusedOn termId ->
-                                                let
-                                                    itemId : Maybe GlossaryItemId
-                                                    itemId =
-                                                        IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId termId incubatingItems
-                                                in
-                                                case itemId of
-                                                    Just itemId_ ->
-                                                        IncubatingGlossaryItems.orderedFocusedOn itemId_
-                                                            >> Maybe.withDefault
-                                                                (incubatingItems
-                                                                    |> IncubatingGlossaryItems.orderedAlphabetically
-                                                                    |> (\lhs -> ( lhs, [] ))
-                                                                )
-
-                                                    Nothing ->
-                                                        always
-                                                            (incubatingItems
-                                                                |> IncubatingGlossaryItems.orderedAlphabetically
-                                                                |> (\lhs -> ( lhs, [] ))
-                                                            )
+                                                GlossaryItems.orderedFocusedOn termId
+                                                    >> Maybe.withDefault ( Array.empty, Array.empty )
                                        )
                                     |> viewCards
                                         model
                                         { enableMathSupport = glossary.enableMathSupport
-                                        , editable = editing model.editability
+                                        , editable = editable
                                         , tabbable = noModalDialogShown_
                                         , enableLastUpdatedDates = glossary.enableLastUpdatedDates
                                         }
-                                        glossary.tags
-                                        incubatingItems
-                                ]
-                            , Html.footer
-                                []
-                                [ div
-                                    []
-                                    [ p []
-                                        [ text "Built using "
-                                        , a
-                                            [ Html.Attributes.target "_blank"
-                                            , Accessibility.Key.tabbable noModalDialogShown_
-                                            , href "https://glossary.page/template"
-                                            ]
-                                            [ span
-                                                [ class "font-semibold print:font-normal" ]
-                                                [ text "Glossary Page Template" ]
-                                            ]
-                                        , span
-                                            [ class "hidden print:inline" ]
-                                            [ text " (https://glossary.page/template)" ]
-                                        , text "."
-                                        ]
-                                    ]
+                                        glossary.items
                                 ]
                             ]
                         ]
                     ]
                 ]
-            }
-
-        ( Err error, _ ) ->
-            { title = "Glossary"
-            , body = [ pre [] [ text <| Decode.errorToString error ] ]
-            }
-
-        ( _, Err error ) ->
-            { title = "Glossary"
-            , body = [ pre [] [ text <| Decode.errorToString error ] ]
             }
 
 

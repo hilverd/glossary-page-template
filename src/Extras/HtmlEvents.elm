@@ -16,7 +16,7 @@ module Extras.HtmlEvents exposing
     , onEscape
     , preventDefaultOnDecoder
     , rightArrow
-    , upArrow, e
+    , upArrow
     )
 
 import Html exposing (Attribute)
@@ -132,11 +132,6 @@ end =
 controlK : KeyDownEvent
 controlK =
     { keyValue = Character 'k', controlKey = True }
-
-
-e : KeyDownEvent
-e =
-    { keyValue = Character 'e', controlKey = False }
 
 
 n : KeyDownEvent

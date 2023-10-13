@@ -1,7 +1,6 @@
 module Extras.HtmlTree exposing
-    ( Attribute, attributeToHtmlAttribute, boolAttribute, HtmlTree(..), nothing
+    ( Attribute, attributeToHtmlAttribute, boolAttribute, HtmlTree(..)
     , toHtml, toHtmlReplacementString, escape
-    , showIf
     )
 
 {-| An `HtmlTree` represents some HTML content that is to be written to a file.
@@ -9,17 +8,12 @@ module Extras.HtmlTree exposing
 
 # Type and Constructors
 
-@docs Attribute, attributeToHtmlAttribute, boolAttribute, HtmlTree, nothing
+@docs Attribute, attributeToHtmlAttribute, boolAttribute, HtmlTree
 
 
 # Converting to a String
 
 @docs toHtml, toHtmlReplacementString, escape
-
-
-# Conditional nodes
-
-@docs showIf
 
 -}
 
@@ -181,21 +175,3 @@ toIndentedHtml initialLevel level format tree =
                            )
                         ++ closingTag
                    )
-
-
-{-| An HtmlTree with no real content.
--}
-nothing : HtmlTree
-nothing =
-    Leaf ""
-
-
-{-| Return the given content if a condition is true, else return `nothing`.
--}
-showIf : Bool -> HtmlTree -> HtmlTree
-showIf condition htmlTree =
-    if condition then
-        htmlTree
-
-    else
-        nothing

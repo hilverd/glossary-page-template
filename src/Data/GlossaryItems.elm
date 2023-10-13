@@ -1,11 +1,11 @@
-module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, preferredTermIdsToIndexes, get, insert, update, remove, filterByTag, terms, preferredTerms, preferredTermsWithDefinitions, enableFocusingOn, preferredTermsByAlternativeTermId, alternativeTerms)
+module Data.GlossaryItems exposing (GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, primaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms, primaryTermsWithDefinitions, enableFocusingOn)
 
 {-| A set of glossary items that make up a glossary.
 
 
 # Glossary Items
 
-@docs GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, preferredTermIdsToIndexes, get, insert, update, remove, filterByTag, terms, preferredTerms, preferredTermsWithDefinitions, enableFocusingOn, preferredTermsByAlternativeTermId, alternativeTerms
+@docs GlossaryItems, fromList, orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn, primaryTermIdsToIndexes, get, insert, update, remove, terms, primaryTerms, primaryTermsWithDefinitions, enableFocusingOn
 
 -}
 
@@ -13,7 +13,6 @@ import Array exposing (Array)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
-import Data.GlossaryItem.Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
@@ -29,64 +28,60 @@ This is done using an opaque type that supports efficiently retrieving the items
 -}
 type GlossaryItems
     = GlossaryItems
-        { itemByIndex : Dict Int GlossaryItem
-        , orderedAlphabetically : Array GlossaryItemIndex
-        , orderedByMostMentionedFirst : Array GlossaryItemIndex
-        , orderedFocusedOn : Maybe ( TermId, ( Array GlossaryItemIndex, Array GlossaryItemIndex ) )
-        , preferredTermIdsToIndexes : Dict String GlossaryItemIndex
+        { orderedAlphabetically : Array ( GlossaryItemIndex, GlossaryItem )
+        , orderedByMostMentionedFirst : Array ( GlossaryItemIndex, GlossaryItem )
+        , orderedFocusedOn :
+            Maybe
+                ( TermId
+                , ( Array ( GlossaryItemIndex, GlossaryItem )
+                  , Array ( GlossaryItemIndex, GlossaryItem )
+                  )
+                )
+        , primaryTermIdsToIndexes : Dict String GlossaryItemIndex
         }
 
 
 compareForSortingAlphabetically : GlossaryItem -> GlossaryItem -> Order
 compareForSortingAlphabetically item1 item2 =
     Term.compareAlphabetically
-        (GlossaryItem.preferredTerm item1)
-        (GlossaryItem.preferredTerm item2)
+        (item1.terms |> List.head |> Maybe.withDefault Term.emptyPlaintext)
+        (item2.terms |> List.head |> Maybe.withDefault Term.emptyPlaintext)
 
 
 {-| Build glossary items from a list.
 
     import Array
-    import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+    import Data.GlossaryItem exposing (GlossaryItem)
     import Data.GlossaryItem.Term as Term exposing (Term)
 
     item1 : GlossaryItem
-    item1 = GlossaryItem.init
-              (Term.fromMarkdown "\\_\\_slots\\_\\_" False)
-              []
-              Nothing
-              []
-              Nothing
-              []
-              False
-              Nothing
+    item1 = { terms = [ Term.fromMarkdown "\\_\\_slots\\_\\_" False ]
+            , definitions = []
+            , relatedTerms = []
+            , needsUpdating = False
+            , lastUpdatedDate = Nothing
+            }
 
     item2 : GlossaryItem
-    item2 = GlossaryItem.init
-              (Term.fromMarkdown "Situation" False)
-              []
-              Nothing
-              []
-              Nothing
-              []
-              False
-              Nothing
+    item2 = { terms = [ Term.fromMarkdown "Situation" False ]
+            , definitions = []
+            , relatedTerms = []
+            , needsUpdating = False
+            , lastUpdatedDate = Nothing
+            }
 
     item3 : GlossaryItem
-    item3 = GlossaryItem.init
-              (Term.fromMarkdown "strong" False)
-              []
-              Nothing
-              []
-              Nothing
-              []
-              False
-              Nothing
+    item3 = { terms = [ Term.fromMarkdown "strong" False ]
+            , definitions = []
+            , relatedTerms = []
+            , needsUpdating = False
+            , lastUpdatedDate = Nothing
+            }
 
     fromList [item1, item2, item3]
     |> orderedAlphabetically
     |> Array.toList
-    |> List.map (Tuple.second >> GlossaryItem.allTerms >> List.map Term.raw)
+    |> List.map (Tuple.second >> .terms >> List.map Term.raw)
     --> [["Situation"], ["\\_\\_slots\\_\\_"], ["strong"]]
 
 -}
@@ -103,35 +98,29 @@ fromList glossaryItems =
                 |> List.sortWith compareForSortingAlphabetically
                 |> zipListWithIndexes
 
-        itemByIndex : Dict Int GlossaryItem
-        itemByIndex =
-            alphabetically
-                |> List.foldl
-                    (\( index, item ) -> Dict.insert (GlossaryItemIndex.toInt index) item)
-                    Dict.empty
-
         byMostMentionedFirst : List ( GlossaryItemIndex, GlossaryItem )
         byMostMentionedFirst =
             orderListByMostMentionedFirst alphabetically
 
-        preferredTermIdsToIndexes1 : List ( GlossaryItemIndex, GlossaryItem ) -> Dict String GlossaryItemIndex
-        preferredTermIdsToIndexes1 =
+        primaryTermIdsToIndexes1 : List ( GlossaryItemIndex, GlossaryItem ) -> Dict String GlossaryItemIndex
+        primaryTermIdsToIndexes1 =
             List.foldl
                 (\( index, item ) result ->
-                    let
-                        termIdString =
-                            item |> GlossaryItem.preferredTerm |> Term.id |> TermId.toString
-                    in
-                    Dict.insert termIdString index result
+                    item.terms
+                        |> List.head
+                        |> Maybe.map
+                            (\primaryTerm ->
+                                Dict.insert (primaryTerm |> Term.id |> TermId.toString) index result
+                            )
+                        |> Maybe.withDefault result
                 )
                 Dict.empty
     in
     GlossaryItems <|
-        { itemByIndex = itemByIndex
-        , orderedAlphabetically = alphabetically |> List.map Tuple.first |> Array.fromList
-        , orderedByMostMentionedFirst = byMostMentionedFirst |> List.map Tuple.first |> Array.fromList
+        { orderedAlphabetically = Array.fromList alphabetically
+        , orderedByMostMentionedFirst = Array.fromList byMostMentionedFirst
         , orderedFocusedOn = Nothing
-        , preferredTermIdsToIndexes = preferredTermIdsToIndexes1 alphabetically
+        , primaryTermIdsToIndexes = primaryTermIdsToIndexes1 alphabetically
         }
 
 
@@ -156,9 +145,9 @@ orderListByMostMentionedFirst indexedGlossaryItems =
 
                 score : Int
                 score =
-                    (glossaryItem |> GlossaryItem.allTerms |> List.map (Term.raw >> Regex.find termAsWord >> List.length) |> List.sum)
-                        + (glossaryItem |> GlossaryItem.definition |> Maybe.map (Definition.raw >> Regex.find termAsWord >> List.length) |> Maybe.withDefault 0)
-                        + (glossaryItem |> GlossaryItem.relatedPreferredTerms |> List.map RelatedTerm.raw |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
+                    (glossaryItem.terms |> List.map (Term.raw >> Regex.find termAsWord >> List.length) |> List.sum)
+                        + (glossaryItem.definitions |> List.map (Definition.raw >> Regex.find termAsWord >> List.length) |> List.sum)
+                        + (glossaryItem.relatedTerms |> List.map RelatedTerm.raw |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
             in
             if score > 0 then
                 1
@@ -187,9 +176,7 @@ orderListByMostMentionedFirst indexedGlossaryItems =
             indexed
                 |> List.concatMap
                     (\( index, glossaryItem ) ->
-                        glossaryItem
-                            |> GlossaryItem.allTerms
-                            |> List.map (\term -> ( index, term ))
+                        List.map (\term -> ( index, term )) glossaryItem.terms
                     )
                 |> List.foldl
                     (\( glossaryItemIndex, term ) result ->
@@ -204,9 +191,9 @@ orderListByMostMentionedFirst indexedGlossaryItems =
         |> List.sortWith
             (\( _, item1 ) ( _, item2 ) ->
                 let
-                    itemScore : GlossaryItem -> Int
+                    itemScore : { a | terms : List Term } -> Int
                     itemScore =
-                        GlossaryItem.allTerms
+                        .terms
                             >> List.map
                                 (\term ->
                                     termBodyScores
@@ -221,8 +208,8 @@ orderListByMostMentionedFirst indexedGlossaryItems =
 
                     EQ ->
                         compare
-                            (item1 |> GlossaryItem.preferredTerm |> Term.raw |> String.toUpper)
-                            (item2 |> GlossaryItem.preferredTerm |> Term.raw |> String.toUpper)
+                            (item1.terms |> List.head |> Maybe.map Term.raw |> Maybe.withDefault "" |> String.toUpper)
+                            (item2.terms |> List.head |> Maybe.map Term.raw |> Maybe.withDefault "" |> String.toUpper)
 
                     GT ->
                         LT
@@ -232,24 +219,24 @@ orderListByMostMentionedFirst indexedGlossaryItems =
 sanitiseList : List GlossaryItem -> List GlossaryItem
 sanitiseList glossaryItems =
     let
-        preferredTermIdsSet : Set String
-        preferredTermIdsSet =
+        primaryTermIdsSet : Set String
+        primaryTermIdsSet =
             glossaryItems
-                |> List.map (GlossaryItem.preferredTerm >> Term.id >> TermId.toString)
+                |> List.concatMap (.terms >> List.take 1)
+                |> List.map (Term.id >> TermId.toString)
                 |> Set.fromList
     in
     glossaryItems
         |> List.map
             (\glossaryItem ->
-                GlossaryItem.updateRelatedTerms
-                    (glossaryItem
-                        |> GlossaryItem.relatedPreferredTerms
-                        |> List.filter
-                            (\relatedTerm ->
-                                Set.member (relatedTerm |> RelatedTerm.idReference |> TermId.toString) preferredTermIdsSet
-                            )
-                    )
-                    glossaryItem
+                { glossaryItem
+                    | relatedTerms =
+                        glossaryItem.relatedTerms
+                            |> List.filter
+                                (\relatedTerm ->
+                                    Set.member (relatedTerm |> RelatedTerm.idReference |> TermId.toString) primaryTermIdsSet
+                                )
+                }
             )
 
 
@@ -329,112 +316,6 @@ remove indexWhenOrderedAlphabetically glossaryItems =
            )
 
 
-{-| Filter the glossary items by a tag.
--}
-filterByTag : Tag -> GlossaryItems -> GlossaryItems
-filterByTag tag glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            let
-                filteredItemByIndex : Dict Int GlossaryItem
-                filteredItemByIndex =
-                    glossaryItems
-                        |> orderedAlphabetically
-                        |> Array.foldl
-                            (\( index, item ) result ->
-                                let
-                                    indexInt =
-                                        GlossaryItemIndex.toInt index
-
-                                    itemMatchesTag =
-                                        item
-                                            |> GlossaryItem.tags
-                                            |> List.any ((==) tag)
-                                in
-                                if itemMatchesTag then
-                                    Dict.insert indexInt item result
-
-                                else
-                                    result
-                            )
-                            Dict.empty
-
-                termIdsAfterFiltering : Set String
-                termIdsAfterFiltering =
-                    filteredItemByIndex
-                        |> Dict.values
-                        |> List.map
-                            (GlossaryItem.preferredTerm
-                                >> Term.id
-                                >> TermId.toString
-                            )
-                        |> Set.fromList
-
-                transformedItemByIndex : Dict Int GlossaryItem
-                transformedItemByIndex =
-                    filteredItemByIndex
-                        |> Dict.map
-                            (\_ item ->
-                                let
-                                    tags =
-                                        item
-                                            |> GlossaryItem.tags
-                                            |> List.filter ((/=) tag)
-
-                                    relatedPreferredTerms =
-                                        item
-                                            |> GlossaryItem.relatedPreferredTerms
-                                            |> List.filter
-                                                (\relatedPreferredTerm ->
-                                                    Set.member
-                                                        (relatedPreferredTerm |> RelatedTerm.idReference |> TermId.toString)
-                                                        termIdsAfterFiltering
-                                                )
-                                in
-                                item
-                                    |> GlossaryItem.updateRelatedTerms relatedPreferredTerms
-                                    |> GlossaryItem.updateNormalTags tags
-                            )
-
-                itemIndexesAfterFiltering : Set Int
-                itemIndexesAfterFiltering =
-                    filteredItemByIndex
-                        |> Dict.keys
-                        |> Set.fromList
-
-                filterAndTransform : Array ( GlossaryItemIndex, GlossaryItem ) -> Array ( GlossaryItemIndex, GlossaryItem )
-                filterAndTransform =
-                    Array.toList
-                        >> List.filterMap
-                            (\( index, _ ) ->
-                                Dict.get (GlossaryItemIndex.toInt index) transformedItemByIndex
-                                    |> Maybe.map (Tuple.pair index)
-                            )
-                        >> Array.fromList
-
-                itemByIndex_ : Dict Int GlossaryItem
-                itemByIndex_ =
-                    glossaryItems
-                        |> orderedAlphabetically
-                        |> filterAndTransform
-                        |> Array.foldl
-                            (\( index, item ) -> Dict.insert (GlossaryItemIndex.toInt index) item)
-                            Dict.empty
-
-                preferredTermIdsToIndexes_ =
-                    items.preferredTermIdsToIndexes
-                        |> Dict.filter
-                            (\_ index ->
-                                Set.member (GlossaryItemIndex.toInt index) itemIndexesAfterFiltering
-                            )
-            in
-            GlossaryItems
-                { items
-                    | itemByIndex = itemByIndex_
-                    , preferredTermIdsToIndexes = preferredTermIdsToIndexes_
-                }
-
-
 {-| Retrieve the glossary items ordered alphabetically.
 -}
 orderedAlphabetically : GlossaryItems -> Array ( GlossaryItemIndex, GlossaryItem )
@@ -442,14 +323,6 @@ orderedAlphabetically glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             items.orderedAlphabetically
-                |> Array.toList
-                |> List.filterMap
-                    (\index ->
-                        items.itemByIndex
-                            |> Dict.get (GlossaryItemIndex.toInt index)
-                            |> Maybe.map (Tuple.pair index)
-                    )
-                |> Array.fromList
 
 
 {-| Retrieve the glossary items ordered by most mentioned first.
@@ -459,17 +332,9 @@ orderedByMostMentionedFirst glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             items.orderedByMostMentionedFirst
-                |> Array.toList
-                |> List.filterMap
-                    (\index ->
-                        items.itemByIndex
-                            |> Dict.get (GlossaryItemIndex.toInt index)
-                            |> Maybe.map (Tuple.pair index)
-                    )
-                |> Array.fromList
 
 
-{-| Retrieve the glossary items ordered "focused on" a specific item, identified by its preferred term.
+{-| Retrieve the glossary items ordered "focused on" a specific item, identified by its primary term.
 -}
 orderedFocusedOn :
     TermId
@@ -483,34 +348,9 @@ orderedFocusedOn termId glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             case items.orderedFocusedOn of
-                Just ( termIdFocusedOn, ( indexes, otherIndexes ) ) ->
+                Just ( termIdFocusedOn, indexedItems ) ->
                     if termIdFocusedOn == termId then
-                        let
-                            indexedGlossaryItems : Array ( GlossaryItemIndex, GlossaryItem )
-                            indexedGlossaryItems =
-                                indexes
-                                    |> Array.toList
-                                    |> List.filterMap
-                                        (\index ->
-                                            items.itemByIndex
-                                                |> Dict.get (GlossaryItemIndex.toInt index)
-                                                |> Maybe.map (Tuple.pair index)
-                                        )
-                                    |> Array.fromList
-
-                            otherIndexedGlossaryItems : Array ( GlossaryItemIndex, GlossaryItem )
-                            otherIndexedGlossaryItems =
-                                otherIndexes
-                                    |> Array.toList
-                                    |> List.filterMap
-                                        (\index ->
-                                            items.itemByIndex
-                                                |> Dict.get (GlossaryItemIndex.toInt index)
-                                                |> Maybe.map (Tuple.pair index)
-                                        )
-                                    |> Array.fromList
-                        in
-                        Just ( indexedGlossaryItems, otherIndexedGlossaryItems )
+                        Just indexedItems
 
                     else
                         Nothing
@@ -519,13 +359,13 @@ orderedFocusedOn termId glossaryItems =
                     Nothing
 
 
-{-| Retrieve a dict mapping each preferred term ID to its index in the item list (no matter how it's sorted).
+{-| Retrieve a dict mapping each primary term ID to its index in the item list (no matter how it's sorted).
 -}
-preferredTermIdsToIndexes : GlossaryItems -> Dict String GlossaryItemIndex
-preferredTermIdsToIndexes glossaryItems =
+primaryTermIdsToIndexes : GlossaryItems -> Dict String GlossaryItemIndex
+primaryTermIdsToIndexes glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
-            items.preferredTermIdsToIndexes
+            items.primaryTermIdsToIndexes
 
 
 {-| Retrieve the list of all terms in the glossary.
@@ -534,39 +374,39 @@ terms : GlossaryItems -> List Term
 terms =
     orderedAlphabetically
         >> Array.toList
-        >> List.concatMap (Tuple.second >> GlossaryItem.allTerms)
+        >> List.concatMap (Tuple.second >> .terms)
 
 
-{-| Retrieve the list of all preferred terms in the glossary.
-A _preferred term_ is a term that occurs as the first (and possibly only) one in a glossary item.
-When adding related terms in the UI, only preferred terms are available.
-This is to encourage standardizing on one "preferred" term for a concept, instead of several synonyms with no clear preferred one.
+{-| Retrieve the list of all primary terms in the glossary.
+A _primary term_ is a term that occurs as the first (and possibly only) one in a glossary item.
+When adding related terms in the UI, only primary terms are available.
+This is to encourage standardizing on one "primary" term for a concept, instead of several synonyms with no clear preferred one.
 -}
-preferredTerms : GlossaryItems -> List Term
-preferredTerms =
+primaryTerms : GlossaryItems -> List Term
+primaryTerms =
     orderedAlphabetically
         >> Array.toList
-        >> List.map (Tuple.second >> GlossaryItem.preferredTerm)
+        >> List.concatMap (Tuple.second >> .terms >> List.take 1)
 
 
-{-| Similar to `preferredTerms` but only return those preferred terms whose items have at least one definition.
+{-| Similar to `primaryTerms` but only return those terms whose items have at least one definition.
 -}
-preferredTermsWithDefinitions : GlossaryItems -> List Term
-preferredTermsWithDefinitions =
+primaryTermsWithDefinitions : GlossaryItems -> List Term
+primaryTermsWithDefinitions =
     orderedAlphabetically
         >> Array.toList
         >> List.filterMap
             (\( _, item ) ->
-                if GlossaryItem.hasADefinition item then
+                if GlossaryItem.hasSomeDefinitions item then
                     Just item
 
                 else
                     Nothing
             )
-        >> List.map GlossaryItem.preferredTerm
+        >> List.concatMap (.terms >> List.take 1)
 
 
-{-| Make it easy to retrieve the items ordered "focused on" a specific item (identified by the ID of that item's preferred term).
+{-| Make it easy to retrieve the items ordered "focused on" a specific item (identified by the ID of that item's primary term).
 Returns an updated `GlossaryItems` where the necessary computations have been done.
 -}
 enableFocusingOn : TermId -> GlossaryItems -> GlossaryItems
@@ -574,27 +414,22 @@ enableFocusingOn termId glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             let
-                preferredTermsGraph : DirectedGraph TermId
-                preferredTermsGraph =
-                    items.preferredTermIdsToIndexes
+                primaryTermsGraph : DirectedGraph TermId
+                primaryTermsGraph =
+                    items.primaryTermIdsToIndexes
                         |> Dict.keys
                         |> List.foldl
                             (TermId.fromString >> DirectedGraph.insertVertex)
                             (DirectedGraph.empty TermId.toString TermId.fromString)
 
-                orderedAlphabetically_ : Array ( GlossaryItemIndex, GlossaryItem )
-                orderedAlphabetically_ =
-                    glossaryItems
-                        |> orderedAlphabetically
-
                 relatedTermsGraph : DirectedGraph TermId
                 relatedTermsGraph =
-                    orderedAlphabetically_
+                    items.orderedAlphabetically
                         |> Array.toList
                         |> List.filterMap
                             (Tuple.second
                                 >> (\item ->
-                                        if GlossaryItem.hasADefinition item then
+                                        if GlossaryItem.hasSomeDefinitions item then
                                             Just item
 
                                         else
@@ -603,18 +438,23 @@ enableFocusingOn termId glossaryItems =
                             )
                         |> List.foldl
                             (\item graph ->
-                                let
-                                    preferredTermId : TermId
-                                    preferredTermId =
-                                        item |> GlossaryItem.preferredTerm |> Term.id
-                                in
-                                item
-                                    |> GlossaryItem.relatedPreferredTerms
-                                    |> List.foldl
-                                        (RelatedTerm.idReference >> DirectedGraph.insertEdge preferredTermId)
-                                        graph
+                                item.terms
+                                    |> List.head
+                                    |> Maybe.map
+                                        (\primaryTerm ->
+                                            item.relatedTerms
+                                                |> List.foldl
+                                                    (\relatedTerm graph_ ->
+                                                        DirectedGraph.insertEdge
+                                                            (Term.id primaryTerm)
+                                                            (RelatedTerm.idReference relatedTerm)
+                                                            graph_
+                                                    )
+                                                    graph
+                                        )
+                                    |> Maybe.withDefault graph
                             )
-                            preferredTermsGraph
+                            primaryTermsGraph
 
                 termIdsByDistance : ( List TermId, List TermId )
                 termIdsByDistance =
@@ -622,84 +462,27 @@ enableFocusingOn termId glossaryItems =
 
                 termIdToIndexedItem : TermId -> Maybe ( GlossaryItemIndex, GlossaryItem )
                 termIdToIndexedItem termId_ =
-                    items.preferredTermIdsToIndexes
+                    items.primaryTermIdsToIndexes
                         |> Dict.get (TermId.toString termId_)
                         |> Maybe.andThen
                             (\index ->
-                                Array.get (GlossaryItemIndex.toInt index) orderedAlphabetically_
+                                Array.get (GlossaryItemIndex.toInt index) items.orderedAlphabetically
                             )
 
                 itemsByDistance :
-                    ( Array GlossaryItemIndex
-                    , Array GlossaryItemIndex
+                    ( Array ( GlossaryItemIndex, GlossaryItem )
+                    , Array ( GlossaryItemIndex, GlossaryItem )
                     )
                 itemsByDistance =
                     termIdsByDistance
                         |> Tuple.mapBoth
                             (List.filterMap
                                 termIdToIndexedItem
-                                >> List.map Tuple.first
                                 >> Array.fromList
                             )
                             (List.filterMap
                                 termIdToIndexedItem
-                                >> List.map Tuple.first
                                 >> Array.fromList
                             )
             in
             GlossaryItems { items | orderedFocusedOn = Just ( termId, itemsByDistance ) }
-
-
-{-| Retrieve a dict mapping the ID of each alternative term to a list of all preferred terms that occur an an item together with the alternative term.
--}
-preferredTermsByAlternativeTermId : GlossaryItems -> Dict String (List Term)
-preferredTermsByAlternativeTermId =
-    orderedAlphabetically
-        >> Array.map Tuple.second
-        >> Array.foldl
-            (\item result ->
-                let
-                    preferredTerm =
-                        GlossaryItem.preferredTerm item
-
-                    alternativeTerms_ =
-                        GlossaryItem.alternativeTerms item
-                in
-                alternativeTerms_
-                    |> List.foldl
-                        (\alternativeTerm result_ ->
-                            Dict.update
-                                (alternativeTerm |> Term.id |> TermId.toString)
-                                (\preferredTerms_ ->
-                                    preferredTerms_
-                                        |> Maybe.map (\terms_ -> preferredTerm :: terms_)
-                                        |> Maybe.withDefault [ preferredTerm ]
-                                        |> Just
-                                )
-                                result_
-                        )
-                        result
-            )
-            Dict.empty
-
-
-{-| A list of all alternative terms in the items, with duplicates removed.
--}
-alternativeTerms : GlossaryItems -> List Term
-alternativeTerms =
-    orderedAlphabetically
-        >> Array.map Tuple.second
-        >> Array.foldl
-            (\item result ->
-                item
-                    |> GlossaryItem.alternativeTerms
-                    |> List.foldl
-                        (\alternativeTerm ->
-                            Dict.insert
-                                (alternativeTerm |> Term.id |> TermId.toString)
-                                alternativeTerm
-                        )
-                        result
-            )
-            Dict.empty
-        >> Dict.values

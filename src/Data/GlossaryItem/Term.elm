@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, updateRaw, htmlTreeForAnki)
+module Data.GlossaryItem.Term exposing (Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, htmlTreeForAnki)
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -9,7 +9,7 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, updateRaw, htmlTreeForAnki
+@docs Term, emptyPlaintext, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupCharacter, compareAlphabetically, htmlTreeForAnki
 
 -}
 
@@ -159,11 +159,7 @@ decode enableMarkdownBasedSyntax =
             fromPlaintextWithId
         )
         (Decode.field "body" Decode.string)
-        (Decode.oneOf
-            [ Decode.field "idReference" <| Decode.map TermId.fromString <| Decode.string -- for backwards compatibility
-            , Decode.field "id" <| Decode.map TermId.fromString <| Decode.string
-            ]
-        )
+        (Decode.field "id" <| Decode.map TermId.fromString <| Decode.string)
         (Decode.field "isAbbreviation" Decode.bool)
 
 
@@ -348,20 +344,6 @@ compareAlphabetically term1 term2 =
                     |> preserveOnlyAlphaNumChars
                     |> String.toUpper
                 )
-
-
-{-| Update the raw body of a term.
--}
-updateRaw : (String -> String) -> Term -> Term
-updateRaw f term =
-    case term of
-        PlaintextTerm t ->
-            fromPlaintext (f t.body) t.isAbbreviation
-
-        MarkdownTerm t ->
-            fromMarkdown
-                (t.body |> MarkdownFragment.raw |> f)
-                t.isAbbreviation
 
 
 {-| Convert a term to an HtmlTree for Anki.

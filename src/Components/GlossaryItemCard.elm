@@ -1,17 +1,15 @@
 module Components.GlossaryItemCard exposing (Style(..), view)
 
-import Accessibility exposing (Html, div, span, text)
+import Accessibility exposing (Html, div, p, span, text)
 import Accessibility.Aria
 import Accessibility.Key
 import Components.Button
+import Data.FeatureFlag exposing (enableTopicsFeature)
+import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
-import Data.GlossaryItem.Tag as Tag exposing (Tag)
-import Data.GlossaryItem.TagInItem as TagInItem exposing (TagInItem)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import ElementIds
@@ -33,11 +31,11 @@ type Style msg
         , onClickViewFull : msg
         , onClickEdit : msg
         , onClickDelete : msg
-        , onClickItem : GlossaryItemId -> msg
-        , onClickTag : Tag -> msg
-        , onClickRelatedTerm : Term -> msg
+        , onClickItem : GlossaryItemIndex -> msg
+        , onClickRelatedTerm : RelatedTerm -> msg
         , editable : Bool
         , shownAsSingle : Bool
+        , errorWhileDeleting : Maybe ( GlossaryItemIndex, String )
         }
 
 
@@ -52,63 +50,28 @@ view :
 view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glossaryItemWithPreviousAndNext =
     Extras.Html.showMaybe
         (\( index, glossaryItem ) ->
-            let
-                disambiguatedPreferredTerm : Term
-                disambiguatedPreferredTerm =
-                    GlossaryItemForHtml.disambiguatedPreferredTerm glossaryItem
-
-                alternativeTerms : List Term
-                alternativeTerms =
-                    GlossaryItemForHtml.alternativeTerms glossaryItem
-
-                tags : List Tag
-                tags =
-                    GlossaryItemForHtml.allTags glossaryItem
-
-                itemHasSomeDefinitions : Bool
-                itemHasSomeDefinitions =
-                    GlossaryItemForHtml.definition glossaryItem /= Nothing
-
-                definitions =
-                    GlossaryItemForHtml.definition glossaryItem
-                        |> Maybe.map List.singleton
-                        |> Maybe.withDefault []
-
-                relatedTerms =
-                    GlossaryItemForHtml.relatedPreferredTerms glossaryItem
-
-                needsUpdating =
-                    GlossaryItemForHtml.needsUpdating glossaryItem
-
-                lastUpdatedDate =
-                    GlossaryItemForHtml.lastUpdatedDateAsIso8601 glossaryItem
-            in
             case style of
                 Preview ->
                     let
+                        itemHasSomeDefinitions : Bool
+                        itemHasSomeDefinitions =
+                            GlossaryItem.hasSomeDefinitions glossaryItem
+
                         tabbable : Bool
                         tabbable =
                             True
                     in
                     div
                         [ Html.Attributes.style "max-height" "100%" ]
-                        (viewGlossaryTerm
-                            { enableMathSupport = enableMathSupport
-                            , tabbable = tabbable
-                            , showSilcrow = False
-                            , isPreferred = True
-                            }
-                            disambiguatedPreferredTerm
-                            :: List.map
-                                (viewGlossaryTerm
-                                    { enableMathSupport = enableMathSupport
-                                    , tabbable = tabbable
-                                    , showSilcrow = False
-                                    , isPreferred = False
-                                    }
-                                )
-                                alternativeTerms
-                            ++ (if needsUpdating then
+                        (List.map
+                            (viewGlossaryTerm
+                                { enableMathSupport = enableMathSupport
+                                , tabbable = tabbable
+                                , showSilcrow = False
+                                }
+                            )
+                            glossaryItem.terms
+                            ++ (if glossaryItem.needsUpdating then
                                     [ Html.dd
                                         [ class "needs-updating" ]
                                         [ span
@@ -120,28 +83,23 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                 else
                                     []
                                )
-                            ++ viewTags
-                                { enableMathSupport = enableMathSupport
-                                , onClickTag = Nothing
-                                }
-                                tags
-                            :: List.map
+                            ++ List.map
                                 (viewGlossaryItemDefinition
                                     { enableMathSupport = enableMathSupport
                                     , tabbable = makeLinksTabbable
+                                    , topicsClickable = False
                                     }
                                 )
-                                definitions
-                            ++ viewGlossaryItemRelatedTerms
-                                enableMathSupport
-                                True
-                                tabbable
-                                itemHasSomeDefinitions
-                                Nothing
-                                relatedTerms
+                                glossaryItem.definitions
+                            ++ viewGlossaryItemRelatedTerms enableMathSupport True tabbable itemHasSomeDefinitions Nothing glossaryItem.relatedTerms
                         )
 
-                Normal { tabbable, onClickViewFull, onClickEdit, onClickDelete, onClickTag, onClickItem, onClickRelatedTerm, editable, shownAsSingle } ->
+                Normal { tabbable, onClickViewFull, onClickEdit, onClickDelete, onClickItem, onClickRelatedTerm, editable, shownAsSingle, errorWhileDeleting } ->
+                    let
+                        itemHasSomeDefinitions : Bool
+                        itemHasSomeDefinitions =
+                            GlossaryItem.hasSomeDefinitions glossaryItem
+                    in
                     if shownAsSingle then
                         div
                             [ Html.Attributes.style "max-height" "100%"
@@ -183,23 +141,15 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                         ]
                                 , div
                                     []
-                                    (viewGlossaryTerm
-                                        { enableMathSupport = enableMathSupport
-                                        , tabbable = tabbable
-                                        , showSilcrow = True
-                                        , isPreferred = True
-                                        }
-                                        disambiguatedPreferredTerm
-                                        :: List.map
-                                            (viewGlossaryTerm
-                                                { enableMathSupport = enableMathSupport
-                                                , tabbable = tabbable
-                                                , showSilcrow = False
-                                                , isPreferred = False
-                                                }
-                                            )
-                                            alternativeTerms
-                                        ++ (if needsUpdating then
+                                    (List.map
+                                        (viewGlossaryTerm
+                                            { enableMathSupport = enableMathSupport
+                                            , tabbable = tabbable
+                                            , showSilcrow = True
+                                            }
+                                        )
+                                        glossaryItem.terms
+                                        ++ (if glossaryItem.needsUpdating then
                                                 [ Html.dd
                                                     [ class "needs-updating" ]
                                                     [ span
@@ -211,35 +161,31 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                             else
                                                 []
                                            )
-                                        ++ viewTags
-                                            { enableMathSupport = enableMathSupport
-                                            , onClickTag = Just onClickTag
-                                            }
-                                            tags
-                                        :: List.map
+                                        ++ List.map
                                             (viewGlossaryItemDefinition
                                                 { enableMathSupport = enableMathSupport
                                                 , tabbable = makeLinksTabbable
+                                                , topicsClickable = makeLinksTabbable
                                                 }
                                             )
-                                            definitions
-                                        ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDefinitions Nothing relatedTerms
+                                            glossaryItem.definitions
+                                        ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDefinitions Nothing glossaryItem.relatedTerms
                                     )
                                 ]
                             , div
                                 [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
                                 [ Extras.Html.showIf enableLastUpdatedDates <|
                                     Extras.Html.showMaybe
-                                        (\lastUpdatedDate_ ->
+                                        (\lastUpdatedDate ->
                                             div
                                                 [ class "text-right text-sm mt-1.5 mb-2.5 text-gray-500 dark:text-gray-400" ]
                                                 [ text "Updated: "
                                                 , Html.node "last-updated"
-                                                    [ Html.Attributes.attribute "datetime" lastUpdatedDate_ ]
+                                                    [ Html.Attributes.attribute "datetime" lastUpdatedDate ]
                                                     []
                                                 ]
                                         )
-                                        lastUpdatedDate
+                                        glossaryItem.lastUpdatedDate
                                 , div
                                     [ class "flex justify-between" ]
                                     [ span
@@ -269,6 +215,15 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                             ]
                                         ]
                                     ]
+                                , errorWhileDeleting
+                                    |> Extras.Html.showMaybe
+                                        (\( indexOfItemBeingDeleted, errorMessage ) ->
+                                            if index == indexOfItemBeingDeleted then
+                                                errorDiv <| "Failed to save — " ++ errorMessage ++ "."
+
+                                            else
+                                                Extras.Html.nothing
+                                        )
                                 ]
                             ]
 
@@ -295,23 +250,15 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                         ]
                                     ]
                                 , div []
-                                    (viewGlossaryTerm
-                                        { enableMathSupport = enableMathSupport
-                                        , tabbable = tabbable
-                                        , showSilcrow = True
-                                        , isPreferred = True
-                                        }
-                                        disambiguatedPreferredTerm
-                                        :: List.map
-                                            (viewGlossaryTerm
-                                                { enableMathSupport = enableMathSupport
-                                                , tabbable = tabbable
-                                                , showSilcrow = False
-                                                , isPreferred = False
-                                                }
-                                            )
-                                            alternativeTerms
-                                        ++ (if needsUpdating then
+                                    (List.map
+                                        (viewGlossaryTerm
+                                            { enableMathSupport = enableMathSupport
+                                            , tabbable = tabbable
+                                            , showSilcrow = True
+                                            }
+                                        )
+                                        glossaryItem.terms
+                                        ++ (if glossaryItem.needsUpdating then
                                                 [ Html.dd
                                                     [ class "needs-updating" ]
                                                     [ span
@@ -323,39 +270,35 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                             else
                                                 []
                                            )
-                                        ++ viewTags
-                                            { enableMathSupport = enableMathSupport
-                                            , onClickTag = Just onClickTag
-                                            }
-                                            tags
-                                        :: List.map
+                                        ++ List.map
                                             (viewGlossaryItemDefinition
                                                 { enableMathSupport = enableMathSupport
                                                 , tabbable = makeLinksTabbable
+                                                , topicsClickable = makeLinksTabbable
                                                 }
                                             )
-                                            definitions
+                                            glossaryItem.definitions
                                         ++ viewGlossaryItemRelatedTerms
                                             enableMathSupport
                                             False
                                             tabbable
                                             itemHasSomeDefinitions
                                             Nothing
-                                            relatedTerms
+                                            glossaryItem.relatedTerms
                                     )
                                 ]
                             , Extras.Html.showIf enableLastUpdatedDates <|
                                 Extras.Html.showMaybe
-                                    (\lastUpdatedDate_ ->
+                                    (\lastUpdatedDate ->
                                         div
                                             [ class "text-right text-sm mt-1.5 text-gray-500 dark:text-gray-400" ]
                                             [ text "Updated: "
                                             , Html.node "last-updated"
-                                                [ Html.Attributes.attribute "datetime" lastUpdatedDate_ ]
+                                                [ Html.Attributes.attribute "datetime" lastUpdatedDate ]
                                                 []
                                             ]
                                     )
-                                    lastUpdatedDate
+                                    glossaryItem.lastUpdatedDate
                             ]
         )
         glossaryItemWithPreviousAndNext.item
@@ -365,59 +308,34 @@ viewAsSingle :
     { enableMathSupport : Bool
     , makeLinksTabbable : Bool
     , enableLastUpdatedDates : Bool
-    , onClickItem : GlossaryItemId -> msg
-    , onClickRelatedTerm : Term -> msg
+    , onClickItem : GlossaryItemIndex -> msg
+    , onClickRelatedTerm : RelatedTerm -> msg
     }
     -> GlossaryItemWithPreviousAndNext
     -> Html msg
 viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRelatedTerm } glossaryItemWithPreviousAndNext =
     let
-        disambiguatedPreferredTermForPreviousOrNext : GlossaryItemForHtml -> Html msg
-        disambiguatedPreferredTermForPreviousOrNext glossaryItem =
-            let
-                preferredTerm =
-                    GlossaryItemForHtml.disambiguatedPreferredTerm glossaryItem
-            in
-            if Term.isAbbreviation preferredTerm then
-                Html.abbr []
-                    [ Term.view
-                        enableMathSupport
-                        [ class "text-sm" ]
-                        preferredTerm
-                    ]
+        primaryTermForPreviousOrNext glossaryItem =
+            glossaryItem.terms
+                |> List.take 1
+                |> List.map
+                    (\term ->
+                        if Term.isAbbreviation term then
+                            Html.abbr []
+                                [ Term.view
+                                    enableMathSupport
+                                    [ class "text-sm" ]
+                                    term
+                                ]
 
-            else
-                Term.view enableMathSupport
-                    [ class "text-sm" ]
-                    preferredTerm
+                        else
+                            Term.view enableMathSupport
+                                [ class "text-sm" ]
+                                term
+                    )
     in
     Extras.Html.showMaybe
         (\( _, glossaryItem ) ->
-            let
-                disambiguatedPreferredTerm =
-                    GlossaryItemForHtml.disambiguatedPreferredTerm glossaryItem
-
-                alternativeTerms =
-                    GlossaryItemForHtml.alternativeTerms glossaryItem
-
-                tags : List Tag
-                tags =
-                    GlossaryItemForHtml.allTags glossaryItem
-
-                definitions =
-                    GlossaryItemForHtml.definition glossaryItem
-                        |> Maybe.map List.singleton
-                        |> Maybe.withDefault []
-
-                relatedTerms =
-                    GlossaryItemForHtml.relatedPreferredTerms glossaryItem
-
-                needsUpdating =
-                    GlossaryItemForHtml.needsUpdating glossaryItem
-
-                lastUpdatedDate =
-                    GlossaryItemForHtml.lastUpdatedDateAsIso8601 glossaryItem
-            in
             Html.div []
                 [ Html.nav
                     [ class "flex items-start justify-between px-4 sm:px-0"
@@ -430,32 +348,24 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                                 Components.Button.text
                                     [ Html.Events.onClick <| onClickItem previousItemIndex ]
                                     [ Icons.arrowLongLeft
-                                        [ Svg.Attributes.class "h-5 w-5 shrink-0" ]
+                                        [ Svg.Attributes.class "h-5 w-5" ]
                                     , span
                                         [ class "font-medium" ]
-                                        [ disambiguatedPreferredTermForPreviousOrNext previousItem ]
+                                        (primaryTermForPreviousOrNext previousItem)
                                     ]
                             )
                             glossaryItemWithPreviousAndNext.previous
                         ]
                     , Html.div
                         [ class "hidden md:-mt-px md:flex md:flex-col px-3" ]
-                        (viewGlossaryTerm
-                            { enableMathSupport = enableMathSupport
-                            , tabbable = True
-                            , showSilcrow = False
-                            , isPreferred = True
-                            }
-                            disambiguatedPreferredTerm
-                            :: List.map
-                                (viewGlossaryTerm
-                                    { enableMathSupport = enableMathSupport
-                                    , tabbable = True
-                                    , showSilcrow = False
-                                    , isPreferred = False
-                                    }
-                                )
-                                alternativeTerms
+                        (List.map
+                            (viewGlossaryTerm
+                                { enableMathSupport = enableMathSupport
+                                , tabbable = True
+                                , showSilcrow = False
+                                }
+                            )
+                            glossaryItem.terms
                         )
                     , Html.div
                         [ class "-mt-px flex w-0 flex-1 justify-end" ]
@@ -465,9 +375,9 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                                     [ Html.Events.onClick <| onClickItem nextItemIndex ]
                                     [ span
                                         [ class "font-medium" ]
-                                        [ disambiguatedPreferredTermForPreviousOrNext nextItem ]
+                                        (primaryTermForPreviousOrNext nextItem)
                                     , Icons.arrowLongRight
-                                        [ Svg.Attributes.class "h-5 w-5 shrink-0" ]
+                                        [ Svg.Attributes.class "h-5 w-5" ]
                                     ]
                             )
                             glossaryItemWithPreviousAndNext.next
@@ -475,26 +385,18 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                     ]
                 , Html.div
                     [ class "md:hidden mt-4" ]
-                    (viewGlossaryTerm
-                        { enableMathSupport = enableMathSupport
-                        , tabbable = True
-                        , showSilcrow = False
-                        , isPreferred = True
-                        }
-                        disambiguatedPreferredTerm
-                        :: List.map
-                            (viewGlossaryTerm
-                                { enableMathSupport = enableMathSupport
-                                , tabbable = True
-                                , showSilcrow = False
-                                , isPreferred = False
-                                }
-                            )
-                            alternativeTerms
+                    (List.map
+                        (viewGlossaryTerm
+                            { enableMathSupport = enableMathSupport
+                            , tabbable = True
+                            , showSilcrow = False
+                            }
+                        )
+                        glossaryItem.terms
                     )
                 , Html.div
                     [ class "mt-4" ]
-                    ((if needsUpdating then
+                    ((if glossaryItem.needsUpdating then
                         [ Html.dd
                             [ class "needs-updating" ]
                             [ span
@@ -506,80 +408,66 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                       else
                         []
                      )
-                        ++ viewTags
-                            { enableMathSupport = enableMathSupport
-                            , onClickTag = Nothing
-                            }
-                            tags
-                        :: List.map
+                        ++ List.map
                             (viewGlossaryItemDefinition
                                 { enableMathSupport = enableMathSupport
                                 , tabbable = True
+                                , topicsClickable = False
                                 }
                             )
-                            definitions
+                            glossaryItem.definitions
                         ++ viewGlossaryItemRelatedTerms
                             enableMathSupport
                             False
                             True
-                            (GlossaryItemForHtml.definition glossaryItem /= Nothing)
+                            (GlossaryItem.hasSomeDefinitions glossaryItem)
                             (Just onClickRelatedTerm)
-                            relatedTerms
+                            glossaryItem.relatedTerms
                     )
                 , div
                     [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
                     [ Extras.Html.showIf enableLastUpdatedDates <|
                         Extras.Html.showMaybe
-                            (\lastUpdatedDate_ ->
+                            (\lastUpdatedDate ->
                                 div
                                     [ class "text-right text-sm mt-1.5 mb-2.5 text-gray-500 dark:text-gray-400" ]
                                     [ text "Updated: "
                                     , Html.node "last-updated"
-                                        [ Html.Attributes.attribute "datetime" lastUpdatedDate_ ]
+                                        [ Html.Attributes.attribute "datetime" lastUpdatedDate ]
                                         []
                                     ]
                             )
-                            lastUpdatedDate
+                            glossaryItem.lastUpdatedDate
                     ]
                 ]
         )
         glossaryItemWithPreviousAndNext.item
 
 
-viewGlossaryTerm :
-    { enableMathSupport : Bool, tabbable : Bool, showSilcrow : Bool, isPreferred : Bool }
-    -> Term
-    -> Html msg
-viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term =
-    let
-        viewTerm =
-            if isPreferred then
-                Term.view enableMathSupport [] term
-
-            else
-                span
-                    [ class "inline-flex items-center" ]
-                    [ Icons.cornerLeftUp
-                        [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-1 mr-1.5 text-gray-400 dark:text-gray-400 print:hidden"
-                        ]
-                    , Term.view enableMathSupport [] term
-                    ]
-    in
+errorDiv : String -> Html msg
+errorDiv message =
     div
-        [ class "flex justify-between"
-        , Extras.HtmlAttribute.showIf isPreferred <| class "mb-1"
+        [ class "flex justify-end mt-2" ]
+        [ p
+            [ class "text-red-600" ]
+            [ text message ]
         ]
+
+
+viewGlossaryTerm : { enableMathSupport : Bool, tabbable : Bool, showSilcrow : Bool } -> Term -> Html msg
+viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow } term =
+    div
+        [ class "flex justify-between" ]
         [ Html.dt
             [ class "group" ]
             [ span [ class "mr-1.5 hidden print:inline" ] [ text "➢" ]
             , Html.dfn
-                [ Extras.HtmlAttribute.showIf showSilcrow <| Html.Attributes.id <| TermId.toString <| Term.id term ]
+                [ Html.Attributes.id <| TermId.toString <| Term.id term ]
                 [ if Term.isAbbreviation term then
-                    Html.abbr []
-                        [ viewTerm ]
+                    Html.abbr [] [ Term.view enableMathSupport [] term ]
 
                   else
-                    viewTerm
+                    Term.view enableMathSupport [] term
                 ]
             , Extras.Html.showIf showSilcrow <|
                 span
@@ -594,36 +482,25 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term 
         ]
 
 
-viewTags : { enableMathSupport : Bool, onClickTag : Maybe (Tag -> msg) } -> List Tag -> Html msg
-viewTags { enableMathSupport, onClickTag } tags =
-    Html.div
-        [ class "mt-4" ]
-        (List.map
-            (\tag ->
-                Components.Button.softSmall
-                    (onClickTag /= Nothing)
-                    [ class "mr-2 mb-2"
-                    , Html.Attributes.title <| "Tag: " ++ Tag.raw tag
-                    , Extras.HtmlAttribute.showMaybe (\onClickTag_ -> Html.Events.onClick <| onClickTag_ tag) onClickTag
-                    ]
-                    [ Tag.view enableMathSupport
-                        [ class "text-sm" ]
-                        tag
-                    ]
-            )
-            tags
-        )
-
-
-viewGlossaryItemDefinition : { enableMathSupport : Bool, tabbable : Bool } -> Definition -> Html msg
-viewGlossaryItemDefinition { enableMathSupport, tabbable } definition =
+viewGlossaryItemDefinition : { enableMathSupport : Bool, tabbable : Bool, topicsClickable : Bool } -> Definition -> Html msg
+viewGlossaryItemDefinition { enableMathSupport, tabbable, topicsClickable } definition =
     Html.dd
         []
         [ Definition.view { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable } definition
+        , Extras.Html.showIf enableTopicsFeature <|
+            Html.div
+                [ class "mt-4" ]
+                [ Components.Button.softSmall
+                    topicsClickable
+                    [ class "mr-2 mb-2"
+                    , Html.Attributes.title "Topic: First Topic"
+                    ]
+                    [ text "First Topic" ]
+                ]
         ]
 
 
-viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Bool -> Maybe (Term -> msg) -> List Term -> List (Html msg)
+viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Bool -> Maybe (RelatedTerm -> msg) -> List RelatedTerm -> List (Html msg)
 viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDefinitions onClick relatedTerms =
     if List.isEmpty relatedTerms then
         []
@@ -646,7 +523,7 @@ viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDefin
                                         "#"
 
                                        else
-                                        relatedTerm |> Term.id |> TermId.toString |> fragmentOnly
+                                        relatedTerm |> RelatedTerm.idReference |> TermId.toString |> fragmentOnly
                                       )
                                         |> Html.Attributes.href
                                     , Accessibility.Key.tabbable tabbable
@@ -656,7 +533,7 @@ viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDefin
                                         )
                                         onClick
                                     ]
-                                    [ Term.view enableMathSupport [] relatedTerm ]
+                                    [ RelatedTerm.view enableMathSupport relatedTerm ]
                             )
                         |> List.intersperse (text ", ")
                    )

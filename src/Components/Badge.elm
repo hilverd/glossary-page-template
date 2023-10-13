@@ -1,25 +1,23 @@
-module Components.Badge exposing (indigoWithBorderAndRemoveButton, indigoWithCheckbox, pill)
+module Components.Badge exposing (withBorderAndRemoveButton, withCheckbox)
 
 import Accessibility exposing (Attribute, Html, button, checkbox, span, text)
 import Accessibility.Key
 import Html.Attributes exposing (class, for, id)
-import Html.Events
 import Icons
 import Svg.Attributes
 
 
-indigoWithBorderAndRemoveButton : Bool -> List (Attribute Never) -> msg -> List (Html msg) -> Html msg
-indigoWithBorderAndRemoveButton tabbable additionalAttributes onClick children =
+withBorderAndRemoveButton : Bool -> List (Attribute Never) -> String -> Html msg
+withBorderAndRemoveButton tabbable additionalAttributes label =
     span
-        (class "inline-flex items-center gap-x-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 px-2 py-1 text-indigo-800 dark:text-indigo-100" :: additionalAttributes)
+        (class "inline-flex items-center gap-x-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 px-2 py-1 font-medium text-indigo-800 dark:text-indigo-100" :: additionalAttributes)
         [ span
-            [ class "mr-0.5 whitespace-nowrap" ]
-            children
+            [ class "mr-0.5" ]
+            [ text label ]
         , button
             [ Html.Attributes.type_ "button"
             , Accessibility.Key.tabbable tabbable
             , class "group relative -mr-1 h-3.5 w-3.5 rounded-lg hover:bg-indigo-600/20 dark:hover:bg-indigo-200/20"
-            , Html.Events.onClick onClick
             ]
             [ span
                 [ class "sr-only" ]
@@ -33,37 +31,23 @@ indigoWithBorderAndRemoveButton tabbable additionalAttributes onClick children =
         ]
 
 
-indigoWithCheckbox :
-    { tabbable : Bool, checked : Bool }
-    -> String
-    -> msg
-    -> List (Attribute Never)
-    -> List (Html msg)
-    -> Html msg
-indigoWithCheckbox { tabbable, checked } id_ onClick additionalAttributes children =
+withCheckbox : Bool -> String -> List (Attribute Never) -> Html msg
+withCheckbox tabbable label additionalAttributes =
     span
-        (class "inline-flex items-center gap-x-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 px-1 text-indigo-800 dark:text-indigo-100" :: additionalAttributes)
+        (class "inline-flex items-center gap-x-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 px-1 font-medium text-indigo-800 dark:text-indigo-100" :: additionalAttributes)
         [ span
             [ class "inline-flex items-center px-2 py-2" ]
             [ checkbox
                 "select"
-                (Just checked)
+                (Just False)
                 [ class "h-4 w-4 text-indigo-600 focus:ring-indigo-500"
-                , id id_
-                , Html.Events.onClick onClick
+                , id "TODO"
                 , Accessibility.Key.tabbable tabbable
                 ]
             ]
         , Accessibility.label
-            [ class "-ml-px block w-full py-1.5 pr-3 text-indigo-600 focus:ring-indigo-600 leading-6 whitespace-nowrap"
-            , for id_
+            [ class "-ml-px block w-full py-1.5 pr-3 text-indigo-600 focus:ring-indigo-600 leading-6"
+            , for "TODO"
             ]
-            children
+            [ text label ]
         ]
-
-
-pill : List (Attribute Never) -> List (Html msg) -> Html msg
-pill additionalAttributes children =
-    span
-        (class "inline-flex items-center rounded-full bg-gray-200 dark:bg-gray-700 px-2 py-1 text-gray-800 dark:text-gray-100 select-none" :: additionalAttributes)
-        children

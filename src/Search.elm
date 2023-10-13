@@ -2,7 +2,6 @@ module Search exposing (search)
 
 import Array
 import Components.SearchDialog as SearchDialog
-import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
@@ -11,8 +10,6 @@ import Extras.Html
 import Extras.Url
 import Html
 import Html.Attributes exposing (class)
-import Icons
-import Svg.Attributes
 
 
 search : Bool -> String -> GlossaryItems -> List SearchDialog.SearchResult
@@ -27,156 +24,58 @@ search enableMathSupport searchString glossaryItems =
 
     else
         let
-            candidates :
-                List
-                    { preferredTerm : Term
-                    , alternativeTerm : Maybe Term
-                    , definition : Maybe Definition
-                    }
-            candidates =
+            termsAndDefinitions : List ( Term, Maybe Definition )
+            termsAndDefinitions =
                 glossaryItems
-                    |> GlossaryItems.orderedAlphabetically
+                    |> GlossaryItems.orderedByMostMentionedFirst
                     |> Array.toList
                     |> List.concatMap
                         (\( _, item ) ->
-                            let
-                                preferredTerm =
-                                    GlossaryItem.preferredTerm item
-
-                                definition =
-                                    GlossaryItem.definition item
-                            in
-                            { preferredTerm = preferredTerm
-                            , alternativeTerm = Nothing
-                            , definition = definition
-                            }
-                                :: (item
-                                        |> GlossaryItem.alternativeTerms
-                                        |> List.map
-                                            (\alternativeTerm ->
-                                                { preferredTerm = preferredTerm
-                                                , alternativeTerm = Just alternativeTerm
-                                                , definition = definition
-                                                }
-                                            )
-                                   )
-                        )
-                    |> List.sortWith
-                        (\candidate1 candidate2 ->
-                            case ( candidate1.alternativeTerm, candidate2.alternativeTerm ) of
-                                ( Just alternativeTerm1, Just alternativeTerm2 ) ->
-                                    if alternativeTerm1 == alternativeTerm2 then
-                                        Term.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
-
-                                    else
-                                        Term.compareAlphabetically alternativeTerm1 alternativeTerm2
-
-                                ( Just alternativeTerm1, Nothing ) ->
-                                    Term.compareAlphabetically alternativeTerm1 candidate2.preferredTerm
-
-                                ( Nothing, Just alternativeTerm2 ) ->
-                                    Term.compareAlphabetically candidate1.preferredTerm alternativeTerm2
-
-                                ( Nothing, Nothing ) ->
-                                    Term.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
-                        )
-
-            results =
-                candidates
-                    |> List.filter
-                        (\{ preferredTerm, alternativeTerm } ->
-                            alternativeTerm
-                                |> Maybe.map
-                                    (\alternativeTerm_ ->
-                                        alternativeTerm_
-                                            |> Term.inlineText
-                                            |> String.toLower
-                                            |> String.contains searchStringNormalised
+                            item.terms
+                                |> List.map
+                                    (\term ->
+                                        ( term, List.head item.definitions )
                                     )
-                                |> Maybe.withDefault
-                                    (preferredTerm
-                                        |> Term.inlineText
-                                        |> String.toLower
-                                        |> String.contains searchStringNormalised
-                                    )
-                        )
-                    |> List.partition
-                        (\{ preferredTerm, alternativeTerm } ->
-                            alternativeTerm
-                                |> Maybe.map
-                                    (\alternativeTerm_ ->
-                                        alternativeTerm_
-                                            |> Term.inlineText
-                                            |> String.toLower
-                                            |> String.startsWith searchStringNormalised
-                                    )
-                                |> Maybe.withDefault
-                                    (preferredTerm
-                                        |> Term.inlineText
-                                        |> String.toLower
-                                        |> String.startsWith searchStringNormalised
-                                    )
-                        )
-                    |> (\( whereSearchStringIsPrefix, whereSearchStringIsNotPrefix ) ->
-                            whereSearchStringIsPrefix ++ whereSearchStringIsNotPrefix
-                       )
-                    |> List.map
-                        (\{ preferredTerm, alternativeTerm, definition } ->
-                            case alternativeTerm of
-                                Just alternativeTerm_ ->
-                                    SearchDialog.searchResult
-                                        (Extras.Url.fragmentOnly <| TermId.toString <| Term.id preferredTerm)
-                                        [ Html.div
-                                            [ class "flex flex-col" ]
-                                            [ Html.div
-                                                [ class "font-medium" ]
-                                                [ Term.view enableMathSupport [] alternativeTerm_ ]
-                                            , Html.div
-                                                [ class "inline-flex items-center group-hover:underline font-medium" ]
-                                                [ Icons.cornerDownRight
-                                                    [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400"
-                                                    ]
-                                                , Term.view enableMathSupport [] preferredTerm
-                                                ]
-                                            , Extras.Html.showMaybe
-                                                (\definition_ ->
-                                                    Html.div
-                                                        [ if enableMathSupport then
-                                                            class "overflow-hidden whitespace-nowrap"
-
-                                                          else
-                                                            class "truncate"
-                                                        ]
-                                                        [ Definition.viewInline enableMathSupport [] definition_
-                                                        ]
-                                                )
-                                                definition
-                                            ]
-                                        ]
-
-                                Nothing ->
-                                    SearchDialog.searchResult
-                                        (Extras.Url.fragmentOnly <| TermId.toString <| Term.id preferredTerm)
-                                        [ Html.div
-                                            []
-                                            [ Html.p
-                                                [ class "font-medium" ]
-                                                [ Term.view enableMathSupport [] preferredTerm ]
-                                            , Extras.Html.showMaybe
-                                                (\definition_ ->
-                                                    Html.div
-                                                        [ if enableMathSupport then
-                                                            class "overflow-hidden whitespace-nowrap"
-
-                                                          else
-                                                            class "truncate"
-                                                        ]
-                                                        [ Definition.viewInline enableMathSupport [] definition_
-                                                        ]
-                                                )
-                                                definition
-                                            ]
-                                        ]
                         )
         in
-        results
+        termsAndDefinitions
+            |> List.filterMap
+                (\( term, definition ) ->
+                    if String.contains searchStringNormalised (term |> Term.inlineText |> String.toLower) then
+                        Just ( term, definition )
+
+                    else
+                        Nothing
+                )
+            |> List.partition
+                (\( term, _ ) ->
+                    String.startsWith searchStringNormalised (term |> Term.inlineText |> String.toLower)
+                )
+            |> (\( whereSearchStringIsPrefix, whereSearchStringIsNotPrefix ) ->
+                    whereSearchStringIsPrefix ++ whereSearchStringIsNotPrefix
+               )
+            |> List.map
+                (\( term, maybeDefinition ) ->
+                    SearchDialog.searchResult
+                        (Extras.Url.fragmentOnly <| TermId.toString <| Term.id term)
+                        [ Html.div
+                            []
+                            [ Html.p
+                                [ class "font-medium" ]
+                                [ Term.view enableMathSupport [] term ]
+                            , Extras.Html.showMaybe
+                                (\definition ->
+                                    Html.div
+                                        [ if enableMathSupport then
+                                            class "overflow-hidden whitespace-nowrap"
+
+                                          else
+                                            class "truncate"
+                                        ]
+                                        [ Definition.viewInline enableMathSupport [] definition
+                                        ]
+                                )
+                                maybeDefinition
+                            ]
+                        ]
+                )

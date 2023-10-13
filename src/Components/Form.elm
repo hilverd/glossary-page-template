@@ -27,8 +27,7 @@ input value_ showValidationErrors validationError additionalAttributes =
             )
             []
         , Extras.Html.showIf (showValidationErrors && validationError /= Nothing) <|
-            Accessibility.div
-                [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
+            Accessibility.div [ class "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" ]
                 [ Icons.exclamationCircle
                     [ Svg.Attributes.class "h-5 w-5 text-red-500 dark:text-red-400" ]
                 ]

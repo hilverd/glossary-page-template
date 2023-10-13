@@ -3,13 +3,12 @@ module ElementIds exposing
     , about
     , aboutLinkBody
     , aboutLinkHref
-    , aboutParagraphInputField
     , cardWidthCompact
     , cardWidthIntermediate
     , cardWidthWide
     , confirmDeleteModalTitle
     , container
-    , definition
+    , definitionSingle
     , exportDropdownButton
     , glossaryItemDiv
     , indexForMobile
@@ -30,20 +29,18 @@ module ElementIds exposing
     , showExportMenuLabel
     , showLastUpdatedDatesLabel
     , staticSidebarForDesktop
-    , tagCheckbox
-    , tags
     , termIndexGroupLabel
     , termInputField
     , termsIndex
     , textFieldWithCommandToRunEditor
     , themeDropdownButton
     , title
-    , titleInputField
     , viewSingleItemModalTitle
     )
 
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
-import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
+import Data.DefinitionIndex as DefinitionIndex exposing (DefinitionIndex)
+import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TermIndex as TermIndex exposing (TermIndex)
@@ -82,16 +79,6 @@ outer =
 about : String
 about =
     prefixed "about"
-
-
-tags : String
-tags =
-    prefixed "tags"
-
-
-tagCheckbox : String -> String
-tagCheckbox tagId =
-    prefixed <| "tag-checkbox-" ++ tagId
 
 
 items : String
@@ -154,9 +141,9 @@ termInputField termIndex =
     prefixed <| "term-" ++ (termIndex |> TermIndex.toInt |> String.fromInt)
 
 
-definition : String
-definition =
-    prefixed <| "definition"
+definitionSingle : DefinitionIndex -> String
+definitionSingle index =
+    prefixed <| "definition-" ++ (index |> DefinitionIndex.toInt |> String.fromInt)
 
 
 seeAlsoSelect : RelatedTermIndex -> String
@@ -166,7 +153,7 @@ seeAlsoSelect index =
 
 orderItemsFocusedOnSelect : String
 orderItemsFocusedOnSelect =
-    prefixed "order-items-focused-on-select"
+    prefixed "order-items-focused-on"
 
 
 termIndexGroupLabel : Bool -> String -> String
@@ -178,9 +165,9 @@ termIndexGroupLabel staticSidebar groupLabel =
         prefixed <| "index-group-" ++ groupLabel
 
 
-glossaryItemDiv : GlossaryItemId -> String
+glossaryItemDiv : GlossaryItemIndex -> String
 glossaryItemDiv index =
-    prefixed <| "item-" ++ (index |> GlossaryItemId.toInt |> String.fromInt)
+    prefixed <| "item-" ++ (index |> GlossaryItemIndex.toInt |> String.fromInt)
 
 
 indexForMobile : String
@@ -260,13 +247,3 @@ showLastUpdatedDatesLabel =
 textFieldWithCommandToRunEditor : String
 textFieldWithCommandToRunEditor =
     prefixed "text-field-with-command-to-run-editor"
-
-
-titleInputField : String
-titleInputField =
-    prefixed "title-input-field"
-
-
-aboutParagraphInputField : String
-aboutParagraphInputField =
-    prefixed "about-paragraph-input-field"

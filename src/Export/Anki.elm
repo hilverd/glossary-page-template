@@ -10,7 +10,7 @@ import Array
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term
@@ -68,24 +68,15 @@ paragraphs =
 
 
 itemToAnki : Bool -> GlossaryItem -> String
-itemToAnki enableMathSupport glossaryItem =
+itemToAnki enableMathSupport { terms, definitions, relatedTerms } =
     let
         quote : String -> String
         quote string =
             "\"" ++ string ++ "\""
 
-        definitions =
-            GlossaryItem.definition glossaryItem
-                |> Maybe.map List.singleton
-                |> Maybe.withDefault []
-
-        relatedTerms =
-            GlossaryItem.relatedPreferredTerms glossaryItem
-
         front : String
         front =
-            glossaryItem
-                |> GlossaryItem.allTerms
+            terms
                 |> List.map (Term.htmlTreeForAnki enableMathSupport >> Extras.HtmlTree.toHtml >> escape)
                 |> htmlLines
                 |> quote

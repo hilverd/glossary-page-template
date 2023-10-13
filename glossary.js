@@ -28,9 +28,6 @@ if (containerElement) {
     const aboutLiElements = Array.prototype.slice.apply(aboutUlElement.querySelectorAll('li'));
     const aboutLinks = aboutLiElements.map(aboutLinkFromLiElement);
 
-    const tagElements = Array.prototype.slice.apply(document.querySelectorAll('#glossary-page-tags > p > button'));
-    const tags = tagElements.map(tagElement => tagElement.textContent.trim());
-
     const dlElement = glossaryElement.querySelector('dl');
     const glossaryItemDivElements = Array.prototype.slice.apply(dlElement.querySelectorAll('div'));
     const glossaryItems = glossaryItemDivElements.map(glossaryItemFromDivElement);
@@ -47,44 +44,19 @@ if (containerElement) {
         }
     }
 
-    function tagInItemFromButtonElement(buttonElement) {
-        return buttonElement?.textContent?.trim();
-    }
-
     function glossaryItemFromDivElement(glossaryItemDivElement) {
         const dtElements = Array.prototype.slice.apply(glossaryItemDivElement.querySelectorAll('dt'));
-        const preferredTermDtElement = dtElements[0];
-        const alternativeTermsDtElements = dtElements.slice(1);
         const ddElements = Array.prototype.slice.apply(glossaryItemDivElement.querySelectorAll('dd'));
-
-        const definitionDdElements = ddElements
-            .filter(ddElement =>
-                ddElement.className !== 'tags' &&
-                ddElement.className !== 'needs-updating' &&
-                ddElement.className !== 'related-terms'
-            );
-
-        /* The current implementation allows one definition per item.
-           Previous versions allowed multiple definitions, and for backwards compatibility these are being joined here.
-        */
-        const definition = definitionDdElements.map(ddElement => ddElement.textContent.trim()).join('\n\n');
-
-        const tagsDdElement = ddElements.filter(ddElement => ddElement.className === 'tags')[0];
-        const tagElements = Array.prototype.slice.apply(tagsDdElement?.querySelectorAll('button') || []);
-        const tags = tagElements.map(tagElement => tagInItemFromButtonElement(tagElement));
-        const hasDisambiguationTag = preferredTermDtElement.querySelector('dfn span.disambiguation') !== null;
-
-        const needsUpdatingDdElements = ddElements.filter(ddElement => ddElement.className === 'needs-updating');
-        const relatedTermDdElements = ddElements.filter(ddElement => ddElement.className === 'related-terms');
+        const relatedTermDdElements = ddElements.filter(ddElement => ddElement.getAttribute('class') === 'related-terms');
         const relatedTerms = (relatedTermDdElements.length > 0) ? glossaryItemRelatedTermFromDdElement(relatedTermDdElements[0]) : [];
+        const needsUpdatingDdElements = ddElements.filter(ddElement => ddElement.getAttribute('class') === 'needs-updating');
         const lastUpdatedDate = glossaryItemDivElement.dataset.lastUpdated;
 
         return {
-            preferredTerm: glossaryItemTermFromDtElement(preferredTermDtElement),
-            alternativeTerms: alternativeTermsDtElements.map(glossaryItemTermFromDtElement),
-            disambiguationTag: hasDisambiguationTag ? tags[0] : null,
-            normalTags: hasDisambiguationTag ? tags.slice(1) : tags,
-            definition: definition || null,
+            terms: dtElements.map(glossaryItemTermFromDtElement),
+            definitions: ddElements
+                .filter(ddElement => ddElement.getAttribute('class') !== 'related-terms' && ddElement.getAttribute('class') !== 'needs-updating')
+                .map(ddElement => ddElement.textContent.trim()),
             relatedTerms: relatedTerms,
             needsUpdating: needsUpdatingDdElements.length > 0,
             lastUpdatedDate: lastUpdatedDate
@@ -95,8 +67,7 @@ if (containerElement) {
         const dfnElement = dtElement.querySelector('dfn');
         const id = dfnElement.id || null;
         const isAbbreviation = Boolean(dfnElement.querySelector('abbr'));
-        const dfnElementWithoutDisambiguationTag = dfnElement.querySelector('span') || dfnElement;
-        const body = dfnElementWithoutDisambiguationTag.textContent;
+        const body = dfnElement.textContent;
 
         return {
             id: normaliseWhitespace(id),
@@ -110,8 +81,7 @@ if (containerElement) {
             const hrefAttribute = aElement.getAttribute('href');
 
             return {
-                id: hrefAttribute.substring(1),
-                isAbbreviation: false, // ignored
+                idReference: hrefAttribute.substring(1),
                 body: normaliseWhitespace(aElement.textContent)
             };
         });
@@ -132,7 +102,6 @@ if (containerElement) {
             titleString: normaliseWhitespace(titleElement.textContent),
             aboutParagraph: aboutParagraph,
             aboutLinks: aboutLinks,
-            tags: tags,
             glossaryItems: glossaryItems,
             editorIsRunning: editorIsRunning,
             enableHelpForMakingChanges: enableHelpForMakingChanges,
