@@ -627,10 +627,10 @@ update msg model =
             )
 
         ToggleMarkdownBasedSyntax ->
-            case model.common.glossary of
+            case model.common.incubatingGlossary of
                 Ok glossary ->
                     let
-                        updatedGlossary : Glossary
+                        updatedGlossary : IncubatingGlossary
                         updatedGlossary =
                             { glossary | enableMarkdownBasedSyntax = not glossary.enableMarkdownBasedSyntax }
 
@@ -642,17 +642,17 @@ update msg model =
                         , deleting = NotSaving
                         , savingSettings = SavingInProgress
                       }
-                    , patchHtmlFileAfterChangingSettings { common0 | glossary = Ok updatedGlossary }
+                    , patchHtmlFileAfterChangingSettings { common0 | incubatingGlossary = Ok updatedGlossary }
                     )
 
                 _ ->
                     ( model, Cmd.none )
 
         ChangeCardWidth cardWidth ->
-            case model.common.glossary of
+            case model.common.incubatingGlossary of
                 Ok glossary ->
                     let
-                        updatedGlossary : Glossary
+                        updatedGlossary : IncubatingGlossary
                         updatedGlossary =
                             { glossary | cardWidth = cardWidth }
 
@@ -660,7 +660,7 @@ update msg model =
                             model.common
 
                         common1 =
-                            { common0 | glossary = Ok updatedGlossary }
+                            { common0 | incubatingGlossary = Ok updatedGlossary }
                     in
                     ( { model
                         | confirmDeleteId = Nothing
@@ -702,10 +702,10 @@ update msg model =
             )
 
         ToggleEnableLastUpdatedDates ->
-            case model.common.glossary of
+            case model.common.incubatingGlossary of
                 Ok glossary ->
                     let
-                        updatedGlossary : Glossary
+                        updatedGlossary : IncubatingGlossary
                         updatedGlossary =
                             { glossary | enableLastUpdatedDates = not glossary.enableLastUpdatedDates }
 
@@ -713,7 +713,7 @@ update msg model =
                             model.common
 
                         common1 =
-                            { common0 | glossary = Ok updatedGlossary }
+                            { common0 | incubatingGlossary = Ok updatedGlossary }
                     in
                     ( { model
                         | confirmDeleteId = Nothing

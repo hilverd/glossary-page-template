@@ -16,7 +16,7 @@ import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Glossary exposing (Glossary)
-import Data.GlossaryItem.Tag as Tag exposing (Tag)
+import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItems as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.IncubatingGlossary exposing (IncubatingGlossary)
