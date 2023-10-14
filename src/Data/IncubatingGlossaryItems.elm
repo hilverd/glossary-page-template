@@ -1,10 +1,8 @@
 module Data.IncubatingGlossaryItems exposing
     ( IncubatingGlossaryItems
     , fromList, insertTag, remove
-    , get, tags, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
-    , enableFocusingOn
+    , get, tags, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
-    , itemIdFromDisambiguatedPreferredTermId
     )
 
 {-| The glossary items that make up a glossary.
@@ -22,12 +20,7 @@ module Data.IncubatingGlossaryItems exposing
 
 # Query
 
-@docs get, tags, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
-
-
-# Prepare to Export
-
-@docs enableFocusingOn
+@docs get, tags, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
 
 
 # Export
@@ -515,6 +508,8 @@ tags glossaryItems =
             TagIdDict.values items.tagById
 
 
+{-| Look up a tag ID from its contents.
+-}
 tagIdFromTag : Tag -> IncubatingGlossaryItems -> Maybe TagId
 tagIdFromTag tag glossaryItems =
     case glossaryItems of
@@ -522,6 +517,8 @@ tagIdFromTag tag glossaryItems =
             Dict.get (Tag.raw tag) items.tagIdByRawTag
 
 
+{-| Look up a tag from its ID.
+-}
 tagFromId : TagId -> IncubatingGlossaryItems -> Maybe Tag
 tagFromId tagId glossaryItems =
     case glossaryItems of
@@ -736,58 +733,6 @@ disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItems =
                     []
 
 
-{-| Make it easy to retrieve the items ordered "focused on" a specific item.
-Returns an updated `GlossaryItems` where the necessary computations have been done.
--}
-enableFocusingOn : GlossaryItemId -> IncubatingGlossaryItems -> IncubatingGlossaryItems
-enableFocusingOn itemId glossaryItems =
-    case glossaryItems of
-        IncubatingGlossaryItems items ->
-            let
-                itemIdsGraph : DirectedGraph GlossaryItemId
-                itemIdsGraph =
-                    items.itemById
-                        |> GlossaryItemIdDict.keys
-                        |> List.foldl
-                            DirectedGraph.insertVertex
-                            (DirectedGraph.empty
-                                (GlossaryItemId.toInt >> String.fromInt)
-                                (String.toInt >> Maybe.withDefault 0 >> GlossaryItemId.create)
-                            )
-
-                relatedItemsGraph : DirectedGraph GlossaryItemId
-                relatedItemsGraph =
-                    items.relatedItemIdsById
-                        |> GlossaryItemIdDict.foldl
-                            (\id relatedItemIds result ->
-                                let
-                                    itemHasDefinition =
-                                        items.itemById
-                                            |> GlossaryItemIdDict.get id
-                                            |> Maybe.map (IncubatingGlossaryItem.definition >> (/=) Nothing)
-                                            |> Maybe.withDefault False
-                                in
-                                if itemHasDefinition then
-                                    List.foldl
-                                        (DirectedGraph.insertEdge id)
-                                        result
-                                        relatedItemIds
-
-                                else
-                                    result
-                            )
-                            itemIdsGraph
-
-                itemIdsByDistance : ( List GlossaryItemId, List GlossaryItemId )
-                itemIdsByDistance =
-                    DirectedGraph.verticesByDistance itemId relatedItemsGraph
-            in
-            IncubatingGlossaryItems
-                { items
-                    | orderedFocusedOn = Just ( itemId, itemIdsByDistance )
-                }
-
-
 toList : Maybe TagId -> IncubatingGlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml )
 toList filterByTagId glossaryItems =
     case glossaryItems of
@@ -847,22 +792,50 @@ orderedFocusedOn :
     -> GlossaryItemId
     -> IncubatingGlossaryItems
     ->
-        Maybe
-            ( List ( GlossaryItemId, GlossaryItemForHtml )
-            , List ( GlossaryItemId, GlossaryItemForHtml )
-            )
+        ( List ( GlossaryItemId, GlossaryItemForHtml )
+        , List ( GlossaryItemId, GlossaryItemForHtml )
+        )
 orderedFocusedOn filterByTagId glossaryItemId glossaryItems =
     case glossaryItems of
         IncubatingGlossaryItems items ->
-            items.orderedFocusedOn
-                |> Maybe.andThen
-                    (\( itemIdFocusedOn, ( ids, otherIds ) ) ->
-                        if itemIdFocusedOn == glossaryItemId then
-                            Just
-                                ( toList filterByTagId glossaryItems ids
-                                , toList filterByTagId glossaryItems otherIds
-                                )
+            let
+                itemIdsGraph : DirectedGraph GlossaryItemId
+                itemIdsGraph =
+                    items.itemById
+                        |> GlossaryItemIdDict.keys
+                        |> List.foldl
+                            DirectedGraph.insertVertex
+                            (DirectedGraph.empty
+                                (GlossaryItemId.toInt >> String.fromInt)
+                                (String.toInt >> Maybe.withDefault 0 >> GlossaryItemId.create)
+                            )
 
-                        else
-                            Nothing
-                    )
+                relatedItemsGraph : DirectedGraph GlossaryItemId
+                relatedItemsGraph =
+                    items.relatedItemIdsById
+                        |> GlossaryItemIdDict.foldl
+                            (\id relatedItemIds result ->
+                                let
+                                    itemHasDefinition =
+                                        items.itemById
+                                            |> GlossaryItemIdDict.get id
+                                            |> Maybe.map (IncubatingGlossaryItem.definition >> (/=) Nothing)
+                                            |> Maybe.withDefault False
+                                in
+                                if itemHasDefinition then
+                                    List.foldl
+                                        (DirectedGraph.insertEdge id)
+                                        result
+                                        relatedItemIds
+
+                                else
+                                    result
+                            )
+                            itemIdsGraph
+
+                ( ids, otherIds ) =
+                    DirectedGraph.verticesByDistance glossaryItemId relatedItemsGraph
+            in
+            ( toList filterByTagId glossaryItems ids
+            , toList filterByTagId glossaryItems otherIds
+            )

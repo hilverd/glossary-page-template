@@ -625,27 +625,9 @@ update msg model =
 
                         _ ->
                             model.mostRecentTermIdForOrderingItemsFocusedOn
-
-                common1 =
-                    case ( orderItemsBy, common.incubatingGlossary ) of
-                        ( FocusedOn termId, Ok glossary ) ->
-                            let
-                                glosssaryItems_ =
-                                    glossary.items
-                                        |> IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId termId
-                                        |> Maybe.map
-                                            (\itemId ->
-                                                IncubatingGlossaryItems.enableFocusingOn itemId glossary.items
-                                            )
-                                        |> Maybe.withDefault glossary.items
-                            in
-                            { common | incubatingGlossary = Ok { glossary | items = glosssaryItems_ } }
-
-                        _ ->
-                            common
             in
             ( { model
-                | common = { common1 | orderItemsBy = orderItemsBy }
+                | common = { common | orderItemsBy = orderItemsBy }
                 , mostRecentTermIdForOrderingItemsFocusedOn = mostRecentTermIdForOrderingItemsFocusedOn1
               }
             , orderItemsBy |> Data.OrderItemsBy.encode |> changeOrderItemsBy
@@ -2431,7 +2413,7 @@ view model =
                                                                 FocusedOn termId ->
                                                                     \items_ ->
                                                                         IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId termId items_
-                                                                            |> Maybe.andThen
+                                                                            |> Maybe.map
                                                                                 (\itemId -> IncubatingGlossaryItems.orderedFocusedOn filterByTag itemId items_)
                                                                             |> Maybe.withDefault ( [], [] )
                                                                             |> (\( lhs, rhs ) -> List.append lhs rhs)
@@ -2556,11 +2538,6 @@ view model =
                                                 case itemId of
                                                     Just itemId_ ->
                                                         IncubatingGlossaryItems.orderedFocusedOn filterByTag itemId_
-                                                            >> Maybe.withDefault
-                                                                (incubatingItems
-                                                                    |> IncubatingGlossaryItems.orderedAlphabetically filterByTag
-                                                                    |> (\lhs -> ( lhs, [] ))
-                                                                )
 
                                                     Nothing ->
                                                         always
