@@ -678,16 +678,21 @@ disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItems =
                                 let
                                     itemMatchesTag : Bool
                                     itemMatchesTag =
-                                        (items.disambiguationTagIdByItemId
-                                            |> GlossaryItemIdDict.get itemId
-                                            |> Maybe.map (\disambiguationTagId -> disambiguationTagId == filterByTagId)
-                                            |> Maybe.withDefault False
-                                        )
-                                            || (items.normalTagIdsByItemId
-                                                    |> GlossaryItemIdDict.get itemId
-                                                    |> Maybe.map2 List.member filterByTagId
-                                                    |> Maybe.withDefault False
-                                               )
+                                        filterByTagId
+                                            |> Maybe.map
+                                                (\filterByTagId_ ->
+                                                    (items.disambiguationTagIdByItemId
+                                                        |> GlossaryItemIdDict.get itemId
+                                                        |> Maybe.map (\disambiguationTagId -> disambiguationTagId == Just filterByTagId_)
+                                                        |> Maybe.withDefault False
+                                                    )
+                                                        || (items.normalTagIdsByItemId
+                                                                |> GlossaryItemIdDict.get itemId
+                                                                |> Maybe.map (List.member filterByTagId_)
+                                                                |> Maybe.withDefault False
+                                                           )
+                                                )
+                                            |> Maybe.withDefault True
                                 in
                                 if itemMatchesTag then
                                     case disambiguatedPreferredTerm itemId glossaryItems of
