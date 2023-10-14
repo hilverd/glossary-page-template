@@ -6,7 +6,9 @@ import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Expect
 import Search
 import Test exposing (Test, describe, test)
@@ -17,46 +19,46 @@ termFromBody body =
     Term.fromPlaintext body False
 
 
-loadedGlossaryItems : GlossaryItems
+loadedGlossaryItems : IncubatingGlossaryItems
 loadedGlossaryItems =
     let
-        one : GlossaryItem
+        one : GlossaryItemForHtml
         one =
-            GlossaryItem.init
+            GlossaryItemForHtml.create
                 (termFromBody "The term one")
                 []
                 Nothing
                 []
-                (Just (Definition.fromPlaintext "The term one"))
-                [ RelatedTerm.fromPlaintext (TermId.fromString "Second_the_term") "Second the term" ]
+                (Just <| Definition.fromPlaintext "The term one")
+                [ Term.fromPlaintext "Second the term" False ]
                 False
                 Nothing
 
-        two : GlossaryItem
+        two : GlossaryItemForHtml
         two =
-            GlossaryItem.init
+            GlossaryItemForHtml.create
                 (termFromBody "Second the term")
                 []
                 Nothing
                 []
-                (Just (Definition.fromPlaintext "Second the term"))
+                (Just <| Definition.fromPlaintext "Second the term")
                 []
                 False
                 Nothing
 
-        three : GlossaryItem
+        three : GlossaryItemForHtml
         three =
-            GlossaryItem.init
+            GlossaryItemForHtml.create
                 (termFromBody "The term three")
                 []
                 Nothing
                 []
                 (Just (Definition.fromPlaintext "The term three"))
-                [ RelatedTerm.fromPlaintext (TermId.fromString "Second_the_term") "Second the term" ]
+                [ Term.fromPlaintext "Second the term" False ]
                 False
                 Nothing
     in
-    GlossaryItems.fromList [ one, two, three ]
+    IncubatingGlossaryItems.fromList [] [ one, two, three ]
 
 
 suite : Test
