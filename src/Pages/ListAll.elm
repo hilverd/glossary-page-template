@@ -412,17 +412,12 @@ update msg model =
 
                 results : List Components.SearchDialog.SearchResult
                 results =
-                    case model.common.glossary of
+                    case model.common.incubatingGlossary of
                         Ok { enableMathSupport, items } ->
-                            Search.search enableMathSupport
-                                searchString
-                                (model.itemsFilteredByTag
-                                    |> Maybe.map Tuple.second
-                                    |> Maybe.withDefault items
-                                )
+                            Search.search enableMathSupport searchString items
 
                         Err _ ->
-                            Search.search False searchString <| GlossaryItems.fromList []
+                            []
               in
               { model
                 | searchDialog =

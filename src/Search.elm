@@ -6,7 +6,9 @@ import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Extras.Html
 import Extras.Url
 import Html
@@ -15,7 +17,7 @@ import Icons
 import Svg.Attributes
 
 
-search : Bool -> String -> GlossaryItems -> List SearchDialog.SearchResult
+search : Bool -> String -> IncubatingGlossaryItems -> List SearchDialog.SearchResult
 search enableMathSupport searchString glossaryItems =
     let
         searchStringNormalised : String
@@ -35,26 +37,25 @@ search enableMathSupport searchString glossaryItems =
                     }
             candidates =
                 glossaryItems
-                    |> GlossaryItems.orderedAlphabetically
-                    |> Array.toList
+                    |> IncubatingGlossaryItems.orderedAlphabetically Nothing
                     |> List.concatMap
                         (\( _, item ) ->
                             let
-                                preferredTerm =
-                                    GlossaryItem.preferredTerm item
+                                disambiguatedPreferredTerm =
+                                    GlossaryItemForHtml.disambiguatedPreferredTerm item
 
                                 definition =
-                                    GlossaryItem.definition item
+                                    GlossaryItemForHtml.definition item
                             in
-                            { preferredTerm = preferredTerm
+                            { preferredTerm = disambiguatedPreferredTerm
                             , alternativeTerm = Nothing
                             , definition = definition
                             }
                                 :: (item
-                                        |> GlossaryItem.alternativeTerms
+                                        |> GlossaryItemForHtml.alternativeTerms
                                         |> List.map
                                             (\alternativeTerm ->
-                                                { preferredTerm = preferredTerm
+                                                { preferredTerm = disambiguatedPreferredTerm
                                                 , alternativeTerm = Just alternativeTerm
                                                 , definition = definition
                                                 }
