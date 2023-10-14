@@ -414,7 +414,7 @@ update msg model =
                 results =
                     case model.common.incubatingGlossary of
                         Ok { enableMathSupport, items } ->
-                            Search.search enableMathSupport searchString items
+                            Search.search enableMathSupport model.common.filterByTag searchString items
 
                         Err _ ->
                             []
