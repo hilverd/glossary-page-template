@@ -68,7 +68,7 @@ suite =
             [ test "returns search results sorted by relevance for a given search string" <|
                 \_ ->
                     loadedGlossaryItems
-                        |> Search.search False "term"
+                        |> Search.search False Nothing "term"
                         |> List.map SearchDialog.searchResultHref
                         |> Expect.equal
                             [ "#Second_the_term"
@@ -78,7 +78,7 @@ suite =
             , test "terms for which the search string is a prefix are ranked higher than other terms" <|
                 \_ ->
                     loadedGlossaryItems
-                        |> Search.search False "the"
+                        |> Search.search False Nothing "the"
                         |> List.map SearchDialog.searchResultHref
                         |> Expect.equal
                             [ "#The_term_one"
