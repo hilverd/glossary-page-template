@@ -27,7 +27,7 @@ import Accessibility
 import Accessibility.Aria
 import Accessibility.Key
 import Accessibility.Role
-import Array exposing (Array)
+import Array
 import Browser exposing (Document)
 import Browser.Dom as Dom
 import Browser.Navigation as Navigation
@@ -45,16 +45,13 @@ import Components.SelectMenu
 import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Glossary as Glossary exposing (Glossary)
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem, preferredTerm)
-import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
+import Data.GlossaryItem exposing (preferredTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId exposing (GlossaryItemId)
-import Data.GlossaryItemIndex as GlossaryItemIndex exposing (GlossaryItemIndex)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.IncubatingGlossary as IncubatingGlossary exposing (IncubatingGlossary)
 import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
@@ -62,9 +59,7 @@ import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Saving exposing (Saving(..))
 import Data.TagId exposing (TagId)
-import Data.TermIndex exposing (TermIndex)
 import Data.Theme exposing (Theme(..))
-import Dict
 import ElementIds
 import Export.Anki
 import Export.Markdown
@@ -137,7 +132,6 @@ type alias Model =
     , savingSettings : Saving
     , mostRecentTermIdForOrderingItemsFocusedOn : Maybe TermId
     , resultOfAttemptingToCopyEditorCommandToClipboard : Maybe Bool
-    , itemsFilteredByTag : Maybe ( Tag, GlossaryItems )
     }
 
 
@@ -262,7 +256,6 @@ init editorIsRunning currentlyEditing commonModel =
                 _ ->
                     Nothing
       , resultOfAttemptingToCopyEditorCommandToClipboard = Nothing
-      , itemsFilteredByTag = Nothing
       }
     , case commonModel.maybeId of
         Just id ->
@@ -2343,11 +2336,6 @@ view model =
                 noModalDialogShown_ : Bool
                 noModalDialogShown_ =
                     noModalDialogShown model
-
-                items =
-                    model.itemsFilteredByTag
-                        |> Maybe.map Tuple.second
-                        |> Maybe.withDefault glossary.items
 
                 incubatingItems : IncubatingGlossaryItems
                 incubatingItems =
