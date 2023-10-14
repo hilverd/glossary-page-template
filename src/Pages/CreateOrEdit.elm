@@ -100,11 +100,11 @@ init commonModel =
                 existingTerms : List Term
                 existingTerms =
                     -- TODO: should this be all terms, with the preferred ones disambiguated?
-                    IncubatingGlossaryItems.disambiguatedPreferredTerms items
+                    IncubatingGlossaryItems.disambiguatedPreferredTerms Nothing items
 
                 existingDisambiguatedPreferredTerms : List Term
                 existingDisambiguatedPreferredTerms =
-                    IncubatingGlossaryItems.disambiguatedPreferredTerms items
+                    IncubatingGlossaryItems.disambiguatedPreferredTerms Nothing items
 
                 preferredTermsOfItemsListingThisItemAsRelated : List Term
                 preferredTermsOfItemsListingThisItemAsRelated =

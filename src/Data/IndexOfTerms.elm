@@ -15,6 +15,7 @@ import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
+import Data.TagId exposing (TagId)
 import Dict exposing (Dict)
 
 
@@ -166,14 +167,14 @@ fromGlossaryItems glossaryItems =
 
 {-| Create an index of terms from glossary items.
 -}
-fromIncubatingGlossaryItems : IncubatingGlossaryItems -> IndexOfTerms
-fromIncubatingGlossaryItems glossaryItems =
+fromIncubatingGlossaryItems : Maybe TagId -> IncubatingGlossaryItems -> IndexOfTerms
+fromIncubatingGlossaryItems filterByTagId glossaryItems =
     let
         disambiguatedPreferredTerms =
-            IncubatingGlossaryItems.disambiguatedPreferredTerms glossaryItems
+            IncubatingGlossaryItems.disambiguatedPreferredTerms filterByTagId glossaryItems
 
         preferredTermsByAlternativeTerm =
-            IncubatingGlossaryItems.disambiguatedPreferredTermsByAlternativeTerm glossaryItems
+            IncubatingGlossaryItems.disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItems
 
         entryListsByFirstAlphabeticCharacterOrEllpisis : Dict String (List Entry)
         entryListsByFirstAlphabeticCharacterOrEllpisis =

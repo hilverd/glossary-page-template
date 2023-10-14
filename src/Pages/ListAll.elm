@@ -1510,7 +1510,9 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
 
         disambiguatedPreferredTermsWithDefinitions : List Term
         disambiguatedPreferredTermsWithDefinitions =
-            IncubatingGlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions glossaryItems
+            IncubatingGlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions
+                model.common.filterByTag
+                glossaryItems
 
         orderItemsFocusedOnTerm : Maybe Term
         orderItemsFocusedOnTerm =
@@ -2376,7 +2378,7 @@ view model =
 
                 incubatingIndexOfTerms : IndexOfTerms
                 incubatingIndexOfTerms =
-                    IndexOfTerms.fromIncubatingGlossaryItems incubatingItems
+                    IndexOfTerms.fromIncubatingGlossaryItems model.common.filterByTag incubatingItems
 
                 filterByTag : Maybe TagId
                 filterByTag =
