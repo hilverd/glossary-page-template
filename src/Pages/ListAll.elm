@@ -819,7 +819,7 @@ patchHtmlFileAfterChangingSettings common =
         Extras.Task.messageToCommand okMsg
 
     else
-        case common.glossary of
+        case common.incubatingGlossary of
             Ok glossary ->
                 Http.request
                     { method = "PATCH"
@@ -827,7 +827,7 @@ patchHtmlFileAfterChangingSettings common =
                     , url = "/"
                     , body =
                         glossary
-                            |> Glossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
+                            |> IncubatingGlossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
                             |> HtmlTree.toHtmlReplacementString
                             |> Http.stringBody "text/html"
                     , expect =
@@ -873,7 +873,7 @@ patchHtmlFileAfterDeletingItem common glossaryItems =
                     , url = "/"
                     , body =
                         glossary
-                            |> IncubatingGlossary.toHtmlTree common.enableExportMenu common.enableHelpForMakingChanges
+                            |> IncubatingGlossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
                             |> HtmlTree.toHtmlReplacementString
                             |> Http.stringBody "text/html"
                     , expect =
