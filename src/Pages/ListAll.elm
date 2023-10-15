@@ -744,7 +744,7 @@ update msg model =
 
         DownloadMarkdown ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
-            , case model.common.glossary of
+            , case model.common.incubatingGlossary of
                 Ok { title, aboutSection, items } ->
                     Export.Markdown.download title aboutSection items
 
@@ -754,7 +754,7 @@ update msg model =
 
         DownloadAnki ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
-            , case model.common.glossary of
+            , case model.common.incubatingGlossary of
                 Ok { enableMathSupport, title, aboutSection, items } ->
                     Export.Anki.download enableMathSupport title aboutSection items
 

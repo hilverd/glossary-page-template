@@ -14,8 +14,10 @@ import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
+import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Extras.HtmlTree
 import Extras.String
 import File.Download as Download
@@ -56,23 +58,23 @@ paragraphs =
         >> String.join (crlf ++ crlf)
 
 
-itemToMarkdown : GlossaryItem -> String
+itemToMarkdown : GlossaryItemForHtml -> String
 itemToMarkdown glossaryItem =
     let
         termsString : String
         termsString =
             glossaryItem
-                |> GlossaryItem.allTerms
+                |> GlossaryItemForHtml.allTerms
                 |> List.map (Term.markdown >> bold)
                 |> lines
 
         definitions =
-            GlossaryItem.definition glossaryItem
+            GlossaryItemForHtml.definition glossaryItem
                 |> Maybe.map List.singleton
                 |> Maybe.withDefault []
 
         relatedTerms =
-            GlossaryItem.relatedPreferredTerms glossaryItem
+            GlossaryItemForHtml.relatedPreferredTerms glossaryItem
 
         definitionsString : String
         definitionsString =
@@ -94,7 +96,7 @@ itemToMarkdown glossaryItem =
         relatedTermsString : String
         relatedTermsString =
             relatedTerms
-                |> List.map RelatedTerm.markdown
+                |> List.map Term.markdown
                 |> String.join ", "
                 |> (++) relatedTermsPrefix
     in
@@ -105,7 +107,7 @@ itemToMarkdown glossaryItem =
 {-| Export a glossary with the given title, "about" paragraph, and "about" links to a Markdown file.
 This is achieved by producing a [command for downloading](https://package.elm-lang.org/packages/elm/file/latest/File.Download) this file.
 -}
-download : GlossaryTitle -> AboutSection -> GlossaryItems -> Cmd msg
+download : GlossaryTitle -> AboutSection -> IncubatingGlossaryItems -> Cmd msg
 download glossaryTitle aboutSection glossaryItems =
     let
         filename : String
@@ -129,8 +131,7 @@ download glossaryTitle aboutSection glossaryItems =
         itemsString : String
         itemsString =
             glossaryItems
-                |> GlossaryItems.orderedAlphabetically
-                |> Array.toList
+                |> IncubatingGlossaryItems.orderedAlphabetically Nothing
                 |> List.map (Tuple.second >> itemToMarkdown)
                 |> paragraphs
 
