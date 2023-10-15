@@ -996,7 +996,7 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
         ]
 
 
-viewSettings : Glossary -> Model -> Html Msg
+viewSettings : IncubatingGlossary -> Model -> Html Msg
 viewSettings glossary model =
     let
         errorDiv : String -> Html msg
@@ -1916,7 +1916,7 @@ viewExportButton enabled exportDropdownMenu =
         ]
 
 
-viewSelectInputSyntax : Glossary -> Model -> Html Msg
+viewSelectInputSyntax : IncubatingGlossary -> Model -> Html Msg
 viewSelectInputSyntax glossary model =
     let
         tabbable : Bool
@@ -2011,7 +2011,7 @@ viewSelectInputSyntax glossary model =
         ]
 
 
-viewSelectCardWidth : Glossary -> Model -> Html Msg
+viewSelectCardWidth : IncubatingGlossary -> Model -> Html Msg
 viewSelectCardWidth glossary model =
     let
         tabbable : Bool
@@ -2330,8 +2330,8 @@ canEdit editability =
 
 view : Model -> Document Msg
 view model =
-    case ( model.common.glossary, model.common.incubatingGlossary ) of
-        ( Ok glossary, Ok incubatingGlossary ) ->
+    case model.common.incubatingGlossary of
+        Ok incubatingGlossary ->
             let
                 noModalDialogShown_ : Bool
                 noModalDialogShown_ =
@@ -2349,7 +2349,7 @@ view model =
                 filterByTag =
                     model.common.filterByTag
             in
-            { title = GlossaryTitle.inlineText glossary.title
+            { title = GlossaryTitle.inlineText incubatingGlossary.title
             , body =
                 [ Html.div
                     [ class "min-h-full focus:outline-none"
@@ -2441,8 +2441,8 @@ view model =
                             )
                         )
                     ]
-                    [ viewMenuForMobile model glossary.enableMathSupport noModalDialogShown_ incubatingIndexOfTerms
-                    , viewStaticSidebarForDesktop glossary.enableMathSupport noModalDialogShown_ incubatingIndexOfTerms
+                    [ viewMenuForMobile model incubatingGlossary.enableMathSupport noModalDialogShown_ incubatingIndexOfTerms
+                    , viewStaticSidebarForDesktop incubatingGlossary.enableMathSupport noModalDialogShown_ incubatingIndexOfTerms
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar noModalDialogShown_
@@ -2457,9 +2457,9 @@ view model =
                         , div
                             [ Html.Attributes.id ElementIds.container
                             , class "relative"
-                            , Extras.HtmlAttribute.fromBool "data-enable-markdown-based-syntax" glossary.enableMarkdownBasedSyntax
+                            , Extras.HtmlAttribute.fromBool "data-enable-markdown-based-syntax" incubatingGlossary.enableMarkdownBasedSyntax
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
-                            , glossary.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
+                            , incubatingGlossary.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
                             ]
                             [ header [] <|
                                 let
@@ -2491,18 +2491,18 @@ view model =
                                     ]
                                 , viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
                                     |> Extras.Html.showIf (model.editability == ReadOnlyWithHelpForMakingChanges)
-                                , Extras.Html.showIf (editing model.editability) <| viewSettings glossary model
+                                , Extras.Html.showIf (editing model.editability) <| viewSettings incubatingGlossary model
                                 , h1
                                     [ id ElementIds.title ]
-                                    [ GlossaryTitle.view glossary.enableMathSupport glossary.title ]
+                                    [ GlossaryTitle.view incubatingGlossary.enableMathSupport incubatingGlossary.title ]
                                 ]
                             , Html.main_
                                 []
                                 [ Components.AboutSection.view
-                                    { enableMathSupport = glossary.enableMathSupport
+                                    { enableMathSupport = incubatingGlossary.enableMathSupport
                                     , modalDialogShown = not noModalDialogShown_
                                     }
-                                    glossary.aboutSection
+                                    incubatingGlossary.aboutSection
                                 , Extras.Html.showIf (editing model.editability) <|
                                     div
                                         [ class "flex-none mt-2" ]
@@ -2536,12 +2536,12 @@ view model =
                                        )
                                     |> viewCards
                                         model
-                                        { enableMathSupport = glossary.enableMathSupport
+                                        { enableMathSupport = incubatingGlossary.enableMathSupport
                                         , editable = editing model.editability
                                         , tabbable = noModalDialogShown_
-                                        , enableLastUpdatedDates = glossary.enableLastUpdatedDates
+                                        , enableLastUpdatedDates = incubatingGlossary.enableLastUpdatedDates
                                         }
-                                        glossary.tags
+                                        (IncubatingGlossaryItems.tags incubatingItems)
                                         incubatingItems
                                 ]
                             , Html.footer
@@ -2572,12 +2572,7 @@ view model =
                 ]
             }
 
-        ( Err error, _ ) ->
-            { title = "Glossary"
-            , body = [ pre [] [ text <| Decode.errorToString error ] ]
-            }
-
-        ( _, Err error ) ->
+        Err error ->
             { title = "Glossary"
             , body = [ pre [] [ text <| Decode.errorToString error ] ]
             }
