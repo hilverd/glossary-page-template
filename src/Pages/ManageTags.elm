@@ -10,6 +10,7 @@ import Components.Badge
 import Components.Button
 import Components.Copy
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
+import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.Saving exposing (Saving(..))
 import Extras.Html
 import Html.Attributes exposing (class)
@@ -41,10 +42,13 @@ type alias Msg =
 
 init : CommonModel -> ( Model, Cmd Msg )
 init common =
-    case common.glossary of
-        Ok { tags } ->
+    case common.incubatingGlossary of
+        Ok { items } ->
             ( { common = common
-              , form = Form.create tags
+              , form =
+                    items
+                        |> IncubatingGlossaryItems.tags
+                        |> Form.create
               }
             , Cmd.none
             )
@@ -224,7 +228,7 @@ viewFooter model =
 
 view : Model -> Document Msg
 view model =
-    case model.common.glossary of
+    case model.common.incubatingGlossary of
         Ok { enableMathSupport } ->
             { title = "Manage Tags"
             , body =
