@@ -18,6 +18,8 @@ import Data.AboutSection exposing (AboutSection)
 import Data.Glossary as Glossary
 import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
+import Data.IncubatingGlossary as IncubatingGlossary exposing (IncubatingGlossary)
+import Data.IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.Saving exposing (Saving(..))
 import ElementIds
 import Extras.Html
@@ -67,7 +69,7 @@ type alias Msg =
 
 init : CommonModel -> ( Model, Cmd Msg )
 init common =
-    case common.glossary of
+    case common.incubatingGlossary of
         Ok { title, aboutSection } ->
             ( { common = common
               , form = Form.create title aboutSection
@@ -135,7 +137,7 @@ update msg model =
             ( { model | form = Form.deleteAboutLink aboutLinkIndex model.form }, Cmd.none )
 
         Save ->
-            case model.common.glossary of
+            case model.common.incubatingGlossary of
                 Ok glossary0 ->
                     if Form.hasValidationErrors model.form then
                         ( { model
@@ -154,7 +156,7 @@ update msg model =
                             common1 : CommonModel
                             common1 =
                                 { common0
-                                    | glossary =
+                                    | incubatingGlossary =
                                         Ok
                                             { glossary0
                                                 | title = titleFromForm glossary0.enableMarkdownBasedSyntax model.form
@@ -217,7 +219,7 @@ aboutSectionFromForm enableMarkdownBasedSyntax form =
     }
 
 
-patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
+patchHtmlFile : CommonModel -> IncubatingGlossaryItems -> Cmd Msg
 patchHtmlFile common glossaryItems =
     let
         msg : PageMsg a
@@ -228,10 +230,10 @@ patchHtmlFile common glossaryItems =
         Extras.Task.messageToCommand msg
 
     else
-        case common.glossary of
+        case common.incubatingGlossary of
             Ok glossary0 ->
                 let
-                    glossary : Glossary.Glossary
+                    glossary : IncubatingGlossary
                     glossary =
                         { glossary0 | items = glossaryItems }
                 in
@@ -241,7 +243,7 @@ patchHtmlFile common glossaryItems =
                     , url = "/"
                     , body =
                         glossary
-                            |> Glossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
+                            |> IncubatingGlossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
                             |> HtmlTree.toHtmlReplacementString
                             |> Http.stringBody "text/html"
                     , expect =
@@ -536,7 +538,7 @@ orMaybe first second =
             second
 
 
-viewCreateFormFooter : Model -> Bool -> GlossaryItems -> Html Msg
+viewCreateFormFooter : Model -> Bool -> IncubatingGlossaryItems -> Html Msg
 viewCreateFormFooter model showValidationErrors glossaryItems =
     let
         form =
@@ -558,9 +560,9 @@ viewCreateFormFooter model showValidationErrors glossaryItems =
         common =
             model.common
 
-        updatedGlossary : Result Decode.Error Glossary.Glossary
+        updatedGlossary : Result Decode.Error IncubatingGlossary
         updatedGlossary =
-            case common.glossary of
+            case common.incubatingGlossary of
                 Ok glossary ->
                     Ok { glossary | items = glossaryItems }
 
@@ -580,7 +582,7 @@ viewCreateFormFooter model showValidationErrors glossaryItems =
             [ Components.Button.white
                 (saving /= SavingInProgress)
                 [ Html.Events.onClick <|
-                    PageMsg.NavigateToListAll { common | glossary = updatedGlossary }
+                    PageMsg.NavigateToListAll { common | incubatingGlossary = updatedGlossary }
                 ]
                 [ text "Cancel" ]
             , Components.Button.primary
@@ -604,7 +606,7 @@ viewCreateFormFooter model showValidationErrors glossaryItems =
 
 view : Model -> Document Msg
 view model =
-    case model.common.glossary of
+    case model.common.incubatingGlossary of
         Ok { enableMarkdownBasedSyntax, enableMathSupport, items } ->
             let
                 title1 : GlossaryTitle.GlossaryTitle
