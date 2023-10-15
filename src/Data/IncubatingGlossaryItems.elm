@@ -39,7 +39,7 @@ import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
 import Data.IncubatingGlossaryItem as IncubatingGlossaryItem exposing (IncubatingGlossaryItem, alternativeTerms, lastUpdatedDateAsIso8601, preferredTerm)
 import Data.TagId as TagId exposing (TagId)
-import Data.TagIdDict as TagIdDict exposing (TagIdDict)
+import Data.TagIdDict as TagIdDict exposing (TagIdDict, nextTagId)
 import Dict exposing (Dict)
 import DirectedGraph exposing (DirectedGraph)
 import Extras.Regex
@@ -63,6 +63,8 @@ type IncubatingGlossaryItems
         , orderedAlphabetically : List GlossaryItemId
         , orderedByMostMentionedFirst : List GlossaryItemId
         , orderedFocusedOn : Maybe ( GlossaryItemId, ( List GlossaryItemId, List GlossaryItemId ) )
+        , nextItemId : GlossaryItemId
+        , nextTagId : TagId
         }
 
 
@@ -357,6 +359,26 @@ fromList tags_ glossaryItemsForHtml =
 
         orderedByMostMentionedFirst_ =
             orderByMostMentionedFirst indexedGlossaryItemsForHtml
+
+        nextItemId : GlossaryItemId
+        nextItemId =
+            itemById
+                |> GlossaryItemIdDict.keys
+                |> List.map GlossaryItemId.toInt
+                |> List.maximum
+                |> Maybe.map ((+) 1)
+                |> Maybe.withDefault 0
+                |> GlossaryItemId.create
+
+        nextTagId : TagId
+        nextTagId =
+            tagById
+                |> TagIdDict.keys
+                |> List.map TagId.toInt
+                |> List.maximum
+                |> Maybe.map ((+) 1)
+                |> Maybe.withDefault 0
+                |> TagId.create
     in
     IncubatingGlossaryItems
         { itemById = itemById
@@ -370,6 +392,8 @@ fromList tags_ glossaryItemsForHtml =
         , orderedAlphabetically = orderedAlphabetically_
         , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
         , orderedFocusedOn = Nothing
+        , nextItemId = nextItemId
+        , nextTagId = nextTagId
         }
 
 
@@ -385,24 +409,21 @@ insertTag tag glossaryItems =
             in
             if Dict.get rawTag items.tagIdByRawTag == Nothing then
                 let
-                    nextTagId : TagId
-                    nextTagId =
-                        TagIdDict.nextTagId items.tagById
-
                     tagById_ : TagIdDict Tag
                     tagById_ =
                         items.tagById
-                            |> TagIdDict.insert nextTagId tag
+                            |> TagIdDict.insert items.nextTagId tag
 
                     tagIdByRawTag_ : Dict String TagId
                     tagIdByRawTag_ =
                         items.tagIdByRawTag
-                            |> Dict.insert rawTag nextTagId
+                            |> Dict.insert rawTag items.nextTagId
                 in
                 IncubatingGlossaryItems
                     { items
                         | tagById = tagById_
                         , tagIdByRawTag = tagIdByRawTag_
+                        , nextTagId = TagId.increment items.nextTagId
                     }
 
             else
@@ -413,8 +434,17 @@ insertTag tag glossaryItems =
 -}
 remove : GlossaryItemId -> IncubatingGlossaryItems -> IncubatingGlossaryItems
 remove itemId glossaryItems =
-    -- TODO
     glossaryItems
+        |> orderedAlphabetically Nothing
+        |> List.filterMap
+            (\( itemId_, itemForHtml ) ->
+                if itemId_ == itemId then
+                    Nothing
+
+                else
+                    Just itemForHtml
+            )
+        |> fromList (tags glossaryItems)
 
 
 {-| Get the item associated with an ID. If the ID is not found, return `Nothing`.
@@ -579,7 +609,12 @@ disambiguatedPreferredTerms filterByTagId glossaryItems =
                 itemIds : List GlossaryItemId
                 itemIds =
                     filterByTagId
-                        |> Maybe.andThen (\tagId -> TagIdDict.get tagId items.itemIdsByTagId)
+                        |> Maybe.map
+                            (\tagId ->
+                                items.itemIdsByTagId
+                                    |> TagIdDict.get tagId
+                                    |> Maybe.withDefault []
+                            )
                         |> Maybe.withDefault (GlossaryItemIdDict.keys items.itemById)
             in
             List.filterMap
@@ -741,11 +776,12 @@ toList filterByTagId glossaryItems =
                 itemIdsMatchingTagFilter : Maybe (Set Int)
                 itemIdsMatchingTagFilter =
                     filterByTagId
-                        |> Maybe.andThen
+                        |> Maybe.map
                             (\tagId ->
                                 items.itemIdsByTagId
                                     |> TagIdDict.get tagId
                                     |> Maybe.map (List.map GlossaryItemId.toInt >> Set.fromList)
+                                    |> Maybe.withDefault Set.empty
                             )
             in
             List.filterMap

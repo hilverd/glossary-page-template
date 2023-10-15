@@ -2,7 +2,7 @@ module Data.TagIdDict exposing
     ( TagIdDict
     , empty, insert, update
     , get, nextTagId
-    , values, toList, fromList
+    , keys, values, toList, fromList
     , map, foldl
     )
 
@@ -26,7 +26,7 @@ module Data.TagIdDict exposing
 
 # Lists
 
-@docs values, toList, fromList
+@docs keys, values, toList, fromList
 
 
 # Transform
@@ -99,6 +99,17 @@ nextTagId tagIdDict =
                 |> Maybe.map ((+) 1)
                 |> Maybe.withDefault 0
                 |> TagId.create
+
+
+{-| Get all of the keys in a dictionary, sorted from lowest to highest.
+-}
+keys : TagIdDict v -> List TagId
+keys tagIdDict =
+    case tagIdDict of
+        TagIdDict dict ->
+            dict
+                |> Dict.keys
+                |> List.map TagId.create
 
 
 {-| Get all of the values in a dictionary, in the order of their keys.
