@@ -525,16 +525,7 @@ get itemId glossaryItems =
                                             relatedItemIds
                                                 |> List.filterMap
                                                     (\relatedItemId ->
-                                                        items.itemById
-                                                            |> GlossaryItemIdDict.get relatedItemId
-                                                            |> Maybe.map
-                                                                (\relatedItem ->
-                                                                    let
-                                                                        preferredTerm_ =
-                                                                            IncubatingGlossaryItem.preferredTerm relatedItem
-                                                                    in
-                                                                    preferredTerm_
-                                                                )
+                                                        disambiguatedPreferredTerm relatedItemId glossaryItems
                                                     )
                                         )
                                     |> Maybe.withDefault []
