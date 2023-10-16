@@ -21,7 +21,8 @@ import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
-import Data.GlossaryItemForHtml as GlossaryItemForHtml
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItemIndex as GlossaryItemIndex
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -100,7 +101,6 @@ init commonModel =
 
                 existingTerms : List Term
                 existingTerms =
-                    -- TODO: should this be all terms, with the preferred ones disambiguated?
                     IncubatingGlossaryItems.disambiguatedPreferredTerms Nothing items
 
                 existingDisambiguatedPreferredTerms : List Term
@@ -864,7 +864,7 @@ viewAddRelatedTermButtonForEmptyState =
 viewCreateSeeAlso :
     Bool
     -> Bool
-    -> GlossaryItems
+    -> IncubatingGlossaryItems
     -> Array TermField
     -> Array Form.IncubatingRelatedTermField
     -> Dict Int Components.DropdownMenu.Model
@@ -883,9 +883,8 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
         allPreferredTerms : List Term
         allPreferredTerms =
             glossaryItems
-                |> GlossaryItems.orderedAlphabetically
-                |> Array.toList
-                |> List.map (Tuple.second >> GlossaryItem.preferredTerm)
+                |> IncubatingGlossaryItems.orderedAlphabetically Nothing
+                |> List.map (Tuple.second >> GlossaryItemForHtml.disambiguatedPreferredTerm)
     in
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
@@ -1030,7 +1029,7 @@ viewCreateFormFooter model =
 
 view : Model -> Document Msg
 view model =
-    case model.common.glossary of
+    case model.common.incubatingGlossary of
         Ok glossary ->
             let
                 terms : Array TermField
@@ -1049,9 +1048,9 @@ view model =
                 suggestedRelatedTerms =
                     Form.suggestRelatedTerms model.form
 
-                -- newOrUpdatedGlossaryItem : GlossaryItem
-                -- newOrUpdatedGlossaryItem =
-                --     Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form Nothing
+                newOrUpdatedGlossaryItem : GlossaryItemForHtml
+                newOrUpdatedGlossaryItem =
+                    Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form Nothing
             in
             { title = GlossaryTitle.inlineText glossary.title
             , body =
@@ -1108,13 +1107,8 @@ view model =
                                                 [ Components.GlossaryItemCard.view
                                                     { enableMathSupport = glossary.enableMathSupport, makeLinksTabbable = True, enableLastUpdatedDates = False }
                                                     Components.GlossaryItemCard.Preview
-                                                    -- TODO
-                                                    -- { previous = Nothing
-                                                    -- , item = Just ( GlossaryItemIndex.fromInt -1, newOrUpdatedGlossaryItem )
-                                                    -- , next = Nothing
-                                                    -- }
                                                     { previous = Nothing
-                                                    , item = Nothing
+                                                    , item = Just ( GlossaryItemId.create -1, newOrUpdatedGlossaryItem )
                                                     , next = Nothing
                                                     }
                                                 ]
