@@ -746,7 +746,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfR
                 ]
             , Components.SelectMenu.render
                 [ Components.SelectMenu.id <| ElementIds.seeAlsoSelect index
-                , Components.SelectMenu.ariaLabel "Related preferred term"
+                , Components.SelectMenu.ariaLabel "Related item"
                 , Components.SelectMenu.validationError relatedTerm.validationError
                 , Components.SelectMenu.showValidationErrors showValidationErrors
                 , Components.SelectMenu.onChange (PageMsg.Internal << SelectRelatedTerm index)
@@ -844,7 +844,7 @@ viewAddRelatedTermButton =
     Components.Button.secondary
         [ Html.Events.onClick <| PageMsg.Internal <| AddRelatedTerm Nothing ]
         [ Icons.plus [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
-        , text "Add related term"
+        , text "Add related item"
         ]
 
 
@@ -855,7 +855,7 @@ viewAddRelatedTermButtonForEmptyState =
         [ Icons.plus [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
         , span
             [ class "mt-2 block font-medium text-gray-900 dark:text-gray-200" ]
-            [ text "Add related term" ]
+            [ text "Add related item" ]
         ]
 
 
@@ -890,10 +890,10 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Related terms" ]
+                [ text "Related items" ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
-                [ text "Point to any related preferred terms the reader might want to look up." ]
+                [ text "Point to any related items the reader might want to look up." ]
             ]
         , div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
