@@ -21,6 +21,7 @@ import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
+import Data.GlossaryItemForHtml as GlossaryItemForHtml
 import Data.GlossaryItemIndex as GlossaryItemIndex
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -127,13 +128,14 @@ init commonModel =
                             items
                                 |> IncubatingGlossaryItems.get id
                                 |> Maybe.map
-                                    (Form.fromGlossaryItemForHtml
-                                        existingTerms
-                                        existingDisambiguatedPreferredTerms
-                                        tags
-                                        preferredTermsOfItemsListingThisItemAsRelated
-                                        -- TODO
-                                        []
+                                    (\itemForHtml ->
+                                        Form.fromGlossaryItemForHtml
+                                            existingTerms
+                                            existingDisambiguatedPreferredTerms
+                                            tags
+                                            preferredTermsOfItemsListingThisItemAsRelated
+                                            (GlossaryItemForHtml.relatedPreferredTerms itemForHtml)
+                                            itemForHtml
                                     )
                                 |> Maybe.withDefault emptyForm
                         )
@@ -707,7 +709,7 @@ viewCreateSeeAlsoSingle :
     -> List Term
     -> Dict Int Components.DropdownMenu.Model
     -> Int
-    -> Form.RelatedTermField
+    -> Form.IncubatingRelatedTermField
     -> Html Msg
 viewCreateSeeAlsoSingle showValidationErrors relatedTermsIdReferences numberOfRelatedTerms allTerms dropdownMenusWithMoreOptionsForRelatedTerms index relatedTerm =
     viewCreateSeeAlsoSingle1
@@ -727,7 +729,7 @@ viewCreateSeeAlsoSingle1 :
     -> List Term
     -> Maybe Components.DropdownMenu.Model
     -> RelatedTermIndex
-    -> Form.RelatedTermField
+    -> Form.IncubatingRelatedTermField
     -> Html Msg
 viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfRelatedTerms allTerms maybeDropdownMenuWithMoreOptions index relatedTerm =
     div
@@ -755,14 +757,14 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfR
                     |> List.filter
                         (\term ->
                             (not <| Set.member (Term.id term |> TermId.toString) relatedTermsIdReferences)
-                                || (Just (Term.id term) == relatedTerm.idReference)
+                                || (Just (Term.id term) == relatedTerm.id)
                         )
                     |> List.map
                         (\term ->
                             Components.SelectMenu.Choice
                                 (Term.id term |> TermId.toString)
                                 [ text <| Term.inlineText term ]
-                                (Just (Term.id term) == relatedTerm.idReference)
+                                (Just (Term.id term) == relatedTerm.id)
                         )
                 )
             , Extras.Html.showIf (numberOfRelatedTerms > 1) <|
@@ -864,7 +866,7 @@ viewCreateSeeAlso :
     -> Bool
     -> GlossaryItems
     -> Array TermField
-    -> Array Form.RelatedTermField
+    -> Array Form.IncubatingRelatedTermField
     -> Dict Int Components.DropdownMenu.Model
     -> List Term
     -> Html Msg
@@ -874,7 +876,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
         termIdsSet =
             terms |> Array.toList |> List.map (TermField.raw >> Form.termBodyToId) |> Set.fromList
 
-        relatedTermsList : List Form.RelatedTermField
+        relatedTermsList : List Form.IncubatingRelatedTermField
         relatedTermsList =
             Array.toList relatedTermsArray
 
@@ -901,7 +903,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
                 (viewCreateSeeAlsoSingle
                     showValidationErrors
                     (relatedTermsList
-                        |> List.filterMap (.idReference >> Maybe.map TermId.toString)
+                        |> List.filterMap (.id >> Maybe.map TermId.toString)
                         |> Set.fromList
                     )
                     (List.length relatedTermsList)
@@ -1039,11 +1041,9 @@ view model =
                 definitionArray =
                     Form.definitionField model.form
 
-                relatedTerms : Array Form.RelatedTermField
+                relatedTerms : Array Form.IncubatingRelatedTermField
                 relatedTerms =
-                    -- TODO
-                    -- Form.relatedTermFields model.form
-                    Array.empty
+                    Form.relatedTermFields model.form
 
                 suggestedRelatedTerms : List Term
                 suggestedRelatedTerms =

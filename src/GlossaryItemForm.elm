@@ -1,5 +1,6 @@
 module GlossaryItemForm exposing
     ( GlossaryItemForm
+    , IncubatingRelatedTermField
     , RelatedTermField
     , addRelatedTerm
     , addTerm
@@ -8,6 +9,7 @@ module GlossaryItemForm exposing
     , deleteRelatedTerm
     , deleteTerm
     , empty
+    , emptyIncubatingRelatedTermField
     , fromGlossaryItemForHtml
     , hasValidationErrors
     , moveRelatedTermDown
@@ -59,7 +61,7 @@ type alias RelatedTermField =
 
 
 type alias IncubatingRelatedTermField =
-    { itemId : Maybe GlossaryItemId
+    { id : Maybe TermId
     , validationError : Maybe String
     }
 
@@ -233,7 +235,7 @@ validate form =
                     (\relatedTermField ->
                         { relatedTermField
                             | validationError =
-                                if relatedTermField.itemId == Nothing then
+                                if relatedTermField.id == Nothing then
                                     Just "Please select an item"
 
                                 else
@@ -284,9 +286,9 @@ empty withTermsOutside withPreferredTermsOutside allTags preferredTermsOfItemsLi
         |> validate
 
 
-emptyRelatedTermField : RelatedTermField
-emptyRelatedTermField =
-    { idReference = Nothing
+emptyIncubatingRelatedTermField : IncubatingRelatedTermField
+emptyIncubatingRelatedTermField =
+    { id = Nothing
     , validationError = Nothing
     }
 
@@ -296,10 +298,10 @@ fromGlossaryItemForHtml :
     -> List Term
     -> List Tag
     -> List Term
-    -> List GlossaryItemId
+    -> List Term
     -> GlossaryItemForHtml
     -> GlossaryItemForm
-fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTermsOfItemsListingThisItemAsRelated_ relatedItemIds item =
+fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTermsOfItemsListingThisItemAsRelated_ relatedTerms item =
     let
         itemTags : List Tag
         itemTags =
@@ -367,8 +369,8 @@ fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTe
                 |> List.map (\tag -> ( tag, List.member tag itemTags ))
         , definitionField = definitionField_
         , relatedTermFields =
-            relatedItemIds
-                |> List.map (\itemId -> IncubatingRelatedTermField (Just itemId) Nothing)
+            relatedTerms
+                |> List.map (\term -> IncubatingRelatedTermField (Just <| Term.id term) Nothing)
                 |> Array.fromList
         , termsOutside = termsOutside1
         , preferredTermsOutside = preferredTermsOutside1
@@ -459,10 +461,18 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                 |> Array.toList
                 |> List.filterMap
                     (\relatedTermField ->
-                        relatedTermField.itemId
+                        relatedTermField.id
+                            |> Maybe.andThen
+                                (\termId ->
+                                    IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId
+                                        termId
+                                        glossaryItems
+                                )
                             |> Maybe.andThen
                                 (\itemId ->
-                                    IncubatingGlossaryItems.disambiguatedPreferredTerm itemId glossaryItems
+                                    IncubatingGlossaryItems.disambiguatedPreferredTerm
+                                        itemId
+                                        glossaryItems
                                 )
                     )
 
@@ -617,11 +627,11 @@ addRelatedTerm maybeTermId glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             let
-                relatedTermField : RelatedTermField
+                relatedTermField : IncubatingRelatedTermField
                 relatedTermField =
                     maybeTermId
-                        |> Maybe.map (\termId -> { idReference = Just termId, validationError = Nothing })
-                        |> Maybe.withDefault emptyRelatedTermField
+                        |> Maybe.map (\termId -> { id = Just termId, validationError = Nothing })
+                        |> Maybe.withDefault emptyIncubatingRelatedTermField
 
                 needsUpdating1 : Bool
                 needsUpdating1 =
@@ -631,14 +641,12 @@ addRelatedTerm maybeTermId glossaryItemForm =
                     else
                         form.needsUpdating
             in
-            -- TODO
-            -- GlossaryItemForm
-            --     { form
-            --         | relatedTermFields = Array.push relatedTermField form.relatedTermFields
-            --         , needsUpdating = needsUpdating1
-            --     }
-            --     |> validate
-            glossaryItemForm
+            GlossaryItemForm
+                { form
+                    | relatedTermFields = Array.push relatedTermField form.relatedTermFields
+                    , needsUpdating = needsUpdating1
+                }
+                |> validate
 
 
 selectRelatedTerm : RelatedTermIndex -> GlossaryItemForm -> Maybe TermId -> GlossaryItemForm
