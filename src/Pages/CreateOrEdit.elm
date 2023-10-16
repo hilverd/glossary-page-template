@@ -26,6 +26,7 @@ import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItemIndex as GlossaryItemIndex
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
+import Data.IncubatingGlossary as IncubatingGlossary
 import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
@@ -335,7 +336,7 @@ update msg model =
             ( model, getCurrentDateTimeForSaving () )
 
         ReceiveCurrentDateTimeForSaving dateTime ->
-            case model.common.glossary of
+            case model.common.incubatingGlossary of
                 Ok glossary ->
                     if Form.hasValidationErrors model.form then
                         ( { model
@@ -347,9 +348,10 @@ update msg model =
 
                     else
                         let
-                            -- newOrUpdatedGlossaryItem : GlossaryItem
-                            -- newOrUpdatedGlossaryItem =
-                            --     Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form <| Just dateTime
+                            newOrUpdatedGlossaryItem : GlossaryItemForHtml
+                            newOrUpdatedGlossaryItem =
+                                Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form <| Just dateTime
+
                             common : CommonModel
                             common =
                                 model.common
@@ -383,27 +385,19 @@ update msg model =
                                           Nothing
                                         )
 
-                            updatedGlossaryItemsWithFocusedOn =
-                                case common.orderItemsBy of
-                                    FocusedOn termId ->
-                                        GlossaryItems.enableFocusingOn termId updatedGlossaryItems
-
-                                    _ ->
-                                        updatedGlossaryItems
-
                             model_ : Model
                             model_ =
                                 { model
                                     | common =
                                         { common
-                                            | glossary = Ok <| { glossary | items = updatedGlossaryItemsWithFocusedOn }
+                                            | incubatingGlossary = Ok <| { glossary | items = updatedGlossaryItems }
                                             , maybeId = maybeId
                                         }
                                     , saving = SavingInProgress
                                 }
                         in
                         ( model_
-                        , patchHtmlFile model_.common updatedGlossaryItemsWithFocusedOn
+                        , patchHtmlFile model_.common updatedGlossaryItems
                         )
 
                 _ ->
@@ -415,14 +409,14 @@ update msg model =
             )
 
 
-patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
+patchHtmlFile : CommonModel -> IncubatingGlossaryItems -> Cmd Msg
 patchHtmlFile common glossaryItems =
-    case common.glossary of
+    case common.incubatingGlossary of
         Ok glossary ->
             let
                 msg : PageMsg InternalMsg
                 msg =
-                    PageMsg.NavigateToListAll { common | glossary = Ok { glossary | items = glossaryItems } }
+                    PageMsg.NavigateToListAll { common | incubatingGlossary = Ok { glossary | items = glossaryItems } }
             in
             if common.enableSavingChangesInMemory then
                 Extras.Task.messageToCommand msg
@@ -434,7 +428,7 @@ patchHtmlFile common glossaryItems =
                     , url = "/"
                     , body =
                         { glossary | items = glossaryItems }
-                            |> Glossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
+                            |> IncubatingGlossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
                             |> HtmlTree.toHtmlReplacementString
                             |> Http.stringBody "text/html"
                     , expect =
