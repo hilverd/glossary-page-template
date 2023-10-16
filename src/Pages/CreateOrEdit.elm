@@ -359,30 +359,23 @@ update msg model =
                             ( updatedGlossaryItems, maybeId ) =
                                 case common.maybeId of
                                     Just id ->
-                                        ( -- GlossaryItems.update id newOrUpdatedGlossaryItem glossary.items
-                                          -- TODO
-                                          glossary.items
+                                        ( IncubatingGlossaryItems.update id newOrUpdatedGlossaryItem glossary.items
                                         , Just id
                                         )
 
                                     Nothing ->
-                                        -- let
-                                        --     updated : GlossaryItems
-                                        --     updated =
-                                        --         GlossaryItems.insert newOrUpdatedGlossaryItem glossary.items
-                                        -- in
-                                        ( glossary.items
-                                          -- TODO
-                                          -- updated
+                                        let
+                                            updated : IncubatingGlossaryItems
+                                            updated =
+                                                IncubatingGlossaryItems.insert newOrUpdatedGlossaryItem glossary.items
+                                        in
+                                        ( updated
                                         , -- Find index of newly inserted item
-                                          -- TODO
-                                          --   updated
-                                          --     |> GlossaryItems.orderedAlphabetically
-                                          --     |> Array.toList
-                                          --     |> List.filter (Tuple.second >> (==) newOrUpdatedGlossaryItem)
-                                          --     |> List.head
-                                          --     |> Maybe.map Tuple.first
-                                          Nothing
+                                          updated
+                                            |> IncubatingGlossaryItems.orderedAlphabetically Nothing
+                                            |> List.filter (Tuple.second >> (==) newOrUpdatedGlossaryItem)
+                                            |> List.head
+                                            |> Maybe.map Tuple.first
                                         )
 
                             model_ : Model

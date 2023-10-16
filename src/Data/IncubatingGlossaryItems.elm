@@ -1,6 +1,6 @@
 module Data.IncubatingGlossaryItems exposing
     ( IncubatingGlossaryItems
-    , fromList, insertTag, remove
+    , fromList, insertTag, insert, update, remove
     , get, tags, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
@@ -15,7 +15,7 @@ module Data.IncubatingGlossaryItems exposing
 
 # Build
 
-@docs fromList, insertTag, remove
+@docs fromList, insertTag, insert, update, remove
 
 
 # Query
@@ -428,6 +428,34 @@ insertTag tag glossaryItems =
 
             else
                 glossaryItems
+
+
+{-| Insert an item.
+-}
+insert : GlossaryItemForHtml -> IncubatingGlossaryItems -> IncubatingGlossaryItems
+insert item glossaryItems =
+    glossaryItems
+        |> orderedAlphabetically Nothing
+        |> List.map Tuple.second
+        |> (::) item
+        |> fromList (tags glossaryItems)
+
+
+{-| Update an item.
+-}
+update : GlossaryItemId -> GlossaryItemForHtml -> IncubatingGlossaryItems -> IncubatingGlossaryItems
+update itemId item glossaryItems =
+    glossaryItems
+        |> orderedAlphabetically Nothing
+        |> List.map
+            (\( itemId_, item_ ) ->
+                if itemId_ == itemId then
+                    item
+
+                else
+                    item_
+            )
+        |> fromList (tags glossaryItems)
 
 
 {-| Remove the item associated with an ID. Does nothing if the ID is not found.
