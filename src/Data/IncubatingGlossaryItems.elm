@@ -1,7 +1,7 @@
 module Data.IncubatingGlossaryItems exposing
     ( IncubatingGlossaryItems
     , fromList, insertTag, insert, update, remove
-    , get, tags, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+    , get, tags, tagByIdList, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
 
@@ -20,7 +20,7 @@ module Data.IncubatingGlossaryItems exposing
 
 # Query
 
-@docs get, tags, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+@docs get, tags, tagByIdList, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
 
 
 # Export
@@ -555,6 +555,15 @@ tags glossaryItems =
     case glossaryItems of
         IncubatingGlossaryItems items ->
             TagIdDict.values items.tagById
+
+
+{-| The tags for these glossary items along with their tag IDs.
+-}
+tagByIdList : IncubatingGlossaryItems -> List ( TagId, Tag )
+tagByIdList glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            TagIdDict.toList items.tagById
 
 
 {-| Look up a tag ID from its contents.

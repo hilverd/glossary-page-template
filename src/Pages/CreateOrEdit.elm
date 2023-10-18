@@ -16,7 +16,7 @@ import Components.GlossaryItemCard
 import Components.SelectMenu
 import Components.Spinner
 import Data.Glossary as Glossary
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem, disambiguationTag)
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
@@ -31,6 +31,7 @@ import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (Incubat
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.Saving exposing (Saving(..))
+import Data.TagId as TagId exposing (TagId)
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import Dict exposing (Dict)
 import ElementIds
@@ -96,9 +97,9 @@ init commonModel =
     case commonModel.incubatingGlossary of
         Ok { items } ->
             let
-                tags : List Tag
+                tags : List ( TagId, Tag )
                 tags =
-                    IncubatingGlossaryItems.tags items
+                    IncubatingGlossaryItems.tagByIdList items
 
                 existingTerms : List Term
                 existingTerms =
@@ -124,21 +125,28 @@ init commonModel =
                     Form.empty existingTerms existingDisambiguatedPreferredTerms tags preferredTermsOfItemsListingThisItemAsRelated
 
                 form =
-                    Maybe.map
+                    Maybe.andThen
                         (\id ->
                             items
                                 |> IncubatingGlossaryItems.get id
                                 |> Maybe.map
                                     (\itemForHtml ->
+                                        let
+                                            disambiguationTagId : Maybe TagId
+                                            disambiguationTagId =
+                                                itemForHtml
+                                                    |> GlossaryItemForHtml.disambiguationTag
+                                                    |> Maybe.andThen (\tag -> IncubatingGlossaryItems.tagIdFromTag tag items)
+                                        in
                                         Form.fromGlossaryItemForHtml
                                             existingTerms
                                             existingDisambiguatedPreferredTerms
-                                            tags
+                                            (IncubatingGlossaryItems.tagByIdList items)
                                             preferredTermsOfItemsListingThisItemAsRelated
                                             (GlossaryItemForHtml.relatedPreferredTerms itemForHtml)
+                                            disambiguationTagId
                                             itemForHtml
                                     )
-                                |> Maybe.withDefault emptyForm
                         )
                         commonModel.maybeId
                         |> Maybe.withDefault emptyForm
@@ -661,7 +669,7 @@ viewDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled
         ]
 
 
-viewTags : Bool -> List ( Tag, Bool ) -> Html Msg
+viewTags : Bool -> List ( ( TagId, Tag ), Bool ) -> Html Msg
 viewTags enableMathSupport tagCheckboxes =
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
@@ -677,10 +685,10 @@ viewTags enableMathSupport tagCheckboxes =
             []
             (tagCheckboxes
                 |> List.map
-                    (\( tag, checked ) ->
+                    (\( ( tagId, tag ), checked ) ->
                         Components.Badge.indigoWithCheckbox
                             { tabbable = True, checked = checked }
-                            (Tag.id tag)
+                            (tagId |> TagId.toInt |> String.fromInt |> (++) "tag-")
                             (PageMsg.Internal <| ToggleTagCheckbox tag)
                             [ class "mr-2 mb-2" ]
                             [ Tag.view enableMathSupport [] tag ]
@@ -1067,9 +1075,10 @@ view model =
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
                                         definitionArray
-                                    , Extras.Html.showIf (not <| List.isEmpty <| Form.tagCheckboxes model.form) <|
-                                        viewTags glossary.enableMathSupport <|
-                                            Form.tagCheckboxes model.form
+                                    , model.form
+                                        |> Form.tagCheckboxes
+                                        |> viewTags glossary.enableMathSupport
+                                        |> Extras.Html.showIf (not <| List.isEmpty <| Form.tagCheckboxes model.form)
                                     , viewCreateSeeAlso
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid

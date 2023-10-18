@@ -31,7 +31,7 @@ module GlossaryItemForm exposing
     )
 
 import Array exposing (Array)
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem, disambiguationTag)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Tag exposing (Tag)
@@ -43,6 +43,7 @@ import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
+import Data.TagId exposing (TagId)
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import Dict exposing (Dict)
 import ElementIds
@@ -70,7 +71,8 @@ type GlossaryItemForm
     = GlossaryItemForm
         { preferredTermField : TermField
         , alternativeTermFields : Array TermField
-        , tagCheckboxes : List ( Tag, Bool )
+        , tagCheckboxes : List ( ( TagId, Tag ), Bool )
+        , disambiguationTagId : Maybe TagId
         , definitionField : DefinitionField
         , relatedTermFields : Array IncubatingRelatedTermField
         , termsOutside : List Term
@@ -104,11 +106,18 @@ termFields form =
         |> Array.fromList
 
 
-tagCheckboxes : GlossaryItemForm -> List ( Tag, Bool )
+tagCheckboxes : GlossaryItemForm -> List ( ( TagId, Tag ), Bool )
 tagCheckboxes glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             form.tagCheckboxes
+
+
+disambiguationTagId : GlossaryItemForm -> Maybe TagId
+disambiguationTagId glossaryItemForm =
+    case glossaryItemForm of
+        GlossaryItemForm form ->
+            form.disambiguationTagId
 
 
 definitionField : GlossaryItemForm -> DefinitionField
@@ -247,6 +256,7 @@ validate form =
         { preferredTermField = validatedPreferredTermField
         , alternativeTermFields = validatedAlternativeTermFields
         , tagCheckboxes = tagCheckboxes form
+        , disambiguationTagId = disambiguationTagId form
         , definitionField = validatedDefinitionField
         , relatedTermFields = validatedRelatedTermFields
         , termsOutside = termsOutside form
@@ -269,12 +279,13 @@ hasValidationErrors form =
         || (form |> relatedTermFields |> hasErrors .validationError)
 
 
-empty : List Term -> List Term -> List Tag -> List Term -> GlossaryItemForm
+empty : List Term -> List Term -> List ( TagId, Tag ) -> List Term -> GlossaryItemForm
 empty withTermsOutside withPreferredTermsOutside allTags preferredTermsOfItemsListingThisItemAsRelated_ =
     GlossaryItemForm
         { preferredTermField = TermField.empty
         , alternativeTermFields = Array.empty
-        , tagCheckboxes = List.map (\tag -> ( tag, False )) allTags
+        , tagCheckboxes = List.map (\tagWithId -> ( tagWithId, False )) allTags
+        , disambiguationTagId = Nothing
         , definitionField = DefinitionField.empty
         , relatedTermFields = Array.empty
         , termsOutside = withTermsOutside
@@ -296,16 +307,17 @@ emptyIncubatingRelatedTermField =
 fromGlossaryItemForHtml :
     List Term
     -> List Term
-    -> List Tag
+    -> List ( TagId, Tag )
     -> List Term
     -> List Term
+    -> Maybe TagId
     -> GlossaryItemForHtml
     -> GlossaryItemForm
-fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTermsOfItemsListingThisItemAsRelated_ relatedTerms item =
+fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTermsOfItemsListingThisItemAsRelated_ relatedTerms disambiguationTagId_ item =
     let
-        itemTags : List Tag
-        itemTags =
-            GlossaryItemForHtml.allTags item
+        normalTags : List Tag
+        normalTags =
+            GlossaryItemForHtml.normalTags item
 
         preferredTermFieldForItem : TermField
         preferredTermFieldForItem =
@@ -365,8 +377,12 @@ fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTe
         { preferredTermField = preferredTermFieldForItem
         , alternativeTermFields = Array.fromList alternativeTermFieldsForItem
         , tagCheckboxes =
-            allTags
-                |> List.map (\tag -> ( tag, List.member tag itemTags ))
+            List.map
+                (\( tagId, tag ) ->
+                    ( ( tagId, tag ), List.member tag normalTags || Just tagId == disambiguationTagId_ )
+                )
+                allTags
+        , disambiguationTagId = disambiguationTagId_
         , definitionField = definitionField_
         , relatedTermFields =
             relatedTerms
@@ -426,13 +442,19 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
             form
                 |> tagCheckboxes
                 |> List.filterMap
-                    (\( tag, checked ) ->
-                        if checked then
+                    (\( ( tagId, tag ), checked ) ->
+                        if checked && Just tagId /= disambiguationTagId form then
                             Just tag
 
                         else
                             Nothing
                     )
+
+        disambiguationTag : Maybe Tag
+        disambiguationTag =
+            form
+                |> disambiguationTagId
+                |> Maybe.andThen (\tagId -> IncubatingGlossaryItems.tagFromId tagId glossaryItems)
 
         definition =
             form
@@ -482,11 +504,10 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
         lastUpdatedDate_ =
             dateTime
     in
-    GlossaryItemForHtml.create preferredTerm
+    GlossaryItemForHtml.create
+        preferredTerm
         alternativeTerms
-        (Nothing
-         -- TODO
-        )
+        disambiguationTag
         normalTags
         definition
         relatedTerms
@@ -582,12 +603,12 @@ toggleTagCheckbox tag glossaryItemForm =
                 tagCheckboxes_ =
                     form.tagCheckboxes
                         |> List.map
-                            (\( tag_, checked ) ->
+                            (\( ( tagId, tag_ ), checked ) ->
                                 if tag_ == tag then
-                                    ( tag_, not checked )
+                                    ( ( tagId, tag_ ), not checked )
 
                                 else
-                                    ( tag_, checked )
+                                    ( ( tagId, tag_ ), checked )
                             )
             in
             GlossaryItemForm

@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Tag exposing (Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, id, view)
+module Data.GlossaryItem.Tag exposing (Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, view)
 
 {-| A tag that can be used in glossary items.
 This can be in either plain text or Markdown.
@@ -9,7 +9,7 @@ Tags can be used to group items together that belong in the same "context" or sh
 
 # Tags
 
-@docs Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, id, view
+@docs Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, view
 
 -}
 
@@ -131,17 +131,6 @@ markdown tag =
 
         MarkdownTag t ->
             MarkdownFragment.raw t.body
-
-
-{-| Return a string for the tag that can be used as an HTML ID attribute.
-
-    fromPlaintext "Foo bar" |> id
-    --> "Foo_bar"
-
--}
-id : Tag -> String
-id =
-    raw >> String.replace " " "_"
 
 
 {-| View a tag as HTML.
