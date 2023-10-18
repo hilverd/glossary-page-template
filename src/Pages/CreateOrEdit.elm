@@ -697,6 +697,24 @@ viewTags enableMathSupport tagCheckboxes =
         ]
 
 
+viewDisambiguationTag : Html Msg
+viewDisambiguationTag =
+    div
+        [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
+        [ div []
+            [ h2
+                [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
+                [ text "Disambiguation tag (optional)" ]
+            , p
+                [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
+                [ text "If another item has the same preferred term, then choose which tag should be used to distinguish this item." ]
+            ]
+        , div
+            []
+            [ text "TODO" ]
+        ]
+
+
 viewCreateSeeAlsoSingle :
     Bool
     -> Set String
@@ -1079,6 +1097,7 @@ view model =
                                         |> Form.tagCheckboxes
                                         |> viewTags glossary.enableMathSupport
                                         |> Extras.Html.showIf (not <| List.isEmpty <| Form.tagCheckboxes model.form)
+                                    , viewDisambiguationTag
                                     , viewCreateSeeAlso
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
