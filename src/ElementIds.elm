@@ -10,6 +10,7 @@ module ElementIds exposing
     , confirmDeleteModalTitle
     , container
     , definition
+    , disambiguationTagSelect
     , exportDropdownButton
     , glossaryItemDiv
     , indexForMobile
@@ -163,6 +164,11 @@ definition =
 seeAlsoSelect : RelatedTermIndex -> String
 seeAlsoSelect index =
     prefixed <| "see-also-" ++ (index |> RelatedTermIndex.toInt |> String.fromInt)
+
+
+disambiguationTagSelect : String
+disambiguationTagSelect =
+    prefixed "disambiguation-tag-select"
 
 
 orderItemsFocusedOnSelect : String

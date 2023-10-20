@@ -76,6 +76,7 @@ type InternalMsg
     | ToggleAbbreviation TermIndex
     | ToggleTagCheckbox Tag
     | UpdateDefinition String
+    | SelectDisambiguationTag String
     | AddRelatedTerm (Maybe TermId)
     | SelectRelatedTerm RelatedTermIndex String
     | DeleteRelatedTerm RelatedTermIndex
@@ -241,6 +242,26 @@ update msg model =
 
         UpdateDefinition body ->
             ( { model | form = Form.updateDefinition model.form body }, Cmd.none )
+
+        SelectDisambiguationTag rawTag ->
+            let
+                disambiguationTagId : Maybe TagId
+                disambiguationTagId =
+                    model.form
+                        |> Form.tagCheckboxes
+                        |> List.filterMap
+                            (\( ( tagId, tag ), _ ) ->
+                                if Tag.raw tag == rawTag then
+                                    Just tagId
+
+                                else
+                                    Nothing
+                            )
+                        |> List.head
+            in
+            ( { model | form = Form.updateDisambiguationTagId model.form disambiguationTagId }
+            , Cmd.none
+            )
 
         AddRelatedTerm maybeTermId ->
             let
@@ -697,8 +718,8 @@ viewTags enableMathSupport tagCheckboxes =
         ]
 
 
-viewDisambiguationTag : Html Msg
-viewDisambiguationTag =
+viewDisambiguationTag : Maybe TagId -> List ( TagId, Tag ) -> Html Msg
+viewDisambiguationTag disambiguationTagId tags =
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
@@ -710,8 +731,27 @@ viewDisambiguationTag =
                 [ text "If another item has the same preferred term, then choose which tag should be used to distinguish this item." ]
             ]
         , div
-            []
-            [ text "TODO" ]
+            [ class "max-w-md" ]
+            [ Components.SelectMenu.render
+                [ Components.SelectMenu.id <| ElementIds.disambiguationTagSelect
+                , Components.SelectMenu.ariaLabel "Disambiguation tag"
+                , Components.SelectMenu.onChange (PageMsg.Internal << SelectDisambiguationTag)
+                ]
+                (Components.SelectMenu.Choice
+                    ""
+                    [ text <| "None" ]
+                    (disambiguationTagId == Nothing)
+                    :: (tags
+                            |> List.map
+                                (\( tagId, tag ) ->
+                                    Components.SelectMenu.Choice
+                                        (Tag.raw tag)
+                                        [ text <| Tag.inlineText tag ]
+                                        (disambiguationTagId == Just tagId)
+                                )
+                       )
+                )
+            ]
         ]
 
 
@@ -1053,6 +1093,10 @@ view model =
                 definitionArray =
                     Form.definitionField model.form
 
+                disambiguationTagId : Maybe TagId
+                disambiguationTagId =
+                    Form.disambiguationTagId model.form
+
                 relatedTerms : Array Form.IncubatingRelatedTermField
                 relatedTerms =
                     Form.relatedTermFields model.form
@@ -1097,7 +1141,17 @@ view model =
                                         |> Form.tagCheckboxes
                                         |> viewTags glossary.enableMathSupport
                                         |> Extras.Html.showIf (not <| List.isEmpty <| Form.tagCheckboxes model.form)
-                                    , viewDisambiguationTag
+                                    , model.form
+                                        |> Form.tagCheckboxes
+                                        |> List.filterMap
+                                            (\( tagWithId, checked ) ->
+                                                if checked then
+                                                    Just tagWithId
+
+                                                else
+                                                    Nothing
+                                            )
+                                        |> viewDisambiguationTag disambiguationTagId
                                     , viewCreateSeeAlso
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid

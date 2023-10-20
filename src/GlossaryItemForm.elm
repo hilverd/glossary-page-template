@@ -8,6 +8,7 @@ module GlossaryItemForm exposing
     , definitionField
     , deleteRelatedTerm
     , deleteTerm
+    , disambiguationTagId
     , empty
     , emptyIncubatingRelatedTermField
     , fromGlossaryItemForHtml
@@ -27,6 +28,7 @@ module GlossaryItemForm exposing
     , toggleNeedsUpdating
     , toggleTagCheckbox
     , updateDefinition
+    , updateDisambiguationTagId
     , updateTerm
     )
 
@@ -633,6 +635,15 @@ updateDefinition glossaryItemForm body =
                     | definitionField = DefinitionField.fromString body
                     , needsUpdating = needsUpdating1
                 }
+                |> validate
+
+
+updateDisambiguationTagId : GlossaryItemForm -> Maybe TagId -> GlossaryItemForm
+updateDisambiguationTagId glossaryItemForm tagId =
+    case glossaryItemForm of
+        GlossaryItemForm form ->
+            GlossaryItemForm
+                { form | disambiguationTagId = tagId }
                 |> validate
 
 
