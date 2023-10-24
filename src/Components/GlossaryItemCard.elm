@@ -562,7 +562,7 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term 
                     [ Icons.cornerLeftUp
                         [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-1 mr-1.5 text-gray-400 dark:text-gray-400 print:hidden"
                         ]
-                    , Term.view enableMathSupport [] term
+                    , Term.view enableMathSupport [ class "font-normal" ] term
                     ]
     in
     div

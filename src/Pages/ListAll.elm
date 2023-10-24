@@ -1099,7 +1099,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
         IndexOfTerms.PreferredTerm term ->
             [ li []
                 [ Html.a
-                    [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
+                    [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
                     , Html.Attributes.href <| fragmentOnly <| TermId.toString <| Term.id term
                     , Accessibility.Key.tabbable tabbable
                     , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
@@ -1114,7 +1114,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
                 [ Html.span
                     [ class "block border-l pl-4 -ml-px border-transparent select-none" ]
                     [ Term.view enableMathSupport
-                        [ class "text-slate-400 dark:text-slate-500 contrast-more:text-slate-600 contrast-more:dark:text-slate-400 contrast-more:font-light" ]
+                        [ class "" ]
                         term
                     ]
                 ]
@@ -1129,7 +1129,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
                                 Html.Attributes.attribute "style" "margin-top: 0rem"
                             ]
                             [ Html.a
-                                [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
+                                [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
                                 , Html.Attributes.href <| fragmentOnly <| TermId.toString <| Term.id preferredTerm
                                 , Accessibility.Key.tabbable tabbable
                                 , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
@@ -1154,7 +1154,7 @@ viewTermIndexGroup enableMathSupport tabbable staticSidebar { label, entries } =
         , class "mt-6"
         ]
         [ h5
-            [ class "mb-8 lg:mb-3 font-semibold text-slate-900 dark:text-slate-200" ]
+            [ class "mb-8 lg:mb-3 font-semibold text-slate-700 dark:text-slate-300" ]
             [ text label ]
         , ul
             [ class "space-y-6 lg:space-y-2 border-l border-slate-200 dark:border-slate-600" ]
