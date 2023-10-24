@@ -98,7 +98,7 @@ viewEditTag { enableMathSupport, tabbable } numberOfTags index tag =
     div
         []
         [ div
-            [ class "flex-auto max-w-xl flex items-center" ]
+            [ class "flex max-w-xl items-center" ]
             [ span
                 [ class "inline-flex items-center" ]
                 [ Components.Button.rounded True
@@ -113,48 +113,11 @@ viewEditTag { enableMathSupport, tabbable } numberOfTags index tag =
             , div []
                 [ Tag.view enableMathSupport [] tag
                 ]
-
-            -- , Extras.Html.showIf (numberOfRelatedTerms > 1) <|
-            --     Extras.Html.showMaybe
-            --         (\dropdownMenuWithMoreOptions ->
-            --             span
-            --                 [ class "sm:hidden ml-2 flex items-center" ]
-            --                 [ viewMoreOptionsForTagDropdownButton numberOfTags index dropdownMenuWithMoreOptions ]
-            --         )
-            --         maybeDropdownMenuWithMoreOptions
-            , div
-                [ class "hidden sm:block sm:ml-2 flex items-center" ]
-                [ Components.Button.rounded (index > 0)
-                    [ Accessibility.Aria.label "Move up"
-
-                    -- , Html.Events.onClick <| PageMsg.Internal <| MoveTagUp index
-                    ]
-                    [ Icons.arrowUp
-                        [ Svg.Attributes.class "h-5 w-5" ]
-                    ]
-                , Components.Button.rounded (index + 1 < numberOfTags)
-                    [ Accessibility.Aria.label "Move down"
-
-                    -- , Html.Events.onClick <| PageMsg.Internal <| MoveTagDown index
-                    , class ""
-                    ]
-                    [ Icons.arrowDown
-                        [ Svg.Attributes.class "h-5 w-5" ]
-                    ]
-                , span
-                    [ class "ml-2" ]
-                    [ viewRenameTagButton tabbable ]
-                ]
+            , span
+                [ class "ml-4 mt-1" ]
+                [ viewRenameTagButton tabbable ]
             ]
         ]
-
-
-
--- div []
---     [ Components.Badge.pill
---         []
---         [ Tag.view enableMathSupport [] tag ]
---     ]
 
 
 viewAddTagButtonForEmptyState : Html Msg
