@@ -1,4 +1,4 @@
-module TagsForm exposing (TagsForm, create, tags)
+module TagsForm exposing (TagsForm, create, hasValidationErrors, tags)
 
 import Array exposing (Array)
 import Data.GlossaryItem.Tag exposing (Tag)
@@ -21,3 +21,8 @@ create : List Tag -> TagsForm
 create tags_ =
     TagsForm
         { tags = Array.fromList tags_ }
+
+
+hasValidationErrors : TagsForm -> Bool
+hasValidationErrors tagsForm =
+    False

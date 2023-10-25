@@ -1,6 +1,6 @@
 module Pages.ManageTags exposing (InternalMsg, Model, Msg, init, subscriptions, update, view)
 
-import Accessibility exposing (Html, div, form, h1, main_, span, text)
+import Accessibility exposing (Html, div, form, h1, main_, p, span, text)
 import Accessibility.Aria
 import Accessibility.Key
 import Array exposing (Array)
@@ -9,13 +9,16 @@ import CommonModel exposing (CommonModel)
 import Components.Badge
 import Components.Button
 import Components.Copy
+import Components.Spinner
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
+import Data.IncubatingGlossary exposing (IncubatingGlossary)
 import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.Saving exposing (Saving(..))
 import Extras.Html
 import Html.Attributes exposing (class)
 import Html.Events
 import Icons
+import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
 import Svg.Attributes
 import TagsForm as Form exposing (TagsForm)
@@ -28,12 +31,15 @@ import TagsForm as Form exposing (TagsForm)
 type alias Model =
     { common : CommonModel
     , form : TagsForm
+    , triedToSaveWhenFormInvalid : Bool
+    , saving : Saving
     }
 
 
 type InternalMsg
     = NoOp
     | AddTag
+    | Save
 
 
 type alias Msg =
@@ -49,6 +55,8 @@ init common =
                     items
                         |> IncubatingGlossaryItems.tags
                         |> Form.create
+              , triedToSaveWhenFormInvalid = False
+              , saving = NotSaving
               }
             , Cmd.none
             )
@@ -56,6 +64,8 @@ init common =
         _ ->
             ( { common = common
               , form = Form.create []
+              , triedToSaveWhenFormInvalid = False
+              , saving = NotSaving
               }
             , Cmd.none
             )
@@ -72,6 +82,9 @@ update msg model =
             ( model, Cmd.none )
 
         AddTag ->
+            ( model, Cmd.none )
+
+        Save ->
             ( model, Cmd.none )
 
 
@@ -171,8 +184,37 @@ viewEditTags { enableMathSupport, tabbable } tagsArray =
         ]
 
 
-viewFooter : Model -> Html Msg
-viewFooter model =
+viewFooter : Model -> Bool -> IncubatingGlossaryItems -> Html Msg
+viewFooter model showValidationErrors glossaryItems =
+    let
+        form =
+            model.form
+
+        saving =
+            model.saving
+
+        errorDiv : String -> Html msg
+        errorDiv message =
+            div
+                [ class "flex justify-end mt-2" ]
+                [ p
+                    [ class "text-red-600 dark:text-red-400" ]
+                    [ text message ]
+                ]
+
+        common : CommonModel
+        common =
+            model.common
+
+        updatedGlossary : Result Decode.Error IncubatingGlossary
+        updatedGlossary =
+            case common.incubatingGlossary of
+                Ok glossary ->
+                    Ok { glossary | items = glossaryItems }
+
+                error ->
+                    error
+    in
     div
         [ class "pt-5 lg:border-t dark:border-gray-700 flex flex-col items-center" ]
         [ Extras.Html.showIf model.common.enableSavingChangesInMemory <|
@@ -182,17 +224,34 @@ viewFooter model =
         , div
             [ class "flex items-center" ]
             [ Components.Button.white
-                True
-                [ Html.Events.onClick <| PageMsg.NavigateToListAll model.common ]
-                [ text "Finished editing" ]
+                (saving /= SavingInProgress)
+                [ Html.Events.onClick <|
+                    PageMsg.NavigateToListAll { common | incubatingGlossary = updatedGlossary }
+                ]
+                [ text "Cancel" ]
+            , Components.Button.primary
+                (saving /= SavingInProgress && not (showValidationErrors && Form.hasValidationErrors form))
+                [ class "ml-3"
+                , Html.Events.onClick <| PageMsg.Internal Save
+                ]
+                [ text "Save" ]
+            , Components.Spinner.view
+                [ Svg.Attributes.class "ml-3 w-8 h-8" ]
+                (saving == SavingInProgress)
             ]
+        , case saving of
+            SavingFailed errorMessage ->
+                errorDiv <| "Failed to save — " ++ errorMessage ++ "."
+
+            _ ->
+                Extras.Html.nothing
         ]
 
 
 view : Model -> Document Msg
 view model =
     case model.common.incubatingGlossary of
-        Ok { enableMathSupport } ->
+        Ok { enableMathSupport, items } ->
             { title = "Manage Tags"
             , body =
                 [ div
@@ -216,7 +275,7 @@ view model =
                                 ]
                             , div
                                 [ class "mt-4 lg:mt-8" ]
-                                [ viewFooter model ]
+                                [ viewFooter model model.triedToSaveWhenFormInvalid items ]
                             ]
                         ]
                     ]
