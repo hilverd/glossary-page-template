@@ -227,13 +227,13 @@ termToHtmlTree disambiguationTag_ term =
                 |> Maybe.map
                     (\disambiguationTag0 ->
                         [ HtmlTree.Node "span"
-                            True
+                            False
                             []
                             [ HtmlTree.Leaf <| Term.raw term ]
                         , HtmlTree.Node "span"
-                            True
+                            False
                             [ HtmlTree.Attribute "class" "disambiguation" ]
-                            [ HtmlTree.Leaf <| Tag.raw disambiguationTag0 ]
+                            [ HtmlTree.Leaf <| "(" ++ Tag.raw disambiguationTag0 ++ ")" ]
                         ]
                     )
                 |> Maybe.withDefault
