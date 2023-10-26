@@ -1537,6 +1537,12 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                     ]
             ]
         , Extras.Html.showIf
+            (List.isEmpty combinedIndexedGlossaryItems && model.common.filterByTag /= Nothing)
+          <|
+            div
+                [ class "mt-4" ]
+                [ text "No matching items found." ]
+        , Extras.Html.showIf
             (model.common.enableOrderItemsButtons
                 && (not <| List.isEmpty combinedIndexedGlossaryItems)
             )
