@@ -1,7 +1,7 @@
 module Data.IncubatingGlossaryItems exposing
     ( IncubatingGlossaryItems
     , fromList, insertTag, insert, update, remove
-    , get, tags, tagByIdList, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+    , get, tags, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
 
@@ -20,7 +20,7 @@ module Data.IncubatingGlossaryItems exposing
 
 # Query
 
-@docs get, tags, tagByIdList, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+@docs get, tags, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
 
 
 # Export
@@ -38,6 +38,7 @@ import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemFor
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
 import Data.IncubatingGlossaryItem as IncubatingGlossaryItem exposing (IncubatingGlossaryItem, alternativeTerms, lastUpdatedDateAsIso8601, preferredTerm)
+import Data.TagDescription exposing (TagDescription)
 import Data.TagId as TagId exposing (TagId)
 import Data.TagIdDict as TagIdDict exposing (TagIdDict, nextTagId)
 import Dict exposing (Dict)
@@ -55,6 +56,7 @@ type IncubatingGlossaryItems
         { itemById : GlossaryItemIdDict IncubatingGlossaryItem
         , tagById : TagIdDict Tag
         , tagIdByRawTag : Dict String TagId
+        , tagDescriptionById : TagIdDict TagDescription
         , disambiguationTagIdByItemId : GlossaryItemIdDict (Maybe TagId)
         , normalTagIdsByItemId : GlossaryItemIdDict (List TagId)
         , itemIdsByTagId : TagIdDict (List GlossaryItemId)
@@ -172,8 +174,8 @@ orderByMostMentionedFirst indexedGlossaryItemsForHtml =
 
 {-| Convert a list of glossary items for/from HTML into a `GlossaryItems`.
 -}
-fromList : List Tag -> List GlossaryItemForHtml -> IncubatingGlossaryItems
-fromList tags_ glossaryItemsForHtml =
+fromList : List ( Tag, TagDescription ) -> List GlossaryItemForHtml -> IncubatingGlossaryItems
+fromList tagsWithDescriptions_ glossaryItemsForHtml =
     let
         indexedGlossaryItemsForHtml : List ( GlossaryItemId, GlossaryItemForHtml )
         indexedGlossaryItemsForHtml =
@@ -195,7 +197,8 @@ fromList tags_ glossaryItemsForHtml =
 
         tagById0 : TagIdDict Tag
         tagById0 =
-            tags_
+            tagsWithDescriptions_
+                |> List.map Tuple.first
                 |> List.indexedMap (TagId.create >> Tuple.pair)
                 |> TagIdDict.fromList
 
@@ -267,6 +270,18 @@ fromList tags_ glossaryItemsForHtml =
                 )
                 Dict.empty
                 tagById
+
+        tagDescriptionById : TagIdDict TagDescription
+        tagDescriptionById =
+            tagsWithDescriptions_
+                |> List.foldl
+                    (\( tag, description ) result ->
+                        tagIdByRawTag
+                            |> Dict.get (Tag.raw tag)
+                            |> Maybe.map (\tagId -> TagIdDict.insert tagId description result)
+                            |> Maybe.withDefault result
+                    )
+                    TagIdDict.empty
 
         ( disambiguationTagIdByItemId, normalTagIdsByItemId ) =
             indexedGlossaryItemsForHtml
@@ -384,6 +399,7 @@ fromList tags_ glossaryItemsForHtml =
         { itemById = itemById
         , tagById = tagById
         , tagIdByRawTag = tagIdByRawTag
+        , tagDescriptionById = tagDescriptionById
         , disambiguationTagIdByItemId = disambiguationTagIdByItemId
         , normalTagIdsByItemId = normalTagIdsByItemId
         , itemIdsByTagId = itemIdsByTagId_
@@ -438,7 +454,7 @@ insert item glossaryItems =
         |> orderedAlphabetically Nothing
         |> List.map Tuple.second
         |> (::) item
-        |> fromList (tags glossaryItems)
+        |> fromList (tagsWithDescriptions glossaryItems)
 
 
 {-| Update an item.
@@ -455,7 +471,7 @@ update itemId item glossaryItems =
                 else
                     item_
             )
-        |> fromList (tags glossaryItems)
+        |> fromList (tagsWithDescriptions glossaryItems)
 
 
 {-| Remove the item associated with an ID. Does nothing if the ID is not found.
@@ -472,7 +488,7 @@ remove itemId glossaryItems =
                 else
                     Just itemForHtml
             )
-        |> fromList (tags glossaryItems)
+        |> fromList (tagsWithDescriptions glossaryItems)
 
 
 {-| Get the item associated with an ID. If the ID is not found, return `Nothing`.
@@ -555,6 +571,21 @@ tags glossaryItems =
     case glossaryItems of
         IncubatingGlossaryItems items ->
             TagIdDict.values items.tagById
+
+
+{-| The tags for these glossary items along with their descriptions. Tags can exist without being used in any items.
+-}
+tagsWithDescriptions : IncubatingGlossaryItems -> List ( Tag, TagDescription )
+tagsWithDescriptions glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            items.tagDescriptionById
+                |> TagIdDict.toList
+                |> List.filterMap
+                    (\( id, description ) ->
+                        TagIdDict.get id items.tagById
+                            |> Maybe.andThen (\tag -> Just ( tag, description ))
+                    )
 
 
 {-| The tags for these glossary items along with their tag IDs.

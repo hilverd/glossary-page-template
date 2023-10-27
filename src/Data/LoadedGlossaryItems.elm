@@ -1,10 +1,11 @@
 module Data.LoadedGlossaryItems exposing (LoadedGlossaryItems, decodeFromFlags, decodeIncubatingFromFlags)
 
 import Data.GlossaryItem as GlossaryItem
-import Data.GlossaryItem.Tag as Tag
+import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
+import Data.TagDescription as TagDescription exposing (TagDescription)
 import Json.Decode as Decode
 
 
@@ -24,9 +25,25 @@ decodeFromFlags enableMarkdownBasedSyntax =
 decodeIncubatingFromFlags : Bool -> Decode.Value -> Result Decode.Error IncubatingGlossaryItems
 decodeIncubatingFromFlags enableMarkdownBasedSyntax flags =
     let
-        tags =
+        tagsWithDescriptions : List ( Tag, TagDescription )
+        tagsWithDescriptions =
             flags
-                |> Decode.decodeValue (Decode.field "tags" <| Decode.list <| Tag.decode enableMarkdownBasedSyntax)
+                |> Decode.decodeValue
+                    (Decode.field "tagsWithDescriptions" <|
+                        Decode.list <|
+                            Decode.map2
+                                (\tagString descriptionString ->
+                                    ( Tag.fromMarkdown tagString
+                                    , if enableMarkdownBasedSyntax then
+                                        TagDescription.fromMarkdown descriptionString
+
+                                      else
+                                        TagDescription.fromPlaintext descriptionString
+                                    )
+                                )
+                                (Decode.field "tag" <| Decode.string)
+                                (Decode.field "description" <| Decode.string)
+                    )
                 |> Result.withDefault []
     in
     flags
@@ -34,4 +51,4 @@ decodeIncubatingFromFlags enableMarkdownBasedSyntax flags =
             (Decode.field "glossaryItems" <|
                 Decode.list (GlossaryItemForHtml.decode enableMarkdownBasedSyntax)
             )
-        |> Result.map (IncubatingGlossaryItems.fromList tags)
+        |> Result.map (IncubatingGlossaryItems.fromList tagsWithDescriptions)

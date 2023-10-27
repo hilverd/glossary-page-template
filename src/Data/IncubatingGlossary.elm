@@ -7,7 +7,8 @@ import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
-import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
+import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems, tagsWithDescriptions)
+import Data.TagDescription as TagDescription exposing (TagDescription)
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 
@@ -28,8 +29,8 @@ type alias IncubatingGlossary =
 toHtmlTree : Bool -> Bool -> Bool -> IncubatingGlossary -> HtmlTree
 toHtmlTree enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, title, aboutSection, enableLastUpdatedDates, items } =
     let
-        tags =
-            IncubatingGlossaryItems.tags items
+        tagsWithDescriptions =
+            IncubatingGlossaryItems.tagsWithDescriptions items
     in
     HtmlTree.Node "div"
         True
@@ -81,7 +82,7 @@ toHtmlTree enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges {
             , HtmlTree.Node "article"
                 True
                 [ HtmlTree.Attribute "id" ElementIds.items ]
-                [ HtmlTree.showIf (not <| List.isEmpty tags) <|
+                [ HtmlTree.showIf (not <| List.isEmpty tagsWithDescriptions) <|
                     HtmlTree.Node
                         "div"
                         True
@@ -89,16 +90,28 @@ toHtmlTree enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges {
                         [ HtmlTree.Node "p"
                             True
                             []
-                            (HtmlTree.Leaf "Tags:"
-                                :: List.map
-                                    (\tag ->
-                                        HtmlTree.Node "button"
-                                            False
-                                            [ HtmlTree.Attribute "type" "button" ]
-                                            [ HtmlTree.Leaf <| Tag.raw tag ]
+                            [ HtmlTree.Leaf "Tags:"
+                            , HtmlTree.Node "dl"
+                                True
+                                []
+                                (List.map
+                                    (\( tag, description ) ->
+                                        HtmlTree.Node "div"
+                                            True
+                                            []
+                                            [ HtmlTree.Node "dt"
+                                                True
+                                                []
+                                                [ HtmlTree.Leaf <| Tag.raw tag ]
+                                            , HtmlTree.Node "dd"
+                                                True
+                                                []
+                                                [ HtmlTree.Leaf <| TagDescription.raw description ]
+                                            ]
                                     )
-                                    tags
-                            )
+                                    tagsWithDescriptions
+                                )
+                            ]
                         ]
                 , HtmlTree.Node "dl"
                     True
