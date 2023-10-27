@@ -29,8 +29,14 @@ if (containerElement) {
     const aboutLiElements = Array.prototype.slice.apply(aboutUlElement.querySelectorAll('li'));
     const aboutLinks = aboutLiElements.map(aboutLinkFromLiElement);
 
-    const tagElements = Array.prototype.slice.apply(document.querySelectorAll('#glossary-page-tags > p > button'));
-    const tags = tagElements.map(tagElement => tagElement.textContent.trim());
+    const tagDivElements = Array.prototype.slice.apply(document.querySelectorAll('#glossary-page-tags > dl > div'));
+
+    const tagsWithDescriptions = tagDivElements.map(tagDivElement => {
+        return {
+            tag: tagDivElement.querySelector('dt').textContent.trim(),
+            description: tagDivElement.querySelector('dd').textContent.trim()
+        }
+    });
 
     const dlElement = glossaryElement.querySelector('dl');
     const glossaryItemDivElements = Array.prototype.slice.apply(dlElement.querySelectorAll('div'));
@@ -133,7 +139,7 @@ if (containerElement) {
             titleString: normaliseWhitespace(titleElement.textContent),
             aboutParagraph: aboutParagraph,
             aboutLinks: aboutLinks,
-            tags: tags,
+            tagsWithDescriptions: tagsWithDescriptions,
             glossaryItems: glossaryItems,
             editorIsRunning: editorIsRunning,
             enableHelpForMakingChanges: enableHelpForMakingChanges,
