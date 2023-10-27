@@ -21,6 +21,7 @@
         "Data.IncubatingGlossaryItems",
         "Data.IndexOfTerms",
         "Data.MarkdownFragment",
+        "Data.TagDescription",
         "Data.TagId",
         "Data.TagIdDict",
         "DirectedGraph",

@@ -1,14 +1,12 @@
-module Data.GlossaryItem.Tag exposing (Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, view)
+module Data.TagDescription exposing (TagDescription, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, view)
 
-{-| A tag that can be used in glossary items.
+{-| The description for a tag.
 This can be in either plain text or Markdown.
 
-Tags can be used to group items together that belong in the same "context" or share some important property. They should probably be used sparingly as too many tags could be an indication of a glossary trying to focus on too many different topics at once.
 
+# Tag Descriptions
 
-# Tags
-
-@docs Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, view
+@docs TagDescription, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, view
 
 -}
 
@@ -22,43 +20,43 @@ import Markdown.Renderer as Renderer
 import MarkdownRenderers
 
 
-{-| A tag.
+{-| A tag description.
 -}
-type Tag
-    = PlaintextTag
+type TagDescription
+    = PlaintextTagDescription
         { body : String
         }
-    | MarkdownTag
+    | MarkdownTagDescription
         { body : MarkdownFragment
         , inlineText : String
         }
 
 
-{-| Convenience function for constructing an empty plain text tag.
+{-| Convenience function for constructing an empty plain text tag description.
 -}
-emptyPlaintext : Tag
+emptyPlaintext : TagDescription
 emptyPlaintext =
     fromPlaintext ""
 
 
-{-| Construct a tag from a plain text string.
+{-| Construct a tag description from a plain text string.
 
     fromPlaintext "NA" |> raw --> "NA"
 
 -}
-fromPlaintext : String -> Tag
+fromPlaintext : String -> TagDescription
 fromPlaintext body =
-    PlaintextTag
+    PlaintextTagDescription
         { body = body
         }
 
 
-{-| Construct a tag from a Markdown string.
+{-| Construct a tag description from a Markdown string.
 
     fromMarkdown "The _ideal_ case" |> raw --> "The _ideal_ case"
 
 -}
-fromMarkdown : String -> Tag
+fromMarkdown : String -> TagDescription
 fromMarkdown body =
     let
         fragment : MarkdownFragment
@@ -71,15 +69,15 @@ fromMarkdown body =
                 |> MarkdownFragment.concatenateInlineText
                 |> Result.withDefault body
     in
-    MarkdownTag
+    MarkdownTagDescription
         { body = fragment
         , inlineText = inlineTextConcatenated
         }
 
 
-{-| Decode a tag from its JSON representation.
+{-| Decode a tag description from its JSON representation.
 -}
-decode : Bool -> Decoder Tag
+decode : Bool -> Decoder TagDescription
 decode enableMarkdownBasedSyntax =
     Decode.map
         (if enableMarkdownBasedSyntax then
@@ -91,48 +89,48 @@ decode enableMarkdownBasedSyntax =
         Decode.string
 
 
-{-| Retrieve the raw body of a tag.
+{-| Retrieve the raw body of a tag description.
 -}
-raw : Tag -> String
-raw tag =
-    case tag of
-        PlaintextTag t ->
+raw : TagDescription -> String
+raw tagDescription =
+    case tagDescription of
+        PlaintextTagDescription t ->
             t.body
 
-        MarkdownTag t ->
+        MarkdownTagDescription t ->
             MarkdownFragment.raw t.body
 
 
-{-| Retrieve the concatenated inline text of a tag.
+{-| Retrieve the concatenated inline text of a tag description.
 
     fromMarkdown "*Hello* _there_"
     |> inlineText
     --> "Hello there"
 
 -}
-inlineText : Tag -> String
-inlineText tag =
-    case tag of
-        PlaintextTag t ->
+inlineText : TagDescription -> String
+inlineText tagDescription =
+    case tagDescription of
+        PlaintextTagDescription t ->
             t.body
 
-        MarkdownTag t ->
+        MarkdownTagDescription t ->
             t.inlineText
 
 
-{-| Convert a tag to a string suitable for a Markdown document.
+{-| Convert a tag description to a string suitable for a Markdown document.
 -}
-markdown : Tag -> String
-markdown tag =
-    case tag of
-        PlaintextTag t ->
+markdown : TagDescription -> String
+markdown tagDescription =
+    case tagDescription of
+        PlaintextTagDescription t ->
             Extras.String.escapeForMarkdown t.body
 
-        MarkdownTag t ->
+        MarkdownTagDescription t ->
             MarkdownFragment.raw t.body
 
 
-{-| View a tag as HTML.
+{-| View a tag description as HTML.
 
     import Html exposing (Html)
 
@@ -152,13 +150,13 @@ markdown tag =
     --> expected
 
 -}
-view : Bool -> List (Attribute msg) -> Tag -> Html msg
-view enableMathSupport additionalAttributes tag =
-    case tag of
-        PlaintextTag t ->
+view : Bool -> List (Attribute msg) -> TagDescription -> Html msg
+view enableMathSupport additionalAttributes tagDescription =
+    case tagDescription of
+        PlaintextTagDescription t ->
             Html.span additionalAttributes [ text t.body ]
 
-        MarkdownTag t ->
+        MarkdownTagDescription t ->
             let
                 parsed : Result String (List Block)
                 parsed =
