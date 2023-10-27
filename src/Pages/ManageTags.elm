@@ -92,20 +92,6 @@ update msg model =
 -- VIEW
 
 
-viewRenameTagButton : Bool -> Html Msg
-viewRenameTagButton tabbable =
-    Components.Button.text
-        [ -- Html.Events.onClick <| PageMsg.Internal RenameTag
-          Accessibility.Key.tabbable tabbable
-        ]
-        [ Icons.pencil
-            [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
-        , span
-            [ class "ml-2" ]
-            [ text "Rename tag" ]
-        ]
-
-
 viewEditTag : { enableMathSupport : Bool, tabbable : Bool } -> Int -> Int -> Tag -> Html Msg
 viewEditTag { enableMathSupport, tabbable } numberOfTags index tag =
     div
@@ -126,9 +112,6 @@ viewEditTag { enableMathSupport, tabbable } numberOfTags index tag =
             , div []
                 [ Tag.view enableMathSupport [] tag
                 ]
-            , span
-                [ class "ml-4 mt-1" ]
-                [ viewRenameTagButton tabbable ]
             ]
         ]
 
