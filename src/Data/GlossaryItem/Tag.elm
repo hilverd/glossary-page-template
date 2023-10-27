@@ -42,7 +42,7 @@ emptyPlaintext =
     fromPlaintext ""
 
 
-{-| Construct a tag from a plain text string and a Boolean indicating whether the tag is an abbreviation.
+{-| Construct a tag from a plain text string.
 
     fromPlaintext "NA" |> raw --> "NA"
 
@@ -54,7 +54,7 @@ fromPlaintext body =
         }
 
 
-{-| Construct a tag from a Markdown string and a Boolean indicating whether the tag is an abbreviation.
+{-| Construct a tag from a Markdown string.
 
     fromMarkdown "The _ideal_ case" |> raw --> "The _ideal_ case"
 
