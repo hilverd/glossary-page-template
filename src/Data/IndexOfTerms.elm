@@ -1,19 +1,15 @@
-module Data.IndexOfTerms exposing (Entry(..), TermGroup, IndexOfTerms, fromGlossaryItems, fromIncubatingGlossaryItems, termGroups)
+module Data.IndexOfTerms exposing (Entry(..), TermGroup, IndexOfTerms, fromIncubatingGlossaryItems, termGroups)
 
 {-| An index of terms, grouped in alphabetical order by their first character.
 
 
 # Indexes of Terms
 
-@docs Entry, TermGroup, IndexOfTerms, fromGlossaryItems, fromIncubatingGlossaryItems, termGroups
+@docs Entry, TermGroup, IndexOfTerms, fromIncubatingGlossaryItems, termGroups
 
 -}
 
-import Array
-import Data.GlossaryItem as GlossaryItem exposing (alternativeTerms, preferredTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItem.TermId as TermId
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.TagId exposing (TagId)
 import Dict exposing (Dict)
@@ -40,129 +36,6 @@ type alias TermGroup =
 -}
 type IndexOfTerms
     = IndexOfTerms (List TermGroup)
-
-
-{-| Create an index of terms from glossary items.
--}
-fromGlossaryItems : GlossaryItems -> IndexOfTerms
-fromGlossaryItems glossaryItems =
-    let
-        preferredTermsByAlternativeTermId : Dict String (List Term)
-        preferredTermsByAlternativeTermId =
-            GlossaryItems.preferredTermsByAlternativeTermId glossaryItems
-
-        preferredTerms : List Term
-        preferredTerms =
-            glossaryItems
-                |> GlossaryItems.orderedAlphabetically
-                |> Array.toList
-                |> List.map (Tuple.second >> GlossaryItem.preferredTerm)
-
-        alternativeTerms : List Term
-        alternativeTerms =
-            GlossaryItems.alternativeTerms glossaryItems
-
-        entryListsByFirstAlphabeticCharacterOrEllpisis : Dict String (List Entry)
-        entryListsByFirstAlphabeticCharacterOrEllpisis =
-            let
-                resultAfterAddingPreferredTerms : Dict String (List Entry)
-                resultAfterAddingPreferredTerms =
-                    preferredTerms
-                        |> List.foldl
-                            (\preferredTerm result ->
-                                Dict.update
-                                    (Term.indexGroupString preferredTerm)
-                                    (\termList ->
-                                        termList
-                                            |> Maybe.map (\terms -> PreferredTerm preferredTerm :: terms)
-                                            |> Maybe.withDefault [ PreferredTerm preferredTerm ]
-                                            |> Just
-                                    )
-                                    result
-                            )
-                            Dict.empty
-            in
-            alternativeTerms
-                |> List.foldl
-                    (\alternativeTerm result ->
-                        let
-                            preferredTermsForThisAlternativeTerm : List Term
-                            preferredTermsForThisAlternativeTerm =
-                                Dict.get
-                                    (alternativeTerm |> Term.id |> TermId.toString)
-                                    preferredTermsByAlternativeTermId
-                                    |> Maybe.withDefault []
-                                    |> List.sortWith Term.compareAlphabetically
-
-                            entry =
-                                AlternativeTerm alternativeTerm preferredTermsForThisAlternativeTerm
-                        in
-                        Dict.update
-                            (Term.indexGroupString alternativeTerm)
-                            (\entries ->
-                                entries
-                                    |> Maybe.map (\entries_ -> entry :: entries_)
-                                    |> Maybe.withDefault [ entry ]
-                                    |> Just
-                            )
-                            result
-                    )
-                    resultAfterAddingPreferredTerms
-
-        alphabetAndEllipsis : List String
-        alphabetAndEllipsis =
-            (List.range (Char.toCode 'A') (Char.toCode 'Z')
-                |> List.map (Char.fromCode >> String.fromChar)
-            )
-                ++ [ "…" ]
-
-        entryListsByFirstCharacterIncludingAlphabetAndEllipsis : Dict String (List Entry)
-        entryListsByFirstCharacterIncludingAlphabetAndEllipsis =
-            List.foldl
-                (\letter result ->
-                    Dict.update letter
-                        (\maybeTermList ->
-                            if maybeTermList == Nothing then
-                                Just []
-
-                            else
-                                maybeTermList
-                        )
-                        result
-                )
-                entryListsByFirstAlphabeticCharacterOrEllpisis
-                alphabetAndEllipsis
-
-        termForEntry : Entry -> Term
-        termForEntry entry =
-            case entry of
-                PreferredTerm term ->
-                    term
-
-                AlternativeTerm term _ ->
-                    term
-
-        termIndexGroups : List TermGroup
-        termIndexGroups =
-            entryListsByFirstCharacterIncludingAlphabetAndEllipsis
-                |> (\d ->
-                        if Dict.get "…" d == Just [] then
-                            Dict.remove "…" d
-
-                        else
-                            d
-                   )
-                |> Dict.toList
-                |> List.map
-                    (Tuple.mapSecond <|
-                        List.sortWith
-                            (\entry1 entry2 ->
-                                Term.compareAlphabetically (termForEntry entry1) (termForEntry entry2)
-                            )
-                    )
-                |> List.map (\( label, entries ) -> TermGroup label entries)
-    in
-    IndexOfTerms termIndexGroups
 
 
 {-| Create an index of terms from glossary items.

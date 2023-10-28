@@ -29,7 +29,6 @@ module Data.IncubatingGlossaryItems exposing
 
 -}
 
-import Data.GlossaryItem exposing (alternativeTerms, disambiguationTag)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)

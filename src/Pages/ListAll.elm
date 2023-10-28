@@ -44,8 +44,6 @@ import Components.SearchDialog
 import Components.SelectMenu
 import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
-import Data.Glossary as Glossary exposing (Glossary)
-import Data.GlossaryItem exposing (preferredTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)

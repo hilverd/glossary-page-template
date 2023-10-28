@@ -1,13 +1,9 @@
 module SearchTests exposing (suite)
 
-import Components.SearchDialog as SearchDialog exposing (SearchResult, searchResult)
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
+import Components.SearchDialog as SearchDialog
 import Data.GlossaryItem.Definition as Definition
-import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Expect
 import Search

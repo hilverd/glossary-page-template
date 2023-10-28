@@ -6,16 +6,12 @@ module Export.Markdown exposing (download)
 
 -}
 
-import Array
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
-import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Extras.HtmlTree

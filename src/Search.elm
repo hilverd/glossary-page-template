@@ -1,13 +1,10 @@
 module Search exposing (search)
 
-import Array
 import Components.SearchDialog as SearchDialog
-import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItemForHtml as GlossaryItemForHtml
 import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.TagId exposing (TagId)
 import Extras.Html

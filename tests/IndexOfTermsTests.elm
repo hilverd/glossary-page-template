@@ -1,9 +1,9 @@
 module IndexOfTermsTests exposing (suite)
 
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.IndexOfTerms as IndexOfTerms
 import Expect
 import Test exposing (Test, describe, test)
@@ -14,12 +14,12 @@ termFromBody body =
     Term.fromPlaintext body False
 
 
-glossaryItems : GlossaryItems
+glossaryItems : IncubatingGlossaryItems
 glossaryItems =
     let
-        one : GlossaryItem
+        one : GlossaryItemForHtml
         one =
-            GlossaryItem.init
+            GlossaryItemForHtml.create
                 (termFromBody "Óne")
                 []
                 Nothing
@@ -29,9 +29,9 @@ glossaryItems =
                 False
                 Nothing
 
-        two : GlossaryItem
+        two : GlossaryItemForHtml
         two =
-            GlossaryItem.init
+            GlossaryItemForHtml.create
                 (termFromBody "Two")
                 []
                 Nothing
@@ -41,9 +41,9 @@ glossaryItems =
                 False
                 Nothing
 
-        thirtyFourty : GlossaryItem
+        thirtyFourty : GlossaryItemForHtml
         thirtyFourty =
-            GlossaryItem.init
+            GlossaryItemForHtml.create
                 (termFromBody "3040")
                 []
                 Nothing
@@ -53,9 +53,9 @@ glossaryItems =
                 False
                 Nothing
 
-        three : GlossaryItem
+        three : GlossaryItemForHtml
         three =
-            GlossaryItem.init
+            GlossaryItemForHtml.create
                 (termFromBody "3Three")
                 []
                 Nothing
@@ -65,9 +65,9 @@ glossaryItems =
                 False
                 Nothing
 
-        doubleOhSeven : GlossaryItem
+        doubleOhSeven : GlossaryItemForHtml
         doubleOhSeven =
-            GlossaryItem.init
+            GlossaryItemForHtml.create
                 (termFromBody "007")
                 []
                 Nothing
@@ -77,9 +77,9 @@ glossaryItems =
                 False
                 Nothing
 
-        omega : GlossaryItem
+        omega : GlossaryItemForHtml
         omega =
-            GlossaryItem.init
+            GlossaryItemForHtml.create
                 (termFromBody "Ω")
                 []
                 Nothing
@@ -89,9 +89,9 @@ glossaryItems =
                 False
                 Nothing
 
-        future : GlossaryItem
+        future : GlossaryItemForHtml
         future =
-            GlossaryItem.init
+            GlossaryItemForHtml.create
                 (termFromBody "_future_")
                 []
                 Nothing
@@ -101,7 +101,7 @@ glossaryItems =
                 False
                 Nothing
     in
-    GlossaryItems.fromList [ doubleOhSeven, one, two, thirtyFourty, three, omega, future ]
+    IncubatingGlossaryItems.fromList [] [ doubleOhSeven, one, two, thirtyFourty, three, omega, future ]
 
 
 suite : Test
@@ -110,7 +110,7 @@ suite =
         [ test "sorts terms alphabetically by their first alphabetic character (stripped of any diacritical marks)" <|
             \_ ->
                 glossaryItems
-                    |> IndexOfTerms.fromGlossaryItems
+                    |> IndexOfTerms.fromIncubatingGlossaryItems Nothing
                     |> IndexOfTerms.termGroups
                     |> Expect.equal
                         [ { label = "0–9"
@@ -151,8 +151,8 @@ suite =
         , test "doesn't include ellipsis if not needed" <|
             \_ ->
                 []
-                    |> GlossaryItems.fromList
-                    |> IndexOfTerms.fromGlossaryItems
+                    |> IncubatingGlossaryItems.fromList []
+                    |> IndexOfTerms.fromIncubatingGlossaryItems Nothing
                     |> IndexOfTerms.termGroups
                     |> Expect.equal
                         [ { label = "A", entries = [] }

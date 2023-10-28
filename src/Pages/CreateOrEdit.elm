@@ -9,22 +9,16 @@ import CommonModel exposing (CommonModel)
 import Components.Badge
 import Components.Button
 import Components.Copy
-import Components.Dividers
 import Components.DropdownMenu
 import Components.Form
 import Components.GlossaryItemCard
 import Components.SelectMenu
 import Components.Spinner
-import Data.Glossary as Glossary
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem, disambiguationTag)
-import Data.GlossaryItem.RelatedTerm as RelatedTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId as GlossaryItemId
-import Data.GlossaryItemIndex as GlossaryItemIndex
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.IncubatingGlossary as IncubatingGlossary
 import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
