@@ -1,7 +1,7 @@
 module Data.IncubatingGlossaryItems exposing
     ( IncubatingGlossaryItems
     , fromList, insertTag, insert, update, remove
-    , get, tags, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+    , get, tags, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
 
@@ -20,7 +20,7 @@ module Data.IncubatingGlossaryItems exposing
 
 # Query
 
-@docs get, tags, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+@docs get, tags, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
 
 
 # Export
@@ -612,8 +612,16 @@ tagFromId : TagId -> IncubatingGlossaryItems -> Maybe Tag
 tagFromId tagId glossaryItems =
     case glossaryItems of
         IncubatingGlossaryItems items ->
-            items.tagById
-                |> TagIdDict.get tagId
+            TagIdDict.get tagId items.tagById
+
+
+{-| Look up a tag's description from its ID.
+-}
+tagDescriptionFromId : TagId -> IncubatingGlossaryItems -> Maybe TagDescription
+tagDescriptionFromId tagId glossaryItems =
+    case glossaryItems of
+        IncubatingGlossaryItems items ->
+            TagIdDict.get tagId items.tagDescriptionById
 
 
 {-| The disambiguated preferred term for the given item with given ID.

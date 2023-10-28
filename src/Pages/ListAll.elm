@@ -58,6 +58,7 @@ import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (Incubat
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Saving exposing (Saving(..))
+import Data.TagDescription as TagDescription exposing (TagDescription)
 import Data.TagId exposing (TagId)
 import Data.Theme exposing (Theme(..))
 import ElementIds
@@ -1505,11 +1506,18 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                 model
                 { previous = Nothing, item = Just indexedItem, next = Nothing }
 
-        filterByTag : Maybe Tag
-        filterByTag =
+        filterByTagWithDescription : Maybe ( Tag, TagDescription )
+        filterByTagWithDescription =
             model.common.filterByTag
                 |> Maybe.andThen
-                    (\tagId -> IncubatingGlossaryItems.tagFromId tagId glossaryItems)
+                    (\tagId ->
+                        IncubatingGlossaryItems.tagFromId tagId glossaryItems
+                            |> Maybe.andThen
+                                (\tag ->
+                                    IncubatingGlossaryItems.tagDescriptionFromId tagId glossaryItems
+                                        |> Maybe.map (\description -> ( tag, description ))
+                                )
+                    )
     in
     Html.article
         [ Html.Attributes.id ElementIds.items
@@ -1517,8 +1525,8 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
         ]
         [ Extras.Html.showMaybe
             (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
-            filterByTag
-        , Extras.Html.showIf (filterByTag == Nothing) <|
+            filterByTagWithDescription
+        , Extras.Html.showIf (filterByTagWithDescription == Nothing) <|
             viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
         , Extras.Html.showIf (editing model.editability) <|
             div
@@ -2085,18 +2093,21 @@ viewSelectCardWidth glossary model =
         ]
 
 
-viewCurrentTagFilter : { enableMathSupport : Bool, tabbable : Bool } -> Tag -> Html Msg
-viewCurrentTagFilter { enableMathSupport, tabbable } tag =
+viewCurrentTagFilter : { enableMathSupport : Bool, tabbable : Bool } -> ( Tag, TagDescription ) -> Html Msg
+viewCurrentTagFilter { enableMathSupport, tabbable } ( tag, tagDescription ) =
     div
-        [ class "print:hidden pt-3" ]
+        [ class "pt-3" ]
         [ span
-            [ class "mr-2 font-medium text-gray-900 dark:text-gray-100" ]
+            [ class "print:hidden mr-2 font-medium text-gray-900 dark:text-gray-100" ]
             [ text "Only showing items for tag:" ]
         , Components.Badge.indigoWithBorderAndRemoveButton
             tabbable
-            [ class "mt-2" ]
+            [ class "print:hidden mt-2" ]
             (PageMsg.Internal DoNotFilterByTag)
             [ Tag.view enableMathSupport [] tag ]
+        , div
+            [ class "mt-3" ]
+            [ TagDescription.view enableMathSupport [] tagDescription ]
         ]
 
 
