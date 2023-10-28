@@ -15,13 +15,10 @@ import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
-import Data.Glossary exposing (Glossary)
-import Data.GlossaryItem.Tag as Tag
-import Data.GlossaryItems as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.IncubatingGlossary exposing (IncubatingGlossary)
 import Data.IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
-import Data.LoadedGlossaryItems as LoadedGlossaryItems exposing (LoadedGlossaryItems)
+import Data.LoadedGlossaryItems as LoadedGlossaryItems
 import Data.OrderItemsBy as OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Theme as Theme exposing (Theme)
 import Html
@@ -144,87 +141,9 @@ init flags =
                 |> Decode.decodeValue (Decode.field "enableSavingChangesInMemory" Decode.bool)
                 |> Result.withDefault False
 
-        loadedGlossaryItems : LoadedGlossaryItems
-        loadedGlossaryItems =
-            LoadedGlossaryItems.decodeFromFlags enableMarkdownBasedSyntax flags
-
         loadedIncubatingGlossaryItems : Result Decode.Error IncubatingGlossaryItems
         loadedIncubatingGlossaryItems =
             LoadedGlossaryItems.decodeIncubatingFromFlags enableMarkdownBasedSyntax flags
-
-        glossary : Result Decode.Error Glossary
-        glossary =
-            loadedGlossaryItems
-                |> Result.map
-                    (\items ->
-                        let
-                            katexIsAvailable : Bool
-                            katexIsAvailable =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "katexIsAvailable" Decode.bool)
-                                    |> Result.withDefault False
-
-                            cardWidth : CardWidth
-                            cardWidth =
-                                flags
-                                    |> Decode.decodeValue CardWidth.decode
-                                    |> Result.withDefault CardWidth.Compact
-
-                            title : GlossaryTitle
-                            title =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "titleString" Decode.string)
-                                    |> Result.withDefault "Element not found"
-                                    |> (if enableMarkdownBasedSyntax then
-                                            GlossaryTitle.fromMarkdown
-
-                                        else
-                                            GlossaryTitle.fromPlaintext
-                                       )
-
-                            aboutParagraph : AboutParagraph
-                            aboutParagraph =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "aboutParagraph" Decode.string)
-                                    |> Result.withDefault "Element not found"
-                                    |> (if enableMarkdownBasedSyntax then
-                                            AboutParagraph.fromMarkdown
-
-                                        else
-                                            AboutParagraph.fromPlaintext
-                                       )
-
-                            aboutLinks : List AboutLink
-                            aboutLinks =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "aboutLinks" <| Decode.list AboutLink.decode)
-                                    |> Result.withDefault []
-
-                            aboutSection : AboutSection
-                            aboutSection =
-                                { paragraph = aboutParagraph, links = aboutLinks }
-
-                            items1 =
-                                case orderItemsBy of
-                                    FocusedOn termId ->
-                                        GlossaryItems.enableFocusingOn termId items
-
-                                    _ ->
-                                        items
-                        in
-                        { enableMarkdownBasedSyntax = enableMarkdownBasedSyntax
-                        , enableMathSupport = enableMarkdownBasedSyntax && katexIsAvailable
-                        , enableLastUpdatedDates = enableLastUpdatedDates
-                        , cardWidth = cardWidth
-                        , title = title
-                        , aboutSection = aboutSection
-                        , tags =
-                            flags
-                                |> Decode.decodeValue (Decode.field "tags" <| Decode.list <| Tag.decode enableMarkdownBasedSyntax)
-                                |> Result.withDefault []
-                        , items = items1
-                        }
-                    )
 
         incubatingGlossary : Result Decode.Error IncubatingGlossary
         incubatingGlossary =
@@ -302,7 +221,6 @@ init flags =
                 , orderItemsBy = orderItemsBy
                 , maybeId = Nothing
                 , fragment = fragment
-                , glossary = glossary
                 , incubatingGlossary = incubatingGlossary
                 }
     in

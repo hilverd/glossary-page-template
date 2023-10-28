@@ -1,25 +1,10 @@
-module Data.LoadedGlossaryItems exposing (LoadedGlossaryItems, decodeFromFlags, decodeIncubatingFromFlags)
+module Data.LoadedGlossaryItems exposing (decodeIncubatingFromFlags)
 
-import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.TagDescription as TagDescription exposing (TagDescription)
 import Json.Decode as Decode
-
-
-type alias LoadedGlossaryItems =
-    Result Decode.Error GlossaryItems
-
-
-decodeFromFlags : Bool -> Decode.Value -> LoadedGlossaryItems
-decodeFromFlags enableMarkdownBasedSyntax =
-    Decode.decodeValue
-        (Decode.field "glossaryItems" <|
-            Decode.list (GlossaryItem.decode enableMarkdownBasedSyntax)
-        )
-        >> Result.map GlossaryItems.fromList
 
 
 decodeIncubatingFromFlags : Bool -> Decode.Value -> Result Decode.Error IncubatingGlossaryItems
