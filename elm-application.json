@@ -16,7 +16,6 @@
         "Data.GlossaryItemForHtml",
         "Data.GlossaryItemId",
         "Data.GlossaryItemIdDict",
-        "Data.GlossaryItemIndex",
         "Data.GlossaryTitle",
         "Data.IncubatingGlossaryItem",
         "Data.IncubatingGlossaryItems",
