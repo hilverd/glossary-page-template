@@ -148,7 +148,7 @@ suite =
                         , { label = "Z", entries = [] }
                         , { label = "…", entries = [ IndexOfTerms.PreferredTerm <| termFromBody "Ω" ] }
                         ]
-        , test "doesn't include ellipsis if not needed" <|
+        , test "doesn't include 0–9 and ellipsis if not needed" <|
             \_ ->
                 []
                     |> GlossaryItems.fromList []
