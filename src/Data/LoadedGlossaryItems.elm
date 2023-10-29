@@ -1,4 +1,4 @@
-module Data.LoadedGlossaryItems exposing (decodeIncubatingFromFlags)
+module Data.LoadedGlossaryItems exposing (decodeFromFlags)
 
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml
@@ -7,8 +7,8 @@ import Data.TagDescription as TagDescription exposing (TagDescription)
 import Json.Decode as Decode
 
 
-decodeIncubatingFromFlags : Bool -> Decode.Value -> Result Decode.Error GlossaryItems
-decodeIncubatingFromFlags enableMarkdownBasedSyntax flags =
+decodeFromFlags : Bool -> Decode.Value -> Result Decode.Error GlossaryItems
+decodeFromFlags enableMarkdownBasedSyntax flags =
     let
         tagsWithDescriptions : List ( Tag, TagDescription )
         tagsWithDescriptions =

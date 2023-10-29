@@ -1,6 +1,5 @@
 module GlossaryItemForm exposing
     ( GlossaryItemForm
-    , IncubatingRelatedTermField
     , RelatedTermField
     , addRelatedTerm
     , addTerm
@@ -10,7 +9,7 @@ module GlossaryItemForm exposing
     , deleteTerm
     , disambiguationTagId
     , empty
-    , emptyIncubatingRelatedTermField
+    , emptyRelatedTermField
     , fromGlossaryItemForHtml
     , hasValidationErrors
     , moveRelatedTermDown
@@ -54,12 +53,6 @@ import Set exposing (Set)
 
 
 type alias RelatedTermField =
-    { idReference : Maybe TermId
-    , validationError : Maybe String
-    }
-
-
-type alias IncubatingRelatedTermField =
     { id : Maybe TermId
     , validationError : Maybe String
     }
@@ -72,7 +65,7 @@ type GlossaryItemForm
         , tagCheckboxes : List ( ( TagId, Tag ), Bool )
         , disambiguationTagId : Maybe TagId
         , definitionField : DefinitionField
-        , relatedTermFields : Array IncubatingRelatedTermField
+        , relatedTermFields : Array RelatedTermField
         , termsOutside : List Term
         , preferredTermsOutside : List Term
         , preferredTermsOfItemsListingThisItemAsRelated : List Term
@@ -125,7 +118,7 @@ definitionField glossaryItemForm =
             form.definitionField
 
 
-relatedTermFields : GlossaryItemForm -> Array IncubatingRelatedTermField
+relatedTermFields : GlossaryItemForm -> Array RelatedTermField
 relatedTermFields glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
@@ -234,7 +227,7 @@ validate form =
         validatedDefinitionField =
             definitionField form
 
-        validatedRelatedTermFields : Array IncubatingRelatedTermField
+        validatedRelatedTermFields : Array RelatedTermField
         validatedRelatedTermFields =
             form
                 |> relatedTermFields
@@ -295,8 +288,8 @@ empty withTermsOutside withPreferredTermsOutside allTags preferredTermsOfItemsLi
         |> validate
 
 
-emptyIncubatingRelatedTermField : IncubatingRelatedTermField
-emptyIncubatingRelatedTermField =
+emptyRelatedTermField : RelatedTermField
+emptyRelatedTermField =
     { id = Nothing
     , validationError = Nothing
     }
@@ -384,7 +377,7 @@ fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTe
         , definitionField = definitionField_
         , relatedTermFields =
             relatedTerms
-                |> List.map (\term -> IncubatingRelatedTermField (Just <| Term.id term) Nothing)
+                |> List.map (\term -> RelatedTermField (Just <| Term.id term) Nothing)
                 |> Array.fromList
         , termsOutside = termsOutside1
         , preferredTermsOutside = preferredTermsOutside1
@@ -655,11 +648,11 @@ addRelatedTerm maybeTermId glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             let
-                relatedTermField : IncubatingRelatedTermField
+                relatedTermField : RelatedTermField
                 relatedTermField =
                     maybeTermId
                         |> Maybe.map (\termId -> { id = Just termId, validationError = Nothing })
-                        |> Maybe.withDefault emptyIncubatingRelatedTermField
+                        |> Maybe.withDefault emptyRelatedTermField
 
                 needsUpdating1 : Bool
                 needsUpdating1 =
@@ -685,7 +678,7 @@ selectRelatedTerm index glossaryItemForm relatedTermIdReference =
                 { form
                     | relatedTermFields =
                         Extras.Array.update
-                            (always <| IncubatingRelatedTermField relatedTermIdReference Nothing)
+                            (always <| RelatedTermField relatedTermIdReference Nothing)
                             (RelatedTermIndex.toInt index)
                             form.relatedTermFields
                 }
@@ -712,11 +705,11 @@ moveRelatedTermUp index glossaryItemForm =
                 indexInt =
                     RelatedTermIndex.toInt index
 
-                maybeCurrentAtIndex : Maybe IncubatingRelatedTermField
+                maybeCurrentAtIndex : Maybe RelatedTermField
                 maybeCurrentAtIndex =
                     Array.get indexInt form.relatedTermFields
 
-                maybeCurrentAtPreviousIndex : Maybe IncubatingRelatedTermField
+                maybeCurrentAtPreviousIndex : Maybe RelatedTermField
                 maybeCurrentAtPreviousIndex =
                     Array.get (indexInt - 1) form.relatedTermFields
             in
@@ -747,11 +740,11 @@ moveRelatedTermDown index glossaryItemForm =
                 indexInt =
                     RelatedTermIndex.toInt index
 
-                maybeCurrentAtIndex : Maybe IncubatingRelatedTermField
+                maybeCurrentAtIndex : Maybe RelatedTermField
                 maybeCurrentAtIndex =
                     Array.get indexInt form.relatedTermFields
 
-                maybeCurrentAtNextIndex : Maybe IncubatingRelatedTermField
+                maybeCurrentAtNextIndex : Maybe RelatedTermField
                 maybeCurrentAtNextIndex =
                     Array.get (indexInt + 1) form.relatedTermFields
             in

@@ -143,7 +143,7 @@ init flags =
 
         loadedGlossaryItems : Result Decode.Error GlossaryItems
         loadedGlossaryItems =
-            LoadedGlossaryItems.decodeIncubatingFromFlags enableMarkdownBasedSyntax flags
+            LoadedGlossaryItems.decodeFromFlags enableMarkdownBasedSyntax flags
 
         glossary : Result Decode.Error Glossary
         glossary =

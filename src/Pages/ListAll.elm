@@ -2352,13 +2352,13 @@ view model =
                 noModalDialogShown_ =
                     noModalDialogShown model
 
-                incubatingItems : GlossaryItems
-                incubatingItems =
+                items : GlossaryItems
+                items =
                     glossary.items
 
-                incubatingIndexOfTerms : IndexOfTerms
-                incubatingIndexOfTerms =
-                    IndexOfTerms.fromGlossaryItems model.common.filterByTag incubatingItems
+                indexOfTerms : IndexOfTerms
+                indexOfTerms =
+                    IndexOfTerms.fromGlossaryItems model.common.filterByTag items
 
                 filterByTag : Maybe TagId
                 filterByTag =
@@ -2405,7 +2405,7 @@ view model =
                                         else
                                             let
                                                 itemWithPreviousAndNext =
-                                                    incubatingItems
+                                                    items
                                                         |> (case model.common.orderItemsBy of
                                                                 Alphabetically ->
                                                                     GlossaryItems.orderedAlphabetically filterByTag
@@ -2456,8 +2456,8 @@ view model =
                             )
                         )
                     ]
-                    [ viewMenuForMobile model glossary.enableMathSupport noModalDialogShown_ incubatingIndexOfTerms
-                    , viewStaticSidebarForDesktop glossary.enableMathSupport noModalDialogShown_ incubatingIndexOfTerms
+                    [ viewMenuForMobile model glossary.enableMathSupport noModalDialogShown_ indexOfTerms
+                    , viewStaticSidebarForDesktop glossary.enableMathSupport noModalDialogShown_ indexOfTerms
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar noModalDialogShown_
@@ -2522,7 +2522,7 @@ view model =
                                     div
                                         [ class "flex-none mt-2" ]
                                         [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
-                                , incubatingItems
+                                , items
                                     |> (case model.common.orderItemsBy of
                                             Alphabetically ->
                                                 GlossaryItems.orderedAlphabetically filterByTag
@@ -2536,7 +2536,7 @@ view model =
                                                 let
                                                     itemId : Maybe GlossaryItemId
                                                     itemId =
-                                                        GlossaryItems.itemIdFromDisambiguatedPreferredTermId termId incubatingItems
+                                                        GlossaryItems.itemIdFromDisambiguatedPreferredTermId termId items
                                                 in
                                                 case itemId of
                                                     Just itemId_ ->
@@ -2544,7 +2544,7 @@ view model =
 
                                                     Nothing ->
                                                         always
-                                                            (incubatingItems
+                                                            (items
                                                                 |> GlossaryItems.orderedAlphabetically filterByTag
                                                                 |> (\lhs -> ( lhs, [] ))
                                                             )
@@ -2556,8 +2556,8 @@ view model =
                                         , tabbable = noModalDialogShown_
                                         , enableLastUpdatedDates = glossary.enableLastUpdatedDates
                                         }
-                                        (GlossaryItems.tags incubatingItems)
-                                        incubatingItems
+                                        (GlossaryItems.tags items)
+                                        items
                                 ]
                             , Html.footer
                                 []

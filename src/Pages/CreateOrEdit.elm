@@ -756,7 +756,7 @@ viewCreateSeeAlsoSingle :
     -> List Term
     -> Dict Int Components.DropdownMenu.Model
     -> Int
-    -> Form.IncubatingRelatedTermField
+    -> Form.RelatedTermField
     -> Html Msg
 viewCreateSeeAlsoSingle showValidationErrors relatedTermsIdReferences numberOfRelatedTerms allTerms dropdownMenusWithMoreOptionsForRelatedTerms index relatedTerm =
     viewCreateSeeAlsoSingle1
@@ -776,7 +776,7 @@ viewCreateSeeAlsoSingle1 :
     -> List Term
     -> Maybe Components.DropdownMenu.Model
     -> RelatedTermIndex
-    -> Form.IncubatingRelatedTermField
+    -> Form.RelatedTermField
     -> Html Msg
 viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfRelatedTerms allTerms maybeDropdownMenuWithMoreOptions index relatedTerm =
     div
@@ -913,7 +913,7 @@ viewCreateSeeAlso :
     -> Bool
     -> GlossaryItems
     -> Array TermField
-    -> Array Form.IncubatingRelatedTermField
+    -> Array Form.RelatedTermField
     -> Dict Int Components.DropdownMenu.Model
     -> List Term
     -> Html Msg
@@ -923,7 +923,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
         termIdsSet =
             terms |> Array.toList |> List.map (TermField.raw >> Form.termBodyToId) |> Set.fromList
 
-        relatedTermsList : List Form.IncubatingRelatedTermField
+        relatedTermsList : List Form.RelatedTermField
         relatedTermsList =
             Array.toList relatedTermsArray
 
@@ -1091,7 +1091,7 @@ view model =
                 disambiguationTagId =
                     Form.disambiguationTagId model.form
 
-                relatedTerms : Array Form.IncubatingRelatedTermField
+                relatedTerms : Array Form.RelatedTermField
                 relatedTerms =
                     Form.relatedTermFields model.form
 
