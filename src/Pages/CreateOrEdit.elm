@@ -14,6 +14,7 @@ import Components.Form
 import Components.GlossaryItemCard
 import Components.SelectMenu
 import Components.Spinner
+import Data.Glossary as Glossary
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -21,7 +22,6 @@ import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemFor
 import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
-import Data.IncubatingGlossary as IncubatingGlossary
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.Saving exposing (Saving(..))
@@ -89,7 +89,7 @@ type alias Msg =
 
 init : CommonModel -> ( Model, Cmd Msg )
 init commonModel =
-    case commonModel.incubatingGlossary of
+    case commonModel.glossary of
         Ok { items } ->
             let
                 tags : List ( TagId, Tag )
@@ -359,7 +359,7 @@ update msg model =
             ( model, getCurrentDateTimeForSaving () )
 
         ReceiveCurrentDateTimeForSaving dateTime ->
-            case model.common.incubatingGlossary of
+            case model.common.glossary of
                 Ok glossary ->
                     if Form.hasValidationErrors model.form then
                         ( { model
@@ -406,7 +406,7 @@ update msg model =
                                 { model
                                     | common =
                                         { common
-                                            | incubatingGlossary = Ok <| { glossary | items = updatedGlossaryItems }
+                                            | glossary = Ok <| { glossary | items = updatedGlossaryItems }
                                             , maybeId = maybeId
                                         }
                                     , saving = SavingInProgress
@@ -427,12 +427,12 @@ update msg model =
 
 patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
 patchHtmlFile common glossaryItems =
-    case common.incubatingGlossary of
+    case common.glossary of
         Ok glossary ->
             let
                 msg : PageMsg InternalMsg
                 msg =
-                    PageMsg.NavigateToListAll { common | incubatingGlossary = Ok { glossary | items = glossaryItems } }
+                    PageMsg.NavigateToListAll { common | glossary = Ok { glossary | items = glossaryItems } }
             in
             if common.enableSavingChangesInMemory then
                 Extras.Task.messageToCommand msg
@@ -444,7 +444,7 @@ patchHtmlFile common glossaryItems =
                     , url = "/"
                     , body =
                         { glossary | items = glossaryItems }
-                            |> IncubatingGlossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
+                            |> Glossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
                             |> HtmlTree.toHtmlReplacementString
                             |> Http.stringBody "text/html"
                     , expect =
@@ -1076,7 +1076,7 @@ viewCreateFormFooter model =
 
 view : Model -> Document Msg
 view model =
-    case model.common.incubatingGlossary of
+    case model.common.glossary of
         Ok glossary ->
             let
                 terms : Array TermField

@@ -15,9 +15,9 @@ import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.Glossary exposing (Glossary)
 import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
-import Data.IncubatingGlossary exposing (IncubatingGlossary)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
 import Data.OrderItemsBy as OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Theme as Theme exposing (Theme)
@@ -145,8 +145,8 @@ init flags =
         loadedGlossaryItems =
             LoadedGlossaryItems.decodeIncubatingFromFlags enableMarkdownBasedSyntax flags
 
-        incubatingGlossary : Result Decode.Error IncubatingGlossary
-        incubatingGlossary =
+        glossary : Result Decode.Error Glossary
+        glossary =
             loadedGlossaryItems
                 |> Result.map
                     (\items ->
@@ -221,7 +221,7 @@ init flags =
                 , orderItemsBy = orderItemsBy
                 , maybeId = Nothing
                 , fragment = fragment
-                , incubatingGlossary = incubatingGlossary
+                , glossary = glossary
                 }
     in
     ( ListAll listAllModel

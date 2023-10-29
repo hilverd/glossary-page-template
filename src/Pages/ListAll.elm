@@ -44,6 +44,7 @@ import Components.SearchDialog
 import Components.SelectMenu
 import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -52,7 +53,6 @@ import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
-import Data.IncubatingGlossary as IncubatingGlossary exposing (IncubatingGlossary)
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Saving exposing (Saving(..))
@@ -404,7 +404,7 @@ update msg model =
 
                 results : List Components.SearchDialog.SearchResult
                 results =
-                    case model.common.incubatingGlossary of
+                    case model.common.glossary of
                         Ok { enableMathSupport, items } ->
                             Search.search enableMathSupport model.common.filterByTag searchString items
 
@@ -460,7 +460,7 @@ update msg model =
                     model.common
 
                 model1 =
-                    case model.common.incubatingGlossary of
+                    case model.common.glossary of
                         Ok glossary ->
                             glossary.items
                                 |> GlossaryItems.itemIdFromDisambiguatedPreferredTermId (Term.id relatedTerm)
@@ -503,7 +503,7 @@ update msg model =
                 ( { model | deleting = NotSaving }, Cmd.none )
 
         Delete id ->
-            case model.common.incubatingGlossary of
+            case model.common.glossary of
                 Ok { items } ->
                     let
                         updatedGlossaryItems : GlossaryItems
@@ -532,10 +532,10 @@ update msg model =
                         , giveFocusToOuter
                         ]
             in
-            case common.incubatingGlossary of
+            case common.glossary of
                 Ok glossary ->
                     ( { model
-                        | common = { common | incubatingGlossary = Ok { glossary | items = updatedGlossaryItems } }
+                        | common = { common | glossary = Ok { glossary | items = updatedGlossaryItems } }
                         , confirmDeleteId = Nothing
                         , deleting = NotSaving
                         , savingSettings = NotSaving
@@ -626,10 +626,10 @@ update msg model =
             )
 
         ToggleMarkdownBasedSyntax ->
-            case model.common.incubatingGlossary of
+            case model.common.glossary of
                 Ok glossary ->
                     let
-                        updatedGlossary : IncubatingGlossary
+                        updatedGlossary : Glossary
                         updatedGlossary =
                             { glossary | enableMarkdownBasedSyntax = not glossary.enableMarkdownBasedSyntax }
 
@@ -641,17 +641,17 @@ update msg model =
                         , deleting = NotSaving
                         , savingSettings = SavingInProgress
                       }
-                    , patchHtmlFileAfterChangingSettings { common0 | incubatingGlossary = Ok updatedGlossary }
+                    , patchHtmlFileAfterChangingSettings { common0 | glossary = Ok updatedGlossary }
                     )
 
                 _ ->
                     ( model, Cmd.none )
 
         ChangeCardWidth cardWidth ->
-            case model.common.incubatingGlossary of
+            case model.common.glossary of
                 Ok glossary ->
                     let
-                        updatedGlossary : IncubatingGlossary
+                        updatedGlossary : Glossary
                         updatedGlossary =
                             { glossary | cardWidth = cardWidth }
 
@@ -659,7 +659,7 @@ update msg model =
                             model.common
 
                         common1 =
-                            { common0 | incubatingGlossary = Ok updatedGlossary }
+                            { common0 | glossary = Ok updatedGlossary }
                     in
                     ( { model
                         | confirmDeleteId = Nothing
@@ -701,10 +701,10 @@ update msg model =
             )
 
         ToggleEnableLastUpdatedDates ->
-            case model.common.incubatingGlossary of
+            case model.common.glossary of
                 Ok glossary ->
                     let
-                        updatedGlossary : IncubatingGlossary
+                        updatedGlossary : Glossary
                         updatedGlossary =
                             { glossary | enableLastUpdatedDates = not glossary.enableLastUpdatedDates }
 
@@ -712,7 +712,7 @@ update msg model =
                             model.common
 
                         common1 =
-                            { common0 | incubatingGlossary = Ok updatedGlossary }
+                            { common0 | glossary = Ok updatedGlossary }
                     in
                     ( { model
                         | confirmDeleteId = Nothing
@@ -743,7 +743,7 @@ update msg model =
 
         DownloadMarkdown ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
-            , case model.common.incubatingGlossary of
+            , case model.common.glossary of
                 Ok { title, aboutSection, items } ->
                     Export.Markdown.download title aboutSection items
 
@@ -753,7 +753,7 @@ update msg model =
 
         DownloadAnki ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
-            , case model.common.incubatingGlossary of
+            , case model.common.glossary of
                 Ok { enableMathSupport, title, aboutSection, items } ->
                     Export.Anki.download enableMathSupport title aboutSection items
 
@@ -779,7 +779,7 @@ update msg model =
             let
                 filterByTag : Maybe TagId
                 filterByTag =
-                    case model.common.incubatingGlossary of
+                    case model.common.glossary of
                         Ok glossary ->
                             glossary.items
                                 |> GlossaryItems.tagIdFromTag tag
@@ -818,7 +818,7 @@ patchHtmlFileAfterChangingSettings common =
         Extras.Task.messageToCommand okMsg
 
     else
-        case common.incubatingGlossary of
+        case common.glossary of
             Ok glossary ->
                 Http.request
                     { method = "PATCH"
@@ -826,7 +826,7 @@ patchHtmlFileAfterChangingSettings common =
                     , url = "/"
                     , body =
                         glossary
-                            |> IncubatingGlossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
+                            |> Glossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
                             |> HtmlTree.toHtmlReplacementString
                             |> Http.stringBody "text/html"
                     , expect =
@@ -859,10 +859,10 @@ patchHtmlFileAfterDeletingItem common glossaryItems =
         Extras.Task.messageToCommand msg
 
     else
-        case common.incubatingGlossary of
+        case common.glossary of
             Ok glossary0 ->
                 let
-                    glossary : IncubatingGlossary
+                    glossary : Glossary
                     glossary =
                         { glossary0 | items = glossaryItems }
                 in
@@ -872,7 +872,7 @@ patchHtmlFileAfterDeletingItem common glossaryItems =
                     , url = "/"
                     , body =
                         glossary
-                            |> IncubatingGlossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
+                            |> Glossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
                             |> HtmlTree.toHtmlReplacementString
                             |> Http.stringBody "text/html"
                     , expect =
@@ -995,7 +995,7 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
         ]
 
 
-viewSettings : IncubatingGlossary -> Model -> Html Msg
+viewSettings : Glossary -> Model -> Html Msg
 viewSettings glossary model =
     let
         errorDiv : String -> Html msg
@@ -1928,7 +1928,7 @@ viewExportButton enabled exportDropdownMenu =
         ]
 
 
-viewSelectInputSyntax : IncubatingGlossary -> Model -> Html Msg
+viewSelectInputSyntax : Glossary -> Model -> Html Msg
 viewSelectInputSyntax glossary model =
     let
         tabbable : Bool
@@ -2023,7 +2023,7 @@ viewSelectInputSyntax glossary model =
         ]
 
 
-viewSelectCardWidth : IncubatingGlossary -> Model -> Html Msg
+viewSelectCardWidth : Glossary -> Model -> Html Msg
 viewSelectCardWidth glossary model =
     let
         tabbable : Bool
@@ -2345,8 +2345,8 @@ canEdit editability =
 
 view : Model -> Document Msg
 view model =
-    case model.common.incubatingGlossary of
-        Ok incubatingGlossary ->
+    case model.common.glossary of
+        Ok glossary ->
             let
                 noModalDialogShown_ : Bool
                 noModalDialogShown_ =
@@ -2354,7 +2354,7 @@ view model =
 
                 incubatingItems : GlossaryItems
                 incubatingItems =
-                    incubatingGlossary.items
+                    glossary.items
 
                 incubatingIndexOfTerms : IndexOfTerms
                 incubatingIndexOfTerms =
@@ -2364,7 +2364,7 @@ view model =
                 filterByTag =
                     model.common.filterByTag
             in
-            { title = GlossaryTitle.inlineText incubatingGlossary.title
+            { title = GlossaryTitle.inlineText glossary.title
             , body =
                 [ Html.div
                     [ class "min-h-full focus:outline-none"
@@ -2456,8 +2456,8 @@ view model =
                             )
                         )
                     ]
-                    [ viewMenuForMobile model incubatingGlossary.enableMathSupport noModalDialogShown_ incubatingIndexOfTerms
-                    , viewStaticSidebarForDesktop incubatingGlossary.enableMathSupport noModalDialogShown_ incubatingIndexOfTerms
+                    [ viewMenuForMobile model glossary.enableMathSupport noModalDialogShown_ incubatingIndexOfTerms
+                    , viewStaticSidebarForDesktop glossary.enableMathSupport noModalDialogShown_ incubatingIndexOfTerms
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar noModalDialogShown_
@@ -2472,9 +2472,9 @@ view model =
                         , div
                             [ Html.Attributes.id ElementIds.container
                             , class "relative"
-                            , Extras.HtmlAttribute.fromBool "data-enable-markdown-based-syntax" incubatingGlossary.enableMarkdownBasedSyntax
+                            , Extras.HtmlAttribute.fromBool "data-enable-markdown-based-syntax" glossary.enableMarkdownBasedSyntax
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
-                            , incubatingGlossary.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
+                            , glossary.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
                             ]
                             [ header [] <|
                                 let
@@ -2506,18 +2506,18 @@ view model =
                                     ]
                                 , viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
                                     |> Extras.Html.showIf (model.editability == ReadOnlyWithHelpForMakingChanges)
-                                , Extras.Html.showIf (editing model.editability) <| viewSettings incubatingGlossary model
+                                , Extras.Html.showIf (editing model.editability) <| viewSettings glossary model
                                 , h1
                                     [ id ElementIds.title ]
-                                    [ GlossaryTitle.view incubatingGlossary.enableMathSupport incubatingGlossary.title ]
+                                    [ GlossaryTitle.view glossary.enableMathSupport glossary.title ]
                                 ]
                             , Html.main_
                                 []
                                 [ Components.AboutSection.view
-                                    { enableMathSupport = incubatingGlossary.enableMathSupport
+                                    { enableMathSupport = glossary.enableMathSupport
                                     , modalDialogShown = not noModalDialogShown_
                                     }
-                                    incubatingGlossary.aboutSection
+                                    glossary.aboutSection
                                 , Extras.Html.showIf (editing model.editability) <|
                                     div
                                         [ class "flex-none mt-2" ]
@@ -2551,10 +2551,10 @@ view model =
                                        )
                                     |> viewCards
                                         model
-                                        { enableMathSupport = incubatingGlossary.enableMathSupport
+                                        { enableMathSupport = glossary.enableMathSupport
                                         , editable = editing model.editability
                                         , tabbable = noModalDialogShown_
-                                        , enableLastUpdatedDates = incubatingGlossary.enableLastUpdatedDates
+                                        , enableLastUpdatedDates = glossary.enableLastUpdatedDates
                                         }
                                         (GlossaryItems.tags incubatingItems)
                                         incubatingItems

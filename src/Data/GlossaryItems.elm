@@ -29,7 +29,7 @@ module Data.GlossaryItems exposing
 
 -}
 
-import Data.GlossaryItem as IncubatingGlossaryItem exposing (IncubatingGlossaryItem, alternativeTerms, lastUpdatedDateAsIso8601, preferredTerm)
+import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem, alternativeTerms, lastUpdatedDateAsIso8601, preferredTerm)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
@@ -52,7 +52,7 @@ import Set exposing (Set)
 -}
 type GlossaryItems
     = GlossaryItems
-        { itemById : GlossaryItemIdDict IncubatingGlossaryItem
+        { itemById : GlossaryItemIdDict GlossaryItem
         , tagById : TagIdDict Tag
         , tagIdByRawTag : Dict String TagId
         , tagDescriptionById : TagIdDict TagDescription
@@ -206,9 +206,9 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 |> List.foldl
                     (\( itemId, glossaryItemForHtml ) { itemById_, tagById_, allRawTags, nextTagIdInt } ->
                         let
-                            glossaryItem : IncubatingGlossaryItem
+                            glossaryItem : GlossaryItem
                             glossaryItem =
-                                IncubatingGlossaryItem.init
+                                GlossaryItem.init
                                     (GlossaryItemForHtml.nonDisambiguatedPreferredTerm glossaryItemForHtml)
                                     (GlossaryItemForHtml.alternativeTerms glossaryItemForHtml)
                                     (GlossaryItemForHtml.definition glossaryItemForHtml)
@@ -502,10 +502,10 @@ get itemId glossaryItems =
                         let
                             preferredTerm : Term
                             preferredTerm =
-                                IncubatingGlossaryItem.preferredTerm item
+                                GlossaryItem.preferredTerm item
 
                             alternativeTerms =
-                                IncubatingGlossaryItem.alternativeTerms item
+                                GlossaryItem.alternativeTerms item
 
                             disambiguationTag =
                                 items.disambiguationTagIdByItemId
@@ -529,7 +529,7 @@ get itemId glossaryItems =
 
                             definition : Maybe Definition
                             definition =
-                                IncubatingGlossaryItem.definition item
+                                GlossaryItem.definition item
 
                             relatedPreferredTerms : List Term
                             relatedPreferredTerms =
@@ -546,10 +546,10 @@ get itemId glossaryItems =
                                     |> Maybe.withDefault []
 
                             needsUpdating =
-                                IncubatingGlossaryItem.needsUpdating item
+                                GlossaryItem.needsUpdating item
 
                             lastUpdatedDateAsIso8601 =
-                                IncubatingGlossaryItem.lastUpdatedDateAsIso8601 item
+                                GlossaryItem.lastUpdatedDateAsIso8601 item
                         in
                         GlossaryItemForHtml.create
                             preferredTerm
@@ -634,7 +634,7 @@ disambiguatedPreferredTerm itemId glossaryItems =
                 maybePreferredTerm =
                     items.itemById
                         |> GlossaryItemIdDict.get itemId
-                        |> Maybe.map IncubatingGlossaryItem.preferredTerm
+                        |> Maybe.map GlossaryItem.preferredTerm
 
                 disambiguationTagId : Maybe TagId
                 disambiguationTagId =
@@ -709,7 +709,7 @@ preferredTermFromId termId glossaryItems =
                 |> Maybe.andThen
                     (\itemId ->
                         GlossaryItemIdDict.get itemId items.itemById
-                            |> Maybe.map IncubatingGlossaryItem.preferredTerm
+                            |> Maybe.map GlossaryItem.preferredTerm
                     )
 
 
@@ -734,7 +734,7 @@ disambiguatedPreferredTermsWhichHaveDefinitions filterByTagId glossaryItems =
                     (\( itemId, item ) ->
                         if
                             Set.member (GlossaryItemId.toInt itemId) itemIdIntsSet
-                                && IncubatingGlossaryItem.definition item
+                                && GlossaryItem.definition item
                                 /= Nothing
                         then
                             disambiguatedPreferredTerm itemId glossaryItems
@@ -796,7 +796,7 @@ disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItems =
                                     case disambiguatedPreferredTerm itemId glossaryItems of
                                         Just disambiguatedPreferredTerm_ ->
                                             item
-                                                |> IncubatingGlossaryItem.alternativeTerms
+                                                |> GlossaryItem.alternativeTerms
                                                 |> List.foldl
                                                     (\alternativeTerm ( alternativeTermByRaw1, preferredTermsByRawAlternativeTerm1 ) ->
                                                         let
@@ -921,7 +921,7 @@ orderedFocusedOn filterByTagId glossaryItemId glossaryItems =
                                     itemHasDefinition =
                                         items.itemById
                                             |> GlossaryItemIdDict.get id
-                                            |> Maybe.map (IncubatingGlossaryItem.definition >> (/=) Nothing)
+                                            |> Maybe.map (GlossaryItem.definition >> (/=) Nothing)
                                             |> Maybe.withDefault False
                                 in
                                 if itemHasDefinition then

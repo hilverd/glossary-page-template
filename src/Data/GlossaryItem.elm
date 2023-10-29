@@ -1,5 +1,5 @@
 module Data.GlossaryItem exposing
-    ( IncubatingGlossaryItem
+    ( GlossaryItem
     , init
     , preferredTerm, alternativeTerms, definition, needsUpdating, lastUpdatedDateAsIso8601
     )
@@ -9,7 +9,7 @@ module Data.GlossaryItem exposing
 
 # Glossary Items
 
-@docs IncubatingGlossaryItem
+@docs GlossaryItem
 
 
 # Build
@@ -29,8 +29,8 @@ import Data.GlossaryItem.Term exposing (Term)
 
 {-| A glossary item.
 -}
-type IncubatingGlossaryItem
-    = IncubatingGlossaryItem
+type GlossaryItem
+    = GlossaryItem
         { preferredTerm : Term
         , alternativeTerms : List Term
         , definition : Maybe Definition
@@ -41,9 +41,9 @@ type IncubatingGlossaryItem
 
 {-| Create a glossary item from its components.
 -}
-init : Term -> List Term -> Maybe Definition -> Bool -> Maybe String -> IncubatingGlossaryItem
+init : Term -> List Term -> Maybe Definition -> Bool -> Maybe String -> GlossaryItem
 init preferredTerm_ alternativeTerms_ definition_ needsUpdating_ lastUpdatedDateAsIso8601_ =
-    IncubatingGlossaryItem
+    GlossaryItem
         { preferredTerm = preferredTerm_
         , alternativeTerms = alternativeTerms_
         , definition = definition_
@@ -54,44 +54,44 @@ init preferredTerm_ alternativeTerms_ definition_ needsUpdating_ lastUpdatedDate
 
 {-| The preferred term for this glossary item.
 -}
-preferredTerm : IncubatingGlossaryItem -> Term
+preferredTerm : GlossaryItem -> Term
 preferredTerm glossaryItem =
     case glossaryItem of
-        IncubatingGlossaryItem item ->
+        GlossaryItem item ->
             item.preferredTerm
 
 
 {-| The alternative terms for this glossary item.
 -}
-alternativeTerms : IncubatingGlossaryItem -> List Term
+alternativeTerms : GlossaryItem -> List Term
 alternativeTerms glossaryItem =
     case glossaryItem of
-        IncubatingGlossaryItem item ->
+        GlossaryItem item ->
             item.alternativeTerms
 
 
 {-| The definition for this glossary item.
 -}
-definition : IncubatingGlossaryItem -> Maybe Definition
+definition : GlossaryItem -> Maybe Definition
 definition glossaryItem =
     case glossaryItem of
-        IncubatingGlossaryItem item ->
+        GlossaryItem item ->
             item.definition
 
 
 {-| The "needs updating" flag for this glossary item.
 -}
-needsUpdating : IncubatingGlossaryItem -> Bool
+needsUpdating : GlossaryItem -> Bool
 needsUpdating glossaryItem =
     case glossaryItem of
-        IncubatingGlossaryItem item ->
+        GlossaryItem item ->
             item.needsUpdating
 
 
 {-| The last updated date for this glossary item.
 -}
-lastUpdatedDateAsIso8601 : IncubatingGlossaryItem -> Maybe String
+lastUpdatedDateAsIso8601 : GlossaryItem -> Maybe String
 lastUpdatedDateAsIso8601 glossaryItem =
     case glossaryItem of
-        IncubatingGlossaryItem item ->
+        GlossaryItem item ->
             item.lastUpdatedDateAsIso8601

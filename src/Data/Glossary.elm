@@ -1,4 +1,4 @@
-module Data.IncubatingGlossary exposing (IncubatingGlossary, toHtmlTree)
+module Data.Glossary exposing (Glossary, toHtmlTree)
 
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
@@ -13,7 +13,7 @@ import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 
 
-type alias IncubatingGlossary =
+type alias Glossary =
     { enableMarkdownBasedSyntax : Bool
     , enableMathSupport : Bool
     , enableLastUpdatedDates : Bool
@@ -26,7 +26,7 @@ type alias IncubatingGlossary =
 
 {-| Represent these glossary items as an HTML tree, ready for writing back to the glossary's HTML file.
 -}
-toHtmlTree : Bool -> Bool -> Bool -> IncubatingGlossary -> HtmlTree
+toHtmlTree : Bool -> Bool -> Bool -> Glossary -> HtmlTree
 toHtmlTree enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, title, aboutSection, enableLastUpdatedDates, items } =
     let
         tagsWithDescriptions =

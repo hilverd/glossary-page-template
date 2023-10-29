@@ -10,9 +10,9 @@ import Components.Badge
 import Components.Button
 import Components.Copy
 import Components.Spinner
+import Data.Glossary exposing (Glossary)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
-import Data.IncubatingGlossary exposing (IncubatingGlossary)
 import Data.Saving exposing (Saving(..))
 import Extras.Html
 import Html.Attributes exposing (class)
@@ -48,7 +48,7 @@ type alias Msg =
 
 init : CommonModel -> ( Model, Cmd Msg )
 init common =
-    case common.incubatingGlossary of
+    case common.glossary of
         Ok { items } ->
             ( { common = common
               , form =
@@ -189,9 +189,9 @@ viewFooter model showValidationErrors glossaryItems =
         common =
             model.common
 
-        updatedGlossary : Result Decode.Error IncubatingGlossary
+        updatedGlossary : Result Decode.Error Glossary
         updatedGlossary =
-            case common.incubatingGlossary of
+            case common.glossary of
                 Ok glossary ->
                     Ok { glossary | items = glossaryItems }
 
@@ -209,7 +209,7 @@ viewFooter model showValidationErrors glossaryItems =
             [ Components.Button.white
                 (saving /= SavingInProgress)
                 [ Html.Events.onClick <|
-                    PageMsg.NavigateToListAll { common | incubatingGlossary = updatedGlossary }
+                    PageMsg.NavigateToListAll { common | glossary = updatedGlossary }
                 ]
                 [ text "Cancel" ]
             , Components.Button.primary
@@ -233,7 +233,7 @@ viewFooter model showValidationErrors glossaryItems =
 
 view : Model -> Document Msg
 view model =
-    case model.common.incubatingGlossary of
+    case model.common.glossary of
         Ok { enableMathSupport, items } ->
             { title = "Manage Tags"
             , body =
