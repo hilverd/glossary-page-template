@@ -5,7 +5,7 @@ import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemForHtml as GlossaryItemForHtml
-import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.TagId exposing (TagId)
 import Extras.Html
 import Extras.Url
@@ -15,7 +15,7 @@ import Icons
 import Svg.Attributes
 
 
-search : Bool -> Maybe TagId -> String -> IncubatingGlossaryItems -> List SearchDialog.SearchResult
+search : Bool -> Maybe TagId -> String -> GlossaryItems -> List SearchDialog.SearchResult
 search enableMathSupport filterByTagId searchString glossaryItems =
     let
         searchStringNormalised : String
@@ -35,7 +35,7 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                     }
             candidates =
                 glossaryItems
-                    |> IncubatingGlossaryItems.orderedAlphabetically filterByTagId
+                    |> GlossaryItems.orderedAlphabetically filterByTagId
                     |> List.concatMap
                         (\( _, item ) ->
                             let

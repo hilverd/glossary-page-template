@@ -6,8 +6,8 @@ import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems, tagsWithDescriptions)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
-import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems, tagsWithDescriptions)
 import Data.TagDescription as TagDescription exposing (TagDescription)
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
@@ -20,7 +20,7 @@ type alias IncubatingGlossary =
     , cardWidth : CardWidth
     , title : GlossaryTitle
     , aboutSection : AboutSection
-    , items : IncubatingGlossaryItems
+    , items : GlossaryItems
     }
 
 
@@ -30,7 +30,7 @@ toHtmlTree : Bool -> Bool -> Bool -> IncubatingGlossary -> HtmlTree
 toHtmlTree enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, title, aboutSection, enableLastUpdatedDates, items } =
     let
         tagsWithDescriptions =
-            IncubatingGlossaryItems.tagsWithDescriptions items
+            GlossaryItems.tagsWithDescriptions items
     in
     HtmlTree.Node "div"
         True
@@ -117,7 +117,7 @@ toHtmlTree enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges {
                     True
                     []
                     (items
-                        |> IncubatingGlossaryItems.orderedAlphabetically Nothing
+                        |> GlossaryItems.orderedAlphabetically Nothing
                         |> List.map (Tuple.second >> GlossaryItemForHtml.toHtmlTree)
                     )
                 ]

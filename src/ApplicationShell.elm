@@ -15,9 +15,9 @@ import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.IncubatingGlossary exposing (IncubatingGlossary)
-import Data.IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
 import Data.OrderItemsBy as OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Theme as Theme exposing (Theme)
@@ -141,13 +141,13 @@ init flags =
                 |> Decode.decodeValue (Decode.field "enableSavingChangesInMemory" Decode.bool)
                 |> Result.withDefault False
 
-        loadedIncubatingGlossaryItems : Result Decode.Error IncubatingGlossaryItems
-        loadedIncubatingGlossaryItems =
+        loadedGlossaryItems : Result Decode.Error GlossaryItems
+        loadedGlossaryItems =
             LoadedGlossaryItems.decodeIncubatingFromFlags enableMarkdownBasedSyntax flags
 
         incubatingGlossary : Result Decode.Error IncubatingGlossary
         incubatingGlossary =
-            loadedIncubatingGlossaryItems
+            loadedGlossaryItems
                 |> Result.map
                     (\items ->
                         let

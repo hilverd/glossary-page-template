@@ -19,9 +19,9 @@ import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId as GlossaryItemId
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.IncubatingGlossary as IncubatingGlossary
-import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.Saving exposing (Saving(..))
@@ -94,15 +94,15 @@ init commonModel =
             let
                 tags : List ( TagId, Tag )
                 tags =
-                    IncubatingGlossaryItems.tagByIdList items
+                    GlossaryItems.tagByIdList items
 
                 existingTerms : List Term
                 existingTerms =
-                    IncubatingGlossaryItems.disambiguatedPreferredTerms Nothing items
+                    GlossaryItems.disambiguatedPreferredTerms Nothing items
 
                 existingDisambiguatedPreferredTerms : List Term
                 existingDisambiguatedPreferredTerms =
-                    IncubatingGlossaryItems.disambiguatedPreferredTerms Nothing items
+                    GlossaryItems.disambiguatedPreferredTerms Nothing items
 
                 preferredTermsOfItemsListingThisItemAsRelated : List Term
                 preferredTermsOfItemsListingThisItemAsRelated =
@@ -110,8 +110,8 @@ init commonModel =
                         |> Maybe.map
                             (\id ->
                                 items
-                                    |> IncubatingGlossaryItems.relatedForWhichItems id
-                                    |> List.filterMap (\id_ -> IncubatingGlossaryItems.disambiguatedPreferredTerm id_ items)
+                                    |> GlossaryItems.relatedForWhichItems id
+                                    |> List.filterMap (\id_ -> GlossaryItems.disambiguatedPreferredTerm id_ items)
                             )
                         |> Maybe.withDefault []
 
@@ -123,7 +123,7 @@ init commonModel =
                     Maybe.andThen
                         (\id ->
                             items
-                                |> IncubatingGlossaryItems.get id
+                                |> GlossaryItems.get id
                                 |> Maybe.map
                                     (\itemForHtml ->
                                         let
@@ -131,12 +131,12 @@ init commonModel =
                                             disambiguationTagId =
                                                 itemForHtml
                                                     |> GlossaryItemForHtml.disambiguationTag
-                                                    |> Maybe.andThen (\tag -> IncubatingGlossaryItems.tagIdFromTag tag items)
+                                                    |> Maybe.andThen (\tag -> GlossaryItems.tagIdFromTag tag items)
                                         in
                                         Form.fromGlossaryItemForHtml
                                             existingTerms
                                             existingDisambiguatedPreferredTerms
-                                            (IncubatingGlossaryItems.tagByIdList items)
+                                            (GlossaryItems.tagByIdList items)
                                             preferredTermsOfItemsListingThisItemAsRelated
                                             (GlossaryItemForHtml.relatedPreferredTerms itemForHtml)
                                             disambiguationTagId
@@ -382,20 +382,20 @@ update msg model =
                             ( updatedGlossaryItems, maybeId ) =
                                 case common.maybeId of
                                     Just id ->
-                                        ( IncubatingGlossaryItems.update id newOrUpdatedGlossaryItem glossary.items
+                                        ( GlossaryItems.update id newOrUpdatedGlossaryItem glossary.items
                                         , Just id
                                         )
 
                                     Nothing ->
                                         let
-                                            updated : IncubatingGlossaryItems
+                                            updated : GlossaryItems
                                             updated =
-                                                IncubatingGlossaryItems.insert newOrUpdatedGlossaryItem glossary.items
+                                                GlossaryItems.insert newOrUpdatedGlossaryItem glossary.items
                                         in
                                         ( updated
                                         , -- Find index of newly inserted item
                                           updated
-                                            |> IncubatingGlossaryItems.orderedAlphabetically Nothing
+                                            |> GlossaryItems.orderedAlphabetically Nothing
                                             |> List.filter (Tuple.second >> (==) newOrUpdatedGlossaryItem)
                                             |> List.head
                                             |> Maybe.map Tuple.first
@@ -425,7 +425,7 @@ update msg model =
             )
 
 
-patchHtmlFile : CommonModel -> IncubatingGlossaryItems -> Cmd Msg
+patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
 patchHtmlFile common glossaryItems =
     case common.incubatingGlossary of
         Ok glossary ->
@@ -911,7 +911,7 @@ viewAddRelatedTermButtonForEmptyState =
 viewCreateSeeAlso :
     Bool
     -> Bool
-    -> IncubatingGlossaryItems
+    -> GlossaryItems
     -> Array TermField
     -> Array Form.IncubatingRelatedTermField
     -> Dict Int Components.DropdownMenu.Model
@@ -930,7 +930,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
         allPreferredTerms : List Term
         allPreferredTerms =
             glossaryItems
-                |> IncubatingGlossaryItems.orderedAlphabetically Nothing
+                |> GlossaryItems.orderedAlphabetically Nothing
                 |> List.map (Tuple.second >> GlossaryItemForHtml.disambiguatedPreferredTerm)
     in
     div

@@ -15,9 +15,9 @@ import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
+import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.IncubatingGlossary as IncubatingGlossary exposing (IncubatingGlossary)
-import Data.IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.Saving exposing (Saving(..))
 import ElementIds
 import Extras.Html
@@ -217,7 +217,7 @@ aboutSectionFromForm enableMarkdownBasedSyntax form =
     }
 
 
-patchHtmlFile : CommonModel -> IncubatingGlossaryItems -> Cmd Msg
+patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
 patchHtmlFile common glossaryItems =
     let
         msg : PageMsg a
@@ -536,7 +536,7 @@ orMaybe first second =
             second
 
 
-viewCreateFormFooter : Model -> Bool -> IncubatingGlossaryItems -> Html Msg
+viewCreateFormFooter : Model -> Bool -> GlossaryItems -> Html Msg
 viewCreateFormFooter model showValidationErrors glossaryItems =
     let
         form =

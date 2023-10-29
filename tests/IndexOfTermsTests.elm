@@ -3,7 +3,7 @@ module IndexOfTermsTests exposing (suite)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.IndexOfTerms as IndexOfTerms
 import Expect
 import Test exposing (Test, describe, test)
@@ -14,7 +14,7 @@ termFromBody body =
     Term.fromPlaintext body False
 
 
-glossaryItems : IncubatingGlossaryItems
+glossaryItems : GlossaryItems
 glossaryItems =
     let
         one : GlossaryItemForHtml
@@ -101,7 +101,7 @@ glossaryItems =
                 False
                 Nothing
     in
-    IncubatingGlossaryItems.fromList [] [ doubleOhSeven, one, two, thirtyFourty, three, omega, future ]
+    GlossaryItems.fromList [] [ doubleOhSeven, one, two, thirtyFourty, three, omega, future ]
 
 
 suite : Test
@@ -110,7 +110,7 @@ suite =
         [ test "sorts terms alphabetically by their first alphabetic character (stripped of any diacritical marks)" <|
             \_ ->
                 glossaryItems
-                    |> IndexOfTerms.fromIncubatingGlossaryItems Nothing
+                    |> IndexOfTerms.fromGlossaryItems Nothing
                     |> IndexOfTerms.termGroups
                     |> Expect.equal
                         [ { label = "0–9"
@@ -151,8 +151,8 @@ suite =
         , test "doesn't include ellipsis if not needed" <|
             \_ ->
                 []
-                    |> IncubatingGlossaryItems.fromList []
-                    |> IndexOfTerms.fromIncubatingGlossaryItems Nothing
+                    |> GlossaryItems.fromList []
+                    |> IndexOfTerms.fromGlossaryItems Nothing
                     |> IndexOfTerms.termGroups
                     |> Expect.equal
                         [ { label = "A", entries = [] }

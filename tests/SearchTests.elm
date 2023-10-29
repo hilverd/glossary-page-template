@@ -4,7 +4,7 @@ import Components.SearchDialog as SearchDialog
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Expect
 import Search
 import Test exposing (Test, describe, test)
@@ -15,7 +15,7 @@ termFromBody body =
     Term.fromPlaintext body False
 
 
-loadedGlossaryItems : IncubatingGlossaryItems
+loadedGlossaryItems : GlossaryItems
 loadedGlossaryItems =
     let
         one : GlossaryItemForHtml
@@ -54,7 +54,7 @@ loadedGlossaryItems =
                 False
                 Nothing
     in
-    IncubatingGlossaryItems.fromList [] [ one, two, three ]
+    GlossaryItems.fromList [] [ one, two, three ]
 
 
 suite : Test

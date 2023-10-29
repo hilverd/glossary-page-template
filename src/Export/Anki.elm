@@ -12,8 +12,8 @@ import Data.AboutSection exposing (AboutSection)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
-import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Extras.HtmlTree
 import File.Download as Download
 import Regex
@@ -115,7 +115,7 @@ itemToAnki enableMathSupport glossaryItem =
 {-| Export a glossary with the given title, "about" paragraph, and "about" links to a [text file suitable for Anki](https://docs.ankiweb.net/importing.html#text-files).
 This is achieved by producing a [command for downloading](https://package.elm-lang.org/packages/elm/file/latest/File.Download) this file.
 -}
-download : Bool -> GlossaryTitle -> AboutSection -> IncubatingGlossaryItems -> Cmd msg
+download : Bool -> GlossaryTitle -> AboutSection -> GlossaryItems -> Cmd msg
 download enableMathSupport glossaryTitle aboutSection glossaryItems =
     let
         filename : String
@@ -151,7 +151,7 @@ download enableMathSupport glossaryTitle aboutSection glossaryItems =
         itemsString : String
         itemsString =
             glossaryItems
-                |> IncubatingGlossaryItems.orderedAlphabetically Nothing
+                |> GlossaryItems.orderedAlphabetically Nothing
                 |> List.map (Tuple.second >> itemToAnki enableMathSupport)
                 |> lines
 

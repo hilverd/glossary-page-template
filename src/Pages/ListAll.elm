@@ -50,9 +50,9 @@ import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.IncubatingGlossary as IncubatingGlossary exposing (IncubatingGlossary)
-import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Saving exposing (Saving(..))
@@ -153,7 +153,7 @@ type InternalMsg
     | ConfirmDelete GlossaryItemId
     | CancelDelete
     | Delete GlossaryItemId
-    | Deleted IncubatingGlossaryItems
+    | Deleted GlossaryItems
     | FailedToDelete Http.Error
     | JumpToTermIndexGroup Bool String
     | ChangeOrderItemsBy OrderItemsBy
@@ -463,7 +463,7 @@ update msg model =
                     case model.common.incubatingGlossary of
                         Ok glossary ->
                             glossary.items
-                                |> IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId (Term.id relatedTerm)
+                                |> GlossaryItems.itemIdFromDisambiguatedPreferredTermId (Term.id relatedTerm)
                                 |> Maybe.map
                                     (\index ->
                                         { model
@@ -506,9 +506,9 @@ update msg model =
             case model.common.incubatingGlossary of
                 Ok { items } ->
                     let
-                        updatedGlossaryItems : IncubatingGlossaryItems
+                        updatedGlossaryItems : GlossaryItems
                         updatedGlossaryItems =
-                            IncubatingGlossaryItems.remove id items
+                            GlossaryItems.remove id items
                     in
                     ( { model
                         | deleting = SavingInProgress
@@ -782,7 +782,7 @@ update msg model =
                     case model.common.incubatingGlossary of
                         Ok glossary ->
                             glossary.items
-                                |> IncubatingGlossaryItems.tagIdFromTag tag
+                                |> GlossaryItems.tagIdFromTag tag
 
                         _ ->
                             Nothing
@@ -848,7 +848,7 @@ patchHtmlFileAfterChangingSettings common =
                 Extras.Task.messageToCommand okMsg
 
 
-patchHtmlFileAfterDeletingItem : CommonModel -> IncubatingGlossaryItems -> Cmd Msg
+patchHtmlFileAfterDeletingItem : CommonModel -> GlossaryItems -> Cmd Msg
 patchHtmlFileAfterDeletingItem common glossaryItems =
     let
         msg : PageMsg InternalMsg
@@ -1468,7 +1468,7 @@ viewCards :
     Model
     -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
     -> List Tag
-    -> IncubatingGlossaryItems
+    -> GlossaryItems
     -> ( List ( GlossaryItemId, GlossaryItemForHtml ), List ( GlossaryItemId, GlossaryItemForHtml ) )
     -> Html Msg
 viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } tags glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
@@ -1479,7 +1479,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
 
         disambiguatedPreferredTermsWithDefinitions : List Term
         disambiguatedPreferredTermsWithDefinitions =
-            IncubatingGlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions
+            GlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions
                 model.common.filterByTag
                 glossaryItems
 
@@ -1487,7 +1487,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
         orderItemsFocusedOnTerm =
             case model.common.orderItemsBy of
                 FocusedOn termId ->
-                    IncubatingGlossaryItems.preferredTermFromId termId glossaryItems
+                    GlossaryItems.preferredTermFromId termId glossaryItems
 
                 _ ->
                     Nothing
@@ -1509,10 +1509,10 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             model.common.filterByTag
                 |> Maybe.andThen
                     (\tagId ->
-                        IncubatingGlossaryItems.tagFromId tagId glossaryItems
+                        GlossaryItems.tagFromId tagId glossaryItems
                             |> Maybe.andThen
                                 (\tag ->
-                                    IncubatingGlossaryItems.tagDescriptionFromId tagId glossaryItems
+                                    GlossaryItems.tagDescriptionFromId tagId glossaryItems
                                         |> Maybe.map (\description -> ( tag, description ))
                                 )
                     )
@@ -2352,13 +2352,13 @@ view model =
                 noModalDialogShown_ =
                     noModalDialogShown model
 
-                incubatingItems : IncubatingGlossaryItems
+                incubatingItems : GlossaryItems
                 incubatingItems =
                     incubatingGlossary.items
 
                 incubatingIndexOfTerms : IndexOfTerms
                 incubatingIndexOfTerms =
-                    IndexOfTerms.fromIncubatingGlossaryItems model.common.filterByTag incubatingItems
+                    IndexOfTerms.fromGlossaryItems model.common.filterByTag incubatingItems
 
                 filterByTag : Maybe TagId
                 filterByTag =
@@ -2408,16 +2408,16 @@ view model =
                                                     incubatingItems
                                                         |> (case model.common.orderItemsBy of
                                                                 Alphabetically ->
-                                                                    IncubatingGlossaryItems.orderedAlphabetically filterByTag
+                                                                    GlossaryItems.orderedAlphabetically filterByTag
 
                                                                 MostMentionedFirst ->
-                                                                    IncubatingGlossaryItems.orderedByMostMentionedFirst filterByTag
+                                                                    GlossaryItems.orderedByMostMentionedFirst filterByTag
 
                                                                 FocusedOn termId ->
                                                                     \items_ ->
-                                                                        IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId termId items_
+                                                                        GlossaryItems.itemIdFromDisambiguatedPreferredTermId termId items_
                                                                             |> Maybe.map
-                                                                                (\itemId -> IncubatingGlossaryItems.orderedFocusedOn filterByTag itemId items_)
+                                                                                (\itemId -> GlossaryItems.orderedFocusedOn filterByTag itemId items_)
                                                                             |> Maybe.withDefault ( [], [] )
                                                                             |> (\( lhs, rhs ) -> List.append lhs rhs)
                                                            )
@@ -2525,27 +2525,27 @@ view model =
                                 , incubatingItems
                                     |> (case model.common.orderItemsBy of
                                             Alphabetically ->
-                                                IncubatingGlossaryItems.orderedAlphabetically filterByTag
+                                                GlossaryItems.orderedAlphabetically filterByTag
                                                     >> (\lhs -> ( lhs, [] ))
 
                                             MostMentionedFirst ->
-                                                IncubatingGlossaryItems.orderedByMostMentionedFirst filterByTag
+                                                GlossaryItems.orderedByMostMentionedFirst filterByTag
                                                     >> (\lhs -> ( lhs, [] ))
 
                                             FocusedOn termId ->
                                                 let
                                                     itemId : Maybe GlossaryItemId
                                                     itemId =
-                                                        IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId termId incubatingItems
+                                                        GlossaryItems.itemIdFromDisambiguatedPreferredTermId termId incubatingItems
                                                 in
                                                 case itemId of
                                                     Just itemId_ ->
-                                                        IncubatingGlossaryItems.orderedFocusedOn filterByTag itemId_
+                                                        GlossaryItems.orderedFocusedOn filterByTag itemId_
 
                                                     Nothing ->
                                                         always
                                                             (incubatingItems
-                                                                |> IncubatingGlossaryItems.orderedAlphabetically filterByTag
+                                                                |> GlossaryItems.orderedAlphabetically filterByTag
                                                                 |> (\lhs -> ( lhs, [] ))
                                                             )
                                        )
@@ -2556,7 +2556,7 @@ view model =
                                         , tabbable = noModalDialogShown_
                                         , enableLastUpdatedDates = incubatingGlossary.enableLastUpdatedDates
                                         }
-                                        (IncubatingGlossaryItems.tags incubatingItems)
+                                        (GlossaryItems.tags incubatingItems)
                                         incubatingItems
                                 ]
                             , Html.footer

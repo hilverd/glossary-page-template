@@ -39,7 +39,7 @@ import Data.GlossaryItem.TagInItem exposing (TagInItem(..))
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TagId exposing (TagId)
 import Data.TermIndex as TermIndex exposing (TermIndex)
@@ -400,7 +400,7 @@ termBodyToId =
     String.replace " " "_"
 
 
-toGlossaryItem : Bool -> IncubatingGlossaryItems -> GlossaryItemForm -> Maybe String -> GlossaryItemForHtml
+toGlossaryItem : Bool -> GlossaryItems -> GlossaryItemForm -> Maybe String -> GlossaryItemForHtml
 toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
     let
         termFieldToTerm : TermField -> Term
@@ -452,7 +452,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
         disambiguationTag =
             form
                 |> disambiguationTagId
-                |> Maybe.andThen (\tagId -> IncubatingGlossaryItems.tagFromId tagId glossaryItems)
+                |> Maybe.andThen (\tagId -> GlossaryItems.tagFromId tagId glossaryItems)
 
         definition =
             form
@@ -484,13 +484,13 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                         relatedTermField.id
                             |> Maybe.andThen
                                 (\termId ->
-                                    IncubatingGlossaryItems.itemIdFromDisambiguatedPreferredTermId
+                                    GlossaryItems.itemIdFromDisambiguatedPreferredTermId
                                         termId
                                         glossaryItems
                                 )
                             |> Maybe.andThen
                                 (\itemId ->
-                                    IncubatingGlossaryItems.disambiguatedPreferredTerm
+                                    GlossaryItems.disambiguatedPreferredTerm
                                         itemId
                                         glossaryItems
                                 )

@@ -12,8 +12,8 @@ import Data.AboutSection exposing (AboutSection)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
-import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Extras.HtmlTree
 import Extras.String
 import File.Download as Download
@@ -103,7 +103,7 @@ itemToMarkdown glossaryItem =
 {-| Export a glossary with the given title, "about" paragraph, and "about" links to a Markdown file.
 This is achieved by producing a [command for downloading](https://package.elm-lang.org/packages/elm/file/latest/File.Download) this file.
 -}
-download : GlossaryTitle -> AboutSection -> IncubatingGlossaryItems -> Cmd msg
+download : GlossaryTitle -> AboutSection -> GlossaryItems -> Cmd msg
 download glossaryTitle aboutSection glossaryItems =
     let
         filename : String
@@ -127,7 +127,7 @@ download glossaryTitle aboutSection glossaryItems =
         itemsString : String
         itemsString =
             glossaryItems
-                |> IncubatingGlossaryItems.orderedAlphabetically Nothing
+                |> GlossaryItems.orderedAlphabetically Nothing
                 |> List.map (Tuple.second >> itemToMarkdown)
                 |> paragraphs
 

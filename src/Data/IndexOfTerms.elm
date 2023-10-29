@@ -1,16 +1,16 @@
-module Data.IndexOfTerms exposing (Entry(..), TermGroup, IndexOfTerms, fromIncubatingGlossaryItems, termGroups)
+module Data.IndexOfTerms exposing (Entry(..), TermGroup, IndexOfTerms, fromGlossaryItems, termGroups)
 
 {-| An index of terms, grouped in alphabetical order by their first character.
 
 
 # Indexes of Terms
 
-@docs Entry, TermGroup, IndexOfTerms, fromIncubatingGlossaryItems, termGroups
+@docs Entry, TermGroup, IndexOfTerms, fromGlossaryItems, termGroups
 
 -}
 
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.TagId exposing (TagId)
 import Dict exposing (Dict)
 
@@ -40,14 +40,14 @@ type IndexOfTerms
 
 {-| Create an index of terms from glossary items.
 -}
-fromIncubatingGlossaryItems : Maybe TagId -> IncubatingGlossaryItems -> IndexOfTerms
-fromIncubatingGlossaryItems filterByTagId glossaryItems =
+fromGlossaryItems : Maybe TagId -> GlossaryItems -> IndexOfTerms
+fromGlossaryItems filterByTagId glossaryItems =
     let
         disambiguatedPreferredTerms =
-            IncubatingGlossaryItems.disambiguatedPreferredTerms filterByTagId glossaryItems
+            GlossaryItems.disambiguatedPreferredTerms filterByTagId glossaryItems
 
         preferredTermsByAlternativeTerm =
-            IncubatingGlossaryItems.disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItems
+            GlossaryItems.disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItems
 
         entryListsByFirstAlphabeticCharacterOrEllpisis : Dict String (List Entry)
         entryListsByFirstAlphabeticCharacterOrEllpisis =

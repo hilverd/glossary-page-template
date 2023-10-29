@@ -11,8 +11,8 @@ import Components.Button
 import Components.Copy
 import Components.Spinner
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.IncubatingGlossary exposing (IncubatingGlossary)
-import Data.IncubatingGlossaryItems as IncubatingGlossaryItems exposing (IncubatingGlossaryItems)
 import Data.Saving exposing (Saving(..))
 import Extras.Html
 import Html.Attributes exposing (class)
@@ -53,7 +53,7 @@ init common =
             ( { common = common
               , form =
                     items
-                        |> IncubatingGlossaryItems.tags
+                        |> GlossaryItems.tags
                         |> Form.create
               , triedToSaveWhenFormInvalid = False
               , saving = NotSaving
@@ -167,7 +167,7 @@ viewEditTags { enableMathSupport, tabbable } tagsArray =
         ]
 
 
-viewFooter : Model -> Bool -> IncubatingGlossaryItems -> Html Msg
+viewFooter : Model -> Bool -> GlossaryItems -> Html Msg
 viewFooter model showValidationErrors glossaryItems =
     let
         form =
