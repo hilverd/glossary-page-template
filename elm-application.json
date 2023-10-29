@@ -8,7 +8,6 @@
         "Data.AboutLink",
         "Data.AboutParagraph",
         "Data.GlossaryItem.Definition",
-        "Data.GlossaryItem.RelatedTerm",
         "Data.GlossaryItem.Tag",
         "Data.GlossaryItem.TagInItem",
         "Data.GlossaryItem.Term",

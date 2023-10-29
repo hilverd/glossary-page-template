@@ -5,7 +5,6 @@ import Accessibility.Aria
 import Accessibility.Key
 import Components.Button
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
-import Data.GlossaryItem.RelatedTerm as RelatedTerm exposing (RelatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.TagInItem as TagInItem exposing (TagInItem)
 import Data.GlossaryItem.Term as Term exposing (Term)
