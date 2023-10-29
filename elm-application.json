@@ -17,7 +17,7 @@
         "Data.GlossaryItemIdDict",
         "Data.GlossaryItems",
         "Data.GlossaryTitle",
-        "Data.IncubatingGlossaryItem",
+        "Data.GlossaryItem",
         "Data.IndexOfTerms",
         "Data.MarkdownFragment",
         "Data.TagDescription",

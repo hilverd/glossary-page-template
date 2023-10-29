@@ -1,4 +1,4 @@
-module Data.IncubatingGlossaryItem exposing
+module Data.GlossaryItem exposing
     ( IncubatingGlossaryItem
     , init
     , preferredTerm, alternativeTerms, definition, needsUpdating, lastUpdatedDateAsIso8601
