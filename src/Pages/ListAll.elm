@@ -2104,7 +2104,7 @@ viewCurrentTagFilter { enableMathSupport, tabbable } ( tag, tagDescription ) =
             (PageMsg.Internal DoNotFilterByTag)
             [ Tag.view enableMathSupport [] tag ]
         , div
-            [ class "mt-3" ]
+            [ class "mt-3 mb-4" ]
             [ TagDescription.view enableMathSupport [] tagDescription ]
         ]
 
