@@ -79,41 +79,37 @@ toHtmlTree enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges {
                         aboutSection.links
                     )
                 ]
+            , HtmlTree.showIf (not <| List.isEmpty tagsWithDescriptions) <|
+                HtmlTree.Node
+                    "div"
+                    True
+                    [ HtmlTree.Attribute "id" ElementIds.tags ]
+                    [ HtmlTree.Leaf "Tags:"
+                    , HtmlTree.Node "dl"
+                        True
+                        []
+                        (List.map
+                            (\( tag, description ) ->
+                                HtmlTree.Node "div"
+                                    True
+                                    []
+                                    [ HtmlTree.Node "dt"
+                                        False
+                                        []
+                                        [ HtmlTree.Leaf <| Tag.raw tag ]
+                                    , HtmlTree.Node "dd"
+                                        False
+                                        []
+                                        [ HtmlTree.Leaf <| TagDescription.raw description ]
+                                    ]
+                            )
+                            tagsWithDescriptions
+                        )
+                    ]
             , HtmlTree.Node "article"
                 True
                 [ HtmlTree.Attribute "id" ElementIds.items ]
-                [ HtmlTree.showIf (not <| List.isEmpty tagsWithDescriptions) <|
-                    HtmlTree.Node
-                        "div"
-                        True
-                        [ HtmlTree.Attribute "id" ElementIds.tags ]
-                        [ HtmlTree.Node "p"
-                            True
-                            []
-                            [ HtmlTree.Leaf "Tags:"
-                            , HtmlTree.Node "dl"
-                                True
-                                []
-                                (List.map
-                                    (\( tag, description ) ->
-                                        HtmlTree.Node "div"
-                                            True
-                                            []
-                                            [ HtmlTree.Node "dt"
-                                                True
-                                                []
-                                                [ HtmlTree.Leaf <| Tag.raw tag ]
-                                            , HtmlTree.Node "dd"
-                                                True
-                                                []
-                                                [ HtmlTree.Leaf <| TagDescription.raw description ]
-                                            ]
-                                    )
-                                    tagsWithDescriptions
-                                )
-                            ]
-                        ]
-                , HtmlTree.Node "dl"
+                [ HtmlTree.Node "dl"
                     True
                     []
                     (items
