@@ -4,8 +4,10 @@ import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.TagDescription as TagDescription exposing (TagDescription)
+import Data.TagId as TagId
 import Expect
 import Test exposing (Test, describe, test)
 
@@ -139,9 +141,72 @@ glossaryItems =
 suite : Test
 suite =
     describe "The GlossaryItems module"
-        [ test "does stuff" <|
+        [ test "returns items in alphabetical order" <|
             \_ ->
-                1
+                glossaryItems
+                    |> GlossaryItems.orderedAlphabetically Nothing
                     |> Expect.equal
-                        1
+                        [ ( GlossaryItemId.create 0, defaultComputerScienceItem )
+                        , ( GlossaryItemId.create 1, defaultFinanceItem )
+                        , ( GlossaryItemId.create 2, informationRetrievalItem )
+                        , ( GlossaryItemId.create 3, interestRateItem )
+                        , ( GlossaryItemId.create 4, loanItem )
+                        ]
+        , test "returns items in alphabetical order with tag filter applied" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.orderedAlphabetically (Just <| TagId.create 0)
+                    |> List.map Tuple.first
+                    |> Expect.equal
+                        [ GlossaryItemId.create 0
+                        , GlossaryItemId.create 2
+                        ]
+        , test "returns items ordered by most mentioned first" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.orderedByMostMentionedFirst Nothing
+                    |> List.map Tuple.first
+                    |> Expect.equal
+                        [ GlossaryItemId.create 3
+                        , GlossaryItemId.create 4
+                        , GlossaryItemId.create 2
+                        , GlossaryItemId.create 0
+                        , GlossaryItemId.create 1
+                        ]
+        , test "returns items ordered by most mentioned first with tag filter applied" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.orderedByMostMentionedFirst (Just <| TagId.create 1)
+                    |> List.map Tuple.first
+                    |> Expect.equal
+                        [ GlossaryItemId.create 3
+                        , GlossaryItemId.create 4
+                        , GlossaryItemId.create 1
+                        ]
+        , test "returns items ordered 'focused on' a specific item" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.orderedFocusedOn Nothing (GlossaryItemId.create 1)
+                    |> (\( lhs, rhs ) -> ( List.map Tuple.first lhs, List.map Tuple.first rhs ))
+                    |> Expect.equal
+                        ( [ GlossaryItemId.create 1
+                          , GlossaryItemId.create 4
+                          , GlossaryItemId.create 3
+                          ]
+                        , [ GlossaryItemId.create 0
+                          , GlossaryItemId.create 2
+                          ]
+                        )
+        , test "returns items ordered 'focused on' a specific item with tag filter applied" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.orderedFocusedOn (Just <| TagId.create 1) (GlossaryItemId.create 1)
+                    |> (\( lhs, rhs ) -> ( List.map Tuple.first lhs, List.map Tuple.first rhs ))
+                    |> Expect.equal
+                        ( [ GlossaryItemId.create 1
+                          , GlossaryItemId.create 4
+                          , GlossaryItemId.create 3
+                          ]
+                        , []
+                        )
         ]
