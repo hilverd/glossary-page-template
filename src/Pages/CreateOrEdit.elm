@@ -136,7 +136,7 @@ init commonModel =
                                         Form.fromGlossaryItemForHtml
                                             existingTerms
                                             existingDisambiguatedPreferredTerms
-                                            (GlossaryItems.tagByIdList items)
+                                            tags
                                             preferredTermsOfItemsListingThisItemAsRelated
                                             (GlossaryItemForHtml.relatedPreferredTerms itemForHtml)
                                             disambiguationTagId
