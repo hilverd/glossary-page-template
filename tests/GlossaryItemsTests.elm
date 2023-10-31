@@ -32,6 +32,16 @@ financeTagDescription =
     TagDescription.fromMarkdown "These are items about finance — the study and discipline of money, currency and capital assets."
 
 
+gardeningTag : Tag
+gardeningTag =
+    Tag.fromMarkdown "Gardening"
+
+
+gardeningTagDescription : TagDescription
+gardeningTagDescription =
+    TagDescription.fromMarkdown "These are items about gardening — the practice of growing and cultivating plants as part of horticulture."
+
+
 defaultComputerScienceDefinition : Definition
 defaultComputerScienceDefinition =
     Definition.fromMarkdown "The preexisting value of a user-configurable setting that is assigned to a software application, computer program or device. Such settings are also called presets or factory presets, especially for electronic devices."
@@ -155,6 +165,7 @@ glossaryItems =
     GlossaryItems.fromList
         [ ( computerScienceTag, computerScienceTagDescription )
         , ( financeTag, financeTagDescription )
+        , ( gardeningTag, gardeningTagDescription )
         ]
         [ defaultComputerScienceItem
         , defaultFinanceItem
@@ -260,4 +271,47 @@ suite =
                         , ( GlossaryItemId.create 3, updatedInterestRateItem )
                         , ( GlossaryItemId.create 4, updatedLoanItem )
                         ]
+        , test "gets items by ID" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.get (GlossaryItemId.create 0)
+                    |> Expect.equal (Just defaultComputerScienceItem)
+        , test "gets all tags" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.tags
+                    |> Expect.equal [ computerScienceTag, financeTag, gardeningTag ]
+        , test "gets all tags along with their descriptions" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.tagsWithDescriptions
+                    |> Expect.equal
+                        [ ( computerScienceTag, computerScienceTagDescription )
+                        , ( financeTag, financeTagDescription )
+                        , ( gardeningTag, gardeningTagDescription )
+                        ]
+        , test "gets all tags along with their tag IDs" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.tagByIdList
+                    |> Expect.equal
+                        [ ( TagId.create 0, computerScienceTag )
+                        , ( TagId.create 1, financeTag )
+                        , ( TagId.create 2, gardeningTag )
+                        ]
+        , test "looks up a tag ID from its contents" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.tagIdFromTag computerScienceTag
+                    |> Expect.equal (Just <| TagId.create 0)
+        , test "looks up a tag from its ID" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.tagFromId (TagId.create 1)
+                    |> Expect.equal (Just financeTag)
+        , test "looks up a tag description from its ID" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.tagDescriptionFromId (TagId.create 2)
+                    |> Expect.equal (Just gardeningTagDescription)
         ]
