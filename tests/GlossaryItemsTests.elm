@@ -106,6 +106,19 @@ interestRateItem =
         (Just "2023-10-30T08:25:30.335Z")
 
 
+updatedInterestRateItem : GlossaryItemForHtml
+updatedInterestRateItem =
+    GlossaryItemForHtml.create
+        (Term.fromMarkdown "Interest rate updated" False)
+        [ Term.fromMarkdown "IR" True ]
+        Nothing
+        [ financeTag ]
+        (Just interestRateDefinition)
+        [ Term.fromMarkdown "Loan" False ]
+        False
+        (Just "2023-10-30T08:25:30.335Z")
+
+
 loanDefinition : Definition
 loanDefinition =
     Definition.fromMarkdown "The transfer of money by one party to another with an agreement to pay it back. The recipient, or borrower, incurs a debt and is usually required to pay interest for the use of the money."
@@ -120,6 +133,19 @@ loanItem =
         [ financeTag ]
         (Just loanDefinition)
         [ Term.fromMarkdown "Interest rate" False ]
+        False
+        (Just "2023-10-30T08:26:18.523Z")
+
+
+updatedLoanItem : GlossaryItemForHtml
+updatedLoanItem =
+    GlossaryItemForHtml.create
+        (Term.fromMarkdown "Loan" False)
+        []
+        Nothing
+        [ financeTag ]
+        (Just loanDefinition)
+        [ Term.fromMarkdown "Interest rate updated" False ]
         False
         (Just "2023-10-30T08:26:18.523Z")
 
@@ -209,4 +235,29 @@ suite =
                           ]
                         , []
                         )
+        , test "removes and inserts items" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.remove (GlossaryItemId.create 0)
+                    |> GlossaryItems.insert defaultComputerScienceItem
+                    |> GlossaryItems.orderedAlphabetically Nothing
+                    |> Expect.equal
+                        [ ( GlossaryItemId.create 0, defaultComputerScienceItem )
+                        , ( GlossaryItemId.create 1, defaultFinanceItem )
+                        , ( GlossaryItemId.create 2, informationRetrievalItem )
+                        , ( GlossaryItemId.create 3, interestRateItem )
+                        , ( GlossaryItemId.create 4, loanItem )
+                        ]
+        , test "updates items" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.update (GlossaryItemId.create 3) updatedInterestRateItem
+                    |> GlossaryItems.orderedAlphabetically Nothing
+                    |> Expect.equal
+                        [ ( GlossaryItemId.create 0, defaultComputerScienceItem )
+                        , ( GlossaryItemId.create 1, defaultFinanceItem )
+                        , ( GlossaryItemId.create 2, informationRetrievalItem )
+                        , ( GlossaryItemId.create 3, updatedInterestRateItem )
+                        , ( GlossaryItemId.create 4, updatedLoanItem )
+                        ]
         ]

@@ -34,7 +34,7 @@ import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml, relatedPreferredTerms)
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml, disambiguatedPreferredTerm, relatedPreferredTerms)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
 import Data.TagDescription exposing (TagDescription)
@@ -367,8 +367,8 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                     )
                     GlossaryItemIdDict.empty
 
-        orderedAlphabetically_ : List GlossaryItemId
-        orderedAlphabetically_ =
+        orderedAlphabetically__ : List GlossaryItemId
+        orderedAlphabetically__ =
             orderAlphabetically indexedGlossaryItemsForHtml
 
         orderedByMostMentionedFirst_ =
@@ -404,7 +404,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
         , itemIdsByTagId = itemIdsByTagId_
         , itemIdByDisambiguatedPreferredTermId = itemIdByDisambiguatedPreferredTermId_
         , relatedItemIdsById = relatedItemIdsById
-        , orderedAlphabetically = orderedAlphabetically_
+        , orderedAlphabetically = orderedAlphabetically__
         , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
         , orderedFocusedOn = Nothing
         , nextItemId = nextItemId
@@ -460,8 +460,16 @@ insert item glossaryItems =
 -}
 update : GlossaryItemId -> GlossaryItemForHtml -> GlossaryItems -> GlossaryItems
 update itemId item glossaryItems =
+    let
+        disambiguatedPreferredTerm_ itemId_ =
+            if itemId_ == itemId then
+                always <| Just <| GlossaryItemForHtml.disambiguatedPreferredTerm item
+
+            else
+                disambiguatedPreferredTerm itemId_
+    in
     glossaryItems
-        |> orderedAlphabetically Nothing
+        |> orderedAlphabetically_ disambiguatedPreferredTerm_ Nothing
         |> List.map
             (\( itemId_, item_ ) ->
                 if itemId_ == itemId then
@@ -490,10 +498,8 @@ remove itemId glossaryItems =
         |> fromList (tagsWithDescriptions glossaryItems)
 
 
-{-| Get the item associated with an ID. If the ID is not found, return `Nothing`.
--}
-get : GlossaryItemId -> GlossaryItems -> Maybe GlossaryItemForHtml
-get itemId glossaryItems =
+get_ : (GlossaryItemId -> GlossaryItems -> Maybe Term) -> GlossaryItemId -> GlossaryItems -> Maybe GlossaryItemForHtml
+get_ disambiguatedPreferredTerm_ itemId glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             GlossaryItemIdDict.get itemId items.itemById
@@ -540,7 +546,7 @@ get itemId glossaryItems =
                                             relatedItemIds
                                                 |> List.filterMap
                                                     (\relatedItemId ->
-                                                        disambiguatedPreferredTerm relatedItemId glossaryItems
+                                                        disambiguatedPreferredTerm_ relatedItemId glossaryItems
                                                     )
                                         )
                                     |> Maybe.withDefault []
@@ -561,6 +567,13 @@ get itemId glossaryItems =
                             needsUpdating
                             lastUpdatedDateAsIso8601
                     )
+
+
+{-| Get the item associated with an ID. If the ID is not found, return `Nothing`.
+-}
+get : GlossaryItemId -> GlossaryItems -> Maybe GlossaryItemForHtml
+get =
+    get_ disambiguatedPreferredTerm
 
 
 {-| The tags for these glossary items. Tags can exist without being used in any items.
@@ -623,7 +636,7 @@ tagDescriptionFromId tagId glossaryItems =
             TagIdDict.get tagId items.tagDescriptionById
 
 
-{-| The disambiguated preferred term for the given item with given ID.
+{-| The disambiguated preferred term for the item with the given ID.
 -}
 disambiguatedPreferredTerm : GlossaryItemId -> GlossaryItems -> Maybe Term
 disambiguatedPreferredTerm itemId glossaryItems =
@@ -834,8 +847,8 @@ disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItems =
                     []
 
 
-toList : Maybe TagId -> GlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml )
-toList filterByTagId glossaryItems =
+toList_ : (GlossaryItemId -> GlossaryItems -> Maybe Term) -> Maybe TagId -> GlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml )
+toList_ disambiguatedPreferredTerm_ filterByTagId glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             let
@@ -853,7 +866,7 @@ toList filterByTagId glossaryItems =
             List.filterMap
                 (\itemId ->
                     glossaryItems
-                        |> get itemId
+                        |> get_ disambiguatedPreferredTerm_ itemId
                         |> Maybe.andThen
                             (\glossaryItemForHtml ->
                                 if
@@ -869,13 +882,23 @@ toList filterByTagId glossaryItems =
                 )
 
 
+toList : Maybe TagId -> GlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml )
+toList =
+    toList_ disambiguatedPreferredTerm
+
+
+orderedAlphabetically_ : (GlossaryItemId -> GlossaryItems -> Maybe Term) -> Maybe TagId -> GlossaryItems -> List ( GlossaryItemId, GlossaryItemForHtml )
+orderedAlphabetically_ disambiguatedPreferredTerm_ filterByTagId glossaryItems =
+    case glossaryItems of
+        GlossaryItems items ->
+            toList_ disambiguatedPreferredTerm_ filterByTagId glossaryItems items.orderedAlphabetically
+
+
 {-| Retrieve the glossary items ordered alphabetically.
 -}
 orderedAlphabetically : Maybe TagId -> GlossaryItems -> List ( GlossaryItemId, GlossaryItemForHtml )
-orderedAlphabetically filterByTagId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            toList filterByTagId glossaryItems items.orderedAlphabetically
+orderedAlphabetically =
+    orderedAlphabetically_ disambiguatedPreferredTerm
 
 
 {-| Retrieve the glossary items ordered by most mentioned first.
