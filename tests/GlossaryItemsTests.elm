@@ -3,6 +3,7 @@ module GlossaryItemsTests exposing (suite)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
+import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -314,4 +315,34 @@ suite =
                 glossaryItems
                     |> GlossaryItems.tagDescriptionFromId (TagId.create 2)
                     |> Expect.equal (Just gardeningTagDescription)
+        , test "returns disambiguated preferred term for item with given ID" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.disambiguatedPreferredTerm (GlossaryItemId.create 0)
+                    |> Expect.equal (Just <| Term.fromMarkdown "Default (Computer Science)" False)
+        , test "returns all disambiguated preferred terms" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.disambiguatedPreferredTerms Nothing
+                    |> Expect.equal
+                        [ Term.fromMarkdown "Default (Computer Science)" False
+                        , Term.fromMarkdown "Default (Finance)" False
+                        , Term.fromMarkdown "Information retrieval" False
+                        , Term.fromMarkdown "Interest rate" False
+                        , Term.fromMarkdown "Loan" False
+                        ]
+        , test "returns all disambiguated preferred terms with tag filter applied" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.disambiguatedPreferredTerms (Just <| TagId.create 1)
+                    |> Expect.equal
+                        [ Term.fromMarkdown "Default (Finance)" False
+                        , Term.fromMarkdown "Interest rate" False
+                        , Term.fromMarkdown "Loan" False
+                        ]
+        , test "looks up ID of item whose preferred term has given ID" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.itemIdFromDisambiguatedPreferredTermId (TermId.fromString "Default_(Finance)")
+                    |> Expect.equal (Just <| GlossaryItemId.create 1)
         ]

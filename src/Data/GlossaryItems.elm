@@ -696,9 +696,10 @@ disambiguatedPreferredTerms filterByTagId glossaryItems =
                             )
                         |> Maybe.withDefault (GlossaryItemIdDict.keys items.itemById)
             in
-            List.filterMap
-                (\itemId -> disambiguatedPreferredTerm itemId glossaryItems)
-                itemIds
+            itemIds
+                |> List.filterMap
+                    (\itemId -> disambiguatedPreferredTerm itemId glossaryItems)
+                |> List.sortWith Term.compareAlphabetically
 
 
 {-| Look up the ID of the item whose preferred term has the given ID.
@@ -755,6 +756,7 @@ disambiguatedPreferredTermsWhichHaveDefinitions filterByTagId glossaryItems =
                         else
                             Nothing
                     )
+                |> List.sortWith Term.compareAlphabetically
 
 
 {-| The IDs of the items that list this item as a related one.
