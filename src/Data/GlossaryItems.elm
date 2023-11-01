@@ -1,7 +1,7 @@
 module Data.GlossaryItems exposing
     ( GlossaryItems
     , fromList, insertTag, insert, update, remove
-    , get, tags, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+    , get, tags, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
 
@@ -20,7 +20,7 @@ module Data.GlossaryItems exposing
 
 # Query
 
-@docs get, tags, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, preferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+@docs get, tags, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
 
 
 # Export
@@ -712,18 +712,19 @@ itemIdFromDisambiguatedPreferredTermId termId glossaryItems =
                 |> Dict.get (TermId.toString termId)
 
 
-{-| Look up the preferred term of the item whose preferred term has the given ID.
+{-| Look up the disambiguated preferred term of the item whose disambiguated preferred term has the given ID.
 -}
-preferredTermFromId : TermId -> GlossaryItems -> Maybe Term
-preferredTermFromId termId glossaryItems =
+disambiguatedPreferredTermFromId : TermId -> GlossaryItems -> Maybe Term
+disambiguatedPreferredTermFromId termId glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             items.itemIdByDisambiguatedPreferredTermId
                 |> Dict.get (TermId.toString termId)
                 |> Maybe.andThen
                     (\itemId ->
-                        GlossaryItemIdDict.get itemId items.itemById
-                            |> Maybe.map GlossaryItem.preferredTerm
+                        glossaryItems
+                            |> get itemId
+                            |> Maybe.map GlossaryItemForHtml.disambiguatedPreferredTerm
                     )
 
 

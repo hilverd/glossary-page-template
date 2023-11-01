@@ -345,4 +345,9 @@ suite =
                 glossaryItems
                     |> GlossaryItems.itemIdFromDisambiguatedPreferredTermId (TermId.fromString "Default_(Finance)")
                     |> Expect.equal (Just <| GlossaryItemId.create 1)
+        , test "looks up disambiguated preferred term of item whose disambiguated preferred term has given ID" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.disambiguatedPreferredTermFromId (TermId.fromString "Default_(Finance)")
+                    |> Expect.equal (Just <| Term.fromMarkdown "Default (Finance)" False)
         ]

@@ -1487,7 +1487,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
         orderItemsFocusedOnTerm =
             case model.common.orderItemsBy of
                 FocusedOn termId ->
-                    GlossaryItems.preferredTermFromId termId glossaryItems
+                    GlossaryItems.disambiguatedPreferredTermFromId termId glossaryItems
 
                 _ ->
                     Nothing
