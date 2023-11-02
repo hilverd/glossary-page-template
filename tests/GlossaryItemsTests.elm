@@ -350,4 +350,21 @@ suite =
                 glossaryItems
                     |> GlossaryItems.disambiguatedPreferredTermFromId (TermId.fromString "Default_(Finance)")
                     |> Expect.equal (Just <| Term.fromMarkdown "Default (Finance)" False)
+        , test "returns a list of pairs associating each alternative term with the disambiguated preferred terms that it appears together with" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.disambiguatedPreferredTermsByAlternativeTerm Nothing
+                    |> Expect.equal
+                        [ ( Term.fromMarkdown "Preset" False
+                          , [ Term.fromMarkdown "Default (Computer Science)" False ]
+                          )
+                        , ( Term.fromMarkdown "IR" True
+                          , [ Term.fromMarkdown "Interest rate" False
+                            , Term.fromMarkdown "Information retrieval" False
+                            ]
+                          )
+                        , ( Term.fromMarkdown "Factory preset" False
+                          , [ Term.fromMarkdown "Default (Computer Science)" False ]
+                          )
+                        ]
         ]

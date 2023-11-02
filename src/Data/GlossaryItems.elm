@@ -778,7 +778,7 @@ relatedForWhichItems itemId glossaryItems =
                     []
 
 
-{-| A list of pairs assocatiating each alternative term with the disambiguated preferred terms that it appears together with.
+{-| A list of pairs associating each alternative term with the disambiguated preferred terms that it appears together with.
 -}
 disambiguatedPreferredTermsByAlternativeTerm : Maybe TagId -> GlossaryItems -> List ( Term, List Term )
 disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItems =
