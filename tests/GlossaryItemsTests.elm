@@ -179,75 +179,7 @@ glossaryItems =
 suite : Test
 suite =
     describe "The GlossaryItems module"
-        [ test "returns items in alphabetical order" <|
-            \_ ->
-                glossaryItems
-                    |> GlossaryItems.orderedAlphabetically Nothing
-                    |> Expect.equal
-                        [ ( GlossaryItemId.create 0, defaultComputerScienceItem )
-                        , ( GlossaryItemId.create 1, defaultFinanceItem )
-                        , ( GlossaryItemId.create 2, informationRetrievalItem )
-                        , ( GlossaryItemId.create 3, interestRateItem )
-                        , ( GlossaryItemId.create 4, loanItem )
-                        ]
-        , test "returns items in alphabetical order with tag filter applied" <|
-            \_ ->
-                glossaryItems
-                    |> GlossaryItems.orderedAlphabetically (Just <| TagId.create 0)
-                    |> List.map Tuple.first
-                    |> Expect.equal
-                        [ GlossaryItemId.create 0
-                        , GlossaryItemId.create 2
-                        ]
-        , test "returns items ordered by most mentioned first" <|
-            \_ ->
-                glossaryItems
-                    |> GlossaryItems.orderedByMostMentionedFirst Nothing
-                    |> List.map Tuple.first
-                    |> Expect.equal
-                        [ GlossaryItemId.create 3
-                        , GlossaryItemId.create 4
-                        , GlossaryItemId.create 2
-                        , GlossaryItemId.create 0
-                        , GlossaryItemId.create 1
-                        ]
-        , test "returns items ordered by most mentioned first with tag filter applied" <|
-            \_ ->
-                glossaryItems
-                    |> GlossaryItems.orderedByMostMentionedFirst (Just <| TagId.create 1)
-                    |> List.map Tuple.first
-                    |> Expect.equal
-                        [ GlossaryItemId.create 3
-                        , GlossaryItemId.create 4
-                        , GlossaryItemId.create 1
-                        ]
-        , test "returns items ordered 'focused on' a specific item" <|
-            \_ ->
-                glossaryItems
-                    |> GlossaryItems.orderedFocusedOn Nothing (GlossaryItemId.create 1)
-                    |> (\( lhs, rhs ) -> ( List.map Tuple.first lhs, List.map Tuple.first rhs ))
-                    |> Expect.equal
-                        ( [ GlossaryItemId.create 1
-                          , GlossaryItemId.create 4
-                          , GlossaryItemId.create 3
-                          ]
-                        , [ GlossaryItemId.create 0
-                          , GlossaryItemId.create 2
-                          ]
-                        )
-        , test "returns items ordered 'focused on' a specific item with tag filter applied" <|
-            \_ ->
-                glossaryItems
-                    |> GlossaryItems.orderedFocusedOn (Just <| TagId.create 1) (GlossaryItemId.create 1)
-                    |> (\( lhs, rhs ) -> ( List.map Tuple.first lhs, List.map Tuple.first rhs ))
-                    |> Expect.equal
-                        ( [ GlossaryItemId.create 1
-                          , GlossaryItemId.create 4
-                          , GlossaryItemId.create 3
-                          ]
-                        , []
-                        )
-        , test "removes and inserts items" <|
+        [ test "removes and inserts items" <|
             \_ ->
                 glossaryItems
                     |> GlossaryItems.remove (GlossaryItemId.create 0)
@@ -340,6 +272,44 @@ suite =
                         , Term.fromMarkdown "Interest rate" False
                         , Term.fromMarkdown "Loan" False
                         ]
+        , test "looks up the ID of the item whose disambiguated preferred term has the given ID" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.itemIdFromDisambiguatedPreferredTermId (TermId.fromString "Default_(Finance)")
+                    |> Expect.equal (Just <| GlossaryItemId.create 1)
+        , test "looks up the disambiguated preferred term of the item whose disambiguated preferred term has the given ID" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.disambiguatedPreferredTermFromId (TermId.fromString "Default_(Finance)")
+                    |> Expect.equal (Just <| Term.fromMarkdown "Default (Finance)" False)
+        , test "returns all of the disambiguated preferred terms which have a definition" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions Nothing
+                    |> Expect.equal
+                        [ Term.fromMarkdown "Default (Computer Science)" False
+                        , Term.fromMarkdown "Default (Finance)" False
+                        , Term.fromMarkdown "Information retrieval" False
+                        , Term.fromMarkdown "Interest rate" False
+                        , Term.fromMarkdown "Loan" False
+                        ]
+        , test "returns all of the disambiguated preferred terms which have a definition with tag filter applied" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions (Just <| TagId.create 1)
+                    |> Expect.equal
+                        [ Term.fromMarkdown "Default (Finance)" False
+                        , Term.fromMarkdown "Interest rate" False
+                        , Term.fromMarkdown "Loan" False
+                        ]
+        , test "returns the IDs of the items that list this item as a related one" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.relatedForWhichItems (GlossaryItemId.create 4)
+                    |> Expect.equal
+                        [ GlossaryItemId.create 3
+                        , GlossaryItemId.create 1
+                        ]
         , test "looks up ID of item whose preferred term has given ID" <|
             \_ ->
                 glossaryItems
@@ -367,4 +337,72 @@ suite =
                           , [ Term.fromMarkdown "Default (Computer Science)" False ]
                           )
                         ]
+        , test "returns items in alphabetical order" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.orderedAlphabetically Nothing
+                    |> Expect.equal
+                        [ ( GlossaryItemId.create 0, defaultComputerScienceItem )
+                        , ( GlossaryItemId.create 1, defaultFinanceItem )
+                        , ( GlossaryItemId.create 2, informationRetrievalItem )
+                        , ( GlossaryItemId.create 3, interestRateItem )
+                        , ( GlossaryItemId.create 4, loanItem )
+                        ]
+        , test "returns items in alphabetical order with tag filter applied" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.orderedAlphabetically (Just <| TagId.create 0)
+                    |> List.map Tuple.first
+                    |> Expect.equal
+                        [ GlossaryItemId.create 0
+                        , GlossaryItemId.create 2
+                        ]
+        , test "returns items ordered by most mentioned first" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.orderedByMostMentionedFirst Nothing
+                    |> List.map Tuple.first
+                    |> Expect.equal
+                        [ GlossaryItemId.create 3
+                        , GlossaryItemId.create 4
+                        , GlossaryItemId.create 2
+                        , GlossaryItemId.create 0
+                        , GlossaryItemId.create 1
+                        ]
+        , test "returns items ordered by most mentioned first with tag filter applied" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.orderedByMostMentionedFirst (Just <| TagId.create 1)
+                    |> List.map Tuple.first
+                    |> Expect.equal
+                        [ GlossaryItemId.create 3
+                        , GlossaryItemId.create 4
+                        , GlossaryItemId.create 1
+                        ]
+        , test "returns items ordered 'focused on' a specific item" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.orderedFocusedOn Nothing (GlossaryItemId.create 1)
+                    |> (\( lhs, rhs ) -> ( List.map Tuple.first lhs, List.map Tuple.first rhs ))
+                    |> Expect.equal
+                        ( [ GlossaryItemId.create 1
+                          , GlossaryItemId.create 4
+                          , GlossaryItemId.create 3
+                          ]
+                        , [ GlossaryItemId.create 0
+                          , GlossaryItemId.create 2
+                          ]
+                        )
+        , test "returns items ordered 'focused on' a specific item with tag filter applied" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.orderedFocusedOn (Just <| TagId.create 1) (GlossaryItemId.create 1)
+                    |> (\( lhs, rhs ) -> ( List.map Tuple.first lhs, List.map Tuple.first rhs ))
+                    |> Expect.equal
+                        ( [ GlossaryItemId.create 1
+                          , GlossaryItemId.create 4
+                          , GlossaryItemId.create 3
+                          ]
+                        , []
+                        )
         ]

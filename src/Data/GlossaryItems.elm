@@ -702,7 +702,7 @@ disambiguatedPreferredTerms filterByTagId glossaryItems =
                 |> List.sortWith Term.compareAlphabetically
 
 
-{-| Look up the ID of the item whose preferred term has the given ID.
+{-| Look up the ID of the item whose disambiguated preferred term has the given ID.
 -}
 itemIdFromDisambiguatedPreferredTermId : TermId -> GlossaryItems -> Maybe GlossaryItemId
 itemIdFromDisambiguatedPreferredTermId termId glossaryItems =
@@ -728,7 +728,7 @@ disambiguatedPreferredTermFromId termId glossaryItems =
                     )
 
 
-{-| All of the preferred terms which have a definition.
+{-| All of the disambiguated preferred terms which have a definition.
 -}
 disambiguatedPreferredTermsWhichHaveDefinitions : Maybe TagId -> GlossaryItems -> List Term
 disambiguatedPreferredTermsWhichHaveDefinitions filterByTagId glossaryItems =
