@@ -435,14 +435,15 @@ suite =
             \_ ->
                 GlossaryItems.fromList
                     [ ( financeTag, financeTagDescription )
+                    , ( houseworkTag, houseworkTagDescription )
                     , ( gardeningTag, gardeningTagDescription )
                     , ( computerScienceTag, computerScienceTagDescription )
                     ]
                     [ GlossaryItemForHtml.create
                         (Term.fromMarkdown "Foo" False)
                         []
-                        Nothing
-                        [ financeTag, gardeningTag, computerScienceTag ]
+                        (Just gardeningTag)
+                        [ financeTag, houseworkTag, computerScienceTag ]
                         Nothing
                         []
                         False
@@ -454,8 +455,8 @@ suite =
                             GlossaryItemForHtml.create
                                 (Term.fromMarkdown "Foo" False)
                                 []
-                                Nothing
-                                [ computerScienceTag, financeTag, gardeningTag ]
+                                (Just gardeningTag)
+                                [ computerScienceTag, financeTag, houseworkTag ]
                                 Nothing
                                 []
                                 False
