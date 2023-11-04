@@ -389,7 +389,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
             tagById
                 |> TagIdDict.keys
                 |> List.map TagId.toInt
-                |> List.maximum 
+                |> List.maximum
                 |> Maybe.map ((+) 1)
                 |> Maybe.withDefault 0
                 |> TagId.create
@@ -604,7 +604,9 @@ tags : GlossaryItems -> List Tag
 tags glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
-            TagIdDict.values items.tagById
+            items.tagById
+                |> TagIdDict.values
+                |> List.sortWith Tag.compareAlphabetically
 
 
 {-| The tags for these glossary items along with their descriptions. Tags can exist without being used in any items.
@@ -619,6 +621,10 @@ tagsWithDescriptions glossaryItems =
                     (\( id, description ) ->
                         TagIdDict.get id items.tagById
                             |> Maybe.andThen (\tag -> Just ( tag, description ))
+                    )
+                |> List.sortWith
+                    (\( tag1, _ ) ( tag2, _ ) ->
+                        Tag.compareAlphabetically tag1 tag2
                     )
 
 

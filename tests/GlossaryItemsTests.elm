@@ -431,7 +431,7 @@ suite =
                           ]
                         , []
                         )
-        , test "sorts tag in items alphabetically" <|
+        , test "sorts tags in items alphabetically" <|
             \_ ->
                 GlossaryItems.fromList
                     [ ( financeTag, financeTagDescription )
@@ -462,4 +462,31 @@ suite =
                                 False
                                 (Just "2023-10-30T08:25:30.335Z")
                         )
+        , test "sorts tags alphabetically" <|
+            \_ ->
+                GlossaryItems.fromList
+                    [ ( financeTag, financeTagDescription )
+                    , ( houseworkTag, houseworkTagDescription )
+                    , ( gardeningTag, gardeningTagDescription )
+                    , ( computerScienceTag, computerScienceTagDescription )
+                    ]
+                    []
+                    |> GlossaryItems.tags
+                    |> Expect.equal [ computerScienceTag, financeTag, gardeningTag, houseworkTag ]
+        , test "sorts tags with descriptions alphabetically" <|
+            \_ ->
+                GlossaryItems.fromList
+                    [ ( financeTag, financeTagDescription )
+                    , ( houseworkTag, houseworkTagDescription )
+                    , ( gardeningTag, gardeningTagDescription )
+                    , ( computerScienceTag, computerScienceTagDescription )
+                    ]
+                    []
+                    |> GlossaryItems.tagsWithDescriptions
+                    |> Expect.equal
+                        [ ( computerScienceTag, computerScienceTagDescription )
+                        , ( financeTag, financeTagDescription )
+                        , ( gardeningTag, gardeningTagDescription )
+                        , ( houseworkTag, houseworkTagDescription )
+                        ]
         ]
