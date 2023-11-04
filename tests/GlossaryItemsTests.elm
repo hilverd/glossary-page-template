@@ -248,6 +248,23 @@ suite =
                         [ ( computerScienceTag, computerScienceTagDescription )
                         , ( gardeningTag, gardeningTagDescription )
                         ]
+        , test "removes tags from items" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.removeTag (TagId.create 1)
+                    |> GlossaryItems.get (GlossaryItemId.create 1)
+                    |> Expect.equal
+                        (Just <|
+                            GlossaryItemForHtml.create
+                                (Term.fromMarkdown "Default" False)
+                                []
+                                Nothing
+                                []
+                                (Just defaultFinanceDefinition)
+                                [ Term.fromMarkdown "Loan" False ]
+                                False
+                                (Just "2023-10-30T08:25:24.765Z")
+                        )
         , test "removes and inserts items" <|
             \_ ->
                 glossaryItems
