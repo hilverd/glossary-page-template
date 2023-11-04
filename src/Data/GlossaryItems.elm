@@ -1,6 +1,6 @@
 module Data.GlossaryItems exposing
     ( GlossaryItems
-    , fromList, insertTag, insert, update, remove
+    , fromList, insertTag, updateTag, insert, update, remove
     , get, tags, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
@@ -15,7 +15,7 @@ module Data.GlossaryItems exposing
 
 # Build
 
-@docs fromList, insertTag, insert, update, remove
+@docs fromList, insertTag, updateTag, insert, update, remove
 
 
 # Query
@@ -467,6 +467,40 @@ insertTag tag tagDescription glossaryItems =
                 glossaryItems
 
 
+{-| Update a tag. Do nothing if there is no tag with the given ID.
+-}
+updateTag : TagId -> Tag -> TagDescription -> GlossaryItems -> GlossaryItems
+updateTag tagId tag tagDescription glossaryItems =
+    case glossaryItems of
+        GlossaryItems items ->
+            if TagIdDict.member tagId items.tagById then
+                let
+                    tagById_ : TagIdDict Tag
+                    tagById_ =
+                        items.tagById
+                            |> TagIdDict.insert tagId tag
+
+                    tagIdByRawTag_ : Dict String TagId
+                    tagIdByRawTag_ =
+                        items.tagIdByRawTag
+                            |> Dict.insert (Tag.raw tag) tagId
+
+                    tagDescriptionById_ : TagIdDict TagDescription
+                    tagDescriptionById_ =
+                        items.tagDescriptionById
+                            |> TagIdDict.insert tagId tagDescription
+                in
+                GlossaryItems
+                    { items
+                        | tagById = tagById_
+                        , tagIdByRawTag = tagIdByRawTag_
+                        , tagDescriptionById = tagDescriptionById_
+                    }
+
+            else
+                glossaryItems
+
+
 {-| Insert an item.
 -}
 insert : GlossaryItemForHtml -> GlossaryItems -> GlossaryItems
@@ -478,7 +512,7 @@ insert item glossaryItems =
         |> fromList (tagsWithDescriptions glossaryItems)
 
 
-{-| Update an item.
+{-| Update an item. Do nothing if there is no item with the given ID.
 -}
 update : GlossaryItemId -> GlossaryItemForHtml -> GlossaryItems -> GlossaryItems
 update itemId item glossaryItems =

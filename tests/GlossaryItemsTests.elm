@@ -205,6 +205,40 @@ suite =
                 glossaryItems
                     |> GlossaryItems.insertTag gardeningTag gardeningTagDescription
                     |> Expect.equal glossaryItems
+        , test "updates tags" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.updateTag (TagId.create 0) houseworkTag houseworkTagDescription
+                    |> GlossaryItems.tagsWithDescriptions
+                    |> Expect.equal
+                        [ ( financeTag, financeTagDescription )
+                        , ( gardeningTag, gardeningTagDescription )
+                        , ( houseworkTag, houseworkTagDescription )
+                        ]
+        , test "updates tags in items" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.updateTag (TagId.create 0) houseworkTag houseworkTagDescription
+                    |> GlossaryItems.get (GlossaryItemId.create 0)
+                    |> Expect.equal
+                        (Just <|
+                            GlossaryItemForHtml.create
+                                (Term.fromMarkdown "Default" False)
+                                [ Term.fromMarkdown "Preset" False
+                                , Term.fromMarkdown "Factory preset" False
+                                ]
+                                (Just houseworkTag)
+                                []
+                                (Just defaultComputerScienceDefinition)
+                                []
+                                False
+                                (Just "2023-09-15T19:58:59.573Z")
+                        )
+        , test "ignores attempts to update tags for non-existing tag IDs" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.updateTag (TagId.create 99) houseworkTag houseworkTagDescription
+                    |> Expect.equal glossaryItems
         , test "removes and inserts items" <|
             \_ ->
                 glossaryItems
