@@ -1,11 +1,11 @@
-module Extras.String exposing (escapeForMarkdown, firstAlphaNumericCharacter)
+module Extras.String exposing (escapeForMarkdown, firstAlphaNumericCharacter, preserveOnlyAlphaNumChars)
 
 {-| Extra functionality for strings.
 
 
 # Strings
 
-@docs escapeForMarkdown, firstAlphaNumericCharacter
+@docs escapeForMarkdown, firstAlphaNumericCharacter, preserveOnlyAlphaNumChars
 
 -}
 
@@ -40,12 +40,26 @@ escapeForMarkdown string =
 
 -}
 firstAlphaNumericCharacter : String -> Maybe String
-firstAlphaNumericCharacter string =
+firstAlphaNumericCharacter =
     let
         regex : Regex.Regex
         regex =
-            "[a-zA-Z0-9]"
+            "[A-Za-zÀ-ÖØ-öø-įĴ-őŔ-žǍ-ǰǴ-ǵǸ-țȞ-ȟȤ-ȳɃɆ-ɏḀ-ẞƀ-ƓƗ-ƚƝ-ơƤ-ƥƫ-ưƲ-ƶẠ-ỿ0-9]"
                 |> Regex.fromString
                 |> Maybe.withDefault Regex.never
     in
-    string |> Regex.findAtMost 1 regex |> List.head |> Maybe.map .match
+    Regex.findAtMost 1 regex >> List.head >> Maybe.map .match
+
+
+{-| Strip out any characters that aren't alphanumeric.
+-}
+preserveOnlyAlphaNumChars : String -> String
+preserveOnlyAlphaNumChars =
+    let
+        regex : Regex.Regex
+        regex =
+            "[^A-Za-zÀ-ÖØ-öø-įĴ-őŔ-žǍ-ǰǴ-ǵǸ-țȞ-ȟȤ-ȳɃɆ-ɏḀ-ẞƀ-ƓƗ-ƚƝ-ơƤ-ƥƫ-ưƲ-ƶẠ-ỿ0-9]"
+                |> Regex.fromString
+                |> Maybe.withDefault Regex.never
+    in
+    Regex.replace regex (always "")

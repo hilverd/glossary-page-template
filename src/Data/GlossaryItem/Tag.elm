@@ -1,4 +1,7 @@
-module Data.GlossaryItem.Tag exposing (Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, view)
+module Data.GlossaryItem.Tag exposing
+    ( Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, view
+    , compareAlphabetically
+    )
 
 {-| A tag that can be used in glossary items.
 This can be in either plain text or Markdown.
@@ -20,6 +23,8 @@ import Json.Decode as Decode exposing (Decoder)
 import Markdown.Block exposing (Block)
 import Markdown.Renderer as Renderer
 import MarkdownRenderers
+import Regex
+import String.Normalize
 
 
 {-| A tag.
@@ -130,6 +135,25 @@ markdown tag =
 
         MarkdownTag t ->
             MarkdownFragment.raw t.body
+
+
+{-| Compares two tags for ordering them alphabetically.
+-}
+compareAlphabetically : Tag -> Tag -> Order
+compareAlphabetically tag1 tag2 =
+    compare
+        (tag1
+            |> inlineText
+            |> String.Normalize.removeDiacritics
+            |> Extras.String.preserveOnlyAlphaNumChars
+            |> String.toUpper
+        )
+        (tag2
+            |> inlineText
+            |> String.Normalize.removeDiacritics
+            |> Extras.String.preserveOnlyAlphaNumChars
+            |> String.toUpper
+        )
 
 
 {-| View a tag as HTML.

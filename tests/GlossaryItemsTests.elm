@@ -431,4 +431,34 @@ suite =
                           ]
                         , []
                         )
+        , test "sorts tag in items alphabetically" <|
+            \_ ->
+                GlossaryItems.fromList
+                    [ ( financeTag, financeTagDescription )
+                    , ( gardeningTag, gardeningTagDescription )
+                    , ( computerScienceTag, computerScienceTagDescription )
+                    ]
+                    [ GlossaryItemForHtml.create
+                        (Term.fromMarkdown "Foo" False)
+                        []
+                        Nothing
+                        [ financeTag, gardeningTag, computerScienceTag ]
+                        Nothing
+                        []
+                        False
+                        (Just "2023-10-30T08:25:30.335Z")
+                    ]
+                    |> GlossaryItems.get (GlossaryItemId.create 0)
+                    |> Expect.equal
+                        (Just <|
+                            GlossaryItemForHtml.create
+                                (Term.fromMarkdown "Foo" False)
+                                []
+                                Nothing
+                                [ computerScienceTag, financeTag, gardeningTag ]
+                                Nothing
+                                []
+                                False
+                                (Just "2023-10-30T08:25:30.335Z")
+                        )
         ]

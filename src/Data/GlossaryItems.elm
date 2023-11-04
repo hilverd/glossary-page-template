@@ -393,6 +393,22 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 |> Maybe.map ((+) 1)
                 |> Maybe.withDefault 0
                 |> TagId.create
+
+        sortedNormalTagIdsByItemId : GlossaryItemIdDict (List TagId)
+        sortedNormalTagIdsByItemId =
+            normalTagIdsByItemId
+                |> GlossaryItemIdDict.map
+                    (\_ normalTags ->
+                        normalTags
+                            |> List.sortWith
+                                (\tagId1 tagId2 ->
+                                    Maybe.map2
+                                        Tag.compareAlphabetically
+                                        (TagIdDict.get tagId1 tagById)
+                                        (TagIdDict.get tagId2 tagById)
+                                        |> Maybe.withDefault EQ
+                                )
+                    )
     in
     GlossaryItems
         { itemById = itemById
@@ -400,7 +416,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
         , tagIdByRawTag = tagIdByRawTag
         , tagDescriptionById = tagDescriptionById
         , disambiguationTagIdByItemId = disambiguationTagIdByItemId
-        , normalTagIdsByItemId = normalTagIdsByItemId
+        , normalTagIdsByItemId = sortedNormalTagIdsByItemId
         , itemIdsByTagId = itemIdsByTagId_
         , itemIdByDisambiguatedPreferredTermId = itemIdByDisambiguatedPreferredTermId_
         , relatedItemIdsById = relatedItemIdsById

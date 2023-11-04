@@ -322,19 +322,7 @@ indexGroupString term =
             t.indexGroupString
 
 
-preserveOnlyAlphaNumChars : String -> String
-preserveOnlyAlphaNumChars =
-    let
-        regex : Regex.Regex
-        regex =
-            "[^A-Za-z0-9]"
-                |> Regex.fromString
-                |> Maybe.withDefault Regex.never
-    in
-    Regex.replace regex (always "")
-
-
-{-| Compares two terms for listing them alphabetically.
+{-| Compares two terms for ordering them alphabetically.
 -}
 compareAlphabetically : Term -> Term -> Order
 compareAlphabetically term1 term2 =
@@ -350,13 +338,13 @@ compareAlphabetically term1 term2 =
                 (term1
                     |> inlineText
                     |> String.Normalize.removeDiacritics
-                    |> preserveOnlyAlphaNumChars
+                    |> Extras.String.preserveOnlyAlphaNumChars
                     |> String.toUpper
                 )
                 (term2
                     |> inlineText
                     |> String.Normalize.removeDiacritics
-                    |> preserveOnlyAlphaNumChars
+                    |> Extras.String.preserveOnlyAlphaNumChars
                     |> String.toUpper
                 )
 
