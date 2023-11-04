@@ -43,6 +43,16 @@ gardeningTagDescription =
     TagDescription.fromMarkdown "These are items about gardening — the practice of growing and cultivating plants as part of horticulture."
 
 
+houseworkTag : Tag
+houseworkTag =
+    Tag.fromMarkdown "Housework"
+
+
+houseworkTagDescription : TagDescription
+houseworkTagDescription =
+    TagDescription.fromMarkdown "These are items about housework — the act of overseeing the organisational, day-to-day operations of a house or estate."
+
+
 defaultComputerScienceDefinition : Definition
 defaultComputerScienceDefinition =
     Definition.fromMarkdown "The preexisting value of a user-configurable setting that is assigned to a software application, computer program or device. Such settings are also called presets or factory presets, especially for electronic devices."
@@ -179,7 +189,23 @@ glossaryItems =
 suite : Test
 suite =
     describe "The GlossaryItems module"
-        [ test "removes and inserts items" <|
+        [ test "inserts tags" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.insertTag houseworkTag houseworkTagDescription
+                    |> GlossaryItems.tagsWithDescriptions
+                    |> Expect.equal
+                        [ ( computerScienceTag, computerScienceTagDescription )
+                        , ( financeTag, financeTagDescription )
+                        , ( gardeningTag, gardeningTagDescription )
+                        , ( houseworkTag, houseworkTagDescription )
+                        ]
+        , test "ignores attempts to insert existing tags" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.insertTag gardeningTag gardeningTagDescription
+                    |> Expect.equal glossaryItems
+        , test "removes and inserts items" <|
             \_ ->
                 glossaryItems
                     |> GlossaryItems.remove (GlossaryItemId.create 0)

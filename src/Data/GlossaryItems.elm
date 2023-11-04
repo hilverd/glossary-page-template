@@ -414,8 +414,8 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
 
 {-| Insert a tag. Does nothing if the tag already exists.
 -}
-insertTag : Tag -> GlossaryItems -> GlossaryItems
-insertTag tag glossaryItems =
+insertTag : Tag -> TagDescription -> GlossaryItems -> GlossaryItems
+insertTag tag tagDescription glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             let
@@ -433,11 +433,17 @@ insertTag tag glossaryItems =
                     tagIdByRawTag_ =
                         items.tagIdByRawTag
                             |> Dict.insert rawTag items.nextTagId
+
+                    tagDescriptionById_ : TagIdDict TagDescription
+                    tagDescriptionById_ =
+                        items.tagDescriptionById
+                            |> TagIdDict.insert items.nextTagId tagDescription
                 in
                 GlossaryItems
                     { items
                         | tagById = tagById_
                         , tagIdByRawTag = tagIdByRawTag_
+                        , tagDescriptionById = tagDescriptionById_
                         , nextTagId = TagId.increment items.nextTagId
                     }
 
