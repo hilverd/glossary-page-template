@@ -1,7 +1,4 @@
-module Data.GlossaryItem.Tag exposing
-    ( Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, view
-    , compareAlphabetically
-    )
+module Data.GlossaryItem.Tag exposing (Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view)
 
 {-| A tag that can be used in glossary items.
 This can be in either plain text or Markdown.
@@ -11,7 +8,7 @@ Tags can be used to group items together that belong in the same "context" or sh
 
 # Tags
 
-@docs Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, view
+@docs Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view
 
 -}
 
@@ -23,7 +20,6 @@ import Json.Decode as Decode exposing (Decoder)
 import Markdown.Block exposing (Block)
 import Markdown.Renderer as Renderer
 import MarkdownRenderers
-import Regex
 import String.Normalize
 
 

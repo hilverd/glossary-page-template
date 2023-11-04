@@ -389,7 +389,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
             tagById
                 |> TagIdDict.keys
                 |> List.map TagId.toInt
-                |> List.maximum
+                |> List.maximum 
                 |> Maybe.map ((+) 1)
                 |> Maybe.withDefault 0
                 |> TagId.create
