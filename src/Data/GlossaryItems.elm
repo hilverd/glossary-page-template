@@ -1,6 +1,6 @@
 module Data.GlossaryItems exposing
     ( GlossaryItems
-    , fromList, insertTag, updateTag, insert, update, remove
+    , fromList, insertTag, updateTag, removeTag, insert, update, remove
     , get, tags, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
@@ -15,7 +15,7 @@ module Data.GlossaryItems exposing
 
 # Build
 
-@docs fromList, insertTag, updateTag, insert, update, remove
+@docs fromList, insertTag, updateTag, removeTag, insert, update, remove
 
 
 # Query
@@ -489,6 +489,40 @@ updateTag tagId tag tagDescription glossaryItems =
                     tagDescriptionById_ =
                         items.tagDescriptionById
                             |> TagIdDict.insert tagId tagDescription
+                in
+                GlossaryItems
+                    { items
+                        | tagById = tagById_
+                        , tagIdByRawTag = tagIdByRawTag_
+                        , tagDescriptionById = tagDescriptionById_
+                    }
+
+            else
+                glossaryItems
+
+
+{-| Remove the tag associated with an ID. Does nothing if the ID is not found.
+-}
+removeTag : TagId -> GlossaryItems -> GlossaryItems
+removeTag tagId glossaryItems =
+    case glossaryItems of
+        GlossaryItems items ->
+            if TagIdDict.member tagId items.tagById then
+                let
+                    tagById_ : TagIdDict Tag
+                    tagById_ =
+                        items.tagById
+                            |> TagIdDict.remove tagId
+
+                    tagIdByRawTag_ : Dict String TagId
+                    tagIdByRawTag_ =
+                        items.tagIdByRawTag
+                            |> Dict.filter (\_ tagId_ -> tagId_ /= tagId)
+
+                    tagDescriptionById_ : TagIdDict TagDescription
+                    tagDescriptionById_ =
+                        items.tagDescriptionById
+                            |> TagIdDict.remove tagId
                 in
                 GlossaryItems
                     { items

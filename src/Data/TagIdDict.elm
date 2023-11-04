@@ -1,6 +1,6 @@
 module Data.TagIdDict exposing
     ( TagIdDict
-    , empty, insert, update
+    , empty, insert, update, remove
     , get, member, nextTagId
     , keys, values, toList, fromList
     , map, foldl
@@ -16,7 +16,7 @@ module Data.TagIdDict exposing
 
 # Build
 
-@docs empty, insert, update
+@docs empty, insert, update, remove
 
 
 # Query
@@ -72,6 +72,18 @@ update tagId f tagIdDict =
         TagIdDict dict ->
             dict
                 |> Dict.update (TagId.toInt tagId) f
+                |> TagIdDict
+
+
+{-| Remove a key-value pair from a dictionary. If the key is not found,
+no changes are made.
+-}
+remove : TagId -> TagIdDict v -> TagIdDict v
+remove tagId tagIdDict =
+    case tagIdDict of
+        TagIdDict dict ->
+            dict
+                |> Dict.remove (TagId.toInt tagId)
                 |> TagIdDict
 
 

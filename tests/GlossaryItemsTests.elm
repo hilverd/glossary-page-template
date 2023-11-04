@@ -239,6 +239,15 @@ suite =
                 glossaryItems
                     |> GlossaryItems.updateTag (TagId.create 99) houseworkTag houseworkTagDescription
                     |> Expect.equal glossaryItems
+        , test "removes tags" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.removeTag (TagId.create 1)
+                    |> GlossaryItems.tagsWithDescriptions
+                    |> Expect.equal
+                        [ ( computerScienceTag, computerScienceTagDescription )
+                        , ( gardeningTag, gardeningTagDescription )
+                        ]
         , test "removes and inserts items" <|
             \_ ->
                 glossaryItems
