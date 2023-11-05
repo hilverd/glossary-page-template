@@ -591,6 +591,19 @@ toggleTagCheckbox tag glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             let
+                tagIdAndChecked : Maybe ( TagId, Bool )
+                tagIdAndChecked =
+                    form.tagCheckboxes
+                        |> List.filterMap
+                            (\( ( tagId, tag_ ), checked ) ->
+                                if tag_ == tag then
+                                    Just ( tagId, checked )
+
+                                else
+                                    Nothing
+                            )
+                        |> List.head
+
                 tagCheckboxes_ =
                     form.tagCheckboxes
                         |> List.map
@@ -601,9 +614,24 @@ toggleTagCheckbox tag glossaryItemForm =
                                 else
                                     ( ( tagId, tag_ ), checked )
                             )
+
+                disambiguationTagId_ =
+                    tagIdAndChecked
+                        |> Maybe.map
+                            (\( tagId, checked ) ->
+                                if Just tagId == form.disambiguationTagId && checked then
+                                    Nothing
+
+                                else
+                                    form.disambiguationTagId
+                            )
+                        |> Maybe.withDefault form.disambiguationTagId
             in
             GlossaryItemForm
-                { form | tagCheckboxes = tagCheckboxes_ }
+                { form
+                    | tagCheckboxes = tagCheckboxes_
+                    , disambiguationTagId = disambiguationTagId_
+                }
 
 
 updateDefinition : GlossaryItemForm -> String -> GlossaryItemForm
