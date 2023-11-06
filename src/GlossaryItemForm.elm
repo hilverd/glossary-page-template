@@ -34,7 +34,6 @@ module GlossaryItemForm exposing
 import Array exposing (Array)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.Tag exposing (Tag)
-import Data.GlossaryItem.TagInItem exposing (TagInItem(..))
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)

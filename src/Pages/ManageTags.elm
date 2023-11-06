@@ -2,11 +2,9 @@ module Pages.ManageTags exposing (InternalMsg, Model, Msg, init, subscriptions, 
 
 import Accessibility exposing (Html, div, form, h1, main_, p, span, text)
 import Accessibility.Aria
-import Accessibility.Key
 import Array exposing (Array)
 import Browser exposing (Document)
 import CommonModel exposing (CommonModel)
-import Components.Badge
 import Components.Button
 import Components.Copy
 import Components.Spinner
@@ -93,7 +91,7 @@ update msg model =
 
 
 viewEditTag : { enableMathSupport : Bool, tabbable : Bool } -> Int -> Int -> Tag -> Html Msg
-viewEditTag { enableMathSupport, tabbable } numberOfTags index tag =
+viewEditTag { enableMathSupport } _ _ tag =
     div
         []
         [ div

@@ -6,7 +6,6 @@ import Accessibility.Key
 import Components.Button
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
-import Data.GlossaryItem.TagInItem as TagInItem exposing (TagInItem)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)

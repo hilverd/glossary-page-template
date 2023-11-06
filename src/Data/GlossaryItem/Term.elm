@@ -23,7 +23,6 @@ import Json.Decode as Decode exposing (Decoder)
 import Markdown.Block exposing (Block)
 import Markdown.Renderer as Renderer
 import MarkdownRenderers
-import Regex
 import String.Normalize
 
 

@@ -39,7 +39,7 @@ import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
 import Data.TagDescription exposing (TagDescription)
 import Data.TagId as TagId exposing (TagId)
-import Data.TagIdDict as TagIdDict exposing (TagIdDict, nextTagId)
+import Data.TagIdDict as TagIdDict exposing (TagIdDict)
 import Dict exposing (Dict)
 import DirectedGraph exposing (DirectedGraph)
 import Extras.Regex

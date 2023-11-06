@@ -37,7 +37,6 @@ module Data.TagIdDict exposing
 
 import Data.TagId as TagId exposing (TagId)
 import Dict exposing (Dict)
-import Json.Decode exposing (dict)
 
 
 {-| A dictionary of tag IDs and values.

@@ -4,11 +4,11 @@ import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
-import Data.GlossaryItem.Tag as Tag exposing (Tag)
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItem.Tag as Tag
+import Data.GlossaryItemForHtml as GlossaryItemForHtml
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems, tagsWithDescriptions)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
-import Data.TagDescription as TagDescription exposing (TagDescription)
+import Data.TagDescription as TagDescription
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 
