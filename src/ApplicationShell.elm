@@ -19,7 +19,7 @@ import Data.Glossary exposing (Glossary)
 import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
-import Data.OrderItemsBy as OrderItemsBy exposing (OrderItemsBy(..))
+import Data.OrderItemsBy as OrderItemsBy exposing (OrderItemsBy)
 import Data.Theme as Theme exposing (Theme)
 import Html
 import Json.Decode as Decode
@@ -129,12 +129,6 @@ init flags =
                 |> Decode.decodeValue (Decode.field "enableOrderItemsButtons" Decode.bool)
                 |> Result.withDefault True
 
-        enableLastUpdatedDates : Bool
-        enableLastUpdatedDates =
-            flags
-                |> Decode.decodeValue (Decode.field "enableLastUpdatedDates" Decode.bool)
-                |> Result.withDefault False
-
         enableSavingChangesInMemory : Bool
         enableSavingChangesInMemory =
             flags
@@ -151,6 +145,12 @@ init flags =
                 |> Result.map
                     (\items ->
                         let
+                            enableLastUpdatedDates : Bool
+                            enableLastUpdatedDates =
+                                flags
+                                    |> Decode.decodeValue (Decode.field "enableLastUpdatedDates" Decode.bool)
+                                    |> Result.withDefault False
+
                             katexIsAvailable : Bool
                             katexIsAvailable =
                                 flags

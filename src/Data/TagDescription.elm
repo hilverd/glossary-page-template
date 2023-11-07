@@ -1,4 +1,4 @@
-module Data.TagDescription exposing (TagDescription, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, view)
+module Data.TagDescription exposing (TagDescription, fromPlaintext, fromMarkdown, raw, inlineText, markdown, view)
 
 {-| The description for a tag.
 This can be in either plain text or Markdown.
@@ -6,7 +6,7 @@ This can be in either plain text or Markdown.
 
 # Tag Descriptions
 
-@docs TagDescription, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, view
+@docs TagDescription, fromPlaintext, fromMarkdown, raw, inlineText, markdown, view
 
 -}
 
@@ -14,7 +14,6 @@ import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.String
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
-import Json.Decode as Decode exposing (Decoder)
 import Markdown.Block exposing (Block)
 import Markdown.Renderer as Renderer
 import MarkdownRenderers
@@ -30,13 +29,6 @@ type TagDescription
         { body : MarkdownFragment
         , inlineText : String
         }
-
-
-{-| Convenience function for constructing an empty plain text tag description.
--}
-emptyPlaintext : TagDescription
-emptyPlaintext =
-    fromPlaintext ""
 
 
 {-| Construct a tag description from a plain text string.
@@ -73,20 +65,6 @@ fromMarkdown body =
         { body = fragment
         , inlineText = inlineTextConcatenated
         }
-
-
-{-| Decode a tag description from its JSON representation.
--}
-decode : Bool -> Decoder TagDescription
-decode enableMarkdownBasedSyntax =
-    Decode.map
-        (if enableMarkdownBasedSyntax then
-            fromMarkdown
-
-         else
-            fromPlaintext
-        )
-        Decode.string
 
 
 {-| Retrieve the raw body of a tag description.

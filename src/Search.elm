@@ -79,103 +79,100 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                                 ( Nothing, Nothing ) ->
                                     Term.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
                         )
-
-            results =
-                candidates
-                    |> List.filter
-                        (\{ preferredTerm, alternativeTerm } ->
-                            alternativeTerm
-                                |> Maybe.map
-                                    (\alternativeTerm_ ->
-                                        alternativeTerm_
-                                            |> Term.inlineText
-                                            |> String.toLower
-                                            |> String.contains searchStringNormalised
-                                    )
-                                |> Maybe.withDefault
-                                    (preferredTerm
-                                        |> Term.inlineText
-                                        |> String.toLower
-                                        |> String.contains searchStringNormalised
-                                    )
-                        )
-                    |> List.partition
-                        (\{ preferredTerm, alternativeTerm } ->
-                            alternativeTerm
-                                |> Maybe.map
-                                    (\alternativeTerm_ ->
-                                        alternativeTerm_
-                                            |> Term.inlineText
-                                            |> String.toLower
-                                            |> String.startsWith searchStringNormalised
-                                    )
-                                |> Maybe.withDefault
-                                    (preferredTerm
-                                        |> Term.inlineText
-                                        |> String.toLower
-                                        |> String.startsWith searchStringNormalised
-                                    )
-                        )
-                    |> (\( whereSearchStringIsPrefix, whereSearchStringIsNotPrefix ) ->
-                            whereSearchStringIsPrefix ++ whereSearchStringIsNotPrefix
-                       )
-                    |> List.map
-                        (\{ preferredTerm, alternativeTerm, definition } ->
-                            case alternativeTerm of
-                                Just alternativeTerm_ ->
-                                    SearchDialog.searchResult
-                                        (Extras.Url.fragmentOnly <| TermId.toString <| Term.id preferredTerm)
-                                        [ Html.div
-                                            [ class "flex flex-col" ]
-                                            [ Html.div
-                                                [ class "font-medium" ]
-                                                [ Term.view enableMathSupport [] alternativeTerm_ ]
-                                            , Html.div
-                                                [ class "inline-flex items-center group-hover:underline font-medium" ]
-                                                [ Icons.cornerDownRight
-                                                    [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400"
-                                                    ]
-                                                , Term.view enableMathSupport [] preferredTerm
-                                                ]
-                                            , Extras.Html.showMaybe
-                                                (\definition_ ->
-                                                    Html.div
-                                                        [ if enableMathSupport then
-                                                            class "overflow-hidden whitespace-nowrap"
-
-                                                          else
-                                                            class "truncate"
-                                                        ]
-                                                        [ Definition.viewInline enableMathSupport [] definition_
-                                                        ]
-                                                )
-                                                definition
-                                            ]
-                                        ]
-
-                                Nothing ->
-                                    SearchDialog.searchResult
-                                        (Extras.Url.fragmentOnly <| TermId.toString <| Term.id preferredTerm)
-                                        [ Html.div
-                                            []
-                                            [ Html.p
-                                                [ class "font-medium" ]
-                                                [ Term.view enableMathSupport [] preferredTerm ]
-                                            , Extras.Html.showMaybe
-                                                (\definition_ ->
-                                                    Html.div
-                                                        [ if enableMathSupport then
-                                                            class "overflow-hidden whitespace-nowrap"
-
-                                                          else
-                                                            class "truncate"
-                                                        ]
-                                                        [ Definition.viewInline enableMathSupport [] definition_
-                                                        ]
-                                                )
-                                                definition
-                                            ]
-                                        ]
-                        )
         in
-        results
+        candidates
+            |> List.filter
+                (\{ preferredTerm, alternativeTerm } ->
+                    alternativeTerm
+                        |> Maybe.map
+                            (\alternativeTerm_ ->
+                                alternativeTerm_
+                                    |> Term.inlineText
+                                    |> String.toLower
+                                    |> String.contains searchStringNormalised
+                            )
+                        |> Maybe.withDefault
+                            (preferredTerm
+                                |> Term.inlineText
+                                |> String.toLower
+                                |> String.contains searchStringNormalised
+                            )
+                )
+            |> List.partition
+                (\{ preferredTerm, alternativeTerm } ->
+                    alternativeTerm
+                        |> Maybe.map
+                            (\alternativeTerm_ ->
+                                alternativeTerm_
+                                    |> Term.inlineText
+                                    |> String.toLower
+                                    |> String.startsWith searchStringNormalised
+                            )
+                        |> Maybe.withDefault
+                            (preferredTerm
+                                |> Term.inlineText
+                                |> String.toLower
+                                |> String.startsWith searchStringNormalised
+                            )
+                )
+            |> (\( whereSearchStringIsPrefix, whereSearchStringIsNotPrefix ) ->
+                    whereSearchStringIsPrefix ++ whereSearchStringIsNotPrefix
+               )
+            |> List.map
+                (\{ preferredTerm, alternativeTerm, definition } ->
+                    case alternativeTerm of
+                        Just alternativeTerm_ ->
+                            SearchDialog.searchResult
+                                (Extras.Url.fragmentOnly <| TermId.toString <| Term.id preferredTerm)
+                                [ Html.div
+                                    [ class "flex flex-col" ]
+                                    [ Html.div
+                                        [ class "font-medium" ]
+                                        [ Term.view enableMathSupport [] alternativeTerm_ ]
+                                    , Html.div
+                                        [ class "inline-flex items-center group-hover:underline font-medium" ]
+                                        [ Icons.cornerDownRight
+                                            [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400"
+                                            ]
+                                        , Term.view enableMathSupport [] preferredTerm
+                                        ]
+                                    , Extras.Html.showMaybe
+                                        (\definition_ ->
+                                            Html.div
+                                                [ if enableMathSupport then
+                                                    class "overflow-hidden whitespace-nowrap"
+
+                                                  else
+                                                    class "truncate"
+                                                ]
+                                                [ Definition.viewInline enableMathSupport [] definition_
+                                                ]
+                                        )
+                                        definition
+                                    ]
+                                ]
+
+                        Nothing ->
+                            SearchDialog.searchResult
+                                (Extras.Url.fragmentOnly <| TermId.toString <| Term.id preferredTerm)
+                                [ Html.div
+                                    []
+                                    [ Html.p
+                                        [ class "font-medium" ]
+                                        [ Term.view enableMathSupport [] preferredTerm ]
+                                    , Extras.Html.showMaybe
+                                        (\definition_ ->
+                                            Html.div
+                                                [ if enableMathSupport then
+                                                    class "overflow-hidden whitespace-nowrap"
+
+                                                  else
+                                                    class "truncate"
+                                                ]
+                                                [ Definition.viewInline enableMathSupport [] definition_
+                                                ]
+                                        )
+                                        definition
+                                    ]
+                                ]
+                )

@@ -32,7 +32,6 @@ module ElementIds exposing
     , showLastUpdatedDatesLabel
     , showOrderItemsButtons
     , staticSidebarForDesktop
-    , tagCheckbox
     , tags
     , termIndexGroupLabel
     , termInputField
@@ -88,11 +87,6 @@ about =
 tags : String
 tags =
     prefixed "tags"
-
-
-tagCheckbox : String -> String
-tagCheckbox tagId =
-    prefixed <| "tag-checkbox-" ++ tagId
 
 
 items : String

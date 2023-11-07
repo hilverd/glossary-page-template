@@ -1,5 +1,5 @@
 module Extras.HtmlTree exposing
-    ( Attribute, attributeToHtmlAttribute, boolAttribute, HtmlTree(..), nothing
+    ( Attribute, attributeToHtmlAttribute, boolAttribute, HtmlTree(..)
     , toHtml, toHtmlReplacementString, escape
     , showIf
     )
@@ -9,7 +9,7 @@ module Extras.HtmlTree exposing
 
 # Type and Constructors
 
-@docs Attribute, attributeToHtmlAttribute, boolAttribute, HtmlTree, nothing
+@docs Attribute, attributeToHtmlAttribute, boolAttribute, HtmlTree
 
 
 # Converting to a String

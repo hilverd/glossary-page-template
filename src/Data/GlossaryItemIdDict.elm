@@ -1,8 +1,8 @@
 module Data.GlossaryItemIdDict exposing
     ( GlossaryItemIdDict
-    , empty, insert, update
+    , empty, insert
     , get
-    , keys, values, toList, fromList
+    , keys, toList
     , map, foldl
     )
 
@@ -16,7 +16,7 @@ module Data.GlossaryItemIdDict exposing
 
 # Build
 
-@docs empty, insert, update
+@docs empty, insert
 
 
 # Query
@@ -26,7 +26,7 @@ module Data.GlossaryItemIdDict exposing
 
 # Lists
 
-@docs keys, values, toList, fromList
+@docs keys, toList
 
 
 # Transform
@@ -63,17 +63,6 @@ insert glossaryItemId value glossaryItemIdDict =
                 |> GlossaryItemIdDict
 
 
-{-| Update the value of a dictionary for a specific key with a given function.
--}
-update : GlossaryItemId -> (Maybe v -> Maybe v) -> GlossaryItemIdDict v -> GlossaryItemIdDict v
-update glossaryItemId f glossaryItemIdDict =
-    case glossaryItemIdDict of
-        GlossaryItemIdDict dict ->
-            dict
-                |> Dict.update (GlossaryItemId.toInt glossaryItemId) f
-                |> GlossaryItemIdDict
-
-
 {-| Get the value associated with a key.
 If the key is not found, return `Nothing`.
 This is useful when you are not sure if a key will be in the dictionary.
@@ -97,16 +86,6 @@ keys glossaryItemIdDict =
                 |> List.map GlossaryItemId.create
 
 
-{-| Get all of the values in a dictionary, in the order of their keys.
--}
-values : GlossaryItemIdDict v -> List v
-values glossaryItemIdDict =
-    case glossaryItemIdDict of
-        GlossaryItemIdDict dict ->
-            dict
-                |> Dict.values
-
-
 {-| Convert a dictionary into an association list of key-value pairs, sorted by keys.
 -}
 toList : GlossaryItemIdDict v -> List ( GlossaryItemId, v )
@@ -119,19 +98,6 @@ toList glossaryItemIdDict =
                     (\( glossaryItemIdInt, val ) ->
                         ( GlossaryItemId.create glossaryItemIdInt, val )
                     )
-
-
-{-| Convert an association list into a dictionary.
--}
-fromList : List ( GlossaryItemId, v ) -> GlossaryItemIdDict v
-fromList list =
-    list
-        |> List.map
-            (\( glossaryItemId, value ) ->
-                ( GlossaryItemId.toInt glossaryItemId, value )
-            )
-        |> Dict.fromList
-        |> GlossaryItemIdDict
 
 
 {-| Apply a function to all values in a dictionary.

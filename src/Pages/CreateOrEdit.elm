@@ -22,7 +22,6 @@ import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemFor
 import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
-import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.Saving exposing (Saving(..))
 import Data.TagId as TagId exposing (TagId)

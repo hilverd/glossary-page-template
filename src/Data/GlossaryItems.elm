@@ -29,12 +29,12 @@ module Data.GlossaryItems exposing
 
 -}
 
-import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem, alternativeTerms, lastUpdatedDateAsIso8601, preferredTerm)
+import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml, disambiguatedPreferredTerm, relatedPreferredTerms)
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
 import Data.TagDescription exposing (TagDescription)
@@ -688,7 +688,7 @@ tagsWithDescriptions glossaryItems =
                 |> List.filterMap
                     (\( id, description ) ->
                         TagIdDict.get id items.tagById
-                            |> Maybe.andThen (\tag -> Just ( tag, description ))
+                            |> Maybe.map (\tag -> ( tag, description ))
                     )
                 |> List.sortWith
                     (\( tag1, _ ) ( tag2, _ ) ->

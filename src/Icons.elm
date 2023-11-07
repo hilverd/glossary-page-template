@@ -4,7 +4,6 @@ module Icons exposing
     , arrowLongLeft
     , arrowLongRight
     , arrowUp
-    , arrowsPointingOut
     , chevronDown
     , computerDesktop
     , copy
@@ -25,7 +24,6 @@ module Icons exposing
     , tick
     , trash
     , viewGridAdd
-    , window
     , xMark
     )
 
@@ -525,23 +523,6 @@ computerDesktop =
         ]
 
 
-arrowsPointingOut : List (Html.Attribute msg) -> Html msg
-arrowsPointingOut =
-    withAdditionalAttributes
-        [ fill "none"
-        , viewBox "0 0 24 24"
-        , strokeWidth "1.5"
-        , stroke "currentColor"
-        ]
-        [ path
-            [ strokeLinecap "round"
-            , strokeLinejoin "round"
-            , d "M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"
-            ]
-            []
-        ]
-
-
 maximize2 : List (Html.Attribute msg) -> Html msg
 maximize2 =
     withAdditionalAttributes
@@ -613,23 +594,6 @@ ellipsisVertical =
             [ strokeLinecap "round"
             , strokeLinejoin "round"
             , d "M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"
-            ]
-            []
-        ]
-
-
-window : List (Html.Attribute msg) -> Html msg
-window =
-    withAdditionalAttributes
-        [ fill "none"
-        , viewBox "0 0 24 24"
-        , strokeWidth "1.5"
-        , stroke "currentColor"
-        ]
-        [ path
-            [ strokeLinecap "round"
-            , strokeLinejoin "round"
-            , d "M3 8.25V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18V8.25m-18 0V6a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 6v2.25m-18 0h18M5.25 6h.008v.008H5.25V6zM7.5 6h.008v.008H7.5V6zm2.25 0h.008v.008H9.75V6z"
             ]
             []
         ]

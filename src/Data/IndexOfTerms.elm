@@ -43,15 +43,15 @@ type IndexOfTerms
 fromGlossaryItems : Maybe TagId -> GlossaryItems -> IndexOfTerms
 fromGlossaryItems filterByTagId glossaryItems =
     let
-        disambiguatedPreferredTerms =
-            GlossaryItems.disambiguatedPreferredTerms filterByTagId glossaryItems
-
-        preferredTermsByAlternativeTerm =
-            GlossaryItems.disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItems
-
         entryListsByFirstAlphabeticCharacterOrEllpisis : Dict String (List Entry)
         entryListsByFirstAlphabeticCharacterOrEllpisis =
             let
+                disambiguatedPreferredTerms =
+                    GlossaryItems.disambiguatedPreferredTerms filterByTagId glossaryItems
+
+                preferredTermsByAlternativeTerm =
+                    GlossaryItems.disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItems
+
                 resultAfterAddingPreferredTerms : Dict String (List Entry)
                 resultAfterAddingPreferredTerms =
                     disambiguatedPreferredTerms

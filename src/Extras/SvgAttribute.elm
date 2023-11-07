@@ -1,4 +1,4 @@
-module Extras.SvgAttribute exposing (showIf, showMaybe)
+module Extras.SvgAttribute exposing (showIf)
 
 import Svg
 import Svg.Attributes
@@ -16,10 +16,3 @@ showIf condition attribute =
 
     else
         empty
-
-
-showMaybe : (a -> Svg.Attribute msg) -> Maybe a -> Svg.Attribute msg
-showMaybe f maybe =
-    maybe
-        |> Maybe.map f
-        |> Maybe.withDefault empty

@@ -77,9 +77,6 @@ itemToAnki enableMathSupport glossaryItem =
                 |> Maybe.map List.singleton
                 |> Maybe.withDefault []
 
-        relatedTerms =
-            GlossaryItemForHtml.relatedPreferredTerms glossaryItem
-
         front : String
         front =
             glossaryItem
@@ -91,6 +88,10 @@ itemToAnki enableMathSupport glossaryItem =
         back : String
         back =
             if List.isEmpty definitions then
+                let
+                    relatedTerms =
+                        GlossaryItemForHtml.relatedPreferredTerms glossaryItem
+                in
                 if List.isEmpty relatedTerms then
                     ""
 

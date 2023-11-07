@@ -456,9 +456,6 @@ update msg model =
 
         ShowRelatedTermAsSingle relatedTerm ->
             let
-                common0 =
-                    model.common
-
                 model1 =
                     case model.common.glossary of
                         Ok glossary ->
@@ -466,6 +463,10 @@ update msg model =
                                 |> GlossaryItems.itemIdFromDisambiguatedPreferredTermId (Term.id relatedTerm)
                                 |> Maybe.map
                                     (\index ->
+                                        let
+                                            common0 =
+                                                model.common
+                                        in
                                         { model
                                             | common = { common0 | maybeId = Just index }
                                         }

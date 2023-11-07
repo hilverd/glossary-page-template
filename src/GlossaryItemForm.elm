@@ -3,19 +3,16 @@ module GlossaryItemForm exposing
     , RelatedTermField
     , addRelatedTerm
     , addTerm
-    , alternativeTermFields
     , definitionField
     , deleteRelatedTerm
     , deleteTerm
     , disambiguationTagId
     , empty
-    , emptyRelatedTermField
     , fromGlossaryItemForHtml
     , hasValidationErrors
     , moveRelatedTermDown
     , moveRelatedTermUp
     , needsUpdating
-    , preferredTermField
     , relatedTermFields
     , selectRelatedTerm
     , suggestRelatedTerms
@@ -46,7 +43,7 @@ import ElementIds
 import Extras.Array
 import Extras.Regex
 import GlossaryItemForm.DefinitionField as DefinitionField exposing (DefinitionField)
-import GlossaryItemForm.TermField as TermField exposing (TermField, isAbbreviation)
+import GlossaryItemForm.TermField as TermField exposing (TermField)
 import Regex
 import Set exposing (Set)
 

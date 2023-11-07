@@ -1,6 +1,6 @@
 module Components.Dividers exposing (withLabel)
 
-import Accessibility exposing (Html, div, span, text)
+import Accessibility exposing (div, span, text)
 import Accessibility.Aria as Aria
 import Html exposing (Html)
 import Html.Attributes exposing (class)

@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Tag exposing (Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view)
+module Data.GlossaryItem.Tag exposing (Tag, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view)
 
 {-| A tag that can be used in glossary items.
 This can be in either plain text or Markdown.
@@ -8,7 +8,7 @@ Tags can be used to group items together that belong in the same "context" or sh
 
 # Tags
 
-@docs Tag, emptyPlaintext, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view
+@docs Tag, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view
 
 -}
 
@@ -33,13 +33,6 @@ type Tag
         { body : MarkdownFragment
         , inlineText : String
         }
-
-
-{-| Convenience function for constructing an empty plain text tag.
--}
-emptyPlaintext : Tag
-emptyPlaintext =
-    fromPlaintext ""
 
 
 {-| Construct a tag from a plain text string.
