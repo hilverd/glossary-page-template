@@ -19,11 +19,7 @@ decodeFromFlags enableMarkdownBasedSyntax flags =
                             Decode.map2
                                 (\tagString descriptionString ->
                                     ( Tag.fromMarkdown tagString
-                                    , if enableMarkdownBasedSyntax then
-                                        TagDescription.fromMarkdown descriptionString
-
-                                      else
-                                        TagDescription.fromPlaintext descriptionString
+                                    , TagDescription.fromMarkdown descriptionString
                                     )
                                 )
                                 (Decode.field "tag" <| Decode.string)

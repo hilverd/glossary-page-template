@@ -10,7 +10,6 @@
         "Data.GlossaryItem.Definition",
         "Data.GlossaryItem.Tag",
         "Data.GlossaryItem.Term",
-        "Data.GlossaryItemForHtml.TagInItem",
         "Data.GlossaryItemForHtml",
         "Data.GlossaryItemId",
         "Data.GlossaryItemIdDict",

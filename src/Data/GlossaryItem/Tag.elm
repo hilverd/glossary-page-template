@@ -1,14 +1,13 @@
-module Data.GlossaryItem.Tag exposing (Tag, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view)
+module Data.GlossaryItem.Tag exposing (Tag, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view)
 
 {-| A tag that can be used in glossary items.
-This can be in either plain text or Markdown.
 
 Tags can be used to group items together that belong in the same "context" or share some important property. They should probably be used sparingly as too many tags could be an indication of a glossary trying to focus on too many different topics at once.
 
 
 # Tags
 
-@docs Tag, fromPlaintext, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view
+@docs Tag, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view
 
 -}
 
@@ -26,24 +25,9 @@ import String.Normalize
 {-| A tag.
 -}
 type Tag
-    = PlaintextTag
-        { body : String
-        }
-    | MarkdownTag
+    = MarkdownTag
         { body : MarkdownFragment
         , inlineText : String
-        }
-
-
-{-| Construct a tag from a plain text string.
-
-    fromPlaintext "NA" |> raw --> "NA"
-
--}
-fromPlaintext : String -> Tag
-fromPlaintext body =
-    PlaintextTag
-        { body = body
         }
 
 
@@ -73,15 +57,10 @@ fromMarkdown body =
 
 {-| Decode a tag from its JSON representation.
 -}
-decode : Bool -> Decoder Tag
-decode enableMarkdownBasedSyntax =
+decode : Decoder Tag
+decode =
     Decode.map
-        (if enableMarkdownBasedSyntax then
-            fromMarkdown
-
-         else
-            fromPlaintext
-        )
+        fromMarkdown
         Decode.string
 
 
@@ -90,9 +69,6 @@ decode enableMarkdownBasedSyntax =
 raw : Tag -> String
 raw tag =
     case tag of
-        PlaintextTag t ->
-            t.body
-
         MarkdownTag t ->
             MarkdownFragment.raw t.body
 
@@ -107,9 +83,6 @@ raw tag =
 inlineText : Tag -> String
 inlineText tag =
     case tag of
-        PlaintextTag t ->
-            t.body
-
         MarkdownTag t ->
             t.inlineText
 
@@ -119,9 +92,6 @@ inlineText tag =
 markdown : Tag -> String
 markdown tag =
     case tag of
-        PlaintextTag t ->
-            Extras.String.escapeForMarkdown t.body
-
         MarkdownTag t ->
             MarkdownFragment.raw t.body
 
@@ -149,8 +119,6 @@ compareAlphabetically tag1 tag2 =
 
     import Html exposing (Html)
 
-    fromPlaintext "Foo" |> view False [] --> Html.span [] [ Html.text "Foo" ]
-
     expected : Html msg
     expected =
         Html.span []
@@ -168,9 +136,6 @@ compareAlphabetically tag1 tag2 =
 view : Bool -> List (Attribute msg) -> Tag -> Html msg
 view enableMathSupport additionalAttributes tag =
     case tag of
-        PlaintextTag t ->
-            Html.span additionalAttributes [ text t.body ]
-
         MarkdownTag t ->
             let
                 parsed : Result String (List Block)

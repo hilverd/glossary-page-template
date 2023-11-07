@@ -80,8 +80,8 @@ decode enableMarkdownBasedSyntax =
         create
         (Decode.field "preferredTerm" <| Term.decode enableMarkdownBasedSyntax)
         (Decode.field "alternativeTerms" <| Decode.list <| Term.decode enableMarkdownBasedSyntax)
-        (Decode.field "disambiguationTag" <| Decode.nullable <| Tag.decode enableMarkdownBasedSyntax)
-        (Decode.field "normalTags" <| Decode.list <| Tag.decode enableMarkdownBasedSyntax)
+        (Decode.field "disambiguationTag" <| Decode.nullable <| Tag.decode)
+        (Decode.field "normalTags" <| Decode.list <| Tag.decode)
         (Decode.field "definition" <|
             Decode.nullable <|
                 Decode.map

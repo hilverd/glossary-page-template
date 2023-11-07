@@ -1,17 +1,15 @@
-module Data.TagDescription exposing (TagDescription, fromPlaintext, fromMarkdown, raw, inlineText, markdown, view)
+module Data.TagDescription exposing (TagDescription, fromMarkdown, raw, inlineText, markdown, view)
 
 {-| The description for a tag.
-This can be in either plain text or Markdown.
 
 
 # Tag Descriptions
 
-@docs TagDescription, fromPlaintext, fromMarkdown, raw, inlineText, markdown, view
+@docs TagDescription, fromMarkdown, raw, inlineText, markdown, view
 
 -}
 
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
-import Extras.String
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
 import Markdown.Block exposing (Block)
@@ -22,24 +20,9 @@ import MarkdownRenderers
 {-| A tag description.
 -}
 type TagDescription
-    = PlaintextTagDescription
-        { body : String
-        }
-    | MarkdownTagDescription
+    = MarkdownTagDescription
         { body : MarkdownFragment
         , inlineText : String
-        }
-
-
-{-| Construct a tag description from a plain text string.
-
-    fromPlaintext "NA" |> raw --> "NA"
-
--}
-fromPlaintext : String -> TagDescription
-fromPlaintext body =
-    PlaintextTagDescription
-        { body = body
         }
 
 
@@ -72,9 +55,6 @@ fromMarkdown body =
 raw : TagDescription -> String
 raw tagDescription =
     case tagDescription of
-        PlaintextTagDescription t ->
-            t.body
-
         MarkdownTagDescription t ->
             MarkdownFragment.raw t.body
 
@@ -89,9 +69,6 @@ raw tagDescription =
 inlineText : TagDescription -> String
 inlineText tagDescription =
     case tagDescription of
-        PlaintextTagDescription t ->
-            t.body
-
         MarkdownTagDescription t ->
             t.inlineText
 
@@ -101,9 +78,6 @@ inlineText tagDescription =
 markdown : TagDescription -> String
 markdown tagDescription =
     case tagDescription of
-        PlaintextTagDescription t ->
-            Extras.String.escapeForMarkdown t.body
-
         MarkdownTagDescription t ->
             MarkdownFragment.raw t.body
 
@@ -111,8 +85,6 @@ markdown tagDescription =
 {-| View a tag description as HTML.
 
     import Html exposing (Html)
-
-    fromPlaintext "Foo" |> view False [] --> Html.span [] [ Html.text "Foo" ]
 
     expected : Html msg
     expected =
@@ -131,9 +103,6 @@ markdown tagDescription =
 view : Bool -> List (Attribute msg) -> TagDescription -> Html msg
 view enableMathSupport additionalAttributes tagDescription =
     case tagDescription of
-        PlaintextTagDescription t ->
-            Html.span additionalAttributes [ text t.body ]
-
         MarkdownTagDescription t ->
             let
                 parsed : Result String (List Block)
