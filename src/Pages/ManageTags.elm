@@ -1,18 +1,21 @@
 module Pages.ManageTags exposing (InternalMsg, Model, Msg, init, subscriptions, update, view)
 
 import Accessibility exposing (Html, div, form, h1, main_, p, span, text)
-import Accessibility.Aria
+import Accessibility.Aria exposing (required)
 import Array exposing (Array)
 import Browser exposing (Document)
 import CommonModel exposing (CommonModel)
 import Components.Button
 import Components.Copy
+import Components.Form
 import Components.Spinner
 import Data.Glossary exposing (Glossary)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.Saving exposing (Saving(..))
+import Data.TagDescription as TagDescription exposing (TagDescription)
 import Extras.Html
+import Html exposing (h2)
 import Html.Attributes exposing (class)
 import Html.Events
 import Icons
@@ -51,7 +54,7 @@ init common =
             ( { common = common
               , form =
                     items
-                        |> GlossaryItems.tags
+                        |> GlossaryItems.tagsWithDescriptions
                         |> Form.create
               , triedToSaveWhenFormInvalid = False
               , saving = NotSaving
@@ -90,25 +93,85 @@ update msg model =
 -- VIEW
 
 
-viewEditTag : { enableMathSupport : Bool, tabbable : Bool } -> Int -> Int -> Tag -> Html Msg
-viewEditTag { enableMathSupport } _ _ tag =
+viewEditTag : { enableMathSupport : Bool, tabbable : Bool } -> Int -> Int -> ( Tag, TagDescription ) -> Html Msg
+viewEditTag { enableMathSupport, tabbable } _ _ ( tag, tagDescription ) =
     div
-        []
-        [ div
-            [ class "flex max-w-xl items-center" ]
-            [ span
-                [ class "inline-flex items-center" ]
-                [ Components.Button.rounded True
-                    [ Accessibility.Aria.label "Delete"
+        [ class "flex items-center" ]
+        [ span
+            [ class "inline-flex items-center" ]
+            [ Components.Button.rounded True
+                [ Accessibility.Aria.label "Delete"
 
-                    -- , Html.Events.onClick <| PageMsg.Internal <| DeleteTag index
+                -- , Html.Events.onClick <| PageMsg.Internal <| DeleteTag index
+                ]
+                [ Icons.trash
+                    [ Svg.Attributes.class "h-5 w-5" ]
+                ]
+            ]
+        , div
+            [ class "lg:flex lg:flex-row lg:space-x-6 lg:items-center" ]
+            [ div
+                [ class "lg:w-1/2 space-y-2" ]
+                [ div
+                    [ class "block w-full min-w-0" ]
+                    [ Components.Form.inputText
+                        (Tag.raw tag)
+                        True
+                        enableMathSupport
+                        False
+                        -- showValidationErrors
+                        Nothing
+                        -- (TagField.validationError tagField)
+                        [ -- id <| ElementIds.tagInputField tagIndex
+                          -- ,
+                          Html.Attributes.required True
+                        , Html.Attributes.autocomplete False
+                        , Html.Attributes.placeholder "Tag"
+                        , Accessibility.Aria.label "Tag"
+                        , Accessibility.Aria.required True
+
+                        -- , Html.Events.onInput (PageMsg.Internal << UpdateTag tagIndex)
+                        -- , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
+                        ]
                     ]
-                    [ Icons.trash
-                        [ Svg.Attributes.class "h-5 w-5" ]
+                , div
+                    [ class "block w-full min-w-0" ]
+                    [ div
+                        [ class "relative block min-w-0 w-full" ]
+                        [ Components.Form.textarea
+                            (TagDescription.raw tagDescription)
+                            False
+                            enableMathSupport
+                            False
+                            Nothing
+                            [ Html.Attributes.required True
+                            , Html.Attributes.placeholder "Description"
+                            , Accessibility.Aria.label "Description"
+                            , Accessibility.Aria.required True
+
+                            -- , Html.Attributes.id ElementIds.tagDescriptionInputField
+                            -- , Html.Events.onInput (PageMsg.Internal << UpdateTagDescription)
+                            ]
+                        ]
                     ]
                 ]
-            , div []
-                [ Tag.view enableMathSupport [] tag
+            , Html.fieldset
+                [ class "border border-solid border-gray-300 px-4 pt-2 pb-4 lg:w-1/2 mt-4 lg:mt-0" ]
+                [ Html.legend
+                    [ class "text-center text-gray-800 dark:text-gray-300 px-1 select-none" ]
+                    [ text "Preview" ]
+                , div
+                    [ class "pb-4 text-gray-700 dark:text-gray-300" ]
+                    [ Components.Button.soft
+                        tabbable
+                        [ class "mr-2 mt-2"
+                        ]
+                        [ Tag.view enableMathSupport [] tag ]
+                    ]
+                , div
+                    [ class "text-gray-700 dark:text-gray-300" ]
+                    [ TagDescription.view enableMathSupport [] tagDescription
+                    ]
                 ]
             ]
         ]
@@ -140,14 +203,14 @@ viewAddTagButton =
         ]
 
 
-viewEditTags : { enableMathSupport : Bool, tabbable : Bool } -> Array Tag -> Html Msg
-viewEditTags { enableMathSupport, tabbable } tagsArray =
+viewEditTags : { enableMathSupport : Bool, tabbable : Bool } -> Array ( Tag, TagDescription ) -> Html Msg
+viewEditTags { enableMathSupport, tabbable } tagsWithDescriptionsArray =
     let
         numberOfTags =
-            Array.length tagsArray
+            Array.length tagsWithDescriptionsArray
 
         tags =
-            Array.toList tagsArray
+            Array.toList tagsWithDescriptionsArray
     in
     div
         [ class "space-y-6 sm:space-y-5" ]
@@ -245,15 +308,9 @@ view model =
                             ]
                         , form
                             [ class "pt-7" ]
-                            [ div
-                                [ class "lg:flex lg:space-x-8" ]
-                                [ div
-                                    []
-                                    [ model.form
-                                        |> Form.tags
-                                        |> viewEditTags { enableMathSupport = enableMathSupport, tabbable = True }
-                                    ]
-                                ]
+                            [ model.form
+                                |> Form.tagsWithDescriptions
+                                |> viewEditTags { enableMathSupport = enableMathSupport, tabbable = True }
                             , div
                                 [ class "mt-4 lg:mt-8" ]
                                 [ viewFooter model model.triedToSaveWhenFormInvalid items ]
