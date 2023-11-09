@@ -98,7 +98,7 @@ viewEditTag { enableMathSupport, tabbable } _ _ ( tag, tagDescription ) =
     div
         [ class "flex items-center" ]
         [ span
-            [ class "inline-flex items-center" ]
+            [ class "inline-flex items-center mr-1" ]
             [ Components.Button.rounded True
                 [ Accessibility.Aria.label "Delete"
 
@@ -109,7 +109,7 @@ viewEditTag { enableMathSupport, tabbable } _ _ ( tag, tagDescription ) =
                 ]
             ]
         , div
-            [ class "lg:flex lg:flex-row lg:space-x-6 lg:items-center" ]
+            [ class "lg:flex lg:flex-row lg:space-x-6 lg:items-center w-full border-l-4 pl-4 border-gray-300 dark:border-gray-700" ]
             [ div
                 [ class "lg:w-1/2 space-y-2" ]
                 [ div
@@ -213,9 +213,9 @@ viewEditTags { enableMathSupport, tabbable } tagsWithDescriptionsArray =
             Array.toList tagsWithDescriptionsArray
     in
     div
-        [ class "space-y-6 sm:space-y-5" ]
+        [ class "space-y-6 sm:space-y-7" ]
         [ div
-            [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
+            [ class "mt-6 sm:mt-5 space-y-8 sm:space-y-7" ]
             (List.indexedMap
                 (viewEditTag { enableMathSupport = enableMathSupport, tabbable = tabbable } numberOfTags)
                 tags
