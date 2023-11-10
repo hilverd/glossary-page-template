@@ -32,6 +32,7 @@ module ElementIds exposing
     , showLastUpdatedDatesLabel
     , showOrderItemsButtons
     , staticSidebarForDesktop
+    , tagInputField
     , tags
     , termIndexGroupLabel
     , termInputField
@@ -275,3 +276,8 @@ titleInputField =
 aboutParagraphInputField : String
 aboutParagraphInputField =
     prefixed "about-paragraph-input-field"
+
+
+tagInputField : Int -> String
+tagInputField index =
+    prefixed <| "tag-" ++ String.fromInt index

@@ -4,6 +4,7 @@ import Accessibility exposing (Html, div, form, h1, main_, p, span, text)
 import Accessibility.Aria exposing (required)
 import Array exposing (Array)
 import Browser exposing (Document)
+import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
 import Components.Button
 import Components.Copy
@@ -14,18 +15,21 @@ import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.Saving exposing (Saving(..))
 import Data.TagDescription as TagDescription exposing (TagDescription)
+import ElementIds
 import Extras.Html
 import Extras.HtmlEvents
 import Html exposing (h2)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, id)
 import Html.Events
 import Icons
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
+import Platform exposing (Task)
 import Svg.Attributes
 import TagsForm as Form exposing (TagsForm)
 import TagsForm.TagDescriptionField as TagDescriptionField exposing (TagDescriptionField)
 import TagsForm.TagField as TagField exposing (TagField)
+import Task
 
 
 
@@ -42,7 +46,8 @@ type alias Model =
 
 type InternalMsg
     = NoOp
-    | AddTag
+    | AddTagWithDescription
+    | DeleteTagWithDescription Int
     | UpdateTag Int String
     | UpdateTagDescription Int String
     | Save
@@ -87,8 +92,22 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
-        AddTag ->
-            ( model, Cmd.none )
+        AddTagWithDescription ->
+            let
+                form : TagsForm
+                form =
+                    Form.addTagWithDescription model.form
+
+                latestIndex : Int
+                latestIndex =
+                    Array.length (Form.tagsWithDescriptionsFields form) - 1
+            in
+            ( { model | form = form }
+            , giveFocusToTagField latestIndex
+            )
+
+        DeleteTagWithDescription index ->
+            ( { model | form = Form.deleteTagWithDescription index model.form }, Cmd.none )
 
         UpdateTag index body ->
             ( { model | form = Form.updateTag index model.form body }, Cmd.none )
@@ -104,6 +123,11 @@ update msg model =
 -- VIEW
 
 
+giveFocusToTagField : Int -> Cmd Msg
+giveFocusToTagField index =
+    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.tagInputField index)
+
+
 viewEditTag : { enableMathSupport : Bool, tabbable : Bool } -> Int -> Int -> ( TagField, TagDescriptionField ) -> Html Msg
 viewEditTag { enableMathSupport, tabbable } _ index ( tagField, tagDescriptionField ) =
     div
@@ -112,8 +136,7 @@ viewEditTag { enableMathSupport, tabbable } _ index ( tagField, tagDescriptionFi
             [ class "inline-flex items-center mr-1" ]
             [ Components.Button.rounded True
                 [ Accessibility.Aria.label "Delete"
-
-                -- , Html.Events.onClick <| PageMsg.Internal <| DeleteTag index
+                , Html.Events.onClick <| PageMsg.Internal <| DeleteTagWithDescription index
                 ]
                 [ Icons.trash
                     [ Svg.Attributes.class "h-5 w-5" ]
@@ -133,9 +156,8 @@ viewEditTag { enableMathSupport, tabbable } _ index ( tagField, tagDescriptionFi
                         -- showValidationErrors
                         Nothing
                         -- (TagField.validationError tagField)
-                        [ -- id <| ElementIds.tagInputField tagIndex
-                          -- ,
-                          Html.Attributes.required True
+                        [ id <| ElementIds.tagInputField index
+                        , Html.Attributes.required True
                         , Html.Attributes.autocomplete False
                         , Html.Attributes.placeholder "Tag"
                         , Accessibility.Aria.label "Tag"
@@ -204,7 +226,7 @@ viewEditTag { enableMathSupport, tabbable } _ index ( tagField, tagDescriptionFi
 viewAddTagButtonForEmptyState : Html Msg
 viewAddTagButtonForEmptyState =
     Components.Button.emptyState
-        [ Html.Events.onClick <| PageMsg.Internal AddTag
+        [ Html.Events.onClick <| PageMsg.Internal AddTagWithDescription
         ]
         [ Icons.plus
             [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
@@ -218,7 +240,7 @@ viewAddTagButton : Html Msg
 viewAddTagButton =
     div []
         [ Components.Button.secondary
-            [ Html.Events.onClick <| PageMsg.Internal AddTag
+            [ Html.Events.onClick <| PageMsg.Internal AddTagWithDescription
             ]
             [ Icons.plus
                 [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]

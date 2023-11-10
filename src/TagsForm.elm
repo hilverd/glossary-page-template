@@ -1,4 +1,4 @@
-module TagsForm exposing (TagsForm, create, hasValidationErrors, tagsWithDescriptionsFields, updateTag, updateTagDescription, validate)
+module TagsForm exposing (TagsForm, addTagWithDescription, create, deleteTagWithDescription, hasValidationErrors, tagsWithDescriptionsFields, updateTag, updateTagDescription, validate)
 
 import Array exposing (Array)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
@@ -137,3 +137,31 @@ updateTagDescription index tagsForm body =
                         form.tagsWithDescriptionsFields
             in
             TagsForm { form | tagsWithDescriptionsFields = tagsWithDescriptionsFields_ }
+
+
+addTagWithDescription : TagsForm -> TagsForm
+addTagWithDescription tagsForm =
+    case tagsForm of
+        TagsForm form ->
+            TagsForm
+                { form
+                    | tagsWithDescriptionsFields =
+                        Array.push
+                            ( TagField.empty, TagDescriptionField.empty )
+                            form.tagsWithDescriptionsFields
+                }
+                |> validate
+
+
+deleteTagWithDescription : Int -> TagsForm -> TagsForm
+deleteTagWithDescription index tagsForm =
+    case tagsForm of
+        TagsForm form ->
+            TagsForm
+                { form
+                    | tagsWithDescriptionsFields =
+                        Extras.Array.delete
+                            index
+                            form.tagsWithDescriptionsFields
+                }
+                |> validate
