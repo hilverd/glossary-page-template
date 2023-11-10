@@ -1,7 +1,7 @@
 module Data.GlossaryItems exposing
     ( GlossaryItems
     , fromList, insertTag, updateTag, removeTag, insert, update, remove
-    , get, tags, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+    , get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
 
@@ -20,7 +20,7 @@ module Data.GlossaryItems exposing
 
 # Query
 
-@docs get, tags, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+@docs get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
 
 
 # Export
@@ -706,10 +706,11 @@ tags glossaryItems =
                 |> List.sortWith Tag.compareAlphabetically
 
 
-{-| The tags for these glossary items along with their descriptions. Tags can exist without being used in any items.
+{-| The tags for these glossary items along with their IDs and descriptions.
+Tags can exist without being used in any items.
 -}
-tagsWithDescriptions : GlossaryItems -> List ( Tag, TagDescription )
-tagsWithDescriptions glossaryItems =
+tagsWithIdsAndDescriptions : GlossaryItems -> List { id : TagId, tag : Tag, description : TagDescription }
+tagsWithIdsAndDescriptions glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             items.tagDescriptionById
@@ -717,12 +718,21 @@ tagsWithDescriptions glossaryItems =
                 |> List.filterMap
                     (\( id, description ) ->
                         TagIdDict.get id items.tagById
-                            |> Maybe.map (\tag -> ( tag, description ))
+                            |> Maybe.map (\tag -> { id = id, tag = tag, description = description })
                     )
                 |> List.sortWith
-                    (\( tag1, _ ) ( tag2, _ ) ->
-                        Tag.compareAlphabetically tag1 tag2
+                    (\record1 record2 ->
+                        Tag.compareAlphabetically record1.tag record2.tag
                     )
+
+
+{-| Similar to `tagsWithIdsAndDescriptions` but without IDs being returned.
+-}
+tagsWithDescriptions : GlossaryItems -> List ( Tag, TagDescription )
+tagsWithDescriptions glossaryItems =
+    glossaryItems
+        |> tagsWithIdsAndDescriptions
+        |> List.map (\{ tag, description } -> ( tag, description ))
 
 
 {-| The tags for these glossary items along with their tag IDs.

@@ -1,40 +1,56 @@
-module TagsForm exposing (TagsForm, addTagWithDescription, create, deleteTagWithDescription, hasValidationErrors, tagsWithDescriptionsFields, updateTag, updateTagDescription, validate)
+module TagsForm exposing (Row(..), TagsForm, addRow, create, deleteRow, hasValidationErrors, rows, updateTag, updateTagDescription, validate)
 
 import Array exposing (Array)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.TagDescription as TagDescription exposing (TagDescription)
+import Data.TagId exposing (TagId)
 import Extras.Array
 import TagsForm.TagDescriptionField as TagDescriptionField exposing (TagDescriptionField)
 import TagsForm.TagField as TagField exposing (TagField)
 
 
-type TagsForm
-    = TagsForm
-        { tagsWithDescriptionsFields : Array ( TagField, TagDescriptionField )
+type Row
+    = Existing
+        { id : TagId
+        , tagField : TagField
+        , tagDescriptionField : TagDescriptionField
+        }
+    | Deleted TagId
+    | New
+        { tagField : TagField
+        , tagDescriptionField : TagDescriptionField
         }
 
 
-tagsWithDescriptionsFields : TagsForm -> Array ( TagField, TagDescriptionField )
-tagsWithDescriptionsFields tagsForm =
+type TagsForm
+    = TagsForm { rows : Array Row }
+
+
+rows : TagsForm -> Array Row
+rows tagsForm =
     case tagsForm of
         TagsForm form ->
-            form.tagsWithDescriptionsFields
+            form.rows
 
 
-create : List ( Tag, TagDescription ) -> TagsForm
-create tags_ =
+create : List { id : TagId, tag : Tag, description : TagDescription } -> TagsForm
+create rows_ =
     TagsForm
-        { tagsWithDescriptionsFields =
-            tags_
+        { rows =
+            rows_
                 |> List.map
-                    (\( tag, tagDescription ) ->
-                        ( tag
-                            |> Tag.raw
-                            |> TagField.fromString
-                        , tagDescription
-                            |> TagDescription.raw
-                            |> TagDescriptionField.fromString
-                        )
+                    (\{ id, tag, description } ->
+                        Existing
+                            { id = id
+                            , tagField =
+                                tag
+                                    |> Tag.raw
+                                    |> TagField.fromString
+                            , tagDescriptionField =
+                                description
+                                    |> TagDescription.raw
+                                    |> TagDescriptionField.fromString
+                            }
                     )
                 |> Array.fromList
         }
@@ -43,14 +59,25 @@ create tags_ =
 hasValidationErrors : TagsForm -> Bool
 hasValidationErrors tagsForm =
     tagsForm
-        |> tagsWithDescriptionsFields
+        |> rows
         |> Array.toList
         |> List.any
-            (\( tagField, tagDescriptionField ) ->
-                TagField.validationError tagField
-                    /= Nothing
-                    || TagDescriptionField.validationError tagDescriptionField
-                    /= Nothing
+            (\row ->
+                case row of
+                    Existing { tagField, tagDescriptionField } ->
+                        TagField.validationError tagField
+                            /= Nothing
+                            || TagDescriptionField.validationError tagDescriptionField
+                            /= Nothing
+
+                    Deleted _ ->
+                        False
+
+                    New { tagField, tagDescriptionField } ->
+                        TagField.validationError tagField
+                            /= Nothing
+                            || TagDescriptionField.validationError tagDescriptionField
+                            /= Nothing
             )
 
 
@@ -95,16 +122,27 @@ validate tagsForm =
                                 Nothing
                             )
 
-                validatedTagsWithDescriptionsFields : Array ( TagField, TagDescriptionField )
-                validatedTagsWithDescriptionsFields =
-                    form.tagsWithDescriptionsFields
-                        |> Array.map
-                            (\( tagField, tagDescriptionField ) ->
-                                ( validateTagField tagField, validateTagDescriptionField tagDescriptionField )
-                            )
+                validateRow : Row -> Row
+                validateRow row =
+                    case row of
+                        Existing { id, tagField, tagDescriptionField } ->
+                            Existing
+                                { id = id
+                                , tagField = validateTagField tagField
+                                , tagDescriptionField = validateTagDescriptionField tagDescriptionField
+                                }
+
+                        Deleted _ ->
+                            row
+
+                        New { tagField, tagDescriptionField } ->
+                            New
+                                { tagField = validateTagField tagField
+                                , tagDescriptionField = validateTagDescriptionField tagDescriptionField
+                                }
             in
             TagsForm
-                { tagsWithDescriptionsFields = validatedTagsWithDescriptionsFields }
+                { rows = Array.map validateRow form.rows }
 
 
 updateTag : Int -> TagsForm -> String -> TagsForm
@@ -112,15 +150,23 @@ updateTag index tagsForm body =
     case tagsForm of
         TagsForm form ->
             let
-                tagsWithDescriptionsFields_ =
+                rows_ =
                     Extras.Array.update
-                        (\( tagField, tagDescriptionField ) ->
-                            ( TagField.setBody body tagField, tagDescriptionField )
+                        (\row ->
+                            case row of
+                                Existing record ->
+                                    Existing { record | tagField = TagField.setBody body record.tagField }
+
+                                Deleted _ ->
+                                    row
+
+                                New record ->
+                                    New { record | tagField = TagField.setBody body record.tagField }
                         )
                         index
-                        form.tagsWithDescriptionsFields
+                        form.rows
             in
-            TagsForm { form | tagsWithDescriptionsFields = tagsWithDescriptionsFields_ }
+            TagsForm { form | rows = rows_ }
 
 
 updateTagDescription : Int -> TagsForm -> String -> TagsForm
@@ -128,40 +174,65 @@ updateTagDescription index tagsForm body =
     case tagsForm of
         TagsForm form ->
             let
-                tagsWithDescriptionsFields_ =
+                rows_ =
                     Extras.Array.update
-                        (\( tagField, tagDescriptionField ) ->
-                            ( tagField, TagDescriptionField.setBody body tagDescriptionField )
+                        (\row ->
+                            case row of
+                                Existing record ->
+                                    Existing { record | tagDescriptionField = TagDescriptionField.setBody body record.tagDescriptionField }
+
+                                Deleted _ ->
+                                    row
+
+                                New record ->
+                                    New { record | tagDescriptionField = TagDescriptionField.setBody body record.tagDescriptionField }
                         )
                         index
-                        form.tagsWithDescriptionsFields
+                        form.rows
             in
-            TagsForm { form | tagsWithDescriptionsFields = tagsWithDescriptionsFields_ }
+            TagsForm { form | rows = rows_ }
 
 
-addTagWithDescription : TagsForm -> TagsForm
-addTagWithDescription tagsForm =
+addRow : TagsForm -> TagsForm
+addRow tagsForm =
     case tagsForm of
         TagsForm form ->
             TagsForm
                 { form
-                    | tagsWithDescriptionsFields =
+                    | rows =
                         Array.push
-                            ( TagField.empty, TagDescriptionField.empty )
-                            form.tagsWithDescriptionsFields
+                            (New { tagField = TagField.empty, tagDescriptionField = TagDescriptionField.empty })
+                            form.rows
                 }
                 |> validate
 
 
-deleteTagWithDescription : Int -> TagsForm -> TagsForm
-deleteTagWithDescription index tagsForm =
+deleteRow : Int -> TagsForm -> TagsForm
+deleteRow index tagsForm =
     case tagsForm of
         TagsForm form ->
-            TagsForm
-                { form
-                    | tagsWithDescriptionsFields =
-                        Extras.Array.delete
-                            index
-                            form.tagsWithDescriptionsFields
-                }
+            let
+                rows_ =
+                    form.rows
+                        |> Array.indexedMap Tuple.pair
+                        |> Array.toList
+                        |> List.filterMap
+                            (\( index_, row ) ->
+                                if index_ == index then
+                                    case row of
+                                        Existing { id } ->
+                                            Just <| Deleted id
+
+                                        Deleted id ->
+                                            Just <| Deleted id
+
+                                        New _ ->
+                                            Nothing
+
+                                else
+                                    Just row
+                            )
+                        |> Array.fromList
+            in
+            TagsForm { form | rows = rows_ }
                 |> validate

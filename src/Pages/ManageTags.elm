@@ -26,7 +26,7 @@ import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
 import Platform exposing (Task)
 import Svg.Attributes
-import TagsForm as Form exposing (TagsForm)
+import TagsForm as Form exposing (Row, TagsForm)
 import TagsForm.TagDescriptionField as TagDescriptionField exposing (TagDescriptionField)
 import TagsForm.TagField as TagField exposing (TagField)
 import Task
@@ -46,8 +46,8 @@ type alias Model =
 
 type InternalMsg
     = NoOp
-    | AddTagWithDescription
-    | DeleteTagWithDescription Int
+    | AddRow
+    | DeleteRow Int
     | UpdateTag Int String
     | UpdateTagDescription Int String
     | Save
@@ -64,7 +64,7 @@ init common =
             ( { common = common
               , form =
                     items
-                        |> GlossaryItems.tagsWithDescriptions
+                        |> GlossaryItems.tagsWithIdsAndDescriptions
                         |> Form.create
               , triedToSaveWhenFormInvalid = False
               , saving = NotSaving
@@ -92,22 +92,22 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
-        AddTagWithDescription ->
+        AddRow ->
             let
                 form : TagsForm
                 form =
-                    Form.addTagWithDescription model.form
+                    Form.addRow model.form
 
                 latestIndex : Int
                 latestIndex =
-                    Array.length (Form.tagsWithDescriptionsFields form) - 1
+                    Array.length (Form.rows form) - 1
             in
             ( { model | form = form }
             , giveFocusToTagField latestIndex
             )
 
-        DeleteTagWithDescription index ->
-            ( { model | form = Form.deleteTagWithDescription index model.form }, Cmd.none )
+        DeleteRow index ->
+            ( { model | form = Form.deleteRow index model.form }, Cmd.none )
 
         UpdateTag index body ->
             ( { model | form = Form.updateTag index model.form body }, Cmd.none )
@@ -128,15 +128,15 @@ giveFocusToTagField index =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.tagInputField index)
 
 
-viewEditTag : { enableMathSupport : Bool, tabbable : Bool } -> Int -> Int -> ( TagField, TagDescriptionField ) -> Html Msg
-viewEditTag { enableMathSupport, tabbable } _ index ( tagField, tagDescriptionField ) =
+viewEditTag : { enableMathSupport : Bool, tabbable : Bool } -> Int -> TagField -> TagDescriptionField -> Html Msg
+viewEditTag { enableMathSupport, tabbable } index tagField tagDescriptionField =
     div
         [ class "flex items-center" ]
         [ span
             [ class "inline-flex items-center mr-1" ]
             [ Components.Button.rounded True
                 [ Accessibility.Aria.label "Delete"
-                , Html.Events.onClick <| PageMsg.Internal <| DeleteTagWithDescription index
+                , Html.Events.onClick <| PageMsg.Internal <| DeleteRow index
                 ]
                 [ Icons.trash
                     [ Svg.Attributes.class "h-5 w-5" ]
@@ -226,7 +226,7 @@ viewEditTag { enableMathSupport, tabbable } _ index ( tagField, tagDescriptionFi
 viewAddTagButtonForEmptyState : Html Msg
 viewAddTagButtonForEmptyState =
     Components.Button.emptyState
-        [ Html.Events.onClick <| PageMsg.Internal AddTagWithDescription
+        [ Html.Events.onClick <| PageMsg.Internal AddRow
         ]
         [ Icons.plus
             [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
@@ -240,7 +240,7 @@ viewAddTagButton : Html Msg
 viewAddTagButton =
     div []
         [ Components.Button.secondary
-            [ Html.Events.onClick <| PageMsg.Internal AddTagWithDescription
+            [ Html.Events.onClick <| PageMsg.Internal AddRow
             ]
             [ Icons.plus
                 [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
@@ -249,24 +249,40 @@ viewAddTagButton =
         ]
 
 
-viewEditTags : { enableMathSupport : Bool, tabbable : Bool } -> Array ( TagField, TagDescriptionField ) -> Html Msg
-viewEditTags { enableMathSupport, tabbable } tagsWithDescriptionsFieldsArray =
+viewEditTags : { enableMathSupport : Bool, tabbable : Bool } -> Array Form.Row -> Html Msg
+viewEditTags { enableMathSupport, tabbable } tagsFormRowsArray =
     let
-        numberOfTags =
-            Array.length tagsWithDescriptionsFieldsArray
-
-        tagsAndDescriptions =
-            Array.toList tagsWithDescriptionsFieldsArray
+        tagsFormRows =
+            Array.toList tagsFormRowsArray
     in
     div
         [ class "space-y-6 sm:space-y-7" ]
         [ div
             [ class "mt-6 sm:mt-5 space-y-8 sm:space-y-7" ]
-            (List.indexedMap
-                (viewEditTag { enableMathSupport = enableMathSupport, tabbable = tabbable } numberOfTags)
-                tagsAndDescriptions
+            (tagsFormRows
+                |> List.indexedMap Tuple.pair
+                |> List.filterMap
+                    (\( index, row ) ->
+                        case row of
+                            Form.Existing { tagField, tagDescriptionField } ->
+                                Just <|
+                                    viewEditTag { enableMathSupport = enableMathSupport, tabbable = tabbable }
+                                        index
+                                        tagField
+                                        tagDescriptionField
+
+                            Form.New { tagField, tagDescriptionField } ->
+                                Just <|
+                                    viewEditTag { enableMathSupport = enableMathSupport, tabbable = tabbable }
+                                        index
+                                        tagField
+                                        tagDescriptionField
+
+                            Form.Deleted _ ->
+                                Nothing
+                    )
             )
-        , if List.isEmpty tagsAndDescriptions then
+        , if List.isEmpty tagsFormRows then
             viewAddTagButtonForEmptyState
 
           else
@@ -355,7 +371,7 @@ view model =
                         , form
                             [ class "pt-7" ]
                             [ model.form
-                                |> Form.tagsWithDescriptionsFields
+                                |> Form.rows
                                 |> viewEditTags { enableMathSupport = enableMathSupport, tabbable = True }
                             , div
                                 [ class "mt-4 lg:mt-8" ]
