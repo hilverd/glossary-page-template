@@ -15,6 +15,7 @@ import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.Saving exposing (Saving(..))
 import Data.TagDescription as TagDescription exposing (TagDescription)
 import Extras.Html
+import Extras.HtmlEvents
 import Html exposing (h2)
 import Html.Attributes exposing (class)
 import Html.Events
@@ -42,6 +43,8 @@ type alias Model =
 type InternalMsg
     = NoOp
     | AddTag
+    | UpdateTag Int String
+    | UpdateTagDescription Int String
     | Save
 
 
@@ -87,6 +90,12 @@ update msg model =
         AddTag ->
             ( model, Cmd.none )
 
+        UpdateTag index body ->
+            ( { model | form = Form.updateTag index model.form body }, Cmd.none )
+
+        UpdateTagDescription index body ->
+            ( { model | form = Form.updateTagDescription index model.form body }, Cmd.none )
+
         Save ->
             ( model, Cmd.none )
 
@@ -96,7 +105,7 @@ update msg model =
 
 
 viewEditTag : { enableMathSupport : Bool, tabbable : Bool } -> Int -> Int -> ( TagField, TagDescriptionField ) -> Html Msg
-viewEditTag { enableMathSupport, tabbable } _ _ ( tagField, tagDescriptionField ) =
+viewEditTag { enableMathSupport, tabbable } _ index ( tagField, tagDescriptionField ) =
     div
         [ class "flex items-center" ]
         [ span
@@ -131,9 +140,8 @@ viewEditTag { enableMathSupport, tabbable } _ _ ( tagField, tagDescriptionField 
                         , Html.Attributes.placeholder "Tag"
                         , Accessibility.Aria.label "Tag"
                         , Accessibility.Aria.required True
-
-                        -- , Html.Events.onInput (PageMsg.Internal << UpdateTag tagIndex)
-                        -- , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
+                        , Html.Events.onInput (PageMsg.Internal << UpdateTag index)
+                        , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                         ]
                     ]
                 , div
@@ -152,7 +160,7 @@ viewEditTag { enableMathSupport, tabbable } _ _ ( tagField, tagDescriptionField 
                             , Accessibility.Aria.required True
 
                             -- , Html.Attributes.id ElementIds.tagDescriptionInputField
-                            -- , Html.Events.onInput (PageMsg.Internal << UpdateTagDescription)
+                            , Html.Events.onInput (PageMsg.Internal << UpdateTagDescription index)
                             ]
                         ]
                     ]
@@ -178,7 +186,10 @@ viewEditTag { enableMathSupport, tabbable } _ _ ( tagField, tagDescriptionField 
                     ]
                 , div
                     []
-                    [ TagDescription.view enableMathSupport
+                    [ TagDescription.view
+                        { enableMathSupport = enableMathSupport
+                        , makeLinksTabbable = tabbable
+                        }
                         [ class "text-gray-700 dark:text-white" ]
                         (tagDescriptionField
                             |> TagDescriptionField.raw

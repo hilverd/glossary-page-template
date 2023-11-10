@@ -2106,7 +2106,13 @@ viewCurrentTagFilter { enableMathSupport, tabbable } ( tag, tagDescription ) =
             [ Tag.view enableMathSupport [] tag ]
         , div
             [ class "mt-3 mb-4" ]
-            [ TagDescription.view enableMathSupport [] tagDescription ]
+            [ TagDescription.view
+                { enableMathSupport = enableMathSupport
+                , makeLinksTabbable = tabbable
+                }
+                []
+                tagDescription
+            ]
         ]
 
 

@@ -88,20 +88,22 @@ markdown tagDescription =
 
     expected : Html msg
     expected =
-        Html.span []
-            [ Html.span []
+        Html.div []
+            [ Html.p []
                 [ Html.text "The "
                 , Html.em [] [ Html.text "ideal" ]
                 , Html.text " case"
                 ]
             ]
 
-    fromMarkdown "The _ideal_ case" |> view False []
+    "The _ideal_ case"
+    |> fromMarkdown
+    |> view {enableMathSupport = False, makeLinksTabbable = True} []
     --> expected
 
 -}
-view : Bool -> List (Attribute msg) -> TagDescription -> Html msg
-view enableMathSupport additionalAttributes tagDescription =
+view : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> List (Attribute msg) -> TagDescription -> Html msg
+view { enableMathSupport, makeLinksTabbable } additionalAttributes tagDescription =
     case tagDescription of
         MarkdownTagDescription t ->
             let
@@ -111,9 +113,17 @@ view enableMathSupport additionalAttributes tagDescription =
             in
             case parsed of
                 Ok blocks ->
-                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
+                    case
+                        Renderer.render
+                            (MarkdownRenderers.htmlMsgRenderer
+                                { enableMathSupport = enableMathSupport
+                                , makeLinksTabbable = makeLinksTabbable
+                                }
+                            )
+                            blocks
+                    of
                         Ok rendered ->
-                            Html.span
+                            Html.div
                                 (class "prose dark:prose-invert print:prose-neutral dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" :: additionalAttributes)
                                 rendered
 
