@@ -964,20 +964,17 @@ toList_ disambiguatedPreferredTerm_ filterByTagId glossaryItems =
             in
             List.filterMap
                 (\itemId ->
-                    glossaryItems
-                        |> get_ disambiguatedPreferredTerm_ itemId
-                        |> Maybe.andThen
-                            (\glossaryItemForHtml ->
-                                if
-                                    itemIdsMatchingTagFilter
-                                        |> Maybe.map (Set.member (GlossaryItemId.toInt itemId))
-                                        |> Maybe.withDefault True
-                                then
-                                    Just <| Tuple.pair itemId glossaryItemForHtml
+                    if
+                        itemIdsMatchingTagFilter
+                            |> Maybe.map (Set.member <| GlossaryItemId.toInt itemId)
+                            |> Maybe.withDefault True
+                    then
+                        glossaryItems
+                            |> get_ disambiguatedPreferredTerm_ itemId
+                            |> Maybe.andThen (Just << Tuple.pair itemId)
 
-                                else
-                                    Nothing
-                            )
+                    else
+                        Nothing
                 )
 
 
