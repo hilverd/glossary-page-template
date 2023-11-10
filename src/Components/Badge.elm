@@ -11,7 +11,7 @@ import Svg.Attributes
 indigoWithBorderAndRemoveButton : Bool -> List (Attribute Never) -> msg -> List (Html msg) -> Html msg
 indigoWithBorderAndRemoveButton tabbable additionalAttributes onClick children =
     span
-        (class "inline-flex items-center gap-x-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 px-2 py-1 text-indigo-800 dark:text-indigo-100" :: additionalAttributes)
+        (class "inline-flex items-center gap-x-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 px-2 py-1 text-indigo-800 dark:text-indigo-100 select-none" :: additionalAttributes)
         [ span
             [ class "mr-0.5 whitespace-nowrap" ]
             children
@@ -42,7 +42,7 @@ indigoWithCheckbox :
     -> Html msg
 indigoWithCheckbox { tabbable, checked } id_ onClick additionalAttributes children =
     span
-        (class "inline-flex items-center gap-x-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 px-1 text-indigo-800 dark:text-indigo-100" :: additionalAttributes)
+        (class "inline-flex items-center gap-x-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 px-1 text-indigo-800 dark:text-indigo-100 select-none" :: additionalAttributes)
         [ span
             [ class "inline-flex items-center px-2 py-2" ]
             [ checkbox
