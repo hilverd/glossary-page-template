@@ -156,21 +156,26 @@ viewEditTag { enableMathSupport, tabbable } _ _ ( tag, tagDescription ) =
                     ]
                 ]
             , Html.fieldset
-                [ class "border border-solid border-gray-300 px-4 pt-2 pb-4 lg:w-1/2 mt-4 lg:mt-0" ]
+                [ class "px-4 pt-2 pb-4 lg:w-1/2 mt-4 lg:mt-0 border border-gray-300 dark:border-gray-700 rounded-md" ]
                 [ Html.legend
-                    [ class "text-center text-gray-800 dark:text-gray-300 px-1 select-none" ]
+                    [ class "text-center text-gray-800 dark:text-gray-100 px-3 py-0.5 select-none" ]
                     [ text "Preview" ]
                 , div
-                    [ class "pb-4 text-gray-700 dark:text-gray-300" ]
+                    [ class "pb-4" ]
                     [ Components.Button.soft
                         tabbable
                         [ class "mr-2 mt-2"
                         ]
-                        [ Tag.view enableMathSupport [] tag ]
+                        [ Tag.view enableMathSupport
+                            [ class "text-gray-700 dark:text-gray-100" ]
+                            tag
+                        ]
                     ]
                 , div
-                    [ class "text-gray-700 dark:text-gray-300" ]
-                    [ TagDescription.view enableMathSupport [] tagDescription
+                    []
+                    [ TagDescription.view enableMathSupport
+                        [ class "text-gray-700 dark:text-white" ]
+                        tagDescription
                     ]
                 ]
             ]

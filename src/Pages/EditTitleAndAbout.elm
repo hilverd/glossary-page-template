@@ -638,9 +638,9 @@ view model =
                                 , div
                                     [ class "mt-8 lg:w-1/2 lg:mt-0 text-gray-900 dark:text-gray-100" ]
                                     [ Html.fieldset
-                                        [ class "border border-solid border-gray-300 p-4" ]
+                                        [ class "border border-solid rounded-md border-gray-300 dark:border-gray-700 p-4" ]
                                         [ Html.legend
-                                            [ class "text-xl text-center text-gray-800 dark:text-gray-300 px-1 select-none" ]
+                                            [ class "text-xl text-center text-gray-800 dark:text-gray-300 px-3 py-0.5 select-none" ]
                                             [ text "Preview" ]
                                         , h2
                                             [ class "pb-4 text-2xl font-bold leading-tight text-gray-700 dark:text-gray-300" ]
