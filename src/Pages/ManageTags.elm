@@ -23,6 +23,8 @@ import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
 import Svg.Attributes
 import TagsForm as Form exposing (TagsForm)
+import TagsForm.TagDescriptionField as TagDescriptionField exposing (TagDescriptionField)
+import TagsForm.TagField as TagField exposing (TagField)
 
 
 
@@ -93,8 +95,8 @@ update msg model =
 -- VIEW
 
 
-viewEditTag : { enableMathSupport : Bool, tabbable : Bool } -> Int -> Int -> ( Tag, TagDescription ) -> Html Msg
-viewEditTag { enableMathSupport, tabbable } _ _ ( tag, tagDescription ) =
+viewEditTag : { enableMathSupport : Bool, tabbable : Bool } -> Int -> Int -> ( TagField, TagDescriptionField ) -> Html Msg
+viewEditTag { enableMathSupport, tabbable } _ _ ( tagField, tagDescriptionField ) =
     div
         [ class "flex items-center" ]
         [ span
@@ -115,7 +117,7 @@ viewEditTag { enableMathSupport, tabbable } _ _ ( tag, tagDescription ) =
                 [ div
                     [ class "block w-full min-w-0" ]
                     [ Components.Form.inputText
-                        (Tag.raw tag)
+                        (TagField.raw tagField)
                         True
                         enableMathSupport
                         False
@@ -139,7 +141,7 @@ viewEditTag { enableMathSupport, tabbable } _ _ ( tag, tagDescription ) =
                     [ div
                         [ class "relative block min-w-0 w-full" ]
                         [ Components.Form.textarea
-                            (TagDescription.raw tagDescription)
+                            (TagDescriptionField.raw tagDescriptionField)
                             False
                             enableMathSupport
                             False
@@ -168,14 +170,20 @@ viewEditTag { enableMathSupport, tabbable } _ _ ( tag, tagDescription ) =
                         ]
                         [ Tag.view enableMathSupport
                             [ class "text-gray-700 dark:text-gray-100" ]
-                            tag
+                            (tagField
+                                |> TagField.raw
+                                |> Tag.fromMarkdown
+                            )
                         ]
                     ]
                 , div
                     []
                     [ TagDescription.view enableMathSupport
                         [ class "text-gray-700 dark:text-white" ]
-                        tagDescription
+                        (tagDescriptionField
+                            |> TagDescriptionField.raw
+                            |> TagDescription.fromMarkdown
+                        )
                     ]
                 ]
             ]
@@ -208,14 +216,14 @@ viewAddTagButton =
         ]
 
 
-viewEditTags : { enableMathSupport : Bool, tabbable : Bool } -> Array ( Tag, TagDescription ) -> Html Msg
-viewEditTags { enableMathSupport, tabbable } tagsWithDescriptionsArray =
+viewEditTags : { enableMathSupport : Bool, tabbable : Bool } -> Array ( TagField, TagDescriptionField ) -> Html Msg
+viewEditTags { enableMathSupport, tabbable } tagsWithDescriptionsFieldsArray =
     let
         numberOfTags =
-            Array.length tagsWithDescriptionsArray
+            Array.length tagsWithDescriptionsFieldsArray
 
-        tags =
-            Array.toList tagsWithDescriptionsArray
+        tagsAndDescriptions =
+            Array.toList tagsWithDescriptionsFieldsArray
     in
     div
         [ class "space-y-6 sm:space-y-7" ]
@@ -223,9 +231,9 @@ viewEditTags { enableMathSupport, tabbable } tagsWithDescriptionsArray =
             [ class "mt-6 sm:mt-5 space-y-8 sm:space-y-7" ]
             (List.indexedMap
                 (viewEditTag { enableMathSupport = enableMathSupport, tabbable = tabbable } numberOfTags)
-                tags
+                tagsAndDescriptions
             )
-        , if List.isEmpty tags then
+        , if List.isEmpty tagsAndDescriptions then
             viewAddTagButtonForEmptyState
 
           else
@@ -314,7 +322,7 @@ view model =
                         , form
                             [ class "pt-7" ]
                             [ model.form
-                                |> Form.tagsWithDescriptions
+                                |> Form.tagsWithDescriptionsFields
                                 |> viewEditTags { enableMathSupport = enableMathSupport, tabbable = True }
                             , div
                                 [ class "mt-4 lg:mt-8" ]

@@ -7,12 +7,12 @@
         "Data.GlossaryItem.Definition",
         "Data.GlossaryItem.Tag",
         "Data.GlossaryItem.Term",
+        "Data.GlossaryItem",
         "Data.GlossaryItemForHtml",
         "Data.GlossaryItemId",
         "Data.GlossaryItemIdDict",
         "Data.GlossaryItems",
         "Data.GlossaryTitle",
-        "Data.GlossaryItem",
         "Data.IndexOfTerms",
         "Data.MarkdownFragment",
         "Data.TagDescription",
@@ -27,6 +27,8 @@
         "Extras.Url",
         "GlossaryItemForm.DefinitionField",
         "GlossaryItemForm.TermField",
-        "MarkdownRenderers"
+        "MarkdownRenderers",
+        "TagsForm.TagDescriptionField",
+        "TagsForm.TagField"
     ]
 }

@@ -1,27 +1,42 @@
-module TagsForm exposing (TagsForm, create, hasValidationErrors, tagsWithDescriptions)
+module TagsForm exposing (TagsForm, create, hasValidationErrors, tagsWithDescriptionsFields)
 
 import Array exposing (Array)
-import Data.GlossaryItem.Tag exposing (Tag)
-import Data.TagDescription exposing (TagDescription)
+import Data.GlossaryItem.Tag as Tag exposing (Tag)
+import Data.TagDescription as TagDescription exposing (TagDescription)
+import TagsForm.TagDescriptionField as TagDescriptionField exposing (TagDescriptionField)
+import TagsForm.TagField as TagField exposing (TagField)
 
 
 type TagsForm
     = TagsForm
-        { tagsWithDescriptions : Array ( Tag, TagDescription )
+        { tagsWithDescriptionsFields : Array ( TagField, TagDescriptionField )
         }
 
 
-tagsWithDescriptions : TagsForm -> Array ( Tag, TagDescription )
-tagsWithDescriptions tagsForm =
+tagsWithDescriptionsFields : TagsForm -> Array ( TagField, TagDescriptionField )
+tagsWithDescriptionsFields tagsForm =
     case tagsForm of
         TagsForm form ->
-            form.tagsWithDescriptions
+            form.tagsWithDescriptionsFields
 
 
 create : List ( Tag, TagDescription ) -> TagsForm
 create tags_ =
     TagsForm
-        { tagsWithDescriptions = Array.fromList tags_ }
+        { tagsWithDescriptionsFields =
+            tags_
+                |> List.map
+                    (\( tag, tagDescription ) ->
+                        ( tag
+                            |> Tag.raw
+                            |> TagField.fromString
+                        , tagDescription
+                            |> TagDescription.raw
+                            |> TagDescriptionField.fromString
+                        )
+                    )
+                |> Array.fromList
+        }
 
 
 hasValidationErrors : TagsForm -> Bool
