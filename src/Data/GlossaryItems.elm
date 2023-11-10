@@ -588,8 +588,45 @@ remove itemId glossaryItems =
         |> fromList (tagsWithDescriptions glossaryItems)
 
 
-get_ : (GlossaryItemId -> GlossaryItems -> Maybe Term) -> GlossaryItemId -> GlossaryItems -> Maybe GlossaryItemForHtml
-get_ disambiguatedPreferredTerm_ itemId glossaryItems =
+relatedPreferredTerms_ : (GlossaryItemId -> GlossaryItems -> Maybe Term) -> Maybe TagId -> GlossaryItemId -> GlossaryItems -> Maybe (List Term)
+relatedPreferredTerms_ disambiguatedPreferredTerm_ filterByTagId itemId glossaryItems =
+    case glossaryItems of
+        GlossaryItems items ->
+            items.relatedItemIdsById
+                |> GlossaryItemIdDict.get itemId
+                |> Maybe.map
+                    (\relatedItemIds ->
+                        relatedItemIds
+                            |> List.filterMap
+                                (\relatedItemId ->
+                                    let
+                                        relatedItemMatchesTagBeingFilteredBy =
+                                            filterByTagId
+                                                |> Maybe.map
+                                                    (\filterByTagId_ ->
+                                                        (items.disambiguationTagIdByItemId
+                                                            |> GlossaryItemIdDict.get relatedItemId
+                                                            |> (==) (Just <| Just filterByTagId_)
+                                                        )
+                                                            || (items.normalTagIdsByItemId
+                                                                    |> GlossaryItemIdDict.get relatedItemId
+                                                                    |> Maybe.map (List.member filterByTagId_)
+                                                                    |> Maybe.withDefault False
+                                                               )
+                                                    )
+                                                |> Maybe.withDefault True
+                                    in
+                                    if relatedItemMatchesTagBeingFilteredBy then
+                                        disambiguatedPreferredTerm_ relatedItemId glossaryItems
+
+                                    else
+                                        Nothing
+                                )
+                    )
+
+
+get_ : (GlossaryItemId -> GlossaryItems -> Maybe Term) -> Maybe TagId -> GlossaryItemId -> GlossaryItems -> Maybe GlossaryItemForHtml
+get_ disambiguatedPreferredTerm_ filterByTagId itemId glossaryItems =
     case glossaryItems of
         GlossaryItems items ->
             GlossaryItemIdDict.get itemId items.itemById
@@ -629,16 +666,8 @@ get_ disambiguatedPreferredTerm_ itemId glossaryItems =
 
                             relatedPreferredTerms : List Term
                             relatedPreferredTerms =
-                                items.relatedItemIdsById
-                                    |> GlossaryItemIdDict.get itemId
-                                    |> Maybe.map
-                                        (\relatedItemIds ->
-                                            relatedItemIds
-                                                |> List.filterMap
-                                                    (\relatedItemId ->
-                                                        disambiguatedPreferredTerm_ relatedItemId glossaryItems
-                                                    )
-                                        )
+                                glossaryItems
+                                    |> relatedPreferredTerms_ disambiguatedPreferredTerm_ filterByTagId itemId
                                     |> Maybe.withDefault []
 
                             needsUpdating =
@@ -663,7 +692,7 @@ get_ disambiguatedPreferredTerm_ itemId glossaryItems =
 -}
 get : GlossaryItemId -> GlossaryItems -> Maybe GlossaryItemForHtml
 get =
-    get_ disambiguatedPreferredTerm
+    get_ disambiguatedPreferredTerm Nothing
 
 
 {-| The tags for these glossary items. Tags can exist without being used in any items.
@@ -970,7 +999,7 @@ toList_ disambiguatedPreferredTerm_ filterByTagId glossaryItems =
                             |> Maybe.withDefault True
                     then
                         glossaryItems
-                            |> get_ disambiguatedPreferredTerm_ itemId
+                            |> get_ disambiguatedPreferredTerm_ filterByTagId itemId
                             |> Maybe.andThen (Just << Tuple.pair itemId)
 
                     else

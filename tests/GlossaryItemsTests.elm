@@ -443,6 +443,58 @@ suite =
                         [ GlossaryItemId.create 0
                         , GlossaryItemId.create 2
                         ]
+        , test "when tag filter is applied, removes non-matching related items" <|
+            \_ ->
+                let
+                    defaultComputerScienceItem_ : GlossaryItemForHtml
+                    defaultComputerScienceItem_ =
+                        GlossaryItemForHtml.create
+                            (Term.fromMarkdown "Default" False)
+                            []
+                            (Just computerScienceTag)
+                            []
+                            (Just defaultComputerScienceDefinition)
+                            [ Term.fromMarkdown "Default (Finance)" False ]
+                            False
+                            (Just "2023-09-15T19:58:59.573Z")
+
+                    defaultFinanceItem_ : GlossaryItemForHtml
+                    defaultFinanceItem_ =
+                        GlossaryItemForHtml.create
+                            (Term.fromMarkdown "Default" False)
+                            []
+                            (Just financeTag)
+                            []
+                            (Just defaultFinanceDefinition)
+                            []
+                            False
+                            (Just "2023-10-30T08:25:24.765Z")
+
+                    glossaryItems_ : GlossaryItems
+                    glossaryItems_ =
+                        GlossaryItems.fromList
+                            [ ( computerScienceTag, computerScienceTagDescription )
+                            , ( financeTag, financeTagDescription )
+                            ]
+                            [ defaultComputerScienceItem_
+                            , defaultFinanceItem_
+                            ]
+                in
+                glossaryItems_
+                    |> GlossaryItems.orderedAlphabetically (Just <| TagId.create 0)
+                    |> Expect.equal
+                        [ ( GlossaryItemId.create 0
+                          , GlossaryItemForHtml.create
+                                (Term.fromMarkdown "Default" False)
+                                []
+                                (Just computerScienceTag)
+                                []
+                                (Just defaultComputerScienceDefinition)
+                                []
+                                False
+                                (Just "2023-09-15T19:58:59.573Z")
+                          )
+                        ]
         , test "returns items ordered by most mentioned first" <|
             \_ ->
                 glossaryItems
