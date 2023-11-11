@@ -18,6 +18,7 @@ import Data.Saving exposing (Saving(..))
 import Data.TagDescription as TagDescription exposing (TagDescription)
 import ElementIds
 import Extras.Html
+import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree
 import Extras.Http
@@ -265,9 +266,9 @@ viewEditTag :
     -> Html Msg
 viewEditTag { enableMathSupport, tabbable, showValidationErrors } index tagField tagDescriptionField =
     div
-        [ class "flex items-center" ]
+        [ class "flex items-start" ]
         [ span
-            [ class "inline-flex items-center mr-1" ]
+            [ class "inline-flex items-center mr-1 mt-4" ]
             [ Components.Button.rounded True
                 [ Accessibility.Aria.label "Delete"
                 , Html.Events.onClick <| PageMsg.Internal <| DeleteRow index
@@ -277,14 +278,16 @@ viewEditTag { enableMathSupport, tabbable, showValidationErrors } index tagField
                 ]
             ]
         , div
-            [ class "lg:flex lg:flex-row lg:space-x-6 lg:items-center w-full border-l-4 pl-4 border-gray-300 dark:border-gray-700" ]
+            [ class "lg:flex lg:flex-row lg:space-x-6 lg:items-start w-full border-l-4 pl-4 border-gray-300 dark:border-gray-700" ]
             [ div
                 [ class "lg:w-1/2 space-y-2" ]
                 [ div
-                    [ class "block w-full min-w-0" ]
+                    [ class "block w-full min-w-0"
+                    , Extras.HtmlAttribute.showIf (index /= 0) <| class "mt-3"
+                    ]
                     [ Components.Form.inputText
                         (TagField.raw tagField)
-                        True
+                        (index == 0)
                         enableMathSupport
                         showValidationErrors
                         (TagField.validationError tagField)
@@ -316,7 +319,7 @@ viewEditTag { enableMathSupport, tabbable, showValidationErrors } index tagField
                         [ class "relative block min-w-0 w-full" ]
                         [ Components.Form.textarea
                             (TagDescriptionField.raw tagDescriptionField)
-                            False
+                            (index == 0)
                             enableMathSupport
                             showValidationErrors
                             (TagDescriptionField.validationError tagDescriptionField)
