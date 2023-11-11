@@ -108,7 +108,7 @@ applyChanges rows glossary =
                             items
                                 |> GlossaryItems.updateTag id
                                     (tagField |> TagField.raw |> Tag.fromMarkdown)
-                                    (tagDescriptionField |> TagDescriptionField.raw |> TagDescription.fromMarkdown)
+                                    (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
 
                         Form.Deleted tagId ->
                             GlossaryItems.removeTag tagId items
@@ -117,7 +117,7 @@ applyChanges rows glossary =
                             items
                                 |> GlossaryItems.insertTag
                                     (tagField |> TagField.raw |> Tag.fromMarkdown)
-                                    (tagDescriptionField |> TagDescriptionField.raw |> TagDescription.fromMarkdown)
+                                    (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
                 )
                 items0
                 rows

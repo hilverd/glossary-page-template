@@ -5,6 +5,7 @@ import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.TagDescription as TagDescription exposing (TagDescription)
 import Data.TagId exposing (TagId)
 import Extras.Array
+import Set
 import TagsForm.TagDescriptionField as TagDescriptionField exposing (TagDescriptionField)
 import TagsForm.TagField as TagField exposing (TagField)
 
@@ -141,9 +142,72 @@ validate tagsForm =
                                 { tagField = validateTagField tagField
                                 , tagDescriptionField = validateTagDescriptionField tagDescriptionField
                                 }
+
+                duplicateTagMessage : String
+                duplicateTagMessage =
+                    "This tag is a duplicate of an earlier one"
+
+                rows_ =
+                    form.rows
+                        |> Array.toList
+                        |> List.map validateRow
+                        |> List.foldl
+                            (\row ( result, trimmedRawTagsSeenSoFar ) ->
+                                case row of
+                                    Existing record ->
+                                        let
+                                            trimmedRawTag =
+                                                record.tagField |> TagField.raw |> String.trim
+
+                                            validatedRow =
+                                                if Set.member trimmedRawTag trimmedRawTagsSeenSoFar then
+                                                    Existing
+                                                        { record
+                                                            | tagField =
+                                                                record.tagField
+                                                                    |> TagField.setValidationError (Just duplicateTagMessage)
+                                                        }
+
+                                                else
+                                                    row
+                                        in
+                                        ( validatedRow :: result
+                                        , Set.insert trimmedRawTag trimmedRawTagsSeenSoFar
+                                        )
+
+                                    Deleted _ ->
+                                        ( row :: result
+                                        , trimmedRawTagsSeenSoFar
+                                        )
+
+                                    New record ->
+                                        let
+                                            trimmedRawTag =
+                                                record.tagField |> TagField.raw |> String.trim
+
+                                            validatedRow =
+                                                if Set.member trimmedRawTag trimmedRawTagsSeenSoFar then
+                                                    New
+                                                        { record
+                                                            | tagField =
+                                                                record.tagField
+                                                                    |> TagField.setValidationError (Just duplicateTagMessage)
+                                                        }
+
+                                                else
+                                                    row
+                                        in
+                                        ( validatedRow :: result
+                                        , Set.insert trimmedRawTag trimmedRawTagsSeenSoFar
+                                        )
+                            )
+                            ( [], Set.empty )
+                        |> Tuple.first
+                        |> List.reverse
+                        |> Array.fromList
             in
             TagsForm
-                { rows = Array.map validateRow form.rows }
+                { rows = rows_ }
 
 
 updateTag : Int -> TagsForm -> String -> TagsForm
