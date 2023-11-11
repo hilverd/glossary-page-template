@@ -408,6 +408,24 @@ viewAddTagButton =
         ]
 
 
+tagsFormRowsIsEmpty : List Row -> Bool
+tagsFormRowsIsEmpty rows =
+    rows
+        |> List.filter
+            (\row ->
+                case row of
+                    Form.Existing _ ->
+                        True
+
+                    Form.New _ ->
+                        True
+
+                    Form.Deleted _ ->
+                        False
+            )
+        |> List.isEmpty
+
+
 viewEditTags :
     { enableMathSupport : Bool
     , tabbable : Bool
@@ -417,6 +435,7 @@ viewEditTags :
     -> Html Msg
 viewEditTags { enableMathSupport, tabbable, showValidationErrors } tagsFormRowsArray =
     let
+        tagsFormRows : List Row
         tagsFormRows =
             Array.toList tagsFormRowsArray
     in
@@ -447,7 +466,7 @@ viewEditTags { enableMathSupport, tabbable, showValidationErrors } tagsFormRowsA
                                 Nothing
                     )
             )
-        , if List.isEmpty tagsFormRows then
+        , if tagsFormRowsIsEmpty tagsFormRows then
             viewAddTagButtonForEmptyState
 
           else
