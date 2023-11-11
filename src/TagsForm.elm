@@ -54,6 +54,7 @@ create rows_ =
                     )
                 |> Array.fromList
         }
+        |> validate
 
 
 hasValidationErrors : TagsForm -> Bool
@@ -95,7 +96,7 @@ validate tagsForm =
                     let
                         body : String
                         body =
-                            TagField.raw tagField
+                            tagField |> TagField.raw |> String.trim
                     in
                     tagField
                         |> TagField.setValidationError
@@ -111,7 +112,7 @@ validate tagsForm =
                     let
                         body : String
                         body =
-                            TagDescriptionField.raw tagDescriptionField
+                            TagDescriptionField.raw tagDescriptionField |> String.trim
                     in
                     tagDescriptionField
                         |> TagDescriptionField.setValidationError
@@ -167,6 +168,7 @@ updateTag index tagsForm body =
                         form.rows
             in
             TagsForm { form | rows = rows_ }
+                |> validate
 
 
 updateTagDescription : Int -> TagsForm -> String -> TagsForm
@@ -191,6 +193,7 @@ updateTagDescription index tagsForm body =
                         form.rows
             in
             TagsForm { form | rows = rows_ }
+                |> validate
 
 
 addRow : TagsForm -> TagsForm

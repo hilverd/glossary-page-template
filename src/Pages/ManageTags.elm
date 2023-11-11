@@ -9,8 +9,9 @@ import CommonModel exposing (CommonModel)
 import Components.Button
 import Components.Copy
 import Components.Form
+import Components.SelectMenu exposing (showValidationErrors)
 import Components.Spinner
-import Data.Glossary exposing (Glossary)
+import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.Saving exposing (Saving(..))
@@ -18,9 +19,13 @@ import Data.TagDescription as TagDescription exposing (TagDescription)
 import ElementIds
 import Extras.Html
 import Extras.HtmlEvents
+import Extras.HtmlTree as HtmlTree
+import Extras.Http
+import Extras.Task
 import Html exposing (h2)
 import Html.Attributes exposing (class, id)
 import Html.Events
+import Http
 import Icons
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
@@ -51,6 +56,7 @@ type InternalMsg
     | UpdateTag Int String
     | UpdateTagDescription Int String
     | Save
+    | FailedToSave Http.Error
 
 
 type alias Msg =
@@ -86,6 +92,84 @@ init common =
 -- UPDATE
 
 
+applyChanges : List Form.Row -> Glossary -> Glossary
+applyChanges rows glossary =
+    let
+        items0 : GlossaryItems
+        items0 =
+            glossary.items
+
+        items1 : GlossaryItems
+        items1 =
+            List.foldl
+                (\row items ->
+                    case row of
+                        Form.Existing { id, tagField, tagDescriptionField } ->
+                            items
+                                |> GlossaryItems.updateTag id
+                                    (tagField |> TagField.raw |> Tag.fromMarkdown)
+                                    (tagDescriptionField |> TagDescriptionField.raw |> TagDescription.fromMarkdown)
+
+                        Form.Deleted tagId ->
+                            GlossaryItems.removeTag tagId items
+
+                        Form.New { tagField, tagDescriptionField } ->
+                            items
+                                |> GlossaryItems.insertTag
+                                    (tagField |> TagField.raw |> Tag.fromMarkdown)
+                                    (tagDescriptionField |> TagDescriptionField.raw |> TagDescription.fromMarkdown)
+                )
+                items0
+                rows
+    in
+    { glossary | items = items1 }
+
+
+patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
+patchHtmlFile common glossaryItems =
+    let
+        msg : PageMsg a
+        msg =
+            PageMsg.NavigateToListAll common
+    in
+    if common.enableSavingChangesInMemory then
+        Extras.Task.messageToCommand msg
+
+    else
+        case common.glossary of
+            Ok glossary0 ->
+                let
+                    glossary : Glossary
+                    glossary =
+                        { glossary0 | items = glossaryItems }
+                in
+                Http.request
+                    { method = "PATCH"
+                    , headers = []
+                    , url = "/"
+                    , body =
+                        glossary
+                            |> Glossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
+                            |> HtmlTree.toHtmlReplacementString
+                            |> Http.stringBody "text/html"
+                    , expect =
+                        Http.expectWhatever
+                            (\result ->
+                                case result of
+                                    Ok _ ->
+                                        msg
+
+                                    Err error ->
+                                        PageMsg.Internal <| FailedToSave error
+                            )
+                    , timeout = Nothing
+                    , tracker = Nothing
+                    }
+
+            _ ->
+                Cmd.none
+
+
 update : InternalMsg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -116,7 +200,49 @@ update msg model =
             ( { model | form = Form.updateTagDescription index model.form body }, Cmd.none )
 
         Save ->
-            ( model, Cmd.none )
+            case model.common.glossary of
+                Ok glossary0 ->
+                    if Form.hasValidationErrors model.form then
+                        ( { model
+                            | triedToSaveWhenFormInvalid = True
+                            , saving = NotSaving
+                          }
+                        , Cmd.none
+                        )
+
+                    else
+                        let
+                            common0 : CommonModel
+                            common0 =
+                                model.common
+
+                            common1 : CommonModel
+                            common1 =
+                                { common0
+                                    | glossary =
+                                        glossary0
+                                            |> applyChanges (model.form |> Form.rows |> Array.toList)
+                                            |> Ok
+                                }
+
+                            model1 : Model
+                            model1 =
+                                { model
+                                    | common = common1
+                                    , saving = SavingInProgress
+                                }
+                        in
+                        ( model1
+                        , patchHtmlFile model1.common glossary0.items
+                        )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        FailedToSave error ->
+            ( { model | saving = SavingFailed <| Extras.Http.errorToHumanReadable <| error }
+            , Cmd.none
+            )
 
 
 
@@ -128,8 +254,16 @@ giveFocusToTagField index =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.tagInputField index)
 
 
-viewEditTag : { enableMathSupport : Bool, tabbable : Bool } -> Int -> TagField -> TagDescriptionField -> Html Msg
-viewEditTag { enableMathSupport, tabbable } index tagField tagDescriptionField =
+viewEditTag :
+    { enableMathSupport : Bool
+    , tabbable : Bool
+    , showValidationErrors : Bool
+    }
+    -> Int
+    -> TagField
+    -> TagDescriptionField
+    -> Html Msg
+viewEditTag { enableMathSupport, tabbable, showValidationErrors } index tagField tagDescriptionField =
     div
         [ class "flex items-center" ]
         [ span
@@ -152,10 +286,8 @@ viewEditTag { enableMathSupport, tabbable } index tagField tagDescriptionField =
                         (TagField.raw tagField)
                         True
                         enableMathSupport
-                        False
-                        -- showValidationErrors
-                        Nothing
-                        -- (TagField.validationError tagField)
+                        showValidationErrors
+                        (TagField.validationError tagField)
                         [ id <| ElementIds.tagInputField index
                         , Html.Attributes.required True
                         , Html.Attributes.autocomplete False
@@ -166,6 +298,18 @@ viewEditTag { enableMathSupport, tabbable } index tagField tagDescriptionField =
                         , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
                         ]
                     ]
+                , Extras.Html.showMaybe
+                    (\validationError ->
+                        p
+                            [ class "mt-2 text-red-600 dark:text-red-400" ]
+                            [ text validationError ]
+                    )
+                    (if showValidationErrors then
+                        TagField.validationError tagField
+
+                     else
+                        Nothing
+                    )
                 , div
                     [ class "block w-full min-w-0" ]
                     [ div
@@ -174,8 +318,8 @@ viewEditTag { enableMathSupport, tabbable } index tagField tagDescriptionField =
                             (TagDescriptionField.raw tagDescriptionField)
                             False
                             enableMathSupport
-                            False
-                            Nothing
+                            showValidationErrors
+                            (TagDescriptionField.validationError tagDescriptionField)
                             [ Html.Attributes.required True
                             , Html.Attributes.placeholder "Description"
                             , Accessibility.Aria.label "Description"
@@ -186,6 +330,18 @@ viewEditTag { enableMathSupport, tabbable } index tagField tagDescriptionField =
                             ]
                         ]
                     ]
+                , Extras.Html.showMaybe
+                    (\validationError ->
+                        p
+                            [ class "mt-2 text-red-600 dark:text-red-400" ]
+                            [ text validationError ]
+                    )
+                    (if showValidationErrors then
+                        TagDescriptionField.validationError tagDescriptionField
+
+                     else
+                        Nothing
+                    )
                 ]
             , Html.fieldset
                 [ class "px-4 pt-2 pb-4 lg:w-1/2 mt-4 lg:mt-0 border border-gray-300 dark:border-gray-700 rounded-md" ]
@@ -249,8 +405,14 @@ viewAddTagButton =
         ]
 
 
-viewEditTags : { enableMathSupport : Bool, tabbable : Bool } -> Array Form.Row -> Html Msg
-viewEditTags { enableMathSupport, tabbable } tagsFormRowsArray =
+viewEditTags :
+    { enableMathSupport : Bool
+    , tabbable : Bool
+    , showValidationErrors : Bool
+    }
+    -> Array Form.Row
+    -> Html Msg
+viewEditTags { enableMathSupport, tabbable, showValidationErrors } tagsFormRowsArray =
     let
         tagsFormRows =
             Array.toList tagsFormRowsArray
@@ -266,14 +428,14 @@ viewEditTags { enableMathSupport, tabbable } tagsFormRowsArray =
                         case row of
                             Form.Existing { tagField, tagDescriptionField } ->
                                 Just <|
-                                    viewEditTag { enableMathSupport = enableMathSupport, tabbable = tabbable }
+                                    viewEditTag { enableMathSupport = enableMathSupport, tabbable = tabbable, showValidationErrors = showValidationErrors }
                                         index
                                         tagField
                                         tagDescriptionField
 
                             Form.New { tagField, tagDescriptionField } ->
                                 Just <|
-                                    viewEditTag { enableMathSupport = enableMathSupport, tabbable = tabbable }
+                                    viewEditTag { enableMathSupport = enableMathSupport, tabbable = tabbable, showValidationErrors = showValidationErrors }
                                         index
                                         tagField
                                         tagDescriptionField
@@ -323,7 +485,9 @@ viewFooter model showValidationErrors glossaryItems =
     in
     div
         [ class "pt-5 lg:border-t dark:border-gray-700 flex flex-col items-center" ]
-        [ Extras.Html.showIf model.common.enableSavingChangesInMemory <|
+        [ errorDiv "There are errors on this form — see above."
+            |> Extras.Html.showIf (showValidationErrors && Form.hasValidationErrors form)
+        , Extras.Html.showIf model.common.enableSavingChangesInMemory <|
             div
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                 [ text Components.Copy.sandboxModeMessage ]
@@ -372,7 +536,11 @@ view model =
                             [ class "pt-7" ]
                             [ model.form
                                 |> Form.rows
-                                |> viewEditTags { enableMathSupport = enableMathSupport, tabbable = True }
+                                |> viewEditTags
+                                    { enableMathSupport = enableMathSupport
+                                    , tabbable = True
+                                    , showValidationErrors = model.triedToSaveWhenFormInvalid
+                                    }
                             , div
                                 [ class "mt-4 lg:mt-8" ]
                                 [ viewFooter model model.triedToSaveWhenFormInvalid items ]
