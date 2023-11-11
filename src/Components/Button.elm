@@ -16,7 +16,7 @@ withAdditionalAttributes :
 withAdditionalAttributes attributes additionalAttributes children =
     Accessibility.button
         ([ Html.Attributes.type_ "button"
-         , class "whitespace-nowrap"
+         , class "select-none whitespace-nowrap"
          ]
             ++ (attributes ++ additionalAttributes)
         )
@@ -124,7 +124,7 @@ softIndigo enabled =
 softSmall : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 softSmall enabled =
     withAdditionalAttributes
-        [ class "rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-700 dark:text-gray-100 shadow-sm select-none"
+        [ class "rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-700 dark:text-gray-100 shadow-sm"
         , Extras.HtmlAttribute.showIf enabled <| class "hover:bg-gray-100 dark:hover:bg-gray-700"
         , Html.Attributes.disabled <| not enabled
         , Accessibility.Key.tabbable enabled
@@ -134,7 +134,7 @@ softSmall enabled =
 soft : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 soft enabled =
     withAdditionalAttributes
-        [ class "rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-2 py-1 text-gray-700 dark:text-gray-200 shadow-sm select-none"
+        [ class "rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-2 py-1 text-gray-700 dark:text-gray-200 shadow-sm"
         , if enabled then
             class "hover:bg-gray-100 dark:hover:bg-gray-800"
 
@@ -175,11 +175,11 @@ toggle on labelId additionalAttributes children =
                 []
             ]
         , Accessibility.span
-            [ class "ml-3 select-none"
+            [ class "ml-3"
             , Html.Attributes.id labelId
             ]
             [ Accessibility.span
-                [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                [ class "font-medium text-gray-900 dark:text-gray-300 select-none" ]
                 children
             ]
         ]
