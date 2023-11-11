@@ -601,7 +601,7 @@ viewTags { enableMathSupport, onClickTag } tags =
                 Components.Button.softSmall
                     (onClickTag /= Nothing)
                     [ class "mr-2 mb-2"
-                    , Html.Attributes.title <| "Tag: " ++ Tag.raw tag
+                    , Html.Attributes.title <| "Tag: " ++ Tag.inlineText tag
                     , Extras.HtmlAttribute.showMaybe (\onClickTag_ -> Html.Events.onClick <| onClickTag_ tag) onClickTag
                     ]
                     [ Tag.view enableMathSupport
