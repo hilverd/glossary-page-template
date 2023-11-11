@@ -351,20 +351,21 @@ viewEditTag { enableMathSupport, tabbable, showValidationErrors } index tagField
                 [ Html.legend
                     [ class "text-center text-gray-800 dark:text-gray-100 px-3 py-0.5 select-none" ]
                     [ text "Preview" ]
-                , div
-                    [ class "pb-4" ]
-                    [ Components.Button.soft
-                        tabbable
-                        [ class "mr-2 mt-2"
+                , Extras.Html.showIf (tagField |> TagField.raw |> String.trim |> String.isEmpty |> not) <|
+                    div
+                        [ class "pb-4" ]
+                        [ Components.Button.soft
+                            tabbable
+                            [ class "mr-2 mt-2"
+                            ]
+                            [ Tag.view enableMathSupport
+                                [ class "text-gray-700 dark:text-gray-100" ]
+                                (tagField
+                                    |> TagField.raw
+                                    |> Tag.fromMarkdown
+                                )
+                            ]
                         ]
-                        [ Tag.view enableMathSupport
-                            [ class "text-gray-700 dark:text-gray-100" ]
-                            (tagField
-                                |> TagField.raw
-                                |> Tag.fromMarkdown
-                            )
-                        ]
-                    ]
                 , div
                     []
                     [ TagDescription.view
