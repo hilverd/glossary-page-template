@@ -327,8 +327,7 @@ viewEditTag { enableMathSupport, tabbable, showValidationErrors } index tagField
                             , Html.Attributes.placeholder "Description"
                             , Accessibility.Aria.label "Description"
                             , Accessibility.Aria.required True
-
-                            -- , Html.Attributes.id ElementIds.tagDescriptionInputField
+                            , id <| ElementIds.tagDescriptionInputField index
                             , Html.Events.onInput (PageMsg.Internal << UpdateTagDescription index)
                             ]
                         ]
