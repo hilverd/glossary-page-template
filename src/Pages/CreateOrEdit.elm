@@ -1158,7 +1158,7 @@ view model =
                                 , div
                                     [ class "mt-8 lg:w-1/2 lg:mt-0 max-w-4xl text-gray-900 dark:text-gray-100" ]
                                     [ Html.fieldset
-                                        [ class "pt-4" ]
+                                        [ class "pt-4 lg:sticky lg:top-5" ]
                                         [ Html.legend
                                             [ class "text-xl text-center text-gray-800 dark:text-gray-300 px-1 select-none" ]
                                             [ text "Preview" ]
