@@ -788,11 +788,27 @@ update msg model =
                         _ ->
                             Nothing
 
+                orderItemsBy_ =
+                    case model.common.orderItemsBy of
+                        FocusedOn _ ->
+                            Alphabetically
+
+                        _ ->
+                            model.common.orderItemsBy
+
                 common0 : CommonModel
                 common0 =
                     model.common
             in
-            ( { model | common = { common0 | filterByTag = filterByTag } }, Cmd.none )
+            ( { model
+                | common =
+                    { common0
+                        | filterByTag = filterByTag
+                        , orderItemsBy = orderItemsBy_
+                    }
+              }
+            , Cmd.none
+            )
 
         DoNotFilterByTag ->
             let
