@@ -139,7 +139,7 @@ init flags =
         loadedGlossaryItems =
             LoadedGlossaryItems.decodeFromFlags enableMarkdownBasedSyntax flags
 
-        glossary : Result Decode.Error Glossary
+        glossary : Result String Glossary
         glossary =
             loadedGlossaryItems
                 |> Result.map
@@ -206,6 +206,7 @@ init flags =
                         , items = items
                         }
                     )
+                |> Result.mapError Decode.errorToString
 
         ( listAllModel, listAllCmd ) =
             Pages.ListAll.init
