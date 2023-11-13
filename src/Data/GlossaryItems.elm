@@ -454,14 +454,21 @@ insertTag tag tagDescription glossaryItems =
                     tagDescriptionById_ =
                         items.tagDescriptionById
                             |> TagIdDict.insert items.nextTagId tagDescription
+
+                    updatedItemsBeforeValidation : GlossaryItems
+                    updatedItemsBeforeValidation =
+                        GlossaryItems
+                            { items
+                                | tagById = tagById_
+                                , tagIdByRawTag = tagIdByRawTag_
+                                , tagDescriptionById = tagDescriptionById_
+                                , nextTagId = TagId.increment items.nextTagId
+                            }
                 in
-                GlossaryItems
-                    { items
-                        | tagById = tagById_
-                        , tagIdByRawTag = tagIdByRawTag_
-                        , tagDescriptionById = tagDescriptionById_
-                        , nextTagId = TagId.increment items.nextTagId
-                    }
+                updatedItemsBeforeValidation
+                    |> orderedAlphabetically Nothing
+                    |> List.map Tuple.second
+                    |> fromList (tagsWithDescriptions updatedItemsBeforeValidation)
 
             else
                 glossaryItems
@@ -489,13 +496,20 @@ updateTag tagId tag tagDescription glossaryItems =
                     tagDescriptionById_ =
                         items.tagDescriptionById
                             |> TagIdDict.insert tagId tagDescription
+
+                    updatedItemsBeforeValidation : GlossaryItems
+                    updatedItemsBeforeValidation =
+                        GlossaryItems
+                            { items
+                                | tagById = tagById_
+                                , tagIdByRawTag = tagIdByRawTag_
+                                , tagDescriptionById = tagDescriptionById_
+                            }
                 in
-                GlossaryItems
-                    { items
-                        | tagById = tagById_
-                        , tagIdByRawTag = tagIdByRawTag_
-                        , tagDescriptionById = tagDescriptionById_
-                    }
+                updatedItemsBeforeValidation
+                    |> orderedAlphabetically Nothing
+                    |> List.map Tuple.second
+                    |> fromList (tagsWithDescriptions updatedItemsBeforeValidation)
 
             else
                 glossaryItems
@@ -523,13 +537,19 @@ removeTag tagId glossaryItems =
                     tagDescriptionById_ =
                         items.tagDescriptionById
                             |> TagIdDict.remove tagId
+
+                    updatedItemsBeforeValidation =
+                        GlossaryItems
+                            { items
+                                | tagById = tagById_
+                                , tagIdByRawTag = tagIdByRawTag_
+                                , tagDescriptionById = tagDescriptionById_
+                            }
                 in
-                GlossaryItems
-                    { items
-                        | tagById = tagById_
-                        , tagIdByRawTag = tagIdByRawTag_
-                        , tagDescriptionById = tagDescriptionById_
-                    }
+                updatedItemsBeforeValidation
+                    |> orderedAlphabetically Nothing
+                    |> List.map Tuple.second
+                    |> fromList (tagsWithDescriptions updatedItemsBeforeValidation)
 
             else
                 glossaryItems
