@@ -474,7 +474,7 @@ viewFooter model showValidationErrors glossaryItems =
         common =
             model.common
 
-        updatedGlossary : Result String Glossary
+        updatedGlossary : Result Decode.Error Glossary
         updatedGlossary =
             case common.glossary of
                 Ok glossary ->
