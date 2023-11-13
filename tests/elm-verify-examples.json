@@ -18,6 +18,7 @@
         "Data.TagDescription",
         "Data.TagId",
         "Data.TagIdDict",
+        "Data.TagsChanges",
         "DirectedGraph",
         "Export.Anki",
         "Export.Markdown",
