@@ -9,6 +9,7 @@ import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.TagDescription as TagDescription exposing (TagDescription)
 import Data.TagId as TagId
+import Data.TagsChanges as TagsChanges exposing (TagsChange, TagsChanges)
 import Expect
 import Test exposing (Test, describe, test)
 
@@ -191,8 +192,14 @@ suite =
     describe "The GlossaryItems module"
         [ test "inserts tags" <|
             \_ ->
+                let
+                    tagsChanges : TagsChanges
+                    tagsChanges =
+                        TagsChanges.empty
+                            |> TagsChanges.insert houseworkTag houseworkTagDescription
+                in
                 glossaryItems
-                    |> GlossaryItems.insertTag houseworkTag houseworkTagDescription
+                    |> GlossaryItems.applyTagsChanges tagsChanges
                     |> GlossaryItems.tagsWithDescriptions
                     |> Expect.equal
                         [ ( computerScienceTag, computerScienceTagDescription )
@@ -200,15 +207,16 @@ suite =
                         , ( gardeningTag, gardeningTagDescription )
                         , ( houseworkTag, houseworkTagDescription )
                         ]
-        , test "ignores attempts to insert existing tags" <|
-            \_ ->
-                glossaryItems
-                    |> GlossaryItems.insertTag gardeningTag gardeningTagDescription
-                    |> Expect.equal glossaryItems
         , test "updates tags" <|
             \_ ->
+                let
+                    tagsChanges : TagsChanges
+                    tagsChanges =
+                        TagsChanges.empty
+                            |> TagsChanges.update (TagId.create 0) houseworkTag houseworkTagDescription
+                in
                 glossaryItems
-                    |> GlossaryItems.updateTag (TagId.create 0) houseworkTag houseworkTagDescription
+                    |> GlossaryItems.applyTagsChanges tagsChanges
                     |> GlossaryItems.tagsWithDescriptions
                     |> Expect.equal
                         [ ( financeTag, financeTagDescription )
@@ -217,8 +225,14 @@ suite =
                         ]
         , test "updates tags in items" <|
             \_ ->
+                let
+                    tagsChanges : TagsChanges
+                    tagsChanges =
+                        TagsChanges.empty
+                            |> TagsChanges.update (TagId.create 0) houseworkTag houseworkTagDescription
+                in
                 glossaryItems
-                    |> GlossaryItems.updateTag (TagId.create 0) houseworkTag houseworkTagDescription
+                    |> GlossaryItems.applyTagsChanges tagsChanges
                     |> GlossaryItems.get (GlossaryItemId.create 0)
                     |> Expect.equal
                         (Just <|
@@ -234,15 +248,16 @@ suite =
                                 False
                                 (Just "2023-09-15T19:58:59.573Z")
                         )
-        , test "ignores attempts to update tags for non-existing tag IDs" <|
-            \_ ->
-                glossaryItems
-                    |> GlossaryItems.updateTag (TagId.create 99) houseworkTag houseworkTagDescription
-                    |> Expect.equal glossaryItems
         , test "removes tags" <|
             \_ ->
+                let
+                    tagsChanges : TagsChanges
+                    tagsChanges =
+                        TagsChanges.empty
+                            |> TagsChanges.remove (TagId.create 1)
+                in
                 glossaryItems
-                    |> GlossaryItems.removeTag (TagId.create 1)
+                    |> GlossaryItems.applyTagsChanges tagsChanges
                     |> GlossaryItems.tagsWithDescriptions
                     |> Expect.equal
                         [ ( computerScienceTag, computerScienceTagDescription )
@@ -250,8 +265,14 @@ suite =
                         ]
         , test "removes tags from items" <|
             \_ ->
+                let
+                    tagsChanges : TagsChanges
+                    tagsChanges =
+                        TagsChanges.empty
+                            |> TagsChanges.remove (TagId.create 1)
+                in
                 glossaryItems
-                    |> GlossaryItems.removeTag (TagId.create 1)
+                    |> GlossaryItems.applyTagsChanges tagsChanges
                     |> GlossaryItems.get (GlossaryItemId.create 1)
                     |> Expect.equal
                         (Just <|

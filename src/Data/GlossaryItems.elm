@@ -1,6 +1,6 @@
 module Data.GlossaryItems exposing
     ( GlossaryItems
-    , fromList, insertTag, updateTag, removeTag, insert, update, remove
+    , fromList, applyTagsChanges, insert, update, remove
     , get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
@@ -15,7 +15,7 @@ module Data.GlossaryItems exposing
 
 # Build
 
-@docs fromList, insertTag, updateTag, removeTag, insert, update, remove
+@docs fromList, applyTagsChanges, insert, update, remove
 
 
 # Query
@@ -40,6 +40,7 @@ import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDic
 import Data.TagDescription exposing (TagDescription)
 import Data.TagId as TagId exposing (TagId)
 import Data.TagIdDict as TagIdDict exposing (TagIdDict)
+import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import Dict exposing (Dict)
 import DirectedGraph exposing (DirectedGraph)
 import Extras.Regex
@@ -428,131 +429,48 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
         }
 
 
-{-| Insert a tag. Does nothing if the tag already exists.
+{-| Apply a set of tags changes.
 -}
-insertTag : Tag -> TagDescription -> GlossaryItems -> GlossaryItems
-insertTag tag tagDescription glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            let
-                rawTag =
-                    Tag.raw tag
-            in
-            if Dict.get rawTag items.tagIdByRawTag == Nothing then
-                let
-                    tagById_ : TagIdDict Tag
-                    tagById_ =
-                        items.tagById
-                            |> TagIdDict.insert items.nextTagId tag
+applyTagsChanges : TagsChanges -> GlossaryItems -> GlossaryItems
+applyTagsChanges tagsChanges glossaryItems =
+    let
+        resultBeforeValidation =
+            tagsChanges
+                |> TagsChanges.toList
+                |> List.foldl
+                    (\tagsChange result ->
+                        case ( result, tagsChange ) of
+                            ( GlossaryItems items, TagsChanges.Insertion tag tagDescription ) ->
+                                GlossaryItems
+                                    { items
+                                        | tagById = TagIdDict.insert items.nextTagId tag items.tagById
+                                        , tagIdByRawTag = Dict.insert (Tag.raw tag) items.nextTagId items.tagIdByRawTag
+                                        , tagDescriptionById = TagIdDict.insert items.nextTagId tagDescription items.tagDescriptionById
+                                        , nextTagId = TagId.increment items.nextTagId
+                                    }
 
-                    tagIdByRawTag_ : Dict String TagId
-                    tagIdByRawTag_ =
-                        items.tagIdByRawTag
-                            |> Dict.insert rawTag items.nextTagId
+                            ( GlossaryItems items, TagsChanges.Update tagId tag tagDescription ) ->
+                                GlossaryItems
+                                    { items
+                                        | tagById = TagIdDict.insert tagId tag items.tagById
+                                        , tagIdByRawTag = Dict.insert (Tag.raw tag) tagId items.tagIdByRawTag
+                                        , tagDescriptionById = TagIdDict.insert tagId tagDescription items.tagDescriptionById
+                                    }
 
-                    tagDescriptionById_ : TagIdDict TagDescription
-                    tagDescriptionById_ =
-                        items.tagDescriptionById
-                            |> TagIdDict.insert items.nextTagId tagDescription
-
-                    updatedItemsBeforeValidation : GlossaryItems
-                    updatedItemsBeforeValidation =
-                        GlossaryItems
-                            { items
-                                | tagById = tagById_
-                                , tagIdByRawTag = tagIdByRawTag_
-                                , tagDescriptionById = tagDescriptionById_
-                                , nextTagId = TagId.increment items.nextTagId
-                            }
-                in
-                updatedItemsBeforeValidation
-                    |> orderedAlphabetically Nothing
-                    |> List.map Tuple.second
-                    |> fromList (tagsWithDescriptions updatedItemsBeforeValidation)
-
-            else
-                glossaryItems
-
-
-{-| Update a tag. Do nothing if there is no tag with the given ID.
--}
-updateTag : TagId -> Tag -> TagDescription -> GlossaryItems -> GlossaryItems
-updateTag tagId tag tagDescription glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            if TagIdDict.member tagId items.tagById then
-                let
-                    tagById_ : TagIdDict Tag
-                    tagById_ =
-                        items.tagById
-                            |> TagIdDict.insert tagId tag
-
-                    tagIdByRawTag_ : Dict String TagId
-                    tagIdByRawTag_ =
-                        items.tagIdByRawTag
-                            |> Dict.insert (Tag.raw tag) tagId
-
-                    tagDescriptionById_ : TagIdDict TagDescription
-                    tagDescriptionById_ =
-                        items.tagDescriptionById
-                            |> TagIdDict.insert tagId tagDescription
-
-                    updatedItemsBeforeValidation : GlossaryItems
-                    updatedItemsBeforeValidation =
-                        GlossaryItems
-                            { items
-                                | tagById = tagById_
-                                , tagIdByRawTag = tagIdByRawTag_
-                                , tagDescriptionById = tagDescriptionById_
-                            }
-                in
-                updatedItemsBeforeValidation
-                    |> orderedAlphabetically Nothing
-                    |> List.map Tuple.second
-                    |> fromList (tagsWithDescriptions updatedItemsBeforeValidation)
-
-            else
-                glossaryItems
-
-
-{-| Remove the tag associated with an ID. Does nothing if the ID is not found.
--}
-removeTag : TagId -> GlossaryItems -> GlossaryItems
-removeTag tagId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            if TagIdDict.member tagId items.tagById then
-                let
-                    tagById_ : TagIdDict Tag
-                    tagById_ =
-                        items.tagById
-                            |> TagIdDict.remove tagId
-
-                    tagIdByRawTag_ : Dict String TagId
-                    tagIdByRawTag_ =
-                        items.tagIdByRawTag
-                            |> Dict.filter (\_ tagId_ -> tagId_ /= tagId)
-
-                    tagDescriptionById_ : TagIdDict TagDescription
-                    tagDescriptionById_ =
-                        items.tagDescriptionById
-                            |> TagIdDict.remove tagId
-
-                    updatedItemsBeforeValidation =
-                        GlossaryItems
-                            { items
-                                | tagById = tagById_
-                                , tagIdByRawTag = tagIdByRawTag_
-                                , tagDescriptionById = tagDescriptionById_
-                            }
-                in
-                updatedItemsBeforeValidation
-                    |> orderedAlphabetically Nothing
-                    |> List.map Tuple.second
-                    |> fromList (tagsWithDescriptions updatedItemsBeforeValidation)
-
-            else
-                glossaryItems
+                            ( GlossaryItems items, TagsChanges.Removal tagId ) ->
+                                GlossaryItems
+                                    { items
+                                        | tagById = TagIdDict.remove tagId items.tagById
+                                        , tagIdByRawTag = Dict.filter (always <| (/=) tagId) items.tagIdByRawTag
+                                        , tagDescriptionById = TagIdDict.remove tagId items.tagDescriptionById
+                                    }
+                    )
+                    glossaryItems
+    in
+    resultBeforeValidation
+        |> orderedAlphabetically Nothing
+        |> List.map Tuple.second
+        |> fromList (tagsWithDescriptions resultBeforeValidation)
 
 
 {-| Insert an item.

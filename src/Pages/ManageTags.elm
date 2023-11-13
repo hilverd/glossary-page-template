@@ -16,6 +16,7 @@ import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.Saving exposing (Saving(..))
 import Data.TagDescription as TagDescription exposing (TagDescription)
+import Data.TagsChanges exposing (TagsChanges)
 import ElementIds
 import Extras.Html
 import Extras.HtmlAttribute
@@ -93,37 +94,14 @@ init common =
 -- UPDATE
 
 
-applyChanges : List Form.Row -> Glossary -> Glossary
-applyChanges rows glossary =
+applyChanges : TagsChanges -> Glossary -> Glossary
+applyChanges changes glossary =
     let
         items0 : GlossaryItems
         items0 =
             glossary.items
-
-        items1 : GlossaryItems
-        items1 =
-            List.foldl
-                (\row items ->
-                    case row of
-                        Form.Existing { id, tagField, tagDescriptionField } ->
-                            items
-                                |> GlossaryItems.updateTag id
-                                    (tagField |> TagField.raw |> Tag.fromMarkdown)
-                                    (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
-
-                        Form.Deleted tagId ->
-                            GlossaryItems.removeTag tagId items
-
-                        Form.New { tagField, tagDescriptionField } ->
-                            items
-                                |> GlossaryItems.insertTag
-                                    (tagField |> TagField.raw |> Tag.fromMarkdown)
-                                    (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
-                )
-                items0
-                rows
     in
-    { glossary | items = items1 }
+    { glossary | items = GlossaryItems.applyTagsChanges changes items0 }
 
 
 patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
@@ -222,7 +200,7 @@ update msg model =
                                 { common0
                                     | glossary =
                                         glossary0
-                                            |> applyChanges (model.form |> Form.rows |> Array.toList)
+                                            |> applyChanges (Form.changes model.form)
                                             |> Ok
                                 }
 

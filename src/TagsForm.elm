@@ -1,9 +1,10 @@
-module TagsForm exposing (Row(..), TagsForm, addRow, create, deleteRow, hasValidationErrors, rows, updateTag, updateTagDescription, validate)
+module TagsForm exposing (Row(..), TagsForm, addRow, changes, create, deleteRow, hasValidationErrors, rows, updateTag, updateTagDescription, validate)
 
 import Array exposing (Array)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.TagDescription as TagDescription exposing (TagDescription)
 import Data.TagId exposing (TagId)
+import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import Extras.Array
 import Set
 import TagsForm.TagDescriptionField as TagDescriptionField exposing (TagDescriptionField)
@@ -25,6 +26,30 @@ type Row
 
 type TagsForm
     = TagsForm { rows : Array Row }
+
+
+changes : TagsForm -> TagsChanges
+changes tagsForm =
+    case tagsForm of
+        TagsForm form ->
+            form.rows
+                |> Array.foldl
+                    (\row ->
+                        case row of
+                            Existing { id, tagField, tagDescriptionField } ->
+                                TagsChanges.update id
+                                    (tagField |> TagField.raw |> String.trim |> Tag.fromMarkdown)
+                                    (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
+
+                            Deleted tagId ->
+                                TagsChanges.remove tagId
+
+                            New { tagField, tagDescriptionField } ->
+                                TagsChanges.insert
+                                    (tagField |> TagField.raw |> String.trim |> Tag.fromMarkdown)
+                                    (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
+                    )
+                    TagsChanges.empty
 
 
 rows : TagsForm -> Array Row
