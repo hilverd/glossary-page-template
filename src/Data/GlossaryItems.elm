@@ -1,6 +1,6 @@
 module Data.GlossaryItems exposing
     ( GlossaryItems
-    , fromList, applyTagsChanges, insert, update, remove
+    , empty, fromList, applyTagsChanges, insert, update, remove
     , get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
@@ -15,7 +15,7 @@ module Data.GlossaryItems exposing
 
 # Build
 
-@docs fromList, applyTagsChanges, insert, update, remove
+@docs empty, fromList, applyTagsChanges, insert, update, remove
 
 
 # Query
@@ -170,6 +170,28 @@ orderByMostMentionedFirst indexedGlossaryItemsForHtml =
                         LT
             )
         |> List.map Tuple.first
+
+
+{-| The empty set of glossary items.
+-}
+empty : GlossaryItems
+empty =
+    GlossaryItems
+        { itemById = GlossaryItemIdDict.empty
+        , tagById = TagIdDict.empty
+        , tagIdByRawTag = Dict.empty
+        , tagDescriptionById = TagIdDict.empty
+        , disambiguationTagIdByItemId = GlossaryItemIdDict.empty
+        , normalTagIdsByItemId = GlossaryItemIdDict.empty
+        , itemIdsByTagId = TagIdDict.empty
+        , itemIdByDisambiguatedPreferredTermId = Dict.empty
+        , relatedItemIdsById = GlossaryItemIdDict.empty
+        , orderedAlphabetically = []
+        , orderedByMostMentionedFirst = []
+        , orderedFocusedOn = Nothing
+        , nextItemId = GlossaryItemId.create 0
+        , nextTagId = TagId.create 0
+        }
 
 
 {-| Convert a list of glossary items for/from HTML into a `GlossaryItems`.

@@ -1,11 +1,12 @@
 module GlossaryItemsTests exposing (suite)
 
+import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.GlossaryItemId as GlossaryItemId
+import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.TagDescription as TagDescription exposing (TagDescription)
 import Data.TagId as TagId
@@ -311,6 +312,62 @@ suite =
                         , ( GlossaryItemId.create 3, updatedInterestRateItem )
                         , ( GlossaryItemId.create 4, updatedLoanItem )
                         ]
+        , test "can start with an empty set and insert tags and items" <|
+            \_ ->
+                {- This test is not very readable.
+                   That is mainly because it needs to cope with the fact that items being inserted cannot refer to other items that have not been inserted yet.
+                   To work around this, it does a first pass over the items to insert them, then a second one to update them.
+                -}
+                let
+                    tagsChanges =
+                        TagsChanges.empty
+                            |> TagsChanges.insert gardeningTag gardeningTagDescription
+                            |> TagsChanges.insert financeTag financeTagDescription
+                            |> TagsChanges.insert computerScienceTag computerScienceTagDescription
+
+                    glossaryItemsForHtml =
+                        [ defaultComputerScienceItem
+                        , defaultFinanceItem
+                        , informationRetrievalItem
+                        , interestRateItem
+                        , loanItem
+                        ]
+                in
+                GlossaryItems.empty
+                    |> GlossaryItems.applyTagsChanges tagsChanges
+                    |> (\result -> List.foldl GlossaryItems.insert result glossaryItemsForHtml)
+                    |> (\result ->
+                            let
+                                itemId : GlossaryItemForHtml -> GlossaryItems -> GlossaryItemId
+                                itemId glossaryItemForHtml result_ =
+                                    result_
+                                        |> GlossaryItems.orderedAlphabetically Nothing
+                                        |> List.filterMap
+                                            (\( id, glossaryItemForHtml_ ) ->
+                                                if GlossaryItemForHtml.definition glossaryItemForHtml_ == GlossaryItemForHtml.definition glossaryItemForHtml then
+                                                    Just id
+
+                                                else
+                                                    Nothing
+                                            )
+                                        |> List.head
+                                        |> Maybe.withDefault (GlossaryItemId.create -1)
+                            in
+                            glossaryItemsForHtml
+                                |> List.foldl
+                                    (\glossaryItemForHtml result1 ->
+                                        GlossaryItems.update
+                                            (itemId glossaryItemForHtml result1)
+                                            glossaryItemForHtml
+                                            result1
+                                    )
+                                    result
+                       )
+                    |> GlossaryItems.orderedAlphabetically Nothing
+                    |> Expect.equal
+                        (glossaryItems
+                            |> GlossaryItems.orderedAlphabetically Nothing
+                        )
         , test "gets items by ID" <|
             \_ ->
                 glossaryItems
