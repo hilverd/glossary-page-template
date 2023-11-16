@@ -2612,7 +2612,7 @@ view model =
 
         Err error ->
             { title = "Glossary"
-            , body = [ pre [] [ text <| Decode.errorToString error ] ]
+            , body = [ pre [] [ text error ] ]
             }
 
 

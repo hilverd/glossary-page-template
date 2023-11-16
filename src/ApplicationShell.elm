@@ -135,11 +135,11 @@ init flags =
                 |> Decode.decodeValue (Decode.field "enableSavingChangesInMemory" Decode.bool)
                 |> Result.withDefault False
 
-        loadedGlossaryItems : Result Decode.Error GlossaryItems
+        loadedGlossaryItems : Result String GlossaryItems
         loadedGlossaryItems =
             LoadedGlossaryItems.decodeFromFlags enableMarkdownBasedSyntax flags
 
-        glossary : Result Decode.Error Glossary
+        glossary : Result String Glossary
         glossary =
             loadedGlossaryItems
                 |> Result.map

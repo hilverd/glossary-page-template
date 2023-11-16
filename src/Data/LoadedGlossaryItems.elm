@@ -7,7 +7,7 @@ import Data.TagDescription as TagDescription exposing (TagDescription)
 import Json.Decode as Decode
 
 
-decodeFromFlags : Bool -> Decode.Value -> Result Decode.Error GlossaryItems
+decodeFromFlags : Bool -> Decode.Value -> Result String GlossaryItems
 decodeFromFlags enableMarkdownBasedSyntax flags =
     let
         tagsWithDescriptions : List ( Tag, TagDescription )
@@ -32,4 +32,5 @@ decodeFromFlags enableMarkdownBasedSyntax flags =
             (Decode.field "glossaryItems" <|
                 Decode.list (GlossaryItemForHtml.decode enableMarkdownBasedSyntax)
             )
+        |> Result.mapError Decode.errorToString
         |> Result.map (GlossaryItems.fromList tagsWithDescriptions)
