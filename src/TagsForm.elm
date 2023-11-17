@@ -235,8 +235,8 @@ validate tagsForm =
                 { rows = rows_ }
 
 
-updateTag : Int -> TagsForm -> String -> TagsForm
-updateTag index tagsForm body =
+updateTag : Int -> String -> TagsForm -> TagsForm
+updateTag index body tagsForm =
     case tagsForm of
         TagsForm form ->
             let
@@ -260,8 +260,8 @@ updateTag index tagsForm body =
                 |> validate
 
 
-updateTagDescription : Int -> TagsForm -> String -> TagsForm
-updateTagDescription index tagsForm body =
+updateTagDescription : Int -> String -> TagsForm -> TagsForm
+updateTagDescription index body tagsForm =
     case tagsForm of
         TagsForm form ->
             let

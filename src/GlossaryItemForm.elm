@@ -511,8 +511,8 @@ addTerm glossaryItemForm =
                 |> validate
 
 
-updateTerm : TermIndex -> GlossaryItemForm -> String -> GlossaryItemForm
-updateTerm termIndex glossaryItemForm body =
+updateTerm : TermIndex -> String -> GlossaryItemForm -> GlossaryItemForm
+updateTerm termIndex body glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             (if TermIndex.toInt termIndex == 0 then
@@ -630,8 +630,8 @@ toggleTagCheckbox tag glossaryItemForm =
                 }
 
 
-updateDefinition : GlossaryItemForm -> String -> GlossaryItemForm
-updateDefinition glossaryItemForm body =
+updateDefinition : String -> GlossaryItemForm -> GlossaryItemForm
+updateDefinition body glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             let
@@ -651,8 +651,8 @@ updateDefinition glossaryItemForm body =
                 |> validate
 
 
-updateDisambiguationTagId : GlossaryItemForm -> Maybe TagId -> GlossaryItemForm
-updateDisambiguationTagId glossaryItemForm tagId =
+updateDisambiguationTagId : Maybe TagId -> GlossaryItemForm -> GlossaryItemForm
+updateDisambiguationTagId tagId glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
@@ -694,8 +694,8 @@ addRelatedTerm maybeTermId glossaryItemForm =
                 |> validate
 
 
-selectRelatedTerm : RelatedTermIndex -> GlossaryItemForm -> Maybe TermId -> GlossaryItemForm
-selectRelatedTerm index glossaryItemForm relatedTermIdReference =
+selectRelatedTerm : RelatedTermIndex -> Maybe TermId -> GlossaryItemForm -> GlossaryItemForm
+selectRelatedTerm index relatedTermIdReference glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm

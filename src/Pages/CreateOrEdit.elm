@@ -56,9 +56,15 @@ type alias Model =
     { common : CommonModel
     , form : GlossaryItemForm
     , triedToSaveWhenFormInvalid : Bool
+    , glossaryItemsError : Maybe String
     , saving : Saving
     , dropdownMenusWithMoreOptionsForRelatedTerms : Dict Int Components.DropdownMenu.Model
     }
+
+
+updateForm : (GlossaryItemForm -> GlossaryItemForm) -> Model -> Model
+updateForm f model =
+    { model | form = f model.form, glossaryItemsError = Nothing }
 
 
 type InternalMsg
@@ -148,6 +154,7 @@ init commonModel =
             ( { common = commonModel
               , form = form
               , triedToSaveWhenFormInvalid = False
+              , glossaryItemsError = Nothing
               , saving = NotSaving
               , dropdownMenusWithMoreOptionsForRelatedTerms =
                     dropdownMenusWithMoreOptionsForRelatedTermsForForm form
@@ -163,6 +170,7 @@ init commonModel =
             ( { common = commonModel
               , form = Form.empty [] [] [] []
               , triedToSaveWhenFormInvalid = False
+              , glossaryItemsError = Nothing
               , saving = NotSaving
               , dropdownMenusWithMoreOptionsForRelatedTerms = Dict.empty
               }
@@ -217,24 +225,28 @@ update msg model =
                 latestTermIndex =
                     Array.length (Form.termFields form) - 1 |> TermIndex.fromInt
             in
-            ( { model | form = form }
+            ( updateForm (always form) model
             , giveFocusToTermInputField latestTermIndex
             )
 
         DeleteTerm termIndex ->
-            ( { model | form = Form.deleteTerm termIndex model.form }, Cmd.none )
+            ( updateForm (Form.deleteTerm termIndex) model
+            , Cmd.none
+            )
 
         UpdateTerm termIndex body ->
-            ( { model | form = Form.updateTerm termIndex model.form body }, Cmd.none )
+            ( updateForm (Form.updateTerm termIndex body) model
+            , Cmd.none
+            )
 
         ToggleAbbreviation termIndex ->
-            ( { model | form = Form.toggleAbbreviation termIndex model.form }, Cmd.none )
+            ( updateForm (Form.toggleAbbreviation termIndex) model, Cmd.none )
 
         ToggleTagCheckbox tag ->
-            ( { model | form = Form.toggleTagCheckbox tag model.form }, Cmd.none )
+            ( updateForm (Form.toggleTagCheckbox tag) model, Cmd.none )
 
         UpdateDefinition body ->
-            ( { model | form = Form.updateDefinition model.form body }, Cmd.none )
+            ( updateForm (Form.updateDefinition body) model, Cmd.none )
 
         SelectDisambiguationTag rawTag ->
             let
@@ -252,7 +264,7 @@ update msg model =
                             )
                         |> List.head
             in
-            ( { model | form = Form.updateDisambiguationTagId model.form disambiguationTagId }
+            ( updateForm (Form.updateDisambiguationTagId disambiguationTagId) model
             , Cmd.none
             )
 
@@ -267,9 +279,9 @@ update msg model =
                     Array.length (Form.relatedTermFields form) - 1 |> RelatedTermIndex.fromInt
             in
             ( { model
-                | form = form
-                , dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
+                | dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
+                |> updateForm (always form)
             , giveFocusToSeeAlsoSelect latestRelatedTermIndex
             )
 
@@ -283,7 +295,9 @@ update msg model =
                     else
                         Just <| TermId.fromString selection
             in
-            ( { model | form = Form.selectRelatedTerm relatedTermIndex model.form relatedTermIdReference }, Cmd.none )
+            ( updateForm (Form.selectRelatedTerm relatedTermIndex relatedTermIdReference) model
+            , Cmd.none
+            )
 
         DeleteRelatedTerm relatedTermIndex ->
             let
@@ -291,9 +305,9 @@ update msg model =
                     Form.deleteRelatedTerm relatedTermIndex model.form
             in
             ( { model
-                | form = form
-                , dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
+                | dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
+                |> updateForm (always form)
             , Cmd.none
             )
 
@@ -333,9 +347,9 @@ update msg model =
                     Form.moveRelatedTermUp relatedTermIndexInt model.form
             in
             ( { model
-                | form = form
-                , dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
+                | dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
+                |> updateForm (always form)
             , Cmd.none
             )
 
@@ -345,14 +359,16 @@ update msg model =
                     Form.moveRelatedTermDown relatedTermIndexInt model.form
             in
             ( { model
-                | form = form
-                , dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
+                | dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
+                |> updateForm (always form)
             , Cmd.none
             )
 
         ToggleNeedsUpdating ->
-            ( { model | form = Form.toggleNeedsUpdating model.form }, Cmd.none )
+            ( updateForm Form.toggleNeedsUpdating model
+            , Cmd.none
+            )
 
         Save ->
             ( model, getCurrentDateTimeForSaving () )
@@ -1042,6 +1058,11 @@ viewCreateFormFooter model =
         [ class "pt-5 lg:border-t dark:border-gray-700 flex flex-col items-center" ]
         [ errorDiv "There are errors on this form — see above."
             |> Extras.Html.showIf (model.triedToSaveWhenFormInvalid && Form.hasValidationErrors model.form)
+        , Extras.Html.showMaybe
+            (\glossaryItemsError ->
+                errorDiv <| "Unable to save as it would result in the following: " ++ glossaryItemsError ++ "."
+            )
+            model.glossaryItemsError
         , Extras.Html.showIf common.enableSavingChangesInMemory <|
             div
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]

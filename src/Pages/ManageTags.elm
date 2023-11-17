@@ -1,7 +1,7 @@
 module Pages.ManageTags exposing (InternalMsg, Model, Msg, init, subscriptions, update, view)
 
 import Accessibility exposing (Html, div, form, h1, main_, p, span, text)
-import Accessibility.Aria exposing (required)
+import Accessibility.Aria
 import Array exposing (Array)
 import Browser exposing (Document)
 import Browser.Dom as Dom
@@ -12,10 +12,10 @@ import Components.Form
 import Components.SelectMenu exposing (showValidationErrors)
 import Components.Spinner
 import Data.Glossary as Glossary exposing (Glossary)
-import Data.GlossaryItem.Tag as Tag exposing (Tag)
+import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.Saving exposing (Saving(..))
-import Data.TagDescription as TagDescription exposing (TagDescription)
+import Data.TagDescription as TagDescription
 import Data.TagsChanges exposing (TagsChanges)
 import ElementIds
 import Extras.Html
@@ -24,14 +24,12 @@ import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree
 import Extras.Http
 import Extras.Task
-import Html exposing (h2)
+import Html
 import Html.Attributes exposing (class, id)
 import Html.Events
 import Http
 import Icons
-import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
-import Platform exposing (Task)
 import Svg.Attributes
 import TagsForm as Form exposing (Row, TagsForm)
 import TagsForm.TagDescriptionField as TagDescriptionField exposing (TagDescriptionField)
@@ -47,8 +45,14 @@ type alias Model =
     { common : CommonModel
     , form : TagsForm
     , triedToSaveWhenFormInvalid : Bool
+    , glossaryItemsError : Maybe String
     , saving : Saving
     }
+
+
+updateForm : (TagsForm -> TagsForm) -> Model -> Model
+updateForm f model =
+    { model | form = f model.form, glossaryItemsError = Nothing }
 
 
 type InternalMsg
@@ -75,6 +79,7 @@ init common =
                         |> GlossaryItems.tagsWithIdsAndDescriptions
                         |> Form.create
               , triedToSaveWhenFormInvalid = False
+              , glossaryItemsError = Nothing
               , saving = NotSaving
               }
             , Cmd.none
@@ -84,6 +89,7 @@ init common =
             ( { common = common
               , form = Form.create []
               , triedToSaveWhenFormInvalid = False
+              , glossaryItemsError = Nothing
               , saving = NotSaving
               }
             , Cmd.none
@@ -165,18 +171,18 @@ update msg model =
                 latestIndex =
                     Array.length (Form.rows form) - 1
             in
-            ( { model | form = form }
+            ( updateForm (always form) model
             , giveFocusToTagField latestIndex
             )
 
         DeleteRow index ->
-            ( { model | form = Form.deleteRow index model.form }, Cmd.none )
+            ( updateForm (Form.deleteRow index) model, Cmd.none )
 
         UpdateTag index body ->
-            ( { model | form = Form.updateTag index model.form body }, Cmd.none )
+            ( updateForm (Form.updateTag index body) model, Cmd.none )
 
         UpdateTagDescription index body ->
-            ( { model | form = Form.updateTagDescription index model.form body }, Cmd.none )
+            ( updateForm (Form.updateTagDescription index body) model, Cmd.none )
 
         Save ->
             case model.common.glossary of
@@ -487,6 +493,11 @@ viewFooter model showValidationErrors glossaryItems =
         [ class "pt-5 lg:border-t dark:border-gray-700 flex flex-col items-center" ]
         [ errorDiv "There are errors on this form — see above."
             |> Extras.Html.showIf (showValidationErrors && Form.hasValidationErrors form)
+        , Extras.Html.showMaybe
+            (\glossaryItemsError ->
+                errorDiv <| "Unable to save as it would result in the following: " ++ glossaryItemsError ++ "."
+            )
+            model.glossaryItemsError
         , Extras.Html.showIf model.common.enableSavingChangesInMemory <|
             div
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
