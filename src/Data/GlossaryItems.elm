@@ -194,6 +194,28 @@ empty =
         }
 
 
+type alias DuplicateRejectingDict comparable v =
+    Result String (Dict comparable v)
+
+
+duplicateRejectingDictEmpty : DuplicateRejectingDict comparable v
+duplicateRejectingDictEmpty =
+    Ok Dict.empty
+
+
+duplicateRejectingDictGet : comparable -> DuplicateRejectingDict comparable v -> Maybe v
+duplicateRejectingDictGet key resultDict =
+    resultDict
+        |> Result.toMaybe
+        |> Maybe.andThen (Dict.get key)
+
+
+duplicateRejectingDictInsert : comparable -> v -> DuplicateRejectingDict comparable v -> DuplicateRejectingDict comparable v
+duplicateRejectingDictInsert key value resultDict =
+    resultDict
+        |> Result.map (Dict.insert key value)
+
+
 {-| Convert a list of glossary items for/from HTML into a `GlossaryItems`.
 -}
 fromList : List ( Tag, TagDescription ) -> List GlossaryItemForHtml -> Result String GlossaryItems
