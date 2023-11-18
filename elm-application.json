@@ -23,6 +23,7 @@
         "Data.TagIdDict",
         "Data.TagsChanges",
         "DirectedGraph",
+        "DuplicateRejectingDict",
         "Export.Anki",
         "Export.Markdown",
         "Extras.Array",
