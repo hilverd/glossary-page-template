@@ -54,7 +54,9 @@ loadedGlossaryItems =
                 False
                 Nothing
     in
-    GlossaryItems.fromList [] [ one, two, three ]
+    [ one, two, three ]
+        |> GlossaryItems.fromList []
+        |> Result.withDefault GlossaryItems.empty
 
 
 suite : Test

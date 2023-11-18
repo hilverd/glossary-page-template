@@ -33,4 +33,4 @@ decodeFromFlags enableMarkdownBasedSyntax flags =
                 Decode.list (GlossaryItemForHtml.decode enableMarkdownBasedSyntax)
             )
         |> Result.mapError Decode.errorToString
-        |> Result.map (GlossaryItems.fromList tagsWithDescriptions)
+        |> Result.andThen (GlossaryItems.fromList tagsWithDescriptions)

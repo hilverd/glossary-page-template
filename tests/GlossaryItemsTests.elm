@@ -186,6 +186,7 @@ glossaryItems =
         , interestRateItem
         , loanItem
         ]
+        |> Result.withDefault GlossaryItems.empty
 
 
 suite : Test
@@ -201,13 +202,15 @@ suite =
                 in
                 glossaryItems
                     |> GlossaryItems.applyTagsChanges tagsChanges
-                    |> GlossaryItems.tagsWithDescriptions
+                    |> Result.map GlossaryItems.tagsWithDescriptions
                     |> Expect.equal
-                        [ ( computerScienceTag, computerScienceTagDescription )
-                        , ( financeTag, financeTagDescription )
-                        , ( gardeningTag, gardeningTagDescription )
-                        , ( houseworkTag, houseworkTagDescription )
-                        ]
+                        (Ok
+                            [ ( computerScienceTag, computerScienceTagDescription )
+                            , ( financeTag, financeTagDescription )
+                            , ( gardeningTag, gardeningTagDescription )
+                            , ( houseworkTag, houseworkTagDescription )
+                            ]
+                        )
         , test "updates tags" <|
             \_ ->
                 let
@@ -218,12 +221,14 @@ suite =
                 in
                 glossaryItems
                     |> GlossaryItems.applyTagsChanges tagsChanges
-                    |> GlossaryItems.tagsWithDescriptions
+                    |> Result.map GlossaryItems.tagsWithDescriptions
                     |> Expect.equal
-                        [ ( financeTag, financeTagDescription )
-                        , ( gardeningTag, gardeningTagDescription )
-                        , ( houseworkTag, houseworkTagDescription )
-                        ]
+                        (Ok
+                            [ ( financeTag, financeTagDescription )
+                            , ( gardeningTag, gardeningTagDescription )
+                            , ( houseworkTag, houseworkTagDescription )
+                            ]
+                        )
         , test "updates tags in items" <|
             \_ ->
                 let
@@ -234,20 +239,21 @@ suite =
                 in
                 glossaryItems
                     |> GlossaryItems.applyTagsChanges tagsChanges
-                    |> GlossaryItems.get (GlossaryItemId.create 0)
+                    |> Result.map (GlossaryItems.get <| GlossaryItemId.create 0)
                     |> Expect.equal
-                        (Just <|
-                            GlossaryItemForHtml.create
-                                (Term.fromMarkdown "Default" False)
-                                [ Term.fromMarkdown "Preset" False
-                                , Term.fromMarkdown "Factory preset" False
-                                ]
-                                (Just houseworkTag)
-                                []
-                                (Just defaultComputerScienceDefinition)
-                                []
-                                False
-                                (Just "2023-09-15T19:58:59.573Z")
+                        (Ok <|
+                            Just <|
+                                GlossaryItemForHtml.create
+                                    (Term.fromMarkdown "Default" False)
+                                    [ Term.fromMarkdown "Preset" False
+                                    , Term.fromMarkdown "Factory preset" False
+                                    ]
+                                    (Just houseworkTag)
+                                    []
+                                    (Just defaultComputerScienceDefinition)
+                                    []
+                                    False
+                                    (Just "2023-09-15T19:58:59.573Z")
                         )
         , test "removes tags" <|
             \_ ->
@@ -259,11 +265,13 @@ suite =
                 in
                 glossaryItems
                     |> GlossaryItems.applyTagsChanges tagsChanges
-                    |> GlossaryItems.tagsWithDescriptions
+                    |> Result.map GlossaryItems.tagsWithDescriptions
                     |> Expect.equal
-                        [ ( computerScienceTag, computerScienceTagDescription )
-                        , ( gardeningTag, gardeningTagDescription )
-                        ]
+                        (Ok
+                            [ ( computerScienceTag, computerScienceTagDescription )
+                            , ( gardeningTag, gardeningTagDescription )
+                            ]
+                        )
         , test "removes tags from items" <|
             \_ ->
                 let
@@ -274,44 +282,49 @@ suite =
                 in
                 glossaryItems
                     |> GlossaryItems.applyTagsChanges tagsChanges
-                    |> GlossaryItems.get (GlossaryItemId.create 1)
+                    |> Result.map (GlossaryItems.get <| GlossaryItemId.create 1)
                     |> Expect.equal
-                        (Just <|
-                            GlossaryItemForHtml.create
-                                (Term.fromMarkdown "Default" False)
-                                []
-                                Nothing
-                                []
-                                (Just defaultFinanceDefinition)
-                                [ Term.fromMarkdown "Loan" False ]
-                                False
-                                (Just "2023-10-30T08:25:24.765Z")
+                        (Ok <|
+                            Just <|
+                                GlossaryItemForHtml.create
+                                    (Term.fromMarkdown "Default" False)
+                                    []
+                                    Nothing
+                                    []
+                                    (Just defaultFinanceDefinition)
+                                    [ Term.fromMarkdown "Loan" False ]
+                                    False
+                                    (Just "2023-10-30T08:25:24.765Z")
                         )
         , test "removes and inserts items" <|
             \_ ->
                 glossaryItems
                     |> GlossaryItems.remove (GlossaryItemId.create 0)
-                    |> GlossaryItems.insert defaultComputerScienceItem
-                    |> GlossaryItems.orderedAlphabetically Nothing
+                    |> Result.andThen (GlossaryItems.insert defaultComputerScienceItem)
+                    |> Result.map (GlossaryItems.orderedAlphabetically Nothing)
                     |> Expect.equal
-                        [ ( GlossaryItemId.create 0, defaultComputerScienceItem )
-                        , ( GlossaryItemId.create 1, defaultFinanceItem )
-                        , ( GlossaryItemId.create 2, informationRetrievalItem )
-                        , ( GlossaryItemId.create 3, interestRateItem )
-                        , ( GlossaryItemId.create 4, loanItem )
-                        ]
+                        (Ok
+                            [ ( GlossaryItemId.create 0, defaultComputerScienceItem )
+                            , ( GlossaryItemId.create 1, defaultFinanceItem )
+                            , ( GlossaryItemId.create 2, informationRetrievalItem )
+                            , ( GlossaryItemId.create 3, interestRateItem )
+                            , ( GlossaryItemId.create 4, loanItem )
+                            ]
+                        )
         , test "updates items" <|
             \_ ->
                 glossaryItems
                     |> GlossaryItems.update (GlossaryItemId.create 3) updatedInterestRateItem
-                    |> GlossaryItems.orderedAlphabetically Nothing
+                    |> Result.map (GlossaryItems.orderedAlphabetically Nothing)
                     |> Expect.equal
-                        [ ( GlossaryItemId.create 0, defaultComputerScienceItem )
-                        , ( GlossaryItemId.create 1, defaultFinanceItem )
-                        , ( GlossaryItemId.create 2, informationRetrievalItem )
-                        , ( GlossaryItemId.create 3, updatedInterestRateItem )
-                        , ( GlossaryItemId.create 4, updatedLoanItem )
-                        ]
+                        (Ok
+                            [ ( GlossaryItemId.create 0, defaultComputerScienceItem )
+                            , ( GlossaryItemId.create 1, defaultFinanceItem )
+                            , ( GlossaryItemId.create 2, informationRetrievalItem )
+                            , ( GlossaryItemId.create 3, updatedInterestRateItem )
+                            , ( GlossaryItemId.create 4, updatedLoanItem )
+                            ]
+                        )
         , test "can start with an empty set and insert tags and items" <|
             \_ ->
                 {- This test is not very readable.
@@ -335,7 +348,7 @@ suite =
                 in
                 GlossaryItems.empty
                     |> GlossaryItems.applyTagsChanges tagsChanges
-                    |> (\result -> List.foldl GlossaryItems.insert result glossaryItemsForHtml)
+                    |> (\result -> List.foldl (Result.andThen << GlossaryItems.insert) result glossaryItemsForHtml)
                     |> (\result ->
                             let
                                 itemId : GlossaryItemForHtml -> GlossaryItems -> GlossaryItemId
@@ -356,17 +369,22 @@ suite =
                             glossaryItemsForHtml
                                 |> List.foldl
                                     (\glossaryItemForHtml result1 ->
-                                        GlossaryItems.update
-                                            (itemId glossaryItemForHtml result1)
-                                            glossaryItemForHtml
+                                        Result.andThen
+                                            (\result1_ ->
+                                                GlossaryItems.update
+                                                    (itemId glossaryItemForHtml result1_)
+                                                    glossaryItemForHtml
+                                                    result1_
+                                            )
                                             result1
                                     )
                                     result
                        )
-                    |> GlossaryItems.orderedAlphabetically Nothing
+                    |> Result.map (GlossaryItems.orderedAlphabetically Nothing)
                     |> Expect.equal
                         (glossaryItems
                             |> GlossaryItems.orderedAlphabetically Nothing
+                            |> Ok
                         )
         , test "gets items by ID" <|
             \_ ->
@@ -548,7 +566,7 @@ suite =
                             False
                             (Just "2023-10-30T08:25:24.765Z")
 
-                    glossaryItems_ : GlossaryItems
+                    glossaryItems_ : Result String GlossaryItems
                     glossaryItems_ =
                         GlossaryItems.fromList
                             [ ( computerScienceTag, computerScienceTagDescription )
@@ -559,20 +577,22 @@ suite =
                             ]
                 in
                 glossaryItems_
-                    |> GlossaryItems.orderedAlphabetically (Just <| TagId.create 0)
+                    |> Result.map (GlossaryItems.orderedAlphabetically (Just <| TagId.create 0))
                     |> Expect.equal
-                        [ ( GlossaryItemId.create 0
-                          , GlossaryItemForHtml.create
-                                (Term.fromMarkdown "Default" False)
-                                []
-                                (Just computerScienceTag)
-                                []
-                                (Just defaultComputerScienceDefinition)
-                                []
-                                False
-                                (Just "2023-09-15T19:58:59.573Z")
-                          )
-                        ]
+                        (Ok
+                            [ ( GlossaryItemId.create 0
+                              , GlossaryItemForHtml.create
+                                    (Term.fromMarkdown "Default" False)
+                                    []
+                                    (Just computerScienceTag)
+                                    []
+                                    (Just defaultComputerScienceDefinition)
+                                    []
+                                    False
+                                    (Just "2023-09-15T19:58:59.573Z")
+                              )
+                            ]
+                        )
         , test "returns items ordered by most mentioned first" <|
             \_ ->
                 glossaryItems
@@ -639,18 +659,19 @@ suite =
                         False
                         (Just "2023-10-30T08:25:30.335Z")
                     ]
-                    |> GlossaryItems.get (GlossaryItemId.create 0)
+                    |> Result.map (GlossaryItems.get <| GlossaryItemId.create 0)
                     |> Expect.equal
-                        (Just <|
-                            GlossaryItemForHtml.create
-                                (Term.fromMarkdown "Foo" False)
-                                []
-                                (Just gardeningTag)
-                                [ computerScienceTag, financeTag, houseworkTag ]
-                                Nothing
-                                []
-                                False
-                                (Just "2023-10-30T08:25:30.335Z")
+                        (Ok <|
+                            Just <|
+                                GlossaryItemForHtml.create
+                                    (Term.fromMarkdown "Foo" False)
+                                    []
+                                    (Just gardeningTag)
+                                    [ computerScienceTag, financeTag, houseworkTag ]
+                                    Nothing
+                                    []
+                                    False
+                                    (Just "2023-10-30T08:25:30.335Z")
                         )
         , test "sorts tags alphabetically" <|
             \_ ->
@@ -661,8 +682,8 @@ suite =
                     , ( computerScienceTag, computerScienceTagDescription )
                     ]
                     []
-                    |> GlossaryItems.tags
-                    |> Expect.equal [ computerScienceTag, financeTag, gardeningTag, houseworkTag ]
+                    |> Result.map GlossaryItems.tags
+                    |> Expect.equal (Ok [ computerScienceTag, financeTag, gardeningTag, houseworkTag ])
         , test "sorts tags with descriptions alphabetically" <|
             \_ ->
                 GlossaryItems.fromList
@@ -672,11 +693,13 @@ suite =
                     , ( computerScienceTag, computerScienceTagDescription )
                     ]
                     []
-                    |> GlossaryItems.tagsWithDescriptions
+                    |> Result.map GlossaryItems.tagsWithDescriptions
                     |> Expect.equal
-                        [ ( computerScienceTag, computerScienceTagDescription )
-                        , ( financeTag, financeTagDescription )
-                        , ( gardeningTag, gardeningTagDescription )
-                        , ( houseworkTag, houseworkTagDescription )
-                        ]
+                        (Ok
+                            [ ( computerScienceTag, computerScienceTagDescription )
+                            , ( financeTag, financeTagDescription )
+                            , ( gardeningTag, gardeningTagDescription )
+                            , ( houseworkTag, houseworkTagDescription )
+                            ]
+                        )
         ]

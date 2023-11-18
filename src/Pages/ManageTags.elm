@@ -100,16 +100,6 @@ init common =
 -- UPDATE
 
 
-applyChanges : TagsChanges -> Glossary -> Glossary
-applyChanges changes glossary =
-    let
-        items0 : GlossaryItems
-        items0 =
-            glossary.items
-    in
-    { glossary | items = GlossaryItems.applyTagsChanges changes items0 }
-
-
 patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
 patchHtmlFile common glossaryItems =
     let
@@ -196,30 +186,33 @@ update msg model =
                         )
 
                     else
-                        let
-                            common0 : CommonModel
-                            common0 =
-                                model.common
+                        case GlossaryItems.applyTagsChanges (Form.changes model.form) glossary0.items of
+                            Ok updatedItems ->
+                                let
+                                    updatedGlossary =
+                                        { glossary0 | items = updatedItems }
 
-                            common1 : CommonModel
-                            common1 =
-                                { common0
-                                    | glossary =
-                                        glossary0
-                                            |> applyChanges (Form.changes model.form)
-                                            |> Ok
-                                }
+                                    common0 : CommonModel
+                                    common0 =
+                                        model.common
 
-                            model1 : Model
-                            model1 =
-                                { model
-                                    | common = common1
-                                    , saving = SavingInProgress
-                                }
-                        in
-                        ( model1
-                        , patchHtmlFile model1.common glossary0.items
-                        )
+                                    common1 : CommonModel
+                                    common1 =
+                                        { common0 | glossary = Ok updatedGlossary }
+
+                                    model1 : Model
+                                    model1 =
+                                        { model
+                                            | common = common1
+                                            , saving = SavingInProgress
+                                        }
+                                in
+                                ( model1
+                                , patchHtmlFile model1.common updatedGlossary.items
+                                )
+
+                            Err error ->
+                                ( { model | glossaryItemsError = Just error }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )

@@ -196,7 +196,7 @@ empty =
 
 {-| Convert a list of glossary items for/from HTML into a `GlossaryItems`.
 -}
-fromList : List ( Tag, TagDescription ) -> List GlossaryItemForHtml -> GlossaryItems
+fromList : List ( Tag, TagDescription ) -> List GlossaryItemForHtml -> Result String GlossaryItems
 fromList tagsWithDescriptions_ glossaryItemsForHtml =
     let
         indexedGlossaryItemsForHtml : List ( GlossaryItemId, GlossaryItemForHtml )
@@ -433,27 +433,28 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                                 )
                     )
     in
-    GlossaryItems
-        { itemById = itemById
-        , tagById = tagById
-        , tagIdByRawTag = tagIdByRawTag
-        , tagDescriptionById = tagDescriptionById
-        , disambiguationTagIdByItemId = disambiguationTagIdByItemId
-        , normalTagIdsByItemId = sortedNormalTagIdsByItemId
-        , itemIdsByTagId = itemIdsByTagId_
-        , itemIdByDisambiguatedPreferredTermId = itemIdByDisambiguatedPreferredTermId_
-        , relatedItemIdsById = relatedItemIdsById
-        , orderedAlphabetically = orderedAlphabetically__
-        , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
-        , orderedFocusedOn = Nothing
-        , nextItemId = nextItemId
-        , nextTagId = nextTagId
-        }
+    Ok <|
+        GlossaryItems
+            { itemById = itemById
+            , tagById = tagById
+            , tagIdByRawTag = tagIdByRawTag
+            , tagDescriptionById = tagDescriptionById
+            , disambiguationTagIdByItemId = disambiguationTagIdByItemId
+            , normalTagIdsByItemId = sortedNormalTagIdsByItemId
+            , itemIdsByTagId = itemIdsByTagId_
+            , itemIdByDisambiguatedPreferredTermId = itemIdByDisambiguatedPreferredTermId_
+            , relatedItemIdsById = relatedItemIdsById
+            , orderedAlphabetically = orderedAlphabetically__
+            , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
+            , orderedFocusedOn = Nothing
+            , nextItemId = nextItemId
+            , nextTagId = nextTagId
+            }
 
 
 {-| Apply a set of tags changes.
 -}
-applyTagsChanges : TagsChanges -> GlossaryItems -> GlossaryItems
+applyTagsChanges : TagsChanges -> GlossaryItems -> Result String GlossaryItems
 applyTagsChanges tagsChanges glossaryItems =
     let
         resultBeforeValidation =
@@ -497,7 +498,7 @@ applyTagsChanges tagsChanges glossaryItems =
 
 {-| Insert an item.
 -}
-insert : GlossaryItemForHtml -> GlossaryItems -> GlossaryItems
+insert : GlossaryItemForHtml -> GlossaryItems -> Result String GlossaryItems
 insert item glossaryItems =
     glossaryItems
         |> orderedAlphabetically Nothing
@@ -508,7 +509,7 @@ insert item glossaryItems =
 
 {-| Update an item. Do nothing if there is no item with the given ID.
 -}
-update : GlossaryItemId -> GlossaryItemForHtml -> GlossaryItems -> GlossaryItems
+update : GlossaryItemId -> GlossaryItemForHtml -> GlossaryItems -> Result String GlossaryItems
 update itemId item glossaryItems =
     let
         disambiguatedPreferredTerm_ itemId_ =
@@ -533,7 +534,7 @@ update itemId item glossaryItems =
 
 {-| Remove the item associated with an ID. Does nothing if the ID is not found.
 -}
-remove : GlossaryItemId -> GlossaryItems -> GlossaryItems
+remove : GlossaryItemId -> GlossaryItems -> Result String GlossaryItems
 remove itemId glossaryItems =
     glossaryItems
         |> orderedAlphabetically Nothing

@@ -403,33 +403,44 @@ update msg model =
 
                                     Nothing ->
                                         let
-                                            updated : GlossaryItems
+                                            updated : Result String GlossaryItems
                                             updated =
                                                 GlossaryItems.insert newOrUpdatedGlossaryItem glossary.items
                                         in
                                         ( updated
-                                        , -- Find index of newly inserted item
-                                          updated
-                                            |> GlossaryItems.orderedAlphabetically Nothing
-                                            |> List.filter (Tuple.second >> (==) newOrUpdatedGlossaryItem)
-                                            |> List.head
-                                            |> Maybe.map Tuple.first
+                                        , updated
+                                            |> Result.toMaybe
+                                            |> Maybe.andThen
+                                                (\updated_ ->
+                                                    -- Find index of newly inserted item
+                                                    updated_
+                                                        |> GlossaryItems.orderedAlphabetically Nothing
+                                                        |> List.filter (Tuple.second >> (==) newOrUpdatedGlossaryItem)
+                                                        |> List.head
+                                                        |> Maybe.map Tuple.first
+                                                )
                                         )
-
-                            model_ : Model
-                            model_ =
-                                { model
-                                    | common =
-                                        { common
-                                            | glossary = Ok <| { glossary | items = updatedGlossaryItems }
-                                            , maybeId = maybeId
-                                        }
-                                    , saving = SavingInProgress
-                                }
                         in
-                        ( model_
-                        , patchHtmlFile model_.common updatedGlossaryItems
-                        )
+                        case updatedGlossaryItems of
+                            Ok updatedGlossaryItems_ ->
+                                let
+                                    model_ : Model
+                                    model_ =
+                                        { model
+                                            | common =
+                                                { common
+                                                    | glossary = Ok <| { glossary | items = updatedGlossaryItems_ }
+                                                    , maybeId = maybeId
+                                                }
+                                            , saving = SavingInProgress
+                                        }
+                                in
+                                ( model_
+                                , patchHtmlFile model_.common updatedGlossaryItems_
+                                )
+
+                            Err error ->
+                                ( { model | glossaryItemsError = Just error }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )

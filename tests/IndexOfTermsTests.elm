@@ -101,7 +101,9 @@ glossaryItems =
                 False
                 Nothing
     in
-    GlossaryItems.fromList [] [ doubleOhSeven, one, two, thirtyFourty, three, omega, future ]
+    [ doubleOhSeven, one, two, thirtyFourty, three, omega, future ]
+        |> GlossaryItems.fromList []
+        |> Result.withDefault GlossaryItems.empty
 
 
 suite : Test
@@ -152,34 +154,36 @@ suite =
             \_ ->
                 []
                     |> GlossaryItems.fromList []
-                    |> IndexOfTerms.fromGlossaryItems Nothing
-                    |> IndexOfTerms.termGroups
+                    |> Result.map (IndexOfTerms.fromGlossaryItems Nothing)
+                    |> Result.map IndexOfTerms.termGroups
                     |> Expect.equal
-                        [ { label = "A", entries = [] }
-                        , { label = "B", entries = [] }
-                        , { label = "C", entries = [] }
-                        , { label = "D", entries = [] }
-                        , { label = "E", entries = [] }
-                        , { label = "F", entries = [] }
-                        , { label = "G", entries = [] }
-                        , { label = "H", entries = [] }
-                        , { label = "I", entries = [] }
-                        , { label = "J", entries = [] }
-                        , { label = "K", entries = [] }
-                        , { label = "L", entries = [] }
-                        , { label = "M", entries = [] }
-                        , { label = "N", entries = [] }
-                        , { label = "O", entries = [] }
-                        , { label = "P", entries = [] }
-                        , { label = "Q", entries = [] }
-                        , { label = "R", entries = [] }
-                        , { label = "S", entries = [] }
-                        , { label = "T", entries = [] }
-                        , { label = "U", entries = [] }
-                        , { label = "V", entries = [] }
-                        , { label = "W", entries = [] }
-                        , { label = "X", entries = [] }
-                        , { label = "Y", entries = [] }
-                        , { label = "Z", entries = [] }
-                        ]
+                        (Ok
+                            [ { label = "A", entries = [] }
+                            , { label = "B", entries = [] }
+                            , { label = "C", entries = [] }
+                            , { label = "D", entries = [] }
+                            , { label = "E", entries = [] }
+                            , { label = "F", entries = [] }
+                            , { label = "G", entries = [] }
+                            , { label = "H", entries = [] }
+                            , { label = "I", entries = [] }
+                            , { label = "J", entries = [] }
+                            , { label = "K", entries = [] }
+                            , { label = "L", entries = [] }
+                            , { label = "M", entries = [] }
+                            , { label = "N", entries = [] }
+                            , { label = "O", entries = [] }
+                            , { label = "P", entries = [] }
+                            , { label = "Q", entries = [] }
+                            , { label = "R", entries = [] }
+                            , { label = "S", entries = [] }
+                            , { label = "T", entries = [] }
+                            , { label = "U", entries = [] }
+                            , { label = "V", entries = [] }
+                            , { label = "W", entries = [] }
+                            , { label = "X", entries = [] }
+                            , { label = "Y", entries = [] }
+                            , { label = "Z", entries = [] }
+                            ]
+                        )
         ]

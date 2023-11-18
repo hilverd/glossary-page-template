@@ -507,16 +507,26 @@ update msg model =
             case model.common.glossary of
                 Ok { items } ->
                     let
-                        updatedGlossaryItems : GlossaryItems
+                        updatedGlossaryItems : Result String GlossaryItems
                         updatedGlossaryItems =
                             GlossaryItems.remove id items
                     in
-                    ( { model
-                        | deleting = SavingInProgress
-                        , savingSettings = NotSaving
-                      }
-                    , patchHtmlFileAfterDeletingItem model.common updatedGlossaryItems
-                    )
+                    case updatedGlossaryItems of
+                        Ok updatedGlossaryItems_ ->
+                            ( { model
+                                | deleting = SavingInProgress
+                                , savingSettings = NotSaving
+                              }
+                            , patchHtmlFileAfterDeletingItem model.common updatedGlossaryItems_
+                            )
+
+                        Err error ->
+                            ( { model
+                                | deleting = SavingFailed error
+                                , savingSettings = NotSaving
+                              }
+                            , Cmd.none
+                            )
 
                 _ ->
                     ( model, Cmd.none )
