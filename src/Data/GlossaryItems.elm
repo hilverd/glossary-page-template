@@ -43,6 +43,7 @@ import Data.TagIdDict as TagIdDict exposing (TagIdDict)
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import Dict exposing (Dict)
 import DirectedGraph exposing (DirectedGraph)
+import DuplicateRejectingDict exposing (DuplicateRejectingDict)
 import Extras.Regex
 import Maybe
 import Regex
@@ -284,13 +285,13 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                     }
                 |> (\{ itemById_, tagById_ } -> ( itemById_, tagById_ ))
 
-        tagIdByRawTag : Dict String TagId
+        tagIdByRawTag : DuplicateRejectingDict String TagId
         tagIdByRawTag =
             TagIdDict.foldl
                 (\tagId tag ->
-                    Dict.insert (Tag.raw tag) tagId
+                    DuplicateRejectingDict.insert (Tag.raw tag) tagId
                 )
-                Dict.empty
+                DuplicateRejectingDict.empty
                 tagById
 
         tagDescriptionById : TagIdDict TagDescription
@@ -299,7 +300,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 |> List.foldl
                     (\( tag, description ) result ->
                         tagIdByRawTag
-                            |> Dict.get (Tag.raw tag)
+                            |> DuplicateRejectingDict.get (Tag.raw tag)
                             |> Maybe.map (\tagId -> TagIdDict.insert tagId description result)
                             |> Maybe.withDefault result
                     )
@@ -314,7 +315,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                                 |> GlossaryItemForHtml.disambiguationTag
                                 |> Maybe.andThen
                                     (\disambiguationTag ->
-                                        Dict.get (Tag.raw disambiguationTag) tagIdByRawTag
+                                        DuplicateRejectingDict.get (Tag.raw disambiguationTag) tagIdByRawTag
                                     )
                             )
                             disambiguationTagByItemId_
@@ -323,7 +324,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                                 |> GlossaryItemForHtml.normalTags
                                 |> List.filterMap
                                     (\tag ->
-                                        Dict.get (Tag.raw tag) tagIdByRawTag
+                                        DuplicateRejectingDict.get (Tag.raw tag) tagIdByRawTag
                                     )
                             )
                             normalTagsByItemId_
@@ -432,24 +433,33 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                                         |> Maybe.withDefault EQ
                                 )
                     )
+
+        tagIdByRawTagResult : Result String (Dict String TagId)
+        tagIdByRawTagResult =
+            tagIdByRawTag
+                |> DuplicateRejectingDict.toResult
+                |> Result.mapError (\{ key } -> "tag \"" ++ key ++ "\" appears multiple times")
     in
-    Ok <|
-        GlossaryItems
-            { itemById = itemById
-            , tagById = tagById
-            , tagIdByRawTag = tagIdByRawTag
-            , tagDescriptionById = tagDescriptionById
-            , disambiguationTagIdByItemId = disambiguationTagIdByItemId
-            , normalTagIdsByItemId = sortedNormalTagIdsByItemId
-            , itemIdsByTagId = itemIdsByTagId_
-            , itemIdByDisambiguatedPreferredTermId = itemIdByDisambiguatedPreferredTermId_
-            , relatedItemIdsById = relatedItemIdsById
-            , orderedAlphabetically = orderedAlphabetically__
-            , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
-            , orderedFocusedOn = Nothing
-            , nextItemId = nextItemId
-            , nextTagId = nextTagId
-            }
+    Result.map
+        (\tagIdByRawTag_ ->
+            GlossaryItems
+                { itemById = itemById
+                , tagById = tagById
+                , tagIdByRawTag = tagIdByRawTag_
+                , tagDescriptionById = tagDescriptionById
+                , disambiguationTagIdByItemId = disambiguationTagIdByItemId
+                , normalTagIdsByItemId = sortedNormalTagIdsByItemId
+                , itemIdsByTagId = itemIdsByTagId_
+                , itemIdByDisambiguatedPreferredTermId = itemIdByDisambiguatedPreferredTermId_
+                , relatedItemIdsById = relatedItemIdsById
+                , orderedAlphabetically = orderedAlphabetically__
+                , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
+                , orderedFocusedOn = Nothing
+                , nextItemId = nextItemId
+                , nextTagId = nextTagId
+                }
+        )
+        tagIdByRawTagResult
 
 
 {-| Apply a set of tags changes.

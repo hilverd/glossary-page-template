@@ -702,4 +702,13 @@ suite =
                             , ( houseworkTag, houseworkTagDescription )
                             ]
                         )
+        , test "returns error for duplicate tags" <|
+            \_ ->
+                GlossaryItems.fromList
+                    [ ( financeTag, financeTagDescription )
+                    , ( financeTag, financeTagDescription )
+                    ]
+                    []
+                    |> Expect.equal
+                        (Err "tag \"Finance\" appears multiple times")
         ]
