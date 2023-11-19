@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki)
+module Data.GlossaryItem.Term exposing (Term, fromPlaintext, fromMarkdown, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki)
 
 {-| A term in a glossary item.
 This can be in either plain text or Markdown.
@@ -9,7 +9,7 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, fromPlaintext, fromMarkdown, fromPlaintextWithId, fromMarkdownWithId, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki
+@docs Term, fromPlaintext, fromMarkdown, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki
 
 -}
 
@@ -30,14 +30,12 @@ import String.Normalize
 -}
 type Term
     = PlaintextTerm
-        { id : TermId
-        , isAbbreviation : Bool
+        { isAbbreviation : Bool
         , body : String
         , indexGroupString : String
         }
     | MarkdownTerm
-        { id : TermId
-        , isAbbreviation : Bool
+        { isAbbreviation : Bool
         , body : MarkdownFragment
         , indexGroupString : String
         , inlineText : String
@@ -67,8 +65,7 @@ stringToIndexGroupString =
 fromPlaintext : String -> Bool -> Term
 fromPlaintext body isAbbreviation0 =
     PlaintextTerm
-        { id = body |> String.replace " " "_" |> TermId.fromString
-        , isAbbreviation = isAbbreviation0
+        { isAbbreviation = isAbbreviation0
         , body = body
         , indexGroupString = stringToIndexGroupString body
         }
@@ -93,80 +90,29 @@ fromMarkdown body isAbbreviation0 =
                 |> Result.withDefault body
     in
     MarkdownTerm
-        { id = body |> String.replace " " "_" |> TermId.fromString
-        , isAbbreviation = isAbbreviation0
+        { isAbbreviation = isAbbreviation0
         , body = fragment
         , indexGroupString = inlineTextConcatenated |> stringToIndexGroupString
         , inlineText = inlineTextConcatenated
         }
 
 
-{-| Construct a term from a plain text string, an ID and a Boolean indicating whether the term is an abbreviation.
-
-    import Data.GlossaryItem.TermId as TermId
-
-    fromPlaintextWithId "Hello" (TermId.fromString "id1") False
-    |> id
-    |> TermId.toString
-    --> "id1"
-
--}
-fromPlaintextWithId : String -> TermId -> Bool -> Term
-fromPlaintextWithId body id0 isAbbreviation0 =
-    PlaintextTerm
-        { id = id0
-        , isAbbreviation = isAbbreviation0
-        , body = body
-        , indexGroupString = stringToIndexGroupString body
-        }
-
-
-{-| Construct a term from a Markdown string, an ID and a Boolean indicating whether the term is an abbreviation.
-
-    import Data.GlossaryItem.TermId as TermId
-
-    fromMarkdownWithId "The _ideal_ case" (TermId.fromString "id1") False
-    |> id
-    |> TermId.toString
-    --> "id1"
-
--}
-fromMarkdownWithId : String -> TermId -> Bool -> Term
-fromMarkdownWithId body id0 isAbbreviation0 =
-    let
-        result0 : Term
-        result0 =
-            fromMarkdown body isAbbreviation0
-    in
-    case result0 of
-        PlaintextTerm _ ->
-            result0
-
-        MarkdownTerm t ->
-            MarkdownTerm { t | id = id0 }
-
-
 {-| Decode a term from its JSON representation.
 -}
 decode : Bool -> Decoder Term
 decode enableMarkdownBasedSyntax =
-    Decode.map3
+    Decode.map2
         (if enableMarkdownBasedSyntax then
-            fromMarkdownWithId
+            fromMarkdown
 
          else
-            fromPlaintextWithId
+            fromPlaintext
         )
         (Decode.field "body" Decode.string)
-        (Decode.oneOf
-            [ Decode.field "idReference" <| Decode.map TermId.fromString <| Decode.string -- for backwards compatibility
-            , Decode.field "id" <| Decode.map TermId.fromString <| Decode.string
-            ]
-        )
         (Decode.field "isAbbreviation" Decode.bool)
 
 
-{-| Retrieve the ID of a term.
+{-| Produce the ID of a term.
 
     import Data.GlossaryItem.TermId as TermId
 
@@ -180,10 +126,10 @@ id : Term -> TermId
 id term =
     case term of
         PlaintextTerm t ->
-            t.id
+            t.body |> String.replace " " "_" |> TermId.fromString
 
         MarkdownTerm t ->
-            t.id
+            t.body |> MarkdownFragment.raw |> String.replace " " "_" |> TermId.fromString
 
 
 {-| Retrieve the "is an abbreviation" Boolean of a term.
