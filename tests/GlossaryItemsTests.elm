@@ -217,16 +217,27 @@ suite =
                     tagsChanges : TagsChanges
                     tagsChanges =
                         TagsChanges.empty
-                            |> TagsChanges.update (TagId.create 0) houseworkTag houseworkTagDescription
+                            |> TagsChanges.update (TagId.create 0) financeTag financeTagDescription
+                            |> TagsChanges.update (TagId.create 1) computerScienceTag computerScienceTagDescription
                 in
                 glossaryItems
                     |> GlossaryItems.applyTagsChanges tagsChanges
-                    |> Result.map GlossaryItems.tagsWithDescriptions
+                    |> Result.map (GlossaryItems.orderedAlphabetically Nothing >> List.map Tuple.second)
+                    |> Result.map
+                        (List.map
+                            (\glossaryItemForHtml ->
+                                ( GlossaryItemForHtml.disambiguatedPreferredTerm glossaryItemForHtml |> Term.raw
+                                , GlossaryItemForHtml.allTags glossaryItemForHtml |> List.map Tag.raw
+                                )
+                            )
+                        )
                     |> Expect.equal
                         (Ok
-                            [ ( financeTag, financeTagDescription )
-                            , ( gardeningTag, gardeningTagDescription )
-                            , ( houseworkTag, houseworkTagDescription )
+                            [ ( "Default (Computer Science)", [ "Computer Science" ] )
+                            , ( "Default (Finance)", [ "Finance" ] )
+                            , ( "Information retrieval", [ "Finance" ] )
+                            , ( "Interest rate", [ "Computer Science" ] )
+                            , ( "Loan", [ "Computer Science" ] )
                             ]
                         )
         , test "updates tags in items" <|
