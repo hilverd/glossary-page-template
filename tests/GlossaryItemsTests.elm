@@ -711,4 +711,29 @@ suite =
                     []
                     |> Expect.equal
                         (Err "tag \"Finance\" appears multiple times")
+        , test "returns error for duplicate disambiguated preferred terms" <|
+            \_ ->
+                GlossaryItems.fromList
+                    [ ( financeTag, financeTagDescription ) ]
+                    [ GlossaryItemForHtml.create
+                        (Term.fromMarkdown "Foo" False)
+                        []
+                        (Just financeTag)
+                        []
+                        Nothing
+                        []
+                        False
+                        (Just "2023-10-30T08:25:30.335Z")
+                    , GlossaryItemForHtml.create
+                        (Term.fromMarkdown "Foo (Finance)" False)
+                        []
+                        Nothing
+                        []
+                        Nothing
+                        []
+                        False
+                        (Just "2023-10-30T08:25:30.335Z")
+                    ]
+                    |> Expect.equal
+                        (Err "there are multiple items with (disambiguated) preferred term \"Foo (Finance)\"")
         ]

@@ -204,19 +204,19 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
         indexedGlossaryItemsForHtml =
             List.indexedMap (GlossaryItemId.create >> Tuple.pair) glossaryItemsForHtml
 
-        itemIdByDisambiguatedPreferredTermId_ : Dict String GlossaryItemId
+        itemIdByDisambiguatedPreferredTermId_ : DuplicateRejectingDict String GlossaryItemId
         itemIdByDisambiguatedPreferredTermId_ =
             indexedGlossaryItemsForHtml
                 |> List.foldl
                     (\( itemId, item ) ->
-                        Dict.insert
+                        DuplicateRejectingDict.insert
                             (GlossaryItemForHtml.disambiguatedPreferredTerm item
                                 |> Term.id
                                 |> TermId.toString
                             )
                             itemId
                     )
-                    Dict.empty
+                    DuplicateRejectingDict.empty
 
         tagById0 : TagIdDict Tag
         tagById0 =
@@ -383,7 +383,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                             |> GlossaryItemForHtml.relatedPreferredTerms
                             |> List.filterMap
                                 (\relatedPreferredTerm ->
-                                    Dict.get
+                                    DuplicateRejectingDict.get
                                         (relatedPreferredTerm |> Term.id |> TermId.toString)
                                         itemIdByDisambiguatedPreferredTermId_
                                 )
@@ -434,14 +434,63 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                                 )
                     )
 
+        itemIdByDisambiguatedPreferredTermIdResult : Result String (Dict String GlossaryItemId)
+        itemIdByDisambiguatedPreferredTermIdResult =
+            itemIdByDisambiguatedPreferredTermId_
+                |> DuplicateRejectingDict.toResult
+                |> Result.mapError
+                    (\{ value1 } ->
+                        let
+                            preferredTerm1 : Maybe String
+                            preferredTerm1 =
+                                itemById
+                                    |> GlossaryItemIdDict.get value1
+                                    |> Maybe.map (GlossaryItem.preferredTerm >> Term.raw)
+
+                            disambiguationTag1 : Maybe String
+                            disambiguationTag1 =
+                                disambiguationTagIdByItemId
+                                    |> GlossaryItemIdDict.get value1
+                                    |> Maybe.andThen
+                                        (Maybe.andThen
+                                            (\tagId ->
+                                                tagById
+                                                    |> TagIdDict.get tagId
+                                                    |> Maybe.map Tag.raw
+                                            )
+                                        )
+
+                            disambiguatedPreferredTerm1 : Maybe String
+                            disambiguatedPreferredTerm1 =
+                                preferredTerm1
+                                    |> Maybe.map
+                                        (\preferredTerm1_ ->
+                                            preferredTerm1_
+                                                ++ (disambiguationTag1
+                                                        |> Maybe.map (\tag1 -> " (" ++ tag1 ++ ")")
+                                                        |> Maybe.withDefault ""
+                                                   )
+                                        )
+                        in
+                        Maybe.map
+                            (\disambiguatedPreferredTerm1_ ->
+                                "there are multiple items with (disambiguated) preferred term \""
+                                    ++ disambiguatedPreferredTerm1_
+                                    ++ "\""
+                            )
+                            disambiguatedPreferredTerm1
+                            |> -- This should never happen
+                               Maybe.withDefault "there are multiple items with the same (disambiguated) preferred term"
+                    )
+
         tagIdByRawTagResult : Result String (Dict String TagId)
         tagIdByRawTagResult =
             tagIdByRawTag
                 |> DuplicateRejectingDict.toResult
                 |> Result.mapError (\{ key } -> "tag \"" ++ key ++ "\" appears multiple times")
     in
-    Result.map
-        (\tagIdByRawTag_ ->
+    Result.map2
+        (\itemIdByDisambiguatedPreferredTermId1 tagIdByRawTag_ ->
             GlossaryItems
                 { itemById = itemById
                 , tagById = tagById
@@ -450,7 +499,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 , disambiguationTagIdByItemId = disambiguationTagIdByItemId
                 , normalTagIdsByItemId = sortedNormalTagIdsByItemId
                 , itemIdsByTagId = itemIdsByTagId_
-                , itemIdByDisambiguatedPreferredTermId = itemIdByDisambiguatedPreferredTermId_
+                , itemIdByDisambiguatedPreferredTermId = itemIdByDisambiguatedPreferredTermId1
                 , relatedItemIdsById = relatedItemIdsById
                 , orderedAlphabetically = orderedAlphabetically__
                 , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
@@ -459,6 +508,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 , nextTagId = nextTagId
                 }
         )
+        itemIdByDisambiguatedPreferredTermIdResult
         tagIdByRawTagResult
 
 
