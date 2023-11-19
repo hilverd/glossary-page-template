@@ -217,12 +217,30 @@ lastUpdatedDateAsIso8601 glossaryItemForHtml =
 
 termToHtmlTree : Maybe Tag -> Term -> HtmlTree
 termToHtmlTree disambiguationTag_ term =
+    let
+        termIdString =
+            term
+                |> Term.id
+                |> TermId.toString
+
+        disambiguatedTermIdString =
+            disambiguationTag_
+                |> Maybe.map
+                    (\tag ->
+                        termIdString
+                            ++ " ("
+                            ++ Tag.raw tag
+                            ++ ")"
+                    )
+                |> Maybe.withDefault termIdString
+                |> String.replace " " "_"
+    in
     HtmlTree.Node "dt"
         True
         []
         [ HtmlTree.Node "dfn"
             True
-            [ HtmlTree.Attribute "id" <| TermId.toString <| Term.id term ]
+            [ HtmlTree.Attribute "id" disambiguatedTermIdString ]
             [ (disambiguationTag_
                 |> Maybe.map
                     (\disambiguationTag0 ->
@@ -245,7 +263,7 @@ termToHtmlTree disambiguationTag_ term =
                             linkedTerm =
                                 HtmlTree.Node "a"
                                     True
-                                    [ hrefToTerm term ]
+                                    [ HtmlTree.Attribute "href" <| fragmentOnly disambiguatedTermIdString ]
                                     inner
                         in
                         if Term.isAbbreviation term then
@@ -291,11 +309,6 @@ nonemptyRelatedTermsToHtmlTree itemHasSomeADefinition relatedTerms_ =
                     |> List.intersperse (HtmlTree.Leaf ", ")
                )
         )
-
-
-hrefToTerm : Term -> HtmlTree.Attribute
-hrefToTerm term =
-    HtmlTree.Attribute "href" <| fragmentOnly <| TermId.toString <| Term.id term
 
 
 hrefFromRelatedTerm : Term -> HtmlTree.Attribute
