@@ -100,13 +100,11 @@ if (containerElement) {
 
     function glossaryItemTermFromDtElement(dtElement) {
         const dfnElement = dtElement.querySelector('dfn');
-        const id = dfnElement.id || null;
         const isAbbreviation = Boolean(dfnElement.querySelector('abbr'));
         const dfnElementWithoutDisambiguationTag = dfnElement.querySelector('span') || dfnElement;
         const body = dfnElementWithoutDisambiguationTag.textContent;
 
         return {
-            id: normaliseWhitespace(id),
             isAbbreviation: isAbbreviation,
             body: normaliseWhitespace(body)
         };
