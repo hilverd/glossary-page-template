@@ -199,7 +199,7 @@ validate form =
                                 termBodyToId body
                         in
                         if isPreferredTerm && Set.member termId termIdsOutsideSet then
-                            Just "This term already exists elsewhere"
+                            Just "This term already exists elsewhere. Please pick a different one or use a disambiguation tag."
 
                         else if (Dict.get termId termIdsInsideForm |> Maybe.withDefault 0) > 1 then
                             Just "This term occurs multiple times"
