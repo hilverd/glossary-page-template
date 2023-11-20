@@ -185,7 +185,7 @@ validate form =
             let
                 body : String
                 body =
-                    TermField.raw termField
+                    termField |> TermField.raw |> String.trim
             in
             termField
                 |> TermField.setValidationError
