@@ -135,11 +135,7 @@ soft : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 soft enabled =
     withAdditionalAttributes
         [ class "rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-2 py-1 text-gray-700 dark:text-gray-200 shadow-sm"
-        , if enabled then
-            class "hover:bg-gray-100 dark:hover:bg-gray-800"
-
-          else
-            class "opacity-50"
+        , Extras.HtmlAttribute.showIf enabled <| class "hover:bg-gray-100 dark:hover:bg-gray-800"
         , Html.Attributes.disabled <| not enabled
         , Accessibility.Key.tabbable enabled
         ]

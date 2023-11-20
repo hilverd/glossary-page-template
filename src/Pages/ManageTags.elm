@@ -331,7 +331,7 @@ viewEditTag { enableMathSupport, tabbable, showValidationErrors } index tagField
                     div
                         [ class "pb-4" ]
                         [ Components.Button.soft
-                            tabbable
+                            False
                             [ class "mr-2 mt-2"
                             ]
                             [ Tag.view enableMathSupport
