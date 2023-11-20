@@ -117,6 +117,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                             ++ viewTags
                                 { enableMathSupport = enableMathSupport
                                 , onClickTag = Nothing
+                                , tabbable = False
                                 }
                                 tags
                             :: List.map
@@ -212,6 +213,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                             ++ viewTags
                                                 { enableMathSupport = enableMathSupport
                                                 , onClickTag = Just onClickTag
+                                                , tabbable = tabbable
                                                 }
                                                 tags
                                             :: List.map
@@ -324,6 +326,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                             ++ viewTags
                                                 { enableMathSupport = enableMathSupport
                                                 , onClickTag = Just onClickTag
+                                                , tabbable = tabbable
                                                 }
                                                 tags
                                             :: List.map
@@ -507,6 +510,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                         ++ viewTags
                             { enableMathSupport = enableMathSupport
                             , onClickTag = Nothing
+                            , tabbable = False
                             }
                             tags
                         :: List.map
@@ -592,14 +596,17 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term 
         ]
 
 
-viewTags : { enableMathSupport : Bool, onClickTag : Maybe (Tag -> msg) } -> List Tag -> Html msg
-viewTags { enableMathSupport, onClickTag } tags =
+viewTags :
+    { enableMathSupport : Bool, onClickTag : Maybe (Tag -> msg), tabbable : Bool }
+    -> List Tag
+    -> Html msg
+viewTags { enableMathSupport, onClickTag, tabbable } tags =
     Html.div
         [ class "mt-4" ]
         (List.map
             (\tag ->
                 Components.Button.softSmall
-                    (onClickTag /= Nothing)
+                    (tabbable && onClickTag /= Nothing)
                     [ class "mr-2 mb-2"
                     , Html.Attributes.title <| "Tag: " ++ Tag.inlineText tag
                     , Extras.HtmlAttribute.showMaybe (\onClickTag_ -> Html.Events.onClick <| onClickTag_ tag) onClickTag
