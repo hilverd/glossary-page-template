@@ -441,41 +441,38 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 |> Result.mapError
                     (\{ value1 } ->
                         let
-                            preferredTerm1 : Maybe String
+                            preferredTerm1 : Maybe Term
                             preferredTerm1 =
                                 itemById
                                     |> GlossaryItemIdDict.get value1
-                                    |> Maybe.map (GlossaryItem.preferredTerm >> Term.raw)
+                                    |> Maybe.map GlossaryItem.preferredTerm
 
-                            disambiguationTag1 : Maybe String
+                            disambiguationTag1 : Maybe Tag
                             disambiguationTag1 =
                                 disambiguationTagIdByItemId
                                     |> GlossaryItemIdDict.get value1
                                     |> Maybe.andThen
                                         (Maybe.andThen
-                                            (\tagId ->
-                                                tagById
-                                                    |> TagIdDict.get tagId
-                                                    |> Maybe.map Tag.raw
-                                            )
+                                            (\tagId -> TagIdDict.get tagId tagById)
                                         )
 
-                            disambiguatedPreferredTerm1 : Maybe String
+                            disambiguatedPreferredTerm1 : Maybe Term
                             disambiguatedPreferredTerm1 =
                                 preferredTerm1
                                     |> Maybe.map
                                         (\preferredTerm1_ ->
-                                            preferredTerm1_
-                                                ++ (disambiguationTag1
-                                                        |> Maybe.map (\tag1 -> " (" ++ tag1 ++ ")")
-                                                        |> Maybe.withDefault ""
-                                                   )
+                                            disambiguationTag1
+                                                |> Maybe.map
+                                                    (\tag1 ->
+                                                        GlossaryItemForHtml.disambiguatedTerm tag1 preferredTerm1_
+                                                    )
+                                                |> Maybe.withDefault preferredTerm1_
                                         )
                         in
                         Maybe.map
                             (\disambiguatedPreferredTerm1_ ->
                                 "there are multiple items with (disambiguated) preferred term \""
-                                    ++ disambiguatedPreferredTerm1_
+                                    ++ Term.raw disambiguatedPreferredTerm1_
                                     ++ "\""
                             )
                             disambiguatedPreferredTerm1
@@ -826,9 +823,7 @@ disambiguatedPreferredTerm itemId glossaryItems =
                         disambiguationTag
                             |> Maybe.map
                                 (\disambiguationTag_ ->
-                                    preferredTerm_
-                                        |> Term.updateRaw
-                                            (\raw0 -> raw0 ++ " (" ++ Tag.raw disambiguationTag_ ++ ")")
+                                    GlossaryItemForHtml.disambiguatedTerm disambiguationTag_ preferredTerm_
                                 )
                             |> Maybe.withDefault preferredTerm_
                     )

@@ -3,6 +3,7 @@ module Data.GlossaryItemForHtml exposing
     , create, decode
     , disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601
     , toHtmlTree
+    , disambiguatedTerm
     )
 
 {-| An item in a glossary as retrieved from the HTML source, and/or suitable for representing as HTML.
@@ -28,6 +29,11 @@ It is not the representation used by the editor UI when the application is runni
 # Converting to HTML
 
 @docs toHtmlTree
+
+
+# Utilities
+
+@docs disambiguatedTerm
 
 -}
 
@@ -108,9 +114,7 @@ disambiguatedPreferredTerm glossaryItemForHtml =
             item.disambiguationTag
                 |> Maybe.map
                     (\disambiguationTag_ ->
-                        item.preferredTerm
-                            |> Term.updateRaw
-                                (\raw0 -> raw0 ++ " (" ++ Tag.raw disambiguationTag_ ++ ")")
+                        disambiguatedTerm disambiguationTag_ item.preferredTerm
                     )
                 |> Maybe.withDefault item.preferredTerm
 
@@ -215,25 +219,40 @@ lastUpdatedDateAsIso8601 glossaryItemForHtml =
             item.lastUpdatedDateAsIso8601
 
 
+{-| Disambiguate a term by appending the given tag in parentheses.
+
+    import Data.GlossaryItem.Tag as Tag exposing (Tag)
+    import Data.GlossaryItem.Term as Term exposing (Term)
+
+    tag : Tag
+    tag = Tag.fromMarkdown "Finance"
+
+    term : Term
+    term = Term.fromMarkdown "Default" False
+
+    disambiguatedTerm tag term
+    --> Term.fromMarkdown "Default (Finance)" False
+
+-}
+disambiguatedTerm : Tag -> Term -> Term
+disambiguatedTerm tag term =
+    Term.updateRaw
+        (\raw0 -> raw0 ++ " (" ++ Tag.raw tag ++ ")")
+        term
+
+
 termToHtmlTree : Maybe Tag -> Term -> HtmlTree
 termToHtmlTree disambiguationTag_ term =
     let
-        termIdString =
-            term
-                |> Term.id
-                |> TermId.toString
-
         disambiguatedTermIdString =
             disambiguationTag_
                 |> Maybe.map
                     (\tag ->
-                        termIdString
-                            ++ " ("
-                            ++ Tag.raw tag
-                            ++ ")"
+                        disambiguatedTerm tag term
                     )
-                |> Maybe.withDefault termIdString
-                |> String.replace " " "_"
+                |> Maybe.withDefault term
+                |> Term.id
+                |> TermId.toString
     in
     HtmlTree.Node "dt"
         True
