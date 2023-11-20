@@ -186,6 +186,36 @@ validate form =
                 body : String
                 body =
                     termField |> TermField.raw |> String.trim
+
+                term : Term
+                term =
+                    Term.fromMarkdown body False
+
+                disambiguatedTerm : Term
+                disambiguatedTerm =
+                    if isPreferredTerm then
+                        form
+                            |> disambiguationTagId
+                            |> Maybe.map
+                                (\disambiguationTagId_ ->
+                                    form
+                                        |> tagCheckboxes
+                                        |> List.filterMap
+                                            (\( ( tagId, tag ), _ ) ->
+                                                if tagId == disambiguationTagId_ then
+                                                    Just tag
+
+                                                else
+                                                    Nothing
+                                            )
+                                        |> List.head
+                                        |> Maybe.map (\disambiguationTag -> GlossaryItemForHtml.disambiguatedTerm disambiguationTag term)
+                                        |> Maybe.withDefault term
+                                )
+                            |> Maybe.withDefault term
+
+                    else
+                        term
             in
             termField
                 |> TermField.setValidationError
@@ -196,7 +226,9 @@ validate form =
                         let
                             termId : String
                             termId =
-                                termBodyToId body
+                                disambiguatedTerm
+                                    |> Term.id
+                                    |> TermId.toString
                         in
                         if isPreferredTerm && Set.member termId termIdsOutsideSet then
                             Just "This term already exists elsewhere. Please pick a different one or use a disambiguation tag."
