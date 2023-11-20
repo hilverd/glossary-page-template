@@ -536,6 +536,24 @@ view model =
                             [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
                             [ text "Manage Tags"
                             ]
+                        , p
+                            [ class "mt-6 max-w-prose text-gray-900 dark:text-gray-100" ]
+                            [ text "You can use tags to attach \"labels\" to items that people can then filter by." ]
+                        , Html.details
+                            []
+                            [ Html.summary
+                                [ class "mt-2 mb-1 items-center font-medium text-gray-900 dark:text-gray-100 select-none" ]
+                                [ span
+                                    [ class "ml-2" ]
+                                    [ text "Read more" ]
+                                ]
+                            , div
+                                [ class "mb-1 max-w-prose text-gray-900 dark:text-gray-100" ]
+                                [ text "This may be useful for large glossaries that span multiple topics, where there is a need to categorize or group items."
+                                , text " Tags can also be used to \"disambiguate\" items that have the same preferred term but whose meaning depends on some \"context\"."
+                                , text " For example, the term \"default\" has a different meaning in the context of computer science than it does in the context of finance."
+                                ]
+                            ]
                         , form
                             [ class "pt-7" ]
                             [ model.form
