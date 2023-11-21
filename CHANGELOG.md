@@ -13,14 +13,16 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 
-- Show spinner while saving changes.
+- Add support for tags.
+  - You can use these to attach "labels" to items that people can then filter by. This may be useful for large glossaries that span multiple topics, where there is a need to categorize or group items. Tags can also be used to "disambiguate" items that have the same preferred term but whose meaning depends on some "context". For example, the term "default" has a different meaning in the context of computer science than it does in the context of finance.
 - Add a small "Built using Glossary Page Template" footer to the list page.
 - Add keyboard shortcut "e" for making changes.
+- Show spinner while saving changes.
 
 ### Changed
 
-- Make the concept of a _preferred term_ (and _alternative terms_) clearer in the UI.
 - Only allow one definition per item, but allow items to have alternative terms in common.
+- Make the concept of a _preferred term_ (and _alternative terms_) clearer in the UI.
 - Show "Make changes" button when Node.js backend is running. This is to make it easier to see the glossary in "read-only" mode.
 
 ### Fixed
