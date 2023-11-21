@@ -421,8 +421,8 @@ termBodyToId =
     String.replace " " "_"
 
 
-toGlossaryItem : Bool -> GlossaryItems -> GlossaryItemForm -> Maybe String -> GlossaryItemForHtml
-toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
+toGlossaryItem : GlossaryItems -> GlossaryItemForm -> Maybe String -> GlossaryItemForHtml
+toGlossaryItem glossaryItems form dateTime =
     let
         termFieldToTerm : TermField -> Term
         termFieldToTerm termField =
@@ -434,14 +434,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                 isAbbreviation =
                     TermField.isAbbreviation termField
             in
-            (if enableMarkdownBasedSyntax then
-                Term.fromMarkdown
-
-             else
-                Term.fromPlaintext
-            )
-                raw
-                isAbbreviation
+            Term.fromMarkdown raw isAbbreviation
 
         preferredTerm : Term
         preferredTerm =
@@ -487,13 +480,7 @@ toGlossaryItem enableMarkdownBasedSyntax glossaryItems form dateTime =
                         else
                             Just definitionString
                    )
-                |> Maybe.map
-                    (if enableMarkdownBasedSyntax then
-                        Definition.fromMarkdown
-
-                     else
-                        Definition.fromPlaintext
-                    )
+                |> Maybe.map Definition.fromMarkdown
 
         relatedTerms : List Term
         relatedTerms =

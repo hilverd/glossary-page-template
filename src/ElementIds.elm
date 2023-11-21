@@ -14,8 +14,6 @@ module ElementIds exposing
     , exportDropdownButton
     , glossaryItemDiv
     , indexForMobile
-    , inputSyntaxMarkdownBased
-    , inputSyntaxPlainText
     , items
     , moreOptionsForRelatedTermDropdownMenu
     , needsUpdatingToggleLabel
@@ -94,16 +92,6 @@ tags =
 items : String
 items =
     prefixed "items"
-
-
-inputSyntaxPlainText : String
-inputSyntaxPlainText =
-    prefixed "input-syntax-plain-text"
-
-
-inputSyntaxMarkdownBased : String
-inputSyntaxMarkdownBased =
-    prefixed "input-syntax-markdown-based"
 
 
 cardWidthCompact : String

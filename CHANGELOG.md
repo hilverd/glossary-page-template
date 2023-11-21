@@ -26,6 +26,8 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 ### Removed
 
+- Remove support for plain text syntax in favour of Markdown.
+
 ## [3.8.0] - 2023-10-13
 
 ### Added

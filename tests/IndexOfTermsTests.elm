@@ -11,7 +11,7 @@ import Test exposing (Test, describe, test)
 
 termFromBody : String -> Term
 termFromBody body =
-    Term.fromPlaintext body False
+    Term.fromMarkdown body False
 
 
 glossaryItems : GlossaryItems
@@ -24,7 +24,7 @@ glossaryItems =
                 []
                 Nothing
                 []
-                (Just (Definition.fromPlaintext "Óne"))
+                (Just (Definition.fromMarkdown "Óne"))
                 []
                 False
                 Nothing
@@ -36,7 +36,7 @@ glossaryItems =
                 []
                 Nothing
                 []
-                (Just (Definition.fromPlaintext "Two"))
+                (Just (Definition.fromMarkdown "Two"))
                 []
                 False
                 Nothing
@@ -48,7 +48,7 @@ glossaryItems =
                 []
                 Nothing
                 []
-                (Just (Definition.fromPlaintext "3040"))
+                (Just (Definition.fromMarkdown "3040"))
                 []
                 False
                 Nothing
@@ -60,7 +60,7 @@ glossaryItems =
                 []
                 Nothing
                 []
-                (Just (Definition.fromPlaintext "3Three"))
+                (Just (Definition.fromMarkdown "3Three"))
                 []
                 False
                 Nothing
@@ -72,7 +72,7 @@ glossaryItems =
                 []
                 Nothing
                 []
-                (Just (Definition.fromPlaintext "007"))
+                (Just (Definition.fromMarkdown "007"))
                 []
                 False
                 Nothing
@@ -84,7 +84,7 @@ glossaryItems =
                 []
                 Nothing
                 []
-                (Just (Definition.fromPlaintext "Ω"))
+                (Just (Definition.fromMarkdown "Ω"))
                 []
                 False
                 Nothing
@@ -96,7 +96,7 @@ glossaryItems =
                 []
                 Nothing
                 []
-                (Just (Definition.fromPlaintext "_future_"))
+                (Just (Definition.fromMarkdown "_future_"))
                 []
                 False
                 Nothing

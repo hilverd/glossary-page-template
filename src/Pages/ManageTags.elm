@@ -9,14 +9,12 @@ import CommonModel exposing (CommonModel)
 import Components.Button
 import Components.Copy
 import Components.Form
-import Components.SelectMenu exposing (showValidationErrors)
 import Components.Spinner
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.Saving exposing (Saving(..))
 import Data.TagDescription as TagDescription
-import Data.TagsChanges exposing (TagsChanges)
 import ElementIds
 import Extras.Html
 import Extras.HtmlAttribute

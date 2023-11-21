@@ -99,12 +99,6 @@ init flags =
                 |> Decode.decodeValue (Decode.field "orderItemsBy" OrderItemsBy.decode)
                 |> Result.withDefault OrderItemsBy.Alphabetically
 
-        enableMarkdownBasedSyntax : Bool
-        enableMarkdownBasedSyntax =
-            flags
-                |> Decode.decodeValue (Decode.field "enableMarkdownBasedSyntax" Decode.bool)
-                |> Result.withDefault False
-
         editorIsRunning : Bool
         editorIsRunning =
             flags
@@ -137,7 +131,7 @@ init flags =
 
         loadedGlossaryItems : Result String GlossaryItems
         loadedGlossaryItems =
-            LoadedGlossaryItems.decodeFromFlags enableMarkdownBasedSyntax flags
+            LoadedGlossaryItems.decodeFromFlags flags
 
         glossary : Result String Glossary
         glossary =
@@ -168,24 +162,14 @@ init flags =
                                 flags
                                     |> Decode.decodeValue (Decode.field "titleString" Decode.string)
                                     |> Result.withDefault "Element not found"
-                                    |> (if enableMarkdownBasedSyntax then
-                                            GlossaryTitle.fromMarkdown
-
-                                        else
-                                            GlossaryTitle.fromPlaintext
-                                       )
+                                    |> GlossaryTitle.fromMarkdown
 
                             aboutParagraph : AboutParagraph
                             aboutParagraph =
                                 flags
                                     |> Decode.decodeValue (Decode.field "aboutParagraph" Decode.string)
                                     |> Result.withDefault "Element not found"
-                                    |> (if enableMarkdownBasedSyntax then
-                                            AboutParagraph.fromMarkdown
-
-                                        else
-                                            AboutParagraph.fromPlaintext
-                                       )
+                                    |> AboutParagraph.fromMarkdown
 
                             aboutLinks : List AboutLink
                             aboutLinks =
@@ -197,8 +181,7 @@ init flags =
                             aboutSection =
                                 { paragraph = aboutParagraph, links = aboutLinks }
                         in
-                        { enableMarkdownBasedSyntax = enableMarkdownBasedSyntax
-                        , enableMathSupport = enableMarkdownBasedSyntax && katexIsAvailable
+                        { enableMathSupport = katexIsAvailable
                         , enableLastUpdatedDates = enableLastUpdatedDates
                         , cardWidth = cardWidth
                         , title = title

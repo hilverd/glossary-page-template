@@ -1,18 +1,16 @@
-module Data.GlossaryItem.Definition exposing (Definition, fromPlaintext, fromMarkdown, raw, markdown, view, viewInline, htmlTreeForAnki)
+module Data.GlossaryItem.Definition exposing (Definition, fromMarkdown, raw, markdown, view, viewInline, htmlTreeForAnki)
 
 {-| A definition for a glossary item.
-This can be in either plain text or Markdown.
 
 
 # Definition
 
-@docs Definition, fromPlaintext, fromMarkdown, raw, markdown, view, viewInline, htmlTreeForAnki
+@docs Definition, fromMarkdown, raw, markdown, view, viewInline, htmlTreeForAnki
 
 -}
 
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.HtmlTree exposing (HtmlTree)
-import Extras.String
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
 import Markdown.Block as Block exposing (Block)
@@ -24,18 +22,7 @@ import MarkdownRenderers
 {-| A definition for a glossary item.
 -}
 type Definition
-    = PlaintextDefinition String
-    | MarkdownDefinition MarkdownFragment
-
-
-{-| Construct a definition from a plain text string.
-
-    fromPlaintext "Foo" |> raw --> "Foo"
-
--}
-fromPlaintext : String -> Definition
-fromPlaintext =
-    PlaintextDefinition
+    = MarkdownDefinition MarkdownFragment
 
 
 {-| Construct a definition from a Markdown string.
@@ -56,9 +43,6 @@ fromMarkdown =
 raw : Definition -> String
 raw definition =
     case definition of
-        PlaintextDefinition body ->
-            body
-
         MarkdownDefinition fragment ->
             MarkdownFragment.raw fragment
 
@@ -68,9 +52,6 @@ raw definition =
 markdown : Definition -> String
 markdown definition =
     case definition of
-        PlaintextDefinition body ->
-            Extras.String.escapeForMarkdown body
-
         MarkdownDefinition fragment ->
             MarkdownFragment.raw fragment
 
@@ -78,11 +59,6 @@ markdown definition =
 {-| View a definition as HTML.
 
     import Html exposing (Html)
-
-    "Foo"
-    |> fromPlaintext
-    |> view {enableMathSupport = False, makeLinksTabbable = True}
-    --> Html.text "Foo"
 
     expected : Html msg
     expected =
@@ -103,9 +79,6 @@ markdown definition =
 view : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> Definition -> Html msg
 view { enableMathSupport, makeLinksTabbable } definition =
     case definition of
-        PlaintextDefinition body ->
-            text body
-
         MarkdownDefinition fragment ->
             let
                 parsed : Result String (List Block)
@@ -140,9 +113,6 @@ view { enableMathSupport, makeLinksTabbable } definition =
 viewInline : Bool -> List (Attribute msg) -> Definition -> Html msg
 viewInline enableMathSupport additionalAttributes definition =
     case definition of
-        PlaintextDefinition body ->
-            Html.span additionalAttributes [ text body ]
-
         MarkdownDefinition fragment ->
             let
                 parsed : Result String (List Block)
@@ -185,9 +155,6 @@ htmlTreeRendererForAnki enableMathSupport =
 htmlTreeForAnki : Bool -> Definition -> HtmlTree
 htmlTreeForAnki enableMathSupport definition =
     case definition of
-        PlaintextDefinition body ->
-            Extras.HtmlTree.Leaf body
-
         MarkdownDefinition fragment ->
             case MarkdownFragment.parsed fragment of
                 Ok blocks ->

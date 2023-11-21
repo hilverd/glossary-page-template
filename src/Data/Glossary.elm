@@ -14,8 +14,7 @@ import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 
 
 type alias Glossary =
-    { enableMarkdownBasedSyntax : Bool
-    , enableMathSupport : Bool
+    { enableMathSupport : Bool
     , enableLastUpdatedDates : Bool
     , cardWidth : CardWidth
     , title : GlossaryTitle
@@ -27,7 +26,7 @@ type alias Glossary =
 {-| Represent these glossary items as an HTML tree, ready for writing back to the glossary's HTML file.
 -}
 toHtmlTree : Bool -> Bool -> Bool -> Glossary -> HtmlTree
-toHtmlTree enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges { enableMarkdownBasedSyntax, cardWidth, title, aboutSection, enableLastUpdatedDates, items } =
+toHtmlTree enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges { cardWidth, title, aboutSection, enableLastUpdatedDates, items } =
     let
         tagsWithDescriptions =
             GlossaryItems.tagsWithDescriptions items
@@ -38,7 +37,6 @@ toHtmlTree enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges {
         , HtmlTree.boolAttribute "data-enable-help-for-making-changes" enableHelpForMakingChanges
         , HtmlTree.boolAttribute "data-enable-export-menu" enableExportMenu
         , HtmlTree.boolAttribute "data-enable-order-items-buttons" enableOrderItemsButtons
-        , HtmlTree.boolAttribute "data-enable-markdown-based-syntax" enableMarkdownBasedSyntax
         , HtmlTree.boolAttribute "data-enable-last-updated-dates" enableLastUpdatedDates
         , cardWidth |> CardWidth.toHtmlTreeAttribute
         ]

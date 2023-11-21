@@ -80,27 +80,20 @@ create preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ definitio
 
 {-| Decode a glossary item from its JSON representation.
 -}
-decode : Bool -> Decoder GlossaryItemForHtml
-decode enableMarkdownBasedSyntax =
+decode : Decoder GlossaryItemForHtml
+decode =
     Decode.map8
         create
-        (Decode.field "preferredTerm" <| Term.decode enableMarkdownBasedSyntax)
-        (Decode.field "alternativeTerms" <| Decode.list <| Term.decode enableMarkdownBasedSyntax)
+        (Decode.field "preferredTerm" <| Term.decode)
+        (Decode.field "alternativeTerms" <| Decode.list <| Term.decode)
         (Decode.field "disambiguationTag" <| Decode.nullable <| Tag.decode)
         (Decode.field "normalTags" <| Decode.list <| Tag.decode)
         (Decode.field "definition" <|
             Decode.nullable <|
-                Decode.map
-                    (if enableMarkdownBasedSyntax then
-                        Definition.fromMarkdown
-
-                     else
-                        Definition.fromPlaintext
-                    )
-                <|
+                Decode.map Definition.fromMarkdown <|
                     Decode.string
         )
-        (Decode.field "relatedTerms" <| Decode.list <| Term.decode enableMarkdownBasedSyntax)
+        (Decode.field "relatedTerms" <| Decode.list <| Term.decode)
         (Decode.field "needsUpdating" Decode.bool)
         (Decode.maybe <| Decode.field "lastUpdatedDate" Decode.string)
 

@@ -1,7 +1,6 @@
-module Data.GlossaryItem.Term exposing (Term, fromPlaintext, fromMarkdown, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki)
+module Data.GlossaryItem.Term exposing (Term, fromMarkdown, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki)
 
 {-| A term in a glossary item.
-This can be in either plain text or Markdown.
 A term's `id` is used to be able to refer to this term (as a related one) from other glossary items.
 A term might be an abbreviation such as "Etc." or "TBD" (an acronym).
 The `body` is the actual term.
@@ -9,7 +8,7 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, fromPlaintext, fromMarkdown, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki
+@docs Term, fromMarkdown, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki
 
 -}
 
@@ -29,12 +28,7 @@ import String.Normalize
 {-| A term.
 -}
 type Term
-    = PlaintextTerm
-        { isAbbreviation : Bool
-        , body : String
-        , indexGroupString : String
-        }
-    | MarkdownTerm
+    = MarkdownTerm
         { isAbbreviation : Bool
         , body : MarkdownFragment
         , indexGroupString : String
@@ -55,20 +49,6 @@ stringToIndexGroupString =
                 else
                     result
            )
-
-
-{-| Construct a term from a plain text string and a Boolean indicating whether the term is an abbreviation.
-
-    fromPlaintext "NA" True |> raw --> "NA"
-
--}
-fromPlaintext : String -> Bool -> Term
-fromPlaintext body isAbbreviation0 =
-    PlaintextTerm
-        { isAbbreviation = isAbbreviation0
-        , body = body
-        , indexGroupString = stringToIndexGroupString body
-        }
 
 
 {-| Construct a term from a Markdown string and a Boolean indicating whether the term is an abbreviation.
@@ -99,15 +79,10 @@ fromMarkdown body isAbbreviation0 =
 
 {-| Decode a term from its JSON representation.
 -}
-decode : Bool -> Decoder Term
-decode enableMarkdownBasedSyntax =
+decode : Decoder Term
+decode =
     Decode.map2
-        (if enableMarkdownBasedSyntax then
-            fromMarkdown
-
-         else
-            fromPlaintext
-        )
+        fromMarkdown
         (Decode.field "body" Decode.string)
         (Decode.field "isAbbreviation" Decode.bool)
 
@@ -116,7 +91,7 @@ decode enableMarkdownBasedSyntax =
 
     import Data.GlossaryItem.TermId as TermId
 
-    fromPlaintext "Hi there" False
+    fromMarkdown "Hi there" False
     |> id
     |> TermId.toString
     --> "Hi_there"
@@ -125,24 +100,18 @@ decode enableMarkdownBasedSyntax =
 id : Term -> TermId
 id term =
     case term of
-        PlaintextTerm t ->
-            t.body |> String.replace " " "_" |> TermId.fromString
-
         MarkdownTerm t ->
             t.body |> MarkdownFragment.raw |> String.replace " " "_" |> TermId.fromString
 
 
 {-| Retrieve the "is an abbreviation" Boolean of a term.
 
-    fromPlaintext "NA" True |> isAbbreviation --> True
+    fromMarkdown "NA" True |> isAbbreviation --> True
 
 -}
 isAbbreviation : Term -> Bool
 isAbbreviation term =
     case term of
-        PlaintextTerm t ->
-            t.isAbbreviation
-
         MarkdownTerm t ->
             t.isAbbreviation
 
@@ -152,9 +121,6 @@ isAbbreviation term =
 raw : Term -> String
 raw term =
     case term of
-        PlaintextTerm t ->
-            t.body
-
         MarkdownTerm t ->
             MarkdownFragment.raw t.body
 
@@ -169,9 +135,6 @@ raw term =
 inlineText : Term -> String
 inlineText term =
     case term of
-        PlaintextTerm t ->
-            t.body
-
         MarkdownTerm t ->
             t.inlineText
 
@@ -181,9 +144,6 @@ inlineText term =
 markdown : Term -> String
 markdown term =
     case term of
-        PlaintextTerm t ->
-            Extras.String.escapeForMarkdown t.body
-
         MarkdownTerm t ->
             MarkdownFragment.raw t.body
 
@@ -191,8 +151,6 @@ markdown term =
 {-| View a term as HTML.
 
     import Html exposing (Html)
-
-    fromPlaintext "Foo" False |> view False [] --> Html.span [] [ Html.text "Foo" ]
 
     expected : Html msg
     expected =
@@ -211,9 +169,6 @@ markdown term =
 view : Bool -> List (Attribute msg) -> Term -> Html msg
 view enableMathSupport additionalAttributes term =
     case term of
-        PlaintextTerm t ->
-            Html.span additionalAttributes [ text t.body ]
-
         MarkdownTerm t ->
             let
                 parsed : Result String (List Block)
@@ -253,9 +208,6 @@ view enableMathSupport additionalAttributes term =
 indexGroupString : Term -> String
 indexGroupString term =
     case term of
-        PlaintextTerm t ->
-            t.indexGroupString
-
         MarkdownTerm t ->
             t.indexGroupString
 
@@ -292,9 +244,6 @@ compareAlphabetically term1 term2 =
 updateRaw : (String -> String) -> Term -> Term
 updateRaw f term =
     case term of
-        PlaintextTerm t ->
-            fromPlaintext (f t.body) t.isAbbreviation
-
         MarkdownTerm t ->
             fromMarkdown
                 (t.body |> MarkdownFragment.raw |> f)
@@ -306,9 +255,6 @@ updateRaw f term =
 htmlTreeForAnki : Bool -> Term -> HtmlTree
 htmlTreeForAnki enableMathSupport term =
     case term of
-        PlaintextTerm t ->
-            Extras.HtmlTree.Leaf t.body
-
         MarkdownTerm t ->
             case MarkdownFragment.parsed t.body of
                 Ok blocks ->

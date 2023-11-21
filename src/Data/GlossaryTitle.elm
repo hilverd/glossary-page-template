@@ -1,12 +1,11 @@
-module Data.GlossaryTitle exposing (GlossaryTitle, fromPlaintext, fromMarkdown, raw, toFilename, inlineText, markdown, view)
+module Data.GlossaryTitle exposing (GlossaryTitle, fromMarkdown, raw, toFilename, inlineText, markdown, view)
 
 {-| The title of a glossary.
-This can be in either plain text or Markdown.
 
 
 # Glossary Titles
 
-@docs GlossaryTitle, fromPlaintext, fromMarkdown, raw, toFilename, inlineText, markdown, view
+@docs GlossaryTitle, fromMarkdown, raw, toFilename, inlineText, markdown, view
 
 -}
 
@@ -23,15 +22,7 @@ import Regex
 {-| An opaque type for a glossary title which is just a wrapper around a string.
 -}
 type GlossaryTitle
-    = PlaintextGlossaryTitle String
-    | MarkdownGlossaryTitle MarkdownFragment
-
-
-{-| Construct a glossary title from a plain text string.
--}
-fromPlaintext : String -> GlossaryTitle
-fromPlaintext =
-    PlaintextGlossaryTitle
+    = MarkdownGlossaryTitle MarkdownFragment
 
 
 {-| Construct a glossary title from a Markdown string.
@@ -52,9 +43,6 @@ fromMarkdown =
 raw : GlossaryTitle -> String
 raw glossaryTitle =
     case glossaryTitle of
-        PlaintextGlossaryTitle title ->
-            title
-
         MarkdownGlossaryTitle fragment ->
             MarkdownFragment.raw fragment
 
@@ -64,7 +52,7 @@ Spaces are replaced by underscores.
 Any other characters which are not generally safe for filenames are omitted.
 
     "Weather Terms: A Complete Guide"
-    |> fromPlaintext
+    |> fromMarkdown
     |> toFilename ".html"
     --> "Weather_Terms_A_Complete_Guide.html"
 
@@ -108,9 +96,6 @@ toFilename extension glossaryTitle =
 inlineText : GlossaryTitle -> String
 inlineText glossaryTitle =
     case glossaryTitle of
-        PlaintextGlossaryTitle title ->
-            title
-
         MarkdownGlossaryTitle fragment ->
             fragment
                 |> MarkdownFragment.concatenateInlineText
@@ -122,9 +107,6 @@ inlineText glossaryTitle =
 markdown : GlossaryTitle -> String
 markdown glossaryTitle =
     case glossaryTitle of
-        PlaintextGlossaryTitle body ->
-            Extras.String.escapeForMarkdown body
-
         MarkdownGlossaryTitle fragment ->
             MarkdownFragment.raw fragment
 
@@ -132,8 +114,6 @@ markdown glossaryTitle =
 {-| View a glossary title as HTML.
 
     import Html exposing (Html)
-
-    fromPlaintext "Foo" |> view False --> Html.text "Foo"
 
     expected : Html msg
     expected =
@@ -152,9 +132,6 @@ markdown glossaryTitle =
 view : Bool -> GlossaryTitle -> Html msg
 view enableMathSupport glossaryTitle =
     case glossaryTitle of
-        PlaintextGlossaryTitle title ->
-            text title
-
         MarkdownGlossaryTitle fragment ->
             let
                 parsed : Result String (List Block)

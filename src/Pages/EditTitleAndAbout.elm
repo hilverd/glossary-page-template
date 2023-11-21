@@ -30,7 +30,6 @@ import Html.Attributes exposing (class, for, id, name, placeholder, required, sp
 import Html.Events
 import Http
 import Icons
-import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
 import Svg.Attributes
 import Task
@@ -80,8 +79,8 @@ init common =
         _ ->
             ( { common = common
               , form =
-                    Form.create (GlossaryTitle.fromPlaintext "")
-                        { paragraph = AboutParagraph.fromPlaintext ""
+                    Form.create (GlossaryTitle.fromMarkdown "")
+                        { paragraph = AboutParagraph.fromMarkdown ""
                         , links = []
                         }
               , triedToSaveWhenFormInvalid = False
@@ -157,8 +156,8 @@ update msg model =
                                     | glossary =
                                         Ok
                                             { glossary0
-                                                | title = titleFromForm glossary0.enableMarkdownBasedSyntax model.form
-                                                , aboutSection = aboutSectionFromForm glossary0.enableMarkdownBasedSyntax model.form
+                                                | title = titleFromForm model.form
+                                                , aboutSection = aboutSectionFromForm model.form
                                             }
                                 }
 
@@ -182,30 +181,20 @@ update msg model =
             )
 
 
-titleFromForm : Bool -> Form.TitleAndAboutForm -> GlossaryTitle.GlossaryTitle
-titleFromForm enableMarkdownBasedSyntax =
+titleFromForm : Form.TitleAndAboutForm -> GlossaryTitle.GlossaryTitle
+titleFromForm =
     Form.titleField
         >> .body
-        >> (if enableMarkdownBasedSyntax then
-                GlossaryTitle.fromMarkdown
-
-            else
-                GlossaryTitle.fromPlaintext
-           )
+        >> GlossaryTitle.fromMarkdown
 
 
-aboutSectionFromForm : Bool -> Form.TitleAndAboutForm -> AboutSection
-aboutSectionFromForm enableMarkdownBasedSyntax form =
+aboutSectionFromForm : Form.TitleAndAboutForm -> AboutSection
+aboutSectionFromForm form =
     { paragraph =
         form
             |> Form.aboutParagraphField
             |> .body
-            |> (if enableMarkdownBasedSyntax then
-                    AboutParagraph.fromMarkdown
-
-                else
-                    AboutParagraph.fromPlaintext
-               )
+            |> AboutParagraph.fromMarkdown
     , links =
         form
             |> Form.aboutLinkFields
@@ -271,8 +260,8 @@ giveFocusToAboutLinkHref index =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.aboutLinkHref index)
 
 
-viewEditTitle : Bool -> Bool -> Bool -> Form.TitleField -> Html Msg
-viewEditTitle enableMarkdownBasedSyntax mathSupportEnabled showValidationErrors titleField =
+viewEditTitle : Bool -> Bool -> Form.TitleField -> Html Msg
+viewEditTitle mathSupportEnabled showValidationErrors titleField =
     div []
         [ div []
             [ h2
@@ -293,7 +282,7 @@ viewEditTitle enableMarkdownBasedSyntax mathSupportEnabled showValidationErrors 
                                 [ class "block w-full min-w-0" ]
                                 [ Components.Form.inputText
                                     titleField.body
-                                    enableMarkdownBasedSyntax
+                                    True
                                     mathSupportEnabled
                                     showValidationErrors
                                     titleField.validationError
@@ -326,8 +315,8 @@ viewEditTitle enableMarkdownBasedSyntax mathSupportEnabled showValidationErrors 
         ]
 
 
-viewEditAboutParagraph : Bool -> Bool -> Bool -> Bool -> Form.AboutParagraphField -> Html Msg
-viewEditAboutParagraph showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors aboutParagraphField =
+viewEditAboutParagraph : Bool -> Bool -> Form.AboutParagraphField -> Html Msg
+viewEditAboutParagraph mathSupportEnabled showValidationErrors aboutParagraphField =
     div []
         [ div []
             [ h2
@@ -342,7 +331,7 @@ viewEditAboutParagraph showNewlineWarnings markdownBasedSyntaxEnabled mathSuppor
                     [ class "relative block min-w-0 w-full" ]
                     [ Components.Form.textarea
                         aboutParagraphField.body
-                        markdownBasedSyntaxEnabled
+                        True
                         mathSupportEnabled
                         showValidationErrors
                         aboutParagraphField.validationError
@@ -366,10 +355,6 @@ viewEditAboutParagraph showNewlineWarnings markdownBasedSyntaxEnabled mathSuppor
                  else
                     Nothing
                 )
-            , Extras.Html.showIf (showNewlineWarnings && (String.trim aboutParagraphField.body |> String.contains "\n")) <|
-                p
-                    [ class "mt-2 text-red-800 dark:text-red-200" ]
-                    [ text "This will be turned into a single paragraph — line breaks are automatically converted to spaces" ]
             ]
         ]
 
@@ -605,15 +590,15 @@ viewCreateFormFooter model showValidationErrors glossaryItems =
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
-        Ok { enableMarkdownBasedSyntax, enableMathSupport, items } ->
+        Ok { enableMathSupport, items } ->
             let
                 title1 : GlossaryTitle.GlossaryTitle
                 title1 =
-                    titleFromForm enableMarkdownBasedSyntax model.form
+                    titleFromForm model.form
 
                 aboutSection : AboutSection
                 aboutSection =
-                    aboutSectionFromForm enableMarkdownBasedSyntax model.form
+                    aboutSectionFromForm model.form
             in
             { title = GlossaryTitle.inlineText title1
             , body =
@@ -631,8 +616,8 @@ view model =
                                 [ class "lg:flex lg:space-x-8" ]
                                 [ div
                                     [ class "lg:w-1/2 space-y-7 lg:space-y-8" ]
-                                    [ viewEditTitle enableMarkdownBasedSyntax enableMathSupport model.triedToSaveWhenFormInvalid <| Form.titleField model.form
-                                    , viewEditAboutParagraph (not enableMarkdownBasedSyntax) enableMarkdownBasedSyntax enableMathSupport model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
+                                    [ viewEditTitle enableMathSupport model.triedToSaveWhenFormInvalid <| Form.titleField model.form
+                                    , viewEditAboutParagraph enableMathSupport model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
                                     , viewEditAboutLinks model.triedToSaveWhenFormInvalid <| Form.aboutLinkFields model.form
                                     ]
                                 , div

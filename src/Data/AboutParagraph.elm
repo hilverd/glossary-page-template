@@ -1,12 +1,11 @@
-module Data.AboutParagraph exposing (AboutParagraph, fromPlaintext, fromMarkdown, raw, markdown, view)
+module Data.AboutParagraph exposing (AboutParagraph, fromMarkdown, raw, markdown, view)
 
 {-| The "about" paragraph(s) shown at the top of a glossary.
-This can be in either plain text or Markdown.
 
 
 # "About" Paragraphs
 
-@docs AboutParagraph, fromPlaintext, fromMarkdown, raw, markdown, view
+@docs AboutParagraph, fromMarkdown, raw, markdown, view
 
 -}
 
@@ -22,18 +21,7 @@ import MarkdownRenderers
 {-| An opaque type for an "about" paragraph which is just a wrapper around a string.
 -}
 type AboutParagraph
-    = PlaintextAboutParagraph String
-    | MarkdownAboutParagraph MarkdownFragment
-
-
-{-| Construct an "about" paragraph from a string.
-
-    fromPlaintext "Foo" |> raw --> "Foo"
-
--}
-fromPlaintext : String -> AboutParagraph
-fromPlaintext =
-    PlaintextAboutParagraph
+    = MarkdownAboutParagraph MarkdownFragment
 
 
 {-| Construct an "about" paragraph from a Markdown string.
@@ -54,9 +42,6 @@ fromMarkdown =
 raw : AboutParagraph -> String
 raw aboutParagraph =
     case aboutParagraph of
-        PlaintextAboutParagraph body ->
-            body
-
         MarkdownAboutParagraph fragment ->
             MarkdownFragment.raw fragment
 
@@ -66,9 +51,6 @@ raw aboutParagraph =
 markdown : AboutParagraph -> String
 markdown aboutParagraph =
     case aboutParagraph of
-        PlaintextAboutParagraph body ->
-            Extras.String.escapeForMarkdown body
-
         MarkdownAboutParagraph fragment ->
             MarkdownFragment.raw fragment
 
@@ -76,11 +58,6 @@ markdown aboutParagraph =
 {-| View an "about" paragraph as HTML.
 
     import Html exposing (Html)
-
-    "Foo"
-    |> fromPlaintext
-    |> view {enableMathSupport = False, makeLinksTabbable = True}
-    --> Html.text "Foo"
 
     expected : Html msg
     expected =
@@ -101,9 +78,6 @@ markdown aboutParagraph =
 view : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> AboutParagraph -> Html msg
 view { enableMathSupport, makeLinksTabbable } aboutParagraph =
     case aboutParagraph of
-        PlaintextAboutParagraph body ->
-            text body
-
         MarkdownAboutParagraph fragment ->
             let
                 parsed : Result String (List Block)

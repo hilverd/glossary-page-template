@@ -75,7 +75,6 @@ import Html.Attributes exposing (class, for, href, id, readonly)
 import Html.Events
 import Http
 import Icons
-import Json.Decode as Decode
 import PageMsg exposing (PageMsg)
 import Process
 import Search
@@ -157,7 +156,6 @@ type InternalMsg
     | FailedToDelete Http.Error
     | JumpToTermIndexGroup Bool String
     | ChangeOrderItemsBy OrderItemsBy
-    | ToggleMarkdownBasedSyntax
     | ChangeCardWidth CardWidth
     | ToggleEnableExportMenu
     | ToggleEnableOrderItemsButtons
@@ -636,28 +634,6 @@ update msg model =
             , orderItemsBy |> Data.OrderItemsBy.encode |> changeOrderItemsBy
             )
 
-        ToggleMarkdownBasedSyntax ->
-            case model.common.glossary of
-                Ok glossary ->
-                    let
-                        updatedGlossary : Glossary
-                        updatedGlossary =
-                            { glossary | enableMarkdownBasedSyntax = not glossary.enableMarkdownBasedSyntax }
-
-                        common0 =
-                            model.common
-                    in
-                    ( { model
-                        | confirmDeleteId = Nothing
-                        , deleting = NotSaving
-                        , savingSettings = SavingInProgress
-                      }
-                    , patchHtmlFileAfterChangingSettings { common0 | glossary = Ok updatedGlossary }
-                    )
-
-                _ ->
-                    ( model, Cmd.none )
-
         ChangeCardWidth cardWidth ->
             case model.common.glossary of
                 Ok glossary ->
@@ -1070,7 +1046,7 @@ viewSettings glossary model =
                 , Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
                     div
                         [ class "mt-6 pb-2" ]
-                        [ viewSelectInputSyntax glossary model ]
+                        [ viewSelectInputSyntax glossary ]
                 , div
                     [ class "mt-6 pb-2" ]
                     [ viewSelectCardWidth glossary model
@@ -1955,67 +1931,11 @@ viewExportButton enabled exportDropdownMenu =
         ]
 
 
-viewSelectInputSyntax : Glossary -> Model -> Html Msg
-viewSelectInputSyntax glossary model =
-    let
-        tabbable : Bool
-        tabbable =
-            noModalDialogShown model
-    in
+viewSelectInputSyntax : Glossary -> Html Msg
+viewSelectInputSyntax glossary =
     div
         []
-        [ label
-            [ class "font-medium text-gray-900 dark:text-gray-100" ]
-            [ text "Input syntax" ]
-        , fieldset [ class "mt-4" ]
-            [ legend
-                [ class "sr-only" ]
-                [ text "Input syntax" ]
-            , div
-                [ class "space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6" ]
-                [ div
-                    [ class "flex items-center" ]
-                    [ Components.Button.radio
-                        "input-syntax"
-                        "input-syntax-plain-text"
-                        (not glossary.enableMarkdownBasedSyntax)
-                        tabbable
-                        [ id ElementIds.inputSyntaxPlainText
-                        , Html.Events.onClick <| PageMsg.Internal ToggleMarkdownBasedSyntax
-                        ]
-                    , label
-                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
-                        , for ElementIds.inputSyntaxPlainText
-                        ]
-                        [ text "Plain text" ]
-                    ]
-                , div
-                    [ class "flex items-center" ]
-                    [ Components.Button.radio
-                        "input-syntax"
-                        "input-syntax-markdown-based"
-                        glossary.enableMarkdownBasedSyntax
-                        tabbable
-                        [ id ElementIds.inputSyntaxMarkdownBased
-                        , Html.Events.onClick <| PageMsg.Internal ToggleMarkdownBasedSyntax
-                        ]
-                    , label
-                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
-                        , for ElementIds.inputSyntaxMarkdownBased
-                        ]
-                        [ span
-                            [ class "mt-1 inline-flex items-center" ]
-                            [ Icons.markdown
-                                [ Svg.Attributes.class "w-7 h-7 text-gray-600 dark:text-gray-300 mr-2"
-                                , Accessibility.Aria.hidden True
-                                ]
-                            , text "Markdown-based"
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        , Extras.Html.showIf (glossary.enableMarkdownBasedSyntax && not glossary.enableMathSupport) <|
+        [ Extras.Html.showIf (not glossary.enableMathSupport) <|
             div
                 [ class "mt-2 max-w-prose" ]
                 [ text "To add support for math typesetting, include KaTeX's stylesheet and script inside the "
@@ -2029,7 +1949,7 @@ viewSelectInputSyntax glossary model =
                     [ text "glossary.html" ]
                 , text " template."
                 ]
-        , Extras.Html.showIf (glossary.enableMarkdownBasedSyntax && glossary.enableMathSupport) <|
+        , Extras.Html.showIf glossary.enableMathSupport <|
             div
                 [ class "mt-2 max-w-prose" ]
                 [ text "Math typesetting support is enabled. Inline math is written like"
@@ -2505,7 +2425,6 @@ view model =
                         , div
                             [ Html.Attributes.id ElementIds.container
                             , class "relative"
-                            , Extras.HtmlAttribute.fromBool "data-enable-markdown-based-syntax" glossary.enableMarkdownBasedSyntax
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
                             , glossary.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
                             ]

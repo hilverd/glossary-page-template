@@ -388,7 +388,7 @@ update msg model =
                         let
                             newOrUpdatedGlossaryItem : GlossaryItemForHtml
                             newOrUpdatedGlossaryItem =
-                                Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form <| Just dateTime
+                                Form.toGlossaryItem glossary.items model.form <| Just dateTime
 
                             common : CommonModel
                             common =
@@ -505,10 +505,10 @@ giveFocusToSeeAlsoSelect index =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.seeAlsoSelect index)
 
 
-viewCreateTerm : Bool -> Bool -> Bool -> Bool -> Int -> TermField -> Html Msg
-viewCreateTerm showMarkdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors canBeDeleted index term =
+viewCreateTerm : Bool -> Bool -> Bool -> Int -> TermField -> Html Msg
+viewCreateTerm mathSupportEnabled showValidationErrors canBeDeleted index term =
     viewCreateTermInternal
-        (showMarkdownBasedSyntaxEnabled && index == 0)
+        (index == 0)
         mathSupportEnabled
         showValidationErrors
         canBeDeleted
@@ -602,8 +602,8 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
         ]
 
 
-viewCreateTerms : Bool -> Bool -> Bool -> Array TermField -> Html Msg
-viewCreateTerms markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors termsArray =
+viewCreateTerms : Bool -> Bool -> Array TermField -> Html Msg
+viewCreateTerms mathSupportEnabled showValidationErrors termsArray =
     let
         terms : List TermField
         terms =
@@ -625,7 +625,7 @@ viewCreateTerms markdownBasedSyntaxEnabled mathSupportEnabled showValidationErro
             ]
         , div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
-            (List.indexedMap (viewCreateTerm markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors (List.length terms > 1)) terms
+            (List.indexedMap (viewCreateTerm mathSupportEnabled showValidationErrors (List.length terms > 1)) terms
                 ++ [ div []
                         [ Components.Button.secondary
                             [ Html.Events.onClick <| PageMsg.Internal AddTerm ]
@@ -638,13 +638,13 @@ viewCreateTerms markdownBasedSyntaxEnabled mathSupportEnabled showValidationErro
         ]
 
 
-viewDefinitionSingle : Bool -> Bool -> Bool -> Bool -> DefinitionField -> Html Msg
-viewDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionSingle =
-    viewDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionSingle
+viewDefinitionSingle : Bool -> Bool -> DefinitionField -> Html Msg
+viewDefinitionSingle mathSupportEnabled showValidationErrors definitionSingle =
+    viewDefinitionSingle1 mathSupportEnabled showValidationErrors definitionSingle
 
 
-viewDefinitionSingle1 : Bool -> Bool -> Bool -> Bool -> DefinitionField -> Html Msg
-viewDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionSingle =
+viewDefinitionSingle1 : Bool -> Bool -> DefinitionField -> Html Msg
+viewDefinitionSingle1 mathSupportEnabled showValidationErrors definitionSingle =
     let
         raw : String
         raw =
@@ -661,7 +661,7 @@ viewDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupport
                 [ class "relative block min-w-0 w-full" ]
                 [ Components.Form.textarea
                     raw
-                    markdownBasedSyntaxEnabled
+                    True
                     mathSupportEnabled
                     showValidationErrors
                     validationError
@@ -685,15 +685,11 @@ viewDefinitionSingle1 showNewlineWarnings markdownBasedSyntaxEnabled mathSupport
              else
                 Nothing
             )
-        , Extras.Html.showIf (showNewlineWarnings && (raw |> String.contains "\n")) <|
-            p
-                [ class "mt-2 text-red-800 dark:text-red-200" ]
-                [ text "This will be turned into a single paragraph — line breaks are automatically converted to spaces" ]
         ]
 
 
-viewDefinition : Bool -> Bool -> Bool -> Bool -> DefinitionField -> Html Msg
-viewDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionField =
+viewDefinition : Bool -> Bool -> DefinitionField -> Html Msg
+viewDefinition mathSupportEnabled showValidationErrors definitionField =
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
@@ -706,7 +702,7 @@ viewDefinition showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled
             ]
         , div
             [ class "space-y-6 sm:space-y-5" ]
-            [ viewDefinitionSingle showNewlineWarnings markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors definitionField ]
+            [ viewDefinitionSingle mathSupportEnabled showValidationErrors definitionField ]
         ]
 
 
@@ -1132,7 +1128,7 @@ view model =
 
                 newOrUpdatedGlossaryItem : GlossaryItemForHtml
                 newOrUpdatedGlossaryItem =
-                    Form.toGlossaryItem glossary.enableMarkdownBasedSyntax glossary.items model.form Nothing
+                    Form.toGlossaryItem glossary.items model.form Nothing
             in
             { title = GlossaryTitle.inlineText glossary.title
             , body =
@@ -1155,10 +1151,8 @@ view model =
                                 [ class "lg:flex lg:space-x-8" ]
                                 [ div
                                     [ class "lg:w-1/2" ]
-                                    [ viewCreateTerms glossary.enableMarkdownBasedSyntax glossary.enableMathSupport model.triedToSaveWhenFormInvalid terms
+                                    [ viewCreateTerms glossary.enableMathSupport model.triedToSaveWhenFormInvalid terms
                                     , viewDefinition
-                                        (not glossary.enableMarkdownBasedSyntax)
-                                        glossary.enableMarkdownBasedSyntax
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
                                         definitionArray

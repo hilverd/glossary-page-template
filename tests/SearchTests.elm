@@ -12,7 +12,7 @@ import Test exposing (Test, describe, test)
 
 termFromBody : String -> Term
 termFromBody body =
-    Term.fromPlaintext body False
+    Term.fromMarkdown body False
 
 
 loadedGlossaryItems : GlossaryItems
@@ -25,8 +25,8 @@ loadedGlossaryItems =
                 []
                 Nothing
                 []
-                (Just <| Definition.fromPlaintext "The term one")
-                [ Term.fromPlaintext "Second the term" False ]
+                (Just <| Definition.fromMarkdown "The term one")
+                [ Term.fromMarkdown "Second the term" False ]
                 False
                 Nothing
 
@@ -37,7 +37,7 @@ loadedGlossaryItems =
                 []
                 Nothing
                 []
-                (Just <| Definition.fromPlaintext "Second the term")
+                (Just <| Definition.fromMarkdown "Second the term")
                 []
                 False
                 Nothing
@@ -49,8 +49,8 @@ loadedGlossaryItems =
                 []
                 Nothing
                 []
-                (Just (Definition.fromPlaintext "The term three"))
-                [ Term.fromPlaintext "Second the term" False ]
+                (Just (Definition.fromMarkdown "The term three"))
+                [ Term.fromMarkdown "Second the term" False ]
                 False
                 Nothing
     in
