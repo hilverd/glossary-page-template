@@ -24,7 +24,7 @@
 </head>
 
 <body>
-    <div id="glossary-page-container" data-enable-help-for-making-changes="true" data-enable-export-menu="true" data-enable-markdown-based-syntax="true" data-enable-last-updated-dates="true" data-card-width="intermediate">
+    <div id="glossary-page-container" data-enable-help-for-making-changes="true" data-enable-export-menu="true" data-enable-order-items-buttons="true" data-enable-last-updated-dates="true" data-card-width="intermediate">
         <header>
             <h1 id="glossary-page-title">
                 Python 3.11.2 Glossary
@@ -39,8 +39,21 @@
 
                 </ul>
             </div>
+            
             <article id="glossary-page-items">
                 <dl>
+                    <div data-last-updated="2023-03-04T00:00:00.000Z">
+                        <dt>
+                            <dfn id="2to3">
+                                <a href="#2to3">
+                                    2to3
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dd>A tool that tries to convert Python 2.x code to Python 3.x code by handling most of the incompatibilities which can be detected by parsing the source and traversing the parse tree.
+
+2to3 is available in the standard library as [`lib2to3`](https://docs.python.org/3/library/2to3.html#module-lib2to3 &quot;lib2to3: The 2to3 library&quot;); a standalone entry point is provided as `Tools/scripts/2to3`. See [2to3 — Automated Python 2 to 3 code translation](https://docs.python.org/3/library/2to3.html#to3-reference).</dd>
+                    </div>
                     <div data-last-updated="2023-03-04T00:00:00.000Z">
                         <dt>
                             <dfn id="Abstract_base_class">
@@ -660,7 +673,14 @@ See also the [`functools.singledispatch()`](https://docs.python.org/3/library/fu
 
 For more details, see [generic alias types](https://docs.python.org/3/library/stdtypes.html#types-genericalias), [**PEP 483**](https://peps.python.org/pep-0483/), [**PEP 484**](https://peps.python.org/pep-0484/), [**PEP 585**](https://peps.python.org/pep-0585/), and the [`typing`](https://docs.python.org/3/library/typing.html#module-typing &quot;typing: Support for type hints \(see :pep:`484`\).&quot;) module.</dd>
                     </div>
-                    <div data-last-updated="2023-03-04T00:00:00.000Z">
+                    <div data-last-updated="2023-11-21T21:53:05.890Z">
+                        <dt>
+                            <dfn id="Global_interpreter_lock">
+                                <a href="#Global_interpreter_lock">
+                                    Global interpreter lock
+                                </a>
+                            </dfn>
+                        </dt>
                         <dt>
                             <dfn id="GIL">
                                 <abbr>
@@ -668,13 +688,6 @@ For more details, see [generic alias types](https://docs.python.org/3/library/st
                                         GIL
                                     </a>
                                 </abbr>
-                            </dfn>
-                        </dt>
-                        <dt>
-                            <dfn id="Global_interpreter_lock">
-                                <a href="#Global_interpreter_lock">
-                                    Global interpreter lock
-                                </a>
                             </dfn>
                         </dt>
                         <dd>The mechanism used by the CPython interpreter to assure that only one thread executes Python bytecode at a time. This simplifies the CPython implementation by making the object model (including critical built-in types such as [`dict`](https://docs.python.org/3/library/stdtypes.html#dict &quot;dict&quot;)) implicitly safe against concurrent access. Locking the entire interpreter makes it easier for the interpreter to be multi-threaded, at the expense of much of the parallelism afforded by multi-processor machines.
@@ -968,6 +981,25 @@ See [`importlib.abc.MetaPathFinder`](https://docs.python.org/3/library/importlib
                         </dt>
                         <dd>A function which is defined inside a class body. If called as an attribute of an instance of that class, the method will get the instance object as its first argument (which is usually called `self`). See function and nested scope.</dd>
                     </div>
+                    <div data-last-updated="2023-11-21T21:53:24.154Z">
+                        <dt>
+                            <dfn id="Method_resolution_order">
+                                <a href="#Method_resolution_order">
+                                    Method resolution order
+                                </a>
+                            </dfn>
+                        </dt>
+                        <dt>
+                            <dfn id="MRO">
+                                <abbr>
+                                    <a href="#MRO">
+                                        MRO
+                                    </a>
+                                </abbr>
+                            </dfn>
+                        </dt>
+                        <dd>Method Resolution Order is the order in which base classes are searched for a member during lookup. See [The Python 2.3 Method Resolution Order](https://www.python.org/download/releases/2.3/mro/) for details of the algorithm used by the Python interpreter since the 2.3 release.</dd>
+                    </div>
                     <div data-last-updated="2023-03-04T00:00:00.000Z">
                         <dt>
                             <dfn id="Module">
@@ -988,25 +1020,6 @@ See [`importlib.abc.MetaPathFinder`](https://docs.python.org/3/library/importlib
                             </dfn>
                         </dt>
                         <dd>A namespace containing the import-related information used to load a module. An instance of [`importlib.machinery.ModuleSpec`](https://docs.python.org/3/library/importlib.html#importlib.machinery.ModuleSpec &quot;importlib.machinery.ModuleSpec&quot;).</dd>
-                    </div>
-                    <div data-last-updated="2023-03-04T00:00:00.000Z">
-                        <dt>
-                            <dfn id="MRO">
-                                <abbr>
-                                    <a href="#MRO">
-                                        MRO
-                                    </a>
-                                </abbr>
-                            </dfn>
-                        </dt>
-                        <dt>
-                            <dfn id="Method_resolution_order">
-                                <a href="#Method_resolution_order">
-                                    Method resolution order
-                                </a>
-                            </dfn>
-                        </dt>
-                        <dd>Method Resolution Order is the order in which base classes are searched for a member during lookup. See [The Python 2.3 Method Resolution Order](https://www.python.org/download/releases/2.3/mro/) for details of the algorithm used by the Python interpreter since the 2.3 release.</dd>
                     </div>
                     <div data-last-updated="2023-03-04T00:00:00.000Z">
                         <dt>
@@ -1418,18 +1431,6 @@ The [`collections.abc.Sequence`](https://docs.python.org/3/library/collections.a
 
 The [`Py_NewRef()`](https://docs.python.org/3/c-api/refcounting.html#c.Py_NewRef &quot;Py_NewRef&quot;) function can be used to create a strong reference to an object. Usually, the [`Py_DECREF()`](https://docs.python.org/3/c-api/refcounting.html#c.Py_DECREF &quot;Py_DECREF&quot;) function must be called on the strong reference before exiting the scope of the strong reference, to avoid leaking one reference.</dd>
                         <dd class="related-terms">See also: <a href="#Borrowed_reference">Borrowed reference</a></dd>
-                    </div>
-                    <div data-last-updated="2023-03-04T00:00:00.000Z">
-                        <dt>
-                            <dfn id="2to3">
-                                <a href="#2to3">
-                                    2to3
-                                </a>
-                            </dfn>
-                        </dt>
-                        <dd>A tool that tries to convert Python 2.x code to Python 3.x code by handling most of the incompatibilities which can be detected by parsing the source and traversing the parse tree.
-
-2to3 is available in the standard library as [`lib2to3`](https://docs.python.org/3/library/2to3.html#module-lib2to3 &quot;lib2to3: The 2to3 library&quot;); a standalone entry point is provided as `Tools/scripts/2to3`. See [2to3 — Automated Python 2 to 3 code translation](https://docs.python.org/3/library/2to3.html#to3-reference).</dd>
                     </div>
                     <div data-last-updated="2023-03-04T00:00:00.000Z">
                         <dt>
