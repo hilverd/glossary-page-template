@@ -1051,7 +1051,7 @@ viewCreateFormFooter model =
         errorDiv : String -> Html msg
         errorDiv message =
             div
-                [ class "flex justify-end mt-2" ]
+                [ class "flex justify-end mb-4" ]
                 [ p
                     [ class "text-red-600 dark:text-red-400" ]
                     [ text message ]
