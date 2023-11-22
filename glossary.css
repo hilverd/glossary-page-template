@@ -40,11 +40,7 @@
     @apply px-6 lg:px-8 print:px-0 print:max-w-full;
   }
 
-  div#glossary-page-about:not([data-enable-markdown-based-syntax="true"]) div#glossary-page-about > p {
-    @apply max-w-prose print:max-w-full;
-  }
-
-  div#glossary-page-container[data-enable-markdown-based-syntax="true"]:not([data-markdown-rendered="true"]) div#glossary-page-about > p {
+  div#glossary-page-container:not([data-markdown-rendered="true"]) div#glossary-page-about > p {
     @apply font-mono whitespace-pre-wrap;
   }
 
@@ -64,7 +60,7 @@
     @apply rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-2 py-1 text-gray-700 dark:text-gray-200 shadow-sm cursor-default mr-2 mb-2;
   }
 
-  div#glossary-page-container[data-enable-markdown-based-syntax="true"]:not([data-markdown-rendered="true"]) #glossary-page-tags > p > button {
+  div#glossary-page-container:not([data-markdown-rendered="true"]) #glossary-page-tags > p > button {
     @apply font-mono whitespace-pre-wrap;
   }
 
@@ -130,11 +126,7 @@
     @apply inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-400/10 px-2 py-1 text-sm font-medium text-yellow-800 dark:text-yellow-500 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-400/20;
   }
 
-  div#glossary-page-container:not([data-enable-markdown-based-syntax="true"]) article#glossary-page-items dl dd {
-    @apply max-w-prose print:max-w-full;
-  }
-
-  div#glossary-page-container[data-enable-markdown-based-syntax="true"]:not([data-markdown-rendered="true"]) article#glossary-page-items dl dd:not(.related-terms) {
+  div#glossary-page-container:not([data-markdown-rendered="true"]) article#glossary-page-items dl dd:not(.related-terms) {
     @apply font-mono whitespace-pre-wrap;
   }
 
