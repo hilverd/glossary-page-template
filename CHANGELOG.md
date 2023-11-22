@@ -12,6 +12,21 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [4.0.0] - not yet released
+
+This release introduces support for _tags_, improves support for items that have terms in common, and removes support for "plain text" in favour of Markdown. It contains **breaking** changes that should only affect you if you have items with multiple definitions or are using plain text.
+
+### How to upgrade from v3
+
+1. Point the [static assets](https://github.com/hilverd/glossary-page-template#static-assets) to a version starting with `@4`.
+2. If you were using plain text rather than Markdown, then inspect all terms and definitions and correct the formatting where needed.
+3. Similarly, if you had items with multiple definitions, then you will want to inspect their definitions and correct the formatting where needed.
+
+### Added
 
 - Add support for tags.
   - You can use these to attach "labels" to items that people can then filter by. This may be useful for large glossaries that span multiple topics, where there is a need to categorize or group items. Tags can also be used to "disambiguate" items that have the same preferred term but whose meaning depends on some "context". For example, the term "default" has a different meaning in the context of computer science than it does in the context of finance.
@@ -25,7 +40,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Make the concept of a _preferred term_ (and _alternative terms_) clearer in the UI.
 - Show "Make changes" button when Node.js backend is running. This is to make it easier to see the glossary in "read-only" mode.
 
-### Fixed
 ### Removed
 
 - Remove support for plain text syntax in favour of Markdown.
@@ -584,7 +598,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v3.8.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.0.0...HEAD
+[4.0.0]: https://github.com/hilverd/glossary-page-template/compare/v3.8.0...v4.0.0
 [3.8.0]: https://github.com/hilverd/glossary-page-template/compare/v3.7.0...v3.8.0
 [3.7.0]: https://github.com/hilverd/glossary-page-template/compare/v3.6.1...v3.7.0
 [3.6.1]: https://github.com/hilverd/glossary-page-template/compare/v3.6.0...v3.6.1
