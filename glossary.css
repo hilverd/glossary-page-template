@@ -52,8 +52,20 @@
     @apply text-3xl font-bold leading-tight;
   }
 
-  #glossary-page-tags > p {
-    @apply mb-4;
+  #glossary-page-tags > dl {
+    @apply mt-4;
+  }
+
+  #glossary-page-tags > dl > div > dt::before {
+    @apply content-["•_"];
+  }
+
+  #glossary-page-tags > dl > div > dt {
+    @apply font-mono;
+  }
+
+  #glossary-page-tags > dl > div > dd {
+    @apply font-mono whitespace-pre-wrap mb-5;
   }
 
   #glossary-page-tags > p > button {
