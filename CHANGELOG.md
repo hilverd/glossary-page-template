@@ -20,6 +20,8 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 This release introduces support for _tags_, improves support for items that have terms in common, and removes support for "plain text" in favour of Markdown. It contains **breaking** changes that should only affect you if you have items with multiple definitions or are using plain text.
 
+Download [glossary.html](https://github.com/hilverd/glossary-page-template/releases/latest/download/glossary.html) to see some examples of the new features.
+
 ### How to upgrade from v3
 
 1. Point the [static assets](https://github.com/hilverd/glossary-page-template#static-assets) to a version starting with `@4`.
