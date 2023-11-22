@@ -1386,7 +1386,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIdOfItemToDelete deletin
 viewMakeChangesButton : Bool -> Bool -> Html Msg
 viewMakeChangesButton showSandboxModeMessage tabbable =
     div
-        [ class "print:hidden" ]
+        [ class "mb-4 flex-none print:hidden" ]
         [ Components.Button.white True
             [ Html.Events.onClick <| PageMsg.Internal MakeChanges
             , Accessibility.Key.tabbable tabbable
@@ -1403,7 +1403,7 @@ viewMakeChangesButton showSandboxModeMessage tabbable =
             ]
         , Extras.Html.showIf showSandboxModeMessage <|
             div
-                [ class "mt-4 mb-5 sm:mb-4 text-sm text-gray-500 dark:text-gray-400" ]
+                [ class "my-4 text-sm text-gray-500 dark:text-gray-400" ]
                 [ text Components.Copy.sandboxModeMessage ]
         ]
 
@@ -2439,10 +2439,7 @@ view model =
                                     [ div
                                         [ class "flex flex-row justify-start lg:justify-end" ]
                                         [ Extras.Html.showIf (canEdit model.editability) <|
-                                            div
-                                                [ class "flex-none" ]
-                                                [ viewMakeChangesButton model.common.enableSavingChangesInMemory noModalDialogShown_
-                                                ]
+                                            viewMakeChangesButton model.common.enableSavingChangesInMemory noModalDialogShown_
                                         , div
                                             [ class "hidden lg:block ml-auto pb-3 pt-0.5" ]
                                             [ viewThemeButton noModalDialogShown_ model.common.theme model.themeDropdownMenu
