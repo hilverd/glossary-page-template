@@ -160,7 +160,7 @@ toggle on labelId additionalAttributes children =
             ]
             [ Accessibility.span
                 [ Accessibility.Aria.hidden True
-                , class "pointer-events-none inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-700 shadow transform motion-reduce:transform-none ring-0 transition ease-in-out duration-200"
+                , class "pointer-events-none inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-700 shadow transform motion-reduce:transition-none ring-0 transition ease-in-out duration-200"
                 , class <|
                     if on then
                         "translate-x-5"
