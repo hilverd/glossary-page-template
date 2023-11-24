@@ -11,13 +11,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-      - uses: pnpm/action-setup@646cdf48217256a3d0b80361c5a50727664284f2
+        uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
         with:
-          version: 8.6.12
+          version: 8.11.0
       - uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: "20"
           cache: "pnpm"
       - run: pnpm install
       - run: pnpm exec elm-verify-examples
