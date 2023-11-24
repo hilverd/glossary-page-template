@@ -16,6 +16,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 
 - Fix minor HTML/UI bug -- don't give IDs to alternative terms, to prevent duplicates.
+- Make clicking on a tag to filter by also scroll to the top.
 
 ### Removed
 

@@ -793,7 +793,7 @@ update msg model =
                         , orderItemsBy = orderItemsBy_
                     }
               }
-            , Cmd.none
+            , Extras.BrowserDom.scrollToTop <| PageMsg.Internal NoOp
             )
 
         DoNotFilterByTag ->
