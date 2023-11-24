@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- Fix minor HTML/UI bug -- don't give IDs to alternative terms, to prevent duplicates.
+
 ### Removed
 
 ## [4.0.0] - 2023-11-24

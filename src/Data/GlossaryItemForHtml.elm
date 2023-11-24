@@ -234,8 +234,8 @@ disambiguatedTerm tag term =
         term
 
 
-termToHtmlTree : Maybe Tag -> Term -> HtmlTree
-termToHtmlTree disambiguationTag_ term =
+preferredTermToHtmlTree : Maybe Tag -> Term -> HtmlTree
+preferredTermToHtmlTree disambiguationTag_ term =
     let
         disambiguatedTermIdString =
             disambiguationTag_
@@ -284,6 +284,28 @@ termToHtmlTree disambiguationTag_ term =
                         else
                             linkedTerm
                    )
+            ]
+        ]
+
+
+alternativeTermToHtmlTree : Term -> HtmlTree
+alternativeTermToHtmlTree term =
+    HtmlTree.Node "dt"
+        True
+        []
+        [ HtmlTree.Node "dfn"
+            True
+            []
+            [ let
+                termHtmlTree : HtmlTree
+                termHtmlTree =
+                    HtmlTree.Leaf (Term.raw term)
+              in
+              if Term.isAbbreviation term then
+                HtmlTree.Node "abbr" True [] [ termHtmlTree ]
+
+              else
+                termHtmlTree
             ]
         ]
 
@@ -347,8 +369,8 @@ toHtmlTree glossaryItem =
                         )
                     |> Maybe.withDefault []
                 )
-                (termToHtmlTree item.disambiguationTag item.preferredTerm
-                    :: List.map (termToHtmlTree Nothing) item.alternativeTerms
+                (preferredTermToHtmlTree item.disambiguationTag item.preferredTerm
+                    :: List.map alternativeTermToHtmlTree item.alternativeTerms
                     ++ (if item.needsUpdating then
                             [ HtmlTree.Node "dd"
                                 False
