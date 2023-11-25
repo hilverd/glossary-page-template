@@ -1,4 +1,4 @@
-module Components.Button exposing (emptyState, primary, radio, rounded, roundedWithoutBorder, secondary, soft, softIndigo, softSmall, softSmallIndigo, text, toggle, white)
+module Components.Button exposing (emptyState, primary, radio, rounded, roundedWithoutBorder, secondary, soft, softIndigo, softSmall, softSmallIndigo, text, textWrapNormal, toggle, white)
 
 import Accessibility exposing (Attribute)
 import Accessibility.Aria
@@ -61,6 +61,17 @@ text : List (Attribute msg) -> List (Html msg) -> Html msg
 text =
     withAdditionalAttributes
         [ class "inline-flex items-center space-x-2 font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-400" ]
+
+
+textWrapNormal : List (Attribute msg) -> List (Html msg) -> Html msg
+textWrapNormal additionalAttributes children =
+    Accessibility.button
+        ([ Html.Attributes.type_ "button"
+         , class "select-none inline-flex items-center space-x-2 font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-400"
+         ]
+            ++ additionalAttributes
+        )
+        children
 
 
 roundedWithoutBorder : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg

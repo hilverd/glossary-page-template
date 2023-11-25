@@ -428,7 +428,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                         ]
                         [ Extras.Html.showMaybe
                             (\( previousItemIndex, previousItem ) ->
-                                Components.Button.text
+                                Components.Button.textWrapNormal
                                     [ Html.Events.onClick <| onClickItem previousItemIndex ]
                                     [ Icons.arrowLongLeft
                                         [ Svg.Attributes.class "h-5 w-5 shrink-0" ]
@@ -440,7 +440,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                             glossaryItemWithPreviousAndNext.previous
                         ]
                     , Html.div
-                        [ class "hidden md:-mt-px md:flex md:flex-col px-3" ]
+                        [ class "hidden md:-mt-px md:flex max-w-xs md:flex-col px-3" ]
                         (viewGlossaryTerm
                             { enableMathSupport = enableMathSupport
                             , tabbable = True
@@ -462,7 +462,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                         [ class "-mt-px flex w-0 flex-1 justify-end" ]
                         [ Extras.Html.showMaybe
                             (\( nextItemIndex, nextItem ) ->
-                                Components.Button.text
+                                Components.Button.textWrapNormal
                                     [ Html.Events.onClick <| onClickItem nextItemIndex ]
                                     [ span
                                         [ class "font-medium" ]
