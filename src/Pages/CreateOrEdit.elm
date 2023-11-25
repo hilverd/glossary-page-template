@@ -122,7 +122,12 @@ init commonModel =
 
                 emptyForm : GlossaryItemForm
                 emptyForm =
-                    Form.empty existingTerms existingDisambiguatedPreferredTerms tags preferredTermsOfItemsListingThisItemAsRelated
+                    Form.empty
+                        existingTerms
+                        existingDisambiguatedPreferredTerms
+                        tags
+                        commonModel.filterByTag
+                        preferredTermsOfItemsListingThisItemAsRelated
 
                 form =
                     Maybe.andThen
@@ -168,7 +173,7 @@ init commonModel =
 
         Err _ ->
             ( { common = commonModel
-              , form = Form.empty [] [] [] []
+              , form = Form.empty [] [] [] Nothing []
               , triedToSaveWhenFormInvalid = False
               , glossaryItemsError = Nothing
               , saving = NotSaving

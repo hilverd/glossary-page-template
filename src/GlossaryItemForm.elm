@@ -298,12 +298,17 @@ hasValidationErrors form =
         || (form |> relatedTermFields |> hasErrors .validationError)
 
 
-empty : List Term -> List Term -> List ( TagId, Tag ) -> List Term -> GlossaryItemForm
-empty withTermsOutside withPreferredTermsOutside allTags preferredTermsOfItemsListingThisItemAsRelated_ =
+empty : List Term -> List Term -> List ( TagId, Tag ) -> Maybe TagId -> List Term -> GlossaryItemForm
+empty withTermsOutside withPreferredTermsOutside allTags filterByTag preferredTermsOfItemsListingThisItemAsRelated_ =
     GlossaryItemForm
         { preferredTermField = TermField.empty
         , alternativeTermFields = Array.empty
-        , tagCheckboxes = List.map (\tagWithId -> ( tagWithId, False )) allTags
+        , tagCheckboxes =
+            List.map
+                (\( tagId, tag ) ->
+                    ( ( tagId, tag ), Just tagId == filterByTag )
+                )
+                allTags
         , disambiguationTagId = Nothing
         , definitionField = DefinitionField.empty
         , relatedTermFields = Array.empty
