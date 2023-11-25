@@ -62,7 +62,7 @@ itemToMarkdown glossaryItem =
             glossaryItem
                 |> GlossaryItemForHtml.allTerms
                 |> List.map (Term.markdown >> bold)
-                |> lines
+                |> String.join ("\\" ++ crlf)
 
         definitions =
             GlossaryItemForHtml.definition glossaryItem
