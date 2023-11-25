@@ -139,6 +139,14 @@ download enableMathSupport glossaryTitle aboutSection glossaryItems =
         htmlHeader =
             header "html" "true"
 
+        columnsHeader : String
+        columnsHeader =
+            header "columns" "Front\tBack\tTags"
+
+        tagsColumnHeader : String
+        tagsColumnHeader =
+            header "tags column" "3"
+
         instructionsComment : String
         instructionsComment =
             comment "This file is meant to be imported into Anki (https://docs.ankiweb.net/importing.html#text-files)."
@@ -168,6 +176,8 @@ download enableMathSupport glossaryTitle aboutSection glossaryItems =
         content =
             [ separatorHeader
             , htmlHeader
+            , columnsHeader
+            , tagsColumnHeader
             , instructionsComment
             , comment ""
             , titleComment
