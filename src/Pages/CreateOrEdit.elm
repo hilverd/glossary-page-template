@@ -804,7 +804,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfR
     div
         []
         [ div
-            [ class "flex-auto max-w-xl flex items-center" ]
+            [ class "flex-auto max-w-2xl flex items-center" ]
             [ span
                 [ class "inline-flex items-center" ]
                 [ Components.Button.rounded True
