@@ -1437,8 +1437,12 @@ viewCreateGlossaryItemButtonForEmptyState tabbable common =
             [ Icons.viewGridAdd
                 [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
             , span
-                [ class "mt-2 block font-medium text-gray-900 dark:text-gray-200" ]
-                [ text "Create a new glossary item" ]
+                [ class "mt-2 inline-flex items-center font-medium text-gray-900 dark:text-gray-200" ]
+                [ text "Create a new glossary item"
+                , Html.kbd
+                    [ class "ml-2 rounded border border-indigo-700 dark:border-indigo-300 px-1 font-sans text-xs" ]
+                    [ text "n" ]
+                ]
             ]
         ]
 
