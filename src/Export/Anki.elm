@@ -10,6 +10,7 @@ import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
 import Data.GlossaryItem.Definition as Definition
+import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -109,8 +110,15 @@ itemToAnki enableMathSupport glossaryItem =
                     |> List.map (Definition.htmlTreeForAnki enableMathSupport >> Extras.HtmlTree.toHtml >> escape)
                     |> paragraphs
                     |> quote
+
+        tags : String
+        tags =
+            GlossaryItemForHtml.allTags glossaryItem
+                |> List.map (Tag.inlineText >> String.replace " " "_" >> escape)
+                |> String.join " "
+                |> quote
     in
-    front ++ "\t" ++ back
+    front ++ "\t" ++ back ++ "\t" ++ tags
 
 
 {-| Export a glossary with the given title, "about" paragraph, and "about" links to a [text file suitable for Anki](https://docs.ankiweb.net/importing.html#text-files).

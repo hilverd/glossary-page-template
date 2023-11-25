@@ -12,6 +12,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Support tags in Anki export.
+
 ### Changed
 
 - When creating a new item, if a tag is being filtered by then auto-tick that tag's checkbox.
