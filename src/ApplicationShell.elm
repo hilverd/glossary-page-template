@@ -30,6 +30,8 @@ import Pages.ListAll
 import Pages.ManageTags
 import Task
 import Url
+import Url.Parser
+import Url.Parser.Query
 
 
 
@@ -67,6 +69,21 @@ type alias Model =
     Page
 
 
+type alias QueryParameters =
+    { orderItemsBy : OrderItemsBy
+    }
+
+
+query : Url.Parser.Query.Parser QueryParameters
+query =
+    Url.Parser.Query.map QueryParameters OrderItemsBy.decodeQuery
+
+
+parser : Url.Parser.Parser (QueryParameters -> a) a
+parser =
+    Url.Parser.query query
+
+
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
@@ -76,6 +93,16 @@ init flags =
                 |> Decode.decodeValue (Decode.field "windowLocationHref" Decode.string)
                 |> Result.toMaybe
                 |> Maybe.andThen Url.fromString
+
+        queryParameters : QueryParameters
+        queryParameters =
+            maybeUrl
+                |> Maybe.andThen
+                    (\url ->
+                        { url | path = "" }
+                            |> Url.Parser.parse parser
+                    )
+                |> Maybe.withDefault { orderItemsBy = OrderItemsBy.Alphabetically }
 
         filename : Maybe String
         filename =
