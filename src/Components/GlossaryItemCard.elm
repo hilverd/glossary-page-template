@@ -17,7 +17,7 @@ import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.Url exposing (fragmentOnly)
 import Html
-import Html.Attributes exposing (class, id)
+import Html.Attributes exposing (class, id, target)
 import Html.Events
 import Icons
 import Svg.Attributes
@@ -588,6 +588,7 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term 
                     [ class "silcrow invisible group-hover:visible hover:visible print:group-hover:invisible print:hover:invisible" ]
                     [ Html.a
                         [ term |> Term.id |> TermId.toString |> fragmentOnly |> Html.Attributes.href
+                        , target "_self"
                         , Accessibility.Key.tabbable tabbable
                         ]
                         [ text "§" ]
@@ -654,6 +655,7 @@ viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDefin
                                         relatedTerm |> Term.id |> TermId.toString |> fragmentOnly
                                       )
                                         |> Html.Attributes.href
+                                    , target "_self"
                                     , Accessibility.Key.tabbable tabbable
                                     , Extras.HtmlAttribute.showMaybe
                                         (\onClick1 ->

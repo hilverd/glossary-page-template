@@ -1103,6 +1103,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
                 [ Html.a
                     [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
                     , Html.Attributes.href <| fragmentOnly <| TermId.toString <| Term.id term
+                    , Html.Attributes.target "_self"
                     , Accessibility.Key.tabbable tabbable
                     , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
                     ]
@@ -1133,6 +1134,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
                             [ Html.a
                                 [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
                                 , Html.Attributes.href <| fragmentOnly <| TermId.toString <| Term.id preferredTerm
+                                , Html.Attributes.target "_self"
                                 , Accessibility.Key.tabbable tabbable
                                 , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
                                 ]

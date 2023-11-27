@@ -1,5 +1,6 @@
 module CommonModel exposing (CommonModel)
 
+import Browser.Navigation exposing (Key)
 import Data.Glossary exposing (Glossary)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.OrderItemsBy exposing (OrderItemsBy)
@@ -8,7 +9,8 @@ import Data.Theme exposing (Theme)
 
 
 type alias CommonModel =
-    { filename : Maybe String
+    { key : Key
+    , filename : Maybe String
     , enableHelpForMakingChanges : Bool
     , theme : Theme
     , enableExportMenu : Bool
