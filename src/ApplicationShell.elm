@@ -29,6 +29,7 @@ import Pages.CreateOrEdit
 import Pages.EditTitleAndAbout
 import Pages.ListAll
 import Pages.ManageTags
+import QueryParameters exposing (QueryParameters)
 import Task
 import Url exposing (Url)
 import Url.Parser
@@ -74,29 +75,12 @@ type alias Model =
     }
 
 
-type alias QueryParameters =
-    { orderItemsBy : OrderItemsBy
-    }
-
-
-query : Url.Parser.Query.Parser QueryParameters
-query =
-    Url.Parser.Query.map QueryParameters OrderItemsBy.decodeQuery
-
-
-parser : Url.Parser.Parser (QueryParameters -> a) a
-parser =
-    Url.Parser.query query
-
-
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
 init flags url key =
     let
         queryParameters : QueryParameters
         queryParameters =
-            { url | path = "" }
-                |> Url.Parser.parse parser
-                |> Maybe.withDefault { orderItemsBy = OrderItemsBy.Alphabetically }
+            QueryParameters.fromUrl url
 
         filename : Maybe String
         filename =

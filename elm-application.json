@@ -33,6 +33,7 @@
         "GlossaryItemForm.DefinitionField",
         "GlossaryItemForm.TermField",
         "MarkdownRenderers",
+        "QueryParameters",
         "TagsForm.TagDescriptionField",
         "TagsForm.TagField"
     ]
