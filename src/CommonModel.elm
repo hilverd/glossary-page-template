@@ -6,6 +6,7 @@ import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.OrderItemsBy exposing (OrderItemsBy)
 import Data.TagId exposing (TagId)
 import Data.Theme exposing (Theme)
+import QueryParameters exposing (QueryParameters)
 
 
 type alias CommonModel =
@@ -16,6 +17,7 @@ type alias CommonModel =
     , enableExportMenu : Bool
     , enableOrderItemsButtons : Bool
     , enableSavingChangesInMemory : Bool
+    , queryParameters : QueryParameters
     , filterByTag : Maybe TagId
     , orderItemsBy : OrderItemsBy
     , maybeId : Maybe GlossaryItemId

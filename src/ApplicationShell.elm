@@ -207,6 +207,7 @@ init flags url key =
                 , enableExportMenu = enableExportMenu
                 , enableOrderItemsButtons = enableOrderItemsButtons
                 , enableSavingChangesInMemory = enableSavingChangesInMemory
+                , queryParameters = queryParameters
                 , filterByTag = Nothing
                 , orderItemsBy = orderItemsBy
                 , maybeId = Nothing

@@ -77,6 +77,7 @@ import Http
 import Icons
 import PageMsg exposing (PageMsg)
 import Process
+import QueryParameters
 import Search
 import Svg.Attributes exposing (fill, height, stroke, width)
 import Task
@@ -246,7 +247,7 @@ init editorIsRunning currentlyEditing commonModel =
       , deleting = NotSaving
       , savingSettings = NotSaving
       , mostRecentTermIdForOrderingItemsFocusedOn =
-            case commonModel.orderItemsBy of
+            case QueryParameters.orderItemsBy commonModel.queryParameters of
                 FocusedOn termId ->
                     Just termId
 
@@ -628,7 +629,13 @@ update msg model =
                             model.mostRecentTermIdForOrderingItemsFocusedOn
             in
             ( { model
-                | common = { common | orderItemsBy = orderItemsBy }
+                | common =
+                    { common
+                        | queryParameters =
+                            model.common.queryParameters
+                                |> QueryParameters.setOrderItemsBy orderItemsBy
+                        , orderItemsBy = orderItemsBy
+                    }
                 , mostRecentTermIdForOrderingItemsFocusedOn = mostRecentTermIdForOrderingItemsFocusedOn1
               }
             , orderItemsBy |> Data.OrderItemsBy.encode |> changeOrderItemsBy
@@ -764,9 +771,13 @@ update msg model =
 
         FilterByTag tag ->
             let
+                common0 : CommonModel
+                common0 =
+                    model.common
+
                 filterByTag : Maybe TagId
                 filterByTag =
-                    case model.common.glossary of
+                    case common0.glossary of
                         Ok glossary ->
                             glossary.items
                                 |> GlossaryItems.tagIdFromTag tag
@@ -774,22 +785,22 @@ update msg model =
                         _ ->
                             Nothing
 
+                orderItemsBy_ : OrderItemsBy
                 orderItemsBy_ =
-                    case model.common.orderItemsBy of
+                    case QueryParameters.orderItemsBy common0.queryParameters of
                         FocusedOn _ ->
                             Alphabetically
 
                         _ ->
-                            model.common.orderItemsBy
-
-                common0 : CommonModel
-                common0 =
-                    model.common
+                            QueryParameters.orderItemsBy common0.queryParameters
             in
             ( { model
                 | common =
                     { common0
                         | filterByTag = filterByTag
+                        , queryParameters =
+                            common0.queryParameters
+                                |> QueryParameters.setOrderItemsBy orderItemsBy_
                         , orderItemsBy = orderItemsBy_
                     }
               }
