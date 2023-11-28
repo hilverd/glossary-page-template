@@ -48,9 +48,10 @@ To use SRI, change the two lines at the end of the `<head>` element so they
 
 You can get the `hash-here` values from the [release notes](https://github.com/hilverd/glossary-page-template/releases/latest).
 
-### Known limitations
+## Known Limitations
 
 * The integrated editor UI is meant to be run and used by a single local user only. It is not designed to be exposed to untrusted users.
+* In its current state this project is not very suitable for glossaries of more than 500 items. At the moment everything is stored in a single HTML file, and above around 500 items the DOM is arguably too large, the page takes up too much memory in the browser, and performance degrades overall. The number 500 is a rule of thumb — on older devices even that might already be too much. I'm planning to address this.
 
 ## License
 
