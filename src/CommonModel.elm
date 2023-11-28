@@ -1,16 +1,17 @@
-module CommonModel exposing (CommonModel)
+module CommonModel exposing (CommonModel, relativeUrl)
 
 import Browser.Navigation exposing (Key)
 import Data.Glossary exposing (Glossary)
 import Data.GlossaryItemId exposing (GlossaryItemId)
-import Data.OrderItemsBy exposing (OrderItemsBy)
 import Data.TagId exposing (TagId)
 import Data.Theme exposing (Theme)
 import QueryParameters exposing (QueryParameters)
+import Url exposing (Url)
 
 
 type alias CommonModel =
     { key : Key
+    , initialUrl : Url
     , filename : Maybe String
     , enableHelpForMakingChanges : Bool
     , theme : Theme
@@ -19,8 +20,25 @@ type alias CommonModel =
     , enableSavingChangesInMemory : Bool
     , queryParameters : QueryParameters
     , filterByTag : Maybe TagId
-    , orderItemsBy : OrderItemsBy
     , maybeId : Maybe GlossaryItemId
     , fragment : Maybe String
     , glossary : Result String Glossary
     }
+
+
+relativeUrl : CommonModel -> String
+relativeUrl commonModel =
+    commonModel.queryParameters
+        |> QueryParameters.toRelativeUrl
+        |> (\urlString ->
+                if urlString == "" then
+                    let
+                        initialUrl =
+                            commonModel.initialUrl
+                    in
+                    { initialUrl | query = Nothing }
+                        |> Url.toString
+
+                else
+                    urlString
+           )

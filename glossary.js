@@ -144,7 +144,6 @@ if (containerElement) {
             enableOrderItemsButtons: enableOrderItemsButtons,
             enableLastUpdatedDates: enableLastUpdatedDates,
             theme: localStorage.glossaryPageTheme || 'system',
-            orderItemsBy: (enableOrderItemsButtons && localStorage.orderItemsBy) || 'alphabetically',
             cardWidth: cardWidth,
             katexIsAvailable: katexIsAvailable
         }
@@ -243,10 +242,6 @@ if (containerElement) {
         }
 
         reflectThemeInClassList();
-    });
-
-    app.ports.changeOrderItemsBy.subscribe((orderItemsBy) => {
-        localStorage.orderItemsBy = orderItemsBy;
     });
 
     app.ports.getCurrentDateTimeForSaving.subscribe(() => {

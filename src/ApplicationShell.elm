@@ -99,12 +99,6 @@ init flags url key =
                 |> Decode.decodeValue (Decode.field "theme" Theme.decode)
                 |> Result.withDefault Theme.System
 
-        orderItemsBy : OrderItemsBy
-        orderItemsBy =
-            flags
-                |> Decode.decodeValue (Decode.field "orderItemsBy" OrderItemsBy.decode)
-                |> Result.withDefault OrderItemsBy.Alphabetically
-
         editorIsRunning : Bool
         editorIsRunning =
             flags
@@ -201,6 +195,7 @@ init flags url key =
                 editorIsRunning
                 False
                 { key = key
+                , initialUrl = url
                 , filename = filename
                 , enableHelpForMakingChanges = enableHelpForMakingChanges
                 , theme = theme
@@ -209,7 +204,6 @@ init flags url key =
                 , enableSavingChangesInMemory = enableSavingChangesInMemory
                 , queryParameters = queryParameters
                 , filterByTag = Nothing
-                , orderItemsBy = orderItemsBy
                 , maybeId = Nothing
                 , fragment = fragment
                 , glossary = glossary

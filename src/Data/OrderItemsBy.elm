@@ -1,8 +1,7 @@
-module Data.OrderItemsBy exposing (OrderItemsBy(..), decode, decodeQuery, encode)
+module Data.OrderItemsBy exposing (OrderItemsBy(..), fromQuery, toQueryParameter)
 
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
-import Dict
-import Json.Decode as Decode exposing (Decoder)
+import Url.Builder
 import Url.Parser.Query
 
 
@@ -12,35 +11,8 @@ type OrderItemsBy
     | FocusedOn TermId
 
 
-decode : Decoder OrderItemsBy
-decode =
-    Decode.string
-        |> Decode.andThen
-            (\str ->
-                case str of
-                    "alphabetically" ->
-                        Decode.succeed Alphabetically
-
-                    "most-mentioned-first" ->
-                        Decode.succeed MostMentionedFirst
-
-                    somethingElse ->
-                        if String.startsWith "focused-on-" str then
-                            let
-                                termId =
-                                    str
-                                        |> String.slice 11 (String.length str)
-                                        |> TermId.fromString
-                            in
-                            Decode.succeed <| FocusedOn termId
-
-                        else
-                            Decode.fail <| "Unknown order: " ++ somethingElse
-            )
-
-
-decodeQuery : Url.Parser.Query.Parser OrderItemsBy
-decodeQuery =
+fromQuery : Url.Parser.Query.Parser OrderItemsBy
+fromQuery =
     Url.Parser.Query.custom "order-items-by"
         (\strings ->
             case strings of
@@ -68,14 +40,18 @@ decodeQuery =
         )
 
 
-encode : OrderItemsBy -> String
-encode orderItemsBy =
-    case orderItemsBy of
-        Alphabetically ->
-            "alphabetically"
+toQueryParameter : OrderItemsBy -> Maybe Url.Builder.QueryParameter
+toQueryParameter orderItemsBy =
+    let
+        maybeValue =
+            case orderItemsBy of
+                Alphabetically ->
+                    Nothing
 
-        MostMentionedFirst ->
-            "most-mentioned-first"
+                MostMentionedFirst ->
+                    Just "most-mentioned-first"
 
-        FocusedOn termId ->
-            "focused-on-" ++ TermId.toString termId
+                FocusedOn termId ->
+                    Just <| "focused-on-" ++ TermId.toString termId
+    in
+    Maybe.map (Url.Builder.string "order-items-by") maybeValue

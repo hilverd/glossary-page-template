@@ -18,6 +18,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Changed
 
 - When creating a new item, if a tag is being filtered by then auto-tick that tag's checkbox.
+- Use URL query parameter for `order-items-by` instead of `localStorage`.
 
 ### Fixed
 

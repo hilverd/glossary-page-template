@@ -279,9 +279,6 @@ port preventBackgroundScrolling : () -> Cmd msg
 port changeTheme : Maybe String -> Cmd msg
 
 
-port changeOrderItemsBy : String -> Cmd msg
-
-
 port scrollElementIntoView : String -> Cmd msg
 
 
@@ -627,18 +624,21 @@ update msg model =
 
                         _ ->
                             model.mostRecentTermIdForOrderingItemsFocusedOn
+
+                updatedQueryParameters =
+                    QueryParameters.setOrderItemsBy orderItemsBy model.common.queryParameters
+
+                common1 =
+                    { common | queryParameters = updatedQueryParameters }
             in
             ( { model
-                | common =
-                    { common
-                        | queryParameters =
-                            model.common.queryParameters
-                                |> QueryParameters.setOrderItemsBy orderItemsBy
-                        , orderItemsBy = orderItemsBy
-                    }
+                | common = common1
                 , mostRecentTermIdForOrderingItemsFocusedOn = mostRecentTermIdForOrderingItemsFocusedOn1
               }
-            , orderItemsBy |> Data.OrderItemsBy.encode |> changeOrderItemsBy
+            , common1
+                |> CommonModel.relativeUrl
+                |> Debug.log "relativeUrl"
+                |> Navigation.pushUrl model.common.key
             )
 
         ChangeCardWidth cardWidth ->
@@ -801,7 +801,6 @@ update msg model =
                         , queryParameters =
                             common0.queryParameters
                                 |> QueryParameters.setOrderItemsBy orderItemsBy_
-                        , orderItemsBy = orderItemsBy_
                     }
               }
             , Extras.BrowserDom.scrollToTop <| PageMsg.Internal NoOp
@@ -1505,7 +1504,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
 
         orderItemsFocusedOnTerm : Maybe Term
         orderItemsFocusedOnTerm =
-            case model.common.orderItemsBy of
+            case QueryParameters.orderItemsBy model.common.queryParameters of
                 FocusedOn termId ->
                     GlossaryItems.disambiguatedPreferredTermFromId termId glossaryItems
 
@@ -2145,7 +2144,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                     [ Components.Button.radio
                         "order-items-by"
                         "order-items-alphabetically"
-                        (model.common.orderItemsBy == Alphabetically)
+                        (QueryParameters.orderItemsBy model.common.queryParameters == Alphabetically)
                         tabbable
                         [ id ElementIds.orderItemsAlphabetically
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy Alphabetically
@@ -2161,7 +2160,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                     [ Components.Button.radio
                         "order-items-by"
                         "order-items-most-mentioned-first"
-                        (model.common.orderItemsBy == MostMentionedFirst)
+                        (QueryParameters.orderItemsBy model.common.queryParameters == MostMentionedFirst)
                         tabbable
                         [ id ElementIds.orderItemsMostMentionedFirst
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy MostMentionedFirst
@@ -2177,7 +2176,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                     [ Components.Button.radio
                         "order-items-by"
                         "order-items-focused-on"
-                        (case model.common.orderItemsBy of
+                        (case QueryParameters.orderItemsBy model.common.queryParameters of
                             FocusedOn _ ->
                                 True
 
@@ -2224,7 +2223,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                     ]
                 ]
             ]
-        , Extras.Html.showIf (model.common.orderItemsBy == MostMentionedFirst) <|
+        , Extras.Html.showIf (QueryParameters.orderItemsBy model.common.queryParameters == MostMentionedFirst) <|
             p
                 [ class "mt-2 text-gray-700 dark:text-gray-300" ]
                 [ text "Items that are mentioned in many other items are shown first." ]
@@ -2376,7 +2375,7 @@ view model =
                                             let
                                                 itemWithPreviousAndNext =
                                                     items
-                                                        |> (case model.common.orderItemsBy of
+                                                        |> (case QueryParameters.orderItemsBy model.common.queryParameters of
                                                                 Alphabetically ->
                                                                     GlossaryItems.orderedAlphabetically filterByTag
 
@@ -2489,7 +2488,7 @@ view model =
                                         [ class "flex-none mt-2" ]
                                         [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
                                 , items
-                                    |> (case model.common.orderItemsBy of
+                                    |> (case QueryParameters.orderItemsBy model.common.queryParameters of
                                             Alphabetically ->
                                                 GlossaryItems.orderedAlphabetically filterByTag
                                                     >> (\lhs -> ( lhs, [] ))

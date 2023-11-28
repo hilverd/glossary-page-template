@@ -2,6 +2,7 @@ module QueryParameters exposing
     ( QueryParameters
     , fromUrl, setOrderItemsBy
     , orderItemsBy
+    , toRelativeUrl
     )
 
 {-| Query parameters that can be present in the URL.
@@ -21,9 +22,15 @@ module QueryParameters exposing
 
 @docs orderItemsBy
 
+
+# Converting to URLs
+
+@docs toRelativeUrl
+
 -}
 
 import Data.OrderItemsBy as OrderItemsBy exposing (OrderItemsBy)
+import Html exposing (param)
 import Url exposing (Url)
 import Url.Builder exposing (QueryParameter)
 import Url.Parser
@@ -50,7 +57,7 @@ default =
 
 query : Url.Parser.Query.Parser QueryParameters
 query =
-    Url.Parser.Query.map create OrderItemsBy.decodeQuery
+    Url.Parser.Query.map create OrderItemsBy.fromQuery
 
 
 parser : Url.Parser.Parser (QueryParameters -> a) a
@@ -83,3 +90,14 @@ orderItemsBy queryParameters =
     case queryParameters of
         QueryParameters parameters ->
             parameters.orderItemsBy
+
+
+{-| Convert a list of query parameters to a relative URL.
+-}
+toRelativeUrl : QueryParameters -> String
+toRelativeUrl queryParameters =
+    case queryParameters of
+        QueryParameters parameters ->
+            [ OrderItemsBy.toQueryParameter parameters.orderItemsBy ]
+                |> List.filterMap identity
+                |> Url.Builder.relative []
