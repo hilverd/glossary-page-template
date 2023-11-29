@@ -20,7 +20,6 @@ import Data.Glossary exposing (Glossary)
 import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
-import Data.OrderItemsBy as OrderItemsBy exposing (OrderItemsBy)
 import Data.Theme as Theme exposing (Theme)
 import Html
 import Json.Decode as Decode
@@ -32,8 +31,6 @@ import Pages.ManageTags
 import QueryParameters exposing (QueryParameters)
 import Task
 import Url exposing (Url)
-import Url.Parser
-import Url.Parser.Query
 
 
 
@@ -203,7 +200,6 @@ init flags url key =
                 , enableOrderItemsButtons = enableOrderItemsButtons
                 , enableSavingChangesInMemory = enableSavingChangesInMemory
                 , queryParameters = queryParameters
-                , filterByTag = Nothing
                 , maybeId = Nothing
                 , fragment = fragment
                 , glossary = glossary
@@ -410,7 +406,7 @@ resetViewport =
 
 
 onUrlChange : Url -> Msg
-onUrlChange url =
+onUrlChange _ =
     NoOp
 
 

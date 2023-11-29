@@ -43,6 +43,7 @@ import Html.Events
 import Http
 import Icons
 import PageMsg exposing (PageMsg)
+import QueryParameters exposing (QueryParameters)
 import Set exposing (Set)
 import Svg.Attributes
 import Task
@@ -120,13 +121,19 @@ init commonModel =
                             )
                         |> Maybe.withDefault []
 
+                filterByTagId : Maybe TagId
+                filterByTagId =
+                    commonModel.queryParameters
+                        |> QueryParameters.filterByTag
+                        |> Maybe.andThen (\tag -> GlossaryItems.tagIdFromTag tag items)
+
                 emptyForm : GlossaryItemForm
                 emptyForm =
                     Form.empty
                         existingTerms
                         existingDisambiguatedPreferredTerms
                         tags
-                        commonModel.filterByTag
+                        filterByTagId
                         preferredTermsOfItemsListingThisItemAsRelated
 
                 form =

@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Tag exposing (Tag, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view)
+module Data.GlossaryItem.Tag exposing (Tag, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view, fromQuery, toQueryParameter)
 
 {-| A tag that can be used in glossary items.
 
@@ -7,7 +7,7 @@ Tags can be used to group items together that belong in the same "context" or sh
 
 # Tags
 
-@docs Tag, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view
+@docs Tag, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view, fromQuery, toQueryParameter
 
 -}
 
@@ -20,6 +20,8 @@ import Markdown.Block exposing (Block)
 import Markdown.Renderer as Renderer
 import MarkdownRenderers
 import String.Normalize
+import Url.Builder
+import Url.Parser.Query
 
 
 {-| A tag.
@@ -155,3 +157,27 @@ view enableMathSupport additionalAttributes tag =
 
                 Err parsingError ->
                     text <| "Failed to parse Markdown: " ++ parsingError
+
+
+{-| Obtain the tag being filtered by according to query parameters in the URL.
+-}
+fromQuery : Url.Parser.Query.Parser (Maybe Tag)
+fromQuery =
+    Url.Parser.Query.custom "filter-by-tag"
+        (\strings ->
+            case strings of
+                [ string ] ->
+                    string
+                        |> fromMarkdown
+                        |> Just
+
+                _ ->
+                    Nothing
+        )
+
+
+{-| Represent a tag being filtered by as a query parameter.
+-}
+toQueryParameter : Tag -> Url.Builder.QueryParameter
+toQueryParameter =
+    Url.Builder.string "filter-by-tag" << raw

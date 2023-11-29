@@ -3,7 +3,6 @@ module CommonModel exposing (CommonModel, relativeUrl)
 import Browser.Navigation exposing (Key)
 import Data.Glossary exposing (Glossary)
 import Data.GlossaryItemId exposing (GlossaryItemId)
-import Data.TagId exposing (TagId)
 import Data.Theme exposing (Theme)
 import QueryParameters exposing (QueryParameters)
 import Url exposing (Url)
@@ -19,7 +18,6 @@ type alias CommonModel =
     , enableOrderItemsButtons : Bool
     , enableSavingChangesInMemory : Bool
     , queryParameters : QueryParameters
-    , filterByTag : Maybe TagId
     , maybeId : Maybe GlossaryItemId
     , fragment : Maybe String
     , glossary : Result String Glossary

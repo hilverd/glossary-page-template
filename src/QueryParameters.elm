@@ -1,7 +1,7 @@
 module QueryParameters exposing
     ( QueryParameters
-    , fromUrl, setOrderItemsBy
-    , orderItemsBy
+    , fromUrl, setOrderItemsBy, setFilterByTag
+    , orderItemsBy, filterByTag
     , toRelativeUrl
     )
 
@@ -15,12 +15,12 @@ module QueryParameters exposing
 
 # Build
 
-@docs fromUrl, setOrderItemsBy
+@docs fromUrl, setOrderItemsBy, setFilterByTag
 
 
 # Query
 
-@docs orderItemsBy
+@docs orderItemsBy, filterByTag
 
 
 # Converting to URLs
@@ -29,10 +29,10 @@ module QueryParameters exposing
 
 -}
 
+import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.OrderItemsBy as OrderItemsBy exposing (OrderItemsBy)
-import Html exposing (param)
 import Url exposing (Url)
-import Url.Builder exposing (QueryParameter)
+import Url.Builder
 import Url.Parser
 import Url.Parser.Query
 
@@ -42,22 +42,31 @@ import Url.Parser.Query
 type QueryParameters
     = QueryParameters
         { orderItemsBy : OrderItemsBy
+        , filterByTag : Maybe Tag
         }
 
 
-create : OrderItemsBy -> QueryParameters
-create orderItemsBy_ =
-    QueryParameters { orderItemsBy = orderItemsBy_ }
+create : OrderItemsBy -> Maybe Tag -> QueryParameters
+create orderItemsBy_ filterByTag_ =
+    QueryParameters
+        { orderItemsBy = orderItemsBy_
+        , filterByTag = filterByTag_
+        }
 
 
 default : QueryParameters
 default =
-    QueryParameters { orderItemsBy = OrderItemsBy.Alphabetically }
+    QueryParameters
+        { orderItemsBy = OrderItemsBy.Alphabetically
+        , filterByTag = Nothing
+        }
 
 
 query : Url.Parser.Query.Parser QueryParameters
 query =
-    Url.Parser.Query.map create OrderItemsBy.fromQuery
+    Url.Parser.Query.map2 create
+        OrderItemsBy.fromQuery
+        Tag.fromQuery
 
 
 parser : Url.Parser.Parser (QueryParameters -> a) a
@@ -83,6 +92,15 @@ setOrderItemsBy orderItemsBy_ queryParameters =
             QueryParameters { parameters | orderItemsBy = orderItemsBy_ }
 
 
+{-| Change the tag being filtered by.
+-}
+setFilterByTag : Maybe Tag -> QueryParameters -> QueryParameters
+setFilterByTag filterByTag_ queryParameters =
+    case queryParameters of
+        QueryParameters parameters ->
+            QueryParameters { parameters | filterByTag = filterByTag_ }
+
+
 {-| The way items are ordered.
 -}
 orderItemsBy : QueryParameters -> OrderItemsBy
@@ -92,12 +110,23 @@ orderItemsBy queryParameters =
             parameters.orderItemsBy
 
 
+{-| The tag being filtered by.
+-}
+filterByTag : QueryParameters -> Maybe Tag
+filterByTag queryParameters =
+    case queryParameters of
+        QueryParameters parameters ->
+            parameters.filterByTag
+
+
 {-| Convert a list of query parameters to a relative URL.
 -}
 toRelativeUrl : QueryParameters -> String
 toRelativeUrl queryParameters =
     case queryParameters of
         QueryParameters parameters ->
-            [ OrderItemsBy.toQueryParameter parameters.orderItemsBy ]
+            [ OrderItemsBy.toQueryParameter parameters.orderItemsBy
+            , Maybe.map Tag.toQueryParameter parameters.filterByTag
+            ]
                 |> List.filterMap identity
                 |> Url.Builder.relative []

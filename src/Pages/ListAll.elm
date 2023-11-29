@@ -402,7 +402,7 @@ update msg model =
                 results =
                     case model.common.glossary of
                         Ok { enableMathSupport, items } ->
-                            Search.search enableMathSupport model.common.filterByTag searchString items
+                            Search.search enableMathSupport (filterByTag model) searchString items
 
                         Err _ ->
                             []
@@ -637,7 +637,6 @@ update msg model =
               }
             , common1
                 |> CommonModel.relativeUrl
-                |> Debug.log "relativeUrl"
                 |> Navigation.pushUrl model.common.key
             )
 
@@ -775,16 +774,6 @@ update msg model =
                 common0 =
                     model.common
 
-                filterByTag : Maybe TagId
-                filterByTag =
-                    case common0.glossary of
-                        Ok glossary ->
-                            glossary.items
-                                |> GlossaryItems.tagIdFromTag tag
-
-                        _ ->
-                            Nothing
-
                 orderItemsBy_ : OrderItemsBy
                 orderItemsBy_ =
                     case QueryParameters.orderItemsBy common0.queryParameters of
@@ -793,17 +782,22 @@ update msg model =
 
                         _ ->
                             QueryParameters.orderItemsBy common0.queryParameters
-            in
-            ( { model
-                | common =
+
+                common1 =
                     { common0
-                        | filterByTag = filterByTag
-                        , queryParameters =
+                        | queryParameters =
                             common0.queryParameters
                                 |> QueryParameters.setOrderItemsBy orderItemsBy_
+                                |> QueryParameters.setFilterByTag (Just tag)
                     }
-              }
-            , Extras.BrowserDom.scrollToTop <| PageMsg.Internal NoOp
+            in
+            ( { model | common = common1 }
+            , Cmd.batch
+                [ Extras.BrowserDom.scrollToTop <| PageMsg.Internal NoOp
+                , common1
+                    |> CommonModel.relativeUrl
+                    |> Navigation.pushUrl model.common.key
+                ]
             )
 
         DoNotFilterByTag ->
@@ -811,8 +805,37 @@ update msg model =
                 common0 : CommonModel
                 common0 =
                     model.common
+
+                common1 =
+                    { common0
+                        | queryParameters =
+                            common0.queryParameters
+                                |> QueryParameters.setFilterByTag Nothing
+                    }
             in
-            ( { model | common = { common0 | filterByTag = Nothing } }, Cmd.none )
+            ( { model | common = common1 }
+            , common1
+                |> CommonModel.relativeUrl
+                |> Navigation.pushUrl model.common.key
+            )
+
+
+filterByTag : Model -> Maybe TagId
+filterByTag model =
+    let
+        queryParametersTag : Maybe Tag
+        queryParametersTag =
+            model.common.queryParameters
+                |> QueryParameters.filterByTag
+    in
+    case model.common.glossary of
+        Ok glossary ->
+            queryParametersTag
+                |> Maybe.andThen
+                    (\tag -> GlossaryItems.tagIdFromTag tag glossary.items)
+
+        _ ->
+            Nothing
 
 
 giveFocusToOuter : Cmd Msg
@@ -1492,6 +1515,10 @@ viewCards :
     -> Html Msg
 viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } tags glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
+        filterByTag_ : Maybe TagId
+        filterByTag_ =
+            filterByTag model
+
         combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForHtml )
         combinedIndexedGlossaryItems =
             List.append indexedGlossaryItems otherIndexedGlossaryItems
@@ -1499,7 +1526,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
         disambiguatedPreferredTermsWithDefinitions : List Term
         disambiguatedPreferredTermsWithDefinitions =
             GlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions
-                model.common.filterByTag
+                filterByTag_
                 glossaryItems
 
         orderItemsFocusedOnTerm : Maybe Term
@@ -1525,7 +1552,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
 
         filterByTagWithDescription : Maybe ( Tag, TagDescription )
         filterByTagWithDescription =
-            model.common.filterByTag
+            filterByTag_
                 |> Maybe.andThen
                     (\tagId ->
                         GlossaryItems.tagFromId tagId glossaryItems
@@ -1562,7 +1589,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                     ]
             ]
         , Extras.Html.showIf
-            (List.isEmpty combinedIndexedGlossaryItems && model.common.filterByTag /= Nothing)
+            (List.isEmpty combinedIndexedGlossaryItems && filterByTag_ /= Nothing)
           <|
             div
                 [ class "mt-4" ]
@@ -2325,13 +2352,13 @@ view model =
                 items =
                     glossary.items
 
+                filterByTag_ : Maybe TagId
+                filterByTag_ =
+                    filterByTag model
+
                 indexOfTerms : IndexOfTerms
                 indexOfTerms =
-                    IndexOfTerms.fromGlossaryItems model.common.filterByTag items
-
-                filterByTag : Maybe TagId
-                filterByTag =
-                    model.common.filterByTag
+                    IndexOfTerms.fromGlossaryItems filterByTag_ items
             in
             { title = GlossaryTitle.inlineText glossary.title
             , body =
@@ -2377,16 +2404,16 @@ view model =
                                                     items
                                                         |> (case QueryParameters.orderItemsBy model.common.queryParameters of
                                                                 Alphabetically ->
-                                                                    GlossaryItems.orderedAlphabetically filterByTag
+                                                                    GlossaryItems.orderedAlphabetically filterByTag_
 
                                                                 MostMentionedFirst ->
-                                                                    GlossaryItems.orderedByMostMentionedFirst filterByTag
+                                                                    GlossaryItems.orderedByMostMentionedFirst filterByTag_
 
                                                                 FocusedOn termId ->
                                                                     \items_ ->
                                                                         GlossaryItems.itemIdFromDisambiguatedPreferredTermId termId items_
                                                                             |> Maybe.map
-                                                                                (\itemId -> GlossaryItems.orderedFocusedOn filterByTag itemId items_)
+                                                                                (\itemId -> GlossaryItems.orderedFocusedOn filterByTag_ itemId items_)
                                                                             |> Maybe.withDefault ( [], [] )
                                                                             |> (\( lhs, rhs ) -> List.append lhs rhs)
                                                            )
@@ -2490,11 +2517,11 @@ view model =
                                 , items
                                     |> (case QueryParameters.orderItemsBy model.common.queryParameters of
                                             Alphabetically ->
-                                                GlossaryItems.orderedAlphabetically filterByTag
+                                                GlossaryItems.orderedAlphabetically filterByTag_
                                                     >> (\lhs -> ( lhs, [] ))
 
                                             MostMentionedFirst ->
-                                                GlossaryItems.orderedByMostMentionedFirst filterByTag
+                                                GlossaryItems.orderedByMostMentionedFirst filterByTag_
                                                     >> (\lhs -> ( lhs, [] ))
 
                                             FocusedOn termId ->
@@ -2505,12 +2532,12 @@ view model =
                                                 in
                                                 case itemId of
                                                     Just itemId_ ->
-                                                        GlossaryItems.orderedFocusedOn filterByTag itemId_
+                                                        GlossaryItems.orderedFocusedOn filterByTag_ itemId_
 
                                                     Nothing ->
                                                         always
                                                             (items
-                                                                |> GlossaryItems.orderedAlphabetically filterByTag
+                                                                |> GlossaryItems.orderedAlphabetically filterByTag_
                                                                 |> (\lhs -> ( lhs, [] ))
                                                             )
                                        )

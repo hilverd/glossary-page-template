@@ -14,6 +14,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 
 - Support tags in Anki export.
+- Use URL query parameter to save tag being filtered by.
 
 ### Changed
 
