@@ -1566,6 +1566,10 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
         totalNumberOfItems : Int
         totalNumberOfItems =
             List.length combinedIndexedGlossaryItems
+
+        recommendedMaximumNumberOfItems : Int
+        recommendedMaximumNumberOfItems =
+            500
     in
     Html.article
         [ Html.Attributes.id ElementIds.items
@@ -1592,12 +1596,14 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                         viewCreateGlossaryItemButton tabbable model.common
                     ]
             ]
-        , Extras.Html.showIf (editable && totalNumberOfItems > 1) <|
+        , Extras.Html.showIf (editable && totalNumberOfItems > recommendedMaximumNumberOfItems) <|
             div
                 [ class "mt-4 text-red-600 dark:text-red-400 flex items-center max-w-prose" ]
                 [ span
                     [ class "font-medium" ]
-                    [ text "⚠ This glossary contains more than 500 items, which is currently "
+                    [ text "⚠ This glossary contains more than "
+                    , text <| String.fromInt recommendedMaximumNumberOfItems
+                    , text " items, which is currently "
                     , a
                         [ href "https://github.com/hilverd/glossary-page-template#known-limitations" ]
                         [ text "not recommended" ]
