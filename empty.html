@@ -115,7 +115,7 @@ server.listen(PORT, HOST, () => {
 });
 
 function serveLocalFile(req, res) {
-    var filePath = '.' + req.url;
+    var filePath = '.' + req.url.replace(/\?.*$/g, '');
     if (filePath === './') filePath = FILE;
 
     const extname = String(path.extname(filePath)).toLowerCase();

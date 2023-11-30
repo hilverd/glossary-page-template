@@ -12,6 +12,30 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [4.1.0] - unreleased
+
+This release contains a (very minor) **breaking** change that only affects a specific scenario when editing a glossary. This scenario occurs when you reload the page if the URL contains query parameters (which are now used to store which tag is being filtered by and the item sort order). The Node.js script for the editor does not currently cope with query parameters and needs a small tweak -- please see below.
+
+### How to upgrade from v4.0.0
+
+1. Point the [static assets](https://github.com/hilverd/glossary-page-template#static-assets) to a version starting with `@4` or `@4.1`.
+2. In the Node.js script at the bottom of the file, replace
+
+```
+var filePath = '.' + req.url;
+```
+
+with
+
+```
+var filePath = '.' + req.url.replace(/\?.*$/g, '');
+```
+
+### Added
 
 - Support tags in Anki export.
 - Use URL query parameter to save tag being filtered by.
@@ -27,8 +51,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Fix minor HTML/UI bug -- don't give IDs to alternative terms, to prevent duplicates.
 - Make clicking on a tag to filter by also scroll to the top.
 - Improve formatting when exporting to Markdown.
-
-### Removed
 
 ## [4.0.0] - 2023-11-24
 
