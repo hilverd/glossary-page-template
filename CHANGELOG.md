@@ -15,6 +15,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 - Support tags in Anki export.
 - Use URL query parameter to save tag being filtered by.
+- Show a warning in edit mode if there are more than 500 items, which is currently not recommended for performance reasons.
 
 ### Changed
 

@@ -1562,6 +1562,10 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                                         |> Maybe.map (\description -> ( tag, description ))
                                 )
                     )
+
+        totalNumberOfItems : Int
+        totalNumberOfItems =
+            List.length combinedIndexedGlossaryItems
     in
     Html.article
         [ Html.Attributes.id ElementIds.items
@@ -1588,6 +1592,18 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                         viewCreateGlossaryItemButton tabbable model.common
                     ]
             ]
+        , Extras.Html.showIf (editable && totalNumberOfItems > 1) <|
+            div
+                [ class "mt-4 text-red-600 dark:text-red-400 flex items-center max-w-prose" ]
+                [ span
+                    [ class "font-medium" ]
+                    [ text "⚠ This glossary contains more than 500 items, which is currently "
+                    , a
+                        [ href "https://github.com/hilverd/glossary-page-template#known-limitations" ]
+                        [ text "not recommended" ]
+                    , text " for performance reasons."
+                    ]
+                ]
         , Extras.Html.showIf
             (List.isEmpty combinedIndexedGlossaryItems && filterByTag_ /= Nothing)
           <|
@@ -1601,7 +1617,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
           <|
             viewOrderItemsBy
                 model
-                (List.length combinedIndexedGlossaryItems)
+                totalNumberOfItems
                 enableMathSupport
                 disambiguatedPreferredTermsWithDefinitions
                 orderItemsFocusedOnTerm
