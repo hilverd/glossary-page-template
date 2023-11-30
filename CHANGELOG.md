@@ -16,7 +16,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 ### Removed
 
-## [4.1.0] - unreleased
+## [4.1.0] - 2023-11-30
 
 This release contains a (very minor) **breaking** change that only affects a specific scenario when editing a glossary. This scenario occurs when you reload the page if the URL contains query parameters (which are now used to store which tag is being filtered by and the item sort order). The Node.js script for the editor does not currently cope with query parameters and needs a small tweak -- please see below.
 
@@ -636,7 +636,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.0.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.1.0...HEAD
+[4.1.0]: https://github.com/hilverd/glossary-page-template/compare/v4.0.0...v4.1.0
 [4.0.0]: https://github.com/hilverd/glossary-page-template/compare/v3.8.0...v4.0.0
 [3.8.0]: https://github.com/hilverd/glossary-page-template/compare/v3.7.0...v3.8.0
 [3.7.0]: https://github.com/hilverd/glossary-page-template/compare/v3.6.1...v3.7.0
