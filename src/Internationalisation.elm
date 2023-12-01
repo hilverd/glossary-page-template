@@ -6,6 +6,8 @@ module Internationalisation exposing (sandboxModeMessage)
 import Internationalisation.Eng as I18n
 
 
+{-| A message indicating to the user that the application is running in sandbox mode.
+-}
 sandboxModeMessage : String
 sandboxModeMessage =
     I18n.sandboxModeMessage
