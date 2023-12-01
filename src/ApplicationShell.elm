@@ -1,11 +1,11 @@
-module ApplicationShell exposing (main, Flags, Model, Msg)
+module ApplicationShell exposing (main, Flags, Page, Model, Msg)
 
 {-| The application shell which shows different "pages" depending on the application state.
 
 
 # Definition
 
-@docs main, Flags, Model, Msg
+@docs main, Flags, Page, Model, Msg
 
 -}
 
@@ -57,6 +57,8 @@ type alias Flags =
     Decode.Value
 
 
+{-| A page that can be shown in the browser.
+-}
 type Page
     = ListAll Pages.ListAll.Model
     | CreateOrEdit Pages.CreateOrEdit.Model
