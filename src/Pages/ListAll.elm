@@ -1748,7 +1748,7 @@ viewBackToTopLink staticSidebar tabbable =
             ]
             [ span
                 [ class "inline-flex" ]
-                [ text "Back to top"
+                [ text I18n.backToTop
                 , Icons.arrowUp
                     [ Svg.Attributes.class "w-5 h-5 ml-2" ]
                 ]

@@ -1,4 +1,4 @@
-module Internationalisation exposing (sandboxModeMessage)
+module Internationalisation exposing (backToTop, sandboxModeMessage)
 
 {-| User interface text in a specific language (e.g. English).
 -}
@@ -11,3 +11,10 @@ import Internationalisation.Eng as I18n
 sandboxModeMessage : String
 sandboxModeMessage =
     I18n.sandboxModeMessage
+
+
+{-| The text for a link that takes the user back to the top of the page.
+-}
+backToTop : String
+backToTop =
+    I18n.backToTop

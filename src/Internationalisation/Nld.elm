@@ -1,4 +1,4 @@
-module Internationalisation.Nld exposing (sandboxModeMessage)
+module Internationalisation.Nld exposing (backToTop, sandboxModeMessage)
 
 {-| User interface text in the Dutch language.
 -}
@@ -7,3 +7,8 @@ module Internationalisation.Nld exposing (sandboxModeMessage)
 sandboxModeMessage : String
 sandboxModeMessage =
     "[Zandbak-modus — veranderingen gaan verloren als je de pagina ververst]"
+
+
+backToTop : String
+backToTop =
+    "Terug naar boven"
