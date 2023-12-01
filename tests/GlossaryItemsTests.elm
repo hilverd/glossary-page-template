@@ -1,6 +1,5 @@
 module GlossaryItemsTests exposing (suite)
 
-import Data.GlossaryItem as GlossaryItem
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
@@ -10,7 +9,7 @@ import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.TagDescription as TagDescription exposing (TagDescription)
 import Data.TagId as TagId
-import Data.TagsChanges as TagsChanges exposing (TagsChange, TagsChanges)
+import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import Expect
 import Test exposing (Test, describe, test)
 

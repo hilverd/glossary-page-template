@@ -1,7 +1,7 @@
 module Data.TagIdDict exposing
     ( TagIdDict
     , empty, insert, update, remove
-    , get, member, nextTagId
+    , get, nextTagId
     , keys, values, toList, fromList
     , foldl
     )
@@ -21,7 +21,7 @@ module Data.TagIdDict exposing
 
 # Query
 
-@docs get, member, nextTagId
+@docs get, nextTagId
 
 
 # Lists
@@ -96,16 +96,6 @@ get tagId tagIdDict =
         TagIdDict dict ->
             dict
                 |> Dict.get (TagId.toInt tagId)
-
-
-{-| Determine if a key is in a dictionary.
--}
-member : TagId -> TagIdDict v -> Bool
-member tagId tagIdDict =
-    case tagIdDict of
-        TagIdDict dict ->
-            dict
-                |> Dict.member (TagId.toInt tagId)
 
 
 {-| Compute the next tag ID to be used for inserting a new item.

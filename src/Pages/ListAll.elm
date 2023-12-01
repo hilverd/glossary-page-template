@@ -1,4 +1,4 @@
-port module Pages.ListAll exposing (InternalMsg, MenuForMobileVisibility, Model, Msg, SearchDialog, init, subscriptions, update, view)
+port module Pages.ListAll exposing (Editability, InternalMsg, Layout, MenuForMobileVisibility, Model, Msg, SearchDialog, init, subscriptions, update, view)
 
 import Accessibility
     exposing
@@ -822,14 +822,14 @@ update msg model =
 
 filterByTag : Model -> Maybe TagId
 filterByTag model =
-    let
-        queryParametersTag : Maybe Tag
-        queryParametersTag =
-            model.common.queryParameters
-                |> QueryParameters.filterByTag
-    in
     case model.common.glossary of
         Ok glossary ->
+            let
+                queryParametersTag : Maybe Tag
+                queryParametersTag =
+                    model.common.queryParameters
+                        |> QueryParameters.filterByTag
+            in
             queryParametersTag
                 |> Maybe.andThen
                     (\tag -> GlossaryItems.tagIdFromTag tag glossary.items)

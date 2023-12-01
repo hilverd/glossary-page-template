@@ -43,7 +43,7 @@ import Html.Events
 import Http
 import Icons
 import PageMsg exposing (PageMsg)
-import QueryParameters exposing (QueryParameters)
+import QueryParameters
 import Set exposing (Set)
 import Svg.Attributes
 import Task

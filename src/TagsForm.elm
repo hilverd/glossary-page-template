@@ -1,4 +1,4 @@
-module TagsForm exposing (Row(..), TagsForm, addRow, changes, create, deleteRow, hasValidationErrors, rows, updateTag, updateTagDescription, validate)
+module TagsForm exposing (Row(..), TagsForm, addRow, changes, create, deleteRow, hasValidationErrors, rows, updateTag, updateTagDescription)
 
 import Array exposing (Array)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)

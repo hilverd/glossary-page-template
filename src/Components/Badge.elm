@@ -1,4 +1,4 @@
-module Components.Badge exposing (indigoWithBorderAndRemoveButton, indigoWithCheckbox, pill)
+module Components.Badge exposing (indigoWithBorderAndRemoveButton, indigoWithCheckbox)
 
 import Accessibility exposing (Attribute, Html, button, checkbox, span, text)
 import Accessibility.Key
@@ -60,10 +60,3 @@ indigoWithCheckbox { tabbable, checked } id_ onClick additionalAttributes childr
             ]
             children
         ]
-
-
-pill : List (Attribute Never) -> List (Html msg) -> Html msg
-pill additionalAttributes children =
-    span
-        (class "inline-flex items-center rounded-full bg-gray-200 dark:bg-gray-700 px-2 py-1 text-gray-800 dark:text-gray-100 select-none" :: additionalAttributes)
-        children

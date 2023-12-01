@@ -10,7 +10,6 @@ module Data.GlossaryTitle exposing (GlossaryTitle, fromMarkdown, raw, toFilename
 -}
 
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
-import Extras.String
 import Html exposing (Html, text)
 import Html.Attributes exposing (class)
 import Markdown.Block exposing (Block)

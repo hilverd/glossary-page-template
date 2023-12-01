@@ -10,7 +10,6 @@ module Data.AboutParagraph exposing (AboutParagraph, fromMarkdown, raw, markdown
 -}
 
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
-import Extras.String
 import Html exposing (Html, text)
 import Html.Attributes exposing (class)
 import Markdown.Block as Block exposing (Block)

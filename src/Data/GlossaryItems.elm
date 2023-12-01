@@ -391,33 +391,6 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                     )
                     GlossaryItemIdDict.empty
 
-        orderedAlphabetically__ : List GlossaryItemId
-        orderedAlphabetically__ =
-            orderAlphabetically indexedGlossaryItemsForHtml
-
-        orderedByMostMentionedFirst_ =
-            orderByMostMentionedFirst indexedGlossaryItemsForHtml
-
-        nextItemId : GlossaryItemId
-        nextItemId =
-            itemById
-                |> GlossaryItemIdDict.keys
-                |> List.map GlossaryItemId.toInt
-                |> List.maximum
-                |> Maybe.map ((+) 1)
-                |> Maybe.withDefault 0
-                |> GlossaryItemId.create
-
-        nextTagId : TagId
-        nextTagId =
-            tagById
-                |> TagIdDict.keys
-                |> List.map TagId.toInt
-                |> List.maximum
-                |> Maybe.map ((+) 1)
-                |> Maybe.withDefault 0
-                |> TagId.create
-
         sortedNormalTagIdsByItemId : GlossaryItemIdDict (List TagId)
         sortedNormalTagIdsByItemId =
             normalTagIdsByItemId
@@ -488,6 +461,34 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
     in
     Result.map2
         (\itemIdByDisambiguatedPreferredTermId1 tagIdByRawTag_ ->
+            let
+                orderedAlphabetically__ : List GlossaryItemId
+                orderedAlphabetically__ =
+                    orderAlphabetically indexedGlossaryItemsForHtml
+
+                orderedByMostMentionedFirst_ =
+                    orderByMostMentionedFirst indexedGlossaryItemsForHtml
+
+                nextItemId : GlossaryItemId
+                nextItemId =
+                    itemById
+                        |> GlossaryItemIdDict.keys
+                        |> List.map GlossaryItemId.toInt
+                        |> List.maximum
+                        |> Maybe.map ((+) 1)
+                        |> Maybe.withDefault 0
+                        |> GlossaryItemId.create
+
+                nextTagId : TagId
+                nextTagId =
+                    tagById
+                        |> TagIdDict.keys
+                        |> List.map TagId.toInt
+                        |> List.maximum
+                        |> Maybe.map ((+) 1)
+                        |> Maybe.withDefault 0
+                        |> TagId.create
+            in
             GlossaryItems
                 { itemById = itemById
                 , tagById = tagById
