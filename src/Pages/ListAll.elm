@@ -35,7 +35,6 @@ import CommonModel exposing (CommonModel)
 import Components.AboutSection
 import Components.Badge
 import Components.Button
-import Components.Copy
 import Components.Dividers
 import Components.DropdownMenu
 import Components.GlossaryItemCard
@@ -75,6 +74,7 @@ import Html.Attributes exposing (class, for, href, id, readonly)
 import Html.Events
 import Http
 import Icons
+import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
 import Process
 import QueryParameters
@@ -1376,7 +1376,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIdOfItemToDelete deletin
             , Extras.Html.showIf enableSavingChangesInMemory <|
                 div
                     [ class "mt-5 sm:mt-4 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
-                    [ text Components.Copy.sandboxModeMessage ]
+                    [ text I18n.sandboxModeMessage ]
             , case deleting of
                 SavingFailed errorMessage ->
                     div
@@ -1439,7 +1439,7 @@ viewMakeChangesButton showSandboxModeMessage tabbable =
         , Extras.Html.showIf showSandboxModeMessage <|
             div
                 [ class "my-4 text-sm text-gray-500 dark:text-gray-400" ]
-                [ text Components.Copy.sandboxModeMessage ]
+                [ text I18n.sandboxModeMessage ]
         ]
 
 

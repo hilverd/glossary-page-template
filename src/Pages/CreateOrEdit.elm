@@ -8,7 +8,6 @@ import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
 import Components.Badge
 import Components.Button
-import Components.Copy
 import Components.DropdownMenu
 import Components.Form
 import Components.GlossaryItemCard
@@ -42,6 +41,7 @@ import Html.Attributes exposing (class, id, required, style)
 import Html.Events
 import Http
 import Icons
+import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
 import QueryParameters
 import Set exposing (Set)
@@ -1085,7 +1085,7 @@ viewCreateFormFooter model =
         , Extras.Html.showIf common.enableSavingChangesInMemory <|
             div
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
-                [ text Components.Copy.sandboxModeMessage ]
+                [ text I18n.sandboxModeMessage ]
         , div
             [ class "flex items-center" ]
             [ Components.Button.white

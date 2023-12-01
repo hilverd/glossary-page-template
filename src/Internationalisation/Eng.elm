@@ -1,4 +1,7 @@
-module Components.Copy exposing (sandboxModeMessage)
+module Internationalisation.Eng exposing (sandboxModeMessage)
+
+{-| User interface text in the English language.
+-}
 
 
 sandboxModeMessage : String

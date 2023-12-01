@@ -7,7 +7,6 @@ import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
 import Components.Button
-import Components.Copy
 import Components.Form
 import Components.Spinner
 import Data.Glossary as Glossary exposing (Glossary)
@@ -27,6 +26,7 @@ import Html.Attributes exposing (class, id)
 import Html.Events
 import Http
 import Icons
+import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
 import Svg.Attributes
 import TagsForm as Form exposing (Row, TagsForm)
@@ -492,7 +492,7 @@ viewFooter model showValidationErrors glossaryItems =
         , Extras.Html.showIf model.common.enableSavingChangesInMemory <|
             div
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
-                [ text Components.Copy.sandboxModeMessage ]
+                [ text I18n.sandboxModeMessage ]
         , div
             [ class "flex items-center" ]
             [ Components.Button.white
