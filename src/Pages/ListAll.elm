@@ -2192,7 +2192,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                         [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
                         , for ElementIds.orderItemsMostMentionedFirst
                         ]
-                        [ text "most mentioned first" ]
+                        [ text I18n.mostMentionedFirst ]
                     ]
                 , div
                     [ class "flex items-center" ]
@@ -2221,7 +2221,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                         ]
                         [ span
                             [ class "mr-2" ]
-                            [ text "focused on"
+                            [ text I18n.focusedOn
                             ]
                         , Components.SelectMenu.render
                             [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect

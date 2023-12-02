@@ -1,4 +1,4 @@
-module Internationalisation.Nld exposing (ankiDeck, backToTop, export, howToMakeChangesTitle, noResultsFound, onlyShowingItemsForTag, orderItems, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, tags, themeDark, themeLight, themeSystem, webInterfaceDescription, youCanHideTheseInstructions, alphabetically)
+module Internationalisation.Nld exposing (alphabetically, ankiDeck, backToTop, export, focusedOn, howToMakeChangesTitle, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, tags, themeDark, themeLight, themeSystem, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in the Dutch language.
 -}
@@ -124,3 +124,18 @@ orderItems =
 alphabetically : String
 alphabetically =
     "alfabetisch"
+
+
+mostMentionedFirst : String
+mostMentionedFirst =
+    "meest genoemd eerst"
+
+
+focusedOn : String
+focusedOn =
+    "gefocused op"
+
+
+pleaseSelect : String
+pleaseSelect =
+    "Selecteer a.u.b."

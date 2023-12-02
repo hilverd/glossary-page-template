@@ -17,6 +17,7 @@ import Extras.HtmlAttribute
 import Html
 import Html.Attributes exposing (class, disabled, selected, value)
 import Html.Events
+import Internationalisation as I18n
 import Json.Decode as Decode
 
 
@@ -136,7 +137,7 @@ render properties choices =
               else
                 [ option
                     [ value "" ]
-                    [ text "--- Please select ---" ]
+                    [ text <| "--- " ++ I18n.pleaseSelect ++ " ---" ]
                 ]
              )
                 ++ (choices

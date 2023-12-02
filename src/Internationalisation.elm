@@ -1,4 +1,4 @@
-module Internationalisation exposing (alphabetically, ankiDeck, backToTop, export, howToMakeChangesTitle, noResultsFound, onlyShowingItemsForTag, orderItems, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, tags, themeDark, themeLight, themeSystem, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation exposing (alphabetically, ankiDeck, backToTop, export, focusedOn, howToMakeChangesTitle, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, tags, themeDark, themeLight, themeSystem, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in a specific language (e.g. English).
 -}
@@ -129,3 +129,18 @@ orderItems =
 alphabetically : String
 alphabetically =
     I18n.alphabetically
+
+
+mostMentionedFirst : String
+mostMentionedFirst =
+    I18n.mostMentionedFirst
+
+
+focusedOn : String
+focusedOn =
+    I18n.focusedOn
+
+
+pleaseSelect : String
+pleaseSelect =
+    I18n.pleaseSelect
