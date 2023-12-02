@@ -28,6 +28,7 @@ import Extras.HtmlEvents
 import Html
 import Html.Attributes exposing (class)
 import Html.Events
+import Internationalisation as I18n
 import Process
 import Svg
 import Svg.Attributes
@@ -440,7 +441,7 @@ view toParentMsg model searchString searchResults =
                         , Html.Attributes.spellcheck False
                         , class "h-12 w-full border-0 bg-transparent dark:bg-gray-600 pl-11 pr-4 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-0"
                         , Html.Attributes.id <| searchStringFieldId model_.idPrefix
-                        , Html.Attributes.placeholder "Search..."
+                        , Html.Attributes.placeholder I18n.searchPlaceholder
                         , Extras.HtmlAttribute.showMaybe Html.Events.onInput config.onChangeSearchString
                         , Html.Events.preventDefaultOn "keydown"
                             (Extras.HtmlEvents.preventDefaultOnDecoder
@@ -514,7 +515,7 @@ view toParentMsg model searchString searchResults =
                 , Extras.Html.showIf (String.trim searchString /= "" && List.isEmpty searchResults) <|
                     p
                         [ class "p-4 text-gray-500 dark:text-gray-300" ]
-                        [ text "No results found." ]
+                        [ text I18n.noResultsFound ]
                 ]
             ]
         ]

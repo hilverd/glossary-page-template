@@ -1774,7 +1774,7 @@ viewQuickSearchButton tabbable =
                     , height "24"
                     , Svg.Attributes.class "mr-3 flex-none"
                     ]
-                , text "Quick search..."
+                , text I18n.quickSearch
                 , span
                     [ class "ml-auto pl-3 flex-none text-xs font-semibold" ]
                     [ text "Ctrl K"
@@ -1972,7 +1972,7 @@ viewExportButton enabled exportDropdownMenu =
         (Components.DropdownMenu.Chevron
             [ Icons.documentDownload
                 [ Svg.Attributes.class "h-5 w-5 mr-2" ]
-            , text "Export"
+            , text I18n.export
             ]
         )
         [ Components.DropdownMenu.choice

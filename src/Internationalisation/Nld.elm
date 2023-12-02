@@ -1,4 +1,4 @@
-module Internationalisation.Nld exposing (backToTop, sandboxModeMessage)
+module Internationalisation.Nld exposing (backToTop, export, noResultsFound, quickSearch, sandboxModeMessage, searchPlaceholder)
 
 {-| User interface text in the Dutch language.
 -}
@@ -12,3 +12,23 @@ sandboxModeMessage =
 backToTop : String
 backToTop =
     "Terug naar boven"
+
+
+quickSearch : String
+quickSearch =
+    "Snel zoeken..."
+
+
+searchPlaceholder : String
+searchPlaceholder =
+    "Zoek..."
+
+
+noResultsFound : String
+noResultsFound =
+    "Geen resultaten gevonden."
+
+
+export : String
+export =
+    "Exporteer"

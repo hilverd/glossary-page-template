@@ -1,4 +1,4 @@
-module Internationalisation.Eng exposing (backToTop, sandboxModeMessage)
+module Internationalisation.Eng exposing (backToTop, export, noResultsFound, quickSearch, sandboxModeMessage, searchPlaceholder)
 
 {-| User interface text in the English language.
 -}
@@ -12,3 +12,23 @@ sandboxModeMessage =
 backToTop : String
 backToTop =
     "Back to top"
+
+
+quickSearch : String
+quickSearch =
+    "Quick search..."
+
+
+searchPlaceholder : String
+searchPlaceholder =
+    "Search..."
+
+
+noResultsFound : String
+noResultsFound =
+    "No results found."
+
+
+export : String
+export =
+    "Export"
