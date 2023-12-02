@@ -965,29 +965,12 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
                 [ class "mb-1 text-lg leading-6 items-center font-medium text-gray-900 dark:text-gray-100 select-none" ]
                 [ span
                     [ class "ml-2" ]
-                    [ text "How to Make Changes" ]
+                    [ text I18n.howToMakeChangesTitle ]
                 ]
             , div
                 [ class "mb-1 max-w-xl" ]
-                [ p
-                    [ class "mt-3" ]
-                    [ text "This page includes a web interface for making changes that are saved back to the HTML file itself."
-                    , text " This is meant to be used "
-                    , span [ class "font-semibold" ] [ text "locally" ]
-                    , text " by a "
-                    , span [ class "font-semibold" ] [ text "single user" ]
-                    , text " at a time and works best if the file is kept under version control."
-                    ]
-                , p []
-                    [ text "If you're on macOS, Linux, or Cygwin and have "
-                    , a
-                        [ href "https://nodejs.org/"
-                        , Html.Attributes.target "_blank"
-                        , Accessibility.Key.tabbable tabbable
-                        ]
-                        [ text "Node.js" ]
-                    , text " installed, then run the following command."
-                    ]
+                [ I18n.webInterfaceDescription
+                , I18n.runTheFollowingCommand tabbable
                 , div
                     [ class "mt-3 flex rounded-md shadow-sm" ]
                     [ div
@@ -1016,16 +999,7 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
                             ]
                         ]
                     ]
-                , p
-                    [ class "mt-3 max-w-xl" ]
-                    [ text "You can hide these instructions altogether by setting the "
-                    , Extras.Html.inlineCode "data-enable-help-for-making-changes"
-                    , text " attribute to "
-                    , Extras.Html.inlineCode "false"
-                    , text " on the "
-                    , code [] [ text <| "<div id=\"" ++ ElementIds.container ++ "\">" ]
-                    , text " element."
-                    ]
+                , I18n.youCanHideTheseInstructions
                 ]
             ]
         ]
@@ -1938,7 +1912,7 @@ viewThemeButton enabled theme themeDropdownMenu =
                 [ class "inline-flex items-center" ]
                 [ themeIcon Light
                     [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" ]
-                , text "Light"
+                , text I18n.themeLight
                 ]
             ]
             (PageMsg.Internal <| ChangeTheme Light)
@@ -1947,7 +1921,7 @@ viewThemeButton enabled theme themeDropdownMenu =
                 [ class "inline-flex items-center" ]
                 [ themeIcon Dark
                     [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" ]
-                , text "Dark"
+                , text I18n.themeDark
                 ]
             ]
             (PageMsg.Internal <| ChangeTheme Dark)
@@ -1956,7 +1930,7 @@ viewThemeButton enabled theme themeDropdownMenu =
                 [ class "inline-flex items-center" ]
                 [ themeIcon System
                     [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" ]
-                , text "System"
+                , text I18n.themeSystem
                 ]
             ]
             (PageMsg.Internal <| ChangeTheme System)
@@ -1980,7 +1954,7 @@ viewExportButton enabled exportDropdownMenu =
                 [ class "inline-flex items-center" ]
                 [ Icons.anki
                     [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-600 mr-2" ]
-                , text "Anki deck"
+                , text I18n.ankiDeck
                 ]
             ]
             (PageMsg.Internal <| DownloadAnki)
@@ -2109,7 +2083,7 @@ viewCurrentTagFilter { enableMathSupport, tabbable } ( tag, tagDescription ) =
         [ class "pt-3" ]
         [ span
             [ class "print:hidden mr-2 font-medium text-gray-900 dark:text-gray-100" ]
-            [ text "Only showing items for tag:" ]
+            [ text I18n.onlyShowingItemsForTag ]
         , Components.Badge.indigoWithBorderAndRemoveButton
             tabbable
             [ class "print:hidden mt-2" ]
@@ -2134,7 +2108,7 @@ viewAllTagFilters { enableMathSupport, tabbable } tags =
             [ class "print:hidden pt-3" ]
             (span
                 [ class "mr-2 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Tags:" ]
+                [ text <| I18n.tags ++ ":" ]
                 :: (tags
                         |> List.map
                             (\tag ->
@@ -2178,7 +2152,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
         [ fieldset []
             [ legend
                 [ class "mb-4 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Order items"
+                [ text I18n.orderItems
                 , span
                     [ class "ml-2 text-gray-500 dark:text-gray-400" ]
                     [ text "("
@@ -2202,7 +2176,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                         [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
                         , for ElementIds.orderItemsAlphabetically
                         ]
-                        [ text "alphabetically" ]
+                        [ text I18n.alphabetically ]
                     ]
                 , div
                     [ class "flex items-center" ]
