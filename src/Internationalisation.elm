@@ -1,4 +1,4 @@
-module Internationalisation exposing (alphabetically, ankiDeck, backToTop, export, focusedOn, howToMakeChangesTitle, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, tags, themeDark, themeLight, themeSystem, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, export, focusedOn, howToMakeChangesTitle, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in a specific language (e.g. English).
 -}
@@ -144,3 +144,13 @@ focusedOn =
 pleaseSelect : String
 pleaseSelect =
     I18n.pleaseSelect
+
+
+builtUsingGlossaryPageTemplate : Bool -> Html msg
+builtUsingGlossaryPageTemplate =
+    I18n.builtUsingGlossaryPageTemplate
+
+
+updatedOn : String -> Html msg
+updatedOn =
+    I18n.updatedOn

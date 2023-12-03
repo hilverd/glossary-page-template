@@ -1,4 +1,4 @@
-module Internationalisation.Eng exposing (alphabetically, ankiDeck, backToTop, export, focusedOn, howToMakeChangesTitle, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, tags, themeDark, themeLight, themeSystem, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation.Eng exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, export, focusedOn, howToMakeChangesTitle, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in the English language.
 -}
@@ -6,7 +6,7 @@ module Internationalisation.Eng exposing (alphabetically, ankiDeck, backToTop, e
 import Accessibility.Key
 import ElementIds
 import Extras.Html
-import Html exposing (Html, a, code, p, span, text)
+import Html exposing (Html, a, code, div, p, span, text)
 import Html.Attributes exposing (class, href)
 
 
@@ -139,3 +139,34 @@ focusedOn =
 pleaseSelect : String
 pleaseSelect =
     "Please select"
+
+
+builtUsingGlossaryPageTemplate : Bool -> Html msg
+builtUsingGlossaryPageTemplate tabbable =
+    p []
+        [ text "Built using "
+        , a
+            [ Html.Attributes.target "_blank"
+            , Accessibility.Key.tabbable tabbable
+            , href "https://glossary.page/template"
+            ]
+            [ span
+                [ class "font-semibold print:font-normal" ]
+                [ text "Glossary Page Template" ]
+            ]
+        , span
+            [ class "hidden print:inline" ]
+            [ text " (https://glossary.page/template)" ]
+        , text "."
+        ]
+
+
+updatedOn : String -> Html msg
+updatedOn date =
+    div
+        [ class "text-right text-sm mt-1.5 mb-2.5 text-gray-500 dark:text-gray-400" ]
+        [ text "Updated: "
+        , Html.node "last-updated"
+            [ Html.Attributes.attribute "datetime" date ]
+            []
+        ]

@@ -2551,23 +2551,7 @@ view model =
                                 []
                                 [ div
                                     []
-                                    [ p []
-                                        [ text "Built using "
-                                        , a
-                                            [ Html.Attributes.target "_blank"
-                                            , Accessibility.Key.tabbable noModalDialogShown_
-                                            , href "https://glossary.page/template"
-                                            ]
-                                            [ span
-                                                [ class "font-semibold print:font-normal" ]
-                                                [ text "Glossary Page Template" ]
-                                            ]
-                                        , span
-                                            [ class "hidden print:inline" ]
-                                            [ text " (https://glossary.page/template)" ]
-                                        , text "."
-                                        ]
-                                    ]
+                                    [ I18n.builtUsingGlossaryPageTemplate noModalDialogShown_ ]
                                 ]
                             ]
                         ]

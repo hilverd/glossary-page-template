@@ -20,6 +20,7 @@ import Html
 import Html.Attributes exposing (class, id, target)
 import Html.Events
 import Icons
+import Internationalisation as I18n
 import Svg.Attributes
 
 
@@ -229,17 +230,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                 , div
                                     [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
                                     [ Extras.Html.showIf enableLastUpdatedDates <|
-                                        Extras.Html.showMaybe
-                                            (\lastUpdatedDate_ ->
-                                                div
-                                                    [ class "text-right text-sm mt-1.5 mb-2.5 text-gray-500 dark:text-gray-400" ]
-                                                    [ text "Updated: "
-                                                    , Html.node "last-updated"
-                                                        [ Html.Attributes.attribute "datetime" lastUpdatedDate_ ]
-                                                        []
-                                                    ]
-                                            )
-                                            lastUpdatedDate
+                                        Extras.Html.showMaybe I18n.updatedOn lastUpdatedDate
                                     , div
                                         [ class "flex justify-between" ]
                                         [ span
@@ -346,17 +337,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                         )
                                     ]
                                 , Extras.Html.showIf enableLastUpdatedDates <|
-                                    Extras.Html.showMaybe
-                                        (\lastUpdatedDate_ ->
-                                            div
-                                                [ class "text-right text-sm mt-1.5 text-gray-500 dark:text-gray-400" ]
-                                                [ text "Updated: "
-                                                , Html.node "last-updated"
-                                                    [ Html.Attributes.attribute "datetime" lastUpdatedDate_ ]
-                                                    []
-                                                ]
-                                        )
-                                        lastUpdatedDate
+                                    Extras.Html.showMaybe I18n.updatedOn lastUpdatedDate
                                 ]
         )
         glossaryItemWithPreviousAndNext.item
@@ -531,17 +512,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                 , div
                     [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
                     [ Extras.Html.showIf enableLastUpdatedDates <|
-                        Extras.Html.showMaybe
-                            (\lastUpdatedDate_ ->
-                                div
-                                    [ class "text-right text-sm mt-1.5 mb-2.5 text-gray-500 dark:text-gray-400" ]
-                                    [ text "Updated: "
-                                    , Html.node "last-updated"
-                                        [ Html.Attributes.attribute "datetime" lastUpdatedDate_ ]
-                                        []
-                                    ]
-                            )
-                            lastUpdatedDate
+                        Extras.Html.showMaybe I18n.updatedOn lastUpdatedDate
                     ]
                 ]
         )
