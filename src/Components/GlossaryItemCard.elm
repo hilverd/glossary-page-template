@@ -610,10 +610,10 @@ viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDefin
             [ class "related-terms" ]
             (text
                 (if itemHasSomeDefinitions then
-                    "See also: "
+                    I18n.seeAlso ++ ": "
 
                  else
-                    "See: "
+                    I18n.see ++ ": "
                 )
                 :: (relatedTerms
                         |> List.map

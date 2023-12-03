@@ -1,4 +1,4 @@
-module Internationalisation exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, export, focusedOn, howToMakeChangesTitle, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in a specific language (e.g. English).
 -}
@@ -154,3 +154,33 @@ builtUsingGlossaryPageTemplate =
 updatedOn : String -> Html msg
 updatedOn =
     I18n.updatedOn
+
+
+makeChanges : String
+makeChanges =
+    I18n.makeChanges
+
+
+settings : String
+settings =
+    I18n.settings
+
+
+seeAlso : String
+seeAlso =
+    I18n.seeAlso
+
+
+see : String
+see =
+    I18n.see
+
+
+explanationForMostMentionedFirst : String
+explanationForMostMentionedFirst =
+    I18n.explanationForMostMentionedFirst
+
+
+explanationForFocusedOn : Html msg -> Html msg
+explanationForFocusedOn =
+    I18n.explanationForFocusedOn

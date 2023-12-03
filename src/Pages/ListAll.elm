@@ -1036,7 +1036,7 @@ viewSettings glossary model =
                 [ class "mb-1 text-lg leading-6 items-center font-medium text-gray-900 dark:text-gray-100 select-none" ]
                 [ span
                     [ class "ml-2" ]
-                    [ text "Settings" ]
+                    [ text I18n.settings ]
                 ]
             , div
                 [ Extras.HtmlAttribute.showIf (model.savingSettings == SavingInProgress) <|
@@ -1404,7 +1404,7 @@ viewMakeChangesButton showSandboxModeMessage tabbable =
                 [ Svg.Attributes.class "h-5 w-5" ]
             , span
                 [ class "ml-2 inline-flex items-center" ]
-                [ text "Make changes"
+                [ text I18n.makeChanges
                 , Html.kbd
                     [ class "ml-2 inline-flex items-center rounded border border-gray-700 dark:border-gray-300 px-1 font-sans text-xs" ]
                     [ text "e" ]
@@ -2249,15 +2249,10 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
         , Extras.Html.showIf (QueryParameters.orderItemsBy model.common.queryParameters == MostMentionedFirst) <|
             p
                 [ class "mt-2 text-gray-700 dark:text-gray-300" ]
-                [ text "Items that are mentioned in many other items are shown first." ]
+                [ text I18n.explanationForMostMentionedFirst ]
         , Extras.Html.showMaybe
-            (\term ->
-                p
-                    [ class "mt-2 text-gray-700 dark:text-gray-300" ]
-                    [ text "Items closely related to \""
-                    , Term.view enableMathSupport [] term
-                    , text "\" are shown first. This is determined based on \"See also\" links."
-                    ]
+            (Term.view enableMathSupport []
+                >> I18n.explanationForFocusedOn
             )
             orderItemsFocusedOnTerm
         ]

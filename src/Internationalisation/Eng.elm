@@ -1,4 +1,4 @@
-module Internationalisation.Eng exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, export, focusedOn, howToMakeChangesTitle, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation.Eng exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in the English language.
 -}
@@ -169,4 +169,39 @@ updatedOn date =
         , Html.node "last-updated"
             [ Html.Attributes.attribute "datetime" date ]
             []
+        ]
+
+
+makeChanges : String
+makeChanges =
+    "Make changes"
+
+
+settings : String
+settings =
+    "Settings"
+
+
+seeAlso : String
+seeAlso =
+    "See also"
+
+
+see : String
+see =
+    "See"
+
+
+explanationForMostMentionedFirst : String
+explanationForMostMentionedFirst =
+    "Items that are mentioned in many other items are shown first."
+
+
+explanationForFocusedOn : Html msg -> Html msg
+explanationForFocusedOn termHtml =
+    p
+        [ class "mt-2 text-gray-700 dark:text-gray-300" ]
+        [ text "Items closely related to \""
+        , termHtml
+        , text "\" are shown first. This is determined based on \"See also\" links."
         ]

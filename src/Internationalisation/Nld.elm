@@ -1,4 +1,4 @@
-module Internationalisation.Nld exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, export, focusedOn, howToMakeChangesTitle, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation.Nld exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in the Dutch language.
 -}
@@ -62,7 +62,7 @@ themeSystem =
 
 howToMakeChangesTitle : String
 howToMakeChangesTitle =
-    "Hoe je veranderingen kunt maken"
+    "Hoe je wijzigingen kunt maken"
 
 
 webInterfaceDescription : Html msg
@@ -169,4 +169,39 @@ updatedOn date =
         , Html.node "last-updated"
             [ Html.Attributes.attribute "datetime" date ]
             []
+        ]
+
+
+makeChanges : String
+makeChanges =
+    "Wijzig"
+
+
+settings : String
+settings =
+    "Instellingen"
+
+
+seeAlso : String
+seeAlso =
+    "Zie ook"
+
+
+see : String
+see =
+    "Zie"
+
+
+explanationForMostMentionedFirst : String
+explanationForMostMentionedFirst =
+    "Items die in veel andere items worden genoemd verschijnen eerder."
+
+
+explanationForFocusedOn : Html msg -> Html msg
+explanationForFocusedOn termHtml =
+    p
+        [ class "mt-2 text-gray-700 dark:text-gray-300" ]
+        [ text "Items die nauw verwant zijn aan \""
+        , termHtml
+        , text "\" worden eerst getoond. Dit wordt bepaald door \"Zie ook\"-koppelingen."
         ]
