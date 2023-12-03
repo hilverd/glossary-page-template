@@ -1,4 +1,4 @@
-module Internationalisation.Eng exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation.Eng exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in the English language.
 -}
@@ -205,3 +205,38 @@ explanationForFocusedOn termHtml =
         , termHtml
         , text "\" are shown first. This is determined based on \"See also\" links."
         ]
+
+
+cardWidth : String
+cardWidth =
+    "Card width"
+
+
+cardWidthCompact : String
+cardWidthCompact =
+    "Compact"
+
+
+cardWidthIntermediate : String
+cardWidthIntermediate =
+    "Intermediate"
+
+
+cardWidthWide : String
+cardWidthWide =
+    "Wide"
+
+
+showExportMenu : String
+showExportMenu =
+    "Show \"Export\" menu"
+
+
+showOrderItemsButtons : String
+showOrderItemsButtons =
+    "Show \"Order items\" buttons"
+
+
+showLastUpdatedDates : String
+showLastUpdatedDates =
+    "Show last updated date for each item"

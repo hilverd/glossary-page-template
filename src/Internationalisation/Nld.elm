@@ -1,4 +1,4 @@
-module Internationalisation.Nld exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation.Nld exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in the Dutch language.
 -}
@@ -73,7 +73,7 @@ webInterfaceDescription =
         , text " Deze is bedoeld om "
         , span [ class "font-semibold" ] [ text "lokaal" ]
         , text " te worden gebruikt door "
-        , span [ class "font-semibold" ] [ text "een gebruiker" ]
+        , span [ class "font-semibold" ] [ text "één gebruiker" ]
         , text " tegelijkertijd en werkt het beste als het bestand onder version control wordt bewaard."
         ]
 
@@ -88,7 +88,7 @@ runTheFollowingCommand tabbable =
             , Accessibility.Key.tabbable tabbable
             ]
             [ text "Node.js" ]
-        , text " geinstalleerd hebt, geef dan het volgende commando."
+        , text " geïnstalleerd hebt, geef dan het volgende commando."
         ]
 
 
@@ -205,3 +205,38 @@ explanationForFocusedOn termHtml =
         , termHtml
         , text "\" worden eerst getoond. Dit wordt bepaald door \"Zie ook\"-koppelingen."
         ]
+
+
+cardWidth : String
+cardWidth =
+    "Breedte van kaarten"
+
+
+cardWidthCompact : String
+cardWidthCompact =
+    "Compact"
+
+
+cardWidthIntermediate : String
+cardWidthIntermediate =
+    "Gemiddeld"
+
+
+cardWidthWide : String
+cardWidthWide =
+    "Breed"
+
+
+showExportMenu : String
+showExportMenu =
+    "Toon \"Exporteer\"-menu"
+
+
+showOrderItemsButtons : String
+showOrderItemsButtons =
+    "Toon knoppen voor het sorteren van items"
+
+
+showLastUpdatedDates : String
+showLastUpdatedDates =
+    "Toon laatste bewerkingsdatum voor ieder item"

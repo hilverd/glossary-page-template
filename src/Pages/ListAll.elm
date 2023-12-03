@@ -1066,7 +1066,7 @@ viewSettings glossary model =
                         [ Html.Events.onClick <| PageMsg.Internal ToggleEnableExportMenu ]
                         [ span
                             [ class "font-medium text-gray-900 dark:text-gray-300" ]
-                            [ text "Show \"Export\" menu" ]
+                            [ text I18n.showExportMenu ]
                         ]
                     ]
                 , div
@@ -1077,7 +1077,7 @@ viewSettings glossary model =
                         [ Html.Events.onClick <| PageMsg.Internal ToggleEnableOrderItemsButtons ]
                         [ span
                             [ class "font-medium text-gray-900 dark:text-gray-300" ]
-                            [ text "Show \"Order items\" buttons" ]
+                            [ text I18n.showOrderItemsButtons ]
                         ]
                     ]
                 , div
@@ -1088,7 +1088,7 @@ viewSettings glossary model =
                         [ Html.Events.onClick <| PageMsg.Internal ToggleEnableLastUpdatedDates ]
                         [ span
                             [ class "font-medium text-gray-900 dark:text-gray-300" ]
-                            [ text "Show last updated date for each item" ]
+                            [ text I18n.showLastUpdatedDates ]
                         ]
                     ]
                 , case model.savingSettings of
@@ -2021,7 +2021,7 @@ viewSelectCardWidth glossary model =
         [ fieldset []
             [ legend
                 [ class "mb-4 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Card width" ]
+                [ text I18n.cardWidth ]
             , div
                 [ class "space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6" ]
                 [ div
@@ -2038,7 +2038,7 @@ viewSelectCardWidth glossary model =
                         [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
                         , for ElementIds.cardWidthCompact
                         ]
-                        [ text "Compact" ]
+                        [ text I18n.cardWidthCompact ]
                     ]
                 , div
                     [ class "flex items-center" ]
@@ -2054,7 +2054,7 @@ viewSelectCardWidth glossary model =
                         [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
                         , for ElementIds.cardWidthIntermediate
                         ]
-                        [ text "Intermediate" ]
+                        [ text I18n.cardWidthIntermediate ]
                     ]
                 , div
                     [ class "flex items-center" ]
@@ -2070,7 +2070,7 @@ viewSelectCardWidth glossary model =
                         [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
                         , for ElementIds.cardWidthWide
                         ]
-                        [ text "Wide" ]
+                        [ text I18n.cardWidthWide ]
                     ]
                 ]
             ]

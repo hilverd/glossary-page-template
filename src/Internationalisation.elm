@@ -1,4 +1,4 @@
-module Internationalisation exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in a specific language (e.g. English).
 -}
@@ -184,3 +184,38 @@ explanationForMostMentionedFirst =
 explanationForFocusedOn : Html msg -> Html msg
 explanationForFocusedOn =
     I18n.explanationForFocusedOn
+
+
+cardWidth : String
+cardWidth =
+    I18n.cardWidth
+
+
+cardWidthCompact : String
+cardWidthCompact =
+    I18n.cardWidthCompact
+
+
+cardWidthIntermediate : String
+cardWidthIntermediate =
+    I18n.cardWidthIntermediate
+
+
+cardWidthWide : String
+cardWidthWide =
+    I18n.cardWidthWide
+
+
+showExportMenu : String
+showExportMenu =
+    I18n.showExportMenu
+
+
+showOrderItemsButtons : String
+showOrderItemsButtons =
+    I18n.showOrderItemsButtons
+
+
+showLastUpdatedDates : String
+showLastUpdatedDates =
+    I18n.showLastUpdatedDates
