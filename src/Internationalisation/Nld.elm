@@ -1,4 +1,4 @@
-module Internationalisation.Nld exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation.Nld exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, createANewGlossaryItem, edit, editTitleAndAboutSection, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, manageTags, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions, delete)
 
 {-| User interface text in the Dutch language.
 -}
@@ -240,3 +240,27 @@ showOrderItemsButtons =
 showLastUpdatedDates : String
 showLastUpdatedDates =
     "Toon laatste bewerkingsdatum voor ieder item"
+
+
+editTitleAndAboutSection : String
+editTitleAndAboutSection =
+    "Wijzig titel en algemene informatie"
+
+
+createANewGlossaryItem : String
+createANewGlossaryItem =
+    "Maak een nieuw item aan"
+
+
+manageTags : String
+manageTags =
+    "Beheer tags"
+
+
+edit : String
+edit =
+    "Wijzig"
+
+delete : String
+delete =
+    "Verwijder"

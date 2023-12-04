@@ -1372,7 +1372,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIdOfItemToDelete deletin
                         (Html.Events.onClick << PageMsg.Internal << Delete)
                         maybeIdOfItemToDelete
                     ]
-                    [ text "Delete" ]
+                    [ text I18n.delete ]
                 , Components.Button.white
                     (deleting /= SavingInProgress)
                     [ class "mt-3 w-full sm:mt-0 sm:w-auto sm:text-sm"
@@ -1429,7 +1429,7 @@ viewEditTitleAndAboutButton tabbable common =
                 [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
             , span
                 [ class "ml-2" ]
-                [ text "Edit title and about section" ]
+                [ text I18n.editTitleAndAboutSection ]
             ]
         ]
 
@@ -1447,7 +1447,7 @@ viewCreateGlossaryItemButtonForEmptyState tabbable common =
                 [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
             , span
                 [ class "mt-2 inline-flex items-center font-medium text-gray-900 dark:text-gray-200" ]
-                [ text "Create a new glossary item"
+                [ text I18n.createANewGlossaryItem
                 , Html.kbd
                     [ class "ml-2 rounded border border-indigo-700 dark:border-indigo-300 px-1 font-sans text-xs" ]
                     [ text "n" ]
@@ -1471,7 +1471,7 @@ viewCreateGlossaryItemButton tabbable common =
                 ]
             , span
                 [ class "inline-flex items-center" ]
-                [ text "Create a new glossary item"
+                [ text I18n.createANewGlossaryItem
                 , Html.kbd
                     [ class "ml-2 inline-flex items-center rounded border border-indigo-700 dark:border-indigo-300 px-1 font-sans text-xs" ]
                     [ text "n" ]
@@ -2135,7 +2135,7 @@ viewManageTagsButton tabbable common =
                 [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
             , span
                 [ class "ml-2" ]
-                [ text "Manage tags" ]
+                [ text I18n.manageTags ]
             ]
         ]
 

@@ -420,7 +420,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
             [ span
                 [ class "flex-none inline-flex items-center" ]
                 [ Components.Button.rounded True
-                    [ Accessibility.Aria.label "Delete"
+                    [ Accessibility.Aria.label I18n.delete
                     , Html.Events.onClick <| PageMsg.Internal <| DeleteAboutLink index
                     ]
                     [ Icons.trash

@@ -245,7 +245,7 @@ viewEditTag { enableMathSupport, tabbable, showValidationErrors } index tagField
         [ span
             [ class "inline-flex items-center mr-1 mt-4" ]
             [ Components.Button.rounded True
-                [ Accessibility.Aria.label "Delete"
+                [ Accessibility.Aria.label I18n.delete
                 , Html.Events.onClick <| PageMsg.Internal <| DeleteRow index
                 ]
                 [ Icons.trash

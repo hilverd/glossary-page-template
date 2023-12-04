@@ -545,7 +545,7 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
                     , Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:pt-6"
                     ]
                     [ Components.Button.rounded canBeDeleted
-                        [ Accessibility.Aria.label "Delete"
+                        [ Accessibility.Aria.label I18n.delete
                         , Html.Events.onClick <| PageMsg.Internal <| DeleteTerm termIndex
                         ]
                         [ Icons.trash
@@ -820,7 +820,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfR
             [ span
                 [ class "inline-flex items-center" ]
                 [ Components.Button.rounded True
-                    [ Accessibility.Aria.label "Delete"
+                    [ Accessibility.Aria.label I18n.delete
                     , Html.Events.onClick <| PageMsg.Internal <| DeleteRelatedTerm index
                     ]
                     [ Icons.trash

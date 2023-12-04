@@ -243,7 +243,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                     [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
                                                 , span
                                                     [ class "font-medium text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-400" ]
-                                                    [ text "Edit" ]
+                                                    [ text I18n.edit ]
                                                 ]
                                             ]
                                         , span
@@ -256,7 +256,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                     [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
                                                 , span
                                                     [ class "font-medium text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-400" ]
-                                                    [ text "Delete" ]
+                                                    [ text I18n.delete ]
                                                 ]
                                             ]
                                         ]

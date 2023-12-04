@@ -1,4 +1,4 @@
-module Internationalisation exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, createANewGlossaryItem, delete, edit, editTitleAndAboutSection, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, manageTags, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in a specific language (e.g. English).
 -}
@@ -219,3 +219,28 @@ showOrderItemsButtons =
 showLastUpdatedDates : String
 showLastUpdatedDates =
     I18n.showLastUpdatedDates
+
+
+editTitleAndAboutSection : String
+editTitleAndAboutSection =
+    I18n.editTitleAndAboutSection
+
+
+createANewGlossaryItem : String
+createANewGlossaryItem =
+    I18n.createANewGlossaryItem
+
+
+manageTags : String
+manageTags =
+    I18n.manageTags
+
+
+edit : String
+edit =
+    I18n.edit
+
+
+delete : String
+delete =
+    I18n.delete

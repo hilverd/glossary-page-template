@@ -1,4 +1,4 @@
-module Internationalisation.Eng exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation.Eng exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, createANewGlossaryItem, delete, edit, editTitleAndAboutSection, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, manageTags, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in the English language.
 -}
@@ -240,3 +240,28 @@ showOrderItemsButtons =
 showLastUpdatedDates : String
 showLastUpdatedDates =
     "Show last updated date for each item"
+
+
+editTitleAndAboutSection : String
+editTitleAndAboutSection =
+    "Edit title and about section"
+
+
+createANewGlossaryItem : String
+createANewGlossaryItem =
+    "Create a new glossary item"
+
+
+manageTags : String
+manageTags =
+    "Manage tags"
+
+
+edit : String
+edit =
+    "Edit"
+
+
+delete : String
+delete =
+    "Delete"
