@@ -1075,7 +1075,7 @@ viewCreateFormFooter model =
     in
     div
         [ class "pt-5 lg:border-t dark:border-gray-700 flex flex-col items-center" ]
-        [ errorDiv "There are errors on this form — see above."
+        [ errorDiv I18n.thereAreErrorsOnThisFormSeeAbove
             |> Extras.Html.showIf (model.triedToSaveWhenFormInvalid && Form.hasValidationErrors model.form)
         , Extras.Html.showMaybe
             (\glossaryItemsError ->

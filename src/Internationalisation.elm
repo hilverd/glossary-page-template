@@ -1,4 +1,4 @@
-module Internationalisation exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, createANewGlossaryItem, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, manageTags, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, textLabel, themeDark, themeLight, themeSystem, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, createANewGlossaryItem, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, links, makeChanges, manageTags, markdownAndTeXSupported, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in a specific language (e.g. English).
 -}
@@ -289,3 +289,33 @@ url =
 textLabel : String
 textLabel =
     I18n.textLabel
+
+
+markdownAndTeXSupported : Bool -> Html msg
+markdownAndTeXSupported =
+    I18n.markdownAndTeXSupported
+
+
+preview : String
+preview =
+    I18n.preview
+
+
+save : String
+save =
+    I18n.save
+
+
+thereAreErrorsOnThisFormSeeAbove : String
+thereAreErrorsOnThisFormSeeAbove =
+    I18n.thereAreErrorsOnThisFormSeeAbove
+
+
+somethingWentWrong : String
+somethingWentWrong =
+    I18n.somethingWentWrong
+
+
+links : String
+links =
+    I18n.links

@@ -7,6 +7,7 @@ import Extras.HtmlAttribute
 import Html exposing (Html, span)
 import Html.Attributes exposing (class)
 import Icons
+import Internationalisation as I18n
 import Svg.Attributes
 
 
@@ -101,29 +102,6 @@ markdownSupportedMessage mathSupportEnabled =
                 [ Svg.Attributes.class "w-5 h-5 mr-2"
                 , Accessibility.Aria.hidden True
                 ]
-            , Html.span
-                []
-                [ Html.a
-                    [ Html.Attributes.href "https://commonmark.org/help/"
-                    , Html.Attributes.target "_blank"
-                    , class "text-inherit no-underline text-gray-500 dark:text-gray-400 font-normal"
-                    ]
-                    [ Html.text "Markdown" ]
-                , Extras.Html.showIf mathSupportEnabled <|
-                    Html.span []
-                        [ Html.text " and "
-                        , Html.a
-                            [ Html.Attributes.href "https://katex.org/docs/supported.html"
-                            , Html.Attributes.target "_blank"
-                            , class "text-inherit no-underline text-gray-500 dark:text-gray-400 font-normal"
-                            ]
-                            [ Html.node "katex-inline"
-                                [ Html.Attributes.attribute "data-expr" "\\TeX"
-                                ]
-                                []
-                            ]
-                        ]
-                , Html.text " supported."
-                ]
+            , I18n.markdownAndTeXSupported mathSupportEnabled
             ]
         ]

@@ -1,4 +1,4 @@
-module Internationalisation.Eng exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, createANewGlossaryItem, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, manageTags, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, textLabel, themeDark, themeLight, themeSystem, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation.Eng exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, createANewGlossaryItem, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, manageTags, markdownAndTeXSupported, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions, links)
 
 {-| User interface text in the English language.
 -}
@@ -310,3 +310,56 @@ url =
 textLabel : String
 textLabel =
     "Text"
+
+
+markdownAndTeXSupported : Bool -> Html msg
+markdownAndTeXSupported mathSupportEnabled =
+    Html.span
+        []
+        [ Html.a
+            [ Html.Attributes.href "https://commonmark.org/help/"
+            , Html.Attributes.target "_blank"
+            , class "text-inherit no-underline text-gray-500 dark:text-gray-400 font-normal"
+            ]
+            [ Html.text "Markdown" ]
+        , Extras.Html.showIf mathSupportEnabled <|
+            Html.span []
+                [ Html.text " and "
+                , Html.a
+                    [ Html.Attributes.href "https://katex.org/docs/supported.html"
+                    , Html.Attributes.target "_blank"
+                    , class "text-inherit no-underline text-gray-500 dark:text-gray-400 font-normal"
+                    ]
+                    [ Html.node "katex-inline"
+                        [ Html.Attributes.attribute "data-expr" "\\TeX"
+                        ]
+                        []
+                    ]
+                ]
+        , Html.text " supported."
+        ]
+
+
+preview : String
+preview =
+    "Preview"
+
+
+save : String
+save =
+    "Save"
+
+
+thereAreErrorsOnThisFormSeeAbove : String
+thereAreErrorsOnThisFormSeeAbove =
+    "There are errors on this form — see above."
+
+
+somethingWentWrong : String
+somethingWentWrong =
+    "Something went wrong."
+
+
+links : String
+links =
+    "Links"

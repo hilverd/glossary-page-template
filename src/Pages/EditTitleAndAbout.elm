@@ -321,7 +321,7 @@ viewEditAboutParagraph mathSupportEnabled showValidationErrors aboutParagraphFie
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "About" ]
+                [ text I18n.about ]
             ]
         , div
             [ class "mt-4 max-w-2xl" ]
@@ -371,7 +371,7 @@ viewEditAboutLinks showValidationErrors aboutLinkFieldsArray =
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Links" ]
+                [ text I18n.links ]
             ]
         , div
             [ class "space-y-6 sm:space-y-5" ]
@@ -554,7 +554,7 @@ viewCreateFormFooter model showValidationErrors glossaryItems =
     in
     div
         [ class "pt-5 lg:border-t dark:border-gray-700 flex flex-col items-center" ]
-        [ errorDiv "There are errors on this form — see above."
+        [ errorDiv I18n.thereAreErrorsOnThisFormSeeAbove
             |> Extras.Html.showIf (showValidationErrors && Form.hasValidationErrors form)
         , Extras.Html.showIf model.common.enableSavingChangesInMemory <|
             div
@@ -567,13 +567,13 @@ viewCreateFormFooter model showValidationErrors glossaryItems =
                 [ Html.Events.onClick <|
                     PageMsg.NavigateToListAll { common | glossary = updatedGlossary }
                 ]
-                [ text "Cancel" ]
+                [ text I18n.cancel ]
             , Components.Button.primary
                 (saving /= SavingInProgress && not (showValidationErrors && Form.hasValidationErrors form))
                 [ class "ml-3"
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]
-                [ text "Save" ]
+                [ text I18n.save ]
             , Components.Spinner.view
                 [ Svg.Attributes.class "ml-3 w-8 h-8" ]
                 (saving == SavingInProgress)
@@ -626,7 +626,7 @@ view model =
                                         [ class "border border-solid rounded-md border-gray-300 dark:border-gray-700 p-4" ]
                                         [ Html.legend
                                             [ class "text-xl text-center text-gray-800 dark:text-gray-300 px-3 py-0.5 select-none" ]
-                                            [ text "Preview" ]
+                                            [ text I18n.preview ]
                                         , h2
                                             [ class "pb-4 text-2xl font-bold leading-tight text-gray-700 dark:text-gray-300" ]
                                             [ GlossaryTitle.view enableMathSupport title1 ]
@@ -649,7 +649,7 @@ view model =
 
         Err _ ->
             { title = "Glossary"
-            , body = [ text "Something went wrong." ]
+            , body = [ text I18n.somethingWentWrong ]
             }
 
 
