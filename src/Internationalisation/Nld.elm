@@ -1,4 +1,4 @@
-module Internationalisation.Nld exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, createANewGlossaryItem, edit, editTitleAndAboutSection, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, manageTags, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions, delete)
+module Internationalisation.Nld exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, createANewGlossaryItem, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, manageTags, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, textLabel, themeDark, themeLight, themeSystem, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in the Dutch language.
 -}
@@ -242,8 +242,13 @@ showLastUpdatedDates =
     "Toon laatste bewerkingsdatum voor ieder item"
 
 
-editTitleAndAboutSection : String
-editTitleAndAboutSection =
+editTitleAndAboutSectionButton : String
+editTitleAndAboutSectionButton =
+    "Wijzig titel en algemene informatie"
+
+
+editTitleAndAboutSectionHeading : String
+editTitleAndAboutSectionHeading =
     "Wijzig titel en algemene informatie"
 
 
@@ -261,6 +266,47 @@ edit : String
 edit =
     "Wijzig"
 
+
 delete : String
 delete =
     "Verwijder"
+
+
+deleteItem : String
+deleteItem =
+    "Verwijder item"
+
+
+areYouSureYouWantToDeleteThisItem : String
+areYouSureYouWantToDeleteThisItem =
+    "Weet je zeker dat je dit item wil verwijderen?"
+
+
+cancel : String
+cancel =
+    "Annuleer"
+
+
+title : String
+title =
+    "Titel"
+
+
+about : String
+about =
+    "Algemene informatie"
+
+
+addLinkButton : String
+addLinkButton =
+    "Voeg link toe"
+
+
+url : String
+url =
+    "URL"
+
+
+textLabel : String
+textLabel =
+    "Tekst"

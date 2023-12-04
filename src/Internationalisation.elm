@@ -1,4 +1,4 @@
-module Internationalisation exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, createANewGlossaryItem, delete, edit, editTitleAndAboutSection, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, manageTags, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, createANewGlossaryItem, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, manageTags, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, textLabel, themeDark, themeLight, themeSystem, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in a specific language (e.g. English).
 -}
@@ -221,9 +221,14 @@ showLastUpdatedDates =
     I18n.showLastUpdatedDates
 
 
-editTitleAndAboutSection : String
-editTitleAndAboutSection =
-    I18n.editTitleAndAboutSection
+editTitleAndAboutSectionButton : String
+editTitleAndAboutSectionButton =
+    I18n.editTitleAndAboutSectionButton
+
+
+editTitleAndAboutSectionHeading : String
+editTitleAndAboutSectionHeading =
+    I18n.editTitleAndAboutSectionHeading
 
 
 createANewGlossaryItem : String
@@ -244,3 +249,43 @@ edit =
 delete : String
 delete =
     I18n.delete
+
+
+deleteItem : String
+deleteItem =
+    I18n.deleteItem
+
+
+areYouSureYouWantToDeleteThisItem : String
+areYouSureYouWantToDeleteThisItem =
+    I18n.areYouSureYouWantToDeleteThisItem
+
+
+cancel : String
+cancel =
+    I18n.cancel
+
+
+title : String
+title =
+    I18n.title
+
+
+about : String
+about =
+    I18n.about
+
+
+addLinkButton : String
+addLinkButton =
+    I18n.addLinkButton
+
+
+url : String
+url =
+    I18n.url
+
+
+textLabel : String
+textLabel =
+    I18n.textLabel

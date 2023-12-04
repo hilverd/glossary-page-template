@@ -266,7 +266,7 @@ viewEditTitle mathSupportEnabled showValidationErrors titleField =
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Title" ]
+                [ text I18n.title ]
             ]
         , div
             [ class "mt-4" ]
@@ -289,7 +289,7 @@ viewEditTitle mathSupportEnabled showValidationErrors titleField =
                                     [ required True
                                     , Html.Attributes.autocomplete False
                                     , Html.Attributes.id ElementIds.titleInputField
-                                    , Accessibility.Aria.label "Title"
+                                    , Accessibility.Aria.label I18n.title
                                     , Accessibility.Aria.required True
                                     , Html.Events.onInput (PageMsg.Internal << UpdateTitle)
                                     , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
@@ -336,7 +336,7 @@ viewEditAboutParagraph mathSupportEnabled showValidationErrors aboutParagraphFie
                         showValidationErrors
                         aboutParagraphField.validationError
                         [ required True
-                        , Accessibility.Aria.label "About"
+                        , Accessibility.Aria.label I18n.about
                         , Accessibility.Aria.required True
                         , Html.Attributes.id ElementIds.aboutParagraphInputField
                         , Html.Events.onInput (PageMsg.Internal << UpdateAboutParagraph)
@@ -396,7 +396,7 @@ viewAddAboutLinkButtonForEmptyState =
             [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
         , span
             [ class "mt-2 block font-medium text-gray-900 dark:text-gray-200" ]
-            [ text "Add link" ]
+            [ text I18n.addLinkButton ]
         ]
 
 
@@ -407,7 +407,7 @@ viewAddAboutLinkButton =
             [ Html.Events.onClick <| PageMsg.Internal AddAboutLink ]
             [ Icons.plus
                 [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
-            , text "Add link"
+            , text I18n.addLinkButton
             ]
         ]
 
@@ -440,7 +440,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                         [ class "block text-sm font-semibold text-gray-500 dark:text-gray-300"
                         , for <| ElementIds.aboutLinkHref index
                         ]
-                        [ text "URL" ]
+                        [ text I18n.url ]
                     , Components.Form.input
                         aboutLinkHref.href
                         showValidationErrors
@@ -468,7 +468,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                         [ class "block text-sm font-semibold text-gray-500 dark:text-gray-300"
                         , for <| ElementIds.aboutLinkBody index
                         ]
-                        [ text "Text" ]
+                        [ text I18n.textLabel ]
                     , Html.div
                         [ class "block w-full min-w-0" ]
                         [ Html.div
@@ -608,7 +608,7 @@ view model =
                         []
                         [ h1
                             [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
-                            [ text "Edit Title and About Section"
+                            [ text I18n.editTitleAndAboutSectionHeading
                             ]
                         , form
                             [ class "pt-7" ]

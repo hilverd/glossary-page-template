@@ -1,4 +1,4 @@
-module Internationalisation.Eng exposing (alphabetically, ankiDeck, backToTop, builtUsingGlossaryPageTemplate, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, createANewGlossaryItem, delete, edit, editTitleAndAboutSection, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, manageTags, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, themeDark, themeLight, themeSystem, updatedOn, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation.Eng exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, createANewGlossaryItem, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, manageTags, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, quickSearch, runTheFollowingCommand, sandboxModeMessage, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, tags, textLabel, themeDark, themeLight, themeSystem, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in the English language.
 -}
@@ -242,9 +242,14 @@ showLastUpdatedDates =
     "Show last updated date for each item"
 
 
-editTitleAndAboutSection : String
-editTitleAndAboutSection =
+editTitleAndAboutSectionButton : String
+editTitleAndAboutSectionButton =
     "Edit title and about section"
+
+
+editTitleAndAboutSectionHeading : String
+editTitleAndAboutSectionHeading =
+    "Edit Title and About Section"
 
 
 createANewGlossaryItem : String
@@ -265,3 +270,43 @@ edit =
 delete : String
 delete =
     "Delete"
+
+
+deleteItem : String
+deleteItem =
+    "Delete item"
+
+
+areYouSureYouWantToDeleteThisItem : String
+areYouSureYouWantToDeleteThisItem =
+    "Are you sure you want to delete this item?"
+
+
+cancel : String
+cancel =
+    "Cancel"
+
+
+title : String
+title =
+    "Title"
+
+
+about : String
+about =
+    "About"
+
+
+addLinkButton : String
+addLinkButton =
+    "Add link"
+
+
+url : String
+url =
+    "URL"
+
+
+textLabel : String
+textLabel =
+    "Text"

@@ -1337,13 +1337,13 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIdOfItemToDelete deletin
                         [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100"
                         , id ElementIds.confirmDeleteModalTitle
                         ]
-                        [ text "Delete item"
+                        [ text I18n.deleteItem
                         ]
                     , div
                         [ class "mt-2" ]
                         [ p
                             [ class "text-sm text-gray-500 dark:text-gray-400" ]
-                            [ text "Are you sure you want to delete this item?" ]
+                            [ text I18n.areYouSureYouWantToDeleteThisItem ]
                         ]
                     ]
                 ]
@@ -1379,7 +1379,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIdOfItemToDelete deletin
                     , Html.Events.onClick <| PageMsg.Internal CancelDelete
                     , Extras.HtmlEvents.onEnter <| PageMsg.Internal CancelDelete
                     ]
-                    [ text "Cancel" ]
+                    [ text I18n.cancel ]
                 , span
                     [ class "w-full sm:w-auto sm:order-last sm:mr-3 flex justify-center" ]
                     [ Components.Spinner.view
@@ -1429,7 +1429,7 @@ viewEditTitleAndAboutButton tabbable common =
                 [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
             , span
                 [ class "ml-2" ]
-                [ text I18n.editTitleAndAboutSection ]
+                [ text I18n.editTitleAndAboutSectionButton ]
             ]
         ]
 
