@@ -1,4 +1,4 @@
-module Internationalisation.Eng exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, createANewGlossaryItem, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, makeChanges, manageTags, markdownAndTeXSupported, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions, links)
+module Internationalisation.Eng exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, createANewGlossaryItem, ctrlK, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, glossaryContainsTooManyItems, howToMakeChangesTitle, links, makeChanges, manageTags, markdownAndTeXSupported, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions, openSidebar)
 
 {-| User interface text in the English language.
 -}
@@ -363,3 +363,40 @@ somethingWentWrong =
 links : String
 links =
     "Links"
+
+
+glossaryContainsTooManyItems : Int -> Html msg
+glossaryContainsTooManyItems recommendedMaximumNumberOfItems =
+    div
+        [ class "mt-4 text-red-600 dark:text-red-400 flex items-center max-w-prose" ]
+        [ span
+            [ class "font-medium" ]
+            [ text "⚠ This glossary contains more than "
+            , text <| String.fromInt recommendedMaximumNumberOfItems
+            , text " items, which is currently "
+            , a
+                [ href "https://github.com/hilverd/glossary-page-template#known-limitations" ]
+                [ text "not recommended" ]
+            , text " for performance reasons."
+            ]
+        ]
+
+
+noMatchingItemsFound : String
+noMatchingItemsFound =
+    "No matching items found."
+
+
+openSidebar : String
+openSidebar =
+    "Open sidebar"
+
+
+closeSidebar : String
+closeSidebar =
+    "Close sidebar"
+
+
+ctrlK : String
+ctrlK =
+    "Ctrl K"

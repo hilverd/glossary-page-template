@@ -1,4 +1,4 @@
-module Internationalisation.Nld exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, createANewGlossaryItem, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, howToMakeChangesTitle, links, makeChanges, manageTags, markdownAndTeXSupported, mostMentionedFirst, noResultsFound, onlyShowingItemsForTag, orderItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation.Nld exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, createANewGlossaryItem, ctrlK, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, focusedOn, glossaryContainsTooManyItems, howToMakeChangesTitle, links, makeChanges, manageTags, markdownAndTeXSupported, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in the Dutch language.
 -}
@@ -363,3 +363,40 @@ somethingWentWrong =
 links : String
 links =
     "Links"
+
+
+glossaryContainsTooManyItems : Int -> Html msg
+glossaryContainsTooManyItems recommendedMaximumNumberOfItems =
+    div
+        [ class "mt-4 text-red-600 dark:text-red-400 flex items-center max-w-prose" ]
+        [ span
+            [ class "font-medium" ]
+            [ text "⚠ Deze woordenlijst bevat meer dan "
+            , text <| String.fromInt recommendedMaximumNumberOfItems
+            , text " items, en dat wordt momenteel "
+            , a
+                [ href "https://github.com/hilverd/glossary-page-template#known-limitations" ]
+                [ text "afgeraden" ]
+            , text " vanwege traagheid."
+            ]
+        ]
+
+
+noMatchingItemsFound : String
+noMatchingItemsFound =
+    "Geen passende items gevonden."
+
+
+openSidebar : String
+openSidebar =
+    "Open paneel"
+
+
+closeSidebar : String
+closeSidebar =
+    "Sluit paneel"
+
+
+ctrlK : String
+ctrlK =
+    "Ctrl K"

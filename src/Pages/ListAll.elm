@@ -1571,25 +1571,13 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                     ]
             ]
         , Extras.Html.showIf (editable && totalNumberOfItems > recommendedMaximumNumberOfItems) <|
-            div
-                [ class "mt-4 text-red-600 dark:text-red-400 flex items-center max-w-prose" ]
-                [ span
-                    [ class "font-medium" ]
-                    [ text "⚠ This glossary contains more than "
-                    , text <| String.fromInt recommendedMaximumNumberOfItems
-                    , text " items, which is currently "
-                    , a
-                        [ href "https://github.com/hilverd/glossary-page-template#known-limitations" ]
-                        [ text "not recommended" ]
-                    , text " for performance reasons."
-                    ]
-                ]
+            I18n.glossaryContainsTooManyItems recommendedMaximumNumberOfItems
         , Extras.Html.showIf
             (List.isEmpty combinedIndexedGlossaryItems && filterByTag_ /= Nothing)
           <|
             div
                 [ class "mt-4" ]
-                [ text "No matching items found." ]
+                [ text I18n.noMatchingItemsFound ]
         , Extras.Html.showIf
             (model.common.enableOrderItemsButtons
                 && (not <| List.isEmpty combinedIndexedGlossaryItems)
@@ -1685,7 +1673,7 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
                     ]
                     [ span
                         [ class "sr-only" ]
-                        [ text "Close sidebar"
+                        [ text I18n.closeSidebar
                         ]
                     , Icons.xMark
                         [ Svg.Attributes.class "h-6 w-6 text-white" ]
@@ -1751,7 +1739,7 @@ viewQuickSearchButton tabbable =
                 , text I18n.quickSearch
                 , span
                     [ class "ml-auto pl-3 flex-none text-xs font-semibold" ]
-                    [ text "Ctrl K"
+                    [ text I18n.ctrlK
                     ]
                 ]
             ]
@@ -1846,7 +1834,7 @@ viewTopBar tabbable theme themeDropdownMenu maybeExportDropdownMenu =
                 ]
                 [ span
                     [ class "sr-only" ]
-                    [ text "Open sidebar" ]
+                    [ text I18n.openSidebar ]
                 , Icons.menu
                     [ Svg.Attributes.class "h-6 w-6"
                     , Accessibility.Aria.hidden True
