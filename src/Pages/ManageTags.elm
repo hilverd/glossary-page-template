@@ -19,7 +19,6 @@ import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree
-import Extras.Http
 import Extras.Task
 import Html
 import Html.Attributes exposing (class, id)
@@ -216,7 +215,7 @@ update msg model =
                     ( model, Cmd.none )
 
         FailedToSave error ->
-            ( { model | saving = SavingFailed <| Extras.Http.errorToHumanReadable <| error }
+            ( { model | saving = SavingFailed <| I18n.httpErrorDescription <| error }
             , Cmd.none
             )
 

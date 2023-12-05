@@ -1,4 +1,4 @@
-module Internationalisation.Eng exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, createANewGlossaryItem, ctrlK, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusedOn, glossaryContainsTooManyItems, howToMakeChangesTitle, links, makeChanges, manageTags, markdownAndTeXSupported, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, theseSettingsAreUpdatedInTheHtmlFile, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation.Eng exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, createANewGlossaryItem, ctrlK, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusedOn, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, makeChanges, manageTags, markdownAndTeXSupported, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, theseSettingsAreUpdatedInTheHtmlFile, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in the English language.
 -}
@@ -8,6 +8,7 @@ import ElementIds
 import Extras.Html
 import Html exposing (Html, a, code, div, p, span, text)
 import Html.Attributes exposing (class, href)
+import Http
 
 
 sandboxModeMessage : String
@@ -18,6 +19,11 @@ sandboxModeMessage =
 backToTop : String
 backToTop =
     "Back to top"
+
+
+search : String
+search =
+    "Search"
 
 
 quickSearch : String
@@ -410,3 +416,39 @@ theseSettingsAreUpdatedInTheHtmlFile =
 failedToSave : String
 failedToSave =
     "Failed to save"
+
+
+httpErrorDescription : Http.Error -> String
+httpErrorDescription error =
+    case error of
+        Http.BadUrl urlString ->
+            "bad URL: " ++ urlString
+
+        Http.Timeout ->
+            "the request timed out"
+
+        Http.NetworkError ->
+            "there was a network error"
+
+        Http.BadStatus statusCode ->
+            "unexpected status code " ++ String.fromInt statusCode
+
+        Http.BadBody body ->
+            "unexpected response body: " ++ body
+
+
+howToEnableMathSupport : Html msg
+howToEnableMathSupport =
+    div
+        [ class "mt-2 max-w-prose" ]
+        [ text "To add support for math typesetting, include KaTeX's stylesheet and script inside the "
+        , code [] [ text "<head>" ]
+        , text " element as shown in the "
+        , a
+            [ class "font-semibold"
+            , href "https://github.com/hilverd/glossary-page-template/releases/latest/download/glossary.html"
+            , Html.Attributes.download "glossary.html"
+            ]
+            [ text "glossary.html" ]
+        , text " template."
+        ]

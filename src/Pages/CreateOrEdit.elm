@@ -31,7 +31,6 @@ import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree
-import Extras.Http
 import Extras.Task
 import GlossaryItemForm as Form exposing (GlossaryItemForm)
 import GlossaryItemForm.DefinitionField as DefinitionField exposing (DefinitionField)
@@ -458,7 +457,7 @@ update msg model =
                     ( model, Cmd.none )
 
         FailedToSave error ->
-            ( { model | saving = SavingFailed <| Extras.Http.errorToHumanReadable <| error }
+            ( { model | saving = SavingFailed <| I18n.httpErrorDescription <| error }
             , Cmd.none
             )
 

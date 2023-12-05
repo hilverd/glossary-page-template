@@ -66,7 +66,6 @@ import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree
-import Extras.Http
 import Extras.Task
 import Extras.Url exposing (fragmentOnly)
 import Html
@@ -561,7 +560,7 @@ update msg model =
 
         FailedToDelete error ->
             ( { model
-                | deleting = SavingFailed <| Extras.Http.errorToHumanReadable error
+                | deleting = SavingFailed <| I18n.httpErrorDescription error
                 , savingSettings = NotSaving
               }
             , Cmd.none
@@ -729,7 +728,7 @@ update msg model =
 
         FailedToChangeSettings error ->
             ( { model
-                | savingSettings = SavingFailed <| Extras.Http.errorToHumanReadable error
+                | savingSettings = SavingFailed <| I18n.httpErrorDescription error
               }
             , Cmd.none
             )
@@ -1850,7 +1849,7 @@ viewTopBar tabbable theme themeDropdownMenu maybeExportDropdownMenu =
                 ]
                 [ span
                     [ class "sr-only" ]
-                    [ text "Search" ]
+                    [ text I18n.search ]
                 , Icons.search
                     [ width "24"
                     , height "24"
@@ -1962,20 +1961,7 @@ viewSelectInputSyntax : Glossary -> Html Msg
 viewSelectInputSyntax glossary =
     div
         []
-        [ Extras.Html.showIf (not glossary.enableMathSupport) <|
-            div
-                [ class "mt-2 max-w-prose" ]
-                [ text "To add support for math typesetting, include KaTeX's stylesheet and script inside the "
-                , code [] [ text "<head>" ]
-                , text " element as shown in the "
-                , a
-                    [ class "font-semibold"
-                    , href "https://github.com/hilverd/glossary-page-template/releases/latest/download/glossary.html"
-                    , Html.Attributes.download "glossary.html"
-                    ]
-                    [ text "glossary.html" ]
-                , text " template."
-                ]
+        [ Extras.Html.showIf (not glossary.enableMathSupport) I18n.howToEnableMathSupport
         , Extras.Html.showIf glossary.enableMathSupport <|
             div
                 [ class "mt-2 max-w-prose" ]
