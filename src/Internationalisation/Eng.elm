@@ -1,4 +1,4 @@
-module Internationalisation.Eng exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, createANewGlossaryItem, ctrlK, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusedOn, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, makeChanges, manageTags, markdownAndTeXSupported, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, theseSettingsAreUpdatedInTheHtmlFile, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation.Eng exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, createANewGlossaryItem, ctrlK, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusedOn, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, makeChanges, manageTags, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, theseSettingsAreUpdatedInTheHtmlFile, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in the English language.
 -}
@@ -6,7 +6,7 @@ module Internationalisation.Eng exposing (about, addLinkButton, alphabetically, 
 import Accessibility.Key
 import ElementIds
 import Extras.Html
-import Html exposing (Html, a, code, div, p, span, text)
+import Html exposing (Html, a, code, div, p, pre, span, text)
 import Html.Attributes exposing (class, href)
 import Http
 
@@ -451,4 +451,25 @@ howToEnableMathSupport =
             ]
             [ text "glossary.html" ]
         , text " template."
+        ]
+
+
+mathSupportIsEnabled : Html msg
+mathSupportIsEnabled =
+    div
+        [ class "mt-2 max-w-prose" ]
+        [ text "Math typesetting support is enabled. Inline math is written like"
+        , pre
+            [ class "mt-4" ]
+            [ code
+                []
+                [ text "`$e = mc^2$`" ]
+            ]
+        , p [ class "mt-4" ] [ text "and display math is written like this:" ]
+        , pre
+            [ class "mt-4" ]
+            [ code
+                []
+                [ text "```math\ne = mc^2\n```" ]
+            ]
         ]

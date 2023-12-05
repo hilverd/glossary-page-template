@@ -1,4 +1,4 @@
-module Internationalisation exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, createANewGlossaryItem, ctrlK, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusedOn, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, makeChanges, manageTags, markdownAndTeXSupported, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, theseSettingsAreUpdatedInTheHtmlFile, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, createANewGlossaryItem, ctrlK, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusedOn, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, makeChanges, manageTags, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, theseSettingsAreUpdatedInTheHtmlFile, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in a specific language (e.g. English).
 -}
@@ -370,3 +370,8 @@ httpErrorDescription =
 howToEnableMathSupport : Html msg
 howToEnableMathSupport =
     I18n.howToEnableMathSupport
+
+
+mathSupportIsEnabled : Html msg
+mathSupportIsEnabled =
+    I18n.mathSupportIsEnabled

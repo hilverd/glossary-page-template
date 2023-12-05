@@ -1962,24 +1962,7 @@ viewSelectInputSyntax glossary =
     div
         []
         [ Extras.Html.showIf (not glossary.enableMathSupport) I18n.howToEnableMathSupport
-        , Extras.Html.showIf glossary.enableMathSupport <|
-            div
-                [ class "mt-2 max-w-prose" ]
-                [ text "Math typesetting support is enabled. Inline math is written like"
-                , pre
-                    [ class "mt-4" ]
-                    [ code
-                        []
-                        [ text "`$e = mc^2$`" ]
-                    ]
-                , p [ class "mt-4" ] [ text "and display math is written like this:" ]
-                , pre
-                    [ class "mt-4" ]
-                    [ code
-                        []
-                        [ text "```math\ne = mc^2\n```" ]
-                    ]
-                ]
+        , Extras.Html.showIf glossary.enableMathSupport I18n.mathSupportIsEnabled
         ]
 
 
