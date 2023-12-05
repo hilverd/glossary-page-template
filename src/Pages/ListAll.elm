@@ -1047,7 +1047,7 @@ viewSettings glossary model =
                         [ class "mt-6" ]
                         [ p
                             [ class "mt-3 max-w-xl" ]
-                            [ text "These settings are updated in the HTML file when you change them, and the page will reload."
+                            [ text I18n.theseSettingsAreUpdatedInTheHtmlFile
                             ]
                         ]
                 , Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
@@ -1357,7 +1357,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIdOfItemToDelete deletin
                         [ class "flex justify-end mt-2" ]
                         [ p
                             [ class "text-red-600 dark:text-red-400" ]
-                            [ text <| "Failed to save — " ++ errorMessage ++ "." ]
+                            [ text <| I18n.failedToSave ++ " — " ++ errorMessage ++ "." ]
                         ]
 
                 _ ->
