@@ -647,7 +647,7 @@ view model =
             }
 
         Err _ ->
-            { title = "Glossary"
+            { title = I18n.glossaryCapitalised
             , body = [ text I18n.somethingWentWrong ]
             }
 
