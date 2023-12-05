@@ -1,4 +1,4 @@
-module Internationalisation.Nld exposing (about, addLinkButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, createANewGlossaryItem, ctrlK, delete, deleteItem, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusedOn, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, makeChanges, manageTags, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, theseSettingsAreUpdatedInTheHtmlFile, title, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation.Nld exposing (about, addLinkButton, addTagButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, copyToClipboard, createANewGlossaryItem, ctrlK, delete, deleteItem, description, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in the Dutch language.
 -}
@@ -114,12 +114,12 @@ youCanHideTheseInstructions =
 
 tags : String
 tags =
-    "Tags"
+    "Labels"
 
 
 onlyShowingItemsForTag : String
 onlyShowingItemsForTag =
-    "Alleen items voor deze tag worden getoond:"
+    "Alleen items voor dit label worden getoond:"
 
 
 orderItems : String
@@ -265,7 +265,12 @@ createANewGlossaryItem =
 
 manageTags : String
 manageTags =
-    "Beheer tags"
+    "Beheer labels"
+
+
+manageTagsTitle : String
+manageTagsTitle =
+    "Beheer labels"
 
 
 edit : String
@@ -473,3 +478,38 @@ mathSupportIsEnabled =
                 [ text "```math\ne = mc^2\n```" ]
             ]
         ]
+
+
+copyToClipboard : String
+copyToClipboard =
+    "Kopieer naar klembord"
+
+
+focusOnTerm : String
+focusOnTerm =
+    "Focus op term"
+
+
+glossaryCapitalised : String
+glossaryCapitalised =
+    "Woordenlijst"
+
+
+otherItems : String
+otherItems =
+    "Andere items"
+
+
+description : String
+description =
+    "Beschrijving"
+
+
+addTagButton : String
+addTagButton =
+    "Voeg label toe"
+
+
+unableToSaveAsItWouldResultInTheFollowing : String
+unableToSaveAsItWouldResultInTheFollowing =
+    "Kan niet opslaan, omdat dit het volgende zou opleveren"

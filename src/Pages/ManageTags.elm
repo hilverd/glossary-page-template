@@ -298,8 +298,8 @@ viewEditTag { enableMathSupport, tabbable, showValidationErrors } index tagField
                             showValidationErrors
                             (TagDescriptionField.validationError tagDescriptionField)
                             [ Html.Attributes.required True
-                            , Html.Attributes.placeholder "Description"
-                            , Accessibility.Aria.label "Description"
+                            , Html.Attributes.placeholder I18n.description
+                            , Accessibility.Aria.label I18n.description
                             , Accessibility.Aria.required True
                             , id <| ElementIds.tagDescriptionInputField index
                             , Html.Events.onInput (PageMsg.Internal << UpdateTagDescription index)
@@ -323,7 +323,7 @@ viewEditTag { enableMathSupport, tabbable, showValidationErrors } index tagField
                 [ class "px-4 pt-2 pb-4 lg:w-1/2 mt-4 lg:mt-0 border border-gray-300 dark:border-gray-700 rounded-md" ]
                 [ Html.legend
                     [ class "text-center text-gray-800 dark:text-gray-100 px-3 py-0.5 select-none" ]
-                    [ text "Preview" ]
+                    [ text I18n.preview ]
                 , Extras.Html.showIf (tagField |> TagField.raw |> String.trim |> String.isEmpty |> not) <|
                     div
                         [ class "pb-4" ]
@@ -365,7 +365,7 @@ viewAddTagButtonForEmptyState =
             [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
         , span
             [ class "mt-2 block font-medium text-gray-900 dark:text-gray-200" ]
-            [ text "Add tag" ]
+            [ text I18n.addTagButton ]
         ]
 
 
@@ -377,7 +377,7 @@ viewAddTagButton =
             ]
             [ Icons.plus
                 [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
-            , text "Add tag"
+            , text I18n.addTagButton
             ]
         ]
 
@@ -485,7 +485,7 @@ viewFooter model showValidationErrors glossaryItems =
             |> Extras.Html.showIf (showValidationErrors && Form.hasValidationErrors form)
         , Extras.Html.showMaybe
             (\glossaryItemsError ->
-                errorDiv <| "Unable to save as it would result in the following: " ++ glossaryItemsError ++ "."
+                errorDiv <| I18n.unableToSaveAsItWouldResultInTheFollowing ++ ": " ++ glossaryItemsError ++ "."
             )
             model.glossaryItemsError
         , Extras.Html.showIf model.common.enableSavingChangesInMemory <|
@@ -499,20 +499,20 @@ viewFooter model showValidationErrors glossaryItems =
                 [ Html.Events.onClick <|
                     PageMsg.NavigateToListAll { common | glossary = updatedGlossary }
                 ]
-                [ text "Cancel" ]
+                [ text I18n.cancel ]
             , Components.Button.primary
                 (saving /= SavingInProgress && not (showValidationErrors && Form.hasValidationErrors form))
                 [ class "ml-3"
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]
-                [ text "Save" ]
+                [ text I18n.save ]
             , Components.Spinner.view
                 [ Svg.Attributes.class "ml-3 w-8 h-8" ]
                 (saving == SavingInProgress)
             ]
         , case saving of
             SavingFailed errorMessage ->
-                errorDiv <| "Failed to save — " ++ errorMessage ++ "."
+                errorDiv <| I18n.failedToSave ++ " — " ++ errorMessage ++ "."
 
             _ ->
                 Extras.Html.nothing
@@ -523,7 +523,7 @@ view : Model -> Document Msg
 view model =
     case model.common.glossary of
         Ok { enableMathSupport, items } ->
-            { title = "Manage Tags"
+            { title = I18n.manageTagsTitle
             , body =
                 [ div
                     [ class "container mx-auto px-6 pb-12 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
@@ -531,7 +531,7 @@ view model =
                         []
                         [ h1
                             [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
-                            [ text "Manage Tags"
+                            [ text I18n.manageTagsTitle
                             ]
                         , p
                             [ class "mt-6 max-w-prose text-gray-900 dark:text-gray-100" ]
@@ -570,7 +570,7 @@ view model =
             }
 
         Err _ ->
-            { title = "Manage Tags"
+            { title = I18n.manageTagsTitle
             , body = [ text "Something went wrong." ]
             }
 

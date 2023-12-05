@@ -3,9 +3,7 @@ port module Pages.ListAll exposing (Editability, InternalMsg, Layout, MenuForMob
 import Accessibility
     exposing
         ( Html
-        , a
         , button
-        , code
         , details
         , div
         , fieldset
@@ -984,7 +982,7 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
                         , Components.Button.white
                             True
                             [ class "rounded-none rounded-r-md border-l-0 focus:ring-2 focus:ring-inset"
-                            , Accessibility.Aria.label "Copy to clipboard"
+                            , Accessibility.Aria.label I18n.copyToClipboard
                             , Extras.HtmlAttribute.showIf (resultOfAttemptingToCopyEditorCommandToClipboard == Nothing) <|
                                 (Html.Events.onClick <| PageMsg.Internal <| CopyEditorCommandToClipboard command)
                             ]
@@ -1092,7 +1090,7 @@ viewSettings glossary model =
                     ]
                 , case model.savingSettings of
                     SavingFailed errorMessage ->
-                        errorDiv <| "Failed to save — " ++ errorMessage ++ "."
+                        errorDiv <| I18n.failedToSave ++ " — " ++ errorMessage ++ "."
 
                     _ ->
                         Extras.Html.nothing
@@ -1598,7 +1596,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
           <|
             Components.Dividers.withLabel
                 [ class "my-10" ]
-                "Other items"
+                I18n.otherItems
         , Extras.Html.showIf (not <| List.isEmpty otherIndexedGlossaryItems) <|
             Html.dl
                 []
@@ -2182,7 +2180,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                             ]
                         , Components.SelectMenu.render
                             [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect
-                            , Components.SelectMenu.ariaLabel "Focus on term"
+                            , Components.SelectMenu.ariaLabel I18n.focusOnTerm
                             , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << TermId.fromString)
                             , Components.SelectMenu.enabled tabbable
                             ]
@@ -2512,7 +2510,7 @@ view model =
             }
 
         Err error ->
-            { title = "Glossary"
+            { title = I18n.glossaryCapitalised
             , body = [ pre [] [ text error ] ]
             }
 
