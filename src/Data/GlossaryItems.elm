@@ -45,6 +45,7 @@ import Dict exposing (Dict)
 import DirectedGraph exposing (DirectedGraph)
 import DuplicateRejectingDict exposing (DuplicateRejectingDict)
 import Extras.Regex
+import Internationalisation as I18n
 import Maybe
 import Regex
 import Set exposing (Set)
@@ -443,21 +444,19 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                                         )
                         in
                         Maybe.map
-                            (\disambiguatedPreferredTerm1_ ->
-                                "there are multiple items with (disambiguated) preferred term \""
-                                    ++ Term.raw disambiguatedPreferredTerm1_
-                                    ++ "\""
+                            (Term.raw
+                                >> I18n.thereAreMultipleItemsWithDisambiguatedPreferredTerm
                             )
                             disambiguatedPreferredTerm1
                             |> -- This should never happen
-                               Maybe.withDefault "there are multiple items with the same (disambiguated) preferred term"
+                               Maybe.withDefault I18n.thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm
                     )
 
         tagIdByRawTagResult : Result String (Dict String TagId)
         tagIdByRawTagResult =
             tagIdByRawTag
                 |> DuplicateRejectingDict.toResult
-                |> Result.mapError (\{ key } -> "tag \"" ++ key ++ "\" appears multiple times")
+                |> Result.mapError (\{ key } -> I18n.tagAppearsMultipleTimes key)
     in
     Result.map2
         (\itemIdByDisambiguatedPreferredTermId1 tagIdByRawTag_ ->

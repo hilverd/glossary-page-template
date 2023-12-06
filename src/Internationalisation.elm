@@ -1,4 +1,4 @@
-module Internationalisation exposing (about, addLinkButton, addTagButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, copyToClipboard, createANewGlossaryItem, ctrlK, delete, deleteItem, description, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation exposing (about, addLinkButton, addTagButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, copyToClipboard, createANewGlossaryItem, ctrlK, delete, deleteItem, description, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tagAppearsMultipleTimes, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
 
 {-| User interface text in a specific language (e.g. English).
 -}
@@ -415,3 +415,18 @@ addTagButton =
 unableToSaveAsItWouldResultInTheFollowing : String
 unableToSaveAsItWouldResultInTheFollowing =
     I18n.unableToSaveAsItWouldResultInTheFollowing
+
+
+thereAreMultipleItemsWithDisambiguatedPreferredTerm : String -> String
+thereAreMultipleItemsWithDisambiguatedPreferredTerm =
+    I18n.thereAreMultipleItemsWithDisambiguatedPreferredTerm
+
+
+thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm : String
+thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm =
+    I18n.thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm
+
+
+tagAppearsMultipleTimes : String -> String
+tagAppearsMultipleTimes =
+    I18n.tagAppearsMultipleTimes
