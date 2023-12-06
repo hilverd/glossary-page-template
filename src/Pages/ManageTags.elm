@@ -268,8 +268,8 @@ viewEditTag { enableMathSupport, tabbable, showValidationErrors } index tagField
                         [ id <| ElementIds.tagInputField index
                         , Html.Attributes.required True
                         , Html.Attributes.autocomplete False
-                        , Html.Attributes.placeholder "Tag"
-                        , Accessibility.Aria.label "Tag"
+                        , Html.Attributes.placeholder I18n.tag
+                        , Accessibility.Aria.label I18n.tag
                         , Accessibility.Aria.required True
                         , Html.Events.onInput (PageMsg.Internal << UpdateTag index)
                         , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
@@ -535,21 +535,18 @@ view model =
                             ]
                         , p
                             [ class "mt-6 max-w-prose text-gray-900 dark:text-gray-100" ]
-                            [ text "You can use tags to attach \"labels\" to items that people can then filter by." ]
+                            [ text I18n.youCanUseTagsToAttachLabels ]
                         , Html.details
                             []
                             [ Html.summary
                                 [ class "mt-2 mb-1 items-center font-medium text-gray-900 dark:text-gray-100 select-none" ]
                                 [ span
                                     [ class "ml-2" ]
-                                    [ text "Read more" ]
+                                    [ text I18n.readMore ]
                                 ]
                             , div
                                 [ class "mb-1 max-w-prose text-gray-900 dark:text-gray-100" ]
-                                [ text "This may be useful for large glossaries that span multiple topics, where there is a need to categorize or group items."
-                                , text " Tags can also be used to \"disambiguate\" items that have the same preferred term but whose meaning depends on some \"context\"."
-                                , text " For example, the term \"default\" has a different meaning in the context of computer science than it does in the context of finance."
-                                ]
+                                [ text I18n.whyTagsMayBeUseful ]
                             ]
                         , form
                             [ class "pt-7" ]
@@ -571,7 +568,7 @@ view model =
 
         Err _ ->
             { title = I18n.manageTagsTitle
-            , body = [ text "Something went wrong." ]
+            , body = [ text I18n.somethingWentWrong ]
             }
 
 

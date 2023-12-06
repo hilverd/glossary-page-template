@@ -1,4 +1,4 @@
-module Internationalisation exposing (about, addLinkButton, addTagButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, copyToClipboard, createANewGlossaryItem, ctrlK, delete, deleteItem, description, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tagAppearsMultipleTimes, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation exposing (about, addLinkButton, addTagButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, copyToClipboard, createANewGlossaryItem, ctrlK, delete, deleteItem, description, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, preview, quickSearch, readMore, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tag, tagAppearsMultipleTimes, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
 
 {-| User interface text in a specific language (e.g. English).
 -}
@@ -109,6 +109,11 @@ runTheFollowingCommand =
 youCanHideTheseInstructions : Html msg
 youCanHideTheseInstructions =
     I18n.youCanHideTheseInstructions
+
+
+tag : String
+tag =
+    I18n.tag
 
 
 {-| Tags.
@@ -430,3 +435,23 @@ thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm =
 tagAppearsMultipleTimes : String -> String
 tagAppearsMultipleTimes =
     I18n.tagAppearsMultipleTimes
+
+
+youCanUseTagsToAttachLabels : String
+youCanUseTagsToAttachLabels =
+    I18n.youCanUseTagsToAttachLabels
+
+
+readMore : String
+readMore =
+    I18n.readMore
+
+
+whyTagsMayBeUseful : String
+whyTagsMayBeUseful =
+    I18n.whyTagsMayBeUseful
+
+
+example : String
+example =
+    I18n.example

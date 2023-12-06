@@ -481,7 +481,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                                 [ class "block w-full border-0 p-0 focus:ring-0 dark:bg-gray-700 dark:text-white"
                                 , id <| ElementIds.aboutLinkBody index
                                 , name <| ElementIds.aboutLinkBody index
-                                , placeholder "Example"
+                                , placeholder I18n.example
                                 , type_ "text"
                                 , required True
                                 , Html.Attributes.autocomplete False

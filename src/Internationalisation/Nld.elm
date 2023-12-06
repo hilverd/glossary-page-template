@@ -1,4 +1,4 @@
-module Internationalisation.Nld exposing (about, addLinkButton, addTagButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, copyToClipboard, createANewGlossaryItem, ctrlK, delete, deleteItem, description, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, preview, quickSearch, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tagAppearsMultipleTimes, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, youCanHideTheseInstructions)
+module Internationalisation.Nld exposing (about, addLinkButton, addTagButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, copyToClipboard, createANewGlossaryItem, ctrlK, delete, deleteItem, description, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, preview, quickSearch, readMore, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tag, tagAppearsMultipleTimes, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
 
 {-| User interface text in the Dutch language.
 -}
@@ -110,6 +110,11 @@ youCanHideTheseInstructions =
         , code [] [ text <| "<div id=\"" ++ ElementIds.container ++ "\">" ]
         , text " -element."
         ]
+
+
+tag : String
+tag =
+    "Label"
 
 
 tags : String
@@ -530,3 +535,25 @@ thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm =
 tagAppearsMultipleTimes : String -> String
 tagAppearsMultipleTimes rawTag =
     "label \"" ++ rawTag ++ "\" komt meerdere keren voor"
+
+
+youCanUseTagsToAttachLabels : String
+youCanUseTagsToAttachLabels =
+    "Je kunt labels aan items toevoegen, zodat mensen er vervolgens op kunnen filteren."
+
+
+readMore : String
+readMore =
+    "Lees meer"
+
+
+whyTagsMayBeUseful : String
+whyTagsMayBeUseful =
+    "Dit kan handig zijn voor grote woordenlijsten die meerdere onderwerpen bestrijken, waarbij het nodig is om items te categoriseren of te groeperen."
+        ++ " Tags kunnen ook worden gebruikt om items \"ondubbelzinnig\" te maken die dezelfde voorkeursterm hebben, maar waarvan de betekenis afhangt van een bepaalde \"context\"."
+        ++ " De term 'standaard' heeft bijvoorbeeld een andere betekenis in de context van muziek dan in de context van de informatica."
+
+
+example : String
+example =
+    "Voorbeeld"
