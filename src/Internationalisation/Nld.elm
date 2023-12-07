@@ -1,4 +1,4 @@
-module Internationalisation.Nld exposing (abbreviation, about, addLinkButton, addTagButton, addTermButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, copyToClipboard, createANewGlossaryItem, ctrlK, definition, delete, deleteItem, description, disambiguationTag, disambiguationTagOptional, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, listTheGroupOfTermsBeingDefined, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, none, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, preview, provideADefinitionForThisGroupOfTerms, quickSearch, readMore, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, selectAllTagsThatApplyToThisItem, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tag, tagAppearsMultipleTimes, tags, terms, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
+module Internationalisation.Nld exposing (abbreviation, about, addLinkButton, addRelatedItem, addTagButton, addTermButton, alphabetically, alternativeTerm, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, chooseWhichTagShouldBeUsedToDistinguishThisItem, closeSidebar, copyToClipboard, createANewGlossaryItem, createANewGlossaryItemCapitalised, ctrlK, definition, delete, deleteItem, description, disambiguationTag, disambiguationTagOptional, edit, editGlossaryItemCapitalised, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, listTheGroupOfTermsBeingDefined, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, miscellaneous, mostMentionedFirst, moveDown, moveUp, needsUpdating, noMatchingItemsFound, noResultsFound, none, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, pointToAnyRelatedItems, preferredTerm, preview, provideADefinitionForThisGroupOfTerms, quickSearch, readMore, relatedItem, relatedItems, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, selectAllTagsThatApplyToThisItem, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, suggestions, tag, tagAppearsMultipleTimes, tags, term, terms, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
 
 {-| User interface text in the Dutch language.
 -}
@@ -612,3 +612,78 @@ disambiguationTag =
 none : String
 none =
     "Geen"
+
+
+chooseWhichTagShouldBeUsedToDistinguishThisItem : String
+chooseWhichTagShouldBeUsedToDistinguishThisItem =
+    "Als een ander item dezelfde voorkeursterm heeft, kies dan welk label gebruikt moet worden om dit item te onderscheiden."
+
+
+relatedItem : String
+relatedItem =
+    "Gerelateerd item"
+
+
+moveUp : String
+moveUp =
+    "Verplaats naar boven"
+
+
+moveDown : String
+moveDown =
+    "Verplaats naar beneden"
+
+
+addRelatedItem : String
+addRelatedItem =
+    "Voeg gerelateerd item toe"
+
+
+relatedItems : String
+relatedItems =
+    "Gerelateerde items"
+
+
+pointToAnyRelatedItems : String
+pointToAnyRelatedItems =
+    "Verwijs naar alle gerelateerde items die de lezer mogelijk wil raadplegen."
+
+
+suggestions : String
+suggestions =
+    "Suggesties"
+
+
+miscellaneous : String
+miscellaneous =
+    "Overig"
+
+
+needsUpdating : String
+needsUpdating =
+    "Moet worden bijgewerkt"
+
+
+createANewGlossaryItemCapitalised : String
+createANewGlossaryItemCapitalised =
+    "Maak een nieuw woordenlijstitem"
+
+
+editGlossaryItemCapitalised : String
+editGlossaryItemCapitalised =
+    "Wijzig woordenlijstitem"
+
+
+preferredTerm : String
+preferredTerm =
+    "Voorkeursterm"
+
+
+alternativeTerm : String
+alternativeTerm =
+    "Alternatieve term"
+
+
+term : String
+term =
+    "Term"

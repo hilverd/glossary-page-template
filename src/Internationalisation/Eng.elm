@@ -1,4 +1,4 @@
-module Internationalisation.Eng exposing (abbreviation, about, addLinkButton, addTagButton, addTermButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, copyToClipboard, createANewGlossaryItem, ctrlK, definition, delete, deleteItem, description, disambiguationTag, disambiguationTagOptional, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, listTheGroupOfTermsBeingDefined, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, none, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, preview, provideADefinitionForThisGroupOfTerms, quickSearch, readMore, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, selectAllTagsThatApplyToThisItem, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tag, tagAppearsMultipleTimes, tags, terms, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
+module Internationalisation.Eng exposing (abbreviation, about, addLinkButton, addRelatedItem, addTagButton, addTermButton, alphabetically, alternativeTerm, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, chooseWhichTagShouldBeUsedToDistinguishThisItem, closeSidebar, copyToClipboard, createANewGlossaryItem, createANewGlossaryItemCapitalised, ctrlK, definition, delete, deleteItem, description, disambiguationTag, disambiguationTagOptional, edit, editGlossaryItemCapitalised, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, listTheGroupOfTermsBeingDefined, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, miscellaneous, mostMentionedFirst, moveDown, moveUp, needsUpdating, noMatchingItemsFound, noResultsFound, none, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, pointToAnyRelatedItems, preferredTerm, preview, provideADefinitionForThisGroupOfTerms, quickSearch, readMore, relatedItem, relatedItems, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, selectAllTagsThatApplyToThisItem, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, suggestions, tag, tagAppearsMultipleTimes, tags, term, terms, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
 
 {-| User interface text in the English language.
 -}
@@ -612,3 +612,78 @@ disambiguationTag =
 none : String
 none =
     "None"
+
+
+chooseWhichTagShouldBeUsedToDistinguishThisItem : String
+chooseWhichTagShouldBeUsedToDistinguishThisItem =
+    "If another item has the same preferred term, then choose which tag should be used to distinguish this item."
+
+
+relatedItem : String
+relatedItem =
+    "Related item"
+
+
+moveUp : String
+moveUp =
+    "Move up"
+
+
+moveDown : String
+moveDown =
+    "Move down"
+
+
+addRelatedItem : String
+addRelatedItem =
+    "Add related item"
+
+
+relatedItems : String
+relatedItems =
+    "Related items"
+
+
+pointToAnyRelatedItems : String
+pointToAnyRelatedItems =
+    "Point to any related items the reader might want to look up."
+
+
+suggestions : String
+suggestions =
+    "Suggestions"
+
+
+miscellaneous : String
+miscellaneous =
+    "Miscellaneous"
+
+
+needsUpdating : String
+needsUpdating =
+    "Needs updating"
+
+
+createANewGlossaryItemCapitalised : String
+createANewGlossaryItemCapitalised =
+    "Create a New Glossary Item"
+
+
+editGlossaryItemCapitalised : String
+editGlossaryItemCapitalised =
+    "Edit Glossary Item"
+
+
+preferredTerm : String
+preferredTerm =
+    "Preferred term"
+
+
+alternativeTerm : String
+alternativeTerm =
+    "Alternative term"
+
+
+term : String
+term =
+    "Term"

@@ -568,11 +568,11 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
                                 , Html.Attributes.autocomplete False
                                 , Html.Attributes.placeholder <|
                                     if TermIndex.toInt termIndex == 0 then
-                                        "Preferred term"
+                                        I18n.preferredTerm
 
                                     else
-                                        "Alternative term"
-                                , Accessibility.Aria.label "Term"
+                                        I18n.alternativeTerm
+                                , Accessibility.Aria.label I18n.term
                                 , Accessibility.Aria.required True
                                 , Html.Events.onInput (PageMsg.Internal << UpdateTerm termIndex)
                                 , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
@@ -672,7 +672,7 @@ viewDefinitionSingle1 mathSupportEnabled showValidationErrors definitionSingle =
                     showValidationErrors
                     validationError
                     [ required True
-                    , Accessibility.Aria.label "Definition"
+                    , Accessibility.Aria.label I18n.definition
                     , Accessibility.Aria.required True
                     , id ElementIds.definition
                     , Html.Events.onInput (PageMsg.Internal << UpdateDefinition)
@@ -750,7 +750,7 @@ viewDisambiguationTag disambiguationTagId tags =
                 [ text I18n.disambiguationTagOptional ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
-                [ text "If another item has the same preferred term, then choose which tag should be used to distinguish this item." ]
+                [ text I18n.chooseWhichTagShouldBeUsedToDistinguishThisItem ]
             ]
         , div
             [ class "max-w-md" ]
@@ -823,7 +823,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfR
                 ]
             , Components.SelectMenu.render
                 [ Components.SelectMenu.id <| ElementIds.seeAlsoSelect index
-                , Components.SelectMenu.ariaLabel "Related item"
+                , Components.SelectMenu.ariaLabel I18n.relatedItem
                 , Components.SelectMenu.validationError relatedTerm.validationError
                 , Components.SelectMenu.showValidationErrors showValidationErrors
                 , Components.SelectMenu.onChange (PageMsg.Internal << SelectRelatedTerm index)
@@ -853,14 +853,14 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfR
             , div
                 [ class "hidden sm:block sm:ml-2 flex items-center" ]
                 [ Components.Button.rounded (RelatedTermIndex.toInt index > 0)
-                    [ Accessibility.Aria.label "Move up"
+                    [ Accessibility.Aria.label I18n.moveUp
                     , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermUp index
                     ]
                     [ Icons.arrowUp
                         [ Svg.Attributes.class "h-5 w-5" ]
                     ]
                 , Components.Button.rounded (RelatedTermIndex.toInt index + 1 < numberOfRelatedTerms)
-                    [ Accessibility.Aria.label "Move down"
+                    [ Accessibility.Aria.label I18n.moveDown
                     , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermDown index
                     , class ""
                     ]
@@ -891,7 +891,7 @@ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownM
                             [ class "inline-flex items-center" ]
                             [ Icons.arrowUp
                                 [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" ]
-                            , text "Move up"
+                            , text I18n.moveUp
                             ]
                         ]
                         (PageMsg.Internal <| MoveRelatedTermUp index)
@@ -905,7 +905,7 @@ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownM
                             [ class "inline-flex items-center" ]
                             [ Icons.arrowDown
                                 [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" ]
-                            , text "Move down"
+                            , text I18n.moveDown
                             ]
                         ]
                         (PageMsg.Internal <| MoveRelatedTermDown index)
@@ -921,7 +921,7 @@ viewAddRelatedTermButton =
     Components.Button.secondary
         [ Html.Events.onClick <| PageMsg.Internal <| AddRelatedTerm Nothing ]
         [ Icons.plus [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
-        , text "Add related item"
+        , text I18n.addRelatedItem
         ]
 
 
@@ -932,7 +932,7 @@ viewAddRelatedTermButtonForEmptyState =
         [ Icons.plus [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
         , span
             [ class "mt-2 block font-medium text-gray-900 dark:text-gray-200" ]
-            [ text "Add related item" ]
+            [ text I18n.addRelatedItem ]
         ]
 
 
@@ -966,10 +966,10 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Related items" ]
+                [ text I18n.relatedItems ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
-                [ text "Point to any related items the reader might want to look up." ]
+                [ text I18n.pointToAnyRelatedItems ]
             ]
         , div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
@@ -1004,7 +1004,7 @@ viewAddSuggestedSeeAlso enableMathSupport suggestedRelatedTerms =
         []
         [ p
             [ class "mb-2 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
-            [ text "Suggestions" ]
+            [ text I18n.suggestions ]
         , div
             [ class "flow-root" ]
             [ div
@@ -1026,16 +1026,14 @@ viewAddSuggestedSeeAlso enableMathSupport suggestedRelatedTerms =
         ]
 
 
-viewMiscellaneous :
-    Bool
-    -> Html Msg
+viewMiscellaneous : Bool -> Html Msg
 viewMiscellaneous on =
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Miscellaneous" ]
+                [ text I18n.miscellaneous ]
             ]
         , Components.Button.toggle
             on
@@ -1043,7 +1041,7 @@ viewMiscellaneous on =
             [ Html.Events.onClick <| PageMsg.Internal <| ToggleNeedsUpdating ]
             [ span
                 [ class "font-medium text-gray-900 dark:text-gray-300" ]
-                [ text "Needs updating" ]
+                [ text I18n.needsUpdating ]
             ]
         ]
 
@@ -1073,7 +1071,7 @@ viewCreateFormFooter model =
             |> Extras.Html.showIf (model.triedToSaveWhenFormInvalid && Form.hasValidationErrors model.form)
         , Extras.Html.showMaybe
             (\glossaryItemsError ->
-                errorDiv <| "Unable to save as it would result in the following: " ++ glossaryItemsError ++ "."
+                errorDiv <| I18n.unableToSaveAsItWouldResultInTheFollowing ++ ": " ++ glossaryItemsError ++ "."
             )
             model.glossaryItemsError
         , Extras.Html.showIf common.enableSavingChangesInMemory <|
@@ -1087,20 +1085,20 @@ viewCreateFormFooter model =
                 [ Html.Events.onClick <|
                     PageMsg.NavigateToListAll common
                 ]
-                [ text "Cancel" ]
+                [ text I18n.cancel ]
             , Components.Button.primary
                 (saving /= SavingInProgress && not (model.triedToSaveWhenFormInvalid && Form.hasValidationErrors model.form))
                 [ class "ml-3"
                 , Html.Events.onClick <| PageMsg.Internal Save
                 ]
-                [ text "Save" ]
+                [ text I18n.save ]
             , Components.Spinner.view
                 [ Svg.Attributes.class "ml-3 w-8 h-8" ]
                 (saving == SavingInProgress)
             ]
         , case saving of
             SavingFailed errorMessage ->
-                errorDiv <| "Failed to save — " ++ errorMessage ++ "."
+                errorDiv <| I18n.failedToSave ++ " — " ++ errorMessage ++ "."
 
             _ ->
                 Extras.Html.nothing
@@ -1146,10 +1144,10 @@ view model =
                             [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
                             [ text <|
                                 if model.common.maybeId == Nothing then
-                                    "Create a New Glossary Item"
+                                    I18n.createANewGlossaryItemCapitalised
 
                                 else
-                                    "Edit Glossary Item"
+                                    I18n.editGlossaryItemCapitalised
                             ]
                         , form
                             [ class "pt-7" ]
@@ -1193,7 +1191,7 @@ view model =
                                         [ class "pt-4 lg:sticky lg:top-5" ]
                                         [ Html.legend
                                             [ class "text-xl text-center text-gray-800 dark:text-gray-300 px-1 select-none" ]
-                                            [ text "Preview" ]
+                                            [ text I18n.preview ]
                                         , article
                                             [ id ElementIds.items ]
                                             [ dl
