@@ -108,7 +108,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                         [ class "needs-updating" ]
                                         [ span
                                             []
-                                            [ text "Needs updating" ]
+                                            [ text I18n.needsUpdating ]
                                         ]
                                     ]
 
@@ -172,8 +172,8 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                             []
                                             [ Components.Button.text
                                                 [ Accessibility.Key.tabbable tabbable
-                                                , Accessibility.Aria.label "View as single item"
-                                                , Html.Attributes.title "View as single item"
+                                                , Accessibility.Aria.label I18n.viewAsSingleItem
+                                                , Html.Attributes.title I18n.viewAsSingleItem
                                                 , Html.Events.onClick onClickViewFull
                                                 ]
                                                 [ Icons.maximize2
@@ -204,7 +204,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                         [ class "needs-updating" ]
                                                         [ span
                                                             []
-                                                            [ text "Needs updating" ]
+                                                            [ text I18n.needsUpdating ]
                                                         ]
                                                     ]
 
@@ -276,8 +276,8 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                             []
                                             [ Components.Button.text
                                                 [ Accessibility.Key.tabbable tabbable
-                                                , Accessibility.Aria.label "View as single item"
-                                                , Html.Attributes.title "View as single item"
+                                                , Accessibility.Aria.label I18n.viewAsSingleItem
+                                                , Html.Attributes.title I18n.viewAsSingleItem
                                                 , Html.Events.onClick onClickViewFull
                                                 ]
                                                 [ Icons.maximize2
@@ -307,7 +307,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                         [ class "needs-updating" ]
                                                         [ span
                                                             []
-                                                            [ text "Needs updating" ]
+                                                            [ text I18n.needsUpdating ]
                                                         ]
                                                     ]
 
@@ -481,7 +481,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                             [ class "needs-updating" ]
                             [ span
                                 []
-                                [ text "Needs updating" ]
+                                [ text I18n.needsUpdating ]
                             ]
                         ]
 
@@ -580,7 +580,7 @@ viewTags { enableMathSupport, onClickTag, tabbable } tags =
                 Components.Button.softSmall
                     (tabbable && onClickTag /= Nothing)
                     [ class "mr-2 mb-2"
-                    , Html.Attributes.title <| "Tag: " ++ Tag.inlineText tag
+                    , Html.Attributes.title <| I18n.tag ++ ": " ++ Tag.inlineText tag
                     , Extras.HtmlAttribute.showMaybe (\onClickTag_ -> Html.Events.onClick <| onClickTag_ tag) onClickTag
                     ]
                     [ Tag.view enableMathSupport

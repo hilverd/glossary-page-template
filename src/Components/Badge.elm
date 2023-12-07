@@ -5,6 +5,7 @@ import Accessibility.Key
 import Html.Attributes exposing (class, for, id)
 import Html.Events
 import Icons
+import Internationalisation as I18n
 import Svg.Attributes
 
 
@@ -23,7 +24,7 @@ indigoWithBorderAndRemoveButton tabbable additionalAttributes onClick children =
             ]
             [ span
                 [ class "sr-only" ]
-                [ text "Remove" ]
+                [ text I18n.delete ]
             , Icons.xMark
                 [ Svg.Attributes.class "h-3.5 w-3.5 stroke-indigo-700/50 dark:stroke-indigo-200/50 group-hover:stroke-indigo-700/75 dark:group-hover:stroke-indigo-200/75" ]
             , span

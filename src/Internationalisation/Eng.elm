@@ -1,4 +1,4 @@
-module Internationalisation.Eng exposing (abbreviation, about, addLinkButton, addRelatedItem, addTagButton, addTermButton, alphabetically, alternativeTerm, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, chooseWhichTagShouldBeUsedToDistinguishThisItem, closeSidebar, copyToClipboard, createANewGlossaryItem, createANewGlossaryItemCapitalised, ctrlK, definition, delete, deleteItem, description, disambiguationTag, disambiguationTagOptional, edit, editGlossaryItemCapitalised, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, listTheGroupOfTermsBeingDefined, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, miscellaneous, mostMentionedFirst, moveDown, moveUp, needsUpdating, noMatchingItemsFound, noResultsFound, none, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, pointToAnyRelatedItems, preferredTerm, preview, provideADefinitionForThisGroupOfTerms, quickSearch, readMore, relatedItem, relatedItems, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, selectAllTagsThatApplyToThisItem, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, suggestions, tag, tagAppearsMultipleTimes, tags, term, terms, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
+module Internationalisation.Eng exposing (abbreviation, about, addLinkButton, addRelatedItem, addTagButton, addTermButton, alphabetically, alternativeTerm, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, builtUsingGlossaryPageTemplateHtmlTree, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, chooseWhichTagShouldBeUsedToDistinguishThisItem, closeSidebar, copyToClipboard, createANewGlossaryItem, createANewGlossaryItemCapitalised, ctrlK, definition, delete, deleteItem, description, disambiguationTag, disambiguationTagOptional, edit, editGlossaryItemCapitalised, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, listTheGroupOfTermsBeingDefined, loadingEllipsis, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, miscellaneous, mostMentionedFirst, moveDown, moveUp, needsUpdating, noMatchingItemsFound, noResultsFound, none, onlyShowingItemsForTag, openOptions, openSidebar, orderItems, otherItems, pleaseSelect, pointToAnyRelatedItems, preferredTerm, preview, provideADefinitionForThisGroupOfTerms, quickSearch, readMore, relatedItem, relatedItems, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, selectAllTagsThatApplyToThisItem, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, suggestions, tag, tagAppearsMultipleTimes, tags, term, terms, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, viewAsSingleItem, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
 
 {-| User interface text in the English language.
 -}
@@ -6,6 +6,7 @@ module Internationalisation.Eng exposing (abbreviation, about, addLinkButton, ad
 import Accessibility.Key
 import ElementIds
 import Extras.Html
+import Extras.HtmlTree as HtmlTree
 import Html exposing (Html, a, code, div, p, pre, span, text)
 import Html.Attributes exposing (class, href)
 import Http
@@ -170,6 +171,19 @@ builtUsingGlossaryPageTemplate tabbable =
             [ text " (https://glossary.page/template)" ]
         , text "."
         ]
+
+
+builtUsingGlossaryPageTemplateHtmlTree : List HtmlTree.HtmlTree
+builtUsingGlossaryPageTemplateHtmlTree =
+    [ HtmlTree.Leaf "Built using "
+    , HtmlTree.Node "a"
+        False
+        [ HtmlTree.Attribute "target" "_blank"
+        , HtmlTree.Attribute "href" "https://glossary.page/template"
+        ]
+        [ HtmlTree.Leaf "Glossary Page Template" ]
+    , HtmlTree.Leaf "."
+    ]
 
 
 updatedOn : String -> Html msg
@@ -687,3 +701,18 @@ alternativeTerm =
 term : String
 term =
     "Term"
+
+
+openOptions : String
+openOptions =
+    "Open options"
+
+
+viewAsSingleItem : String
+viewAsSingleItem =
+    "View as single item"
+
+
+loadingEllipsis : String
+loadingEllipsis =
+    "Loading..."

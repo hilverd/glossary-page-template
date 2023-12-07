@@ -6,6 +6,7 @@ import Extras.Html
 import Extras.SvgAttribute
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
+import Internationalisation as I18n
 import Svg exposing (path, svg)
 import Svg.Attributes
     exposing
@@ -52,5 +53,5 @@ view attributes active =
         , Extras.Html.showIf active <|
             span
                 [ class "sr-only" ]
-                [ text "Loading..." ]
+                [ text I18n.loadingEllipsis ]
         ]

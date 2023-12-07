@@ -11,6 +11,7 @@ import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.TagDescription as TagDescription
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
+import Internationalisation as I18n
 
 
 type alias Glossary =
@@ -82,7 +83,7 @@ toHtmlTree enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges {
                     "div"
                     True
                     [ HtmlTree.Attribute "id" ElementIds.tags ]
-                    [ HtmlTree.Leaf "Tags:"
+                    [ HtmlTree.Leaf <| I18n.tags ++ ":"
                     , HtmlTree.Node "dl"
                         True
                         []
@@ -119,13 +120,5 @@ toHtmlTree enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges {
         , HtmlTree.Node "footer"
             True
             []
-            [ HtmlTree.Leaf "Built using"
-            , HtmlTree.Node "a"
-                False
-                [ HtmlTree.Attribute "target" "_blank"
-                , HtmlTree.Attribute "href" "https://glossary.page/template"
-                ]
-                [ HtmlTree.Leaf "Glossary Page Template" ]
-            , HtmlTree.Leaf "."
-            ]
+            I18n.builtUsingGlossaryPageTemplateHtmlTree
         ]

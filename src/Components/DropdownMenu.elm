@@ -26,6 +26,7 @@ import Html
 import Html.Attributes exposing (attribute, class, href)
 import Html.Events
 import Icons
+import Internationalisation as I18n
 import Json.Decode as Decode
 import Process
 import Svg.Attributes
@@ -287,7 +288,7 @@ view toParentMsg model enabled buttonShape choices =
             openOptionsMessage =
                 Html.span
                     [ class "sr-only" ]
-                    [ Html.text "Open options" ]
+                    [ Html.text I18n.openOptions ]
           in
           div
             []
