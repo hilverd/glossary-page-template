@@ -1,4 +1,4 @@
-module Internationalisation exposing (about, addLinkButton, addTagButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, copyToClipboard, createANewGlossaryItem, ctrlK, delete, deleteItem, description, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, preview, quickSearch, readMore, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tag, tagAppearsMultipleTimes, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
+module Internationalisation exposing (abbreviation, about, addLinkButton, addTagButton, addTermButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, copyToClipboard, createANewGlossaryItem, ctrlK, definition, delete, deleteItem, description, disambiguationTag, disambiguationTagOptional, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, listTheGroupOfTermsBeingDefined, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, none, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, preview, provideADefinitionForThisGroupOfTerms, quickSearch, readMore, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, selectAllTagsThatApplyToThisItem, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tag, tagAppearsMultipleTimes, tags, terms, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
 
 {-| User interface text in a specific language (e.g. English).
 -}
@@ -455,3 +455,53 @@ whyTagsMayBeUseful =
 example : String
 example =
     I18n.example
+
+
+abbreviation : String
+abbreviation =
+    I18n.abbreviation
+
+
+terms : String
+terms =
+    I18n.terms
+
+
+listTheGroupOfTermsBeingDefined : List (Html msg)
+listTheGroupOfTermsBeingDefined =
+    I18n.listTheGroupOfTermsBeingDefined
+
+
+addTermButton : String
+addTermButton =
+    I18n.addTermButton
+
+
+definition : String
+definition =
+    I18n.definition
+
+
+provideADefinitionForThisGroupOfTerms : String
+provideADefinitionForThisGroupOfTerms =
+    I18n.provideADefinitionForThisGroupOfTerms
+
+
+selectAllTagsThatApplyToThisItem : String
+selectAllTagsThatApplyToThisItem =
+    I18n.selectAllTagsThatApplyToThisItem
+
+
+disambiguationTagOptional : String
+disambiguationTagOptional =
+    I18n.disambiguationTagOptional
+
+
+disambiguationTag : String
+disambiguationTag =
+    I18n.disambiguationTag
+
+
+none : String
+none =
+    I18n.none

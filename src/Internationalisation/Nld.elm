@@ -1,4 +1,4 @@
-module Internationalisation.Nld exposing (about, addLinkButton, addTagButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, copyToClipboard, createANewGlossaryItem, ctrlK, delete, deleteItem, description, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, preview, quickSearch, readMore, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tag, tagAppearsMultipleTimes, tags, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
+module Internationalisation.Nld exposing (abbreviation, about, addLinkButton, addTagButton, addTermButton, alphabetically, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, closeSidebar, copyToClipboard, createANewGlossaryItem, ctrlK, definition, delete, deleteItem, description, disambiguationTag, disambiguationTagOptional, edit, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, listTheGroupOfTermsBeingDefined, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, mostMentionedFirst, noMatchingItemsFound, noResultsFound, none, onlyShowingItemsForTag, openSidebar, orderItems, otherItems, pleaseSelect, preview, provideADefinitionForThisGroupOfTerms, quickSearch, readMore, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, selectAllTagsThatApplyToThisItem, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, tag, tagAppearsMultipleTimes, tags, terms, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, title, unableToSaveAsItWouldResultInTheFollowing, updatedOn, url, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
 
 {-| User interface text in the Dutch language.
 -}
@@ -557,3 +557,58 @@ whyTagsMayBeUseful =
 example : String
 example =
     "Voorbeeld"
+
+
+abbreviation : String
+abbreviation =
+    "Afkorting"
+
+
+terms : String
+terms =
+    "Termen"
+
+
+listTheGroupOfTermsBeingDefined : List (Html msg)
+listTheGroupOfTermsBeingDefined =
+    [ text "Maak een lijst van de groep termen die worden gedefinieerd. De eerste wordt beschouwd als de "
+    , Html.em
+        []
+        [ text "voorkeursterm" ]
+    , text "."
+    ]
+
+
+addTermButton : String
+addTermButton =
+    "Voeg term toe"
+
+
+definition : String
+definition =
+    "Definitie"
+
+
+provideADefinitionForThisGroupOfTerms : String
+provideADefinitionForThisGroupOfTerms =
+    "Geef een definitie (optioneel) voor deze groep termen."
+
+
+selectAllTagsThatApplyToThisItem : String
+selectAllTagsThatApplyToThisItem =
+    "Selecteer alle labels die op dit item van toepassing zijn."
+
+
+disambiguationTagOptional : String
+disambiguationTagOptional =
+    "Ondubbelzinnig makend label (optioneel)"
+
+
+disambiguationTag : String
+disambiguationTag =
+    "Ondubbelzinnig makend label"
+
+
+none : String
+none =
+    "Geen"

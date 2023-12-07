@@ -590,7 +590,7 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
                                     [ Html.Events.onClick <| PageMsg.Internal <| ToggleAbbreviation termIndex ]
                                     [ span
                                         [ class "font-medium text-gray-900 dark:text-gray-300" ]
-                                        [ text "Abbreviation" ]
+                                        [ text I18n.abbreviation ]
                                     ]
                                 ]
                             ]
@@ -624,15 +624,10 @@ viewCreateTerms mathSupportEnabled showValidationErrors termsArray =
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Terms" ]
+                [ text I18n.terms ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
-                [ text "List the group of terms being defined. The first one is considered the "
-                , Html.em
-                    []
-                    [ text "preferred" ]
-                , text " term."
-                ]
+                I18n.listTheGroupOfTermsBeingDefined
             ]
         , div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
@@ -641,7 +636,7 @@ viewCreateTerms mathSupportEnabled showValidationErrors termsArray =
                         [ Components.Button.secondary
                             [ Html.Events.onClick <| PageMsg.Internal AddTerm ]
                             [ Icons.plus [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
-                            , text "Add term"
+                            , text I18n.addTermButton
                             ]
                         ]
                    ]
@@ -706,10 +701,10 @@ viewDefinition mathSupportEnabled showValidationErrors definitionField =
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Definition" ]
+                [ text I18n.definition ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
-                [ text "Provide a definition (optional) for this group of terms." ]
+                [ text I18n.provideADefinitionForThisGroupOfTerms ]
             ]
         , div
             [ class "space-y-6 sm:space-y-5" ]
@@ -724,10 +719,10 @@ viewTags enableMathSupport tagCheckboxes =
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Tags" ]
+                [ text I18n.tags ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
-                [ text "Select all tags that apply to this item." ]
+                [ text I18n.selectAllTagsThatApplyToThisItem ]
             ]
         , div
             []
@@ -752,7 +747,7 @@ viewDisambiguationTag disambiguationTagId tags =
         [ div []
             [ h2
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text "Disambiguation tag (optional)" ]
+                [ text I18n.disambiguationTagOptional ]
             , p
                 [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
                 [ text "If another item has the same preferred term, then choose which tag should be used to distinguish this item." ]
@@ -761,12 +756,12 @@ viewDisambiguationTag disambiguationTagId tags =
             [ class "max-w-md" ]
             [ Components.SelectMenu.render
                 [ Components.SelectMenu.id <| ElementIds.disambiguationTagSelect
-                , Components.SelectMenu.ariaLabel "Disambiguation tag"
+                , Components.SelectMenu.ariaLabel I18n.disambiguationTag
                 , Components.SelectMenu.onChange (PageMsg.Internal << SelectDisambiguationTag)
                 ]
                 (Components.SelectMenu.Choice
                     ""
-                    [ text <| "None" ]
+                    [ text I18n.none ]
                     (disambiguationTagId == Nothing)
                     :: (tags
                             |> List.map
