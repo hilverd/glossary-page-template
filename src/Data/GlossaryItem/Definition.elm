@@ -13,6 +13,7 @@ import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.HtmlTree exposing (HtmlTree)
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
+import Internationalisation as I18n
 import Markdown.Block as Block exposing (Block)
 import Markdown.Html
 import Markdown.Renderer as Renderer exposing (Renderer)
@@ -102,10 +103,10 @@ view { enableMathSupport, makeLinksTabbable } definition =
                                 rendered
 
                         Err renderingError ->
-                            text <| "Failed to render Markdown: " ++ renderingError
+                            text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
                 Err parsingError ->
-                    text <| "Failed to parse Markdown: " ++ parsingError
+                    text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
 
 
 {-| View a definition as inline HTML.
@@ -128,10 +129,10 @@ viewInline enableMathSupport additionalAttributes definition =
                                 rendered
 
                         Err renderingError ->
-                            text <| "Failed to render Markdown: " ++ renderingError
+                            text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
                 Err parsingError ->
-                    text <| "Failed to parse Markdown: " ++ parsingError
+                    text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
 
 
 htmlTreeRendererForAnki : Bool -> Renderer HtmlTree
@@ -163,10 +164,10 @@ htmlTreeForAnki enableMathSupport definition =
                             Extras.HtmlTree.Node "div" False [] rendered
 
                         Err renderingError ->
-                            Extras.HtmlTree.Leaf <| "Failed to render Markdown: " ++ renderingError
+                            Extras.HtmlTree.Leaf <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
                 Err parsingError ->
-                    Extras.HtmlTree.Leaf <| "Failed to parse Markdown: " ++ parsingError
+                    Extras.HtmlTree.Leaf <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
 
 
 sanitiseMarkdownFragment : MarkdownFragment -> MarkdownFragment

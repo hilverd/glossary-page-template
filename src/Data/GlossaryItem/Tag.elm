@@ -15,6 +15,7 @@ import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.String
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
+import Internationalisation as I18n
 import Json.Decode as Decode exposing (Decoder)
 import Markdown.Block exposing (Block)
 import Markdown.Renderer as Renderer
@@ -153,10 +154,10 @@ view enableMathSupport additionalAttributes tag =
                                 rendered
 
                         Err renderingError ->
-                            text <| "Failed to render Markdown: " ++ renderingError
+                            text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
                 Err parsingError ->
-                    text <| "Failed to parse Markdown: " ++ parsingError
+                    text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
 
 
 {-| Obtain the tag being filtered by according to query parameters in the URL.

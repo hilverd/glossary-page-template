@@ -18,6 +18,7 @@ import Extras.HtmlTree exposing (HtmlTree)
 import Extras.String
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
+import Internationalisation as I18n
 import Json.Decode as Decode exposing (Decoder)
 import Markdown.Block exposing (Block)
 import Markdown.Renderer as Renderer
@@ -184,10 +185,10 @@ view enableMathSupport additionalAttributes term =
                                 rendered
 
                         Err renderingError ->
-                            text <| "Failed to render Markdown: " ++ renderingError
+                            text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
                 Err parsingError ->
-                    text <| "Failed to parse Markdown: " ++ parsingError
+                    text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
 
 
 {-| The _index group character_ of a term is the character it will be listed under in the index.
@@ -263,7 +264,7 @@ htmlTreeForAnki enableMathSupport term =
                             Extras.HtmlTree.Node "span" False [] rendered
 
                         Err renderingError ->
-                            Extras.HtmlTree.Leaf <| "Failed to render Markdown: " ++ renderingError
+                            Extras.HtmlTree.Leaf <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
                 Err parsingError ->
-                    Extras.HtmlTree.Leaf <| "Failed to parse Markdown: " ++ parsingError
+                    Extras.HtmlTree.Leaf <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
