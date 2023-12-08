@@ -1,4 +1,4 @@
-module Internationalisation.Nld exposing (abbreviation, about, addLinkButton, addRelatedItem, addTagButton, addTermButton, alphabetically, alternativeTerm, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, builtUsingGlossaryPageTemplateHtmlTree, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, chooseWhichTagShouldBeUsedToDistinguishThisItem, closeSidebar, copyToClipboard, createANewGlossaryItem, createANewGlossaryItemCapitalised, ctrlK, definition, delete, deleteItem, description, disambiguationTag, disambiguationTagOptional, edit, editGlossaryItemCapitalised, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, elementNotFound, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToParseMarkdown, failedToRenderMarkdown, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, listTheGroupOfTermsBeingDefined, loadingEllipsis, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, miscellaneous, mostMentionedFirst, moveDown, moveUp, needsUpdating, noMatchingItemsFound, noResultsFound, none, onlyShowingItemsForTag, openOptions, openSidebar, orderItems, otherItems, pleaseSelect, pointToAnyRelatedItems, preferredTerm, preview, provideADefinitionForThisGroupOfTerms, quickSearch, readMore, relatedItem, relatedItems, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, selectAllTagsThatApplyToThisItem, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, suggestions, tag, tagAppearsMultipleTimes, tags, term, terms, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, thisFieldCannotBeEmpty, thisFileIsMeantToBeImportedIntoAnki, title, unableToSaveAsItWouldResultInTheFollowing, unknownCardWidth, unknownTheme, updatedOn, url, viewAsSingleItem, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
+module Internationalisation.Nld exposing (abbreviation, about, addLinkButton, addRelatedItem, addTagButton, addTermButton, alphabetically, alternativeTerm, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, builtUsingGlossaryPageTemplateHtmlTree, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, chooseWhichTagShouldBeUsedToDistinguishThisItem, closeSidebar, copyToClipboard, createANewGlossaryItem, createANewGlossaryItemCapitalised, ctrlK, definition, delete, deleteItem, description, disambiguationTag, disambiguationTagOptional, edit, editGlossaryItemCapitalised, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, elementNotFound, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToParseMarkdown, failedToRenderMarkdown, failedToSave, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, links, listTheGroupOfTermsBeingDefined, loadingEllipsis, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, miscellaneous, mostMentionedFirst, moveDown, moveUp, needsUpdating, noMatchingItemsFound, noResultsFound, none, onlyShowingItemsForTag, openOptions, openSidebar, orderItems, otherItems, pleaseSelect, pleaseSelectAnItem, pointToAnyRelatedItems, preferredTerm, preview, provideADefinitionForThisGroupOfTerms, quickSearch, readMore, relatedItem, relatedItems, runTheFollowingCommand, sandboxModeMessage, save, search, searchPlaceholder, see, seeAlso, selectAllTagsThatApplyToThisItem, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, somethingWentWrong, suggestions, tag, tagAppearsMultipleTimes, tags, term, terms, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, theseSettingsAreUpdatedInTheHtmlFile, thisFieldCannotBeEmpty, thisFileIsMeantToBeImportedIntoAnki, thisTagIsADuplicateOfAnEarlierOne, thisTermAlreadyExistsElsewhere, thisTermIsReserved, thisTermOccursMultipleTimes, title, unableToSaveAsItWouldResultInTheFollowing, unknownCardWidth, unknownTheme, updatedOn, url, viewAsSingleItem, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
 
 {-| User interface text in the Dutch language.
 -}
@@ -115,17 +115,17 @@ youCanHideTheseInstructions =
 
 tag : String
 tag =
-    "Label"
+    "Etiket"
 
 
 tags : String
 tags =
-    "Labels"
+    "Etiketten"
 
 
 onlyShowingItemsForTag : String
 onlyShowingItemsForTag =
-    "Alleen items voor dit label worden getoond:"
+    "Alleen items voor dit etiket worden getoond:"
 
 
 orderItems : String
@@ -284,12 +284,12 @@ createANewGlossaryItem =
 
 manageTags : String
 manageTags =
-    "Beheer labels"
+    "Beheer etiketten"
 
 
 manageTagsTitle : String
 manageTagsTitle =
-    "Beheer labels"
+    "Beheer etiketten"
 
 
 edit : String
@@ -526,7 +526,7 @@ description =
 
 addTagButton : String
 addTagButton =
-    "Voeg label toe"
+    "Voeg etiket toe"
 
 
 unableToSaveAsItWouldResultInTheFollowing : String
@@ -548,12 +548,12 @@ thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm =
 
 tagAppearsMultipleTimes : String -> String
 tagAppearsMultipleTimes rawTag =
-    "label \"" ++ rawTag ++ "\" komt meerdere keren voor"
+    "etiket \"" ++ rawTag ++ "\" komt meerdere keren voor"
 
 
 youCanUseTagsToAttachLabels : String
 youCanUseTagsToAttachLabels =
-    "Je kunt labels aan items toevoegen, zodat mensen er vervolgens op kunnen filteren."
+    "Je kunt etiketten aan items toevoegen, zodat mensen er vervolgens op kunnen filteren."
 
 
 readMore : String
@@ -610,17 +610,17 @@ provideADefinitionForThisGroupOfTerms =
 
 selectAllTagsThatApplyToThisItem : String
 selectAllTagsThatApplyToThisItem =
-    "Selecteer alle labels die op dit item van toepassing zijn."
+    "Selecteer alle etiketten die op dit item van toepassing zijn."
 
 
 disambiguationTagOptional : String
 disambiguationTagOptional =
-    "Ondubbelzinnig makend label (optioneel)"
+    "Ondubbelzinnig makend etiket (optioneel)"
 
 
 disambiguationTag : String
 disambiguationTag =
-    "Ondubbelzinnig makend label"
+    "Ondubbelzinnig makend etiket"
 
 
 none : String
@@ -630,7 +630,7 @@ none =
 
 chooseWhichTagShouldBeUsedToDistinguishThisItem : String
 chooseWhichTagShouldBeUsedToDistinguishThisItem =
-    "Als een ander item dezelfde voorkeursterm heeft, kies dan welk label gebruikt moet worden om dit item te onderscheiden."
+    "Als een ander item dezelfde voorkeursterm heeft, kies dan welk etiket gebruikt moet worden om dit item te onderscheiden."
 
 
 relatedItem : String
@@ -751,3 +751,28 @@ elementNotFound =
 thisFieldCannotBeEmpty : String
 thisFieldCannotBeEmpty =
     "Dit veld mag niet leeg zijn"
+
+
+thisTermAlreadyExistsElsewhere : String
+thisTermAlreadyExistsElsewhere =
+    "Deze term bestaat elders al. Kies een andere of gebruik een ondubbelzinnig makend etiket."
+
+
+thisTermOccursMultipleTimes : String
+thisTermOccursMultipleTimes =
+    "Deze term komt meerdere keren voor"
+
+
+thisTermIsReserved : String
+thisTermIsReserved =
+    "Deze term is gereserveerd"
+
+
+pleaseSelectAnItem : String
+pleaseSelectAnItem =
+    "Selecteer a.u.b. een item"
+
+
+thisTagIsADuplicateOfAnEarlierOne : String
+thisTagIsADuplicateOfAnEarlierOne =
+    "Dit etiket is een duplicaat van een eerder etiket"

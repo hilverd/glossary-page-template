@@ -6,6 +6,7 @@ import Data.TagDescription as TagDescription exposing (TagDescription)
 import Data.TagId exposing (TagId)
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import Extras.Array
+import Internationalisation as I18n
 import Set
 import TagsForm.TagDescriptionField as TagDescriptionField exposing (TagDescriptionField)
 import TagsForm.TagField as TagField exposing (TagField)
@@ -115,7 +116,7 @@ validate tagsForm =
             let
                 cannotBeEmptyMessage : String
                 cannotBeEmptyMessage =
-                    "This field can't be empty"
+                    I18n.thisFieldCannotBeEmpty
 
                 validateTagField : TagField -> TagField
                 validateTagField tagField =
@@ -170,7 +171,7 @@ validate tagsForm =
 
                 duplicateTagMessage : String
                 duplicateTagMessage =
-                    "This tag is a duplicate of an earlier one"
+                    I18n.thisTagIsADuplicateOfAnEarlierOne
 
                 rows_ =
                     form.rows

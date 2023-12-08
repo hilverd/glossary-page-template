@@ -232,13 +232,13 @@ validate form =
                                     |> TermId.toString
                         in
                         if isPreferredTerm && Set.member termId termIdsOutsideSet then
-                            Just "This term already exists elsewhere. Please pick a different one or use a disambiguation tag."
+                            Just I18n.thisTermAlreadyExistsElsewhere
 
                         else if (Dict.get termId termIdsInsideForm |> Maybe.withDefault 0) > 1 then
-                            Just "This term occurs multiple times"
+                            Just I18n.thisTermOccursMultipleTimes
 
                         else if ElementIds.reserved termId then
-                            Just "This term is reserved"
+                            Just I18n.thisTermIsReserved
 
                         else
                             Nothing
@@ -265,7 +265,7 @@ validate form =
                         { relatedTermField
                             | validationError =
                                 if relatedTermField.id == Nothing then
-                                    Just "Please select an item"
+                                    Just I18n.pleaseSelectAnItem
 
                                 else
                                     Nothing

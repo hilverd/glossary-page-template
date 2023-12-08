@@ -25,6 +25,7 @@ import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Extras.Array
+import Internationalisation as I18n
 
 
 type alias TitleField =
@@ -89,7 +90,7 @@ validate form =
     let
         cannotBeEmptyMessage : String
         cannotBeEmptyMessage =
-            "This field can't be empty"
+            I18n.thisFieldCannotBeEmpty
 
         titleField0 : TitleField
         titleField0 =
