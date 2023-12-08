@@ -12,6 +12,7 @@ module Data.TagDescription exposing (TagDescription, fromMarkdown, raw, inlineTe
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
+import Internationalisation as I18n
 import Markdown.Block exposing (Block)
 import Markdown.Renderer as Renderer
 import MarkdownRenderers
@@ -128,7 +129,7 @@ view { enableMathSupport, makeLinksTabbable } additionalAttributes tagDescriptio
                                 rendered
 
                         Err renderingError ->
-                            text <| "Failed to render Markdown: " ++ renderingError
+                            text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
                 Err parsingError ->
-                    text <| "Failed to parse Markdown: " ++ parsingError
+                    text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError

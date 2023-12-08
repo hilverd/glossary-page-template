@@ -22,6 +22,7 @@ import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.LoadedGlossaryItems as LoadedGlossaryItems
 import Data.Theme as Theme exposing (Theme)
 import Html
+import Internationalisation as I18n
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg(..))
 import Pages.CreateOrEdit
@@ -160,14 +161,14 @@ init flags url key =
                             title =
                                 flags
                                     |> Decode.decodeValue (Decode.field "titleString" Decode.string)
-                                    |> Result.withDefault "Element not found"
+                                    |> Result.withDefault I18n.elementNotFound
                                     |> GlossaryTitle.fromMarkdown
 
                             aboutParagraph : AboutParagraph
                             aboutParagraph =
                                 flags
                                     |> Decode.decodeValue (Decode.field "aboutParagraph" Decode.string)
-                                    |> Result.withDefault "Element not found"
+                                    |> Result.withDefault I18n.elementNotFound
                                     |> AboutParagraph.fromMarkdown
 
                             aboutLinks : List AboutLink

@@ -44,6 +44,7 @@ import Extras.Array
 import Extras.Regex
 import GlossaryItemForm.DefinitionField as DefinitionField exposing (DefinitionField)
 import GlossaryItemForm.TermField as TermField exposing (TermField)
+import Internationalisation as I18n
 import Regex
 import Set exposing (Set)
 
@@ -161,7 +162,7 @@ validate form =
     let
         cannotBeEmptyMessage : String
         cannotBeEmptyMessage =
-            "This field can't be empty"
+            I18n.thisFieldCannotBeEmpty
 
         termIdsOutsideSet : Set String
         termIdsOutsideSet =

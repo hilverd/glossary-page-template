@@ -1,6 +1,7 @@
 module Data.CardWidth exposing (CardWidth(..), decode, toHtmlTreeAttribute)
 
 import Extras.HtmlTree
+import Internationalisation as I18n
 import Json.Decode as Decode exposing (Decoder)
 
 
@@ -27,7 +28,7 @@ decode =
                             Decode.succeed Wide
 
                         somethingElse ->
-                            Decode.fail <| "Unknown card width: " ++ somethingElse
+                            Decode.fail <| I18n.unknownCardWidth ++ ": " ++ somethingElse
                 )
         )
 

@@ -1,5 +1,6 @@
 module Data.Theme exposing (Theme(..), decode)
 
+import Internationalisation as I18n
 import Json.Decode as Decode exposing (Decoder)
 
 
@@ -25,5 +26,5 @@ decode =
                         Decode.succeed System
 
                     somethingElse ->
-                        Decode.fail <| "Unknown theme: " ++ somethingElse
+                        Decode.fail <| I18n.unknownTheme ++ ": " ++ somethingElse
             )

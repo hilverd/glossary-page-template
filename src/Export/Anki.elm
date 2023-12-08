@@ -17,6 +17,7 @@ import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Extras.HtmlTree
 import File.Download as Download
+import Internationalisation as I18n
 import Regex
 
 
@@ -97,7 +98,8 @@ itemToAnki enableMathSupport glossaryItem =
                     ""
 
                 else
-                    ("See: "
+                    (I18n.see
+                        ++ ": "
                         ++ (relatedTerms
                                 |> List.map (Term.htmlTreeForAnki enableMathSupport >> Extras.HtmlTree.toHtml >> escape)
                                 |> String.join ", "
@@ -149,7 +151,7 @@ download enableMathSupport glossaryTitle aboutSection glossaryItems =
 
         instructionsComment : String
         instructionsComment =
-            comment "This file is meant to be imported into Anki (https://docs.ankiweb.net/importing.html#text-files)."
+            comment I18n.thisFileIsMeantToBeImportedIntoAnki
 
         titleComment : String
         titleComment =

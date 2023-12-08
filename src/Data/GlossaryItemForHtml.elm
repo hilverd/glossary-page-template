@@ -43,6 +43,7 @@ import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Extras.Url exposing (fragmentOnly)
+import Internationalisation as I18n
 import Json.Decode as Decode exposing (Decoder)
 import List
 
@@ -327,16 +328,16 @@ relatedTermToHtmlTree term =
 
 
 nonemptyRelatedTermsToHtmlTree : Bool -> List Term -> HtmlTree
-nonemptyRelatedTermsToHtmlTree itemHasSomeADefinition relatedTerms_ =
+nonemptyRelatedTermsToHtmlTree itemHasADefinition relatedTerms_ =
     HtmlTree.Node "dd"
         False
         [ HtmlTree.Attribute "class" "related-terms" ]
         (HtmlTree.Leaf
-            (if itemHasSomeADefinition then
-                "See also: "
+            (if itemHasADefinition then
+                I18n.seeAlso ++ ": "
 
              else
-                "See: "
+                I18n.see ++ ": "
             )
             :: (relatedTerms_
                     |> List.map relatedTermToHtmlTree
@@ -378,7 +379,7 @@ toHtmlTree glossaryItem =
                                 [ HtmlTree.Node "span"
                                     False
                                     []
-                                    [ HtmlTree.Leaf "[Needs updating]" ]
+                                    [ HtmlTree.Leaf <| "[" ++ I18n.needsUpdating ++ "]" ]
                                 ]
                             ]
 

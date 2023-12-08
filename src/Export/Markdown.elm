@@ -17,6 +17,7 @@ import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Extras.HtmlTree
 import Extras.String
 import File.Download as Download
+import Internationalisation as I18n
 
 
 bold : String -> String
@@ -84,10 +85,10 @@ itemToMarkdown glossaryItem =
                 ""
 
             else if List.isEmpty definitions then
-                "See: "
+                I18n.see ++ ": "
 
             else
-                "See also: "
+                I18n.seeAlso ++ ": "
 
         relatedTermsString : String
         relatedTermsString =
