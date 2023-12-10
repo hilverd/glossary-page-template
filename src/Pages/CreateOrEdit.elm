@@ -1139,7 +1139,10 @@ view model =
                                                 else
                                                     Nothing
                                             )
-                                        |> viewDisambiguationTag disambiguationTagId
+                                        |> (\tags ->
+                                                Extras.Html.showIf (not <| List.isEmpty tags) <|
+                                                    viewDisambiguationTag disambiguationTagId tags
+                                           )
                                     , viewCreateSeeAlso
                                         glossary.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
