@@ -1,4 +1,4 @@
-module Save exposing (patchHtmlFileSimpler)
+module Save exposing (patchHtmlFile)
 
 import CommonModel exposing (CommonModel)
 import Data.Glossary as Glossary exposing (Glossary)
@@ -7,8 +7,8 @@ import Extras.Task
 import Http
 
 
-patchHtmlFileSimpler : CommonModel -> Glossary -> (Http.Error -> msg) -> msg -> Cmd msg
-patchHtmlFileSimpler common glossary errorMsg msg =
+patchHtmlFile : CommonModel -> Glossary -> (Http.Error -> msg) -> msg -> Cmd msg
+patchHtmlFile common glossary errorMsg msg =
     if common.enableSavingChangesInMemory then
         Extras.Task.messageToCommand msg
 

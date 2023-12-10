@@ -516,7 +516,7 @@ update msg model =
                                 | deleting = SavingInProgress
                                 , savingSettings = NotSaving
                               }
-                            , Save.patchHtmlFileSimpler
+                            , Save.patchHtmlFile
                                 model.common
                                 glossary1
                                 (PageMsg.Internal << FailedToDelete)
@@ -666,7 +666,7 @@ update msg model =
                         , deleting = NotSaving
                         , savingSettings = SavingInProgress
                       }
-                    , Save.patchHtmlFileSimpler
+                    , Save.patchHtmlFile
                         common1
                         glossary1
                         (PageMsg.Internal << FailedToChangeSettings)
@@ -693,7 +693,7 @@ update msg model =
                         , deleting = NotSaving
                         , savingSettings = SavingInProgress
                       }
-                    , Save.patchHtmlFileSimpler
+                    , Save.patchHtmlFile
                         common1
                         glossary
                         (PageMsg.Internal << FailedToChangeSettings)
@@ -720,7 +720,7 @@ update msg model =
                         , deleting = NotSaving
                         , savingSettings = SavingInProgress
                       }
-                    , Save.patchHtmlFileSimpler
+                    , Save.patchHtmlFile
                         common1
                         glossary
                         (PageMsg.Internal << FailedToChangeSettings)
@@ -749,7 +749,7 @@ update msg model =
                         , deleting = NotSaving
                         , savingSettings = SavingInProgress
                       }
-                    , Save.patchHtmlFileSimpler
+                    , Save.patchHtmlFile
                         common1
                         glossary1
                         (PageMsg.Internal << FailedToChangeSettings)
