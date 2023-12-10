@@ -64,6 +64,7 @@ import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree
+import Extras.Http
 import Extras.Task
 import Extras.Url exposing (fragmentOnly)
 import Html
@@ -568,7 +569,7 @@ update msg model =
 
         FailedToDelete error ->
             ( { model
-                | deleting = SavingFailed <| I18n.httpErrorDescription error
+                | deleting = SavingFailed <| Extras.Http.httpErrorDescriptionAskingToReloadOnConflict error
                 , savingSettings = NotSaving
               }
             , Cmd.none
@@ -770,7 +771,7 @@ update msg model =
 
         FailedToChangeSettings error ->
             ( { model
-                | savingSettings = SavingFailed <| I18n.httpErrorDescription error
+                | savingSettings = SavingFailed <| Extras.Http.httpErrorDescriptionAskingToReloadOnConflict error
               }
             , Cmd.none
             )

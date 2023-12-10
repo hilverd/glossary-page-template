@@ -22,6 +22,7 @@ import ElementIds
 import Extras.Html
 import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree
+import Extras.Http
 import Extras.Task
 import Html
 import Html.Attributes exposing (class, for, id, name, placeholder, required, spellcheck, type_)
@@ -173,7 +174,7 @@ update msg model =
                     ( model, Cmd.none )
 
         FailedToSave error ->
-            ( { model | saving = SavingFailed <| I18n.httpErrorDescription <| error }
+            ( { model | saving = SavingFailed <| Extras.Http.httpErrorDescriptionAskingToReloadOnConflict <| error }
             , Cmd.none
             )
 
