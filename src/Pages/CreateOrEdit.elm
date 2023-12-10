@@ -435,19 +435,15 @@ update msg model =
                         case updatedGlossaryItems of
                             Ok updatedGlossaryItems_ ->
                                 let
-                                    model_ : Model
-                                    model_ =
-                                        { model
-                                            | common =
-                                                { common
-                                                    | glossary = Ok <| { glossary | items = updatedGlossaryItems_ }
-                                                    , maybeId = maybeId
-                                                }
-                                            , saving = SavingInProgress
+                                    common1 : CommonModel
+                                    common1 =
+                                        { common
+                                            | glossary = Ok <| { glossary | items = updatedGlossaryItems_ }
+                                            , maybeId = maybeId
                                         }
                                 in
-                                ( model_
-                                , patchHtmlFile model_.common updatedGlossaryItems_
+                                ( { model | saving = SavingInProgress }
+                                , patchHtmlFile common1 updatedGlossaryItems_
                                 )
 
                             Err error ->

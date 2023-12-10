@@ -159,16 +159,9 @@ update msg model =
                                                 , aboutSection = aboutSectionFromForm model.form
                                             }
                                 }
-
-                            model1 : Model
-                            model1 =
-                                { model
-                                    | common = common1
-                                    , saving = SavingInProgress
-                                }
                         in
-                        ( model1
-                        , patchHtmlFile model1.common glossary0.items
+                        ( { model | saving = SavingInProgress }
+                        , patchHtmlFile common1 glossary0.items
                         )
 
                 _ ->

@@ -12,8 +12,15 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
 ### Changed
+
+- Move all UI text to `Internationalisation` directory to facilitate translations (see issue #10).
+
 ### Fixed
+
+- Fix minor bug where changes were applied in memory even if saving failed.
+
 ### Removed
 
 ## [4.1.0] - 2023-11-30

@@ -672,7 +672,11 @@ update msg model =
                 common1 =
                     { common0 | enableExportMenu = not common0.enableExportMenu }
             in
-            ( { model | savingSettings = SavingInProgress }
+            ( { model
+                | confirmDeleteId = Nothing
+                , deleting = NotSaving
+                , savingSettings = SavingInProgress
+              }
             , patchHtmlFileAfterChangingSettings common1
             )
 
@@ -686,7 +690,11 @@ update msg model =
                 common1 =
                     { common0 | enableOrderItemsButtons = not common0.enableOrderItemsButtons }
             in
-            ( { model | savingSettings = SavingInProgress }
+            ( { model
+                | confirmDeleteId = Nothing
+                , deleting = NotSaving
+                , savingSettings = SavingInProgress
+              }
             , patchHtmlFileAfterChangingSettings common1
             )
 

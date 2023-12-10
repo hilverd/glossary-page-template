@@ -196,16 +196,9 @@ update msg model =
                                     common1 : CommonModel
                                     common1 =
                                         { common0 | glossary = Ok updatedGlossary }
-
-                                    model1 : Model
-                                    model1 =
-                                        { model
-                                            | common = common1
-                                            , saving = SavingInProgress
-                                        }
                                 in
-                                ( model1
-                                , patchHtmlFile model1.common updatedGlossary.items
+                                ( { model | saving = SavingInProgress }
+                                , patchHtmlFile common1 updatedGlossary.items
                                 )
 
                             Err error ->
