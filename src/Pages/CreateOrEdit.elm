@@ -1045,7 +1045,7 @@ viewCreateFormFooter model =
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                 [ text I18n.sandboxModeMessage ]
         , div
-            [ class "flex items-center" ]
+            [ class "flex items-center mb-2" ]
             [ Components.Button.white
                 (saving /= SavingInProgress)
                 [ Html.Events.onClick <|
