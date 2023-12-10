@@ -30,6 +30,7 @@ import Http
 import Icons
 import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
+import Save
 import Svg.Attributes
 import Task
 import TitleAndAboutForm as Form exposing (TitleAndAboutForm)
@@ -145,23 +146,27 @@ update msg model =
 
                     else
                         let
+                            glossary1 : Glossary
+                            glossary1 =
+                                { glossary0
+                                    | title = titleFromForm model.form
+                                    , aboutSection = aboutSectionFromForm model.form
+                                }
+
                             common0 : CommonModel
                             common0 =
                                 model.common
 
                             common1 : CommonModel
                             common1 =
-                                { common0
-                                    | glossary =
-                                        Ok
-                                            { glossary0
-                                                | title = titleFromForm model.form
-                                                , aboutSection = aboutSectionFromForm model.form
-                                            }
-                                }
+                                { common0 | glossary = Ok glossary1 }
                         in
                         ( { model | saving = SavingInProgress }
-                        , patchHtmlFile common1 glossary0.items
+                        , Save.patchHtmlFileSimpler
+                            common1
+                            glossary1
+                            (PageMsg.Internal << FailedToSave)
+                            (PageMsg.NavigateToListAll common1)
                         )
 
                 _ ->
@@ -196,51 +201,6 @@ aboutSectionFromForm form =
                     AboutLink.create href.href body.body
                 )
     }
-
-
-patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
-patchHtmlFile common glossaryItems =
-    let
-        msg : PageMsg a
-        msg =
-            PageMsg.NavigateToListAll common
-    in
-    if common.enableSavingChangesInMemory then
-        Extras.Task.messageToCommand msg
-
-    else
-        case common.glossary of
-            Ok glossary0 ->
-                let
-                    glossary : Glossary
-                    glossary =
-                        { glossary0 | items = glossaryItems }
-                in
-                Http.request
-                    { method = "PATCH"
-                    , headers = []
-                    , url = "/"
-                    , body =
-                        glossary
-                            |> Glossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
-                            |> HtmlTree.toHtmlReplacementString
-                            |> Http.stringBody "text/html"
-                    , expect =
-                        Http.expectWhatever
-                            (\result ->
-                                case result of
-                                    Ok _ ->
-                                        msg
-
-                                    Err error ->
-                                        PageMsg.Internal <| FailedToSave error
-                            )
-                    , timeout = Nothing
-                    , tracker = Nothing
-                    }
-
-            _ ->
-                Cmd.none
 
 
 

@@ -43,6 +43,7 @@ import Icons
 import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
 import QueryParameters
+import Save
 import Set exposing (Set)
 import Svg.Attributes
 import Task
@@ -435,15 +436,23 @@ update msg model =
                         case updatedGlossaryItems of
                             Ok updatedGlossaryItems_ ->
                                 let
+                                    glossary1 : Glossary.Glossary
+                                    glossary1 =
+                                        { glossary | items = updatedGlossaryItems_ }
+
                                     common1 : CommonModel
                                     common1 =
                                         { common
-                                            | glossary = Ok <| { glossary | items = updatedGlossaryItems_ }
+                                            | glossary = Ok glossary1
                                             , maybeId = maybeId
                                         }
                                 in
                                 ( { model | saving = SavingInProgress }
-                                , patchHtmlFile common1 updatedGlossaryItems_
+                                , Save.patchHtmlFileSimpler
+                                    common1
+                                    glossary1
+                                    (PageMsg.Internal << FailedToSave)
+                                    (PageMsg.NavigateToListAll common1)
                                 )
 
                             Err error ->
@@ -456,46 +465,6 @@ update msg model =
             ( { model | saving = SavingFailed <| I18n.httpErrorDescription <| error }
             , Cmd.none
             )
-
-
-patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
-patchHtmlFile common glossaryItems =
-    case common.glossary of
-        Ok glossary ->
-            let
-                msg : PageMsg InternalMsg
-                msg =
-                    PageMsg.NavigateToListAll { common | glossary = Ok { glossary | items = glossaryItems } }
-            in
-            if common.enableSavingChangesInMemory then
-                Extras.Task.messageToCommand msg
-
-            else
-                Http.request
-                    { method = "PATCH"
-                    , headers = []
-                    , url = "/"
-                    , body =
-                        { glossary | items = glossaryItems }
-                            |> Glossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
-                            |> HtmlTree.toHtmlReplacementString
-                            |> Http.stringBody "text/html"
-                    , expect =
-                        Http.expectWhatever
-                            (\result ->
-                                case result of
-                                    Ok _ ->
-                                        msg
-
-                                    Err error ->
-                                        PageMsg.Internal <| FailedToSave error
-                            )
-                    , timeout = Nothing
-                    , tracker = Nothing
-                    }
-
-        _ ->
-            Cmd.none
 
 
 

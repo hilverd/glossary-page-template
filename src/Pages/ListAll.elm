@@ -75,6 +75,7 @@ import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
 import Process
 import QueryParameters
+import Save
 import Search
 import Svg.Attributes exposing (fill, height, stroke, width)
 import Task
@@ -498,19 +499,28 @@ update msg model =
 
         Delete id ->
             case model.common.glossary of
-                Ok { items } ->
+                Ok glossary ->
                     let
                         updatedGlossaryItems : Result String GlossaryItems
                         updatedGlossaryItems =
-                            GlossaryItems.remove id items
+                            GlossaryItems.remove id glossary.items
                     in
                     case updatedGlossaryItems of
                         Ok updatedGlossaryItems_ ->
+                            let
+                                glossary1 : Glossary.Glossary
+                                glossary1 =
+                                    { glossary | items = updatedGlossaryItems_ }
+                            in
                             ( { model
                                 | deleting = SavingInProgress
                                 , savingSettings = NotSaving
                               }
-                            , patchHtmlFileAfterDeletingItem model.common updatedGlossaryItems_
+                            , Save.patchHtmlFileSimpler
+                                model.common
+                                glossary1
+                                (PageMsg.Internal << FailedToDelete)
+                                (PageMsg.Internal <| Deleted updatedGlossaryItems_)
                             )
 
                         Err error ->
@@ -641,83 +651,109 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        updatedGlossary : Glossary
-                        updatedGlossary =
+                        glossary1 : Glossary
+                        glossary1 =
                             { glossary | cardWidth = cardWidth }
 
                         common0 =
                             model.common
 
                         common1 =
-                            { common0 | glossary = Ok updatedGlossary }
+                            { common0 | glossary = Ok glossary1 }
                     in
                     ( { model
                         | confirmDeleteId = Nothing
                         , deleting = NotSaving
                         , savingSettings = SavingInProgress
                       }
-                    , patchHtmlFileAfterChangingSettings common1
+                    , Save.patchHtmlFileSimpler
+                        common1
+                        glossary1
+                        (PageMsg.Internal << FailedToChangeSettings)
+                        (PageMsg.Internal <| ChangedSettings common1)
                     )
 
                 _ ->
                     ( model, Cmd.none )
 
         ToggleEnableExportMenu ->
-            let
-                common0 : CommonModel
-                common0 =
-                    model.common
-
-                common1 : CommonModel
-                common1 =
-                    { common0 | enableExportMenu = not common0.enableExportMenu }
-            in
-            ( { model
-                | confirmDeleteId = Nothing
-                , deleting = NotSaving
-                , savingSettings = SavingInProgress
-              }
-            , patchHtmlFileAfterChangingSettings common1
-            )
-
-        ToggleEnableOrderItemsButtons ->
-            let
-                common0 : CommonModel
-                common0 =
-                    model.common
-
-                common1 : CommonModel
-                common1 =
-                    { common0 | enableOrderItemsButtons = not common0.enableOrderItemsButtons }
-            in
-            ( { model
-                | confirmDeleteId = Nothing
-                , deleting = NotSaving
-                , savingSettings = SavingInProgress
-              }
-            , patchHtmlFileAfterChangingSettings common1
-            )
-
-        ToggleEnableLastUpdatedDates ->
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        updatedGlossary : Glossary
-                        updatedGlossary =
-                            { glossary | enableLastUpdatedDates = not glossary.enableLastUpdatedDates }
-
+                        common0 : CommonModel
                         common0 =
                             model.common
 
+                        common1 : CommonModel
                         common1 =
-                            { common0 | glossary = Ok updatedGlossary }
+                            { common0 | enableExportMenu = not common0.enableExportMenu }
                     in
                     ( { model
                         | confirmDeleteId = Nothing
                         , deleting = NotSaving
                         , savingSettings = SavingInProgress
                       }
-                    , patchHtmlFileAfterChangingSettings common1
+                    , Save.patchHtmlFileSimpler
+                        common1
+                        glossary
+                        (PageMsg.Internal << FailedToChangeSettings)
+                        (PageMsg.Internal <| ChangedSettings common1)
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        ToggleEnableOrderItemsButtons ->
+            case model.common.glossary of
+                Ok glossary ->
+                    let
+                        common0 : CommonModel
+                        common0 =
+                            model.common
+
+                        common1 : CommonModel
+                        common1 =
+                            { common0 | enableOrderItemsButtons = not common0.enableOrderItemsButtons }
+                    in
+                    ( { model
+                        | confirmDeleteId = Nothing
+                        , deleting = NotSaving
+                        , savingSettings = SavingInProgress
+                      }
+                    , Save.patchHtmlFileSimpler
+                        common1
+                        glossary
+                        (PageMsg.Internal << FailedToChangeSettings)
+                        (PageMsg.Internal <| ChangedSettings common1)
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        ToggleEnableLastUpdatedDates ->
+            case model.common.glossary of
+                Ok glossary ->
+                    let
+                        glossary1 : Glossary
+                        glossary1 =
+                            { glossary | enableLastUpdatedDates = not glossary.enableLastUpdatedDates }
+
+                        common0 =
+                            model.common
+
+                        common1 =
+                            { common0 | glossary = Ok glossary1 }
+                    in
+                    ( { model
+                        | confirmDeleteId = Nothing
+                        , deleting = NotSaving
+                        , savingSettings = SavingInProgress
+                      }
+                    , Save.patchHtmlFileSimpler
+                        common1
+                        glossary1
+                        (PageMsg.Internal << FailedToChangeSettings)
+                        (PageMsg.Internal <| ChangedSettings common1)
                     )
 
                 _ ->
@@ -846,92 +882,6 @@ filterByTag model =
 giveFocusToOuter : Cmd Msg
 giveFocusToOuter =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.outer)
-
-
-patchHtmlFileAfterChangingSettings : CommonModel -> Cmd Msg
-patchHtmlFileAfterChangingSettings common =
-    let
-        okMsg : PageMsg InternalMsg
-        okMsg =
-            PageMsg.Internal <| ChangedSettings common
-    in
-    if common.enableSavingChangesInMemory then
-        Extras.Task.messageToCommand okMsg
-
-    else
-        case common.glossary of
-            Ok glossary ->
-                Http.request
-                    { method = "PATCH"
-                    , headers = []
-                    , url = "/"
-                    , body =
-                        glossary
-                            |> Glossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
-                            |> HtmlTree.toHtmlReplacementString
-                            |> Http.stringBody "text/html"
-                    , expect =
-                        Http.expectWhatever
-                            (\result ->
-                                case result of
-                                    Ok _ ->
-                                        okMsg
-
-                                    Err error ->
-                                        PageMsg.Internal <| FailedToChangeSettings error
-                            )
-                    , timeout = Nothing
-                    , tracker = Nothing
-                    }
-
-            _ ->
-                -- Should never happen
-                Extras.Task.messageToCommand okMsg
-
-
-patchHtmlFileAfterDeletingItem : CommonModel -> GlossaryItems -> Cmd Msg
-patchHtmlFileAfterDeletingItem common glossaryItems =
-    let
-        msg : PageMsg InternalMsg
-        msg =
-            PageMsg.Internal <| Deleted glossaryItems
-    in
-    if common.enableSavingChangesInMemory then
-        Extras.Task.messageToCommand msg
-
-    else
-        case common.glossary of
-            Ok glossary0 ->
-                let
-                    glossary : Glossary
-                    glossary =
-                        { glossary0 | items = glossaryItems }
-                in
-                Http.request
-                    { method = "PATCH"
-                    , headers = []
-                    , url = "/"
-                    , body =
-                        glossary
-                            |> Glossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
-                            |> HtmlTree.toHtmlReplacementString
-                            |> Http.stringBody "text/html"
-                    , expect =
-                        Http.expectWhatever
-                            (\result ->
-                                case result of
-                                    Ok _ ->
-                                        msg
-
-                                    Err error ->
-                                        PageMsg.Internal <| FailedToDelete error
-                            )
-                    , timeout = Nothing
-                    , tracker = Nothing
-                    }
-
-            _ ->
-                Cmd.none
 
 
 scrollGlossaryItemIntoView : GlossaryItemId -> Cmd Msg

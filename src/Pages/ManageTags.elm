@@ -27,6 +27,7 @@ import Http
 import Icons
 import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
+import Save
 import Svg.Attributes
 import TagsForm as Form exposing (Row, TagsForm)
 import TagsForm.TagDescriptionField as TagDescriptionField exposing (TagDescriptionField)
@@ -97,51 +98,6 @@ init common =
 -- UPDATE
 
 
-patchHtmlFile : CommonModel -> GlossaryItems -> Cmd Msg
-patchHtmlFile common glossaryItems =
-    let
-        msg : PageMsg a
-        msg =
-            PageMsg.NavigateToListAll common
-    in
-    if common.enableSavingChangesInMemory then
-        Extras.Task.messageToCommand msg
-
-    else
-        case common.glossary of
-            Ok glossary0 ->
-                let
-                    glossary : Glossary
-                    glossary =
-                        { glossary0 | items = glossaryItems }
-                in
-                Http.request
-                    { method = "PATCH"
-                    , headers = []
-                    , url = "/"
-                    , body =
-                        glossary
-                            |> Glossary.toHtmlTree common.enableExportMenu common.enableOrderItemsButtons common.enableHelpForMakingChanges
-                            |> HtmlTree.toHtmlReplacementString
-                            |> Http.stringBody "text/html"
-                    , expect =
-                        Http.expectWhatever
-                            (\result ->
-                                case result of
-                                    Ok _ ->
-                                        msg
-
-                                    Err error ->
-                                        PageMsg.Internal <| FailedToSave error
-                            )
-                    , timeout = Nothing
-                    , tracker = Nothing
-                    }
-
-            _ ->
-                Cmd.none
-
-
 update : InternalMsg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -186,7 +142,7 @@ update msg model =
                         case GlossaryItems.applyTagsChanges (Form.changes model.form) glossary0.items of
                             Ok updatedItems ->
                                 let
-                                    updatedGlossary =
+                                    glossary1 =
                                         { glossary0 | items = updatedItems }
 
                                     common0 : CommonModel
@@ -195,10 +151,14 @@ update msg model =
 
                                     common1 : CommonModel
                                     common1 =
-                                        { common0 | glossary = Ok updatedGlossary }
+                                        { common0 | glossary = Ok glossary1 }
                                 in
                                 ( { model | saving = SavingInProgress }
-                                , patchHtmlFile common1 updatedGlossary.items
+                                , Save.patchHtmlFileSimpler
+                                    common1
+                                    glossary1
+                                    (PageMsg.Internal << FailedToSave)
+                                    (PageMsg.NavigateToListAll common1)
                                 )
 
                             Err error ->
