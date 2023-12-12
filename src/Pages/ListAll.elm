@@ -45,7 +45,7 @@ import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
-import Data.GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -2244,6 +2244,36 @@ canEdit editability =
             False
 
 
+pageTitle : Model -> Glossary -> String
+pageTitle model glossary =
+    let
+        glossaryTitle =
+            GlossaryTitle.inlineText glossary.title
+    in
+    case ( model.layout, model.common.maybeId ) of
+        ( ShowSingleItem, Just id ) ->
+            let
+                disambiguatedPreferredTerm =
+                    glossary.items
+                        |> GlossaryItems.get id
+                        |> Maybe.map
+                            (\item ->
+                                item
+                                    |> GlossaryItemForHtml.disambiguatedPreferredTerm
+                                    |> Term.inlineText
+                            )
+            in
+            disambiguatedPreferredTerm
+                |> Maybe.map
+                    (\disambiguatedPreferredTerm_ ->
+                        disambiguatedPreferredTerm_ ++ " · " ++ glossaryTitle
+                    )
+                |> Maybe.withDefault glossaryTitle
+
+        _ ->
+            glossaryTitle
+
+
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
@@ -2265,7 +2295,7 @@ view model =
                 indexOfTerms =
                     IndexOfTerms.fromGlossaryItems filterByTag_ items
             in
-            { title = GlossaryTitle.inlineText glossary.title
+            { title = pageTitle model glossary
             , body =
                 [ Html.div
                     [ class "min-h-full focus:outline-none"

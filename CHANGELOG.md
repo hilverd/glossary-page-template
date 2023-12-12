@@ -13,6 +13,8 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 
+- When viewing a single item, show its (disambiguated) preferred term in the page title.
+
 ### Changed
 
 - Move all UI text to `Internationalisation` directory to facilitate translations (see issue #10).
