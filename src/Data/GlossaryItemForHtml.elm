@@ -45,6 +45,7 @@ import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Extras.Url exposing (fragmentOnly)
 import Internationalisation as I18n
 import Json.Decode as Decode exposing (Decoder)
+import Json.Decode.Pipeline exposing (optional, required)
 import List
 
 
@@ -83,20 +84,21 @@ create preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ definitio
 -}
 decode : Decoder GlossaryItemForHtml
 decode =
-    Decode.map8
-        create
-        (Decode.field "preferredTerm" <| Term.decode)
-        (Decode.field "alternativeTerms" <| Decode.list <| Term.decode)
-        (Decode.field "disambiguationTag" <| Decode.nullable <| Tag.decode)
-        (Decode.field "normalTags" <| Decode.list <| Tag.decode)
-        (Decode.field "definition" <|
-            Decode.nullable <|
-                Decode.map Definition.fromMarkdown <|
-                    Decode.string
-        )
-        (Decode.field "relatedTerms" <| Decode.list <| Term.decode)
-        (Decode.field "needsUpdating" Decode.bool)
-        (Decode.maybe <| Decode.field "lastUpdatedDate" Decode.string)
+    Decode.succeed create
+        |> required "preferredTerm" Term.decode
+        |> (required "alternativeTerms" <| Decode.list Term.decode)
+        |> (required "disambiguationTag" <| Decode.nullable Tag.decode)
+        |> (required "normalTags" <| Decode.list Tag.decode)
+        |> (required "definition" <|
+                Decode.nullable <|
+                    Decode.map Definition.fromMarkdown <|
+                        Decode.string
+           )
+        |> (required "relatedTerms" <| Decode.list Term.decode)
+        |> required "needsUpdating" Decode.bool
+        |> optional "lastUpdatedDate"
+            (Decode.map Just Decode.string)
+            Nothing
 
 
 {-| The disambiguated preferred term for this glossary item.

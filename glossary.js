@@ -93,7 +93,7 @@ if (containerElement) {
             definition: definition || null,
             relatedTerms: relatedTerms,
             needsUpdating: needsUpdatingDdElements.length > 0,
-            lastUpdatedDate: lastUpdatedDate
+            lastUpdatedDate: lastUpdatedDate || null
         }
     }
 
