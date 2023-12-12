@@ -72,6 +72,8 @@ defaultComputerScienceItem =
         []
         False
         (Just "2023-09-15T19:58:59.573Z")
+        Nothing
+        Nothing
 
 
 defaultFinanceDefinition : Definition
@@ -90,6 +92,8 @@ defaultFinanceItem =
         [ Term.fromMarkdown "Loan" False ]
         False
         (Just "2023-10-30T08:25:24.765Z")
+        Nothing
+        Nothing
 
 
 informationRetrievalDefinition : Definition
@@ -108,6 +112,8 @@ informationRetrievalItem =
         []
         False
         (Just "2023-09-16T07:09:19.630Z")
+        Nothing
+        Nothing
 
 
 interestRateDefinition : Definition
@@ -126,6 +132,8 @@ interestRateItem =
         [ Term.fromMarkdown "Loan" False ]
         False
         (Just "2023-10-30T08:25:30.335Z")
+        Nothing
+        Nothing
 
 
 updatedInterestRateItem : GlossaryItemForHtml
@@ -139,6 +147,8 @@ updatedInterestRateItem =
         [ Term.fromMarkdown "Loan" False ]
         False
         (Just "2023-10-30T08:25:30.335Z")
+        Nothing
+        Nothing
 
 
 loanDefinition : Definition
@@ -157,6 +167,8 @@ loanItem =
         [ Term.fromMarkdown "Interest rate" False ]
         False
         (Just "2023-10-30T08:26:18.523Z")
+        Nothing
+        Nothing
 
 
 updatedLoanItem : GlossaryItemForHtml
@@ -170,6 +182,8 @@ updatedLoanItem =
         [ Term.fromMarkdown "Interest rate updated" False ]
         False
         (Just "2023-10-30T08:26:18.523Z")
+        Nothing
+        Nothing
 
 
 glossaryItems : GlossaryItems
@@ -264,6 +278,8 @@ suite =
                                     []
                                     False
                                     (Just "2023-09-15T19:58:59.573Z")
+                                    Nothing
+                                    Nothing
                         )
         , test "removes tags" <|
             \_ ->
@@ -305,6 +321,8 @@ suite =
                                     [ Term.fromMarkdown "Loan" False ]
                                     False
                                     (Just "2023-10-30T08:25:24.765Z")
+                                    Nothing
+                                    Nothing
                         )
         , test "removes and inserts items" <|
             \_ ->
@@ -563,6 +581,8 @@ suite =
                             [ Term.fromMarkdown "Default (Finance)" False ]
                             False
                             (Just "2023-09-15T19:58:59.573Z")
+                            Nothing
+                            Nothing
 
                     defaultFinanceItem_ : GlossaryItemForHtml
                     defaultFinanceItem_ =
@@ -575,6 +595,8 @@ suite =
                             []
                             False
                             (Just "2023-10-30T08:25:24.765Z")
+                            Nothing
+                            Nothing
 
                     glossaryItems_ : Result String GlossaryItems
                     glossaryItems_ =
@@ -600,6 +622,8 @@ suite =
                                     []
                                     False
                                     (Just "2023-09-15T19:58:59.573Z")
+                                    Nothing
+                                    Nothing
                               )
                             ]
                         )
@@ -668,6 +692,8 @@ suite =
                         []
                         False
                         (Just "2023-10-30T08:25:30.335Z")
+                        Nothing
+                        Nothing
                     ]
                     |> Result.map (GlossaryItems.get <| GlossaryItemId.create 0)
                     |> Expect.equal
@@ -682,6 +708,8 @@ suite =
                                     []
                                     False
                                     (Just "2023-10-30T08:25:30.335Z")
+                                    Nothing
+                                    Nothing
                         )
         , test "sorts tags alphabetically" <|
             \_ ->
@@ -734,6 +762,8 @@ suite =
                         []
                         False
                         (Just "2023-10-30T08:25:30.335Z")
+                        Nothing
+                        Nothing
                     , GlossaryItemForHtml.create
                         (Term.fromMarkdown "Foo (Finance)" False)
                         []
@@ -743,6 +773,8 @@ suite =
                         []
                         False
                         (Just "2023-10-30T08:25:30.335Z")
+                        Nothing
+                        Nothing
                     ]
                     |> Expect.equal
                         (Err "there are multiple items with (disambiguated) preferred term \"Foo (Finance)\"")

@@ -6,6 +6,7 @@ module Internationalisation.Eng exposing (abbreviation, about, addLinkButton, ad
 import Accessibility.Key
 import ElementIds
 import Extras.Html
+import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree
 import Html exposing (Html, a, code, div, p, pre, span, text)
 import Html.Attributes exposing (class, href)
@@ -199,7 +200,9 @@ updatedOn name emailAddress date =
                 span
                     []
                     [ text " by "
-                    , text name_
+                    , span
+                        [ Extras.HtmlAttribute.showMaybe Html.Attributes.title emailAddress ]
+                        [ text name_ ]
                     ]
             )
             name

@@ -251,7 +251,7 @@ lastUpdatedByEmailAddress : GlossaryItemForHtml -> Maybe String
 lastUpdatedByEmailAddress glossaryItemForHtml =
     case glossaryItemForHtml of
         GlossaryItemForHtml item ->
-            item.lastUpdatedByName
+            item.lastUpdatedByEmailAddress
 
 
 {-| Disambiguate a term by appending the given tag in parentheses.

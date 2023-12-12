@@ -29,6 +29,8 @@ loadedGlossaryItems =
                 [ Term.fromMarkdown "Second the term" False ]
                 False
                 Nothing
+                Nothing
+                Nothing
 
         two : GlossaryItemForHtml
         two =
@@ -41,6 +43,8 @@ loadedGlossaryItems =
                 []
                 False
                 Nothing
+                Nothing
+                Nothing
 
         three : GlossaryItemForHtml
         three =
@@ -52,6 +56,8 @@ loadedGlossaryItems =
                 (Just (Definition.fromMarkdown "The term three"))
                 [ Term.fromMarkdown "Second the term" False ]
                 False
+                Nothing
+                Nothing
                 Nothing
     in
     [ one, two, three ]

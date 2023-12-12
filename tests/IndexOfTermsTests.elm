@@ -28,6 +28,8 @@ glossaryItems =
                 []
                 False
                 Nothing
+                Nothing
+                Nothing
 
         two : GlossaryItemForHtml
         two =
@@ -39,6 +41,8 @@ glossaryItems =
                 (Just (Definition.fromMarkdown "Two"))
                 []
                 False
+                Nothing
+                Nothing
                 Nothing
 
         thirtyFourty : GlossaryItemForHtml
@@ -52,6 +56,8 @@ glossaryItems =
                 []
                 False
                 Nothing
+                Nothing
+                Nothing
 
         three : GlossaryItemForHtml
         three =
@@ -63,6 +69,8 @@ glossaryItems =
                 (Just (Definition.fromMarkdown "3Three"))
                 []
                 False
+                Nothing
+                Nothing
                 Nothing
 
         doubleOhSeven : GlossaryItemForHtml
@@ -76,6 +84,8 @@ glossaryItems =
                 []
                 False
                 Nothing
+                Nothing
+                Nothing
 
         omega : GlossaryItemForHtml
         omega =
@@ -88,6 +98,8 @@ glossaryItems =
                 []
                 False
                 Nothing
+                Nothing
+                Nothing
 
         future : GlossaryItemForHtml
         future =
@@ -99,6 +111,8 @@ glossaryItems =
                 (Just (Definition.fromMarkdown "_future_"))
                 []
                 False
+                Nothing
+                Nothing
                 Nothing
     in
     [ doubleOhSeven, one, two, thirtyFourty, three, omega, future ]
