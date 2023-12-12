@@ -8,7 +8,7 @@ import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml, lastUpdatedByEmailAddress)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import ElementIds
@@ -158,6 +158,12 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                         let
                             lastUpdatedDate =
                                 GlossaryItemForHtml.lastUpdatedDateAsIso8601 glossaryItem
+
+                            lastUpdatedByName =
+                                GlossaryItemForHtml.lastUpdatedByName glossaryItem
+
+                            lastUpdatedByEmailAddress =
+                                GlossaryItemForHtml.lastUpdatedByEmailAddress glossaryItem
                         in
                         if editable then
                             div
@@ -230,7 +236,9 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                 , div
                                     [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
                                     [ Extras.Html.showIf enableLastUpdatedDates <|
-                                        Extras.Html.showMaybe I18n.updatedOn lastUpdatedDate
+                                        Extras.Html.showMaybe
+                                            (I18n.updatedOn lastUpdatedByName lastUpdatedByEmailAddress)
+                                            lastUpdatedDate
                                     , div
                                         [ class "flex justify-between" ]
                                         [ span
@@ -337,7 +345,9 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                         )
                                     ]
                                 , Extras.Html.showIf enableLastUpdatedDates <|
-                                    Extras.Html.showMaybe I18n.updatedOn lastUpdatedDate
+                                    Extras.Html.showMaybe
+                                        (I18n.updatedOn lastUpdatedByName lastUpdatedByEmailAddress)
+                                        lastUpdatedDate
                                 ]
         )
         glossaryItemWithPreviousAndNext.item
@@ -399,6 +409,12 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
 
                 lastUpdatedDate =
                     GlossaryItemForHtml.lastUpdatedDateAsIso8601 glossaryItem
+
+                lastUpdatedByName =
+                    GlossaryItemForHtml.lastUpdatedByName glossaryItem
+
+                lastUpdatedByEmailAddress =
+                    GlossaryItemForHtml.lastUpdatedByEmailAddress glossaryItem
             in
             Html.div []
                 [ Html.nav
@@ -512,7 +528,9 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                 , div
                     [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
                     [ Extras.Html.showIf enableLastUpdatedDates <|
-                        Extras.Html.showMaybe I18n.updatedOn lastUpdatedDate
+                        Extras.Html.showMaybe
+                            (I18n.updatedOn lastUpdatedByName lastUpdatedByEmailAddress)
+                            lastUpdatedDate
                     ]
                 ]
         )

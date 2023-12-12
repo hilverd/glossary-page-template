@@ -239,6 +239,8 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                                     (GlossaryItemForHtml.definition glossaryItemForHtml)
                                     (GlossaryItemForHtml.needsUpdating glossaryItemForHtml)
                                     (GlossaryItemForHtml.lastUpdatedDateAsIso8601 glossaryItemForHtml)
+                                    (GlossaryItemForHtml.lastUpdatedByName glossaryItemForHtml)
+                                    (GlossaryItemForHtml.lastUpdatedByEmailAddress glossaryItemForHtml)
 
                             itemById1 =
                                 GlossaryItemIdDict.insert itemId glossaryItem itemById_
@@ -693,6 +695,12 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId glossaryItems =
 
                             lastUpdatedDateAsIso8601 =
                                 GlossaryItem.lastUpdatedDateAsIso8601 item
+
+                            lastUpdatedByName =
+                                GlossaryItem.lastUpdatedByName item
+
+                            lastUpdatedByEmailAddress =
+                                GlossaryItem.lastUpdatedByEmailAddress item
                         in
                         GlossaryItemForHtml.create
                             preferredTerm
@@ -703,6 +711,8 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId glossaryItems =
                             relatedPreferredTerms
                             needsUpdating
                             lastUpdatedDateAsIso8601
+                            lastUpdatedByName
+                            lastUpdatedByEmailAddress
                     )
 
 

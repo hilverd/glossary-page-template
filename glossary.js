@@ -84,6 +84,8 @@ if (containerElement) {
         const relatedTermDdElements = ddElements.filter(ddElement => ddElement.className === 'related-terms');
         const relatedTerms = (relatedTermDdElements.length > 0) ? glossaryItemRelatedTermFromDdElement(relatedTermDdElements[0]) : [];
         const lastUpdatedDate = glossaryItemDivElement.dataset.lastUpdated;
+        const lastUpdatedByName = glossaryItemDivElement.dataset.lastUpdatedByName;
+        const lastUpdatedByEmailAddress = glossaryItemDivElement.dataset.lastUpdatedByEmailAddress;
 
         return {
             preferredTerm: glossaryItemTermFromDtElement(preferredTermDtElement),
@@ -93,7 +95,9 @@ if (containerElement) {
             definition: definition || null,
             relatedTerms: relatedTerms,
             needsUpdating: needsUpdatingDdElements.length > 0,
-            lastUpdatedDate: lastUpdatedDate || null
+            lastUpdatedDate: lastUpdatedDate || null,
+            lastUpdatedByName: lastUpdatedByName || null,
+            lastUpdatedByEmailAddress: lastUpdatedByEmailAddress || null
         }
     }
 

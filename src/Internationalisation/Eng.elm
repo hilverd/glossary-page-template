@@ -186,14 +186,23 @@ builtUsingGlossaryPageTemplateHtmlTree =
     ]
 
 
-updatedOn : String -> Html msg
-updatedOn date =
+updatedOn : Maybe String -> Maybe String -> String -> Html msg
+updatedOn name emailAddress date =
     div
         [ class "text-right text-sm mt-1.5 mb-2.5 text-gray-500 dark:text-gray-400" ]
         [ text "Updated: "
         , Html.node "last-updated"
             [ Html.Attributes.attribute "datetime" date ]
             []
+        , Extras.Html.showMaybe
+            (\name_ ->
+                span
+                    []
+                    [ text " by "
+                    , text name_
+                    ]
+            )
+            name
         ]
 
 

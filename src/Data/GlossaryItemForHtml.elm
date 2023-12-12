@@ -1,7 +1,7 @@
 module Data.GlossaryItemForHtml exposing
     ( GlossaryItemForHtml
     , create, decode
-    , disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601
+    , disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
     , toHtmlTree
     , disambiguatedTerm
     )
@@ -23,7 +23,7 @@ It is not the representation used by the editor UI when the application is runni
 
 # Query
 
-@docs disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601
+@docs disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
 
 
 # Converting to HTML
@@ -61,13 +61,26 @@ type GlossaryItemForHtml
         , relatedPreferredTerms : List Term
         , needsUpdating : Bool
         , lastUpdatedDateAsIso8601 : Maybe String
+        , lastUpdatedByName : Maybe String
+        , lastUpdatedByEmailAddress : Maybe String
         }
 
 
 {-| Create a glossary item from its parts.
 -}
-create : Term -> List Term -> Maybe Tag -> List Tag -> Maybe Definition -> List Term -> Bool -> Maybe String -> GlossaryItemForHtml
-create preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ definition_ relatedPreferredTerms_ needsUpdating_ lastUpdatedDateAsIso8601_ =
+create :
+    Term
+    -> List Term
+    -> Maybe Tag
+    -> List Tag
+    -> Maybe Definition
+    -> List Term
+    -> Bool
+    -> Maybe String
+    -> Maybe String
+    -> Maybe String
+    -> GlossaryItemForHtml
+create preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ definition_ relatedPreferredTerms_ needsUpdating_ lastUpdatedDateAsIso8601_ lastUpdatedByName_ lastUpdatedByEmailAddress_ =
     GlossaryItemForHtml
         { preferredTerm = preferredTerm_
         , alternativeTerms = alternativeTerms_
@@ -77,6 +90,8 @@ create preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ definitio
         , relatedPreferredTerms = relatedPreferredTerms_
         , needsUpdating = needsUpdating_
         , lastUpdatedDateAsIso8601 = lastUpdatedDateAsIso8601_
+        , lastUpdatedByName = lastUpdatedByName_
+        , lastUpdatedByEmailAddress = lastUpdatedByEmailAddress_
         }
 
 
@@ -97,6 +112,12 @@ decode =
         |> (required "relatedTerms" <| Decode.list Term.decode)
         |> required "needsUpdating" Decode.bool
         |> optional "lastUpdatedDate"
+            (Decode.map Just Decode.string)
+            Nothing
+        |> optional "lastUpdatedByName"
+            (Decode.map Just Decode.string)
+            Nothing
+        |> optional "lastUpdatedByEmailAddress"
             (Decode.map Just Decode.string)
             Nothing
 
@@ -213,6 +234,24 @@ lastUpdatedDateAsIso8601 glossaryItemForHtml =
     case glossaryItemForHtml of
         GlossaryItemForHtml item ->
             item.lastUpdatedDateAsIso8601
+
+
+{-| The name of the person who last updated this glossary item.
+-}
+lastUpdatedByName : GlossaryItemForHtml -> Maybe String
+lastUpdatedByName glossaryItemForHtml =
+    case glossaryItemForHtml of
+        GlossaryItemForHtml item ->
+            item.lastUpdatedByName
+
+
+{-| The email address of the person who last updated this glossary item.
+-}
+lastUpdatedByEmailAddress : GlossaryItemForHtml -> Maybe String
+lastUpdatedByEmailAddress glossaryItemForHtml =
+    case glossaryItemForHtml of
+        GlossaryItemForHtml item ->
+            item.lastUpdatedByName
 
 
 {-| Disambiguate a term by appending the given tag in parentheses.

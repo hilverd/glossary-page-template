@@ -525,6 +525,8 @@ toGlossaryItem glossaryItems form dateTime =
         relatedTerms
         needsUpdating_
         lastUpdatedDate_
+        Nothing
+        Nothing
 
 
 addTerm : GlossaryItemForm -> GlossaryItemForm

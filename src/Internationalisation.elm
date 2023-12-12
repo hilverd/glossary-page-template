@@ -163,7 +163,7 @@ builtUsingGlossaryPageTemplate =
     I18n.builtUsingGlossaryPageTemplate
 
 
-updatedOn : String -> Html msg
+updatedOn : Maybe String -> Maybe String -> String -> Html msg
 updatedOn =
     I18n.updatedOn
 

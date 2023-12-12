@@ -1,7 +1,7 @@
 module Data.GlossaryItem exposing
     ( GlossaryItem
     , init
-    , preferredTerm, alternativeTerms, definition, needsUpdating, lastUpdatedDateAsIso8601
+    , preferredTerm, alternativeTerms, definition, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
     )
 
 {-| An item in a glossary.
@@ -19,7 +19,7 @@ module Data.GlossaryItem exposing
 
 # Query
 
-@docs preferredTerm, alternativeTerms, definition, needsUpdating, lastUpdatedDateAsIso8601
+@docs preferredTerm, alternativeTerms, definition, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
 
 -}
 
@@ -36,19 +36,31 @@ type GlossaryItem
         , definition : Maybe Definition
         , needsUpdating : Bool
         , lastUpdatedDateAsIso8601 : Maybe String
+        , lastUpdatedByName : Maybe String
+        , lastUpdatedByEmailAddress : Maybe String
         }
 
 
 {-| Create a glossary item from its components.
 -}
-init : Term -> List Term -> Maybe Definition -> Bool -> Maybe String -> GlossaryItem
-init preferredTerm_ alternativeTerms_ definition_ needsUpdating_ lastUpdatedDateAsIso8601_ =
+init :
+    Term
+    -> List Term
+    -> Maybe Definition
+    -> Bool
+    -> Maybe String
+    -> Maybe String
+    -> Maybe String
+    -> GlossaryItem
+init preferredTerm_ alternativeTerms_ definition_ needsUpdating_ lastUpdatedDateAsIso8601_ lastUpdatedByName_ lastUpdatedByEmailAddress_ =
     GlossaryItem
         { preferredTerm = preferredTerm_
         , alternativeTerms = alternativeTerms_
         , definition = definition_
         , needsUpdating = needsUpdating_
         , lastUpdatedDateAsIso8601 = lastUpdatedDateAsIso8601_
+        , lastUpdatedByName = lastUpdatedByName_
+        , lastUpdatedByEmailAddress = lastUpdatedByEmailAddress_
         }
 
 
@@ -95,3 +107,21 @@ lastUpdatedDateAsIso8601 glossaryItem =
     case glossaryItem of
         GlossaryItem item ->
             item.lastUpdatedDateAsIso8601
+
+
+{-| The name of the person who last updated this glossary item.
+-}
+lastUpdatedByName : GlossaryItem -> Maybe String
+lastUpdatedByName glossaryItem =
+    case glossaryItem of
+        GlossaryItem item ->
+            item.lastUpdatedByName
+
+
+{-| The email address of the person who last updated this glossary item.
+-}
+lastUpdatedByEmailAddress : GlossaryItem -> Maybe String
+lastUpdatedByEmailAddress glossaryItem =
+    case glossaryItem of
+        GlossaryItem item ->
+            item.lastUpdatedByEmailAddress
