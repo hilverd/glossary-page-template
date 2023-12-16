@@ -191,7 +191,11 @@ init editorIsRunning currentlyEditing commonModel =
                         CanEditWithBackend
 
                 ( False, True, False ) ->
-                    ReadOnly
+                    if currentlyEditing then
+                        EditingInMemory
+
+                    else
+                        CanEditInMemory
 
                 ( False, True, True ) ->
                     if currentlyEditing then

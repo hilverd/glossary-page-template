@@ -23,6 +23,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 - Fix minor bug where changes were applied in memory even if saving failed.
 - Don't show select menu for disambiguation tag if there are no tags.
+- Fix bug where button for making changes in memory was wrongly hidden.
 
 ### Removed
 
