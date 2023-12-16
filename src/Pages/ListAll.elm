@@ -1306,7 +1306,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIdOfItemToDelete deletin
             , Extras.Html.showIf enableSavingChangesInMemory <|
                 div
                     [ class "mt-5 sm:mt-4 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
-                    [ text I18n.sandboxModeMessage ]
+                    [ text I18n.savingChangesInMemoryMessage ]
             , case deleting of
                 SavingFailed errorMessage ->
                     div
@@ -1349,7 +1349,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIdOfItemToDelete deletin
 
 
 viewMakeChangesButton : Bool -> Bool -> Html Msg
-viewMakeChangesButton showSandboxModeMessage tabbable =
+viewMakeChangesButton showSavingChangesInMemoryMessage tabbable =
     div
         [ class "mb-4 flex-none print:hidden" ]
         [ Components.Button.white True
@@ -1366,10 +1366,10 @@ viewMakeChangesButton showSandboxModeMessage tabbable =
                     [ text "e" ]
                 ]
             ]
-        , Extras.Html.showIf showSandboxModeMessage <|
+        , Extras.Html.showIf showSavingChangesInMemoryMessage <|
             div
                 [ class "my-4 text-sm text-gray-500 dark:text-gray-400" ]
-                [ text I18n.sandboxModeMessage ]
+                [ text I18n.savingChangesInMemoryMessage ]
         ]
 
 

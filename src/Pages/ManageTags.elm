@@ -445,7 +445,7 @@ viewFooter model showValidationErrors glossaryItems =
         , Extras.Html.showIf model.common.enableSavingChangesInMemory <|
             div
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
-                [ text I18n.sandboxModeMessage ]
+                [ text I18n.savingChangesInMemoryMessage ]
         , div
             [ class "flex items-center" ]
             [ Components.Button.white
