@@ -12,6 +12,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [4.2.0] - 2023-12-16
+
+### Added
 
 - When viewing a single item, show its (disambiguated) preferred term in the page title.
 
@@ -24,8 +31,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Fix minor bug where changes were applied in memory even if saving failed.
 - Don't show select menu for disambiguation tag if there are no tags.
 - Fix bug where button for making changes in memory was wrongly hidden.
-
-### Removed
 
 ## [4.1.0] - 2023-11-30
 
@@ -647,7 +652,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.1.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.2.0...HEAD
+[4.2.0]: https://github.com/hilverd/glossary-page-template/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/hilverd/glossary-page-template/compare/v4.0.0...v4.1.0
 [4.0.0]: https://github.com/hilverd/glossary-page-template/compare/v3.8.0...v4.0.0
 [3.8.0]: https://github.com/hilverd/glossary-page-template/compare/v3.7.0...v3.8.0
