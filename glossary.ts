@@ -1,70 +1,70 @@
 import '@webcomponents/custom-elements';
 import './glossary.css';
-import { untilAsync, waitForElement } from './js/utilities.js';
 import { Elm } from './src/ApplicationShell.elm';
+import { untilAsync, waitForElement } from './ts/utilities.ts';
 
-const katexIsAvailable = typeof katex != "undefined";
+const katexIsAvailable: boolean = typeof katex != "undefined";
 
-const containerElement = document.getElementById('glossary-page-container');
+const containerElement: HTMLElement | null = document.getElementById('glossary-page-container');
 
 if (containerElement) {
-    const containerDataset = containerElement.dataset;
+    const containerDataset: DOMStringMap = containerElement.dataset;
 
-    const enableHelpForMakingChanges = containerDataset.enableHelpForMakingChanges === 'true';
-    const enableSavingChangesInMemory = containerDataset.enableSavingChangesInMemory === 'true';
-    const enableExportMenu = containerDataset.enableExportMenu !== 'false';
-    const enableOrderItemsButtons = containerDataset.enableOrderItemsButtons !== 'false';
-    const cardWidth = containerDataset.cardWidth;
-    const enableLastUpdatedDates = containerDataset.enableLastUpdatedDates === 'true';
-    const editorIsRunning = containerDataset.editorIsRunning === 'true';
+    const enableHelpForMakingChanges: boolean = containerDataset.enableHelpForMakingChanges === 'true';
+    const enableSavingChangesInMemory: boolean = containerDataset.enableSavingChangesInMemory === 'true';
+    const enableExportMenu: boolean = containerDataset.enableExportMenu !== 'false';
+    const enableOrderItemsButtons: boolean = containerDataset.enableOrderItemsButtons !== 'false';
+    const cardWidth: string | undefined = containerDataset.cardWidth;
+    const enableLastUpdatedDates: boolean = containerDataset.enableLastUpdatedDates === 'true';
+    const editorIsRunning: boolean = containerDataset.editorIsRunning === 'true';
 
-    const titleElement = document.getElementById('glossary-page-title');
-    const aboutElement = document.getElementById('glossary-page-about');
+    const titleElement: HTMLElement | null = document.getElementById('glossary-page-title');
+    const aboutElement: HTMLElement | null = document.getElementById('glossary-page-about');
 
-    const glossaryElement = document.getElementById('glossary-page-items');
+    const glossaryElement: HTMLElement | null = document.getElementById('glossary-page-items');
 
-    const aboutParagraph = aboutElement.querySelector('p').textContent.trim();
+    const aboutParagraph: string = aboutElement?.querySelector('p')?.textContent?.trim() || '';
 
-    const aboutUlElement = aboutElement.querySelector('ul');
-    const aboutLiElements = Array.prototype.slice.apply(aboutUlElement.querySelectorAll('li'));
-    const aboutLinks = aboutLiElements.map(aboutLinkFromLiElement);
+    const aboutUlElement: HTMLElement | null = aboutElement?.querySelector('ul') || null;
+    const aboutLiElements: HTMLElement[] = Array.prototype.slice.apply(aboutUlElement?.querySelectorAll('li') || []);
+    const aboutLinks: { href: string, body: string }[] = aboutLiElements.map(aboutLinkFromLiElement);
 
-    const tagDivElements = Array.prototype.slice.apply(document.querySelectorAll('#glossary-page-tags > dl > div'));
+    const tagDivElements: HTMLElement[] = Array.prototype.slice.apply(document.querySelectorAll('#glossary-page-tags > dl > div'));
 
-    const tagsWithDescriptions = tagDivElements.map(tagDivElement => {
+    const tagsWithDescriptions: { tag: string, description: string }[] = tagDivElements.map(tagDivElement => {
         return {
-            tag: tagDivElement.querySelector('dt').textContent.trim(),
-            description: tagDivElement.querySelector('dd').textContent.trim()
+            tag: tagDivElement.querySelector('dt')?.textContent?.trim() || '',
+            description: tagDivElement.querySelector('dd')?.textContent?.trim() || ''
         }
     });
 
-    const dlElement = glossaryElement.querySelector('dl');
-    const glossaryItemDivElements = Array.prototype.slice.apply(dlElement.querySelectorAll('div'));
-    const glossaryItems = glossaryItemDivElements.map(glossaryItemFromDivElement);
+    const dlElement: HTMLElement | null = glossaryElement?.querySelector('dl') || null;
+    const glossaryItemDivElements: HTMLElement[] = Array.prototype.slice.apply(dlElement?.querySelectorAll('div') || []);
+    const glossaryItems: any[] = glossaryItemDivElements.map(glossaryItemFromDivElement);
 
-    function normaliseWhitespace(s) {
+    function normaliseWhitespace(s: string): string {
         return s.replace(/\s+/g, ' ').trim();
     }
 
-    function aboutLinkFromLiElement(aboutLiElement) {
-        const aElement = aboutLiElement.querySelector('a');
+    function aboutLinkFromLiElement(aboutLiElement: HTMLElement): { href: string, body: string } {
+        const aElement: HTMLAnchorElement | null = aboutLiElement.querySelector('a');
         return {
-            href: aElement.getAttribute('href'),
-            body: normaliseWhitespace(aElement.textContent)
+            href: aElement?.getAttribute('href') || '',
+            body: normaliseWhitespace(aElement?.textContent || '')
         }
     }
 
-    function tagInItemFromButtonElement(buttonElement) {
+    function tagInItemFromButtonElement(buttonElement: HTMLButtonElement): string | undefined {
         return buttonElement?.textContent?.trim();
     }
 
-    function glossaryItemFromDivElement(glossaryItemDivElement) {
-        const dtElements = Array.prototype.slice.apply(glossaryItemDivElement.querySelectorAll('dt'));
-        const preferredTermDtElement = dtElements[0];
-        const alternativeTermsDtElements = dtElements.slice(1);
-        const ddElements = Array.prototype.slice.apply(glossaryItemDivElement.querySelectorAll('dd'));
+    function glossaryItemFromDivElement(glossaryItemDivElement: HTMLElement): any {
+        const dtElements: HTMLElement[] = Array.prototype.slice.apply(glossaryItemDivElement.querySelectorAll('dt'));
+        const preferredTermDtElement: HTMLElement | undefined = dtElements[0];
+        const alternativeTermsDtElements: HTMLElement[] = dtElements.slice(1);
+        const ddElements: HTMLElement[] = Array.prototype.slice.apply(glossaryItemDivElement.querySelectorAll('dd'));
 
-        const definitionDdElements = ddElements
+        const definitionDdElements: HTMLElement[] = ddElements
             .filter(ddElement =>
                 ddElement.className !== 'tags' &&
                 ddElement.className !== 'needs-updating' &&
@@ -74,19 +74,19 @@ if (containerElement) {
         /* The current implementation allows one definition per item.
            Previous versions allowed multiple definitions, and for backwards compatibility these are being joined here.
         */
-        const definition = definitionDdElements.map(ddElement => ddElement.textContent.trim()).join('\n\n');
+        const definition: string = definitionDdElements.map(ddElement => ddElement.textContent?.trim()).join('\n\n') || '';
 
-        const tagsDdElement = ddElements.filter(ddElement => ddElement.className === 'tags')[0];
-        const tagElements = Array.prototype.slice.apply(tagsDdElement?.querySelectorAll('button') || []);
-        const tags = tagElements.map(tagElement => tagInItemFromButtonElement(tagElement));
-        const hasDisambiguationTag = preferredTermDtElement.querySelector('dfn span.disambiguation') !== null;
+        const tagsDdElement: HTMLElement | undefined = ddElements.filter(ddElement => ddElement.className === 'tags')[0];
+        const tagElements: HTMLButtonElement[] = Array.prototype.slice.apply(tagsDdElement?.querySelectorAll('button') || []);
+        const tags: (string | undefined)[] = tagElements.map(tagElement => tagInItemFromButtonElement(tagElement));
+        const hasDisambiguationTag: boolean = preferredTermDtElement?.querySelector('dfn span.disambiguation') !== null;
 
-        const needsUpdatingDdElements = ddElements.filter(ddElement => ddElement.className === 'needs-updating');
-        const relatedTermDdElements = ddElements.filter(ddElement => ddElement.className === 'related-terms');
-        const relatedTerms = (relatedTermDdElements.length > 0) ? glossaryItemRelatedTermFromDdElement(relatedTermDdElements[0]) : [];
-        const lastUpdatedDate = glossaryItemDivElement.dataset.lastUpdated;
-        const lastUpdatedByName = glossaryItemDivElement.dataset.lastUpdatedByName;
-        const lastUpdatedByEmailAddress = glossaryItemDivElement.dataset.lastUpdatedByEmailAddress;
+        const needsUpdatingDdElements: HTMLElement[] = ddElements.filter(ddElement => ddElement.className === 'needs-updating');
+        const relatedTermDdElements: HTMLElement[] = ddElements.filter(ddElement => ddElement.className === 'related-terms');
+        const relatedTerms: any[] = (relatedTermDdElements.length > 0) ? glossaryItemRelatedTermFromDdElement(relatedTermDdElements[0]) : [];
+        const lastUpdatedDate: string | undefined = glossaryItemDivElement.dataset.lastUpdated;
+        const lastUpdatedByName: string | undefined = glossaryItemDivElement.dataset.lastUpdatedByName;
+        const lastUpdatedByEmailAddress: string | undefined = glossaryItemDivElement.dataset.lastUpdatedByEmailAddress;
 
         return {
             preferredTerm: glossaryItemTermFromDtElement(preferredTermDtElement),
@@ -102,11 +102,11 @@ if (containerElement) {
         }
     }
 
-    function glossaryItemTermFromDtElement(dtElement) {
-        const dfnElement = dtElement.querySelector('dfn');
-        const isAbbreviation = Boolean(dfnElement.querySelector('abbr'));
-        const dfnElementWithoutDisambiguationTag = dfnElement.querySelector('span') || dfnElement;
-        const body = dfnElementWithoutDisambiguationTag.textContent;
+    function glossaryItemTermFromDtElement(dtElement: HTMLElement | undefined): { isAbbreviation: boolean, body: string } {
+        const dfnElement: HTMLElement | null = dtElement?.querySelector('dfn') || null;
+        const isAbbreviation: boolean = Boolean(dfnElement?.querySelector('abbr'));
+        const dfnElementWithoutDisambiguationTag: HTMLElement | null = dfnElement?.querySelector('span') || dfnElement;
+        const body: string = dfnElementWithoutDisambiguationTag?.textContent || '';
 
         return {
             isAbbreviation: isAbbreviation,
@@ -114,14 +114,14 @@ if (containerElement) {
         };
     }
 
-    function glossaryItemRelatedTermFromDdElement(ddElement) {
+    function glossaryItemRelatedTermFromDdElement(ddElement: HTMLElement): any[] {
         return Array.prototype.slice.apply(ddElement.querySelectorAll('a')).map(aElement => {
-            const hrefAttribute = aElement.getAttribute('href');
+            const hrefAttribute: string | null = aElement.getAttribute('href');
 
             return {
-                id: hrefAttribute.substring(1),
+                id: hrefAttribute?.substring(1),
                 isAbbreviation: false, // ignored
-                body: normaliseWhitespace(aElement.textContent)
+                body: normaliseWhitespace(aElement.textContent || '')
             };
         });
     }
@@ -137,7 +137,7 @@ if (containerElement) {
 
     const app = Elm.ApplicationShell.init({
         flags: {
-            titleString: normaliseWhitespace(titleElement.textContent),
+            titleString: normaliseWhitespace(titleElement?.textContent || ''),
             aboutParagraph: aboutParagraph,
             aboutLinks: aboutLinks,
             tagsWithDescriptions: tagsWithDescriptions,
@@ -155,7 +155,7 @@ if (containerElement) {
     });
 
     function allowBackgroundScrolling() {
-        document.querySelector('body').classList.toggle('overflow-hidden', false);
+        document.querySelector('body')?.classList.toggle('overflow-hidden', false);
     }
 
     app.ports.allowBackgroundScrolling.subscribe(() => {
@@ -163,11 +163,11 @@ if (containerElement) {
     });
 
     app.ports.preventBackgroundScrolling.subscribe(() => {
-        document.querySelector('body').classList.toggle('overflow-hidden', true);
+        document.querySelector('body')?.classList.toggle('overflow-hidden', true);
     });
 
-    app.ports.scrollElementIntoView.subscribe((elementId) => {
-        const elem = document.getElementById(elementId);
+    app.ports.scrollElementIntoView.subscribe((elementId: string) => {
+        const elem: HTMLElement | null = document.getElementById(elementId);
 
         if (elem) {
             elem.scrollIntoView({ block: "nearest" });
@@ -177,7 +177,7 @@ if (containerElement) {
         }
     });
 
-    app.ports.giveSearchFieldFocusOnceItIsPresent.subscribe((elementId) => {
+    app.ports.giveSearchFieldFocusOnceItIsPresent.subscribe((elementId: string) => {
         waitForElement(elementId).then(async (element) => {
             try {
                 await untilAsync(() => {
@@ -192,15 +192,15 @@ if (containerElement) {
         });
     });
 
-    app.ports.scrollSearchResultIntoView.subscribe((elementId) => {
-        const elem = document.getElementById(elementId);
+    app.ports.scrollSearchResultIntoView.subscribe((elementId: string) => {
+        const elem: HTMLElement | null = document.getElementById(elementId);
 
         if (elem) {
             elem.scrollIntoView({ block: "nearest" });
         }
     });
 
-    app.ports.changeTheme.subscribe((themeName) => {
+    app.ports.changeTheme.subscribe((themeName: string) => {
         if (themeName) {
             localStorage.glossaryPageTheme = themeName;
         } else {
@@ -214,7 +214,7 @@ if (containerElement) {
         app.ports.receiveCurrentDateTimeForSaving.send(new Date().toISOString());
     });
 
-    app.ports.copyEditorCommandToClipboard.subscribe((textToCopy) => {
+    app.ports.copyEditorCommandToClipboard.subscribe((textToCopy: string) => {
         navigator.clipboard.writeText(textToCopy).then(
             () => {
                 app.ports.attemptedToCopyEditorCommandToClipboard.send(true);
@@ -226,10 +226,16 @@ if (containerElement) {
     });
 
     app.ports.selectAllInTextFieldWithCommandToRunEditor.subscribe(() => {
-        document.getElementById("glossary-page-text-field-with-command-to-run-editor")?.select();
+        const element: HTMLElement | null = document.getElementById("glossary-page-text-field-with-command-to-run-editor");
+
+        if (element instanceof HTMLInputElement) {
+            const textField = element;
+
+            textField.select();
+        }
     });
 
-    function domReady(callback) {
+    function domReady(callback: () => void) {
         document.readyState === 'interactive' || document.readyState === 'complete' ?
             callback() : document.addEventListener('DOMContentLoaded', callback);
     }
@@ -249,7 +255,7 @@ if (containerElement) {
             }
         });
 
-        const browserLocale =
+        const browserLocale: string =
             navigator.languages && navigator.languages.length
                 ? navigator.languages[0]
                 : navigator.language;
@@ -264,7 +270,7 @@ if (containerElement) {
                 static get observedAttributes() { return ['datetime']; }
 
                 setTextContent() {
-                    const datetimeAttribute = this.getAttribute('datetime');
+                    const datetimeAttribute: string | null = this.getAttribute('datetime');
 
                     if (datetimeAttribute)
                         this.textContent = new Date(datetimeAttribute).toLocaleDateString(browserLocale, lastUpdatedDateOptions);

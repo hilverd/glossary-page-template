@@ -1,5 +1,5 @@
-export const untilAsync = async (fn, time = 1000, wait = 10000) => {
-    const startTime = new Date().getTime();
+export const untilAsync = async (fn: () => Promise<boolean>, time: number = 1000, wait: number = 10000): Promise<boolean> => {
+    const startTime: number = new Date().getTime();
     for (; ;) {
         try {
             if (await fn()) {
@@ -17,15 +17,15 @@ export const untilAsync = async (fn, time = 1000, wait = 10000) => {
     }
 };
 
-export function waitForElement(elementId) {
+export function waitForElement(elementId: string): Promise<HTMLElement> {
     return new Promise(resolve => {
         if (document.getElementById(elementId)) {
-            return resolve(document.getElementById(elementId));
+            return resolve(document.getElementById(elementId) as HTMLElement);
         }
 
         const observer = new MutationObserver(mutations => {
             if (document.getElementById(elementId)) {
-                resolve(document.getElementById(elementId));
+                resolve(document.getElementById(elementId) as HTMLElement);
                 observer.disconnect();
             }
         });
