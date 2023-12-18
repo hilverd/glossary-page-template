@@ -476,7 +476,7 @@ viewFooter model showValidationErrors glossaryItems =
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
-        Ok { enableMathSupport, items } ->
+        Ok { items } ->
             { title = I18n.manageTagsTitle
             , body =
                 [ div
@@ -507,7 +507,7 @@ view model =
                             [ model.form
                                 |> Form.rows
                                 |> viewEditTags
-                                    { enableMathSupport = enableMathSupport
+                                    { enableMathSupport = model.common.enableMathSupport
                                     , tabbable = True
                                     , showValidationErrors = model.triedToSaveWhenFormInvalid
                                     }

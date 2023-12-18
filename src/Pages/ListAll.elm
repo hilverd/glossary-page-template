@@ -352,8 +352,8 @@ update msg model =
                 results : List Components.SearchDialog.SearchResult
                 results =
                     case model.common.glossary of
-                        Ok { enableMathSupport, items } ->
-                            Search.search enableMathSupport (filterByTag model) searchString items
+                        Ok { items } ->
+                            Search.search model.common.enableMathSupport (filterByTag model) searchString items
 
                         Err _ ->
                             []
@@ -731,8 +731,8 @@ update msg model =
         DownloadAnki ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
             , case model.common.glossary of
-                Ok { enableMathSupport, title, aboutSection, items } ->
-                    Export.Anki.download enableMathSupport title aboutSection items
+                Ok { title, aboutSection, items } ->
+                    Export.Anki.download model.common.enableMathSupport title aboutSection items
 
                 _ ->
                     Cmd.none
@@ -951,7 +951,7 @@ viewSettings glossary model =
                 , Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
                     div
                         [ class "mt-6 pb-2" ]
-                        [ viewSelectInputSyntax glossary ]
+                        [ viewSelectInputSyntax model.common.enableMathSupport glossary ]
                 , div
                     [ class "mt-6 pb-2" ]
                     [ viewSelectCardWidth glossary model
@@ -1862,12 +1862,12 @@ viewExportButton enabled exportDropdownMenu =
         ]
 
 
-viewSelectInputSyntax : Glossary -> Html Msg
-viewSelectInputSyntax glossary =
+viewSelectInputSyntax : Bool -> Glossary -> Html Msg
+viewSelectInputSyntax enableMathSupport glossary =
     div
         []
-        [ Extras.Html.showIf (not glossary.enableMathSupport) I18n.howToEnableMathSupport
-        , Extras.Html.showIf glossary.enableMathSupport I18n.mathSupportIsEnabled
+        [ Extras.Html.showIf (not enableMathSupport) I18n.howToEnableMathSupport
+        , Extras.Html.showIf enableMathSupport I18n.mathSupportIsEnabled
         ]
 
 
@@ -2309,8 +2309,8 @@ view model =
                             )
                         )
                     ]
-                    [ viewMenuForMobile model glossary.enableMathSupport noModalDialogShown_ indexOfTerms
-                    , viewStaticSidebarForDesktop glossary.enableMathSupport noModalDialogShown_ indexOfTerms
+                    [ viewMenuForMobile model model.common.enableMathSupport noModalDialogShown_ indexOfTerms
+                    , viewStaticSidebarForDesktop model.common.enableMathSupport noModalDialogShown_ indexOfTerms
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar noModalDialogShown_
@@ -2358,12 +2358,12 @@ view model =
                                 , Extras.Html.showIf (Editability.editing model.editability) <| viewSettings glossary model
                                 , h1
                                     [ id ElementIds.title ]
-                                    [ GlossaryTitle.view glossary.enableMathSupport glossary.title ]
+                                    [ GlossaryTitle.view model.common.enableMathSupport glossary.title ]
                                 ]
                             , Html.main_
                                 []
                                 [ Components.AboutSection.view
-                                    { enableMathSupport = glossary.enableMathSupport
+                                    { enableMathSupport = model.common.enableMathSupport
                                     , modalDialogShown = not noModalDialogShown_
                                     }
                                     glossary.aboutSection
@@ -2400,7 +2400,7 @@ view model =
                                        )
                                     |> viewCards
                                         model
-                                        { enableMathSupport = glossary.enableMathSupport
+                                        { enableMathSupport = model.common.enableMathSupport
                                         , enableOrderItemsButtons = glossary.enableOrderItemsButtons
                                         , editable = Editability.editing model.editability
                                         , tabbable = noModalDialogShown_

@@ -117,6 +117,12 @@ init flags url key =
                 |> Decode.decodeValue (Decode.field "enableSavingChangesInMemory" Decode.bool)
                 |> Result.withDefault False
 
+        katexIsAvailable : Bool
+        katexIsAvailable =
+            flags
+                |> Decode.decodeValue (Decode.field "katexIsAvailable" Decode.bool)
+                |> Result.withDefault False
+
         loadedGlossaryItems : Result String GlossaryItems
         loadedGlossaryItems =
             LoadedGlossaryItems.decodeFromFlags flags
@@ -131,12 +137,6 @@ init flags url key =
                             enableLastUpdatedDates =
                                 flags
                                     |> Decode.decodeValue (Decode.field "enableLastUpdatedDates" Decode.bool)
-                                    |> Result.withDefault False
-
-                            katexIsAvailable : Bool
-                            katexIsAvailable =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "katexIsAvailable" Decode.bool)
                                     |> Result.withDefault False
 
                             enableExportMenu : Bool
@@ -181,8 +181,7 @@ init flags url key =
                             aboutSection =
                                 { paragraph = aboutParagraph, links = aboutLinks }
                         in
-                        { enableMathSupport = katexIsAvailable
-                        , enableLastUpdatedDates = enableLastUpdatedDates
+                        { enableLastUpdatedDates = enableLastUpdatedDates
                         , enableExportMenu = enableExportMenu
                         , enableHelpForMakingChanges = enableHelpForMakingChanges
                         , enableOrderItemsButtons = enableOrderItemsButtons
@@ -203,6 +202,7 @@ init flags url key =
                 , initialUrl = url
                 , filename = filename
                 , theme = theme
+                , enableMathSupport = katexIsAvailable
                 , enableSavingChangesInMemory = enableSavingChangesInMemory
                 , queryParameters = queryParameters
                 , maybeId = Nothing

@@ -15,8 +15,7 @@ import Internationalisation as I18n
 
 
 type alias Glossary =
-    { enableMathSupport : Bool
-    , enableLastUpdatedDates : Bool
+    { enableLastUpdatedDates : Bool
     , enableExportMenu : Bool
     , enableOrderItemsButtons : Bool
     , enableHelpForMakingChanges : Bool

@@ -543,7 +543,7 @@ viewCreateFormFooter model showValidationErrors glossaryItems =
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
-        Ok { enableMathSupport, items } ->
+        Ok { items } ->
             let
                 title1 : GlossaryTitle.GlossaryTitle
                 title1 =
@@ -569,8 +569,8 @@ view model =
                                 [ class "lg:flex lg:space-x-8" ]
                                 [ div
                                     [ class "lg:w-1/2 space-y-7 lg:space-y-8" ]
-                                    [ viewEditTitle enableMathSupport model.triedToSaveWhenFormInvalid <| Form.titleField model.form
-                                    , viewEditAboutParagraph enableMathSupport model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
+                                    [ viewEditTitle model.common.enableMathSupport model.triedToSaveWhenFormInvalid <| Form.titleField model.form
+                                    , viewEditAboutParagraph model.common.enableMathSupport model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
                                     , viewEditAboutLinks model.triedToSaveWhenFormInvalid <| Form.aboutLinkFields model.form
                                     ]
                                 , div
@@ -582,9 +582,9 @@ view model =
                                             [ text I18n.preview ]
                                         , h2
                                             [ class "pb-4 text-2xl font-bold leading-tight text-gray-700 dark:text-gray-300" ]
-                                            [ GlossaryTitle.view enableMathSupport title1 ]
+                                            [ GlossaryTitle.view model.common.enableMathSupport title1 ]
                                         , Components.AboutSection.view
-                                            { enableMathSupport = enableMathSupport
+                                            { enableMathSupport = model.common.enableMathSupport
                                             , modalDialogShown = False
                                             }
                                             aboutSection

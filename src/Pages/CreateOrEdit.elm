@@ -1121,14 +1121,14 @@ view model =
                                 [ class "lg:flex lg:space-x-8" ]
                                 [ div
                                     [ class "lg:w-1/2" ]
-                                    [ viewCreateTerms glossary.enableMathSupport model.triedToSaveWhenFormInvalid terms
+                                    [ viewCreateTerms model.common.enableMathSupport model.triedToSaveWhenFormInvalid terms
                                     , viewDefinition
-                                        glossary.enableMathSupport
+                                        model.common.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
                                         definitionArray
                                     , model.form
                                         |> Form.tagCheckboxes
-                                        |> viewTags glossary.enableMathSupport
+                                        |> viewTags model.common.enableMathSupport
                                         |> Extras.Html.showIf (not <| List.isEmpty <| Form.tagCheckboxes model.form)
                                     , model.form
                                         |> Form.tagCheckboxes
@@ -1145,7 +1145,7 @@ view model =
                                                     viewDisambiguationTag disambiguationTagId tags
                                            )
                                     , viewCreateSeeAlso
-                                        glossary.enableMathSupport
+                                        model.common.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
                                         glossary.items
                                         terms
@@ -1166,7 +1166,7 @@ view model =
                                             [ dl
                                                 [ style "display" "block" ]
                                                 [ Components.GlossaryItemCard.view
-                                                    { enableMathSupport = glossary.enableMathSupport, makeLinksTabbable = True, enableLastUpdatedDates = False }
+                                                    { enableMathSupport = model.common.enableMathSupport, makeLinksTabbable = True, enableLastUpdatedDates = False }
                                                     Components.GlossaryItemCard.Preview
                                                     { previous = Nothing
                                                     , item = Just ( GlossaryItemId.create -1, newOrUpdatedGlossaryItem )
