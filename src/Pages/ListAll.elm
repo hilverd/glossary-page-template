@@ -1,4 +1,4 @@
-port module Pages.ListAll exposing (Editability, InternalMsg, Layout, MenuForMobileVisibility, Model, Msg, SearchDialog, init, subscriptions, update, view)
+port module Pages.ListAll exposing (InternalMsg, Layout, MenuForMobileVisibility, Model, Msg, SearchDialog, init, subscriptions, update, view)
 
 import Accessibility
     exposing
@@ -41,6 +41,7 @@ import Components.SearchDialog
 import Components.SelectMenu
 import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.Editability as Editability exposing (Editability(..))
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
@@ -94,15 +95,6 @@ type GradualVisibility
 
 type alias MenuForMobileVisibility =
     GradualVisibility
-
-
-type Editability
-    = ReadOnly
-    | ReadOnlyWithHelpForMakingChanges
-    | CanEditInMemory
-    | EditingInMemory
-    | CanEditWithIncludedBackend
-    | EditingWithIncludedBackend
 
 
 type alias SearchDialog =
@@ -179,54 +171,12 @@ type alias Msg =
 init : Bool -> Bool -> CommonModel -> ( Model, Cmd Msg )
 init editorIsRunning currentlyEditing commonModel =
     ( { editability =
-            case ( commonModel.enableHelpForMakingChanges, commonModel.enableSavingChangesInMemory, editorIsRunning ) of
-                ( False, False, False ) ->
-                    ReadOnly
-
-                ( False, False, True ) ->
-                    if currentlyEditing then
-                        EditingWithIncludedBackend
-
-                    else
-                        CanEditWithIncludedBackend
-
-                ( False, True, False ) ->
-                    if currentlyEditing then
-                        EditingInMemory
-
-                    else
-                        CanEditInMemory
-
-                ( False, True, True ) ->
-                    if currentlyEditing then
-                        EditingInMemory
-
-                    else
-                        CanEditInMemory
-
-                ( True, False, False ) ->
-                    ReadOnlyWithHelpForMakingChanges
-
-                ( True, False, True ) ->
-                    if currentlyEditing then
-                        EditingWithIncludedBackend
-
-                    else
-                        CanEditWithIncludedBackend
-
-                ( True, True, False ) ->
-                    if currentlyEditing then
-                        EditingInMemory
-
-                    else
-                        CanEditInMemory
-
-                ( True, True, True ) ->
-                    if currentlyEditing then
-                        EditingWithIncludedBackend
-
-                    else
-                        CanEditWithIncludedBackend
+            Editability.create
+                { enableHelpForMakingChanges = commonModel.enableHelpForMakingChanges
+                , enableSavingChangesInMemory = commonModel.enableSavingChangesInMemory
+                , editorIsRunning = editorIsRunning
+                , currentlyEditing = currentlyEditing
+                }
       , common = commonModel
       , menuForMobileVisibility = Invisible
       , layout = ShowAllItems
@@ -307,15 +257,7 @@ update msg model =
         MakeChanges ->
             let
                 editability1 =
-                    case model.editability of
-                        CanEditInMemory ->
-                            EditingInMemory
-
-                        CanEditWithIncludedBackend ->
-                            EditingWithIncludedBackend
-
-                        _ ->
-                            model.editability
+                    Editability.startEditing model.editability
             in
             ( { model | editability = editability1 }, Cmd.none )
 
@@ -1514,7 +1456,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
             filterByTagWithDescription
         , Extras.Html.showIf (filterByTagWithDescription == Nothing) <|
             viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
-        , Extras.Html.showIf (editing model.editability) <|
+        , Extras.Html.showIf (Editability.editing model.editability) <|
             div
                 [ class "flex-none mt-4" ]
                 [ viewManageTagsButton tabbable model.common ]
@@ -2222,32 +2164,6 @@ noModalDialogShown model =
             True
 
 
-editing : Editability -> Bool
-editing editability =
-    case editability of
-        EditingInMemory ->
-            True
-
-        EditingWithIncludedBackend ->
-            True
-
-        _ ->
-            False
-
-
-canEdit : Editability -> Bool
-canEdit editability =
-    case editability of
-        CanEditInMemory ->
-            True
-
-        CanEditWithIncludedBackend ->
-            True
-
-        _ ->
-            False
-
-
 pageTitle : Model -> Glossary -> String
 pageTitle model glossary =
     let
@@ -2375,10 +2291,10 @@ view model =
                                         if event == Extras.HtmlEvents.controlK then
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show, True )
 
-                                        else if canEdit model.editability && event == Extras.HtmlEvents.e then
+                                        else if Editability.canEdit model.editability && event == Extras.HtmlEvents.e then
                                             Just <| ( PageMsg.Internal MakeChanges, True )
 
-                                        else if editing model.editability && event == Extras.HtmlEvents.n then
+                                        else if Editability.editing model.editability && event == Extras.HtmlEvents.n then
                                             let
                                                 common_ : CommonModel
                                                 common_ =
@@ -2420,7 +2336,7 @@ view model =
                                     [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
                                     [ div
                                         [ class "flex flex-row justify-start lg:justify-end" ]
-                                        [ Extras.Html.showIf (canEdit model.editability) <|
+                                        [ Extras.Html.showIf (Editability.canEdit model.editability) <|
                                             viewMakeChangesButton model.common.enableSavingChangesInMemory noModalDialogShown_
                                         , div
                                             [ class "hidden lg:block ml-auto pb-3 pt-0.5" ]
@@ -2437,7 +2353,7 @@ view model =
                                     ]
                                 , viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
                                     |> Extras.Html.showIf (model.editability == ReadOnlyWithHelpForMakingChanges)
-                                , Extras.Html.showIf (editing model.editability) <| viewSettings glossary model
+                                , Extras.Html.showIf (Editability.editing model.editability) <| viewSettings glossary model
                                 , h1
                                     [ id ElementIds.title ]
                                     [ GlossaryTitle.view glossary.enableMathSupport glossary.title ]
@@ -2449,7 +2365,7 @@ view model =
                                     , modalDialogShown = not noModalDialogShown_
                                     }
                                     glossary.aboutSection
-                                , Extras.Html.showIf (editing model.editability) <|
+                                , Extras.Html.showIf (Editability.editing model.editability) <|
                                     div
                                         [ class "flex-none mt-2" ]
                                         [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
@@ -2483,7 +2399,7 @@ view model =
                                     |> viewCards
                                         model
                                         { enableMathSupport = glossary.enableMathSupport
-                                        , editable = editing model.editability
+                                        , editable = Editability.editing model.editability
                                         , tabbable = noModalDialogShown_
                                         , enableLastUpdatedDates = glossary.enableLastUpdatedDates
                                         }

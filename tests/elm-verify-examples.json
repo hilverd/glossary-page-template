@@ -4,6 +4,7 @@
         "AmortizedQueue",
         "Data.AboutLink",
         "Data.AboutParagraph",
+        "Data.Editability",
         "Data.GlossaryItem.Definition",
         "Data.GlossaryItem.Tag",
         "Data.GlossaryItem.Term",
