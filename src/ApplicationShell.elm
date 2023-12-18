@@ -111,12 +111,6 @@ init flags url key =
                 |> Decode.decodeValue (Decode.field "enableHelpForMakingChanges" Decode.bool)
                 |> Result.withDefault False
 
-        enableExportMenu : Bool
-        enableExportMenu =
-            flags
-                |> Decode.decodeValue (Decode.field "enableExportMenu" Decode.bool)
-                |> Result.withDefault True
-
         enableOrderItemsButtons : Bool
         enableOrderItemsButtons =
             flags
@@ -151,6 +145,12 @@ init flags url key =
                                     |> Decode.decodeValue (Decode.field "katexIsAvailable" Decode.bool)
                                     |> Result.withDefault False
 
+                            enableExportMenu : Bool
+                            enableExportMenu =
+                                flags
+                                    |> Decode.decodeValue (Decode.field "enableExportMenu" Decode.bool)
+                                    |> Result.withDefault True
+
                             cardWidth : CardWidth
                             cardWidth =
                                 flags
@@ -183,6 +183,7 @@ init flags url key =
                         in
                         { enableMathSupport = katexIsAvailable
                         , enableLastUpdatedDates = enableLastUpdatedDates
+                        , enableExportMenu = enableExportMenu
                         , cardWidth = cardWidth
                         , title = title
                         , aboutSection = aboutSection
@@ -199,7 +200,6 @@ init flags url key =
                 , filename = filename
                 , enableHelpForMakingChanges = enableHelpForMakingChanges
                 , theme = theme
-                , enableExportMenu = enableExportMenu
                 , enableOrderItemsButtons = enableOrderItemsButtons
                 , enableSavingChangesInMemory = enableSavingChangesInMemory
                 , queryParameters = queryParameters

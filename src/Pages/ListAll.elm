@@ -627,13 +627,8 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        common0 : CommonModel
-                        common0 =
-                            model.common
-
-                        common1 : CommonModel
-                        common1 =
-                            { common0 | enableExportMenu = not common0.enableExportMenu }
+                        glossary1 =
+                            { glossary | enableExportMenu = not glossary.enableExportMenu }
                     in
                     ( { model
                         | confirmDeleteId = Nothing
@@ -641,10 +636,10 @@ update msg model =
                         , savingSettings = SavingInProgress
                       }
                     , Save.patchHtmlFile
-                        common1
-                        glossary
+                        model.common
+                        glossary1
                         (PageMsg.Internal << FailedToChangeSettings)
-                        (PageMsg.Internal <| ChangedSettings common1)
+                        (PageMsg.Internal <| ChangedSettings model.common)
                     )
 
                 _ ->
@@ -963,7 +958,7 @@ viewSettings glossary model =
                 , div
                     [ class "mt-6 pb-2" ]
                     [ Components.Button.toggle
-                        model.common.enableExportMenu
+                        glossary.enableExportMenu
                         ElementIds.showExportMenuLabel
                         [ Html.Events.onClick <| PageMsg.Internal ToggleEnableExportMenu ]
                         [ span
@@ -2314,7 +2309,7 @@ view model =
                         [ viewTopBar noModalDialogShown_
                             model.common.theme
                             model.themeDropdownMenu
-                            (if model.common.enableExportMenu then
+                            (if glossary.enableExportMenu then
                                 Just model.exportDropdownMenu
 
                              else
@@ -2330,7 +2325,7 @@ view model =
                                 let
                                     showExportButton : Bool
                                     showExportButton =
-                                        model.common.enableExportMenu
+                                        glossary.enableExportMenu
                                 in
                                 [ div
                                     [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
