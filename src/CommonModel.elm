@@ -14,7 +14,6 @@ type alias CommonModel =
     , filename : Maybe String
     , enableHelpForMakingChanges : Bool
     , theme : Theme
-    , enableOrderItemsButtons : Bool
     , enableSavingChangesInMemory : Bool
     , queryParameters : QueryParameters
     , maybeId : Maybe GlossaryItemId

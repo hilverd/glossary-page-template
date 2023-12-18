@@ -19,7 +19,7 @@ patchHtmlFile common glossary errorMsg msg =
             , url = "/"
             , body =
                 glossary
-                    |> Glossary.toHtmlTree common.enableOrderItemsButtons common.enableHelpForMakingChanges
+                    |> Glossary.toHtmlTree common.enableHelpForMakingChanges
                     |> HtmlTree.toHtmlReplacementString
                     |> Http.stringBody "text/html"
             , expect =

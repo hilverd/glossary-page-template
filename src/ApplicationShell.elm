@@ -111,12 +111,6 @@ init flags url key =
                 |> Decode.decodeValue (Decode.field "enableHelpForMakingChanges" Decode.bool)
                 |> Result.withDefault False
 
-        enableOrderItemsButtons : Bool
-        enableOrderItemsButtons =
-            flags
-                |> Decode.decodeValue (Decode.field "enableOrderItemsButtons" Decode.bool)
-                |> Result.withDefault True
-
         enableSavingChangesInMemory : Bool
         enableSavingChangesInMemory =
             flags
@@ -149,6 +143,12 @@ init flags url key =
                             enableExportMenu =
                                 flags
                                     |> Decode.decodeValue (Decode.field "enableExportMenu" Decode.bool)
+                                    |> Result.withDefault True
+
+                            enableOrderItemsButtons : Bool
+                            enableOrderItemsButtons =
+                                flags
+                                    |> Decode.decodeValue (Decode.field "enableOrderItemsButtons" Decode.bool)
                                     |> Result.withDefault True
 
                             cardWidth : CardWidth
@@ -184,6 +184,7 @@ init flags url key =
                         { enableMathSupport = katexIsAvailable
                         , enableLastUpdatedDates = enableLastUpdatedDates
                         , enableExportMenu = enableExportMenu
+                        , enableOrderItemsButtons = enableOrderItemsButtons
                         , cardWidth = cardWidth
                         , title = title
                         , aboutSection = aboutSection
@@ -200,7 +201,6 @@ init flags url key =
                 , filename = filename
                 , enableHelpForMakingChanges = enableHelpForMakingChanges
                 , theme = theme
-                , enableOrderItemsButtons = enableOrderItemsButtons
                 , enableSavingChangesInMemory = enableSavingChangesInMemory
                 , queryParameters = queryParameters
                 , maybeId = Nothing

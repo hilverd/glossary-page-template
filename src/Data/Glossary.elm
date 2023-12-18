@@ -18,6 +18,7 @@ type alias Glossary =
     { enableMathSupport : Bool
     , enableLastUpdatedDates : Bool
     , enableExportMenu : Bool
+    , enableOrderItemsButtons : Bool
     , cardWidth : CardWidth
     , title : GlossaryTitle
     , aboutSection : AboutSection
@@ -27,8 +28,8 @@ type alias Glossary =
 
 {-| Represent these glossary items as an HTML tree, ready for writing back to the glossary's HTML file.
 -}
-toHtmlTree : Bool -> Bool -> Glossary -> HtmlTree
-toHtmlTree enableOrderItemsButtons enableHelpForMakingChanges { enableExportMenu, cardWidth, title, aboutSection, enableLastUpdatedDates, items } =
+toHtmlTree : Bool -> Glossary -> HtmlTree
+toHtmlTree enableHelpForMakingChanges { enableExportMenu, enableOrderItemsButtons, cardWidth, title, aboutSection, enableLastUpdatedDates, items } =
     let
         tagsWithDescriptions =
             GlossaryItems.tagsWithDescriptions items

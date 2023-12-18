@@ -649,13 +649,8 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        common0 : CommonModel
-                        common0 =
-                            model.common
-
-                        common1 : CommonModel
-                        common1 =
-                            { common0 | enableOrderItemsButtons = not common0.enableOrderItemsButtons }
+                        glossary1 =
+                            { glossary | enableOrderItemsButtons = not glossary.enableOrderItemsButtons }
                     in
                     ( { model
                         | confirmDeleteId = Nothing
@@ -663,10 +658,10 @@ update msg model =
                         , savingSettings = SavingInProgress
                       }
                     , Save.patchHtmlFile
-                        common1
-                        glossary
+                        model.common
+                        glossary1
                         (PageMsg.Internal << FailedToChangeSettings)
-                        (PageMsg.Internal <| ChangedSettings common1)
+                        (PageMsg.Internal <| ChangedSettings model.common)
                     )
 
                 _ ->
@@ -969,7 +964,7 @@ viewSettings glossary model =
                 , div
                     [ class "mt-6 pb-2" ]
                     [ Components.Button.toggle
-                        model.common.enableOrderItemsButtons
+                        glossary.enableOrderItemsButtons
                         ElementIds.showOrderItemsButtons
                         [ Html.Events.onClick <| PageMsg.Internal ToggleEnableOrderItemsButtons ]
                         [ span
@@ -1379,12 +1374,18 @@ viewCreateGlossaryItemButton tabbable common =
 
 viewCards :
     Model
-    -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
+    ->
+        { enableMathSupport : Bool
+        , enableOrderItemsButtons : Bool
+        , editable : Bool
+        , tabbable : Bool
+        , enableLastUpdatedDates : Bool
+        }
     -> List Tag
     -> GlossaryItems
     -> ( List ( GlossaryItemId, GlossaryItemForHtml ), List ( GlossaryItemId, GlossaryItemForHtml ) )
     -> Html Msg
-viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } tags glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates } tags glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
         filterByTag_ : Maybe TagId
         filterByTag_ =
@@ -1444,7 +1445,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
     in
     Html.article
         [ Html.Attributes.id ElementIds.items
-        , Extras.HtmlAttribute.showIf model.common.enableOrderItemsButtons <| class "mt-3 pt-2 border-t border-gray-300 dark:border-gray-700"
+        , Extras.HtmlAttribute.showIf enableOrderItemsButtons <| class "mt-3 pt-2 border-t border-gray-300 dark:border-gray-700"
         ]
         [ Extras.Html.showMaybe
             (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
@@ -1476,7 +1477,7 @@ viewCards model { enableMathSupport, editable, tabbable, enableLastUpdatedDates 
                 [ class "mt-4" ]
                 [ text I18n.noMatchingItemsFound ]
         , Extras.Html.showIf
-            (model.common.enableOrderItemsButtons
+            (enableOrderItemsButtons
                 && (not <| List.isEmpty combinedIndexedGlossaryItems)
             )
           <|
@@ -2394,6 +2395,7 @@ view model =
                                     |> viewCards
                                         model
                                         { enableMathSupport = glossary.enableMathSupport
+                                        , enableOrderItemsButtons = glossary.enableOrderItemsButtons
                                         , editable = Editability.editing model.editability
                                         , tabbable = noModalDialogShown_
                                         , enableLastUpdatedDates = glossary.enableLastUpdatedDates
