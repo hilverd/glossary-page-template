@@ -101,8 +101,8 @@ type Editability
     | ReadOnlyWithHelpForMakingChanges
     | CanEditInMemory
     | EditingInMemory
-    | CanEditWithBackend
-    | EditingWithBackend
+    | CanEditWithIncludedBackend
+    | EditingWithIncludedBackend
 
 
 type alias SearchDialog =
@@ -185,10 +185,10 @@ init editorIsRunning currentlyEditing commonModel =
 
                 ( False, False, True ) ->
                     if currentlyEditing then
-                        EditingWithBackend
+                        EditingWithIncludedBackend
 
                     else
-                        CanEditWithBackend
+                        CanEditWithIncludedBackend
 
                 ( False, True, False ) ->
                     if currentlyEditing then
@@ -209,10 +209,10 @@ init editorIsRunning currentlyEditing commonModel =
 
                 ( True, False, True ) ->
                     if currentlyEditing then
-                        EditingWithBackend
+                        EditingWithIncludedBackend
 
                     else
-                        CanEditWithBackend
+                        CanEditWithIncludedBackend
 
                 ( True, True, False ) ->
                     if currentlyEditing then
@@ -223,10 +223,10 @@ init editorIsRunning currentlyEditing commonModel =
 
                 ( True, True, True ) ->
                     if currentlyEditing then
-                        EditingWithBackend
+                        EditingWithIncludedBackend
 
                     else
-                        CanEditWithBackend
+                        CanEditWithIncludedBackend
       , common = commonModel
       , menuForMobileVisibility = Invisible
       , layout = ShowAllItems
@@ -311,8 +311,8 @@ update msg model =
                         CanEditInMemory ->
                             EditingInMemory
 
-                        CanEditWithBackend ->
-                            EditingWithBackend
+                        CanEditWithIncludedBackend ->
+                            EditingWithIncludedBackend
 
                         _ ->
                             model.editability
@@ -2228,7 +2228,7 @@ editing editability =
         EditingInMemory ->
             True
 
-        EditingWithBackend ->
+        EditingWithIncludedBackend ->
             True
 
         _ ->
@@ -2241,7 +2241,7 @@ canEdit editability =
         CanEditInMemory ->
             True
 
-        CanEditWithBackend ->
+        CanEditWithIncludedBackend ->
             True
 
         _ ->
