@@ -168,11 +168,17 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init : Bool -> Bool -> CommonModel -> ( Model, Cmd Msg )
-init editorIsRunning currentlyEditing commonModel =
+init :
+    { enableHelpForMakingChanges : Bool
+    , editorIsRunning : Bool
+    , currentlyEditing : Bool
+    }
+    -> CommonModel
+    -> ( Model, Cmd Msg )
+init { enableHelpForMakingChanges, editorIsRunning, currentlyEditing } commonModel =
     ( { editability =
             Editability.create
-                { enableHelpForMakingChanges = commonModel.enableHelpForMakingChanges
+                { enableHelpForMakingChanges = enableHelpForMakingChanges
                 , enableSavingChangesInMemory = commonModel.enableSavingChangesInMemory
                 , editorIsRunning = editorIsRunning
                 , currentlyEditing = currentlyEditing

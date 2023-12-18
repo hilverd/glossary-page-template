@@ -12,7 +12,6 @@ type alias CommonModel =
     { key : Key
     , initialUrl : Url
     , filename : Maybe String
-    , enableHelpForMakingChanges : Bool
     , theme : Theme
     , enableSavingChangesInMemory : Bool
     , queryParameters : QueryParameters

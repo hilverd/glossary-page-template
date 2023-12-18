@@ -184,6 +184,7 @@ init flags url key =
                         { enableMathSupport = katexIsAvailable
                         , enableLastUpdatedDates = enableLastUpdatedDates
                         , enableExportMenu = enableExportMenu
+                        , enableHelpForMakingChanges = enableHelpForMakingChanges
                         , enableOrderItemsButtons = enableOrderItemsButtons
                         , cardWidth = cardWidth
                         , title = title
@@ -194,12 +195,13 @@ init flags url key =
 
         ( listAllModel, listAllCmd ) =
             Pages.ListAll.init
-                editorIsRunning
-                False
+                { enableHelpForMakingChanges = enableHelpForMakingChanges
+                , editorIsRunning = editorIsRunning
+                , currentlyEditing = False
+                }
                 { key = key
                 , initialUrl = url
                 , filename = filename
-                , enableHelpForMakingChanges = enableHelpForMakingChanges
                 , theme = theme
                 , enableSavingChangesInMemory = enableSavingChangesInMemory
                 , queryParameters = queryParameters
@@ -318,7 +320,12 @@ update msg model =
         ( _, NavigateToListAll commonModel, _ ) ->
             let
                 ( listAllModel, listAllCmd ) =
-                    Pages.ListAll.init True True commonModel
+                    Pages.ListAll.init
+                        { enableHelpForMakingChanges = False
+                        , editorIsRunning = True
+                        , currentlyEditing = True
+                        }
+                        commonModel
             in
             ( { model | page = ListAll listAllModel }
             , Cmd.map ListAllMsg listAllCmd
