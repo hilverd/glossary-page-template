@@ -17,9 +17,11 @@ import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Glossary exposing (Glossary)
-import Data.GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItem.Tag as Tag exposing (Tag)
+import Data.GlossaryItemForHtml as GlossaryItemForHtml
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
-import Data.LoadedGlossaryItems as LoadedGlossaryItems
+import Data.TagDescription as TagDescription exposing (TagDescription)
 import Data.Theme as Theme exposing (Theme)
 import Html
 import Internationalisation as I18n
@@ -123,13 +125,32 @@ init flags url key =
                 |> Decode.decodeValue (Decode.field "katexIsAvailable" Decode.bool)
                 |> Result.withDefault False
 
-        loadedGlossaryItems : Result String GlossaryItems
-        loadedGlossaryItems =
-            LoadedGlossaryItems.decodeFromFlags flags
+        tagsWithDescriptions : List ( Tag, TagDescription )
+        tagsWithDescriptions =
+            flags
+                |> Decode.decodeValue
+                    (Decode.field "tagsWithDescriptions" <|
+                        Decode.list <|
+                            Decode.map2
+                                (\tagString descriptionString ->
+                                    ( Tag.fromMarkdown tagString
+                                    , TagDescription.fromMarkdown descriptionString
+                                    )
+                                )
+                                (Decode.field "tag" <| Decode.string)
+                                (Decode.field "description" <| Decode.string)
+                    )
+                |> Result.withDefault []
 
         glossary : Result String Glossary
         glossary =
-            loadedGlossaryItems
+            flags
+                |> Decode.decodeValue
+                    (Decode.field "glossaryItems" <|
+                        Decode.list GlossaryItemForHtml.decode
+                    )
+                |> Result.mapError Decode.errorToString
+                |> Result.andThen (GlossaryItems.fromList tagsWithDescriptions)
                 |> Result.map
                     (\items ->
                         let
