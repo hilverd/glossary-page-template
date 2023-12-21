@@ -16,7 +16,7 @@ import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
-import Data.Glossary exposing (Glossary)
+import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -125,93 +125,19 @@ init flags url key =
                 |> Decode.decodeValue (Decode.field "katexIsAvailable" Decode.bool)
                 |> Result.withDefault False
 
-        tagsWithDescriptions : List ( Tag, TagDescription )
-        tagsWithDescriptions =
-            flags
-                |> Decode.decodeValue
-                    (Decode.field "tagsWithDescriptions" <|
-                        Decode.list <|
-                            Decode.map2
-                                (\tagString descriptionString ->
-                                    ( Tag.fromMarkdown tagString
-                                    , TagDescription.fromMarkdown descriptionString
-                                    )
-                                )
-                                (Decode.field "tag" <| Decode.string)
-                                (Decode.field "description" <| Decode.string)
-                    )
-                |> Result.withDefault []
-
         glossary : Result String Glossary
         glossary =
             flags
-                |> Decode.decodeValue
-                    (Decode.field "glossaryItems" <|
-                        Decode.list GlossaryItemForHtml.decode
-                    )
+                |> Decode.decodeValue Glossary.decode
                 |> Result.mapError Decode.errorToString
-                |> Result.andThen (GlossaryItems.fromList tagsWithDescriptions)
-                |> Result.map
-                    (\items ->
-                        let
-                            enableLastUpdatedDates : Bool
-                            enableLastUpdatedDates =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "enableLastUpdatedDates" Decode.bool)
-                                    |> Result.withDefault False
+                |> (\result ->
+                        case result of
+                            Ok result_ ->
+                                result_
 
-                            enableExportMenu : Bool
-                            enableExportMenu =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "enableExportMenu" Decode.bool)
-                                    |> Result.withDefault True
-
-                            enableOrderItemsButtons : Bool
-                            enableOrderItemsButtons =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "enableOrderItemsButtons" Decode.bool)
-                                    |> Result.withDefault True
-
-                            cardWidth : CardWidth
-                            cardWidth =
-                                flags
-                                    |> Decode.decodeValue CardWidth.decode
-                                    |> Result.withDefault CardWidth.Compact
-
-                            title : GlossaryTitle
-                            title =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "titleString" Decode.string)
-                                    |> Result.withDefault I18n.elementNotFound
-                                    |> GlossaryTitle.fromMarkdown
-
-                            aboutParagraph : AboutParagraph
-                            aboutParagraph =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "aboutParagraph" Decode.string)
-                                    |> Result.withDefault I18n.elementNotFound
-                                    |> AboutParagraph.fromMarkdown
-
-                            aboutLinks : List AboutLink
-                            aboutLinks =
-                                flags
-                                    |> Decode.decodeValue (Decode.field "aboutLinks" <| Decode.list AboutLink.decode)
-                                    |> Result.withDefault []
-
-                            aboutSection : AboutSection
-                            aboutSection =
-                                { paragraph = aboutParagraph, links = aboutLinks }
-                        in
-                        { enableLastUpdatedDates = enableLastUpdatedDates
-                        , enableExportMenu = enableExportMenu
-                        , enableHelpForMakingChanges = enableHelpForMakingChanges
-                        , enableOrderItemsButtons = enableOrderItemsButtons
-                        , cardWidth = cardWidth
-                        , title = title
-                        , aboutSection = aboutSection
-                        , items = items
-                        }
-                    )
+                            Err err ->
+                                Err err
+                   )
 
         ( listAllModel, listAllCmd ) =
             Pages.ListAll.init

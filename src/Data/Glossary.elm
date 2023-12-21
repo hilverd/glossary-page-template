@@ -1,17 +1,19 @@
-module Data.Glossary exposing (Glossary, toHtmlTree)
+module Data.Glossary exposing (Glossary, decode, toHtmlTree)
 
-import Data.AboutLink as AboutLink
-import Data.AboutParagraph as AboutParagraph
+import Data.AboutLink as AboutLink exposing (AboutLink)
+import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
-import Data.GlossaryItem.Tag as Tag
-import Data.GlossaryItemForHtml as GlossaryItemForHtml
+import Data.GlossaryItem.Tag as Tag exposing (Tag)
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
-import Data.TagDescription as TagDescription
+import Data.TagDescription as TagDescription exposing (TagDescription)
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Internationalisation as I18n
+import Json.Decode as Decode exposing (Decoder)
+import Json.Decode.Pipeline exposing (optional, required)
 
 
 type alias Glossary =
@@ -24,6 +26,68 @@ type alias Glossary =
     , aboutSection : AboutSection
     , items : GlossaryItems
     }
+
+
+create :
+    Bool
+    -> Bool
+    -> Bool
+    -> Bool
+    -> CardWidth
+    -> GlossaryTitle
+    -> AboutParagraph
+    -> List AboutLink
+    -> List ( Tag, TagDescription )
+    -> List GlossaryItemForHtml
+    -> Result String Glossary
+create enableLastUpdatedDates enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges cardWidth title aboutParagraph aboutLinks tagsWithDescriptions itemsForHtml =
+    let
+        aboutSection =
+            { paragraph = aboutParagraph, links = aboutLinks }
+
+        items : Result String GlossaryItems
+        items =
+            GlossaryItems.fromList tagsWithDescriptions itemsForHtml
+    in
+    items
+        |> Result.map
+            (\items_ ->
+                { enableLastUpdatedDates = enableLastUpdatedDates
+                , enableExportMenu = enableExportMenu
+                , enableOrderItemsButtons = enableOrderItemsButtons
+                , enableHelpForMakingChanges = enableHelpForMakingChanges
+                , cardWidth = cardWidth
+                , title = title
+                , aboutSection = aboutSection
+                , items = items_
+                }
+            )
+
+
+decode : Decoder (Result String Glossary)
+decode =
+    Decode.succeed create
+        |> optional "enableLastUpdatedDates" Decode.bool False
+        |> optional "enableExportMenu" Decode.bool True
+        |> optional "enableOrderItemsButtons" Decode.bool True
+        |> optional "enableHelpForMakingChanges" Decode.bool False
+        |> optional "cardWidth" CardWidth.decode CardWidth.Compact
+        |> optional "titleString" (Decode.map GlossaryTitle.fromMarkdown Decode.string) (GlossaryTitle.fromMarkdown I18n.elementNotFound)
+        |> optional "aboutParagraph" (Decode.map AboutParagraph.fromMarkdown Decode.string) (AboutParagraph.fromMarkdown I18n.elementNotFound)
+        |> optional "aboutLinks" (Decode.list AboutLink.decode) []
+        |> optional "tagsWithDescriptions"
+            (Decode.list <|
+                Decode.map2
+                    (\tagString descriptionString ->
+                        ( Tag.fromMarkdown tagString
+                        , TagDescription.fromMarkdown descriptionString
+                        )
+                    )
+                    (Decode.field "tag" <| Decode.string)
+                    (Decode.field "description" <| Decode.string)
+            )
+            []
+        |> required "glossaryItems" (Decode.list GlossaryItemForHtml.decode)
 
 
 {-| Represent these glossary items as an HTML tree, ready for writing back to the glossary's HTML file.

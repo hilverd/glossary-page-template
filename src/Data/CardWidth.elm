@@ -13,24 +13,22 @@ type CardWidth
 
 decode : Decoder CardWidth
 decode =
-    Decode.field "cardWidth"
-        (Decode.string
-            |> Decode.andThen
-                (\str ->
-                    case str of
-                        "compact" ->
-                            Decode.succeed Compact
+    Decode.string
+        |> Decode.andThen
+            (\str ->
+                case str of
+                    "compact" ->
+                        Decode.succeed Compact
 
-                        "intermediate" ->
-                            Decode.succeed Intermediate
+                    "intermediate" ->
+                        Decode.succeed Intermediate
 
-                        "wide" ->
-                            Decode.succeed Wide
+                    "wide" ->
+                        Decode.succeed Wide
 
-                        somethingElse ->
-                            Decode.fail <| I18n.unknownCardWidth ++ ": " ++ somethingElse
-                )
-        )
+                    somethingElse ->
+                        Decode.fail <| I18n.unknownCardWidth ++ ": " ++ somethingElse
+            )
 
 
 toHtmlTreeAttribute : CardWidth -> Extras.HtmlTree.Attribute
