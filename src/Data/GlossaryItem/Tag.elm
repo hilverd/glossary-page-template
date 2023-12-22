@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Tag exposing (Tag, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view, fromQuery, toQueryParameter)
+module Data.GlossaryItem.Tag exposing (Tag, fromMarkdown, codec, raw, inlineText, markdown, compareAlphabetically, view, fromQuery, toQueryParameter)
 
 {-| A tag that can be used in glossary items.
 
@@ -7,16 +7,16 @@ Tags can be used to group items together that belong in the same "context" or sh
 
 # Tags
 
-@docs Tag, fromMarkdown, decode, raw, inlineText, markdown, compareAlphabetically, view, fromQuery, toQueryParameter
+@docs Tag, fromMarkdown, codec, raw, inlineText, markdown, compareAlphabetically, view, fromQuery, toQueryParameter
 
 -}
 
+import Codec exposing (Codec)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.String
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
 import Internationalisation as I18n
-import Json.Decode as Decode exposing (Decoder)
 import Markdown.Block exposing (Block)
 import Markdown.Renderer as Renderer
 import MarkdownRenderers
@@ -58,13 +58,11 @@ fromMarkdown body =
         }
 
 
-{-| Decode a tag from its JSON representation.
+{-| Encode/decode a tag from its JSON representation.
 -}
-decode : Decoder Tag
-decode =
-    Decode.map
-        fromMarkdown
-        Decode.string
+codec : Codec Tag
+codec =
+    Codec.map fromMarkdown raw Codec.string
 
 
 {-| Retrieve the raw body of a tag.

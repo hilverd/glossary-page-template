@@ -103,12 +103,15 @@ decode =
     let
         termDecoder =
             Codec.decoder Term.codec
+
+        tagDecoder =
+            Codec.decoder Tag.codec
     in
     Decode.succeed create
         |> required "preferredTerm" termDecoder
         |> (required "alternativeTerms" <| Decode.list termDecoder)
-        |> (required "disambiguationTag" <| Decode.nullable Tag.decode)
-        |> (required "normalTags" <| Decode.list Tag.decode)
+        |> (required "disambiguationTag" <| Decode.nullable tagDecoder)
+        |> (required "normalTags" <| Decode.list tagDecoder)
         |> (required "definition" <|
                 Decode.nullable <|
                     Decode.map Definition.fromMarkdown <|
