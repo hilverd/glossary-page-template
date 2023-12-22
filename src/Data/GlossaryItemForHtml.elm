@@ -37,6 +37,7 @@ It is not the representation used by the editor UI when the application is runni
 
 -}
 
+import Codec
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
@@ -99,9 +100,13 @@ create preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ definitio
 -}
 decode : Decoder GlossaryItemForHtml
 decode =
+    let
+        termDecoder =
+            Codec.decoder Term.codec
+    in
     Decode.succeed create
-        |> required "preferredTerm" Term.decode
-        |> (required "alternativeTerms" <| Decode.list Term.decode)
+        |> required "preferredTerm" termDecoder
+        |> (required "alternativeTerms" <| Decode.list termDecoder)
         |> (required "disambiguationTag" <| Decode.nullable Tag.decode)
         |> (required "normalTags" <| Decode.list Tag.decode)
         |> (required "definition" <|
@@ -109,7 +114,7 @@ decode =
                     Decode.map Definition.fromMarkdown <|
                         Decode.string
            )
-        |> (required "relatedTerms" <| Decode.list Term.decode)
+        |> (required "relatedTerms" <| Decode.list termDecoder)
         |> required "needsUpdating" Decode.bool
         |> optional "lastUpdatedDate"
             (Decode.map Just Decode.string)

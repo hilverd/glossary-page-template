@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, fromMarkdown, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki)
+module Data.GlossaryItem.Term exposing (Term, fromMarkdown, codec, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki)
 
 {-| A term in a glossary item.
 A term's `id` is used to be able to refer to this term (as a related one) from other glossary items.
@@ -8,10 +8,11 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, fromMarkdown, decode, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki
+@docs Term, fromMarkdown, codec, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki
 
 -}
 
+import Codec exposing (Codec)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.HtmlTree exposing (HtmlTree)
@@ -19,7 +20,6 @@ import Extras.String
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
 import Internationalisation as I18n
-import Json.Decode as Decode exposing (Decoder)
 import Markdown.Block exposing (Block)
 import Markdown.Renderer as Renderer
 import MarkdownRenderers
@@ -78,14 +78,15 @@ fromMarkdown body isAbbreviation0 =
         }
 
 
-{-| Decode a term from its JSON representation.
+{-| Encode/decode a term from its JSON representation.
 -}
-decode : Decoder Term
-decode =
-    Decode.map2
+codec : Codec Term
+codec =
+    Codec.object
         fromMarkdown
-        (Decode.field "body" Decode.string)
-        (Decode.field "isAbbreviation" Decode.bool)
+        |> Codec.field "body" raw Codec.string
+        |> Codec.field "isAbbreviation" isAbbreviation Codec.bool
+        |> Codec.buildObject
 
 
 {-| Produce the ID of a term.
