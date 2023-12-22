@@ -1,8 +1,7 @@
-module Data.CardWidth exposing (CardWidth(..), decode, toHtmlTreeAttribute)
+module Data.CardWidth exposing (CardWidth(..), codec, toHtmlTreeAttribute)
 
+import Codec exposing (Codec)
 import Extras.HtmlTree
-import Internationalisation as I18n
-import Json.Decode as Decode exposing (Decoder)
 
 
 type CardWidth
@@ -11,24 +10,13 @@ type CardWidth
     | Wide
 
 
-decode : Decoder CardWidth
-decode =
-    Decode.string
-        |> Decode.andThen
-            (\str ->
-                case str of
-                    "compact" ->
-                        Decode.succeed Compact
-
-                    "intermediate" ->
-                        Decode.succeed Intermediate
-
-                    "wide" ->
-                        Decode.succeed Wide
-
-                    somethingElse ->
-                        Decode.fail <| I18n.unknownCardWidth ++ ": " ++ somethingElse
-            )
+codec : Codec CardWidth
+codec =
+    Codec.enum Codec.string
+        [ ( "compact", Compact )
+        , ( "intermediate", Intermediate )
+        , ( "wide", Wide )
+        ]
 
 
 toHtmlTreeAttribute : CardWidth -> Extras.HtmlTree.Attribute

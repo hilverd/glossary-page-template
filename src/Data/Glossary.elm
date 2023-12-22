@@ -1,5 +1,6 @@
 module Data.Glossary exposing (Glossary, decode, toHtmlTree)
 
+import Codec exposing (Codec)
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
@@ -71,7 +72,7 @@ decode =
         |> optional "enableExportMenu" Decode.bool True
         |> optional "enableOrderItemsButtons" Decode.bool True
         |> optional "enableHelpForMakingChanges" Decode.bool False
-        |> optional "cardWidth" CardWidth.decode CardWidth.Compact
+        |> optional "cardWidth" (Codec.decoder CardWidth.codec) CardWidth.Compact
         |> optional "titleString" (Decode.map GlossaryTitle.fromMarkdown Decode.string) (GlossaryTitle.fromMarkdown I18n.elementNotFound)
         |> optional "aboutParagraph" (Decode.map AboutParagraph.fromMarkdown Decode.string) (AboutParagraph.fromMarkdown I18n.elementNotFound)
         |> optional "aboutLinks" (Decode.list AboutLink.decode) []
