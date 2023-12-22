@@ -1,15 +1,15 @@
-module Data.AboutLink exposing (AboutLink, create, href, body, decode)
+module Data.AboutLink exposing (AboutLink, create, href, body, codec)
 
 {-| A link in the "about" section at the top of a glossary.
 
 
 # Links in the "About" Section
 
-@docs AboutLink, create, href, body, decode
+@docs AboutLink, create, href, body, codec
 
 -}
 
-import Json.Decode as Decode exposing (Decoder)
+import Codec exposing (Codec)
 
 
 {-| An opaque type representing a link in the "about" section.
@@ -21,13 +21,15 @@ type AboutLink
         }
 
 
-{-| Decode an `AboutLink` from a JSON representation of what's in the HTML file for the glossary.
+{-| Encode/decode an `AboutLink` from a JSON representation of what's in the HTML file for the glossary.
 -}
-decode : Decoder AboutLink
-decode =
-    Decode.map2 create
-        (Decode.field "href" <| Decode.string)
-        (Decode.field "body" <| Decode.string)
+codec : Codec AboutLink
+codec =
+    Codec.object
+        create
+        |> Codec.field "href" href Codec.string
+        |> Codec.field "body" body Codec.string
+        |> Codec.buildObject
 
 
 {-| Get the `href` part representing the link URL.

@@ -75,7 +75,7 @@ decode =
         |> optional "cardWidth" (Codec.decoder CardWidth.codec) CardWidth.Compact
         |> optional "titleString" (Decode.map GlossaryTitle.fromMarkdown Decode.string) (GlossaryTitle.fromMarkdown I18n.elementNotFound)
         |> optional "aboutParagraph" (Decode.map AboutParagraph.fromMarkdown Decode.string) (AboutParagraph.fromMarkdown I18n.elementNotFound)
-        |> optional "aboutLinks" (Decode.list AboutLink.decode) []
+        |> optional "aboutLinks" (Decode.list <| Codec.decoder AboutLink.codec) []
         |> optional "tagsWithDescriptions"
             (Decode.list <|
                 Decode.map2
