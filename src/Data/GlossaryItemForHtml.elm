@@ -1,6 +1,6 @@
 module Data.GlossaryItemForHtml exposing
     ( GlossaryItemForHtml
-    , create, decode
+    , create, codec
     , disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
     , toHtmlTree
     , disambiguatedTerm
@@ -18,7 +18,7 @@ It is not the representation used by the editor UI when the application is runni
 
 # Build
 
-@docs create, decode
+@docs create, codec
 
 
 # Query
@@ -37,14 +37,14 @@ It is not the representation used by the editor UI when the application is runni
 
 -}
 
-import Codec
+import Codec exposing (Codec)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Extras.Url exposing (fragmentOnly)
-import Internationalisation as I18n
+import Internationalisation as I18n exposing (preferredTerm)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (optional, required)
 import List
@@ -96,38 +96,59 @@ create preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ definitio
         }
 
 
-{-| Decode a glossary item from its JSON representation.
--}
-decode : Decoder GlossaryItemForHtml
-decode =
-    let
-        termDecoder =
-            Codec.decoder Term.codec
 
-        tagDecoder =
-            Codec.decoder Tag.codec
-    in
-    Decode.succeed create
-        |> required "preferredTerm" termDecoder
-        |> (required "alternativeTerms" <| Decode.list termDecoder)
-        |> (required "disambiguationTag" <| Decode.nullable tagDecoder)
-        |> (required "normalTags" <| Decode.list tagDecoder)
-        |> (required "definition" <|
-                Decode.nullable <|
-                    Decode.map Definition.fromMarkdown <|
-                        Decode.string
-           )
-        |> (required "relatedTerms" <| Decode.list termDecoder)
-        |> required "needsUpdating" Decode.bool
-        |> optional "lastUpdatedDate"
-            (Decode.map Just Decode.string)
-            Nothing
-        |> optional "lastUpdatedByName"
-            (Decode.map Just Decode.string)
-            Nothing
-        |> optional "lastUpdatedByEmailAddress"
-            (Decode.map Just Decode.string)
-            Nothing
+-- decode : Decoder GlossaryItemForHtml
+-- decode =
+--     let
+--         termDecoder =
+--             Codec.decoder Term.codec
+--         tagDecoder =
+--             Codec.decoder Tag.codec
+--     in
+--     Decode.succeed create
+--         |> required "preferredTerm" termDecoder
+--         |> (required "alternativeTerms" <| Decode.list termDecoder)
+--         |> (required "disambiguationTag" <| Decode.nullable tagDecoder)
+--         |> (required "normalTags" <| Decode.list tagDecoder)
+--         |> (required "definition" <|
+--                 Decode.nullable <|
+--                     Decode.map Definition.fromMarkdown <|
+--                         Decode.string
+--            )
+--         |> (required "relatedTerms" <| Decode.list termDecoder)
+--         |> required "needsUpdating" Decode.bool
+--         |> optional "lastUpdatedDate"
+--             (Decode.map Just Decode.string)
+--             Nothing
+--         |> optional "lastUpdatedByName"
+--             (Decode.map Just Decode.string)
+--             Nothing
+--         |> optional "lastUpdatedByEmailAddress"
+--             (Decode.map Just Decode.string)
+--             Nothing
+
+
+{-| Encode/decode a glossary item to/from its JSON representation.
+-}
+codec : Codec GlossaryItemForHtml
+codec =
+    Codec.object
+        create
+        |> Codec.field "preferredTerm" nonDisambiguatedPreferredTerm Term.codec
+        |> Codec.field "alternativeTerms" alternativeTerms (Codec.list Term.codec)
+        |> Codec.field "disambiguationTag" disambiguationTag (Codec.nullable Tag.codec)
+        |> Codec.field "normalTags" normalTags (Codec.list Tag.codec)
+        |> Codec.field "definition"
+            definition
+            (Codec.nullable <|
+                Codec.map Definition.fromMarkdown Definition.raw Codec.string
+            )
+        |> Codec.field "relatedTerms" relatedPreferredTerms (Codec.list Term.codec)
+        |> Codec.field "needsUpdating" needsUpdating Codec.bool
+        |> Codec.field "lastUpdatedDate" lastUpdatedDateAsIso8601 (Codec.maybe Codec.string)
+        |> Codec.field "lastUpdatedByName" lastUpdatedByName (Codec.maybe Codec.string)
+        |> Codec.field "lastUpdatedByEmailAddress" lastUpdatedByEmailAddress (Codec.maybe Codec.string)
+        |> Codec.buildObject
 
 
 {-| The disambiguated preferred term for this glossary item.

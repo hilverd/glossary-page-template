@@ -88,7 +88,7 @@ decode =
                     (Decode.field "description" <| Decode.string)
             )
             []
-        |> required "glossaryItems" (Decode.list GlossaryItemForHtml.decode)
+        |> required "glossaryItems" (Decode.list <| Codec.decoder GlossaryItemForHtml.codec)
 
 
 {-| Represent these glossary items as an HTML tree, ready for writing back to the glossary's HTML file.
