@@ -59,6 +59,7 @@ import Data.TagId exposing (TagId)
 import Data.Theme exposing (Theme(..))
 import ElementIds
 import Export.Anki
+import Export.Json
 import Export.Markdown
 import Extras.BrowserDom
 import Extras.Html
@@ -156,6 +157,7 @@ type InternalMsg
     | FailedToChangeSettings Http.Error
     | DownloadMarkdown
     | DownloadAnki
+    | DownloadJson
     | SelectAllInTextFieldWithCommandToRunEditor
     | CopyEditorCommandToClipboard String
     | AttemptedToCopyEditorCommandToClipboard Bool
@@ -733,6 +735,16 @@ update msg model =
             , case model.common.glossary of
                 Ok { title, aboutSection, items } ->
                     Export.Anki.download model.common.enableMathSupport title aboutSection items
+
+                _ ->
+                    Cmd.none
+            )
+
+        DownloadJson ->
+            ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
+            , case model.common.glossary of
+                Ok glossary ->
+                    Export.Json.download glossary
 
                 _ ->
                     Cmd.none
@@ -1850,6 +1862,15 @@ viewExportButton enabled exportDropdownMenu =
                 ]
             ]
             (PageMsg.Internal <| DownloadAnki)
+        , Components.DropdownMenu.choice
+            [ span
+                [ class "inline-flex items-center" ]
+                [ Icons.braces
+                    [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" ]
+                , text I18n.json
+                ]
+            ]
+            (PageMsg.Internal <| DownloadJson)
         , Components.DropdownMenu.choice
             [ span
                 [ class "inline-flex items-center" ]

@@ -27,6 +27,7 @@
         "DuplicateRejectingDict",
         "Export.Anki",
         "Export.Markdown",
+        "Export.Json",
         "Extras.Array",
         "Extras.HtmlTree",
         "Extras.String",

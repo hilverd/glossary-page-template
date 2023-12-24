@@ -4,6 +4,7 @@ module Icons exposing
     , arrowLongLeft
     , arrowLongRight
     , arrowUp
+    , braces
     , chevronDown
     , computerDesktop
     , copy
@@ -667,5 +668,24 @@ cornerLeftUp =
             []
         , path
             [ d "M20 20h-7a4 4 0 0 1-4-4V4" ]
+            []
+        ]
+
+
+braces : List (Html.Attribute msg) -> Html msg
+braces =
+    withAdditionalAttributes
+        [ fill "none"
+        , viewBox "0 0 24 24"
+        , strokeWidth "2"
+        , stroke "currentColor"
+        , strokeLinecap "round"
+        , strokeLinejoin "round"
+        ]
+        [ path
+            [ d "M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1" ]
+            []
+        , path
+            [ d "M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1" ]
             []
         ]
