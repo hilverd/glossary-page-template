@@ -1,6 +1,7 @@
 module CommonModel exposing (CommonModel, relativeUrl)
 
 import Browser.Navigation exposing (Key)
+import Data.Editability exposing (Editability)
 import Data.Glossary exposing (Glossary)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.Theme exposing (Theme)
@@ -13,7 +14,7 @@ type alias CommonModel =
     , initialUrl : Url
     , filename : Maybe String
     , theme : Theme
-    , enableSavingChangesInMemory : Bool
+    , editability : Editability
     , enableMathSupport : Bool
     , queryParameters : QueryParameters
     , maybeId : Maybe GlossaryItemId

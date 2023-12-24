@@ -13,6 +13,7 @@ import Components.Form
 import Components.GlossaryItemCard
 import Components.SelectMenu
 import Components.Spinner
+import Data.Editability as Editability
 import Data.Glossary as Glossary
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
@@ -450,7 +451,7 @@ update msg model =
                                 in
                                 ( { model | saving = SavingInProgress }
                                 , Save.save
-                                    common1
+                                    common1.editability
                                     glossary1
                                     (PageMsg.Internal << FailedToSave)
                                     (PageMsg.NavigateToListAll common1)
@@ -1040,7 +1041,7 @@ viewCreateFormFooter model =
                 errorDiv <| I18n.unableToSaveAsItWouldResultInTheFollowing ++ ": " ++ glossaryItemsError ++ "."
             )
             model.glossaryItemsError
-        , Extras.Html.showIf common.enableSavingChangesInMemory <|
+        , Extras.Html.showIf (common.editability == Editability.EditingInMemory) <|
             div
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                 [ text I18n.savingChangesInMemoryMessage ]

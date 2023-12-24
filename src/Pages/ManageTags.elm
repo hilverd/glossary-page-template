@@ -9,6 +9,7 @@ import CommonModel exposing (CommonModel)
 import Components.Button
 import Components.Form
 import Components.Spinner
+import Data.Editability as Editability
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -156,7 +157,7 @@ update msg model =
                                 in
                                 ( { model | saving = SavingInProgress }
                                 , Save.save
-                                    common1
+                                    common1.editability
                                     glossary1
                                     (PageMsg.Internal << FailedToSave)
                                     (PageMsg.NavigateToListAll common1)
@@ -442,7 +443,7 @@ viewFooter model showValidationErrors glossaryItems =
                 errorDiv <| I18n.unableToSaveAsItWouldResultInTheFollowing ++ ": " ++ glossaryItemsError ++ "."
             )
             model.glossaryItemsError
-        , Extras.Html.showIf model.common.enableSavingChangesInMemory <|
+        , Extras.Html.showIf (model.common.editability == Editability.EditingInMemory) <|
             div
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                 [ text I18n.savingChangesInMemoryMessage ]

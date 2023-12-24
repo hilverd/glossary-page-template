@@ -14,6 +14,7 @@ import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
+import Data.Editability as Editability
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -164,7 +165,7 @@ update msg model =
                         in
                         ( { model | saving = SavingInProgress }
                         , Save.save
-                            common1
+                            common1.editability
                             glossary1
                             (PageMsg.Internal << FailedToSave)
                             (PageMsg.NavigateToListAll common1)
@@ -509,7 +510,7 @@ viewCreateFormFooter model showValidationErrors glossaryItems =
         [ class "pt-5 lg:border-t dark:border-gray-700 flex flex-col items-center" ]
         [ errorDiv I18n.thereAreErrorsOnThisFormSeeAbove
             |> Extras.Html.showIf (showValidationErrors && Form.hasValidationErrors form)
-        , Extras.Html.showIf model.common.enableSavingChangesInMemory <|
+        , Extras.Html.showIf (model.common.editability == Editability.EditingInMemory) <|
             div
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                 [ text I18n.savingChangesInMemoryMessage ]

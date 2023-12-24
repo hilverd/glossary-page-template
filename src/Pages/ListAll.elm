@@ -112,7 +112,6 @@ type Layout
 
 type alias Model =
     { common : CommonModel
-    , editability : Editability
     , menuForMobileVisibility : MenuForMobileVisibility
     , themeDropdownMenu : Components.DropdownMenu.Model
     , exportDropdownMenu : Components.DropdownMenu.Model
@@ -170,22 +169,9 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init :
-    { enableHelpForMakingChanges : Bool
-    , editorIsRunning : Bool
-    , currentlyEditing : Bool
-    }
-    -> CommonModel
-    -> ( Model, Cmd Msg )
-init { enableHelpForMakingChanges, editorIsRunning, currentlyEditing } commonModel =
-    ( { editability =
-            Editability.create
-                { enableHelpForMakingChanges = enableHelpForMakingChanges
-                , enableSavingChangesInMemory = commonModel.enableSavingChangesInMemory
-                , editorIsRunning = editorIsRunning
-                , currentlyEditing = currentlyEditing
-                }
-      , common = commonModel
+init : CommonModel -> ( Model, Cmd Msg )
+init commonModel =
+    ( { common = commonModel
       , menuForMobileVisibility = Invisible
       , layout = ShowAllItems
       , confirmDeleteId = Nothing
@@ -264,10 +250,13 @@ update msg model =
 
         MakeChanges ->
             let
+                common0 =
+                    model.common
+
                 editability1 =
-                    Editability.startEditing model.editability
+                    Editability.startEditing model.common.editability
             in
-            ( { model | editability = editability1 }, Cmd.none )
+            ( { model | common = { common0 | editability = editability1 } }, Cmd.none )
 
         ShowMenuForMobile ->
             ( { model | menuForMobileVisibility = Visible }
@@ -472,7 +461,7 @@ update msg model =
                                 , savingSettings = NotSaving
                               }
                             , Save.save
-                                model.common
+                                model.common.editability
                                 glossary1
                                 (PageMsg.Internal << FailedToDelete)
                                 (PageMsg.Internal <| Deleted updatedGlossaryItems_)
@@ -622,7 +611,7 @@ update msg model =
                         , savingSettings = SavingInProgress
                       }
                     , Save.save
-                        common1
+                        common1.editability
                         glossary1
                         (PageMsg.Internal << FailedToChangeSettings)
                         (PageMsg.Internal <| ChangedSettings common1)
@@ -644,7 +633,7 @@ update msg model =
                         , savingSettings = SavingInProgress
                       }
                     , Save.save
-                        model.common
+                        model.common.editability
                         glossary1
                         (PageMsg.Internal << FailedToChangeSettings)
                         (PageMsg.Internal <| ChangedSettings model.common)
@@ -666,7 +655,7 @@ update msg model =
                         , savingSettings = SavingInProgress
                       }
                     , Save.save
-                        model.common
+                        model.common.editability
                         glossary1
                         (PageMsg.Internal << FailedToChangeSettings)
                         (PageMsg.Internal <| ChangedSettings model.common)
@@ -695,7 +684,7 @@ update msg model =
                         , savingSettings = SavingInProgress
                       }
                     , Save.save
-                        common1
+                        common1.editability
                         glossary1
                         (PageMsg.Internal << FailedToChangeSettings)
                         (PageMsg.Internal <| ChangedSettings common1)
@@ -706,7 +695,7 @@ update msg model =
 
         ChangedSettings common ->
             ( { model | common = common, savingSettings = NotSaving }
-            , if common.enableSavingChangesInMemory then
+            , if common.editability == Editability.EditingInMemory then
                 Cmd.none
 
               else
@@ -952,7 +941,7 @@ viewSettings glossary model =
                 [ Extras.HtmlAttribute.showIf (model.savingSettings == SavingInProgress) <|
                     class "opacity-25"
                 ]
-                [ Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
+                [ Extras.Html.showIf (model.common.editability == EditingWithIncludedBackend) <|
                     div
                         [ class "mt-6" ]
                         [ p
@@ -960,7 +949,7 @@ viewSettings glossary model =
                             [ text I18n.theseSettingsAreUpdatedInTheHtmlFile
                             ]
                         ]
-                , Extras.Html.showIf (not model.common.enableSavingChangesInMemory) <|
+                , Extras.Html.showIf (model.common.editability /= EditingInMemory) <|
                     div
                         [ class "mt-6 pb-2" ]
                         [ viewSelectInputSyntax model.common.enableMathSupport glossary ]
@@ -1224,8 +1213,8 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
             )
 
 
-viewConfirmDeleteModal : Bool -> Maybe GlossaryItemId -> Saving -> Html Msg
-viewConfirmDeleteModal enableSavingChangesInMemory maybeIdOfItemToDelete deleting =
+viewConfirmDeleteModal : Editability -> Maybe GlossaryItemId -> Saving -> Html Msg
+viewConfirmDeleteModal editability maybeIdOfItemToDelete deleting =
     Components.ModalDialog.view
         (PageMsg.Internal CancelDelete)
         ElementIds.confirmDeleteModalTitle
@@ -1257,7 +1246,7 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIdOfItemToDelete deletin
                         ]
                     ]
                 ]
-            , Extras.Html.showIf enableSavingChangesInMemory <|
+            , Extras.Html.showIf (editability == Editability.EditingInMemory) <|
                 div
                     [ class "mt-5 sm:mt-4 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                     [ text I18n.savingChangesInMemoryMessage ]
@@ -1302,8 +1291,8 @@ viewConfirmDeleteModal enableSavingChangesInMemory maybeIdOfItemToDelete deletin
         (maybeIdOfItemToDelete /= Nothing)
 
 
-viewMakeChangesButton : Bool -> Bool -> Html Msg
-viewMakeChangesButton showSavingChangesInMemoryMessage tabbable =
+viewMakeChangesButton : Editability -> Bool -> Html Msg
+viewMakeChangesButton editability tabbable =
     div
         [ class "mb-4 flex-none print:hidden" ]
         [ Components.Button.white True
@@ -1320,7 +1309,7 @@ viewMakeChangesButton showSavingChangesInMemoryMessage tabbable =
                     [ text "e" ]
                 ]
             ]
-        , Extras.Html.showIf showSavingChangesInMemoryMessage <|
+        , Extras.Html.showIf (editability == Editability.EditingInMemory) <|
             div
                 [ class "my-4 text-sm text-gray-500 dark:text-gray-400" ]
                 [ text I18n.savingChangesInMemoryMessage ]
@@ -1470,7 +1459,7 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
             filterByTagWithDescription
         , Extras.Html.showIf (filterByTagWithDescription == Nothing) <|
             viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
-        , Extras.Html.showIf (Editability.editing model.editability) <|
+        , Extras.Html.showIf (Editability.editing model.common.editability) <|
             div
                 [ class "flex-none mt-4" ]
                 [ viewManageTagsButton tabbable model.common ]
@@ -1526,7 +1515,7 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
             model.searchDialog.term
             model.searchDialog.results
         , viewConfirmDeleteModal
-            model.common.enableSavingChangesInMemory
+            model.common.editability
             model.confirmDeleteId
             model.deleting
         , viewSingleItemModalDialog
@@ -2314,10 +2303,10 @@ view model =
                                         if event == Extras.HtmlEvents.controlK then
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show, True )
 
-                                        else if Editability.canEdit model.editability && event == Extras.HtmlEvents.e then
+                                        else if Editability.canEdit model.common.editability && event == Extras.HtmlEvents.e then
                                             Just <| ( PageMsg.Internal MakeChanges, True )
 
-                                        else if Editability.editing model.editability && event == Extras.HtmlEvents.n then
+                                        else if Editability.editing model.common.editability && event == Extras.HtmlEvents.n then
                                             let
                                                 common_ : CommonModel
                                                 common_ =
@@ -2359,8 +2348,8 @@ view model =
                                     [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
                                     [ div
                                         [ class "flex flex-row justify-start lg:justify-end" ]
-                                        [ Extras.Html.showIf (Editability.canEdit model.editability) <|
-                                            viewMakeChangesButton model.common.enableSavingChangesInMemory noModalDialogShown_
+                                        [ Extras.Html.showIf (Editability.canEdit model.common.editability) <|
+                                            viewMakeChangesButton model.common.editability noModalDialogShown_
                                         , div
                                             [ class "hidden lg:block ml-auto pb-3 pt-0.5" ]
                                             [ viewThemeButton noModalDialogShown_ model.common.theme model.themeDropdownMenu
@@ -2375,8 +2364,8 @@ view model =
                                         ]
                                     ]
                                 , viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
-                                    |> Extras.Html.showIf (model.editability == ReadOnlyWithHelpForMakingChanges)
-                                , Extras.Html.showIf (Editability.editing model.editability) <| viewSettings glossary model
+                                    |> Extras.Html.showIf (model.common.editability == ReadOnlyWithHelpForMakingChanges)
+                                , Extras.Html.showIf (Editability.editing model.common.editability) <| viewSettings glossary model
                                 , h1
                                     [ id ElementIds.title ]
                                     [ GlossaryTitle.view model.common.enableMathSupport glossary.title ]
@@ -2388,7 +2377,7 @@ view model =
                                     , modalDialogShown = not noModalDialogShown_
                                     }
                                     glossary.aboutSection
-                                , Extras.Html.showIf (Editability.editing model.editability) <|
+                                , Extras.Html.showIf (Editability.editing model.common.editability) <|
                                     div
                                         [ class "flex-none mt-2" ]
                                         [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
@@ -2423,7 +2412,7 @@ view model =
                                         model
                                         { enableMathSupport = model.common.enableMathSupport
                                         , enableOrderItemsButtons = glossary.enableOrderItemsButtons
-                                        , editable = Editability.editing model.editability
+                                        , editable = Editability.editing model.common.editability
                                         , tabbable = noModalDialogShown_
                                         , enableLastUpdatedDates = glossary.enableLastUpdatedDates
                                         }

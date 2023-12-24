@@ -1,15 +1,15 @@
 module Save exposing (save)
 
-import CommonModel exposing (CommonModel)
+import Data.Editability exposing (Editability(..))
 import Data.Glossary as Glossary exposing (Glossary)
 import Extras.HtmlTree as HtmlTree
 import Extras.Task
 import Http
 
 
-save : CommonModel -> Glossary -> (Http.Error -> msg) -> msg -> Cmd msg
-save common glossary errorMsg msg =
-    if common.enableSavingChangesInMemory then
+save : Editability -> Glossary -> (Http.Error -> msg) -> msg -> Cmd msg
+save editability glossary errorMsg msg =
+    if editability == EditingInMemory then
         Extras.Task.messageToCommand msg
 
     else

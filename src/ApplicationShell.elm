@@ -13,6 +13,8 @@ import Browser exposing (Document, UrlRequest)
 import Browser.Dom as Dom
 import Browser.Navigation exposing (Key)
 import Codec
+import CommonModel exposing (CommonModel)
+import Data.Editability as Editability
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.Theme as Theme exposing (Theme)
 import Html
@@ -110,6 +112,14 @@ init flags url key =
                 |> Decode.decodeValue (Decode.field "enableSavingChangesInMemory" Decode.bool)
                 |> Result.withDefault False
 
+        editability =
+            Editability.create
+                { enableHelpForMakingChanges = enableHelpForMakingChanges
+                , enableSavingChangesInMemory = enableSavingChangesInMemory
+                , editorIsRunning = editorIsRunning
+                , currentlyEditing = False
+                }
+
         katexIsAvailable : Bool
         katexIsAvailable =
             flags
@@ -122,23 +132,22 @@ init flags url key =
                 |> Decode.decodeValue (Codec.decoder Glossary.codec)
                 |> Result.mapError Decode.errorToString
 
+        common : CommonModel
+        common =
+            { key = key
+            , initialUrl = url
+            , filename = filename
+            , theme = theme
+            , editability = editability
+            , enableMathSupport = katexIsAvailable
+            , queryParameters = queryParameters
+            , maybeId = Nothing
+            , fragment = fragment
+            , glossary = glossary
+            }
+
         ( listAllModel, listAllCmd ) =
-            Pages.ListAll.init
-                { enableHelpForMakingChanges = enableHelpForMakingChanges
-                , editorIsRunning = editorIsRunning
-                , currentlyEditing = False
-                }
-                { key = key
-                , initialUrl = url
-                , filename = filename
-                , theme = theme
-                , enableMathSupport = katexIsAvailable
-                , enableSavingChangesInMemory = enableSavingChangesInMemory
-                , queryParameters = queryParameters
-                , maybeId = Nothing
-                , fragment = fragment
-                , glossary = glossary
-                }
+            Pages.ListAll.init common
     in
     ( { key = key, page = ListAll listAllModel }
     , Cmd.map ListAllMsg listAllCmd
@@ -250,12 +259,7 @@ update msg model =
         ( _, NavigateToListAll commonModel, _ ) ->
             let
                 ( listAllModel, listAllCmd ) =
-                    Pages.ListAll.init
-                        { enableHelpForMakingChanges = False
-                        , editorIsRunning = True
-                        , currentlyEditing = True
-                        }
-                        commonModel
+                    Pages.ListAll.init commonModel
             in
             ( { model | page = ListAll listAllModel }
             , Cmd.map ListAllMsg listAllCmd
