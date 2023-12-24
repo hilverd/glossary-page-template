@@ -44,9 +44,7 @@ import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Extras.Url exposing (fragmentOnly)
-import Internationalisation as I18n exposing (preferredTerm)
-import Json.Decode as Decode exposing (Decoder)
-import Json.Decode.Pipeline exposing (optional, required)
+import Internationalisation as I18n
 import List
 
 

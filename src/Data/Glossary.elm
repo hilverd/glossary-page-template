@@ -1,4 +1,4 @@
-module Data.Glossary exposing (Glossary, decode, toHtmlTree)
+module Data.Glossary exposing (Glossary, codec, toHtmlTree)
 
 import Codec exposing (Codec)
 import Data.AboutLink as AboutLink exposing (AboutLink)
@@ -7,14 +7,12 @@ import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems, tagsWithDescriptions)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.TagDescription as TagDescription exposing (TagDescription)
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Internationalisation as I18n
-import Json.Decode as Decode exposing (Decoder)
-import Json.Decode.Pipeline exposing (optional, required)
 
 
 type alias Glossary =
@@ -30,65 +28,68 @@ type alias Glossary =
 
 
 create :
-    Bool
-    -> Bool
-    -> Bool
-    -> Bool
-    -> CardWidth
-    -> GlossaryTitle
-    -> AboutParagraph
-    -> List AboutLink
-    -> List ( Tag, TagDescription )
+    Maybe Bool
+    -> Maybe Bool
+    -> Maybe Bool
+    -> Maybe Bool
+    -> Maybe CardWidth
+    -> Maybe GlossaryTitle
+    -> Maybe AboutParagraph
+    -> Maybe (List AboutLink)
+    -> Maybe (List ( Tag, TagDescription ))
     -> List GlossaryItemForHtml
-    -> Result String Glossary
+    -> Glossary
 create enableLastUpdatedDates enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges cardWidth title aboutParagraph aboutLinks tagsWithDescriptions itemsForHtml =
     let
         aboutSection =
-            { paragraph = aboutParagraph, links = aboutLinks }
+            { paragraph = Maybe.withDefault (AboutParagraph.fromMarkdown I18n.elementNotFound) aboutParagraph
+            , links = Maybe.withDefault [] aboutLinks
+            }
 
         items : Result String GlossaryItems
         items =
-            GlossaryItems.fromList tagsWithDescriptions itemsForHtml
+            GlossaryItems.fromList (Maybe.withDefault [] tagsWithDescriptions) itemsForHtml
     in
-    items
-        |> Result.map
-            (\items_ ->
-                { enableLastUpdatedDates = enableLastUpdatedDates
-                , enableExportMenu = enableExportMenu
-                , enableOrderItemsButtons = enableOrderItemsButtons
-                , enableHelpForMakingChanges = enableHelpForMakingChanges
-                , cardWidth = cardWidth
-                , title = title
-                , aboutSection = aboutSection
-                , items = items_
-                }
-            )
+    { enableLastUpdatedDates = Maybe.withDefault False enableLastUpdatedDates
+    , enableExportMenu = Maybe.withDefault True enableExportMenu
+    , enableOrderItemsButtons = Maybe.withDefault True enableOrderItemsButtons
+    , enableHelpForMakingChanges = Maybe.withDefault False enableHelpForMakingChanges
+    , cardWidth = Maybe.withDefault CardWidth.Compact cardWidth
+    , title = Maybe.withDefault (GlossaryTitle.fromMarkdown I18n.elementNotFound) title
+    , aboutSection = aboutSection
+    , items = Result.withDefault GlossaryItems.empty items
+    }
 
 
-decode : Decoder (Result String Glossary)
-decode =
-    Decode.succeed create
-        |> optional "enableLastUpdatedDates" Decode.bool False
-        |> optional "enableExportMenu" Decode.bool True
-        |> optional "enableOrderItemsButtons" Decode.bool True
-        |> optional "enableHelpForMakingChanges" Decode.bool False
-        |> optional "cardWidth" (Codec.decoder CardWidth.codec) CardWidth.Compact
-        |> optional "titleString" (Decode.map GlossaryTitle.fromMarkdown Decode.string) (GlossaryTitle.fromMarkdown I18n.elementNotFound)
-        |> optional "aboutParagraph" (Decode.map AboutParagraph.fromMarkdown Decode.string) (AboutParagraph.fromMarkdown I18n.elementNotFound)
-        |> optional "aboutLinks" (Decode.list <| Codec.decoder AboutLink.codec) []
-        |> optional "tagsWithDescriptions"
-            (Decode.list <|
-                Decode.map2
+codec : Codec Glossary
+codec =
+    Codec.object create
+        |> Codec.optionalField "enableLastUpdatedDates" (.enableLastUpdatedDates >> Just) Codec.bool
+        |> Codec.optionalField "enableExportMenu" (.enableExportMenu >> Just) Codec.bool
+        |> Codec.optionalField "enableOrderItemsButtons" (.enableOrderItemsButtons >> Just) Codec.bool
+        |> Codec.optionalField "enableHelpForMakingChanges" (.enableHelpForMakingChanges >> Just) Codec.bool
+        |> Codec.optionalField "cardWidth" (.cardWidth >> Just) CardWidth.codec
+        |> Codec.optionalField "titleString" (.title >> Just) (Codec.map GlossaryTitle.fromMarkdown GlossaryTitle.raw Codec.string)
+        |> Codec.optionalField "aboutParagraph" (.aboutSection >> .paragraph >> Just) (Codec.map AboutParagraph.fromMarkdown AboutParagraph.raw Codec.string)
+        |> Codec.optionalField "aboutLinks" (.aboutSection >> .links >> Just) (Codec.list AboutLink.codec)
+        |> Codec.optionalField "tagsWithDescriptions"
+            (.items >> GlossaryItems.tagsWithDescriptions >> Just)
+            (Codec.list
+                (Codec.object
                     (\tagString descriptionString ->
                         ( Tag.fromMarkdown tagString
                         , TagDescription.fromMarkdown descriptionString
                         )
                     )
-                    (Decode.field "tag" <| Decode.string)
-                    (Decode.field "description" <| Decode.string)
+                    |> Codec.field "tag" (Tuple.first >> Tag.raw) Codec.string
+                    |> Codec.field "description" (Tuple.second >> TagDescription.raw) Codec.string
+                    |> Codec.buildObject
+                )
             )
-            []
-        |> required "glossaryItems" (Decode.list <| Codec.decoder GlossaryItemForHtml.codec)
+        |> Codec.field "glossaryItems"
+            (.items >> GlossaryItems.orderedAlphabetically Nothing >> List.map Tuple.second)
+            (Codec.list GlossaryItemForHtml.codec)
+        |> Codec.buildObject
 
 
 {-| Represent these glossary items as an HTML tree, ready for writing back to the glossary's HTML file.

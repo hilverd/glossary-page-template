@@ -12,19 +12,10 @@ module ApplicationShell exposing (main, Flags, Page, Model, Msg)
 import Browser exposing (Document, UrlRequest)
 import Browser.Dom as Dom
 import Browser.Navigation exposing (Key)
-import Data.AboutLink as AboutLink exposing (AboutLink)
-import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
-import Data.AboutSection exposing (AboutSection)
-import Data.CardWidth as CardWidth exposing (CardWidth)
+import Codec
 import Data.Glossary as Glossary exposing (Glossary)
-import Data.GlossaryItem.Tag as Tag exposing (Tag)
-import Data.GlossaryItemForHtml as GlossaryItemForHtml
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
-import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
-import Data.TagDescription as TagDescription exposing (TagDescription)
 import Data.Theme as Theme exposing (Theme)
 import Html
-import Internationalisation as I18n
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg(..))
 import Pages.CreateOrEdit
@@ -128,16 +119,8 @@ init flags url key =
         glossary : Result String Glossary
         glossary =
             flags
-                |> Decode.decodeValue Glossary.decode
+                |> Decode.decodeValue (Codec.decoder Glossary.codec)
                 |> Result.mapError Decode.errorToString
-                |> (\result ->
-                        case result of
-                            Ok result_ ->
-                                result_
-
-                            Err err ->
-                                Err err
-                   )
 
         ( listAllModel, listAllCmd ) =
             Pages.ListAll.init
