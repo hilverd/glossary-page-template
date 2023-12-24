@@ -471,7 +471,7 @@ update msg model =
                                 | deleting = SavingInProgress
                                 , savingSettings = NotSaving
                               }
-                            , Save.patchHtmlFile
+                            , Save.save
                                 model.common
                                 glossary1
                                 (PageMsg.Internal << FailedToDelete)
@@ -621,7 +621,7 @@ update msg model =
                         , deleting = NotSaving
                         , savingSettings = SavingInProgress
                       }
-                    , Save.patchHtmlFile
+                    , Save.save
                         common1
                         glossary1
                         (PageMsg.Internal << FailedToChangeSettings)
@@ -643,7 +643,7 @@ update msg model =
                         , deleting = NotSaving
                         , savingSettings = SavingInProgress
                       }
-                    , Save.patchHtmlFile
+                    , Save.save
                         model.common
                         glossary1
                         (PageMsg.Internal << FailedToChangeSettings)
@@ -665,7 +665,7 @@ update msg model =
                         , deleting = NotSaving
                         , savingSettings = SavingInProgress
                       }
-                    , Save.patchHtmlFile
+                    , Save.save
                         model.common
                         glossary1
                         (PageMsg.Internal << FailedToChangeSettings)
@@ -694,7 +694,7 @@ update msg model =
                         , deleting = NotSaving
                         , savingSettings = SavingInProgress
                       }
-                    , Save.patchHtmlFile
+                    , Save.save
                         common1
                         glossary1
                         (PageMsg.Internal << FailedToChangeSettings)

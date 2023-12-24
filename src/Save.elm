@@ -1,4 +1,4 @@
-module Save exposing (patchHtmlFile)
+module Save exposing (save)
 
 import CommonModel exposing (CommonModel)
 import Data.Glossary as Glossary exposing (Glossary)
@@ -7,31 +7,36 @@ import Extras.Task
 import Http
 
 
-patchHtmlFile : CommonModel -> Glossary -> (Http.Error -> msg) -> msg -> Cmd msg
-patchHtmlFile common glossary errorMsg msg =
+save : CommonModel -> Glossary -> (Http.Error -> msg) -> msg -> Cmd msg
+save common glossary errorMsg msg =
     if common.enableSavingChangesInMemory then
         Extras.Task.messageToCommand msg
 
     else
-        Http.request
-            { method = "PATCH"
-            , headers = []
-            , url = "/"
-            , body =
-                glossary
-                    |> Glossary.toHtmlTree
-                    |> HtmlTree.toHtmlReplacementString
-                    |> Http.stringBody "text/html"
-            , expect =
-                Http.expectWhatever
-                    (\result ->
-                        case result of
-                            Ok _ ->
-                                msg
+        patchHtmlFile glossary errorMsg msg
 
-                            Err error ->
-                                errorMsg error
-                    )
-            , timeout = Nothing
-            , tracker = Nothing
-            }
+
+patchHtmlFile : Glossary -> (Http.Error -> msg) -> msg -> Cmd msg
+patchHtmlFile glossary errorMsg msg =
+    Http.request
+        { method = "PATCH"
+        , headers = []
+        , url = "/"
+        , body =
+            glossary
+                |> Glossary.toHtmlTree
+                |> HtmlTree.toHtmlReplacementString
+                |> Http.stringBody "text/html"
+        , expect =
+            Http.expectWhatever
+                (\result ->
+                    case result of
+                        Ok _ ->
+                            msg
+
+                        Err error ->
+                            errorMsg error
+                )
+        , timeout = Nothing
+        , tracker = Nothing
+        }

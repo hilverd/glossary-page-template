@@ -155,7 +155,7 @@ update msg model =
                                         { common0 | glossary = Ok glossary1 }
                                 in
                                 ( { model | saving = SavingInProgress }
-                                , Save.patchHtmlFile
+                                , Save.save
                                     common1
                                     glossary1
                                     (PageMsg.Internal << FailedToSave)

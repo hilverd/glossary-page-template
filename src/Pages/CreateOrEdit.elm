@@ -449,7 +449,7 @@ update msg model =
                                         }
                                 in
                                 ( { model | saving = SavingInProgress }
-                                , Save.patchHtmlFile
+                                , Save.save
                                     common1
                                     glossary1
                                     (PageMsg.Internal << FailedToSave)
