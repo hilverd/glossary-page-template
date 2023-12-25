@@ -13,8 +13,11 @@ save editability glossary errorMsg msg =
         EditingInMemory ->
             Extras.Task.messageToCommand msg
 
-        _ ->
+        EditingWithIncludedBackend ->
             patchHtmlFile glossary errorMsg msg
+
+        _ ->
+            Cmd.none
 
 
 patchHtmlFile : Glossary -> (Http.Error -> msg) -> msg -> Cmd msg
