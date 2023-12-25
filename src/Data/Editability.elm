@@ -33,6 +33,8 @@ type Editability
     | EditingInMemory
     | CanEditWithIncludedBackend
     | EditingWithIncludedBackend
+    | CanEditWithSeparateBackend String
+    | EditingWithSeparateBackend String
 
 
 {-| Create an Editability from flags expressing the current situation.
@@ -40,59 +42,81 @@ type Editability
 create :
     { enableHelpForMakingChanges : Bool
     , enableSavingChangesInMemory : Bool
+    , separateBackendBaseUrl : Maybe String
     , editorIsRunning : Bool
     , currentlyEditing : Bool
     }
     -> Editability
-create { enableHelpForMakingChanges, enableSavingChangesInMemory, editorIsRunning, currentlyEditing } =
-    case ( enableHelpForMakingChanges, enableSavingChangesInMemory, editorIsRunning ) of
-        ( False, False, False ) ->
+create { enableHelpForMakingChanges, enableSavingChangesInMemory, separateBackendBaseUrl, editorIsRunning, currentlyEditing } =
+    case ( ( enableHelpForMakingChanges, enableSavingChangesInMemory ), ( separateBackendBaseUrl, editorIsRunning ) ) of
+        ( ( False, False ), ( _, False ) ) ->
             ReadOnly
 
-        ( False, False, True ) ->
+        ( ( False, False ), ( Nothing, True ) ) ->
             if currentlyEditing then
                 EditingWithIncludedBackend
 
             else
                 CanEditWithIncludedBackend
 
-        ( False, True, False ) ->
+        ( ( False, False ), ( Just separateBackendBaseUrl_, True ) ) ->
+            if currentlyEditing then
+                EditingWithSeparateBackend separateBackendBaseUrl_
+
+            else
+                CanEditWithSeparateBackend separateBackendBaseUrl_
+
+        ( ( False, True ), ( _, False ) ) ->
             if currentlyEditing then
                 EditingInMemory
 
             else
                 CanEditInMemory
 
-        ( False, True, True ) ->
+        ( ( False, True ), ( _, True ) ) ->
             if currentlyEditing then
                 EditingInMemory
 
             else
                 CanEditInMemory
 
-        ( True, False, False ) ->
+        ( ( True, False ), ( _, False ) ) ->
             ReadOnlyWithHelpForMakingChanges
 
-        ( True, False, True ) ->
+        ( ( True, False ), ( Nothing, True ) ) ->
             if currentlyEditing then
                 EditingWithIncludedBackend
 
             else
                 CanEditWithIncludedBackend
 
-        ( True, True, False ) ->
+        ( ( True, False ), ( Just separateBackendBaseUrl_, True ) ) ->
+            if currentlyEditing then
+                EditingWithSeparateBackend separateBackendBaseUrl_
+
+            else
+                CanEditWithSeparateBackend separateBackendBaseUrl_
+
+        ( ( True, True ), ( _, False ) ) ->
             if currentlyEditing then
                 EditingInMemory
 
             else
                 CanEditInMemory
 
-        ( True, True, True ) ->
+        ( ( True, True ), ( Nothing, True ) ) ->
             if currentlyEditing then
                 EditingWithIncludedBackend
 
             else
                 CanEditWithIncludedBackend
+
+        ( ( True, True ), ( Just separateBackendBaseUrl_, True ) ) ->
+            if currentlyEditing then
+                EditingWithSeparateBackend separateBackendBaseUrl_
+
+            else
+                CanEditWithSeparateBackend separateBackendBaseUrl_
 
 
 {-| Begin editing a glossary (that can be edited).
@@ -106,11 +130,14 @@ startEditing editability =
         CanEditWithIncludedBackend ->
             EditingWithIncludedBackend
 
+        CanEditWithSeparateBackend baseUrl ->
+            EditingWithSeparateBackend baseUrl
+
         _ ->
             editability
 
 
-{-| Whether or not the glossary page is currently being edited.
+{-| Whether or not the glossary is currently being edited.
 -}
 editing : Editability -> Bool
 editing editability =
@@ -121,11 +148,14 @@ editing editability =
         EditingWithIncludedBackend ->
             True
 
+        EditingWithSeparateBackend _ ->
+            True
+
         _ ->
             False
 
 
-{-| Whether or not the glossary page can be edited.
+{-| Whether or not the glossary can be edited.
 -}
 canEdit : Editability -> Bool
 canEdit editability =
@@ -134,6 +164,9 @@ canEdit editability =
             True
 
         CanEditWithIncludedBackend ->
+            True
+
+        CanEditWithSeparateBackend _ ->
             True
 
         _ ->

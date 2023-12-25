@@ -112,6 +112,12 @@ init flags url key =
                 |> Decode.decodeValue (Decode.field "enableSavingChangesInMemory" Decode.bool)
                 |> Result.withDefault False
 
+        separateBackendBaseUrl : Maybe String
+        separateBackendBaseUrl =
+            glossary
+                |> Result.toMaybe
+                |> Maybe.andThen .separateBackendBaseUrl
+
         katexIsAvailable : Bool
         katexIsAvailable =
             flags
@@ -128,6 +134,7 @@ init flags url key =
             Editability.create
                 { enableHelpForMakingChanges = enableHelpForMakingChanges
                 , enableSavingChangesInMemory = enableSavingChangesInMemory
+                , separateBackendBaseUrl = separateBackendBaseUrl
                 , editorIsRunning = editorIsRunning
                 , currentlyEditing = False
                 }
