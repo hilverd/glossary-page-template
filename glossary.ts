@@ -14,7 +14,7 @@ if (containerElement) {
     const enableSavingChangesInMemory: boolean = containerDataset.enableSavingChangesInMemory === 'true';
     const enableExportMenu: boolean = containerDataset.enableExportMenu !== 'false';
     const enableOrderItemsButtons: boolean = containerDataset.enableOrderItemsButtons !== 'false';
-    const cardWidth: string | undefined = containerDataset.cardWidth;
+    const cardWidth: string = containerDataset.cardWidth || 'compact';
     const enableLastUpdatedDates: boolean = containerDataset.enableLastUpdatedDates === 'true';
     const editorIsRunning: boolean = containerDataset.editorIsRunning === 'true';
 
