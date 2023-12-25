@@ -949,10 +949,10 @@ viewSettings glossary model =
                             [ text I18n.theseSettingsAreUpdatedInTheHtmlFile
                             ]
                         ]
-                , Extras.Html.showIf (model.common.editability /= EditingInMemory) <|
+                , Extras.Html.showIf (model.common.editability == EditingWithIncludedBackend) <|
                     div
                         [ class "mt-6 pb-2" ]
-                        [ viewSelectInputSyntax model.common.enableMathSupport glossary ]
+                        [ viewSelectInputSyntax model.common.enableMathSupport ]
                 , div
                     [ class "mt-6 pb-2" ]
                     [ viewSelectCardWidth glossary model
@@ -1872,12 +1872,15 @@ viewExportButton enabled exportDropdownMenu =
         ]
 
 
-viewSelectInputSyntax : Bool -> Glossary -> Html Msg
-viewSelectInputSyntax enableMathSupport glossary =
+viewSelectInputSyntax : Bool -> Html Msg
+viewSelectInputSyntax enableMathSupport =
     div
         []
-        [ Extras.Html.showIf (not enableMathSupport) I18n.howToEnableMathSupport
-        , Extras.Html.showIf enableMathSupport I18n.mathSupportIsEnabled
+        [ if enableMathSupport then
+            I18n.mathSupportIsEnabled
+
+          else
+            I18n.howToEnableMathSupport
         ]
 
 
