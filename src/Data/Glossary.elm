@@ -21,6 +21,7 @@ type alias Glossary =
     , enableOrderItemsButtons : Bool
     , enableHelpForMakingChanges : Bool
     , cardWidth : CardWidth
+    , separateBackendBaseUrl : Maybe String
     , title : GlossaryTitle
     , aboutSection : AboutSection
     , items : GlossaryItems
@@ -33,13 +34,14 @@ create :
     -> Maybe Bool
     -> Maybe Bool
     -> Maybe CardWidth
+    -> Maybe String
     -> Maybe GlossaryTitle
     -> Maybe AboutParagraph
     -> Maybe (List AboutLink)
     -> Maybe (List ( Tag, TagDescription ))
     -> List GlossaryItemForHtml
     -> Glossary
-create enableLastUpdatedDates enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges cardWidth title aboutParagraph aboutLinks tagsWithDescriptions itemsForHtml =
+create enableLastUpdatedDates enableExportMenu enableOrderItemsButtons enableHelpForMakingChanges cardWidth separateBackendBaseUrl title aboutParagraph aboutLinks tagsWithDescriptions itemsForHtml =
     let
         aboutSection =
             { paragraph = Maybe.withDefault (AboutParagraph.fromMarkdown I18n.elementNotFound) aboutParagraph
@@ -55,6 +57,7 @@ create enableLastUpdatedDates enableExportMenu enableOrderItemsButtons enableHel
     , enableOrderItemsButtons = Maybe.withDefault True enableOrderItemsButtons
     , enableHelpForMakingChanges = Maybe.withDefault False enableHelpForMakingChanges
     , cardWidth = Maybe.withDefault CardWidth.Compact cardWidth
+    , separateBackendBaseUrl = separateBackendBaseUrl
     , title = Maybe.withDefault (GlossaryTitle.fromMarkdown I18n.elementNotFound) title
     , aboutSection = aboutSection
     , items = Result.withDefault GlossaryItems.empty items
@@ -69,6 +72,7 @@ codec =
         |> Codec.optionalField "enableOrderItemsButtons" (.enableOrderItemsButtons >> Just) Codec.bool
         |> Codec.optionalField "enableHelpForMakingChanges" (.enableHelpForMakingChanges >> Just) Codec.bool
         |> Codec.optionalField "cardWidth" (.cardWidth >> Just) CardWidth.codec
+        |> Codec.optionalNullableField "separateBackendBaseUrl" .separateBackendBaseUrl Codec.string
         |> Codec.optionalField "titleString" (.title >> Just) (Codec.map GlossaryTitle.fromMarkdown GlossaryTitle.raw Codec.string)
         |> Codec.optionalField "aboutParagraph" (.aboutSection >> .paragraph >> Just) (Codec.map AboutParagraph.fromMarkdown AboutParagraph.raw Codec.string)
         |> Codec.optionalField "aboutLinks" (.aboutSection >> .links >> Just) (Codec.list AboutLink.codec)

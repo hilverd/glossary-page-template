@@ -170,6 +170,7 @@ glossary =
     , enableOrderItemsButtons = True
     , enableHelpForMakingChanges = False
     , cardWidth = CardWidth.Intermediate
+    , separateBackendBaseUrl = Just "/api"
     , title = GlossaryTitle.fromMarkdown "Example Glossary"
     , aboutSection =
         { paragraph = AboutParagraph.fromMarkdown "An example glossary."

@@ -16,6 +16,7 @@ if (containerElement) {
     const enableOrderItemsButtons: boolean = containerDataset.enableOrderItemsButtons !== 'false';
     const cardWidth: string = containerDataset.cardWidth || 'compact';
     const enableLastUpdatedDates: boolean = containerDataset.enableLastUpdatedDates === 'true';
+    const separateBackendBaseUrl: string | null = containerDataset.separateBackendBaseUrl || null;
     const editorIsRunning: boolean = containerDataset.editorIsRunning === 'true';
 
     const titleElement: HTMLElement | null = document.getElementById('glossary-page-title');
@@ -148,6 +149,7 @@ if (containerElement) {
             enableExportMenu: enableExportMenu,
             enableOrderItemsButtons: enableOrderItemsButtons,
             enableLastUpdatedDates: enableLastUpdatedDates,
+            separateBackendBaseUrl: separateBackendBaseUrl,
             theme: localStorage.glossaryPageTheme || 'system',
             cardWidth: cardWidth,
             katexIsAvailable: katexIsAvailable
