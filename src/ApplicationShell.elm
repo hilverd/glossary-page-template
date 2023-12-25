@@ -88,22 +88,22 @@ init flags url key =
         fragment =
             url.fragment
 
-        theme : Theme
-        theme =
+        glossary : Result String Glossary
+        glossary =
             flags
-                |> Decode.decodeValue (Decode.field "theme" Theme.decode)
-                |> Result.withDefault Theme.System
+                |> Decode.decodeValue (Codec.decoder Glossary.codec)
+                |> Result.mapError Decode.errorToString
+
+        enableHelpForMakingChanges : Bool
+        enableHelpForMakingChanges =
+            glossary
+                |> Result.map .enableHelpForMakingChanges
+                |> Result.withDefault False
 
         editorIsRunning : Bool
         editorIsRunning =
             flags
                 |> Decode.decodeValue (Decode.field "editorIsRunning" Decode.bool)
-                |> Result.withDefault False
-
-        enableHelpForMakingChanges : Bool
-        enableHelpForMakingChanges =
-            flags
-                |> Decode.decodeValue (Decode.field "enableHelpForMakingChanges" Decode.bool)
                 |> Result.withDefault False
 
         enableSavingChangesInMemory : Bool
@@ -112,6 +112,18 @@ init flags url key =
                 |> Decode.decodeValue (Decode.field "enableSavingChangesInMemory" Decode.bool)
                 |> Result.withDefault False
 
+        katexIsAvailable : Bool
+        katexIsAvailable =
+            flags
+                |> Decode.decodeValue (Decode.field "katexIsAvailable" Decode.bool)
+                |> Result.withDefault False
+
+        theme : Theme
+        theme =
+            flags
+                |> Decode.decodeValue (Decode.field "theme" Theme.decode)
+                |> Result.withDefault Theme.System
+
         editability =
             Editability.create
                 { enableHelpForMakingChanges = enableHelpForMakingChanges
@@ -119,18 +131,6 @@ init flags url key =
                 , editorIsRunning = editorIsRunning
                 , currentlyEditing = False
                 }
-
-        katexIsAvailable : Bool
-        katexIsAvailable =
-            flags
-                |> Decode.decodeValue (Decode.field "katexIsAvailable" Decode.bool)
-                |> Result.withDefault False
-
-        glossary : Result String Glossary
-        glossary =
-            flags
-                |> Decode.decodeValue (Codec.decoder Glossary.codec)
-                |> Result.mapError Decode.errorToString
 
         common : CommonModel
         common =
