@@ -9,11 +9,12 @@ import Http
 
 save : Editability -> Glossary -> (Http.Error -> msg) -> msg -> Cmd msg
 save editability glossary errorMsg msg =
-    if editability == EditingInMemory then
-        Extras.Task.messageToCommand msg
+    case editability of
+        EditingInMemory ->
+            Extras.Task.messageToCommand msg
 
-    else
-        patchHtmlFile glossary errorMsg msg
+        _ ->
+            patchHtmlFile glossary errorMsg msg
 
 
 patchHtmlFile : Glossary -> (Http.Error -> msg) -> msg -> Cmd msg
