@@ -6,6 +6,7 @@
         "Data.AboutParagraph",
         "Data.Editability",
         "Data.Glossary",
+        "Data.GlossaryChange",
         "Data.GlossaryItem.Definition",
         "Data.GlossaryItem.Tag",
         "Data.GlossaryItem.Term",

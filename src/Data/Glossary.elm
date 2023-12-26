@@ -1,6 +1,6 @@
 module Data.Glossary exposing
     ( Glossary
-    , create, codec, setEnableLastUpdatedDates, setEnableExportMenu, setEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, applyTagsChanges, insert, update, remove
+    , create, codec, setEnableLastUpdatedDates, setEnableExportMenu, setEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, applyChange, applyTagsChanges, insert, update, remove
     , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, separateBackendBaseUrl, title, aboutSection, items
     , toHtmlTree
     )
@@ -15,7 +15,7 @@ module Data.Glossary exposing
 
 # Build
 
-@docs create, codec, setEnableLastUpdatedDates, setEnableExportMenu, setEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, applyTagsChanges, insert, update, remove
+@docs create, codec, setEnableLastUpdatedDates, setEnableExportMenu, setEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, applyChange, applyTagsChanges, insert, update, remove
 
 
 # Query
@@ -34,6 +34,7 @@ import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.GlossaryChange exposing (GlossaryChange(..))
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId exposing (GlossaryItemId)
@@ -323,6 +324,27 @@ codec =
             (items >> GlossaryItems.orderedAlphabetically Nothing >> List.map Tuple.second)
             (Codec.list GlossaryItemForHtml.codec)
         |> Codec.buildObject
+
+
+{-| Apply a change to a glossary, returning a new glossary or an error message.
+
+A change can be inserting, updating, or removing an item, or modifying tags.
+
+-}
+applyChange : GlossaryChange -> Glossary -> Result String Glossary
+applyChange change glossary =
+    case change of
+        ChangeTags tagsChanges ->
+            applyTagsChanges tagsChanges glossary
+
+        Insert item ->
+            insert item glossary
+
+        Update itemId item ->
+            update itemId item glossary
+
+        Remove itemId ->
+            remove itemId glossary
 
 
 {-| Apply a set of tags changes.
