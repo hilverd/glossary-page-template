@@ -1,6 +1,6 @@
 module Data.Glossary exposing
     ( Glossary
-    , create, codec, setEnableLastUpdatedDates, setEnableExportMenu, setEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, insert, update, remove
+    , create, codec, setEnableLastUpdatedDates, setEnableExportMenu, setEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, applyTagsChanges, insert, update, remove
     , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, separateBackendBaseUrl, title, aboutSection, items
     , toHtmlTree
     )
@@ -15,7 +15,7 @@ module Data.Glossary exposing
 
 # Build
 
-@docs create, codec, setEnableLastUpdatedDates, setEnableExportMenu, setEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, insert, update, remove
+@docs create, codec, setEnableLastUpdatedDates, setEnableExportMenu, setEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, applyTagsChanges, insert, update, remove
 
 
 # Query
@@ -40,6 +40,7 @@ import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems, tagsWithDescriptions)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.TagDescription as TagDescription exposing (TagDescription)
+import Data.TagsChanges exposing (TagsChanges)
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Internationalisation as I18n
@@ -322,6 +323,16 @@ codec =
             (items >> GlossaryItems.orderedAlphabetically Nothing >> List.map Tuple.second)
             (Codec.list GlossaryItemForHtml.codec)
         |> Codec.buildObject
+
+
+{-| Apply a set of tags changes.
+-}
+applyTagsChanges : TagsChanges -> Glossary -> Result String Glossary
+applyTagsChanges tagsChanges glossary =
+    glossary
+        |> items
+        |> GlossaryItems.applyTagsChanges tagsChanges
+        |> Result.map (\items_ -> setItems items_ glossary)
 
 
 {-| Insert an item.
