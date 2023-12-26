@@ -591,7 +591,7 @@ update itemId item glossaryItems =
         |> fromList (tagsWithDescriptions glossaryItems)
 
 
-{-| Remove the item associated with an ID. Does nothing if the ID is not found.
+{-| Remove the item associated with an ID. Do nothing if the ID is not found.
 -}
 remove : GlossaryItemId -> GlossaryItems -> Result String GlossaryItems
 remove itemId glossaryItems =

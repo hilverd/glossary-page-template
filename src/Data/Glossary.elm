@@ -1,6 +1,6 @@
 module Data.Glossary exposing
     ( Glossary
-    , create, codec, setEnableLastUpdatedDates, setEnableExportMenu, setEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems
+    , create, codec, setEnableLastUpdatedDates, setEnableExportMenu, setEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, insert, update, remove
     , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, separateBackendBaseUrl, title, aboutSection, items
     , toHtmlTree
     )
@@ -15,7 +15,7 @@ module Data.Glossary exposing
 
 # Build
 
-@docs create, codec, setEnableLastUpdatedDates, setEnableExportMenu, setEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems
+@docs create, codec, setEnableLastUpdatedDates, setEnableExportMenu, setEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, insert, update, remove
 
 
 # Query
@@ -36,6 +36,7 @@ import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems, tagsWithDescriptions)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.TagDescription as TagDescription exposing (TagDescription)
@@ -321,6 +322,36 @@ codec =
             (items >> GlossaryItems.orderedAlphabetically Nothing >> List.map Tuple.second)
             (Codec.list GlossaryItemForHtml.codec)
         |> Codec.buildObject
+
+
+{-| Insert an item.
+-}
+insert : GlossaryItemForHtml -> Glossary -> Result String Glossary
+insert item glossary =
+    glossary
+        |> items
+        |> GlossaryItems.insert item
+        |> Result.map (\items_ -> setItems items_ glossary)
+
+
+{-| Update an item. Do nothing if there is no item with the given ID.
+-}
+update : GlossaryItemId -> GlossaryItemForHtml -> Glossary -> Result String Glossary
+update itemId item glossary =
+    glossary
+        |> items
+        |> GlossaryItems.update itemId item
+        |> Result.map (\items_ -> setItems items_ glossary)
+
+
+{-| Remove the item associated with an ID. Do nothing if the ID is not found.
+-}
+remove : GlossaryItemId -> Glossary -> Result String Glossary
+remove itemId glossary =
+    glossary
+        |> items
+        |> GlossaryItems.remove itemId
+        |> Result.map (\items_ -> setItems items_ glossary)
 
 
 {-| Represent this glossary as an HTML tree, ready for writing back to the glossary's HTML file.
