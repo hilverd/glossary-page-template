@@ -343,8 +343,10 @@ update msg model =
                 results : List Components.SearchDialog.SearchResult
                 results =
                     case model.common.glossary of
-                        Ok { items } ->
-                            Search.search model.common.enableMathSupport (filterByTag model) searchString items
+                        Ok glossary ->
+                            glossary
+                                |> Glossary.items
+                                |> Search.search model.common.enableMathSupport (filterByTag model) searchString
 
                         Err _ ->
                             []
@@ -397,7 +399,8 @@ update msg model =
                 model1 =
                     case model.common.glossary of
                         Ok glossary ->
-                            glossary.items
+                            glossary
+                                |> Glossary.items
                                 |> GlossaryItems.itemIdFromDisambiguatedPreferredTermId (Term.id relatedTerm)
                                 |> Maybe.map
                                     (\index ->
@@ -447,14 +450,14 @@ update msg model =
                     let
                         updatedGlossaryItems : Result String GlossaryItems
                         updatedGlossaryItems =
-                            GlossaryItems.remove id glossary.items
+                            GlossaryItems.remove id (Glossary.items glossary)
                     in
                     case updatedGlossaryItems of
                         Ok updatedGlossaryItems_ ->
                             let
                                 glossary1 : Glossary.Glossary
                                 glossary1 =
-                                    { glossary | items = updatedGlossaryItems_ }
+                                    glossary |> Glossary.setItems updatedGlossaryItems_
                             in
                             ( { model
                                 | deleting = SavingInProgress
@@ -493,7 +496,7 @@ update msg model =
             case common.glossary of
                 Ok glossary ->
                     ( { model
-                        | common = { common | glossary = Ok { glossary | items = updatedGlossaryItems } }
+                        | common = { common | glossary = Ok <| Glossary.setItems updatedGlossaryItems glossary }
                         , confirmDeleteId = Nothing
                         , deleting = NotSaving
                         , savingSettings = NotSaving
@@ -597,7 +600,7 @@ update msg model =
                     let
                         glossary1 : Glossary
                         glossary1 =
-                            { glossary | cardWidth = cardWidth }
+                            glossary |> Glossary.setCardWidth cardWidth
 
                         common0 =
                             model.common
@@ -625,7 +628,8 @@ update msg model =
                 Ok glossary ->
                     let
                         glossary1 =
-                            { glossary | enableExportMenu = not glossary.enableExportMenu }
+                            glossary
+                                |> Glossary.setEnableExportMenu (not <| Glossary.enableExportMenu glossary)
                     in
                     ( { model
                         | confirmDeleteId = Nothing
@@ -647,7 +651,8 @@ update msg model =
                 Ok glossary ->
                     let
                         glossary1 =
-                            { glossary | enableOrderItemsButtons = not glossary.enableOrderItemsButtons }
+                            glossary
+                                |> Glossary.setEnableOrderItemsButtons (not <| Glossary.enableOrderItemsButtons glossary)
                     in
                     ( { model
                         | confirmDeleteId = Nothing
@@ -670,7 +675,8 @@ update msg model =
                     let
                         glossary1 : Glossary
                         glossary1 =
-                            { glossary | enableLastUpdatedDates = not glossary.enableLastUpdatedDates }
+                            glossary
+                                |> Glossary.setEnableLastUpdatedDates (not <| Glossary.enableLastUpdatedDates glossary)
 
                         common0 =
                             model.common
@@ -712,8 +718,11 @@ update msg model =
         DownloadMarkdown ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
             , case model.common.glossary of
-                Ok { title, aboutSection, items } ->
-                    Export.Markdown.download title aboutSection items
+                Ok glossary ->
+                    Export.Markdown.download
+                        (Glossary.title glossary)
+                        (Glossary.aboutSection glossary)
+                        (Glossary.items glossary)
 
                 _ ->
                     Cmd.none
@@ -722,8 +731,12 @@ update msg model =
         DownloadAnki ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
             , case model.common.glossary of
-                Ok { title, aboutSection, items } ->
-                    Export.Anki.download model.common.enableMathSupport title aboutSection items
+                Ok glossary ->
+                    Export.Anki.download
+                        model.common.enableMathSupport
+                        (Glossary.title glossary)
+                        (Glossary.aboutSection glossary)
+                        (Glossary.items glossary)
 
                 _ ->
                     Cmd.none
@@ -817,7 +830,7 @@ filterByTag model =
             in
             queryParametersTag
                 |> Maybe.andThen
-                    (\tag -> GlossaryItems.tagIdFromTag tag glossary.items)
+                    (\tag -> glossary |> Glossary.items |> GlossaryItems.tagIdFromTag tag)
 
         _ ->
             Nothing
@@ -960,7 +973,7 @@ viewSettings glossary model =
                 , div
                     [ class "mt-6 pb-2" ]
                     [ Components.Button.toggle
-                        glossary.enableExportMenu
+                        (Glossary.enableExportMenu glossary)
                         ElementIds.showExportMenuLabel
                         [ Html.Events.onClick <| PageMsg.Internal ToggleEnableExportMenu ]
                         [ span
@@ -971,7 +984,7 @@ viewSettings glossary model =
                 , div
                     [ class "mt-6 pb-2" ]
                     [ Components.Button.toggle
-                        glossary.enableOrderItemsButtons
+                        (Glossary.enableOrderItemsButtons glossary)
                         ElementIds.showOrderItemsButtons
                         [ Html.Events.onClick <| PageMsg.Internal ToggleEnableOrderItemsButtons ]
                         [ span
@@ -982,7 +995,7 @@ viewSettings glossary model =
                 , div
                     [ class "mt-6 pb-2" ]
                     [ Components.Button.toggle
-                        glossary.enableLastUpdatedDates
+                        (Glossary.enableLastUpdatedDates glossary)
                         ElementIds.showLastUpdatedDatesLabel
                         [ Html.Events.onClick <| PageMsg.Internal ToggleEnableLastUpdatedDates ]
                         [ span
@@ -1890,6 +1903,10 @@ viewSelectCardWidth glossary model =
         tabbable : Bool
         tabbable =
             noModalDialogShown model
+
+        cardWidth : CardWidth
+        cardWidth =
+            Glossary.cardWidth glossary
     in
     div
         []
@@ -1904,7 +1921,7 @@ viewSelectCardWidth glossary model =
                     [ Components.Button.radio
                         "card-width"
                         "card-width-compact"
-                        (glossary.cardWidth == CardWidth.Compact)
+                        (cardWidth == CardWidth.Compact)
                         tabbable
                         [ id ElementIds.cardWidthCompact
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeCardWidth CardWidth.Compact
@@ -1920,7 +1937,7 @@ viewSelectCardWidth glossary model =
                     [ Components.Button.radio
                         "card-width"
                         "card-width-intermediate"
-                        (glossary.cardWidth == CardWidth.Intermediate)
+                        (cardWidth == CardWidth.Intermediate)
                         tabbable
                         [ id ElementIds.cardWidthIntermediate
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeCardWidth CardWidth.Intermediate
@@ -1936,7 +1953,7 @@ viewSelectCardWidth glossary model =
                     [ Components.Button.radio
                         "card-width"
                         "card-width-wide"
-                        (glossary.cardWidth == CardWidth.Wide)
+                        (cardWidth == CardWidth.Wide)
                         tabbable
                         [ id ElementIds.cardWidthWide
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeCardWidth CardWidth.Wide
@@ -2183,13 +2200,14 @@ pageTitle : Model -> Glossary -> String
 pageTitle model glossary =
     let
         glossaryTitle =
-            GlossaryTitle.inlineText glossary.title
+            glossary |> Glossary.title |> GlossaryTitle.inlineText
     in
     case ( model.layout, model.common.maybeId ) of
         ( ShowSingleItem, Just id ) ->
             let
                 disambiguatedPreferredTerm =
-                    glossary.items
+                    glossary
+                        |> Glossary.items
                         |> GlossaryItems.get id
                         |> Maybe.map
                             (\item ->
@@ -2220,7 +2238,7 @@ view model =
 
                 items : GlossaryItems
                 items =
-                    glossary.items
+                    Glossary.items glossary
 
                 filterByTag_ : Maybe TagId
                 filterByTag_ =
@@ -2329,7 +2347,7 @@ view model =
                         [ viewTopBar noModalDialogShown_
                             model.common.theme
                             model.themeDropdownMenu
-                            (if glossary.enableExportMenu then
+                            (if Glossary.enableExportMenu glossary then
                                 Just model.exportDropdownMenu
 
                              else
@@ -2339,13 +2357,13 @@ view model =
                             [ Html.Attributes.id ElementIds.container
                             , class "relative"
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
-                            , glossary.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
+                            , glossary |> Glossary.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
                             ]
                             [ header [] <|
                                 let
                                     showExportButton : Bool
                                     showExportButton =
-                                        glossary.enableExportMenu
+                                        Glossary.enableExportMenu glossary
                                 in
                                 [ div
                                     [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
@@ -2371,15 +2389,16 @@ view model =
                                 , Extras.Html.showIf (Editability.editing model.common.editability) <| viewSettings glossary model
                                 , h1
                                     [ id ElementIds.title ]
-                                    [ GlossaryTitle.view model.common.enableMathSupport glossary.title ]
+                                    [ glossary |> Glossary.title |> GlossaryTitle.view model.common.enableMathSupport ]
                                 ]
                             , Html.main_
                                 []
-                                [ Components.AboutSection.view
-                                    { enableMathSupport = model.common.enableMathSupport
-                                    , modalDialogShown = not noModalDialogShown_
-                                    }
-                                    glossary.aboutSection
+                                [ glossary
+                                    |> Glossary.aboutSection
+                                    |> Components.AboutSection.view
+                                        { enableMathSupport = model.common.enableMathSupport
+                                        , modalDialogShown = not noModalDialogShown_
+                                        }
                                 , Extras.Html.showIf (Editability.editing model.common.editability) <|
                                     div
                                         [ class "flex-none mt-2" ]
@@ -2414,10 +2433,10 @@ view model =
                                     |> viewCards
                                         model
                                         { enableMathSupport = model.common.enableMathSupport
-                                        , enableOrderItemsButtons = glossary.enableOrderItemsButtons
+                                        , enableOrderItemsButtons = Glossary.enableOrderItemsButtons glossary
                                         , editable = Editability.editing model.common.editability
                                         , tabbable = noModalDialogShown_
-                                        , enableLastUpdatedDates = glossary.enableLastUpdatedDates
+                                        , enableLastUpdatedDates = Glossary.enableLastUpdatedDates glossary
                                         }
                                         (GlossaryItems.tags items)
                                         items

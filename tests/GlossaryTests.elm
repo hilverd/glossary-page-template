@@ -147,9 +147,18 @@ loanItem =
         Nothing
 
 
-glossaryItems : GlossaryItems
-glossaryItems =
-    GlossaryItems.fromList
+glossary : Glossary
+glossary =
+    Glossary.create
+        True
+        True
+        True
+        False
+        CardWidth.Intermediate
+        "/api"
+        (GlossaryTitle.fromMarkdown "Example Glossary")
+        (AboutParagraph.fromMarkdown "An example glossary.")
+        []
         [ ( computerScienceTag, computerScienceTagDescription )
         , ( financeTag, financeTagDescription )
         , ( gardeningTag, gardeningTagDescription )
@@ -160,24 +169,6 @@ glossaryItems =
         , interestRateItem
         , loanItem
         ]
-        |> Result.withDefault GlossaryItems.empty
-
-
-glossary : Glossary
-glossary =
-    { enableLastUpdatedDates = True
-    , enableExportMenu = True
-    , enableOrderItemsButtons = True
-    , enableHelpForMakingChanges = False
-    , cardWidth = CardWidth.Intermediate
-    , separateBackendBaseUrl = Just "/api"
-    , title = GlossaryTitle.fromMarkdown "Example Glossary"
-    , aboutSection =
-        { paragraph = AboutParagraph.fromMarkdown "An example glossary."
-        , links = []
-        }
-    , items = glossaryItems
-    }
 
 
 suite : Test

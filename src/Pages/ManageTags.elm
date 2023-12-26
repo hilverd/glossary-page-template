@@ -72,10 +72,11 @@ type alias Msg =
 init : CommonModel -> ( Model, Cmd Msg )
 init common =
     case common.glossary of
-        Ok { items } ->
+        Ok glossary ->
             ( { common = common
               , form =
-                    items
+                    glossary
+                        |> Glossary.items
                         |> GlossaryItems.tagsWithIdsAndDescriptions
                         |> Form.create
               , triedToSaveWhenFormInvalid = False
@@ -132,6 +133,11 @@ update msg model =
         Save ->
             case model.common.glossary of
                 Ok glossary0 ->
+                    let
+                        items : GlossaryItems
+                        items =
+                            Glossary.items glossary0
+                    in
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
@@ -141,11 +147,11 @@ update msg model =
                         )
 
                     else
-                        case GlossaryItems.applyTagsChanges (Form.changes model.form) glossary0.items of
+                        case GlossaryItems.applyTagsChanges (Form.changes model.form) items of
                             Ok updatedItems ->
                                 let
                                     glossary1 =
-                                        { glossary0 | items = updatedItems }
+                                        Glossary.setItems updatedItems glossary0
 
                                     common0 : CommonModel
                                     common0 =
@@ -429,7 +435,7 @@ viewFooter model showValidationErrors glossaryItems =
         updatedGlossary =
             case common.glossary of
                 Ok glossary ->
-                    Ok { glossary | items = glossaryItems }
+                    Ok <| Glossary.setItems glossaryItems glossary
 
                 error ->
                     error
@@ -477,7 +483,7 @@ viewFooter model showValidationErrors glossaryItems =
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
-        Ok { items } ->
+        Ok glossary ->
             { title = I18n.manageTagsTitle
             , body =
                 [ div
@@ -514,7 +520,7 @@ view model =
                                     }
                             , div
                                 [ class "mt-4 lg:mt-8" ]
-                                [ viewFooter model model.triedToSaveWhenFormInvalid items ]
+                                [ glossary |> Glossary.items |> viewFooter model model.triedToSaveWhenFormInvalid ]
                             ]
                         ]
                     ]

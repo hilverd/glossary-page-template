@@ -97,7 +97,7 @@ init flags url key =
         enableHelpForMakingChanges : Bool
         enableHelpForMakingChanges =
             glossary
-                |> Result.map .enableHelpForMakingChanges
+                |> Result.map Glossary.enableHelpForMakingChanges
                 |> Result.withDefault False
 
         editorIsRunning : Bool
@@ -116,7 +116,7 @@ init flags url key =
         separateBackendBaseUrl =
             glossary
                 |> Result.toMaybe
-                |> Maybe.andThen .separateBackendBaseUrl
+                |> Maybe.andThen Glossary.separateBackendBaseUrl
 
         katexIsAvailable : Bool
         katexIsAvailable =

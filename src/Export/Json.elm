@@ -20,7 +20,7 @@ download glossary =
     let
         filename : String
         filename =
-            GlossaryTitle.toFilename ".json" glossary.title
+            glossary |> Glossary.title |> GlossaryTitle.toFilename ".json"
 
         content : String
         content =

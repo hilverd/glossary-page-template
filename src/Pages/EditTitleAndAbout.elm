@@ -69,9 +69,9 @@ type alias Msg =
 init : CommonModel -> ( Model, Cmd Msg )
 init common =
     case common.glossary of
-        Ok { title, aboutSection } ->
+        Ok glossary ->
             ( { common = common
-              , form = Form.create title aboutSection
+              , form = Form.create (Glossary.title glossary) (Glossary.aboutSection glossary)
               , triedToSaveWhenFormInvalid = False
               , saving = NotSaving
               }
@@ -150,10 +150,9 @@ update msg model =
                         let
                             glossary1 : Glossary
                             glossary1 =
-                                { glossary0
-                                    | title = titleFromForm model.form
-                                    , aboutSection = aboutSectionFromForm model.form
-                                }
+                                glossary0
+                                    |> Glossary.setTitle (titleFromForm model.form)
+                                    |> Glossary.setAboutSection (aboutSectionFromForm model.form)
 
                             common0 : CommonModel
                             common0 =
@@ -501,7 +500,7 @@ viewCreateFormFooter model showValidationErrors glossaryItems =
         updatedGlossary =
             case common.glossary of
                 Ok glossary ->
-                    Ok { glossary | items = glossaryItems }
+                    Ok <| Glossary.setItems glossaryItems glossary
 
                 error ->
                     error
@@ -544,7 +543,7 @@ viewCreateFormFooter model showValidationErrors glossaryItems =
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
-        Ok { items } ->
+        Ok glossary ->
             let
                 title1 : GlossaryTitle.GlossaryTitle
                 title1 =
@@ -594,7 +593,7 @@ view model =
                                 ]
                             , div
                                 [ class "mt-4 lg:mt-8" ]
-                                [ viewCreateFormFooter model model.triedToSaveWhenFormInvalid items ]
+                                [ viewCreateFormFooter model model.triedToSaveWhenFormInvalid (Glossary.items glossary) ]
                             ]
                         ]
                     ]

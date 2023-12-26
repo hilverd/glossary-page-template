@@ -14,7 +14,7 @@ import Components.GlossaryItemCard
 import Components.SelectMenu
 import Components.Spinner
 import Data.Editability as Editability
-import Data.Glossary as Glossary
+import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -98,8 +98,12 @@ type alias Msg =
 init : CommonModel -> ( Model, Cmd Msg )
 init commonModel =
     case commonModel.glossary of
-        Ok { items } ->
+        Ok glossary ->
             let
+                items : GlossaryItems
+                items =
+                    Glossary.items glossary
+
                 tags : List ( TagId, Tag )
                 tags =
                     GlossaryItems.tagByIdList items
@@ -400,9 +404,13 @@ update msg model =
 
                     else
                         let
+                            items : GlossaryItems
+                            items =
+                                Glossary.items glossary
+
                             newOrUpdatedGlossaryItem : GlossaryItemForHtml
                             newOrUpdatedGlossaryItem =
-                                Form.toGlossaryItem glossary.items model.form <| Just dateTime
+                                Form.toGlossaryItem items model.form <| Just dateTime
 
                             common : CommonModel
                             common =
@@ -411,7 +419,7 @@ update msg model =
                             ( updatedGlossaryItems, maybeId ) =
                                 case common.maybeId of
                                     Just id ->
-                                        ( GlossaryItems.update id newOrUpdatedGlossaryItem glossary.items
+                                        ( GlossaryItems.update id newOrUpdatedGlossaryItem items
                                         , Just id
                                         )
 
@@ -419,7 +427,7 @@ update msg model =
                                         let
                                             updated : Result String GlossaryItems
                                             updated =
-                                                GlossaryItems.insert newOrUpdatedGlossaryItem glossary.items
+                                                GlossaryItems.insert newOrUpdatedGlossaryItem items
                                         in
                                         ( updated
                                         , updated
@@ -438,9 +446,9 @@ update msg model =
                         case updatedGlossaryItems of
                             Ok updatedGlossaryItems_ ->
                                 let
-                                    glossary1 : Glossary.Glossary
+                                    glossary1 : Glossary
                                     glossary1 =
-                                        { glossary | items = updatedGlossaryItems_ }
+                                        Glossary.setItems updatedGlossaryItems_ glossary
 
                                     common1 : CommonModel
                                     common1 =
@@ -1097,11 +1105,15 @@ view model =
                 suggestedRelatedTerms =
                     Form.suggestRelatedTerms model.form
 
+                items : GlossaryItems
+                items =
+                    Glossary.items glossary
+
                 newOrUpdatedGlossaryItem : GlossaryItemForHtml
                 newOrUpdatedGlossaryItem =
-                    Form.toGlossaryItem glossary.items model.form Nothing
+                    Form.toGlossaryItem items model.form Nothing
             in
-            { title = GlossaryTitle.inlineText glossary.title
+            { title = glossary |> Glossary.title |> GlossaryTitle.inlineText
             , body =
                 [ div
                     [ class "container mx-auto px-6 pb-16 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
@@ -1148,7 +1160,7 @@ view model =
                                     , viewCreateSeeAlso
                                         model.common.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
-                                        glossary.items
+                                        items
                                         terms
                                         relatedTerms
                                         model.dropdownMenusWithMoreOptionsForRelatedTerms
