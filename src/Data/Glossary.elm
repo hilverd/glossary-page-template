@@ -1,4 +1,27 @@
-module Data.Glossary exposing (Glossary, codec, toHtmlTree)
+module Data.Glossary exposing
+    ( Glossary
+    , codec
+    , toHtmlTree
+    )
+
+{-| A glossary.
+
+
+# Glossary
+
+@docs Glossary
+
+
+# Build
+
+@docs codec
+
+
+# Export
+
+@docs toHtmlTree
+
+-}
 
 import Codec exposing (Codec)
 import Data.AboutLink as AboutLink exposing (AboutLink)
@@ -15,6 +38,8 @@ import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Internationalisation as I18n
 
 
+{-| A glossary.
+-}
 type alias Glossary =
     { enableLastUpdatedDates : Bool
     , enableExportMenu : Bool
@@ -64,6 +89,8 @@ create enableLastUpdatedDates enableExportMenu enableOrderItemsButtons enableHel
     }
 
 
+{-| An encoder/decoder for a glossary.
+-}
 codec : Codec Glossary
 codec =
     Codec.object create

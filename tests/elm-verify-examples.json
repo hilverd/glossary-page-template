@@ -5,6 +5,7 @@
         "Data.AboutLink",
         "Data.AboutParagraph",
         "Data.Editability",
+        "Data.Glossary",
         "Data.GlossaryItem.Definition",
         "Data.GlossaryItem.Tag",
         "Data.GlossaryItem.Term",
