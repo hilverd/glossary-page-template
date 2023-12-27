@@ -15,6 +15,7 @@ import Components.SelectMenu
 import Components.Spinner
 import Data.Editability as Editability
 import Data.Glossary as Glossary exposing (Glossary)
+import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -404,49 +405,35 @@ update msg model =
 
                     else
                         let
-                            items : GlossaryItems
-                            items =
-                                Glossary.items glossary
-
                             newOrUpdatedGlossaryItem : GlossaryItemForHtml
                             newOrUpdatedGlossaryItem =
-                                Form.toGlossaryItem items model.form <| Just dateTime
+                                Form.toGlossaryItem (Glossary.items glossary) model.form <| Just dateTime
 
                             common : CommonModel
                             common =
                                 model.common
 
-                            ( maybeId, updatedGlossaryItems ) =
+                            resultOfApplyingChange : Result String ( Maybe GlossaryItemId, Glossary )
+                            resultOfApplyingChange =
                                 case common.maybeId of
                                     Just id ->
-                                        ( Just id
-                                        , GlossaryItems.update id newOrUpdatedGlossaryItem items
-                                        )
+                                        Glossary.applyChange
+                                            (GlossaryChange.Update id newOrUpdatedGlossaryItem)
+                                            glossary
 
                                     Nothing ->
-                                        let
-                                            result =
-                                                GlossaryItems.insert newOrUpdatedGlossaryItem items
-                                        in
-                                        case result of
-                                            Ok ( newItemId, updatedItems ) ->
-                                                ( Just newItemId, Ok updatedItems )
-
-                                            Err err ->
-                                                (Nothing, Err err )
+                                        Glossary.applyChange
+                                            (GlossaryChange.Insert newOrUpdatedGlossaryItem)
+                                            glossary
                         in
-                        case updatedGlossaryItems of
-                            Ok updatedGlossaryItems_ ->
+                        case resultOfApplyingChange of
+                            Ok ( maybeId1, glossary1 ) ->
                                 let
-                                    glossary1 : Glossary
-                                    glossary1 =
-                                        Glossary.setItems updatedGlossaryItems_ glossary
-
                                     common1 : CommonModel
                                     common1 =
                                         { common
                                             | glossary = Ok glossary1
-                                            , maybeId = maybeId
+                                            , maybeId = maybeId1
                                         }
                                 in
                                 ( { model | saving = SavingInProgress }
