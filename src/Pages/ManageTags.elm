@@ -11,6 +11,7 @@ import Components.Form
 import Components.Spinner
 import Data.Editability as Editability
 import Data.Glossary as Glossary exposing (Glossary)
+import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.Saving exposing (Saving(..))
@@ -133,11 +134,6 @@ update msg model =
         Save ->
             case model.common.glossary of
                 Ok glossary0 ->
-                    let
-                        items : GlossaryItems
-                        items =
-                            Glossary.items glossary0
-                    in
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
@@ -147,12 +143,13 @@ update msg model =
                         )
 
                     else
-                        case GlossaryItems.applyTagsChanges (Form.changes model.form) items of
-                            Ok updatedItems ->
+                        case
+                            Glossary.applyChange
+                                (GlossaryChange.ChangeTags <| Form.changes model.form)
+                                glossary0
+                        of
+                            Ok glossary1 ->
                                 let
-                                    glossary1 =
-                                        Glossary.setItems updatedItems glossary0
-
                                     common0 : CommonModel
                                     common0 =
                                         model.common
