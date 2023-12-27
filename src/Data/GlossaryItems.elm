@@ -555,15 +555,27 @@ applyTagsChanges tagsChanges glossaryItems =
         |> fromList (tagsWithDescriptions resultBeforeValidation)
 
 
-{-| Insert an item.
+{-| Insert an item, returning the ID of the new item.
 -}
-insert : GlossaryItemForHtml -> GlossaryItems -> Result String GlossaryItems
+insert : GlossaryItemForHtml -> GlossaryItems -> Result String ( GlossaryItemId, GlossaryItems )
 insert item glossaryItems =
-    glossaryItems
-        |> orderedAlphabetically Nothing
-        |> List.map Tuple.second
-        |> (::) item
-        |> fromList (tagsWithDescriptions glossaryItems)
+    let
+        nextItemId : GlossaryItemId
+        nextItemId =
+            case glossaryItems of
+                GlossaryItems items ->
+                    items.nextItemId
+
+        itemsAfterInserting : Result String GlossaryItems
+        itemsAfterInserting =
+            glossaryItems
+                |> orderedAlphabetically Nothing
+                |> List.map Tuple.second
+                |> (::) item
+                |> fromList (tagsWithDescriptions glossaryItems)
+    in
+    itemsAfterInserting
+        |> Result.map (Tuple.pair nextItemId)
 
 
 {-| Update an item. Do nothing if there is no item with the given ID.

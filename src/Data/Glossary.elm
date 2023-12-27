@@ -357,39 +357,46 @@ codec =
 
 A change can be inserting, updating, or removing an item, or modifying tags.
 
+If the change is successful, the new glossary is returned along with the ID of the
+item that was inserted, if any.
+
 -}
-applyChange : GlossaryChange -> Glossary -> Result String Glossary
+applyChange : GlossaryChange -> Glossary -> Result String ( Maybe GlossaryItemId, Glossary )
 applyChange change glossary =
     case change of
         ToggleEnableLastUpdatedDates ->
-            Ok <| toggleEnableLastUpdatedDates glossary
+            Ok <| ( Nothing, toggleEnableLastUpdatedDates glossary )
 
         ToggleEnableExportMenu ->
-            Ok <| toggleEnableExportMenu glossary
+            Ok <| ( Nothing, toggleEnableExportMenu glossary )
 
         ToggleEnableOrderItemsButtons ->
-            Ok <| toggleEnableOrderItemsButtons glossary
+            Ok ( Nothing, toggleEnableOrderItemsButtons glossary )
 
         SetTitle title_ ->
-            Ok <| setTitle title_ glossary
+            Ok ( Nothing, setTitle title_ glossary )
 
         SetAboutSection aboutSection_ ->
-            Ok <| setAboutSection aboutSection_ glossary
+            Ok ( Nothing, setAboutSection aboutSection_ glossary )
 
         SetCardWidth cardWidth_ ->
-            Ok <| setCardWidth cardWidth_ glossary
+            Ok ( Nothing, setCardWidth cardWidth_ glossary )
 
         ChangeTags tagsChanges ->
             applyTagsChanges tagsChanges glossary
+                |> Result.map (\newGlossary -> ( Nothing, newGlossary ))
 
         Insert item ->
             insert item glossary
+                |> Result.map (\( newItemId, newGlossary ) -> ( Just newItemId, newGlossary ))
 
         Update itemId item ->
             update itemId item glossary
+                |> Result.map (\newGlossary -> ( Nothing, newGlossary ))
 
         Remove itemId ->
             remove itemId glossary
+                |> Result.map (\newGlossary -> ( Nothing, newGlossary ))
 
 
 {-| Apply a set of tags changes.
@@ -404,12 +411,12 @@ applyTagsChanges tagsChanges glossary =
 
 {-| Insert an item.
 -}
-insert : GlossaryItemForHtml -> Glossary -> Result String Glossary
+insert : GlossaryItemForHtml -> Glossary -> Result String ( GlossaryItemId, Glossary )
 insert item glossary =
     glossary
         |> items
         |> GlossaryItems.insert item
-        |> Result.map (\items_ -> setItems items_ glossary)
+        |> Result.map (\( newItemId, items_ ) -> ( newItemId, setItems items_ glossary ))
 
 
 {-| Update an item. Do nothing if there is no item with the given ID.

@@ -19,7 +19,7 @@ import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.GlossaryItemId as GlossaryItemId
+import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
@@ -416,32 +416,24 @@ update msg model =
                             common =
                                 model.common
 
-                            ( updatedGlossaryItems, maybeId ) =
+                            ( maybeId, updatedGlossaryItems ) =
                                 case common.maybeId of
                                     Just id ->
-                                        ( GlossaryItems.update id newOrUpdatedGlossaryItem items
-                                        , Just id
+                                        ( Just id
+                                        , GlossaryItems.update id newOrUpdatedGlossaryItem items
                                         )
 
                                     Nothing ->
                                         let
-                                            updated : Result String GlossaryItems
-                                            updated =
+                                            result =
                                                 GlossaryItems.insert newOrUpdatedGlossaryItem items
                                         in
-                                        ( updated
-                                        , updated
-                                            |> Result.toMaybe
-                                            |> Maybe.andThen
-                                                (\updated_ ->
-                                                    -- Find index of newly inserted item
-                                                    updated_
-                                                        |> GlossaryItems.orderedAlphabetically Nothing
-                                                        |> List.filter (Tuple.second >> (==) newOrUpdatedGlossaryItem)
-                                                        |> List.head
-                                                        |> Maybe.map Tuple.first
-                                                )
-                                        )
+                                        case result of
+                                            Ok ( newItemId, updatedItems ) ->
+                                                ( Just newItemId, Ok updatedItems )
+
+                                            Err err ->
+                                                (Nothing, Err err )
                         in
                         case updatedGlossaryItems of
                             Ok updatedGlossaryItems_ ->

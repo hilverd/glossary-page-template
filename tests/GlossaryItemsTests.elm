@@ -329,7 +329,7 @@ suite =
                 glossaryItems
                     |> GlossaryItems.remove (GlossaryItemId.create 0)
                     |> Result.andThen (GlossaryItems.insert defaultComputerScienceItem)
-                    |> Result.map (GlossaryItems.orderedAlphabetically Nothing)
+                    |> Result.map (\( _, updatedItems ) -> GlossaryItems.orderedAlphabetically Nothing updatedItems)
                     |> Expect.equal
                         (Ok
                             [ ( GlossaryItemId.create 0, defaultComputerScienceItem )
@@ -376,7 +376,18 @@ suite =
                 in
                 GlossaryItems.empty
                     |> GlossaryItems.applyTagsChanges tagsChanges
-                    |> (\result -> List.foldl (Result.andThen << GlossaryItems.insert) result glossaryItemsForHtml)
+                    |> (\result ->
+                            List.foldl
+                                (\item ->
+                                    Result.andThen
+                                        (\items ->
+                                            GlossaryItems.insert item items
+                                                |> Result.map Tuple.second
+                                        )
+                                )
+                                result
+                                glossaryItemsForHtml
+                       )
                     |> (\result ->
                             let
                                 itemId : GlossaryItemForHtml -> GlossaryItems -> GlossaryItemId

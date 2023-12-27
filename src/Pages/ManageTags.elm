@@ -148,7 +148,7 @@ update msg model =
                                 (GlossaryChange.ChangeTags <| Form.changes model.form)
                                 glossary0
                         of
-                            Ok glossary1 ->
+                            Ok ( _, glossary1 ) ->
                                 let
                                     common0 : CommonModel
                                     common0 =
