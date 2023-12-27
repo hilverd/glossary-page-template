@@ -675,8 +675,7 @@ update msg model =
                     let
                         glossary1 : Glossary
                         glossary1 =
-                            glossary
-                                |> Glossary.setEnableLastUpdatedDates (not <| Glossary.enableLastUpdatedDates glossary)
+                            Glossary.toggleEnableLastUpdatedDates glossary
 
                         common0 =
                             model.common

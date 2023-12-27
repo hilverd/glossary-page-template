@@ -1,6 +1,6 @@
 module Data.Glossary exposing
     ( Glossary
-    , create, codec, setEnableLastUpdatedDates, setEnableExportMenu, setEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, applyChange, applyTagsChanges, insert, update, remove
+    , create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, applyChange, applyTagsChanges, insert, update, remove
     , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, separateBackendBaseUrl, title, aboutSection, items
     , toHtmlTree
     )
@@ -15,7 +15,7 @@ module Data.Glossary exposing
 
 # Build
 
-@docs create, codec, setEnableLastUpdatedDates, setEnableExportMenu, setEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, applyChange, applyTagsChanges, insert, update, remove
+@docs create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, applyChange, applyTagsChanges, insert, update, remove
 
 
 # Query
@@ -153,6 +153,15 @@ setEnableLastUpdatedDates enable glossary =
             Glossary { glossary_ | enableLastUpdatedDates = enable }
 
 
+{-| Toggle showing of last updated dates for items.
+-}
+toggleEnableLastUpdatedDates : Glossary -> Glossary
+toggleEnableLastUpdatedDates glossary =
+    case glossary of
+        Glossary glossary_ ->
+            Glossary { glossary_ | enableLastUpdatedDates = not glossary_.enableLastUpdatedDates }
+
+
 {-| Enable or disable showing of the export menu.
 -}
 setEnableExportMenu : Bool -> Glossary -> Glossary
@@ -162,6 +171,15 @@ setEnableExportMenu enable glossary =
             Glossary { glossary_ | enableExportMenu = enable }
 
 
+{-| Toggle showing of the export menu.
+-}
+toggleEnableExportMenu : Glossary -> Glossary
+toggleEnableExportMenu glossary =
+    case glossary of
+        Glossary glossary_ ->
+            Glossary { glossary_ | enableExportMenu = not glossary_.enableExportMenu }
+
+
 {-| Enable or disable showing of buttons for ordering items.
 -}
 setEnableOrderItemsButtons : Bool -> Glossary -> Glossary
@@ -169,6 +187,15 @@ setEnableOrderItemsButtons enable glossary =
     case glossary of
         Glossary glossary_ ->
             Glossary { glossary_ | enableOrderItemsButtons = enable }
+
+
+{-| Toggle showing of buttons for ordering items.
+-}
+toggleEnableOrderItemsButtons : Glossary -> Glossary
+toggleEnableOrderItemsButtons glossary =
+    case glossary of
+        Glossary glossary_ ->
+            Glossary { glossary_ | enableOrderItemsButtons = not glossary_.enableOrderItemsButtons }
 
 
 {-| Enable or disable showing help for making changes.
@@ -334,6 +361,24 @@ A change can be inserting, updating, or removing an item, or modifying tags.
 applyChange : GlossaryChange -> Glossary -> Result String Glossary
 applyChange change glossary =
     case change of
+        ToggleEnableLastUpdatedDates ->
+            Ok <| toggleEnableLastUpdatedDates glossary
+
+        ToggleEnableExportMenu ->
+            Ok <| toggleEnableExportMenu glossary
+
+        ToggleEnableOrderItemsButtons ->
+            Ok <| toggleEnableOrderItemsButtons glossary
+
+        SetTitle title_ ->
+            Ok <| setTitle title_ glossary
+
+        SetAboutSection aboutSection_ ->
+            Ok <| setAboutSection aboutSection_ glossary
+
+        SetCardWidth cardWidth_ ->
+            Ok <| setCardWidth cardWidth_ glossary
+
         ChangeTags tagsChanges ->
             applyTagsChanges tagsChanges glossary
 
