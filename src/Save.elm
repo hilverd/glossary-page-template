@@ -1,5 +1,14 @@
 module Save exposing (save)
 
+{-| Functions for saving changes to a glossary.
+
+
+# Saving
+
+@docs save
+
+-}
+
 import Data.Editability exposing (Editability(..))
 import Data.Glossary as Glossary exposing (Glossary)
 import Extras.HtmlTree as HtmlTree
@@ -7,6 +16,8 @@ import Extras.Task
 import Http
 
 
+{-| Save a changed glossary.
+-}
 save : Editability -> Glossary -> (Http.Error -> msg) -> msg -> Cmd msg
 save editability glossary errorMsg msg =
     case editability of
