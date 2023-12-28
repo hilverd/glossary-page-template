@@ -44,6 +44,7 @@ import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Editability as Editability exposing (Editability(..))
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
+import Data.GlossaryChanges as GlossaryChanges
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -451,7 +452,9 @@ update msg model =
                     let
                         updatedGlossary : Result String ( Maybe GlossaryItemId, Glossary )
                         updatedGlossary =
-                            Glossary.applyChange (GlossaryChange.Remove id) glossary
+                            Glossary.applyChanges
+                                (GlossaryChanges.fromList [ GlossaryChange.Remove id ])
+                                glossary
                     in
                     case updatedGlossary of
                         Ok ( _, glossary1 ) ->
@@ -585,7 +588,9 @@ update msg model =
                     let
                         updatedGlossary : Result String ( Maybe GlossaryItemId, Glossary )
                         updatedGlossary =
-                            Glossary.applyChange (GlossaryChange.SetCardWidth cardWidth) glossary
+                            Glossary.applyChanges
+                                (GlossaryChanges.fromList [ GlossaryChange.SetCardWidth cardWidth ])
+                                glossary
                     in
                     case updatedGlossary of
                         Ok ( _, glossary1 ) ->
@@ -618,7 +623,9 @@ update msg model =
                     let
                         updatedGlossary : Result String ( Maybe GlossaryItemId, Glossary )
                         updatedGlossary =
-                            Glossary.applyChange GlossaryChange.ToggleEnableExportMenu glossary
+                            Glossary.applyChanges
+                                (GlossaryChanges.fromList [ GlossaryChange.ToggleEnableExportMenu ])
+                                glossary
                     in
                     case updatedGlossary of
                         Ok ( _, glossary1 ) ->
@@ -651,7 +658,9 @@ update msg model =
                     let
                         updatedGlossary : Result String ( Maybe GlossaryItemId, Glossary )
                         updatedGlossary =
-                            Glossary.applyChange GlossaryChange.ToggleEnableOrderItemsButtons glossary
+                            Glossary.applyChanges
+                                (GlossaryChanges.fromList [ GlossaryChange.ToggleEnableOrderItemsButtons ])
+                                glossary
                     in
                     case updatedGlossary of
                         Ok ( _, glossary1 ) ->
@@ -684,7 +693,9 @@ update msg model =
                     let
                         updatedGlossary : Result String ( Maybe GlossaryItemId, Glossary )
                         updatedGlossary =
-                            Glossary.applyChange GlossaryChange.ToggleEnableLastUpdatedDates glossary
+                            Glossary.applyChanges
+                                (GlossaryChanges.fromList [ GlossaryChange.ToggleEnableLastUpdatedDates ])
+                                glossary
                     in
                     case updatedGlossary of
                         Ok ( _, glossary1 ) ->

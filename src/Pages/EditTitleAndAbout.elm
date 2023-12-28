@@ -17,6 +17,7 @@ import Data.AboutSection exposing (AboutSection)
 import Data.Editability as Editability
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChange as GlossaryChange
+import Data.GlossaryChanges as GlossaryChanges exposing (GlossaryChanges)
 import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.Saving exposing (Saving(..))
@@ -152,9 +153,12 @@ update msg model =
                             glossary1 : Glossary
                             glossary1 =
                                 glossary0
-                                    |> Glossary.applyChange (GlossaryChange.SetTitle <| titleFromForm model.form)
-                                    |> Result.map Tuple.second
-                                    |> Result.andThen (Glossary.applyChange (GlossaryChange.SetAboutSection <| aboutSectionFromForm model.form))
+                                    |> Glossary.applyChanges
+                                        (GlossaryChanges.fromList
+                                            [ GlossaryChange.SetTitle <| titleFromForm model.form
+                                            , GlossaryChange.SetAboutSection <| aboutSectionFromForm model.form
+                                            ]
+                                        )
                                     |> Result.map Tuple.second
                                     |> Result.withDefault glossary0
 

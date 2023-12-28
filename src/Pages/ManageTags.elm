@@ -12,6 +12,7 @@ import Components.Spinner
 import Data.Editability as Editability
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChange as GlossaryChange
+import Data.GlossaryChanges as GlossaryChanges
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.Saving exposing (Saving(..))
@@ -144,8 +145,8 @@ update msg model =
 
                     else
                         case
-                            Glossary.applyChange
-                                (GlossaryChange.ChangeTags <| Form.changes model.form)
+                            Glossary.applyChanges
+                                (GlossaryChanges.fromList [ GlossaryChange.ChangeTags <| Form.changes model.form ])
                                 glossary0
                         of
                             Ok ( _, glossary1 ) ->

@@ -16,6 +16,7 @@ import Components.Spinner
 import Data.Editability as Editability
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChange as GlossaryChange
+import Data.GlossaryChanges as GlossaryChanges
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -417,13 +418,13 @@ update msg model =
                             resultOfApplyingChange =
                                 case common.maybeId of
                                     Just id ->
-                                        Glossary.applyChange
-                                            (GlossaryChange.Update id newOrUpdatedGlossaryItem)
+                                        Glossary.applyChanges
+                                            (GlossaryChanges.fromList [ GlossaryChange.Update id newOrUpdatedGlossaryItem ])
                                             glossary
 
                                     Nothing ->
-                                        Glossary.applyChange
-                                            (GlossaryChange.Insert newOrUpdatedGlossaryItem)
+                                        Glossary.applyChanges
+                                            (GlossaryChanges.fromList [ GlossaryChange.Insert newOrUpdatedGlossaryItem ])
                                             glossary
                         in
                         case resultOfApplyingChange of
