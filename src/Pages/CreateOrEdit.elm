@@ -59,7 +59,6 @@ type alias Model =
     { common : CommonModel
     , form : GlossaryItemForm
     , triedToSaveWhenFormInvalid : Bool
-    , glossaryItemsError : Maybe String
     , saving : Saving
     , dropdownMenusWithMoreOptionsForRelatedTerms : Dict Int Components.DropdownMenu.Model
     }
@@ -67,7 +66,16 @@ type alias Model =
 
 updateForm : (GlossaryItemForm -> GlossaryItemForm) -> Model -> Model
 updateForm f model =
-    { model | form = f model.form, glossaryItemsError = Nothing }
+    { model
+        | form = f model.form
+        , saving =
+            case model.saving of
+                SavingNotAttempted _ ->
+                    NotCurrentlySaving
+
+                _ ->
+                    model.saving
+    }
 
 
 type InternalMsg
@@ -172,7 +180,6 @@ init commonModel =
             ( { common = commonModel
               , form = form
               , triedToSaveWhenFormInvalid = False
-              , glossaryItemsError = Nothing
               , saving = NotCurrentlySaving
               , dropdownMenusWithMoreOptionsForRelatedTerms =
                     dropdownMenusWithMoreOptionsForRelatedTermsForForm form
@@ -188,7 +195,6 @@ init commonModel =
             ( { common = commonModel
               , form = Form.empty [] [] [] Nothing []
               , triedToSaveWhenFormInvalid = False
-              , glossaryItemsError = Nothing
               , saving = NotCurrentlySaving
               , dropdownMenusWithMoreOptionsForRelatedTerms = Dict.empty
               }
@@ -444,7 +450,9 @@ update msg model =
                                 )
 
                             Err error ->
-                                ( { model | glossaryItemsError = Just error }, Cmd.none )
+                                ( { model | saving = SavingNotAttempted error }
+                                , Cmd.none
+                                )
 
                 _ ->
                     ( model, Cmd.none )
@@ -1026,7 +1034,13 @@ viewCreateFormFooter model =
             (\glossaryItemsError ->
                 errorDiv <| I18n.unableToSaveAsItWouldResultInTheFollowing ++ ": " ++ glossaryItemsError ++ "."
             )
-            model.glossaryItemsError
+            (case model.saving of
+                SavingNotAttempted error ->
+                    Just error
+
+                _ ->
+                    Nothing
+            )
         , Extras.Html.showIf (common.editability == Editability.EditingInMemory) <|
             div
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]

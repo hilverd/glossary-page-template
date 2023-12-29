@@ -45,14 +45,22 @@ type alias Model =
     { common : CommonModel
     , form : TagsForm
     , triedToSaveWhenFormInvalid : Bool
-    , glossaryItemsError : Maybe String
     , saving : Saving
     }
 
 
 updateForm : (TagsForm -> TagsForm) -> Model -> Model
 updateForm f model =
-    { model | form = f model.form, glossaryItemsError = Nothing }
+    { model
+        | form = f model.form
+        , saving =
+            case model.saving of
+                SavingNotAttempted _ ->
+                    NotCurrentlySaving
+
+                _ ->
+                    model.saving
+    }
 
 
 type InternalMsg
@@ -80,7 +88,6 @@ init common =
                         |> GlossaryItems.tagsWithIdsAndDescriptions
                         |> Form.create
               , triedToSaveWhenFormInvalid = False
-              , glossaryItemsError = Nothing
               , saving = NotCurrentlySaving
               }
             , Cmd.none
@@ -90,7 +97,6 @@ init common =
             ( { common = common
               , form = Form.create []
               , triedToSaveWhenFormInvalid = False
-              , glossaryItemsError = Nothing
               , saving = NotCurrentlySaving
               }
             , Cmd.none
@@ -166,7 +172,9 @@ update msg model =
                                 )
 
                             Err error ->
-                                ( { model | glossaryItemsError = Just error }, Cmd.none )
+                                ( { model | saving = SavingNotAttempted error }
+                                , Cmd.none
+                                )
 
                 _ ->
                     ( model, Cmd.none )
@@ -444,7 +452,13 @@ viewFooter model showValidationErrors glossaryItems =
             (\glossaryItemsError ->
                 errorDiv <| I18n.unableToSaveAsItWouldResultInTheFollowing ++ ": " ++ glossaryItemsError ++ "."
             )
-            model.glossaryItemsError
+            (case model.saving of
+                SavingNotAttempted error ->
+                    Just error
+
+                _ ->
+                    Nothing
+            )
         , Extras.Html.showIf (model.common.editability == Editability.EditingInMemory) <|
             div
                 [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
