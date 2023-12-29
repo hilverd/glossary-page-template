@@ -43,7 +43,7 @@ import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Editability as Editability exposing (Editability(..))
 import Data.Glossary as Glossary exposing (Glossary)
-import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
+import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChanges as GlossaryChanges
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)

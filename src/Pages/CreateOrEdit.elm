@@ -33,9 +33,7 @@ import ElementIds
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
-import Extras.HtmlTree as HtmlTree
 import Extras.Http
-import Extras.Task
 import GlossaryItemForm as Form exposing (GlossaryItemForm)
 import GlossaryItemForm.DefinitionField as DefinitionField exposing (DefinitionField)
 import GlossaryItemForm.TermField as TermField exposing (TermField)

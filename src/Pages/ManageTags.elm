@@ -21,9 +21,7 @@ import ElementIds
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
-import Extras.HtmlTree as HtmlTree
 import Extras.Http
-import Extras.Task
 import Html
 import Html.Attributes exposing (class, id)
 import Html.Events

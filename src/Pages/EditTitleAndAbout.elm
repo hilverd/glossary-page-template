@@ -17,16 +17,14 @@ import Data.AboutSection exposing (AboutSection)
 import Data.Editability as Editability
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChange as GlossaryChange
-import Data.GlossaryChanges as GlossaryChanges exposing (GlossaryChanges)
+import Data.GlossaryChanges as GlossaryChanges
 import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.Saving exposing (Saving(..))
 import ElementIds
 import Extras.Html
 import Extras.HtmlEvents
-import Extras.HtmlTree as HtmlTree
 import Extras.Http
-import Extras.Task
 import Html
 import Html.Attributes exposing (class, for, id, name, placeholder, required, spellcheck, type_)
 import Html.Events
