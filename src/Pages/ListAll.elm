@@ -193,8 +193,8 @@ init commonModel =
                     , Components.SearchDialog.onHide <| Extras.Task.messageToCommand <| PageMsg.Internal HideSearchDialog
                     ]
             }
-      , deleting = NotSaving
-      , savingSettings = NotSaving
+      , deleting = NotCurrentlySaving
+      , savingSettings = NotCurrentlySaving
       , mostRecentTermIdForOrderingItemsFocusedOn =
             case QueryParameters.orderItemsBy commonModel.queryParameters of
                 FocusedOn termId ->
@@ -438,13 +438,13 @@ update msg model =
             if model.confirmDeleteId /= Nothing then
                 ( { model
                     | confirmDeleteId = Nothing
-                    , deleting = NotSaving
+                    , deleting = NotCurrentlySaving
                   }
                 , allowBackgroundScrolling ()
                 )
 
             else
-                ( { model | deleting = NotSaving }, Cmd.none )
+                ( { model | deleting = NotCurrentlySaving }, Cmd.none )
 
         Delete id ->
             case model.common.glossary of
@@ -460,7 +460,7 @@ update msg model =
                         Ok ( _, glossary1 ) ->
                             ( { model
                                 | deleting = SavingInProgress
-                                , savingSettings = NotSaving
+                                , savingSettings = NotCurrentlySaving
                               }
                             , Save.save
                                 model.common.editability
@@ -472,7 +472,7 @@ update msg model =
                         Err error ->
                             ( { model
                                 | deleting = SavingFailed error
-                                , savingSettings = NotSaving
+                                , savingSettings = NotCurrentlySaving
                               }
                             , Cmd.none
                             )
@@ -495,8 +495,8 @@ update msg model =
             ( { model
                 | common = { common | glossary = Ok <| updatedGlossary }
                 , confirmDeleteId = Nothing
-                , deleting = NotSaving
-                , savingSettings = NotSaving
+                , deleting = NotCurrentlySaving
+                , savingSettings = NotCurrentlySaving
               }
             , cmd
             )
@@ -504,7 +504,7 @@ update msg model =
         FailedToDelete error ->
             ( { model
                 | deleting = SavingFailed <| Extras.Http.httpErrorDescriptionAskingToReloadOnConflict error
-                , savingSettings = NotSaving
+                , savingSettings = NotCurrentlySaving
               }
             , Cmd.none
             )
@@ -596,7 +596,7 @@ update msg model =
                         Ok ( _, glossary1 ) ->
                             ( { model
                                 | confirmDeleteId = Nothing
-                                , deleting = NotSaving
+                                , deleting = NotCurrentlySaving
                                 , savingSettings = SavingInProgress
                               }
                             , Save.save
@@ -609,7 +609,7 @@ update msg model =
                         Err error ->
                             ( { model
                                 | deleting = SavingFailed error
-                                , savingSettings = NotSaving
+                                , savingSettings = NotCurrentlySaving
                               }
                             , Cmd.none
                             )
@@ -631,7 +631,7 @@ update msg model =
                         Ok ( _, glossary1 ) ->
                             ( { model
                                 | confirmDeleteId = Nothing
-                                , deleting = NotSaving
+                                , deleting = NotCurrentlySaving
                                 , savingSettings = SavingInProgress
                               }
                             , Save.save
@@ -644,7 +644,7 @@ update msg model =
                         Err error ->
                             ( { model
                                 | deleting = SavingFailed error
-                                , savingSettings = NotSaving
+                                , savingSettings = NotCurrentlySaving
                               }
                             , Cmd.none
                             )
@@ -666,7 +666,7 @@ update msg model =
                         Ok ( _, glossary1 ) ->
                             ( { model
                                 | confirmDeleteId = Nothing
-                                , deleting = NotSaving
+                                , deleting = NotCurrentlySaving
                                 , savingSettings = SavingInProgress
                               }
                             , Save.save
@@ -679,7 +679,7 @@ update msg model =
                         Err error ->
                             ( { model
                                 | deleting = SavingFailed error
-                                , savingSettings = NotSaving
+                                , savingSettings = NotCurrentlySaving
                               }
                             , Cmd.none
                             )
@@ -701,7 +701,7 @@ update msg model =
                         Ok ( _, glossary1 ) ->
                             ( { model
                                 | confirmDeleteId = Nothing
-                                , deleting = NotSaving
+                                , deleting = NotCurrentlySaving
                                 , savingSettings = SavingInProgress
                               }
                             , Save.save
@@ -714,7 +714,7 @@ update msg model =
                         Err error ->
                             ( { model
                                 | deleting = SavingFailed error
-                                , savingSettings = NotSaving
+                                , savingSettings = NotCurrentlySaving
                               }
                             , Cmd.none
                             )
@@ -730,7 +730,7 @@ update msg model =
             in
             ( { model
                 | common = { common | glossary = Ok <| updatedGlossary }
-                , savingSettings = NotSaving
+                , savingSettings = NotCurrentlySaving
               }
             , if common.editability == Editability.EditingInMemory then
                 Cmd.none

@@ -2,6 +2,6 @@ module Data.Saving exposing (Saving(..))
 
 
 type Saving
-    = NotSaving
+    = NotCurrentlySaving
     | SavingInProgress
     | SavingFailed String

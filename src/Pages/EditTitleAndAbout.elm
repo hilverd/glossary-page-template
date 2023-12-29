@@ -75,7 +75,7 @@ init common =
             ( { common = common
               , form = Form.create (Glossary.title glossary) (Glossary.aboutSection glossary)
               , triedToSaveWhenFormInvalid = False
-              , saving = NotSaving
+              , saving = NotCurrentlySaving
               }
             , Cmd.none
             )
@@ -88,7 +88,7 @@ init common =
                         , links = []
                         }
               , triedToSaveWhenFormInvalid = False
-              , saving = NotSaving
+              , saving = NotCurrentlySaving
               }
             , Cmd.none
             )
@@ -143,7 +143,7 @@ update msg model =
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
-                            , saving = NotSaving
+                            , saving = NotCurrentlySaving
                           }
                         , Cmd.none
                         )

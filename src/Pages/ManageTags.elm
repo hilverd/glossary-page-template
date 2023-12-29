@@ -83,7 +83,7 @@ init common =
                         |> Form.create
               , triedToSaveWhenFormInvalid = False
               , glossaryItemsError = Nothing
-              , saving = NotSaving
+              , saving = NotCurrentlySaving
               }
             , Cmd.none
             )
@@ -93,7 +93,7 @@ init common =
               , form = Form.create []
               , triedToSaveWhenFormInvalid = False
               , glossaryItemsError = Nothing
-              , saving = NotSaving
+              , saving = NotCurrentlySaving
               }
             , Cmd.none
             )
@@ -138,7 +138,7 @@ update msg model =
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
-                            , saving = NotSaving
+                            , saving = NotCurrentlySaving
                           }
                         , Cmd.none
                         )

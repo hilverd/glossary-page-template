@@ -175,7 +175,7 @@ init commonModel =
               , form = form
               , triedToSaveWhenFormInvalid = False
               , glossaryItemsError = Nothing
-              , saving = NotSaving
+              , saving = NotCurrentlySaving
               , dropdownMenusWithMoreOptionsForRelatedTerms =
                     dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
@@ -191,7 +191,7 @@ init commonModel =
               , form = Form.empty [] [] [] Nothing []
               , triedToSaveWhenFormInvalid = False
               , glossaryItemsError = Nothing
-              , saving = NotSaving
+              , saving = NotCurrentlySaving
               , dropdownMenusWithMoreOptionsForRelatedTerms = Dict.empty
               }
             , Cmd.none
@@ -399,7 +399,7 @@ update msg model =
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
-                            , saving = NotSaving
+                            , saving = NotCurrentlySaving
                           }
                         , Cmd.none
                         )
