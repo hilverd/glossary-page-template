@@ -402,7 +402,7 @@ applyChange change glossary =
 
         Update itemId item ->
             update itemId item glossary
-                |> Result.map (\newGlossary -> ( Nothing, newGlossary ))
+                |> Result.map (\newGlossary -> ( Just itemId, newGlossary ))
 
         Remove itemId ->
             remove itemId glossary
