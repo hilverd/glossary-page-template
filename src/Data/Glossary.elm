@@ -331,7 +331,7 @@ codec =
         |> Codec.optionalField "enableHelpForMakingChanges" (enableHelpForMakingChanges >> Just) Codec.bool
         |> Codec.optionalField "cardWidth" (cardWidth >> Just) CardWidth.codec
         |> Codec.optionalNullableField "separateBackendBaseUrl" separateBackendBaseUrl Codec.string
-        |> Codec.optionalField "titleString" (title >> Just) (Codec.map GlossaryTitle.fromMarkdown GlossaryTitle.raw Codec.string)
+        |> Codec.optionalField "titleString" (title >> Just) GlossaryTitle.codec
         |> Codec.optionalField "aboutParagraph" (aboutSection >> .paragraph >> Just) (Codec.map AboutParagraph.fromMarkdown AboutParagraph.raw Codec.string)
         |> Codec.optionalField "aboutLinks" (aboutSection >> .links >> Just) (Codec.list AboutLink.codec)
         |> Codec.optionalField "tagsWithDescriptions"

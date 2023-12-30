@@ -1,14 +1,15 @@
-module Data.GlossaryTitle exposing (GlossaryTitle, fromMarkdown, raw, toFilename, inlineText, markdown, view)
+module Data.GlossaryTitle exposing (GlossaryTitle, fromMarkdown, raw, codec, toFilename, inlineText, markdown, view)
 
 {-| The title of a glossary.
 
 
 # Glossary Titles
 
-@docs GlossaryTitle, fromMarkdown, raw, toFilename, inlineText, markdown, view
+@docs GlossaryTitle, fromMarkdown, raw, codec, toFilename, inlineText, markdown, view
 
 -}
 
+import Codec exposing (Codec)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Html exposing (Html, text)
 import Html.Attributes exposing (class)
@@ -45,6 +46,13 @@ raw glossaryTitle =
     case glossaryTitle of
         MarkdownGlossaryTitle fragment ->
             MarkdownFragment.raw fragment
+
+
+{-| An encoder/decoder for a glossary title.
+-}
+codec : Codec GlossaryTitle
+codec =
+    Codec.map fromMarkdown raw Codec.string
 
 
 {-| Convert a glossary title to a filename with the given extension.

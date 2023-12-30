@@ -1,14 +1,15 @@
-module Data.AboutParagraph exposing (AboutParagraph, fromMarkdown, raw, markdown, view)
+module Data.AboutParagraph exposing (AboutParagraph, fromMarkdown, raw, markdown, view, codec)
 
 {-| The "about" paragraph(s) shown at the top of a glossary.
 
 
 # "About" Paragraphs
 
-@docs AboutParagraph, fromMarkdown, raw, markdown, view
+@docs AboutParagraph, fromMarkdown, raw, markdown, view, codec
 
 -}
 
+import Codec exposing (Codec)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Html exposing (Html, text)
 import Html.Attributes exposing (class)
@@ -130,3 +131,10 @@ sanitiseMarkdownFragment fragment =
                     block
         )
         fragment
+
+
+{-| An encoder/decoder for an "about" paragraph.
+-}
+codec : Codec AboutParagraph
+codec =
+    Codec.map fromMarkdown raw Codec.string

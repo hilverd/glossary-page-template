@@ -1,14 +1,15 @@
-module Data.TagDescription exposing (TagDescription, fromMarkdown, raw, inlineText, markdown, view)
+module Data.TagDescription exposing (TagDescription, fromMarkdown, raw, codec, inlineText, markdown, view)
 
 {-| The description for a tag.
 
 
 # Tag Descriptions
 
-@docs TagDescription, fromMarkdown, raw, inlineText, markdown, view
+@docs TagDescription, fromMarkdown, raw, codec, inlineText, markdown, view
 
 -}
 
+import Codec exposing (Codec)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
@@ -58,6 +59,13 @@ raw tagDescription =
     case tagDescription of
         MarkdownTagDescription t ->
             MarkdownFragment.raw t.body
+
+
+{-| An encoder/decoder for tag descriptions.
+-}
+codec : Codec TagDescription
+codec =
+    Codec.map fromMarkdown raw Codec.string
 
 
 {-| Retrieve the concatenated inline text of a tag description.

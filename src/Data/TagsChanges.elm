@@ -1,6 +1,6 @@
 module Data.TagsChanges exposing
     ( TagsChange(..), TagsChanges
-    , empty, insert, update, remove
+    , empty, insert, update, remove, codec
     , toList
     )
 
@@ -15,7 +15,7 @@ This mainly exists to support tricky (but legal) combinations of changes such as
 
 # Build
 
-@docs empty, insert, update, remove
+@docs empty, insert, update, remove, codec
 
 
 # Query
@@ -24,9 +24,10 @@ This mainly exists to support tricky (but legal) combinations of changes such as
 
 -}
 
-import Data.GlossaryItem.Tag exposing (Tag)
-import Data.TagDescription exposing (TagDescription)
-import Data.TagId exposing (TagId)
+import Codec exposing (Codec)
+import Data.GlossaryItem.Tag as Tag exposing (Tag)
+import Data.TagDescription as TagDescription exposing (TagDescription)
+import Data.TagId as TagId exposing (TagId)
 import Data.TagIdDict as TagIdDict exposing (TagIdDict)
 
 
@@ -36,6 +37,26 @@ type TagsChange
     = Insertion Tag TagDescription
     | Update TagId Tag TagDescription
     | Removal TagId
+
+
+tagsChangeCodec : Codec TagsChange
+tagsChangeCodec =
+    Codec.custom
+        (\insertion_ update_ removal_ value ->
+            case value of
+                Insertion tag tagDescription ->
+                    insertion_ tag tagDescription
+
+                Update tagId tag tagDescription ->
+                    update_ tagId tag tagDescription
+
+                Removal tagId ->
+                    removal_ tagId
+        )
+        |> Codec.variant2 "Insertion" Insertion Tag.codec TagDescription.codec
+        |> Codec.variant3 "Update" Update TagId.codec Tag.codec TagDescription.codec
+        |> Codec.variant1 "Removal" Removal TagId.codec
+        |> Codec.buildCustom
 
 
 type UpdateOrRemoval_
@@ -129,3 +150,28 @@ remove tagId tagsChanges =
                     | updatesAndRemovals =
                         TagIdDict.insert tagId Removal_ changes.updatesAndRemovals
                 }
+
+
+fromList : List TagsChange -> TagsChanges
+fromList tagsChangeList =
+    List.foldl
+        (\tagsChange result ->
+            case tagsChange of
+                Insertion tag tagDescription ->
+                    insert tag tagDescription result
+
+                Update tagId tag tagDescription ->
+                    update tagId tag tagDescription result
+
+                Removal tagId ->
+                    remove tagId result
+        )
+        empty
+        tagsChangeList
+
+
+{-| An encoder/decoder for sets of tags changes.
+-}
+codec : Codec TagsChanges
+codec =
+    Codec.map fromList toList (Codec.list tagsChangeCodec)
