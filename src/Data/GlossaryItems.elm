@@ -573,9 +573,21 @@ insert item glossaryItems =
                 |> List.map Tuple.second
                 |> (::) item
                 |> fromList (tagsWithDescriptions glossaryItems)
+
+        insertedItemId : GlossaryItemId
+        insertedItemId =
+            item
+                |> GlossaryItemForHtml.disambiguatedPreferredTerm
+                |> Term.id
+                |> (\termId ->
+                        itemsAfterInserting
+                            |> Result.toMaybe
+                            |> Maybe.andThen (itemIdFromDisambiguatedPreferredTermId termId)
+                   )
+                |> Maybe.withDefault nextItemId
     in
     itemsAfterInserting
-        |> Result.map (Tuple.pair nextItemId)
+        |> Result.map (Tuple.pair insertedItemId)
 
 
 {-| Update an item. Do nothing if there is no item with the given ID.
