@@ -1,38 +1,56 @@
-module Save exposing (save)
+module Save exposing (changeAndSave)
 
 {-| Functions for saving changes to a glossary.
 
 
 # Saving
 
-@docs save
+@docs changeAndSave
 
 -}
 
 import Data.Editability exposing (Editability(..))
 import Data.Glossary as Glossary exposing (Glossary)
+import Data.GlossaryChanges exposing (GlossaryChanges)
+import Data.GlossaryItemId exposing (GlossaryItemId)
+import Data.Saving exposing (Saving(..))
 import Extras.HtmlTree as HtmlTree
 import Extras.Task
 import Http
 
 
-{-| Save a changed glossary.
+{-| Apply changes to a glossary and save the result.
 -}
-save : Editability -> Glossary -> (Http.Error -> msg) -> msg -> Cmd msg
-save editability glossary errorMsg msg =
-    case editability of
-        EditingInMemory ->
-            Extras.Task.messageToCommand msg
+changeAndSave :
+    Editability
+    -> Glossary
+    -> GlossaryChanges
+    -> (Http.Error -> msg)
+    -> (( Maybe GlossaryItemId, Glossary ) -> msg)
+    -> ( Saving, Cmd msg )
+changeAndSave editability glossary changes errorMsg successMsg =
+    case Glossary.applyChanges changes glossary of
+        Ok resultOfApplyingChanges ->
+            case editability of
+                EditingInMemory ->
+                    ( NotCurrentlySaving, successMsg resultOfApplyingChanges |> Extras.Task.messageToCommand )
 
-        EditingWithIncludedBackend ->
-            patchHtmlFile glossary errorMsg msg
+                EditingWithIncludedBackend ->
+                    ( SavingInProgress, patchHtmlFile resultOfApplyingChanges errorMsg successMsg )
 
-        _ ->
-            Cmd.none
+                _ ->
+                    ( NotCurrentlySaving, Cmd.none )
+
+        Err err ->
+            ( SavingNotAttempted err, Cmd.none )
 
 
-patchHtmlFile : Glossary -> (Http.Error -> msg) -> msg -> Cmd msg
-patchHtmlFile glossary errorMsg msg =
+patchHtmlFile :
+    ( Maybe GlossaryItemId, Glossary )
+    -> (Http.Error -> msg)
+    -> (( Maybe GlossaryItemId, Glossary ) -> msg)
+    -> Cmd msg
+patchHtmlFile ( maybeGlossaryItemId, glossary ) errorMsg successMsg =
     Http.request
         { method = "PATCH"
         , headers = []
@@ -47,7 +65,7 @@ patchHtmlFile glossary errorMsg msg =
                 (\result ->
                     case result of
                         Ok _ ->
-                            msg
+                            successMsg ( maybeGlossaryItemId, glossary )
 
                         Err error ->
                             errorMsg error

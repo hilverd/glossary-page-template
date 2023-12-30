@@ -1,8 +1,8 @@
 module GlossaryItemForHtmlTests exposing (suite)
 
 import Codec
-import Data.GlossaryItem.Definition as Definition exposing (Definition)
-import Data.GlossaryItem.Tag as Tag exposing (Tag)
+import Data.GlossaryItem.Definition as Definition
+import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Expect

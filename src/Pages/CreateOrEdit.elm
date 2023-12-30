@@ -14,14 +14,14 @@ import Components.GlossaryItemCard
 import Components.SelectMenu
 import Components.Spinner
 import Data.Editability as Editability
-import Data.Glossary as Glossary exposing (Glossary)
+import Data.Glossary as Glossary
 import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChanges as GlossaryChanges
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
+import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
@@ -418,41 +418,34 @@ update msg model =
                             common =
                                 model.common
 
-                            resultOfApplyingChange : Result String ( Maybe GlossaryItemId, Glossary )
-                            resultOfApplyingChange =
+                            glossaryChanges =
                                 case common.maybeId of
                                     Just id ->
-                                        Glossary.applyChanges
-                                            (GlossaryChanges.fromList [ GlossaryChange.Update id newOrUpdatedGlossaryItem ])
-                                            glossary
+                                        GlossaryChanges.fromList [ GlossaryChange.Update id newOrUpdatedGlossaryItem ]
 
                                     Nothing ->
-                                        Glossary.applyChanges
-                                            (GlossaryChanges.fromList [ GlossaryChange.Insert newOrUpdatedGlossaryItem ])
-                                            glossary
-                        in
-                        case resultOfApplyingChange of
-                            Ok ( maybeId1, glossary1 ) ->
-                                let
-                                    common1 : CommonModel
-                                    common1 =
-                                        { common
-                                            | glossary = Ok glossary1
-                                            , maybeId = maybeId1
-                                        }
-                                in
-                                ( { model | saving = SavingInProgress }
-                                , Save.save
-                                    common1.editability
-                                    glossary1
-                                    (PageMsg.Internal << FailedToSave)
-                                    (PageMsg.NavigateToListAll common1)
-                                )
+                                        GlossaryChanges.fromList [ GlossaryChange.Insert newOrUpdatedGlossaryItem ]
 
-                            Err error ->
-                                ( { model | saving = SavingNotAttempted error }
-                                , Cmd.none
-                                )
+                            ( saving, cmd ) =
+                                Save.changeAndSave model.common.editability
+                                    glossary
+                                    glossaryChanges
+                                    (PageMsg.Internal << FailedToSave)
+                                    (\( maybeGlossaryItemId, updatedGlossary ) ->
+                                        let
+                                            common0 =
+                                                model.common
+                                        in
+                                        PageMsg.NavigateToListAll
+                                            { common0
+                                                | maybeId = maybeGlossaryItemId
+                                                , glossary = Ok updatedGlossary
+                                            }
+                                    )
+                        in
+                        ( { model | saving = saving }
+                        , cmd
+                        )
 
                 _ ->
                     ( model, Cmd.none )

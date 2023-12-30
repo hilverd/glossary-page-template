@@ -148,33 +148,30 @@ update msg model =
                         )
 
                     else
-                        case
-                            Glossary.applyChanges
-                                (GlossaryChanges.fromList [ GlossaryChange.ChangeTags <| Form.changes model.form ])
-                                glossary0
-                        of
-                            Ok ( _, glossary1 ) ->
-                                let
-                                    common0 : CommonModel
-                                    common0 =
-                                        model.common
+                        let
+                            glossaryChanges =
+                                GlossaryChanges.fromList [ GlossaryChange.ChangeTags <| Form.changes model.form ]
 
-                                    common1 : CommonModel
-                                    common1 =
-                                        { common0 | glossary = Ok glossary1 }
-                                in
-                                ( { model | saving = SavingInProgress }
-                                , Save.save
-                                    common1.editability
-                                    glossary1
+                            ( saving, cmd ) =
+                                Save.changeAndSave model.common.editability
+                                    glossary0
+                                    glossaryChanges
                                     (PageMsg.Internal << FailedToSave)
-                                    (PageMsg.NavigateToListAll common1)
-                                )
-
-                            Err error ->
-                                ( { model | saving = SavingNotAttempted error }
-                                , Cmd.none
-                                )
+                                    (\( maybeGlossaryItemId, updatedGlossary ) ->
+                                        let
+                                            common0 =
+                                                model.common
+                                        in
+                                        PageMsg.NavigateToListAll
+                                            { common0
+                                                | maybeId = maybeGlossaryItemId
+                                                , glossary = Ok updatedGlossary
+                                            }
+                                    )
+                        in
+                        ( { model | saving = saving }
+                        , cmd
+                        )
 
                 _ ->
                     ( model, Cmd.none )

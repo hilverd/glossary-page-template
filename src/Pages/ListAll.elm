@@ -44,7 +44,7 @@ import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Editability as Editability exposing (Editability(..))
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChange as GlossaryChange
-import Data.GlossaryChanges as GlossaryChanges
+import Data.GlossaryChanges as GlossaryChanges exposing (GlossaryChanges)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -450,32 +450,22 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        updatedGlossary : Result String ( Maybe GlossaryItemId, Glossary )
-                        updatedGlossary =
-                            Glossary.applyChanges
-                                (GlossaryChanges.fromList [ GlossaryChange.Remove id ])
-                                glossary
-                    in
-                    case updatedGlossary of
-                        Ok ( _, glossary1 ) ->
-                            ( { model
-                                | deleting = SavingInProgress
-                                , savingSettings = NotCurrentlySaving
-                              }
-                            , Save.save
-                                model.common.editability
-                                glossary1
-                                (PageMsg.Internal << FailedToDelete)
-                                (PageMsg.Internal <| Deleted glossary1)
-                            )
+                        glossaryChanges : GlossaryChanges
+                        glossaryChanges =
+                            GlossaryChanges.fromList [ GlossaryChange.Remove id ]
 
-                        Err error ->
-                            ( { model
-                                | deleting = SavingFailed error
-                                , savingSettings = NotCurrentlySaving
-                              }
-                            , Cmd.none
-                            )
+                        ( saving, cmd ) =
+                            Save.changeAndSave model.common.editability
+                                glossary
+                                glossaryChanges
+                                (PageMsg.Internal << FailedToDelete)
+                                (\( _, updatedGlossary ) ->
+                                    PageMsg.Internal <| Deleted updatedGlossary
+                                )
+                    in
+                    ( { model | deleting = saving }
+                    , cmd
+                    )
 
                 _ ->
                     ( model, Cmd.none )
@@ -586,33 +576,26 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        updatedGlossary : Result String ( Maybe GlossaryItemId, Glossary )
-                        updatedGlossary =
-                            Glossary.applyChanges
-                                (GlossaryChanges.fromList [ GlossaryChange.SetCardWidth cardWidth ])
-                                glossary
-                    in
-                    case updatedGlossary of
-                        Ok ( _, glossary1 ) ->
-                            ( { model
-                                | confirmDeleteId = Nothing
-                                , deleting = NotCurrentlySaving
-                                , savingSettings = SavingInProgress
-                              }
-                            , Save.save
-                                model.common.editability
-                                glossary1
-                                (PageMsg.Internal << FailedToChangeSettings)
-                                (PageMsg.Internal <| ChangedSettings glossary1)
-                            )
+                        glossaryChanges : GlossaryChanges
+                        glossaryChanges =
+                            GlossaryChanges.fromList [ GlossaryChange.SetCardWidth cardWidth ]
 
-                        Err error ->
-                            ( { model
-                                | deleting = SavingFailed error
-                                , savingSettings = NotCurrentlySaving
-                              }
-                            , Cmd.none
-                            )
+                        ( saving, cmd ) =
+                            Save.changeAndSave model.common.editability
+                                glossary
+                                glossaryChanges
+                                (PageMsg.Internal << FailedToChangeSettings)
+                                (\( _, updatedGlossary ) ->
+                                    PageMsg.Internal <| ChangedSettings updatedGlossary
+                                )
+                    in
+                    ( { model
+                        | confirmDeleteId = Nothing
+                        , deleting = NotCurrentlySaving
+                        , savingSettings = saving
+                      }
+                    , cmd
+                    )
 
                 _ ->
                     ( model, Cmd.none )
@@ -621,33 +604,34 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        updatedGlossary : Result String ( Maybe GlossaryItemId, Glossary )
-                        updatedGlossary =
-                            Glossary.applyChanges
-                                (GlossaryChanges.fromList [ GlossaryChange.ToggleEnableExportMenu ])
-                                glossary
-                    in
-                    case updatedGlossary of
-                        Ok ( _, glossary1 ) ->
-                            ( { model
-                                | confirmDeleteId = Nothing
-                                , deleting = NotCurrentlySaving
-                                , savingSettings = SavingInProgress
-                              }
-                            , Save.save
-                                model.common.editability
-                                glossary1
-                                (PageMsg.Internal << FailedToChangeSettings)
-                                (PageMsg.Internal <| ChangedSettings glossary1)
-                            )
+                        glossaryChanges : GlossaryChanges
+                        glossaryChanges =
+                            GlossaryChanges.fromList [ GlossaryChange.ToggleEnableExportMenu ]
 
-                        Err error ->
-                            ( { model
-                                | deleting = SavingFailed error
-                                , savingSettings = NotCurrentlySaving
-                              }
-                            , Cmd.none
-                            )
+                        ( saving, cmd ) =
+                            Save.changeAndSave model.common.editability
+                                glossary
+                                glossaryChanges
+                                (PageMsg.Internal << FailedToChangeSettings)
+                                (\( maybeGlossaryItemId, updatedGlossary ) ->
+                                    let
+                                        common0 =
+                                            model.common
+                                    in
+                                    PageMsg.NavigateToListAll
+                                        { common0
+                                            | maybeId = maybeGlossaryItemId
+                                            , glossary = Ok updatedGlossary
+                                        }
+                                )
+                    in
+                    ( { model
+                        | confirmDeleteId = Nothing
+                        , deleting = NotCurrentlySaving
+                        , savingSettings = saving
+                      }
+                    , cmd
+                    )
 
                 _ ->
                     ( model, Cmd.none )
@@ -656,33 +640,34 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        updatedGlossary : Result String ( Maybe GlossaryItemId, Glossary )
-                        updatedGlossary =
-                            Glossary.applyChanges
-                                (GlossaryChanges.fromList [ GlossaryChange.ToggleEnableOrderItemsButtons ])
-                                glossary
-                    in
-                    case updatedGlossary of
-                        Ok ( _, glossary1 ) ->
-                            ( { model
-                                | confirmDeleteId = Nothing
-                                , deleting = NotCurrentlySaving
-                                , savingSettings = SavingInProgress
-                              }
-                            , Save.save
-                                model.common.editability
-                                glossary1
-                                (PageMsg.Internal << FailedToChangeSettings)
-                                (PageMsg.Internal <| ChangedSettings glossary1)
-                            )
+                        glossaryChanges : GlossaryChanges
+                        glossaryChanges =
+                            GlossaryChanges.fromList [ GlossaryChange.ToggleEnableOrderItemsButtons ]
 
-                        Err error ->
-                            ( { model
-                                | deleting = SavingFailed error
-                                , savingSettings = NotCurrentlySaving
-                              }
-                            , Cmd.none
-                            )
+                        ( saving, cmd ) =
+                            Save.changeAndSave model.common.editability
+                                glossary
+                                glossaryChanges
+                                (PageMsg.Internal << FailedToChangeSettings)
+                                (\( maybeGlossaryItemId, updatedGlossary ) ->
+                                    let
+                                        common0 =
+                                            model.common
+                                    in
+                                    PageMsg.NavigateToListAll
+                                        { common0
+                                            | maybeId = maybeGlossaryItemId
+                                            , glossary = Ok updatedGlossary
+                                        }
+                                )
+                    in
+                    ( { model
+                        | confirmDeleteId = Nothing
+                        , deleting = NotCurrentlySaving
+                        , savingSettings = saving
+                      }
+                    , cmd
+                    )
 
                 _ ->
                     ( model, Cmd.none )
@@ -691,33 +676,34 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        updatedGlossary : Result String ( Maybe GlossaryItemId, Glossary )
-                        updatedGlossary =
-                            Glossary.applyChanges
-                                (GlossaryChanges.fromList [ GlossaryChange.ToggleEnableLastUpdatedDates ])
-                                glossary
-                    in
-                    case updatedGlossary of
-                        Ok ( _, glossary1 ) ->
-                            ( { model
-                                | confirmDeleteId = Nothing
-                                , deleting = NotCurrentlySaving
-                                , savingSettings = SavingInProgress
-                              }
-                            , Save.save
-                                model.common.editability
-                                glossary1
-                                (PageMsg.Internal << FailedToChangeSettings)
-                                (PageMsg.Internal <| ChangedSettings glossary1)
-                            )
+                        glossaryChanges : GlossaryChanges
+                        glossaryChanges =
+                            GlossaryChanges.fromList [ GlossaryChange.ToggleEnableLastUpdatedDates ]
 
-                        Err error ->
-                            ( { model
-                                | deleting = SavingFailed error
-                                , savingSettings = NotCurrentlySaving
-                              }
-                            , Cmd.none
-                            )
+                        ( saving, cmd ) =
+                            Save.changeAndSave model.common.editability
+                                glossary
+                                glossaryChanges
+                                (PageMsg.Internal << FailedToChangeSettings)
+                                (\( maybeGlossaryItemId, updatedGlossary ) ->
+                                    let
+                                        common0 =
+                                            model.common
+                                    in
+                                    PageMsg.NavigateToListAll
+                                        { common0
+                                            | maybeId = maybeGlossaryItemId
+                                            , glossary = Ok updatedGlossary
+                                        }
+                                )
+                    in
+                    ( { model
+                        | confirmDeleteId = Nothing
+                        , deleting = NotCurrentlySaving
+                        , savingSettings = saving
+                      }
+                    , cmd
+                    )
 
                 _ ->
                     ( model, Cmd.none )
