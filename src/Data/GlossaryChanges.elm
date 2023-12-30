@@ -1,6 +1,6 @@
 module Data.GlossaryChanges exposing
     ( GlossaryChanges
-    , fromList
+    , fromList, codec
     , toList
     )
 
@@ -14,7 +14,7 @@ module Data.GlossaryChanges exposing
 
 # Build
 
-@docs fromList
+@docs fromList, codec
 
 
 # Query
@@ -23,7 +23,8 @@ module Data.GlossaryChanges exposing
 
 -}
 
-import Data.GlossaryChange exposing (GlossaryChange)
+import Codec exposing (Codec)
+import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
 
 
 {-| Represents a sequence of changes to be made to a glossary.
@@ -46,3 +47,10 @@ toList glossaryChanges =
     case glossaryChanges of
         GlossaryChanges changes ->
             changes
+
+
+{-| An encoder/decoder for a sequence of changes.
+-}
+codec : Codec GlossaryChanges
+codec =
+    Codec.map fromList toList (Codec.list GlossaryChange.codec)
