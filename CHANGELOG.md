@@ -12,15 +12,19 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [4.3.0] - 2024-01-08
+
+### Added
 
 - Allow exporting to JSON.
 
-### Changed
 ### Fixed
 
 - Restore initial instructions for opening/editing a glossary. These were no longer being shown if the file was being opened directly in a browser (using a `file://` URL).
-
-### Removed
 
 ## [4.2.0] - 2023-12-16
 
@@ -658,7 +662,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.2.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.3.0...HEAD
+[4.3.0]: https://github.com/hilverd/glossary-page-template/compare/v4.2.0...v4.3.0
 [4.2.0]: https://github.com/hilverd/glossary-page-template/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/hilverd/glossary-page-template/compare/v4.0.0...v4.1.0
 [4.0.0]: https://github.com/hilverd/glossary-page-template/compare/v3.8.0...v4.0.0
