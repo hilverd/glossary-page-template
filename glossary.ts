@@ -136,106 +136,126 @@ if (containerElement) {
         }
     }
 
-    const app = Elm.ApplicationShell.init({
-        flags: {
-            titleString: normaliseWhitespace(titleElement?.textContent || ''),
-            aboutParagraph: aboutParagraph,
-            aboutLinks: aboutLinks,
-            tagsWithDescriptions: tagsWithDescriptions,
-            glossaryItems: glossaryItems,
-            editorIsRunning: editorIsRunning,
-            enableHelpForMakingChanges: enableHelpForMakingChanges,
-            enableSavingChangesInMemory: enableSavingChangesInMemory,
-            enableExportMenu: enableExportMenu,
-            enableOrderItemsButtons: enableOrderItemsButtons,
-            enableLastUpdatedDates: enableLastUpdatedDates,
-            separateBackendBaseUrl: separateBackendBaseUrl,
-            theme: localStorage.glossaryPageTheme || 'system',
-            cardWidth: cardWidth,
-            katexIsAvailable: katexIsAvailable
-        }
-    });
-
-    function allowBackgroundScrolling() {
-        document.querySelector('body')?.classList.toggle('overflow-hidden', false);
-    }
-
-    app.ports.allowBackgroundScrolling.subscribe(() => {
-        allowBackgroundScrolling();
-    });
-
-    app.ports.preventBackgroundScrolling.subscribe(() => {
-        document.querySelector('body')?.classList.toggle('overflow-hidden', true);
-    });
-
-    app.ports.scrollElementIntoView.subscribe((elementId: string) => {
-        const elem: HTMLElement | null = document.getElementById(elementId);
-
-        if (elem) {
-            elem.scrollIntoView({ block: "nearest" });
-        } else {
-            // Do this just in case, as it seems that there might be situations where the background is left "locked".
-            allowBackgroundScrolling();
-        }
-    });
-
-    app.ports.giveSearchFieldFocusOnceItIsPresent.subscribe((elementId: string) => {
-        waitForElement(elementId).then(async (element) => {
-            try {
-                await untilAsync(() => {
-                    if (element)
-                        element.focus();
-
-                    document.activeElement === document.getElementById(elementId);
-                }, 50, 2000)
-            } catch (e) {
-                // ignore
+    if (window.location.protocol === 'file:') {
+        containerElement.innerHTML = `
+            <div class="py-4 px-4 text-xl">
+            <p>
+            If you're on macOS, Linux, or Cygwin and have
+            <a target="_blank" href="https://nodejs.org/">Node.js</a>
+            installed, then run the following command.
+            </p>
+            <pre>
+            <code>
+            sed -n '/START OF editor.js$/,$p' glossary.html | FILE=glossary.html node
+            </code>
+            </pre>
+            <p>
+            Here <code>glossary.html</code> is the name of the current file.
+            </p>
+            </div>
+        `
+    } else {
+        const app = Elm.ApplicationShell.init({
+            flags: {
+                titleString: normaliseWhitespace(titleElement?.textContent || ''),
+                aboutParagraph: aboutParagraph,
+                aboutLinks: aboutLinks,
+                tagsWithDescriptions: tagsWithDescriptions,
+                glossaryItems: glossaryItems,
+                editorIsRunning: editorIsRunning,
+                enableHelpForMakingChanges: enableHelpForMakingChanges,
+                enableSavingChangesInMemory: enableSavingChangesInMemory,
+                enableExportMenu: enableExportMenu,
+                enableOrderItemsButtons: enableOrderItemsButtons,
+                enableLastUpdatedDates: enableLastUpdatedDates,
+                separateBackendBaseUrl: separateBackendBaseUrl,
+                theme: localStorage.glossaryPageTheme || 'system',
+                cardWidth: cardWidth,
+                katexIsAvailable: katexIsAvailable
             }
         });
-    });
 
-    app.ports.scrollSearchResultIntoView.subscribe((elementId: string) => {
-        const elem: HTMLElement | null = document.getElementById(elementId);
-
-        if (elem) {
-            elem.scrollIntoView({ block: "nearest" });
-        }
-    });
-
-    app.ports.changeTheme.subscribe((themeName: string) => {
-        if (themeName) {
-            localStorage.glossaryPageTheme = themeName;
-        } else {
-            localStorage.removeItem('glossaryPageTheme');
+        function allowBackgroundScrolling() {
+            document.querySelector('body')?.classList.toggle('overflow-hidden', false);
         }
 
-        reflectThemeInClassList();
-    });
+        app.ports.allowBackgroundScrolling.subscribe(() => {
+            allowBackgroundScrolling();
+        });
 
-    app.ports.getCurrentDateTimeForSaving.subscribe(() => {
-        app.ports.receiveCurrentDateTimeForSaving.send(new Date().toISOString());
-    });
+        app.ports.preventBackgroundScrolling.subscribe(() => {
+            document.querySelector('body')?.classList.toggle('overflow-hidden', true);
+        });
 
-    app.ports.copyEditorCommandToClipboard.subscribe((textToCopy: string) => {
-        navigator.clipboard.writeText(textToCopy).then(
-            () => {
-                app.ports.attemptedToCopyEditorCommandToClipboard.send(true);
-            },
-            () => {
-                app.ports.attemptedToCopyEditorCommandToClipboard.send(false);
-            },
-        );
-    });
+        app.ports.scrollElementIntoView.subscribe((elementId: string) => {
+            const elem: HTMLElement | null = document.getElementById(elementId);
 
-    app.ports.selectAllInTextFieldWithCommandToRunEditor.subscribe(() => {
-        const element: HTMLElement | null = document.getElementById("glossary-page-text-field-with-command-to-run-editor");
+            if (elem) {
+                elem.scrollIntoView({ block: "nearest" });
+            } else {
+                // Do this just in case, as it seems that there might be situations where the background is left "locked".
+                allowBackgroundScrolling();
+            }
+        });
 
-        if (element instanceof HTMLInputElement) {
-            const textField = element;
+        app.ports.giveSearchFieldFocusOnceItIsPresent.subscribe((elementId: string) => {
+            waitForElement(elementId).then(async (element) => {
+                try {
+                    await untilAsync(() => {
+                        if (element)
+                            element.focus();
 
-            textField.select();
-        }
-    });
+                        document.activeElement === document.getElementById(elementId);
+                    }, 50, 2000)
+                } catch (e) {
+                    // ignore
+                }
+            });
+        });
+
+        app.ports.scrollSearchResultIntoView.subscribe((elementId: string) => {
+            const elem: HTMLElement | null = document.getElementById(elementId);
+
+            if (elem) {
+                elem.scrollIntoView({ block: "nearest" });
+            }
+        });
+
+        app.ports.changeTheme.subscribe((themeName: string) => {
+            if (themeName) {
+                localStorage.glossaryPageTheme = themeName;
+            } else {
+                localStorage.removeItem('glossaryPageTheme');
+            }
+
+            reflectThemeInClassList();
+        });
+
+        app.ports.getCurrentDateTimeForSaving.subscribe(() => {
+            app.ports.receiveCurrentDateTimeForSaving.send(new Date().toISOString());
+        });
+
+        app.ports.copyEditorCommandToClipboard.subscribe((textToCopy: string) => {
+            navigator.clipboard.writeText(textToCopy).then(
+                () => {
+                    app.ports.attemptedToCopyEditorCommandToClipboard.send(true);
+                },
+                () => {
+                    app.ports.attemptedToCopyEditorCommandToClipboard.send(false);
+                },
+            );
+        });
+
+        app.ports.selectAllInTextFieldWithCommandToRunEditor.subscribe(() => {
+            const element: HTMLElement | null = document.getElementById("glossary-page-text-field-with-command-to-run-editor");
+
+            if (element instanceof HTMLInputElement) {
+                const textField = element;
+
+                textField.select();
+            }
+        });
+    }
 
     function domReady(callback: () => void) {
         document.readyState === 'interactive' || document.readyState === 'complete' ?

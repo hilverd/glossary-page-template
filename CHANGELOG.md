@@ -17,6 +17,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Changed
 ### Fixed
+
+- Restore initial instructions for opening/editing a glossary. These were no longer being shown if the file was being opened directly in a browser (using a `file://` URL).
+
 ### Removed
 
 ## [4.2.0] - 2023-12-16
