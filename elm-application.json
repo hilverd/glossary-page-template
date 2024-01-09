@@ -20,6 +20,7 @@
         "Data.GlossaryItemIdDict",
         "Data.GlossaryItems",
         "Data.GlossaryTitle",
+        "Data.GlossaryVersionNumber",
         "Data.IndexOfTerms",
         "Data.MarkdownFragment",
         "Data.TagDescription",
