@@ -94,38 +94,6 @@ create preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ definitio
         }
 
 
-
--- decode : Decoder GlossaryItemForHtml
--- decode =
---     let
---         termDecoder =
---             Codec.decoder Term.codec
---         tagDecoder =
---             Codec.decoder Tag.codec
---     in
---     Decode.succeed create
---         |> required "preferredTerm" termDecoder
---         |> (required "alternativeTerms" <| Decode.list termDecoder)
---         |> (required "disambiguationTag" <| Decode.nullable tagDecoder)
---         |> (required "normalTags" <| Decode.list tagDecoder)
---         |> (required "definition" <|
---                 Decode.nullable <|
---                     Decode.map Definition.fromMarkdown <|
---                         Decode.string
---            )
---         |> (required "relatedTerms" <| Decode.list termDecoder)
---         |> required "needsUpdating" Decode.bool
---         |> optional "lastUpdatedDate"
---             (Decode.map Just Decode.string)
---             Nothing
---         |> optional "lastUpdatedByName"
---             (Decode.map Just Decode.string)
---             Nothing
---         |> optional "lastUpdatedByEmailAddress"
---             (Decode.map Just Decode.string)
---             Nothing
-
-
 {-| Encode/decode a glossary item to/from its JSON representation.
 -}
 codec : Codec GlossaryItemForHtml
