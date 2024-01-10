@@ -421,10 +421,10 @@ update msg model =
                             glossaryChanges =
                                 case common.maybeId of
                                     Just id ->
-                                        GlossaryChanges.fromList [ GlossaryChange.Update id newOrUpdatedGlossaryItem ]
+                                        GlossaryChanges.create [ GlossaryChange.Update id newOrUpdatedGlossaryItem ]
 
                                     Nothing ->
-                                        GlossaryChanges.fromList [ GlossaryChange.Insert newOrUpdatedGlossaryItem ]
+                                        GlossaryChanges.create [ GlossaryChange.Insert newOrUpdatedGlossaryItem ]
 
                             ( saving, cmd ) =
                                 Save.changeAndSave model.common.editability

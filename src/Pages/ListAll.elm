@@ -452,7 +452,7 @@ update msg model =
                     let
                         glossaryChanges : GlossaryChanges
                         glossaryChanges =
-                            GlossaryChanges.fromList [ GlossaryChange.Remove id ]
+                            GlossaryChanges.create [ GlossaryChange.Remove id ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
@@ -578,7 +578,7 @@ update msg model =
                     let
                         glossaryChanges : GlossaryChanges
                         glossaryChanges =
-                            GlossaryChanges.fromList [ GlossaryChange.SetCardWidth cardWidth ]
+                            GlossaryChanges.create [ GlossaryChange.SetCardWidth cardWidth ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
@@ -606,7 +606,7 @@ update msg model =
                     let
                         glossaryChanges : GlossaryChanges
                         glossaryChanges =
-                            GlossaryChanges.fromList [ GlossaryChange.ToggleEnableExportMenu ]
+                            GlossaryChanges.create [ GlossaryChange.ToggleEnableExportMenu ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
@@ -642,7 +642,7 @@ update msg model =
                     let
                         glossaryChanges : GlossaryChanges
                         glossaryChanges =
-                            GlossaryChanges.fromList [ GlossaryChange.ToggleEnableOrderItemsButtons ]
+                            GlossaryChanges.create [ GlossaryChange.ToggleEnableOrderItemsButtons ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
@@ -678,7 +678,7 @@ update msg model =
                     let
                         glossaryChanges : GlossaryChanges
                         glossaryChanges =
-                            GlossaryChanges.fromList [ GlossaryChange.ToggleEnableLastUpdatedDates ]
+                            GlossaryChanges.create [ GlossaryChange.ToggleEnableLastUpdatedDates ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability

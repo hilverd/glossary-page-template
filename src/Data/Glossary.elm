@@ -379,7 +379,7 @@ item that was inserted, if any.
 applyChanges : GlossaryChanges -> Glossary -> Result String ( Maybe GlossaryItemId, Glossary )
 applyChanges changes glossary =
     changes
-        |> GlossaryChanges.toList
+        |> GlossaryChanges.changes
         |> List.foldl
             (\change -> Result.andThen (Tuple.second >> applyChange change))
             (Ok ( Nothing, glossary ))

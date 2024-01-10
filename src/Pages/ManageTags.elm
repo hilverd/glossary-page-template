@@ -150,7 +150,7 @@ update msg model =
                     else
                         let
                             glossaryChanges =
-                                GlossaryChanges.fromList [ GlossaryChange.ChangeTags <| Form.changes model.form ]
+                                GlossaryChanges.create [ GlossaryChange.ChangeTags <| Form.changes model.form ]
 
                             ( saving, cmd ) =
                                 Save.changeAndSave model.common.editability

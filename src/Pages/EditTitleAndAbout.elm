@@ -149,7 +149,7 @@ update msg model =
                     else
                         let
                             glossaryChanges =
-                                GlossaryChanges.fromList
+                                GlossaryChanges.create
                                     [ GlossaryChange.SetTitle <| titleFromForm model.form
                                     , GlossaryChange.SetAboutSection <| aboutSectionFromForm model.form
                                     ]

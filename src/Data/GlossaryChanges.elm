@@ -1,7 +1,7 @@
 module Data.GlossaryChanges exposing
     ( GlossaryChanges
-    , fromList, codec
-    , toList
+    , codec
+    , changes, create
     )
 
 {-| A representation of a sequence of changes to be made to a glossary.
@@ -30,27 +30,27 @@ import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
 {-| Represents a sequence of changes to be made to a glossary.
 -}
 type GlossaryChanges
-    = GlossaryChanges (List GlossaryChange)
+    = GlossaryChanges
+        { changeList : List GlossaryChange
+        }
 
 
 {-| Construct a sequence of changes from a list.
 -}
-fromList : List GlossaryChange -> GlossaryChanges
-fromList =
-    GlossaryChanges
+create : List GlossaryChange -> GlossaryChanges
+create changes_ =
+    GlossaryChanges { changeList = changes_ }
 
 
 {-| Return the sequence of changes as a list.
 -}
-toList : GlossaryChanges -> List GlossaryChange
-toList glossaryChanges =
-    case glossaryChanges of
-        GlossaryChanges changes ->
-            changes
+changes : GlossaryChanges -> List GlossaryChange
+changes (GlossaryChanges glossaryChanges) =
+    glossaryChanges.changeList
 
 
 {-| An encoder/decoder for a sequence of changes.
 -}
 codec : Codec GlossaryChanges
 codec =
-    Codec.map fromList toList (Codec.list GlossaryChange.codec)
+    Codec.map create changes (Codec.list GlossaryChange.codec)
