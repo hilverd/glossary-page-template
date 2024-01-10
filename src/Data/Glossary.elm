@@ -1,7 +1,7 @@
 module Data.Glossary exposing
     ( Glossary
     , create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, applyChanges, applyTagsChanges, insert, update, remove
-    , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, separateBackendBaseUrl, title, aboutSection, items
+    , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, separateBackendBaseUrl, title, aboutSection, items, versionNumber
     , toHtmlTree
     )
 
@@ -20,7 +20,7 @@ module Data.Glossary exposing
 
 # Query
 
-@docs enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, separateBackendBaseUrl, title, aboutSection, items
+@docs enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, separateBackendBaseUrl, title, aboutSection, items, versionNumber
 
 
 # Export
@@ -41,6 +41,7 @@ import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemFor
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems, tagsWithDescriptions)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
+import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVersionNumber)
 import Data.TagDescription as TagDescription exposing (TagDescription)
 import Data.TagsChanges exposing (TagsChanges)
 import ElementIds
@@ -61,6 +62,7 @@ type Glossary
         , title : GlossaryTitle
         , aboutSection : AboutSection
         , items : GlossaryItems
+        , versionNumber : GlossaryVersionNumber
         }
 
 
@@ -143,6 +145,13 @@ items glossary =
     case glossary of
         Glossary glossary_ ->
             glossary_.items
+
+
+{-| Get the version number for a glossary.
+-}
+versionNumber : Glossary -> GlossaryVersionNumber
+versionNumber (Glossary glossary_) =
+    glossary_.versionNumber
 
 
 {-| Enable or disable showing of last updated dates for items.
@@ -267,8 +276,9 @@ create :
     -> List AboutLink
     -> List ( Tag, TagDescription )
     -> List GlossaryItemForHtml
+    -> GlossaryVersionNumber
     -> Glossary
-create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ separateBackendBaseUrl_ title_ aboutParagraph aboutLinks tagsWithDescriptions itemsForHtml =
+create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ separateBackendBaseUrl_ title_ aboutParagraph aboutLinks tagsWithDescriptions itemsForHtml versionNumber_ =
     createWithDefaults
         (Just enableLastUpdatedDates_)
         (Just enableExportMenu_)
@@ -281,6 +291,7 @@ create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enable
         (Just aboutLinks)
         (Just tagsWithDescriptions)
         itemsForHtml
+        (Just versionNumber_)
 
 
 createWithDefaults :
@@ -295,8 +306,9 @@ createWithDefaults :
     -> Maybe (List AboutLink)
     -> Maybe (List ( Tag, TagDescription ))
     -> List GlossaryItemForHtml
+    -> Maybe GlossaryVersionNumber
     -> Glossary
-createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ separateBackendBaseUrl_ title_ aboutParagraph aboutLinks tagsWithDescriptions itemsForHtml =
+createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ separateBackendBaseUrl_ title_ aboutParagraph aboutLinks tagsWithDescriptions itemsForHtml versionNumber_ =
     let
         aboutSection_ =
             { paragraph = Maybe.withDefault (AboutParagraph.fromMarkdown I18n.elementNotFound) aboutParagraph
@@ -317,6 +329,7 @@ createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsBut
         , title = Maybe.withDefault (GlossaryTitle.fromMarkdown I18n.elementNotFound) title_
         , aboutSection = aboutSection_
         , items = Result.withDefault GlossaryItems.empty items_
+        , versionNumber = Maybe.withDefault GlossaryVersionNumber.initial versionNumber_
         }
 
 
@@ -351,6 +364,7 @@ codec =
         |> Codec.field "glossaryItems"
             (items >> GlossaryItems.orderedAlphabetically Nothing >> List.map Tuple.second)
             (Codec.list GlossaryItemForHtml.codec)
+        |> Codec.optionalField "versionNumber" (versionNumber >> Just) GlossaryVersionNumber.codec
         |> Codec.buildObject
 
 

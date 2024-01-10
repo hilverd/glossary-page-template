@@ -9,6 +9,7 @@ import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryTitle as GlossaryTitle
+import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVersionNumber)
 import Data.TagDescription as TagDescription exposing (TagDescription)
 import Expect
 import Test exposing (Test, describe, test)
@@ -168,6 +169,7 @@ glossary =
         , interestRateItem
         , loanItem
         ]
+        GlossaryVersionNumber.initial
 
 
 suite : Test

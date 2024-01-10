@@ -24,7 +24,6 @@
         "Data.TagId",
         "Data.TagIdDict",
         "Data.TagsChanges",
-        "Data.VersionedGlossary",
         "Data.VersionedGlossaryChanges",
         "DirectedGraph",
         "DuplicateRejectingDict",
