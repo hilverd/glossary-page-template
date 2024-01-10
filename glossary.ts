@@ -16,6 +16,7 @@ if (containerElement) {
     const enableOrderItemsButtons: boolean = containerDataset.enableOrderItemsButtons !== 'false';
     const cardWidth: string = containerDataset.cardWidth || 'compact';
     const enableLastUpdatedDates: boolean = containerDataset.enableLastUpdatedDates === 'true';
+    const versionNumber: number | null = Number(containerDataset.versionNumber) || null;
     const separateBackendBaseUrl: string | null = containerDataset.separateBackendBaseUrl || null;
     const editorIsRunning: boolean = containerDataset.editorIsRunning === 'true';
 
@@ -168,6 +169,7 @@ if (containerElement) {
                 enableExportMenu: enableExportMenu,
                 enableOrderItemsButtons: enableOrderItemsButtons,
                 enableLastUpdatedDates: enableLastUpdatedDates,
+                versionNumber: versionNumber,
                 separateBackendBaseUrl: separateBackendBaseUrl,
                 theme: localStorage.glossaryPageTheme || 'system',
                 cardWidth: cardWidth,

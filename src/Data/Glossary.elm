@@ -364,7 +364,7 @@ codec =
         |> Codec.field "glossaryItems"
             (items >> GlossaryItems.orderedAlphabetically Nothing >> List.map Tuple.second)
             (Codec.list GlossaryItemForHtml.codec)
-        |> Codec.optionalField "versionNumber" (versionNumber >> Just) GlossaryVersionNumber.codec
+        |> Codec.optionalNullableField "versionNumber" (versionNumber >> Just) GlossaryVersionNumber.codec
         |> Codec.buildObject
 
 
@@ -480,7 +480,8 @@ toHtmlTree glossary =
                 , HtmlTree.boolAttribute "data-enable-export-menu" glossary_.enableExportMenu
                 , HtmlTree.boolAttribute "data-enable-order-items-buttons" glossary_.enableOrderItemsButtons
                 , HtmlTree.boolAttribute "data-enable-last-updated-dates" glossary_.enableLastUpdatedDates
-                , glossary_.cardWidth |> CardWidth.toHtmlTreeAttribute
+                , CardWidth.toHtmlTreeAttribute glossary_.cardWidth
+                , GlossaryVersionNumber.toHtmlTreeAttribute glossary_.versionNumber
                 ]
                 [ HtmlTree.Node "header"
                     True
