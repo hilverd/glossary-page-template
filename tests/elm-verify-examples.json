@@ -24,7 +24,6 @@
         "Data.TagId",
         "Data.TagIdDict",
         "Data.TagsChanges",
-        "Data.VersionedGlossaryChanges",
         "DirectedGraph",
         "DuplicateRejectingDict",
         "Export.Anki",

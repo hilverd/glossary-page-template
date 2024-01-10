@@ -452,7 +452,9 @@ update msg model =
                     let
                         glossaryChanges : GlossaryChanges
                         glossaryChanges =
-                            GlossaryChanges.create [ GlossaryChange.Remove id ]
+                            GlossaryChanges.create
+                                (Glossary.versionNumber glossary)
+                                [ GlossaryChange.Remove id ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
@@ -578,7 +580,9 @@ update msg model =
                     let
                         glossaryChanges : GlossaryChanges
                         glossaryChanges =
-                            GlossaryChanges.create [ GlossaryChange.SetCardWidth cardWidth ]
+                            GlossaryChanges.create
+                                (Glossary.versionNumber glossary)
+                                [ GlossaryChange.SetCardWidth cardWidth ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
@@ -606,7 +610,9 @@ update msg model =
                     let
                         glossaryChanges : GlossaryChanges
                         glossaryChanges =
-                            GlossaryChanges.create [ GlossaryChange.ToggleEnableExportMenu ]
+                            GlossaryChanges.create
+                                (Glossary.versionNumber glossary)
+                                [ GlossaryChange.ToggleEnableExportMenu ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
@@ -642,7 +648,9 @@ update msg model =
                     let
                         glossaryChanges : GlossaryChanges
                         glossaryChanges =
-                            GlossaryChanges.create [ GlossaryChange.ToggleEnableOrderItemsButtons ]
+                            GlossaryChanges.create
+                                (Glossary.versionNumber glossary)
+                                [ GlossaryChange.ToggleEnableOrderItemsButtons ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
@@ -678,7 +686,9 @@ update msg model =
                     let
                         glossaryChanges : GlossaryChanges
                         glossaryChanges =
-                            GlossaryChanges.create [ GlossaryChange.ToggleEnableLastUpdatedDates ]
+                            GlossaryChanges.create
+                                (Glossary.versionNumber glossary)
+                                [ GlossaryChange.ToggleEnableLastUpdatedDates ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability

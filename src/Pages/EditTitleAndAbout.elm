@@ -137,7 +137,7 @@ update msg model =
 
         Save ->
             case model.common.glossary of
-                Ok glossary0 ->
+                Ok glossary ->
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
@@ -150,13 +150,14 @@ update msg model =
                         let
                             glossaryChanges =
                                 GlossaryChanges.create
+                                    (Glossary.versionNumber glossary)
                                     [ GlossaryChange.SetTitle <| titleFromForm model.form
                                     , GlossaryChange.SetAboutSection <| aboutSectionFromForm model.form
                                     ]
 
                             ( saving, cmd ) =
                                 Save.changeAndSave model.common.editability
-                                    glossary0
+                                    glossary
                                     glossaryChanges
                                     (PageMsg.Internal << FailedToSave)
                                     (\( maybeGlossaryItemId, updatedGlossary ) ->
