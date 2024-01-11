@@ -512,6 +512,7 @@ toHtmlTree glossary =
                 , HtmlTree.boolAttribute "data-enable-order-items-buttons" glossary_.enableOrderItemsButtons
                 , HtmlTree.boolAttribute "data-enable-last-updated-dates" glossary_.enableLastUpdatedDates
                 , CardWidth.toHtmlTreeAttribute glossary_.cardWidth
+                , HtmlTree.showAttributeMaybe "data-separate-backend-base-url" identity glossary_.separateBackendBaseUrl
                 , GlossaryVersionNumber.toHtmlTreeAttribute glossary_.versionNumber
                 ]
                 [ HtmlTree.Node "header"

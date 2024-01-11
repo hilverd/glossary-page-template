@@ -2,6 +2,7 @@ module Extras.HtmlTree exposing
     ( Attribute, attributeToHtmlAttribute, boolAttribute, HtmlTree(..)
     , toHtml, toHtmlReplacementString, escape
     , showIf
+    , showAttributeMaybe
     )
 
 {-| An `HtmlTree` represents some HTML content that is to be written to a file.
@@ -17,9 +18,14 @@ module Extras.HtmlTree exposing
 @docs toHtml, toHtmlReplacementString, escape
 
 
-# Conditional nodes
+# Conditional Nodes
 
 @docs showIf
+
+
+# Conditional Attributes
+
+@docs showAttributeMaybe
 
 -}
 
@@ -144,18 +150,22 @@ toIndentedHtml initialLevel level format tree =
                     else
                         ""
 
+                nonemptyAttributes : List Attribute
+                nonemptyAttributes =
+                    List.filter ((/=) nothingAttribute) attributes
+
                 openingTag : String
                 openingTag =
                     "<"
                         ++ name
-                        ++ (if List.isEmpty attributes then
+                        ++ (if List.isEmpty nonemptyAttributes then
                                 ""
 
                             else
                                 let
                                     attributesString : String
                                     attributesString =
-                                        attributes
+                                        nonemptyAttributes
                                             |> List.map (\attribute -> attribute.name ++ "=" ++ "\"" ++ escape attribute.value ++ "\"")
                                             |> String.join " "
                                 in
@@ -199,3 +209,21 @@ showIf condition htmlTree =
 
     else
         nothing
+
+
+{-| An empty attribute.
+-}
+nothingAttribute : Attribute
+nothingAttribute =
+    { name = ""
+    , value = ""
+    }
+
+
+{-| Create an (optional) attribute from a Maybe value.
+-}
+showAttributeMaybe : String -> (a -> String) -> Maybe a -> Attribute
+showAttributeMaybe name f maybe =
+    maybe
+        |> Maybe.map (f >> Attribute name)
+        |> Maybe.withDefault nothingAttribute
