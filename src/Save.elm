@@ -18,6 +18,7 @@ import Data.Saving exposing (Saving(..))
 import Extras.HtmlTree as HtmlTree
 import Extras.Task
 import Http
+import Internationalisation as I18n
 
 
 {-| Apply changes to a glossary and save the result.
@@ -31,7 +32,7 @@ changeAndSave :
     -> ( Saving, Cmd msg )
 changeAndSave editability glossary changes errorMsg successMsg =
     case Glossary.applyChanges changes glossary of
-        Ok resultOfApplyingChanges ->
+        Glossary.ChangesApplied resultOfApplyingChanges ->
             case editability of
                 EditingInMemory ->
                     ( NotCurrentlySaving, successMsg resultOfApplyingChanges |> Extras.Task.messageToCommand )
@@ -45,7 +46,10 @@ changeAndSave editability glossary changes errorMsg successMsg =
                 _ ->
                     ( NotCurrentlySaving, Cmd.none )
 
-        Err err ->
+        Glossary.VersionsDoNotMatch ->
+            ( SavingFailed I18n.otherChangesWereMadePleaseReload, Cmd.none )
+
+        Glossary.LogicalErrorWhenApplyingChanges err ->
             ( SavingNotAttempted err, Cmd.none )
 
 

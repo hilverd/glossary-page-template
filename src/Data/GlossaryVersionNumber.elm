@@ -1,4 +1,4 @@
-module Data.GlossaryVersionNumber exposing (GlossaryVersionNumber, create, initial, toInt, codec, toHtmlTreeAttribute)
+module Data.GlossaryVersionNumber exposing (GlossaryVersionNumber, create, initial, toInt, increment, codec, toHtmlTreeAttribute)
 
 {-| A number representing the version of a glossary.
 These numbers are used to coordinate changes to the glossary.
@@ -7,7 +7,7 @@ In particular, they are used to ensure that changes sent to a separate backend a
 
 # Glossary Version Numbers
 
-@docs GlossaryVersionNumber, create, initial, toInt, codec, toHtmlTreeAttribute
+@docs GlossaryVersionNumber, create, initial, toInt, increment, codec, toHtmlTreeAttribute
 
 -}
 
@@ -40,6 +40,13 @@ initial =
 toInt : GlossaryVersionNumber -> Int
 toInt (GlossaryVersionNumber versionNumber) =
     versionNumber
+
+
+{-| Increment a glossary version number.
+-}
+increment : GlossaryVersionNumber -> GlossaryVersionNumber
+increment (GlossaryVersionNumber versionNumber) =
+    create (versionNumber + 1)
 
 
 {-| An encoder/decoder for glossary version numbers.

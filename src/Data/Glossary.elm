@@ -1,6 +1,7 @@
 module Data.Glossary exposing
     ( Glossary
-    , create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, applyChanges, applyTagsChanges, insert, update, remove
+    , create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems
+    , GlossaryApplyChangesResult(..), applyChanges
     , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, separateBackendBaseUrl, title, aboutSection, items, versionNumber
     , toHtmlTree
     )
@@ -15,7 +16,12 @@ module Data.Glossary exposing
 
 # Build
 
-@docs create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems, applyChanges, applyTagsChanges, insert, update, remove
+@docs create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems
+
+
+# Apply Changes
+
+@docs GlossaryApplyChangesResult, applyChanges
 
 
 # Query
@@ -152,6 +158,13 @@ items glossary =
 versionNumber : Glossary -> GlossaryVersionNumber
 versionNumber (Glossary glossary_) =
     glossary_.versionNumber
+
+
+{-| Increment the version number for a glossary.
+-}
+incrementVersionNumber : Glossary -> Glossary
+incrementVersionNumber (Glossary glossary_) =
+    Glossary { glossary_ | versionNumber = GlossaryVersionNumber.increment glossary_.versionNumber }
 
 
 {-| Enable or disable showing of last updated dates for items.
@@ -368,6 +381,14 @@ codec =
         |> Codec.buildObject
 
 
+{-| The result of applying a sequence of changes to a glossary.
+-}
+type GlossaryApplyChangesResult
+    = VersionsDoNotMatch
+    | LogicalErrorWhenApplyingChanges String
+    | ChangesApplied ( Maybe GlossaryItemId, Glossary )
+
+
 {-| Apply a sequence of changes to a glossary, returning a new glossary or an error message.
 
 A change can be inserting, updating, or removing an item, or modifying tags.
@@ -376,13 +397,25 @@ If the change is successful, the new glossary is returned along with the ID of t
 item that was inserted, if any.
 
 -}
-applyChanges : GlossaryChanges -> Glossary -> Result String ( Maybe GlossaryItemId, Glossary )
+applyChanges : GlossaryChanges -> Glossary -> GlossaryApplyChangesResult
 applyChanges changes glossary =
-    changes
-        |> GlossaryChanges.changes
-        |> List.foldl
-            (\change -> Result.andThen (Tuple.second >> applyChange change))
-            (Ok ( Nothing, glossary ))
+    if GlossaryChanges.applyToVersionNumber changes /= versionNumber glossary then
+        VersionsDoNotMatch
+
+    else
+        changes
+            |> GlossaryChanges.changes
+            |> List.foldl
+                (\change -> Result.andThen (Tuple.second >> applyChange change))
+                (Ok ( Nothing, incrementVersionNumber glossary ))
+            |> (\result ->
+                    case result of
+                        Ok result_ ->
+                            ChangesApplied result_
+
+                        Err err ->
+                            LogicalErrorWhenApplyingChanges err
+               )
 
 
 applyChange : GlossaryChange -> Glossary -> Result String ( Maybe GlossaryItemId, Glossary )
@@ -423,8 +456,6 @@ applyChange change glossary =
                 |> Result.map (\newGlossary -> ( Nothing, newGlossary ))
 
 
-{-| Apply a set of tags changes.
--}
 applyTagsChanges : TagsChanges -> Glossary -> Result String Glossary
 applyTagsChanges tagsChanges glossary =
     glossary
