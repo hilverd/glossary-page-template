@@ -1,10 +1,9 @@
 module Data.Glossary exposing
     ( Glossary
     , create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems
-    , applyChanges
+    , ApplyChangesResult(..), applyChanges, applyChangesResultCodec
     , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, separateBackendBaseUrl, title, aboutSection, items, versionNumber
     , toHtmlTree
-    , ApplyChangesResult(..)
     )
 
 {-| A glossary.
@@ -22,7 +21,7 @@ module Data.Glossary exposing
 
 # Apply Changes
 
-@docs GlossaryApplyChangesResult, applyChanges
+@docs ApplyChangesResult, applyChanges, applyChangesResultCodec
 
 
 # Query
@@ -45,7 +44,7 @@ import Data.GlossaryChange exposing (GlossaryChange(..))
 import Data.GlossaryChanges as GlossaryChanges exposing (GlossaryChanges)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.GlossaryItemId exposing (GlossaryItemId)
+import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems, tagsWithDescriptions)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVersionNumber)
@@ -388,6 +387,28 @@ type ApplyChangesResult
     = VersionsDoNotMatch
     | LogicalErrorWhenApplyingChanges String
     | ChangesApplied ( Maybe GlossaryItemId, Glossary )
+
+
+{-| An encoder/decoder for the result of applying a sequence of changes to a glossary.
+-}
+applyChangesResultCodec : Codec ApplyChangesResult
+applyChangesResultCodec =
+    Codec.custom
+        (\versionsDoNotMatch logicalErrorWhenApplyingChanges changesApplied value ->
+            case value of
+                VersionsDoNotMatch ->
+                    versionsDoNotMatch
+
+                LogicalErrorWhenApplyingChanges error ->
+                    logicalErrorWhenApplyingChanges error
+
+                ChangesApplied result ->
+                    changesApplied result
+        )
+        |> Codec.variant0 "VersionsDoNotMatch" VersionsDoNotMatch
+        |> Codec.variant1 "LogicalErrorWhenApplyingChanges" LogicalErrorWhenApplyingChanges Codec.string
+        |> Codec.variant1 "ChangesApplied" ChangesApplied (Codec.tuple (Codec.nullable GlossaryItemId.codec) codec)
+        |> Codec.buildCustom
 
 
 {-| Apply a sequence of changes to a glossary, returning a new glossary or an error message.
