@@ -1,9 +1,10 @@
 module Data.Glossary exposing
     ( Glossary
     , create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems
-    , GlossaryApplyChangesResult(..), applyChanges
+    , applyChanges
     , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, separateBackendBaseUrl, title, aboutSection, items, versionNumber
     , toHtmlTree
+    , ApplyChangesResult(..)
     )
 
 {-| A glossary.
@@ -383,7 +384,7 @@ codec =
 
 {-| The result of applying a sequence of changes to a glossary.
 -}
-type GlossaryApplyChangesResult
+type ApplyChangesResult
     = VersionsDoNotMatch
     | LogicalErrorWhenApplyingChanges String
     | ChangesApplied ( Maybe GlossaryItemId, Glossary )
@@ -397,7 +398,7 @@ If the change is successful, the new glossary is returned along with the ID of t
 item that was inserted, if any.
 
 -}
-applyChanges : GlossaryChanges -> Glossary -> GlossaryApplyChangesResult
+applyChanges : GlossaryChanges -> Glossary -> ApplyChangesResult
 applyChanges changes glossary =
     if GlossaryChanges.applyToVersionNumber changes /= versionNumber glossary then
         VersionsDoNotMatch
