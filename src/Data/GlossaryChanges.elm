@@ -1,8 +1,7 @@
 module Data.GlossaryChanges exposing
     ( GlossaryChanges
     , create, codec
-    , applyToVersionNumber
-    , body
+    , applyToVersionNumber, body
     )
 
 {-| A representation of a sequence of changes to be made to a glossary.
@@ -20,7 +19,7 @@ module Data.GlossaryChanges exposing
 
 # Query
 
-@docs applyToVersionNumber, changes
+@docs applyToVersionNumber, body
 
 -}
 
