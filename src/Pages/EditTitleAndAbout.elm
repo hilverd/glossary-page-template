@@ -17,7 +17,7 @@ import Data.AboutSection exposing (AboutSection)
 import Data.Editability as Editability
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChange as GlossaryChange
-import Data.GlossaryChanges as GlossaryChanges
+import Data.GlossaryChangelist as GlossaryChangelist
 import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.Saving exposing (Saving(..))
@@ -148,8 +148,8 @@ update msg model =
 
                     else
                         let
-                            glossaryChanges =
-                                GlossaryChanges.create
+                            changelist =
+                                GlossaryChangelist.create
                                     (Glossary.versionNumber glossary)
                                     [ GlossaryChange.SetTitle <| titleFromForm model.form
                                     , GlossaryChange.SetAboutSection <| aboutSectionFromForm model.form
@@ -158,7 +158,7 @@ update msg model =
                             ( saving, cmd ) =
                                 Save.changeAndSave model.common.editability
                                     glossary
-                                    glossaryChanges
+                                    changelist
                                     (PageMsg.Internal << FailedToSave)
                                     (\( maybeGlossaryItemId, updatedGlossary ) ->
                                         let

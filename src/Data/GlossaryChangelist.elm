@@ -1,5 +1,5 @@
-module Data.GlossaryChanges exposing
-    ( GlossaryChanges
+module Data.GlossaryChangelist exposing
+    ( GlossaryChangelist
     , create, codec
     , applyToVersionNumber, body
     )
@@ -7,9 +7,9 @@ module Data.GlossaryChanges exposing
 {-| A representation of a sequence of changes to be made to a glossary.
 
 
-# Glossary Changes
+# Glossary Changelists
 
-@docs GlossaryChanges
+@docs GlossaryChangelist
 
 
 # Build
@@ -28,20 +28,20 @@ import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
 import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVersionNumber)
 
 
-{-| Represents a sequence of changes to be made to a glossary.
+{-| A changelist.
 -}
-type GlossaryChanges
-    = GlossaryChanges
+type GlossaryChangelist
+    = GlossaryChangelist
         { applyToVersionNumber : GlossaryVersionNumber
         , body : List GlossaryChange
         }
 
 
-{-| Construct a sequence of changes from a list.
+{-| Construct a changelist from a list and a version number for the glossary that the changes are to be applied to.
 -}
-create : GlossaryVersionNumber -> List GlossaryChange -> GlossaryChanges
+create : GlossaryVersionNumber -> List GlossaryChange -> GlossaryChangelist
 create applyToVersionNumber_ changeList_ =
-    GlossaryChanges
+    GlossaryChangelist
         { applyToVersionNumber = applyToVersionNumber_
         , body = changeList_
         }
@@ -49,21 +49,21 @@ create applyToVersionNumber_ changeList_ =
 
 {-| Return the version number for the glossary that the changes are to be applied to.
 -}
-applyToVersionNumber : GlossaryChanges -> GlossaryVersionNumber
-applyToVersionNumber (GlossaryChanges glossaryChanges) =
-    glossaryChanges.applyToVersionNumber
+applyToVersionNumber : GlossaryChangelist -> GlossaryVersionNumber
+applyToVersionNumber (GlossaryChangelist changelist) =
+    changelist.applyToVersionNumber
 
 
-{-| Return the sequence of changes as a list.
+{-| Return the changelist as a list.
 -}
-body : GlossaryChanges -> List GlossaryChange
-body (GlossaryChanges glossaryChanges) =
-    glossaryChanges.body
+body : GlossaryChangelist -> List GlossaryChange
+body (GlossaryChangelist changelist) =
+    changelist.body
 
 
-{-| An encoder/decoder for a sequence of changes.
+{-| An encoder/decoder for a changelist.
 -}
-codec : Codec GlossaryChanges
+codec : Codec GlossaryChangelist
 codec =
     Codec.object create
         |> Codec.field "applyToVersionNumber" applyToVersionNumber GlossaryVersionNumber.codec

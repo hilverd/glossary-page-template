@@ -16,7 +16,7 @@ import Components.Spinner
 import Data.Editability as Editability
 import Data.Glossary as Glossary
 import Data.GlossaryChange as GlossaryChange
-import Data.GlossaryChanges as GlossaryChanges
+import Data.GlossaryChangelist as GlossaryChangelist
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -418,22 +418,22 @@ update msg model =
                             common =
                                 model.common
 
-                            glossaryChanges =
+                            changelist =
                                 case common.maybeId of
                                     Just id ->
-                                        GlossaryChanges.create
+                                        GlossaryChangelist.create
                                             (Glossary.versionNumber glossary)
                                             [ GlossaryChange.Update id newOrUpdatedGlossaryItem ]
 
                                     Nothing ->
-                                        GlossaryChanges.create
+                                        GlossaryChangelist.create
                                             (Glossary.versionNumber glossary)
                                             [ GlossaryChange.Insert newOrUpdatedGlossaryItem ]
 
                             ( saving, cmd ) =
                                 Save.changeAndSave model.common.editability
                                     glossary
-                                    glossaryChanges
+                                    changelist
                                     (PageMsg.Internal << FailedToSave)
                                     (\( maybeGlossaryItemId, updatedGlossary ) ->
                                         let

@@ -12,7 +12,7 @@ module Save exposing (changeAndSave)
 import Codec
 import Data.Editability exposing (Editability(..))
 import Data.Glossary as Glossary exposing (Glossary)
-import Data.GlossaryChanges as GlossaryChanges exposing (GlossaryChanges)
+import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.Saving exposing (Saving(..))
 import Extras.HtmlTree as HtmlTree
@@ -26,7 +26,7 @@ import Internationalisation as I18n
 changeAndSave :
     Editability
     -> Glossary
-    -> GlossaryChanges
+    -> GlossaryChangelist
     -> (Http.Error -> msg)
     -> (( Maybe GlossaryItemId, Glossary ) -> msg)
     -> ( Saving, Cmd msg )
@@ -85,7 +85,7 @@ patchHtmlFile ( maybeGlossaryItemId, glossary ) errorMsg successMsg =
 
 sendChangesAsPatch :
     String
-    -> GlossaryChanges
+    -> GlossaryChangelist
     -> ( Maybe GlossaryItemId, Glossary )
     -> (Http.Error -> msg)
     -> (( Maybe GlossaryItemId, Glossary ) -> msg)
@@ -97,7 +97,7 @@ sendChangesAsPatch baseUrl changes ( maybeGlossaryItemId, glossary ) errorMsg su
         , url = baseUrl
         , body =
             changes
-                |> Codec.encodeToValue GlossaryChanges.codec
+                |> Codec.encodeToValue GlossaryChangelist.codec
                 |> Http.jsonBody
         , expect =
             Http.expectWhatever

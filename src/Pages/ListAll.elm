@@ -44,7 +44,7 @@ import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.Editability as Editability exposing (Editability(..))
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChange as GlossaryChange
-import Data.GlossaryChanges as GlossaryChanges exposing (GlossaryChanges)
+import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -450,16 +450,16 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        glossaryChanges : GlossaryChanges
-                        glossaryChanges =
-                            GlossaryChanges.create
+                        changelist : GlossaryChangelist
+                        changelist =
+                            GlossaryChangelist.create
                                 (Glossary.versionNumber glossary)
                                 [ GlossaryChange.Remove id ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
                                 glossary
-                                glossaryChanges
+                                changelist
                                 (PageMsg.Internal << FailedToDelete)
                                 (\( _, updatedGlossary ) ->
                                     PageMsg.Internal <| Deleted updatedGlossary
@@ -578,16 +578,16 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        glossaryChanges : GlossaryChanges
-                        glossaryChanges =
-                            GlossaryChanges.create
+                        changelist : GlossaryChangelist
+                        changelist =
+                            GlossaryChangelist.create
                                 (Glossary.versionNumber glossary)
                                 [ GlossaryChange.SetCardWidth cardWidth ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
                                 glossary
-                                glossaryChanges
+                                changelist
                                 (PageMsg.Internal << FailedToChangeSettings)
                                 (\( _, updatedGlossary ) ->
                                     PageMsg.Internal <| ChangedSettings updatedGlossary
@@ -608,16 +608,16 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        glossaryChanges : GlossaryChanges
-                        glossaryChanges =
-                            GlossaryChanges.create
+                        changelist : GlossaryChangelist
+                        changelist =
+                            GlossaryChangelist.create
                                 (Glossary.versionNumber glossary)
                                 [ GlossaryChange.ToggleEnableExportMenu ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
                                 glossary
-                                glossaryChanges
+                                changelist
                                 (PageMsg.Internal << FailedToChangeSettings)
                                 (\( maybeGlossaryItemId, updatedGlossary ) ->
                                     let
@@ -646,16 +646,16 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        glossaryChanges : GlossaryChanges
-                        glossaryChanges =
-                            GlossaryChanges.create
+                        changelist : GlossaryChangelist
+                        changelist =
+                            GlossaryChangelist.create
                                 (Glossary.versionNumber glossary)
                                 [ GlossaryChange.ToggleEnableOrderItemsButtons ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
                                 glossary
-                                glossaryChanges
+                                changelist
                                 (PageMsg.Internal << FailedToChangeSettings)
                                 (\( maybeGlossaryItemId, updatedGlossary ) ->
                                     let
@@ -684,16 +684,16 @@ update msg model =
             case model.common.glossary of
                 Ok glossary ->
                     let
-                        glossaryChanges : GlossaryChanges
-                        glossaryChanges =
-                            GlossaryChanges.create
+                        changelist : GlossaryChangelist
+                        changelist =
+                            GlossaryChangelist.create
                                 (Glossary.versionNumber glossary)
                                 [ GlossaryChange.ToggleEnableLastUpdatedDates ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
                                 glossary
-                                glossaryChanges
+                                changelist
                                 (PageMsg.Internal << FailedToChangeSettings)
                                 (\( maybeGlossaryItemId, updatedGlossary ) ->
                                     let

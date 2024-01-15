@@ -41,7 +41,7 @@ import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.GlossaryChange exposing (GlossaryChange(..))
-import Data.GlossaryChanges as GlossaryChanges exposing (GlossaryChanges)
+import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
@@ -397,14 +397,14 @@ If the change is successful, the new glossary is returned along with the ID of t
 item that was inserted, if any.
 
 -}
-applyChanges : GlossaryChanges -> Glossary -> ApplyChangesResult
+applyChanges : GlossaryChangelist -> Glossary -> ApplyChangesResult
 applyChanges changes glossary =
-    if GlossaryChanges.applyToVersionNumber changes /= versionNumber glossary then
+    if GlossaryChangelist.applyToVersionNumber changes /= versionNumber glossary then
         VersionsDoNotMatch
 
     else
         changes
-            |> GlossaryChanges.body
+            |> GlossaryChangelist.body
             |> List.foldl
                 (\change -> Result.andThen (Tuple.second >> applyChange change))
                 (Ok ( Nothing, incrementVersionNumber glossary ))

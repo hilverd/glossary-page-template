@@ -10,7 +10,7 @@
         "Data.Editability",
         "Data.Glossary",
         "Data.GlossaryChange",
-        "Data.GlossaryChanges",
+        "Data.GlossaryChangelist",
         "Data.GlossaryItem.Definition",
         "Data.GlossaryItem.Tag",
         "Data.GlossaryItem.Term",
