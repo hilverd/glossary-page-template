@@ -1,7 +1,8 @@
 module Data.GlossaryChanges exposing
     ( GlossaryChanges
     , create, codec
-    , applyToVersionNumber, changes
+    , applyToVersionNumber
+    , body
     )
 
 {-| A representation of a sequence of changes to be made to a glossary.
@@ -33,7 +34,7 @@ import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVer
 type GlossaryChanges
     = GlossaryChanges
         { applyToVersionNumber : GlossaryVersionNumber
-        , changeList : List GlossaryChange
+        , body : List GlossaryChange
         }
 
 
@@ -43,7 +44,7 @@ create : GlossaryVersionNumber -> List GlossaryChange -> GlossaryChanges
 create applyToVersionNumber_ changeList_ =
     GlossaryChanges
         { applyToVersionNumber = applyToVersionNumber_
-        , changeList = changeList_
+        , body = changeList_
         }
 
 
@@ -56,9 +57,9 @@ applyToVersionNumber (GlossaryChanges glossaryChanges) =
 
 {-| Return the sequence of changes as a list.
 -}
-changes : GlossaryChanges -> List GlossaryChange
-changes (GlossaryChanges glossaryChanges) =
-    glossaryChanges.changeList
+body : GlossaryChanges -> List GlossaryChange
+body (GlossaryChanges glossaryChanges) =
+    glossaryChanges.body
 
 
 {-| An encoder/decoder for a sequence of changes.
@@ -67,5 +68,5 @@ codec : Codec GlossaryChanges
 codec =
     Codec.object create
         |> Codec.field "applyToVersionNumber" applyToVersionNumber GlossaryVersionNumber.codec
-        |> Codec.field "changeList" changes (Codec.list GlossaryChange.codec)
+        |> Codec.field "changeList" body (Codec.list GlossaryChange.codec)
         |> Codec.buildObject

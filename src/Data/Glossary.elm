@@ -404,7 +404,7 @@ applyChanges changes glossary =
 
     else
         changes
-            |> GlossaryChanges.changes
+            |> GlossaryChanges.body
             |> List.foldl
                 (\change -> Result.andThen (Tuple.second >> applyChange change))
                 (Ok ( Nothing, incrementVersionNumber glossary ))
