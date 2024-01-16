@@ -1,6 +1,6 @@
 module Data.GlossaryChangelist exposing
     ( GlossaryChangelist
-    , create, codec
+    , create, codec, setLastUpdatedBy
     , applyToVersionNumber, body
     )
 
@@ -14,7 +14,7 @@ module Data.GlossaryChangelist exposing
 
 # Build
 
-@docs create, codec
+@docs create, codec, setLastUpdatedBy
 
 
 # Query
@@ -69,3 +69,15 @@ codec =
         |> Codec.field "applyToVersionNumber" applyToVersionNumber GlossaryVersionNumber.codec
         |> Codec.field "changeList" body (Codec.list GlossaryChange.codec)
         |> Codec.buildObject
+
+
+{-| Set the name and email address of the person these changes.
+-}
+setLastUpdatedBy : { name : String, emailAddress : String } -> GlossaryChangelist -> GlossaryChangelist
+setLastUpdatedBy nameAndEmailAddress (GlossaryChangelist changelist) =
+    GlossaryChangelist
+        { changelist
+            | body =
+                changelist.body
+                    |> List.map (GlossaryChange.setLastUpdatedBy nameAndEmailAddress)
+        }

@@ -1,6 +1,6 @@
 module Data.GlossaryItemForHtml exposing
     ( GlossaryItemForHtml
-    , create, codec
+    , create, codec, setLastUpdatedBy
     , disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
     , toHtmlTree
     , disambiguatedTerm
@@ -18,7 +18,7 @@ It is not the representation used by the editor UI when the application is runni
 
 # Build
 
-@docs create, codec
+@docs create, codec, setLastUpdatedBy
 
 
 # Query
@@ -385,6 +385,17 @@ nonemptyRelatedTermsToHtmlTree itemHasADefinition relatedTerms_ =
 hrefFromRelatedTerm : Term -> HtmlTree.Attribute
 hrefFromRelatedTerm term =
     HtmlTree.Attribute "href" <| fragmentOnly <| TermId.toString <| Term.id term
+
+
+{-| Set the name and email address of the person who last updated this glossary item.
+-}
+setLastUpdatedBy : { name : String, emailAddress : String } -> GlossaryItemForHtml -> GlossaryItemForHtml
+setLastUpdatedBy { name, emailAddress } (GlossaryItemForHtml item) =
+    GlossaryItemForHtml
+        { item
+            | lastUpdatedByName = Just name
+            , lastUpdatedByEmailAddress = Just emailAddress
+        }
 
 
 {-| Represent this glossary item as an HTML tree, ready for writing back to the glossary's HTML file.

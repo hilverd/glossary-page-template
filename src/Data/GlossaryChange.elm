@@ -1,11 +1,11 @@
-module Data.GlossaryChange exposing (GlossaryChange(..), codec)
+module Data.GlossaryChange exposing (GlossaryChange(..), codec, setLastUpdatedBy)
 
 {-| A representation of a change to be made to a glossary.
 
 
 # Glossary Change
 
-@docs GlossaryChange, codec
+@docs GlossaryChange, codec, setLastUpdatedBy
 
 -}
 
@@ -81,3 +81,22 @@ codec =
         |> Codec.variant2 "Update" Update GlossaryItemId.codec GlossaryItemForHtml.codec
         |> Codec.variant1 "Remove" Remove GlossaryItemId.codec
         |> Codec.buildCustom
+
+
+{-| Set the name and email address of the person making this glossary change.
+-}
+setLastUpdatedBy : { name : String, emailAddress : String } -> GlossaryChange -> GlossaryChange
+setLastUpdatedBy { name, emailAddress } change =
+    case change of
+        Insert itemForHtml ->
+            itemForHtml
+                |> GlossaryItemForHtml.setLastUpdatedBy { name = name, emailAddress = emailAddress }
+                |> Insert
+
+        Update itemId itemForHtml ->
+            itemForHtml
+                |> GlossaryItemForHtml.setLastUpdatedBy { name = name, emailAddress = emailAddress }
+                |> Update itemId
+
+        _ ->
+            change
