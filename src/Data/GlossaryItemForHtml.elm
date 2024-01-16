@@ -410,13 +410,10 @@ toHtmlTree glossaryItem =
             in
             HtmlTree.Node "div"
                 True
-                (item.lastUpdatedDateAsIso8601
-                    |> Maybe.map
-                        (\lastUpdatedDate_ ->
-                            [ HtmlTree.Attribute "data-last-updated" lastUpdatedDate_ ]
-                        )
-                    |> Maybe.withDefault []
-                )
+                [ HtmlTree.showAttributeMaybe "data-last-updated" identity item.lastUpdatedDateAsIso8601
+                , HtmlTree.showAttributeMaybe "data-last-updated-by-name" identity item.lastUpdatedByName
+                , HtmlTree.showAttributeMaybe "data-last-updated-by-email-address" identity item.lastUpdatedByEmailAddress
+                ]
                 (preferredTermToHtmlTree item.disambiguationTag item.preferredTerm
                     :: List.map alternativeTermToHtmlTree item.alternativeTerms
                     ++ (if item.needsUpdating then
