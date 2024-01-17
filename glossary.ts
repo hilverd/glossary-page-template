@@ -8,6 +8,12 @@ const katexIsAvailable: boolean = typeof katex != "undefined";
 const containerElement: HTMLElement | null = document.getElementById('glossary-page-container');
 
 if (containerElement) {
+    const bodyDataset: DOMStringMap = document.body.dataset;
+
+    const bearerToken: string | null = bodyDataset.bearerToken || null;
+    const userName: string | null = bodyDataset.userName || null;
+    const userEmailAddress: string | null = bodyDataset.userEmailAddress || null;
+
     const containerDataset: DOMStringMap = containerElement.dataset;
 
     const enableHelpForMakingChanges: boolean = containerDataset.enableHelpForMakingChanges === 'true';
@@ -167,6 +173,9 @@ if (containerElement) {
                 enableLastUpdatedDates: enableLastUpdatedDates,
                 versionNumber: versionNumber,
                 separateBackendBaseUrl: separateBackendBaseUrl,
+                bearerToken: bearerToken,
+                userName: userName,
+                userEmailAddress: userEmailAddress,
                 theme: localStorage.glossaryPageTheme || 'system',
                 cardWidth: cardWidth,
                 katexIsAvailable: katexIsAvailable
