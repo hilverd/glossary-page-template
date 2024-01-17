@@ -1,12 +1,15 @@
-module Extras.Http exposing (httpErrorDescriptionAskingToReloadOnConflict)
+module Extras.Http exposing (httpErrorDescriptionAskingToReloadOnUnauthorisedOrConflict)
 
 import Http
 import Internationalisation as I18n
 
 
-httpErrorDescriptionAskingToReloadOnConflict : Http.Error -> String
-httpErrorDescriptionAskingToReloadOnConflict error =
+httpErrorDescriptionAskingToReloadOnUnauthorisedOrConflict : Http.Error -> String
+httpErrorDescriptionAskingToReloadOnUnauthorisedOrConflict error =
     case error of
+        Http.BadStatus 401 ->
+            I18n.unauthorisedPleaseReload
+
         Http.BadStatus 409 ->
             I18n.otherChangesWereMadePleaseReload
 

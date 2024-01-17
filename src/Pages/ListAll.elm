@@ -495,7 +495,7 @@ update msg model =
 
         FailedToDelete error ->
             ( { model
-                | deleting = SavingFailed <| Extras.Http.httpErrorDescriptionAskingToReloadOnConflict error
+                | deleting = SavingFailed <| Extras.Http.httpErrorDescriptionAskingToReloadOnUnauthorisedOrConflict error
                 , savingSettings = NotCurrentlySaving
               }
             , Cmd.none
@@ -737,7 +737,7 @@ update msg model =
 
         FailedToChangeSettings error ->
             ( { model
-                | savingSettings = SavingFailed <| Extras.Http.httpErrorDescriptionAskingToReloadOnConflict error
+                | savingSettings = SavingFailed <| Extras.Http.httpErrorDescriptionAskingToReloadOnUnauthorisedOrConflict error
               }
             , Cmd.none
             )

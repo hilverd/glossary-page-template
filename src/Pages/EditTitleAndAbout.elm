@@ -180,7 +180,7 @@ update msg model =
                     ( model, Cmd.none )
 
         FailedToSave error ->
-            ( { model | saving = SavingFailed <| Extras.Http.httpErrorDescriptionAskingToReloadOnConflict <| error }
+            ( { model | saving = SavingFailed <| Extras.Http.httpErrorDescriptionAskingToReloadOnUnauthorisedOrConflict <| error }
             , Cmd.none
             )
 
