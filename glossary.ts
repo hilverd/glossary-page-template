@@ -1,7 +1,7 @@
 import '@webcomponents/custom-elements';
 import './glossary.css';
 import { Elm } from './src/ApplicationShell.elm';
-import { untilAsync, waitForElement } from './ts/utilities.ts';
+import { normaliseWhitespace, untilAsync, waitForElement } from './ts/utilities.ts';
 
 const katexIsAvailable: boolean = typeof katex != "undefined";
 
@@ -43,10 +43,6 @@ if (containerElement) {
     const dlElement: HTMLElement | null = glossaryElement?.querySelector('dl') || null;
     const glossaryItemDivElements: HTMLElement[] = Array.prototype.slice.apply(dlElement?.querySelectorAll('div') || []);
     const glossaryItems: any[] = glossaryItemDivElements.map(glossaryItemFromDivElement);
-
-    function normaliseWhitespace(s: string): string {
-        return s.replace(/\s+/g, ' ').trim();
-    }
 
     function aboutLinkFromLiElement(aboutLiElement: HTMLElement): { href: string, body: string } {
         const aElement: HTMLAnchorElement | null = aboutLiElement.querySelector('a');

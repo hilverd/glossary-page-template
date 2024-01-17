@@ -36,3 +36,7 @@ export function waitForElement(elementId: string): Promise<HTMLElement> {
         });
     });
 }
+
+export function normaliseWhitespace(s: string): string {
+    return s.replace(/\s+/g, ' ').trim();
+}
