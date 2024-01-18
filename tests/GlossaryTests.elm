@@ -155,7 +155,6 @@ glossary =
         True
         False
         CardWidth.Intermediate
-        "/api"
         (GlossaryTitle.fromMarkdown "Example Glossary")
         (AboutParagraph.fromMarkdown "An example glossary.")
         []

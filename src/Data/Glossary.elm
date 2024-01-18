@@ -1,8 +1,8 @@
 module Data.Glossary exposing
     ( Glossary
-    , create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems
+    , create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setTitle, setAboutSection, setItems
     , ApplyChangesResult(..), applyChanges
-    , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, separateBackendBaseUrl, title, aboutSection, items, versionNumber
+    , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, title, aboutSection, items, versionNumber
     , toHtmlTree
     )
 
@@ -16,7 +16,7 @@ module Data.Glossary exposing
 
 # Build
 
-@docs create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setSeparateBackendBaseUrl, setTitle, setAboutSection, setItems
+@docs create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setTitle, setAboutSection, setItems
 
 
 # Apply Changes
@@ -26,7 +26,7 @@ module Data.Glossary exposing
 
 # Query
 
-@docs enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, separateBackendBaseUrl, title, aboutSection, items, versionNumber
+@docs enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, title, aboutSection, items, versionNumber
 
 
 # Export
@@ -44,7 +44,7 @@ import Data.GlossaryChange exposing (GlossaryChange(..))
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
+import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems, tagsWithDescriptions)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVersionNumber)
@@ -64,7 +64,6 @@ type Glossary
         , enableOrderItemsButtons : Bool
         , enableHelpForMakingChanges : Bool
         , cardWidth : CardWidth
-        , separateBackendBaseUrl : Maybe String
         , title : GlossaryTitle
         , aboutSection : AboutSection
         , items : GlossaryItems
@@ -115,15 +114,6 @@ cardWidth glossary =
     case glossary of
         Glossary glossary_ ->
             glossary_.cardWidth
-
-
-{-| Get the separate backend base URL for a glossary.
--}
-separateBackendBaseUrl : Glossary -> Maybe String
-separateBackendBaseUrl glossary =
-    case glossary of
-        Glossary glossary_ ->
-            glossary_.separateBackendBaseUrl
 
 
 {-| Get the title for a glossary.
@@ -239,15 +229,6 @@ setCardWidth cardWidth_ glossary =
             Glossary { glossary_ | cardWidth = cardWidth_ }
 
 
-{-| Set the separate backend base URL for a glossary.
--}
-setSeparateBackendBaseUrl : Maybe String -> Glossary -> Glossary
-setSeparateBackendBaseUrl separateBackendBaseUrl_ glossary =
-    case glossary of
-        Glossary glossary_ ->
-            Glossary { glossary_ | separateBackendBaseUrl = separateBackendBaseUrl_ }
-
-
 {-| Set the title for a glossary.
 -}
 setTitle : GlossaryTitle -> Glossary -> Glossary
@@ -283,7 +264,6 @@ create :
     -> Bool
     -> Bool
     -> CardWidth
-    -> String
     -> GlossaryTitle
     -> AboutParagraph
     -> List AboutLink
@@ -291,14 +271,13 @@ create :
     -> List GlossaryItemForHtml
     -> GlossaryVersionNumber
     -> Glossary
-create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ separateBackendBaseUrl_ title_ aboutParagraph aboutLinks tagsWithDescriptions itemsForHtml versionNumber_ =
+create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ title_ aboutParagraph aboutLinks tagsWithDescriptions itemsForHtml versionNumber_ =
     createWithDefaults
         (Just enableLastUpdatedDates_)
         (Just enableExportMenu_)
         (Just enableOrderItemsButtons_)
         (Just enableHelpForMakingChanges_)
         (Just cardWidth_)
-        (Just separateBackendBaseUrl_)
         (Just title_)
         (Just aboutParagraph)
         (Just aboutLinks)
@@ -313,7 +292,6 @@ createWithDefaults :
     -> Maybe Bool
     -> Maybe Bool
     -> Maybe CardWidth
-    -> Maybe String
     -> Maybe GlossaryTitle
     -> Maybe AboutParagraph
     -> Maybe (List AboutLink)
@@ -321,7 +299,7 @@ createWithDefaults :
     -> List GlossaryItemForHtml
     -> Maybe GlossaryVersionNumber
     -> Glossary
-createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ separateBackendBaseUrl_ title_ aboutParagraph aboutLinks tagsWithDescriptions itemsForHtml versionNumber_ =
+createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ title_ aboutParagraph aboutLinks tagsWithDescriptions itemsForHtml versionNumber_ =
     let
         aboutSection_ =
             { paragraph = Maybe.withDefault (AboutParagraph.fromMarkdown I18n.elementNotFound) aboutParagraph
@@ -338,7 +316,6 @@ createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsBut
         , enableOrderItemsButtons = Maybe.withDefault True enableOrderItemsButtons_
         , enableHelpForMakingChanges = Maybe.withDefault False enableHelpForMakingChanges_
         , cardWidth = Maybe.withDefault CardWidth.Compact cardWidth_
-        , separateBackendBaseUrl = separateBackendBaseUrl_
         , title = Maybe.withDefault (GlossaryTitle.fromMarkdown I18n.elementNotFound) title_
         , aboutSection = aboutSection_
         , items = Result.withDefault GlossaryItems.empty items_
@@ -356,7 +333,6 @@ codec =
         |> Codec.optionalField "enableOrderItemsButtons" (enableOrderItemsButtons >> Just) Codec.bool
         |> Codec.optionalField "enableHelpForMakingChanges" (enableHelpForMakingChanges >> Just) Codec.bool
         |> Codec.optionalField "cardWidth" (cardWidth >> Just) CardWidth.codec
-        |> Codec.optionalNullableField "separateBackendBaseUrl" separateBackendBaseUrl Codec.string
         |> Codec.optionalField "titleString" (title >> Just) GlossaryTitle.codec
         |> Codec.optionalField "aboutParagraph" (aboutSection >> .paragraph >> Just) (Codec.map AboutParagraph.fromMarkdown AboutParagraph.raw Codec.string)
         |> Codec.optionalField "aboutLinks" (aboutSection >> .links >> Just) (Codec.list AboutLink.codec)
@@ -512,7 +488,6 @@ toHtmlTree glossary =
                 , HtmlTree.boolAttribute "data-enable-order-items-buttons" glossary_.enableOrderItemsButtons
                 , HtmlTree.boolAttribute "data-enable-last-updated-dates" glossary_.enableLastUpdatedDates
                 , CardWidth.toHtmlTreeAttribute glossary_.cardWidth
-                , HtmlTree.showAttributeMaybe "data-separate-backend-base-url" identity glossary_.separateBackendBaseUrl
                 , GlossaryVersionNumber.toHtmlTreeAttribute glossary_.versionNumber
                 ]
                 [ HtmlTree.Node "header"

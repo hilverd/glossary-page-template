@@ -114,9 +114,9 @@ init flags url key =
 
         separateBackendBaseUrl : Maybe String
         separateBackendBaseUrl =
-            glossary
+            flags
+                |> Decode.decodeValue (Decode.field "separateBackendBaseUrl" Decode.string)
                 |> Result.toMaybe
-                |> Maybe.andThen Glossary.separateBackendBaseUrl
 
         katexIsAvailable : Bool
         katexIsAvailable =
@@ -148,6 +148,7 @@ init flags url key =
             , editability = editability
             , enableMathSupport = katexIsAvailable
             , queryParameters = queryParameters
+            , separateBackendBaseUrl = separateBackendBaseUrl
             , maybeId = Nothing
             , fragment = fragment
             , glossary = glossary

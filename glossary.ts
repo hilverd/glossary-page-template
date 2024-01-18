@@ -23,7 +23,7 @@ if (containerElement) {
     const cardWidth: string = containerDataset.cardWidth || 'compact';
     const enableLastUpdatedDates: boolean = containerDataset.enableLastUpdatedDates === 'true';
     const versionNumber: number | null = Number(containerDataset.versionNumber) || null;
-    const separateBackendBaseUrl: string | null = containerDataset.separateBackendBaseUrl || null;
+    const separateBackendBaseUrl: string | null = bodyDataset.separateBackendBaseUrl || null;
     const editorIsRunning: boolean = containerDataset.editorIsRunning === 'true';
 
     const titleElement: HTMLElement | null = document.getElementById('glossary-page-title');
