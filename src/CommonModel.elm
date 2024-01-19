@@ -18,6 +18,9 @@ type alias CommonModel =
     , enableMathSupport : Bool
     , queryParameters : QueryParameters
     , separateBackendBaseUrl : Maybe String
+    , bearerToken : Maybe String
+    , userName : Maybe String
+    , userEmailAddress : Maybe String
     , maybeId : Maybe GlossaryItemId
     , fragment : Maybe String
     , glossary : Result String Glossary

@@ -118,6 +118,24 @@ init flags url key =
                 |> Decode.decodeValue (Decode.field "separateBackendBaseUrl" Decode.string)
                 |> Result.toMaybe
 
+        bearerToken : Maybe String
+        bearerToken =
+            flags
+                |> Decode.decodeValue (Decode.field "bearerToken" Decode.string)
+                |> Result.toMaybe
+
+        userName : Maybe String
+        userName =
+            flags
+                |> Decode.decodeValue (Decode.field "userName" Decode.string)
+                |> Result.toMaybe
+
+        userEmailAddress : Maybe String
+        userEmailAddress =
+            flags
+                |> Decode.decodeValue (Decode.field "userEmailAddress" Decode.string)
+                |> Result.toMaybe
+
         katexIsAvailable : Bool
         katexIsAvailable =
             flags
@@ -149,6 +167,9 @@ init flags url key =
             , enableMathSupport = katexIsAvailable
             , queryParameters = queryParameters
             , separateBackendBaseUrl = separateBackendBaseUrl
+            , bearerToken = bearerToken
+            , userName = userName
+            , userEmailAddress = userEmailAddress
             , maybeId = Nothing
             , fragment = fragment
             , glossary = glossary
