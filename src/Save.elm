@@ -116,7 +116,7 @@ sendChangesAsPatch :
     -> (Http.Error -> msg)
     -> (( Maybe GlossaryItemId, Glossary ) -> msg)
     -> Cmd msg
-sendChangesAsPatch baseUrl bearerToken changes ( maybeGlossaryItemId, glossary ) errorMsg successMsg =
+sendChangesAsPatch baseUrl bearerToken changelist ( maybeGlossaryItemId, glossary ) errorMsg successMsg =
     let
         authorisationHeader : Maybe Http.Header
         authorisationHeader =
@@ -132,7 +132,7 @@ sendChangesAsPatch baseUrl bearerToken changes ( maybeGlossaryItemId, glossary )
         , headers = headers
         , url = baseUrl
         , body =
-            changes
+            changelist
                 |> Codec.encodeToValue GlossaryChangelist.codec
                 |> Http.jsonBody
         , expect =
