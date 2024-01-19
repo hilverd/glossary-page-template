@@ -27,11 +27,24 @@ changeAndSave :
     Editability
     -> Glossary
     -> GlossaryChangelist
+    -> { userName : Maybe String, userEmailAddress : Maybe String }
     -> (Http.Error -> msg)
     -> (( Maybe GlossaryItemId, Glossary ) -> msg)
     -> ( Saving, Cmd msg )
-changeAndSave editability glossary changes errorMsg successMsg =
-    case Glossary.applyChanges changes glossary of
+changeAndSave editability glossary changelist { userName, userEmailAddress } errorMsg successMsg =
+    let
+        changelistWithUserDetails =
+            Maybe.map2
+                (\userName_ userEmailAddress_ ->
+                    GlossaryChangelist.setLastUpdatedBy
+                        { name = userName_, emailAddress = userEmailAddress_ }
+                        changelist
+                )
+                userName
+                userEmailAddress
+                |> Maybe.withDefault changelist
+    in
+    case Glossary.applyChanges changelistWithUserDetails glossary of
         Glossary.ChangesApplied resultOfApplyingChanges ->
             case editability of
                 EditingInMemory ->
@@ -41,7 +54,14 @@ changeAndSave editability glossary changes errorMsg successMsg =
                     ( SavingInProgress, patchHtmlFile resultOfApplyingChanges errorMsg successMsg )
 
                 EditingWithSeparateBackend baseUrl ->
-                    ( SavingInProgress, sendChangesAsPatch baseUrl changes resultOfApplyingChanges errorMsg successMsg )
+                    ( SavingInProgress
+                    , sendChangesAsPatch
+                        baseUrl
+                        changelistWithUserDetails
+                        resultOfApplyingChanges
+                        errorMsg
+                        successMsg
+                    )
 
                 _ ->
                     ( NotCurrentlySaving, Cmd.none )
