@@ -30,7 +30,24 @@ changeAndSave :
     -> (Http.Error -> msg)
     -> (( Maybe GlossaryItemId, Glossary ) -> msg)
     -> ( Saving, Cmd msg )
-changeAndSave editability glossary changelist errorMsg successMsg =
+changeAndSave editability glossary changelist_ errorMsg successMsg =
+    let
+        changelist =
+            case editability of
+                EditingWithSeparateBackend { userName, userEmailAddress } ->
+                    Maybe.map2
+                        (\userName_ userEmailAddress_ ->
+                            GlossaryChangelist.setLastUpdatedBy
+                                { name = userName_, emailAddress = userEmailAddress_ }
+                                changelist_
+                        )
+                        userName
+                        userEmailAddress
+                        |> Maybe.withDefault changelist_
+
+                _ ->
+                    changelist_
+    in
     case Glossary.applyChanges changelist glossary of
         Glossary.ChangesApplied resultOfApplyingChanges ->
             case editability of
@@ -40,24 +57,12 @@ changeAndSave editability glossary changelist errorMsg successMsg =
                 EditingWithIncludedBackend ->
                     ( SavingInProgress, patchHtmlFile resultOfApplyingChanges errorMsg successMsg )
 
-                EditingWithSeparateBackend { baseUrl, bearerToken, userName, userEmailAddress } ->
-                    let
-                        changelistWithUserDetails =
-                            Maybe.map2
-                                (\userName_ userEmailAddress_ ->
-                                    GlossaryChangelist.setLastUpdatedBy
-                                        { name = userName_, emailAddress = userEmailAddress_ }
-                                        changelist
-                                )
-                                userName
-                                userEmailAddress
-                                |> Maybe.withDefault changelist
-                    in
+                EditingWithSeparateBackend { baseUrl, bearerToken } ->
                     ( SavingInProgress
                     , sendChangesAsPatch
                         baseUrl
                         bearerToken
-                        changelistWithUserDetails
+                        changelist
                         resultOfApplyingChanges
                         errorMsg
                         successMsg
