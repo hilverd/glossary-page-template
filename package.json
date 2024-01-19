@@ -20,7 +20,6 @@
     "@webcomponents/custom-elements": "^1.6.0",
     "autoprefixer": "^10.4.16",
     "elm": "0.19.1-6",
-    "elm-analyse": "^0.16.5",
     "elm-doc-preview": "^5.0.5",
     "elm-format": "^0.8.7",
     "elm-review": "^2.10.3",
