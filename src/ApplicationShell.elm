@@ -153,6 +153,8 @@ init flags url key =
                 { enableHelpForMakingChanges = enableHelpForMakingChanges
                 , enableSavingChangesInMemory = enableSavingChangesInMemory
                 , separateBackendBaseUrl = separateBackendBaseUrl
+                , userName = userName
+                , userEmailAddress = userEmailAddress
                 , editorIsRunning = editorIsRunning
                 , currentlyEditing = False
                 }
@@ -168,8 +170,6 @@ init flags url key =
             , queryParameters = queryParameters
             , separateBackendBaseUrl = separateBackendBaseUrl
             , bearerToken = bearerToken
-            , userName = userName
-            , userEmailAddress = userEmailAddress
             , maybeId = Nothing
             , fragment = fragment
             , glossary = glossary

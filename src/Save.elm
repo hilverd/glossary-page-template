@@ -27,24 +27,11 @@ changeAndSave :
     Editability
     -> Glossary
     -> GlossaryChangelist
-    -> { userName : Maybe String, userEmailAddress : Maybe String }
     -> (Http.Error -> msg)
     -> (( Maybe GlossaryItemId, Glossary ) -> msg)
     -> ( Saving, Cmd msg )
-changeAndSave editability glossary changelist { userName, userEmailAddress } errorMsg successMsg =
-    let
-        changelistWithUserDetails =
-            Maybe.map2
-                (\userName_ userEmailAddress_ ->
-                    GlossaryChangelist.setLastUpdatedBy
-                        { name = userName_, emailAddress = userEmailAddress_ }
-                        changelist
-                )
-                userName
-                userEmailAddress
-                |> Maybe.withDefault changelist
-    in
-    case Glossary.applyChanges changelistWithUserDetails glossary of
+changeAndSave editability glossary changelist errorMsg successMsg =
+    case Glossary.applyChanges changelist glossary of
         Glossary.ChangesApplied resultOfApplyingChanges ->
             case editability of
                 EditingInMemory ->
@@ -53,7 +40,19 @@ changeAndSave editability glossary changelist { userName, userEmailAddress } err
                 EditingWithIncludedBackend ->
                     ( SavingInProgress, patchHtmlFile resultOfApplyingChanges errorMsg successMsg )
 
-                EditingWithSeparateBackend baseUrl ->
+                EditingWithSeparateBackend { baseUrl, userName, userEmailAddress } ->
+                    let
+                        changelistWithUserDetails =
+                            Maybe.map2
+                                (\userName_ userEmailAddress_ ->
+                                    GlossaryChangelist.setLastUpdatedBy
+                                        { name = userName_, emailAddress = userEmailAddress_ }
+                                        changelist
+                                )
+                                userName
+                                userEmailAddress
+                                |> Maybe.withDefault changelist
+                    in
                     ( SavingInProgress
                     , sendChangesAsPatch
                         baseUrl

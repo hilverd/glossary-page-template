@@ -460,7 +460,6 @@ update msg model =
                             Save.changeAndSave model.common.editability
                                 glossary
                                 changelist
-                                { userName = model.common.userName, userEmailAddress = model.common.userEmailAddress }
                                 (PageMsg.Internal << FailedToDelete)
                                 (\( _, updatedGlossary ) ->
                                     PageMsg.Internal <| Deleted updatedGlossary
@@ -589,7 +588,6 @@ update msg model =
                             Save.changeAndSave model.common.editability
                                 glossary
                                 changelist
-                                { userName = model.common.userName, userEmailAddress = model.common.userEmailAddress }
                                 (PageMsg.Internal << FailedToChangeSettings)
                                 (\( _, updatedGlossary ) ->
                                     PageMsg.Internal <| ChangedSettings updatedGlossary
@@ -620,7 +618,6 @@ update msg model =
                             Save.changeAndSave model.common.editability
                                 glossary
                                 changelist
-                                { userName = model.common.userName, userEmailAddress = model.common.userEmailAddress }
                                 (PageMsg.Internal << FailedToChangeSettings)
                                 (\( maybeGlossaryItemId, updatedGlossary ) ->
                                     let
@@ -659,7 +656,6 @@ update msg model =
                             Save.changeAndSave model.common.editability
                                 glossary
                                 changelist
-                                { userName = model.common.userName, userEmailAddress = model.common.userEmailAddress }
                                 (PageMsg.Internal << FailedToChangeSettings)
                                 (\( maybeGlossaryItemId, updatedGlossary ) ->
                                     let
@@ -698,7 +694,6 @@ update msg model =
                             Save.changeAndSave model.common.editability
                                 glossary
                                 changelist
-                                { userName = model.common.userName, userEmailAddress = model.common.userEmailAddress }
                                 (PageMsg.Internal << FailedToChangeSettings)
                                 (\( maybeGlossaryItemId, updatedGlossary ) ->
                                     let
