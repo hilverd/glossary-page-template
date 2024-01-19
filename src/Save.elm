@@ -40,7 +40,7 @@ changeAndSave editability glossary changelist errorMsg successMsg =
                 EditingWithIncludedBackend ->
                     ( SavingInProgress, patchHtmlFile resultOfApplyingChanges errorMsg successMsg )
 
-                EditingWithSeparateBackend { baseUrl, userName, userEmailAddress } ->
+                EditingWithSeparateBackend { baseUrl, bearerToken, userName, userEmailAddress } ->
                     let
                         changelistWithUserDetails =
                             Maybe.map2
@@ -56,6 +56,7 @@ changeAndSave editability glossary changelist errorMsg successMsg =
                     ( SavingInProgress
                     , sendChangesAsPatch
                         baseUrl
+                        bearerToken
                         changelistWithUserDetails
                         resultOfApplyingChanges
                         errorMsg
@@ -104,15 +105,26 @@ patchHtmlFile ( maybeGlossaryItemId, glossary ) errorMsg successMsg =
 
 sendChangesAsPatch :
     String
+    -> Maybe String
     -> GlossaryChangelist
     -> ( Maybe GlossaryItemId, Glossary )
     -> (Http.Error -> msg)
     -> (( Maybe GlossaryItemId, Glossary ) -> msg)
     -> Cmd msg
-sendChangesAsPatch baseUrl changes ( maybeGlossaryItemId, glossary ) errorMsg successMsg =
+sendChangesAsPatch baseUrl bearerToken changes ( maybeGlossaryItemId, glossary ) errorMsg successMsg =
+    let
+        authorisationHeader : Maybe Http.Header
+        authorisationHeader =
+            bearerToken |> Maybe.map (\token -> Http.header "Authorization" ("Bearer " ++ token))
+
+        headers : List Http.Header
+        headers =
+            [ authorisationHeader ]
+                |> List.filterMap identity
+    in
     Http.request
         { method = "PATCH"
-        , headers = []
+        , headers = headers
         , url = baseUrl
         , body =
             changes

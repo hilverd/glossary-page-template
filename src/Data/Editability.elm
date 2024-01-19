@@ -33,8 +33,18 @@ type Editability
     | EditingInMemory
     | CanEditWithIncludedBackend
     | EditingWithIncludedBackend
-    | CanEditWithSeparateBackend { baseUrl : String, userName : Maybe String, userEmailAddress : Maybe String }
-    | EditingWithSeparateBackend { baseUrl : String, userName : Maybe String, userEmailAddress : Maybe String }
+    | CanEditWithSeparateBackend
+        { baseUrl : String
+        , bearerToken : Maybe String
+        , userName : Maybe String
+        , userEmailAddress : Maybe String
+        }
+    | EditingWithSeparateBackend
+        { baseUrl : String
+        , bearerToken : Maybe String
+        , userName : Maybe String
+        , userEmailAddress : Maybe String
+        }
 
 
 {-| Create an Editability from flags expressing the current situation.
@@ -43,13 +53,14 @@ create :
     { enableHelpForMakingChanges : Bool
     , enableSavingChangesInMemory : Bool
     , separateBackendBaseUrl : Maybe String
+    , bearerToken : Maybe String
     , userName : Maybe String
     , userEmailAddress : Maybe String
     , editorIsRunning : Bool
     , currentlyEditing : Bool
     }
     -> Editability
-create { enableHelpForMakingChanges, enableSavingChangesInMemory, separateBackendBaseUrl, userName, userEmailAddress, editorIsRunning, currentlyEditing } =
+create { enableHelpForMakingChanges, enableSavingChangesInMemory, separateBackendBaseUrl, bearerToken, userName, userEmailAddress, editorIsRunning, currentlyEditing } =
     case ( ( enableHelpForMakingChanges, enableSavingChangesInMemory ), ( separateBackendBaseUrl, editorIsRunning ) ) of
         ( ( False, False ), ( _, False ) ) ->
             ReadOnly
@@ -63,10 +74,20 @@ create { enableHelpForMakingChanges, enableSavingChangesInMemory, separateBacken
 
         ( ( False, False ), ( Just separateBackendBaseUrl_, True ) ) ->
             if currentlyEditing then
-                EditingWithSeparateBackend { baseUrl = separateBackendBaseUrl_, userName = userName, userEmailAddress = userEmailAddress }
+                EditingWithSeparateBackend
+                    { baseUrl = separateBackendBaseUrl_
+                    , bearerToken = bearerToken
+                    , userName = userName
+                    , userEmailAddress = userEmailAddress
+                    }
 
             else
-                CanEditWithSeparateBackend { baseUrl = separateBackendBaseUrl_, userName = userName, userEmailAddress = userEmailAddress }
+                CanEditWithSeparateBackend
+                    { baseUrl = separateBackendBaseUrl_
+                    , bearerToken = bearerToken
+                    , userName = userName
+                    , userEmailAddress = userEmailAddress
+                    }
 
         ( ( False, True ), ( _, False ) ) ->
             if currentlyEditing then
@@ -94,10 +115,20 @@ create { enableHelpForMakingChanges, enableSavingChangesInMemory, separateBacken
 
         ( ( True, False ), ( Just separateBackendBaseUrl_, True ) ) ->
             if currentlyEditing then
-                EditingWithSeparateBackend { baseUrl = separateBackendBaseUrl_, userName = userName, userEmailAddress = userEmailAddress }
+                EditingWithSeparateBackend
+                    { baseUrl = separateBackendBaseUrl_
+                    , bearerToken = bearerToken
+                    , userName = userName
+                    , userEmailAddress = userEmailAddress
+                    }
 
             else
-                CanEditWithSeparateBackend { baseUrl = separateBackendBaseUrl_, userName = userName, userEmailAddress = userEmailAddress }
+                CanEditWithSeparateBackend
+                    { baseUrl = separateBackendBaseUrl_
+                    , bearerToken = bearerToken
+                    , userName = userName
+                    , userEmailAddress = userEmailAddress
+                    }
 
         ( ( True, True ), ( _, False ) ) ->
             if currentlyEditing then
@@ -115,10 +146,20 @@ create { enableHelpForMakingChanges, enableSavingChangesInMemory, separateBacken
 
         ( ( True, True ), ( Just separateBackendBaseUrl_, True ) ) ->
             if currentlyEditing then
-                EditingWithSeparateBackend { baseUrl = separateBackendBaseUrl_, userName = userName, userEmailAddress = userEmailAddress }
+                EditingWithSeparateBackend
+                    { baseUrl = separateBackendBaseUrl_
+                    , bearerToken = bearerToken
+                    , userName = userName
+                    , userEmailAddress = userEmailAddress
+                    }
 
             else
-                CanEditWithSeparateBackend { baseUrl = separateBackendBaseUrl_, userName = userName, userEmailAddress = userEmailAddress }
+                CanEditWithSeparateBackend
+                    { baseUrl = separateBackendBaseUrl_
+                    , bearerToken = bearerToken
+                    , userName = userName
+                    , userEmailAddress = userEmailAddress
+                    }
 
 
 {-| Begin editing a glossary (that can be edited).
