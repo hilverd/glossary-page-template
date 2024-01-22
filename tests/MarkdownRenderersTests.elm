@@ -12,7 +12,7 @@ import Test exposing (Test, describe, test)
 suite : Test
 suite =
     describe "The MarkdownRenderers module"
-        [ describe "MarkdownFragment.htmlMsgRenderer without math support"
+        [ describe "MarkdownRenderers.htmlMsgRenderer without math support"
             [ test "renders a Markdown fragment to HTML" <|
                 \_ ->
                     """```math
@@ -39,7 +39,7 @@ e = mc^2
                                 ]
                             )
             ]
-        , describe "MarkdownFragment.htmlMsgRenderer with math support"
+        , describe "MarkdownRenderers.htmlMsgRenderer with math support"
             [ test "renders a Markdown fragment with display math to HTML" <|
                 \_ ->
                     """```math
@@ -86,7 +86,7 @@ e = mc^2
                                 ]
                             )
             ]
-        , describe "MarkdownFragment.inlineHtmlMsgRenderer with math support"
+        , describe "MarkdownRenderers.inlineHtmlMsgRenderer with math support"
             [ test "renders a Markdown fragment with inline math to HTML" <|
                 \_ ->
                     "`$e = mc^2$`"
