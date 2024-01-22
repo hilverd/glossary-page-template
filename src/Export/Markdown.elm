@@ -1,4 +1,7 @@
-module Export.Markdown exposing (download)
+module Export.Markdown exposing
+    ( download
+    , toString
+    )
 
 {-| Functionality for exporting as Markdown.
 
@@ -8,12 +11,11 @@ module Export.Markdown exposing (download)
 
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
-import Data.AboutSection exposing (AboutSection)
 import Data.Glossary as Glossary exposing (Glossary, aboutSection)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItems as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Extras.HtmlTree
 import Extras.String
@@ -102,11 +104,8 @@ itemToMarkdown glossaryItem =
         |> paragraphs
 
 
-{-| Export a glossary to a Markdown file.
-This is achieved by producing a [command for downloading](https://package.elm-lang.org/packages/elm/file/latest/File.Download) this file.
--}
-download : Glossary -> Cmd msg
-download glossary =
+toString : Glossary -> String
+toString glossary =
     let
         title =
             Glossary.title glossary
@@ -116,10 +115,6 @@ download glossary =
 
         items =
             Glossary.items glossary
-
-        filename : String
-        filename =
-            GlossaryTitle.toFilename ".md" title
 
         titleHeadingString : String
         titleHeadingString =
@@ -152,4 +147,23 @@ download glossary =
             ]
                 |> paragraphs
     in
-    Download.string filename "text/markdown" content
+    content
+
+
+{-| Export a glossary to a Markdown file.
+This is achieved by producing a [command for downloading](https://package.elm-lang.org/packages/elm/file/latest/File.Download) this file.
+-}
+download : Glossary -> Cmd msg
+download glossary =
+    let
+        title : GlossaryTitle
+        title =
+            Glossary.title glossary
+
+        filename : String
+        filename =
+            GlossaryTitle.toFilename ".md" title
+    in
+    glossary
+        |> toString
+        |> Download.string filename "text/markdown"
