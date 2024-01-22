@@ -1,11 +1,11 @@
-module Extras.String exposing (escapeForMarkdown, firstAlphaNumericCharacter, preserveOnlyAlphaNumChars)
+module Extras.String exposing (escapeForMarkdown, firstAlphaNumericCharacter, preserveOnlyAlphaNumChars, emDash, enDash)
 
 {-| Extra functionality for strings.
 
 
 # Strings
 
-@docs escapeForMarkdown, firstAlphaNumericCharacter, preserveOnlyAlphaNumChars
+@docs escapeForMarkdown, firstAlphaNumericCharacter, preserveOnlyAlphaNumChars, emDash, enDash
 
 -}
 
@@ -63,3 +63,17 @@ preserveOnlyAlphaNumChars =
                 |> Maybe.withDefault Regex.never
     in
     Regex.replace regex (always "")
+
+
+{-| A long dash (—) used in punctuation.
+-}
+emDash : String
+emDash =
+    "—"
+
+
+{-| A short dash (–) used in punctuation.
+-}
+enDash : String
+enDash =
+    "–"
