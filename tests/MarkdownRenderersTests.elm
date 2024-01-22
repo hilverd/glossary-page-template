@@ -104,4 +104,13 @@ e = mc^2
                                 ]
                             )
             ]
+        , describe "MarkdownRenderers.inlineTextRenderer with math support"
+            [ test "renders a Markdown fragment with inline math to HTML" <|
+                \_ ->
+                    "The formula `$e = mc^2$` is famous."
+                        |> MarkdownFragment.fromString
+                        |> MarkdownFragment.parsed
+                        |> Result.andThen (Renderer.render (MarkdownRenderers.inlineTextRenderer True))
+                        |> Expect.equal (Ok [ "The formula $e = mc^2$ is famous." ])
+            ]
         ]
