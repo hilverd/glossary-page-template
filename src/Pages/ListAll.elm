@@ -744,15 +744,9 @@ update msg model =
 
         DownloadMarkdown ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
-            , case model.common.glossary of
-                Ok glossary ->
-                    Export.Markdown.download
-                        (Glossary.title glossary)
-                        (Glossary.aboutSection glossary)
-                        (Glossary.items glossary)
-
-                _ ->
-                    Cmd.none
+            , model.common.glossary
+                |> Result.map Export.Markdown.download
+                |> Result.withDefault Cmd.none
             )
 
         DownloadAnki ->
