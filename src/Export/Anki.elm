@@ -9,6 +9,7 @@ module Export.Anki exposing (download)
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
+import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
@@ -123,15 +124,24 @@ itemToAnki enableMathSupport glossaryItem =
     front ++ "\t" ++ back ++ "\t" ++ tags
 
 
-{-| Export a glossary with the given title, "about" paragraph, and "about" links to a [text file suitable for Anki](https://docs.ankiweb.net/importing.html#text-files).
+{-| Export a glossary with to a [text file suitable for Anki](https://docs.ankiweb.net/importing.html#text-files).
 This is achieved by producing a [command for downloading](https://package.elm-lang.org/packages/elm/file/latest/File.Download) this file.
 -}
-download : Bool -> GlossaryTitle -> AboutSection -> GlossaryItems -> Cmd msg
-download enableMathSupport glossaryTitle aboutSection glossaryItems =
+download : Bool -> Glossary -> Cmd msg
+download enableMathSupport glossary =
     let
+        title =
+            Glossary.title glossary
+
+        aboutSection =
+            Glossary.aboutSection glossary
+
+        items =
+            Glossary.items glossary
+
         filename : String
         filename =
-            GlossaryTitle.toFilename "-Anki_deck.txt" glossaryTitle
+            GlossaryTitle.toFilename "-Anki_deck.txt" title
 
         separatorHeader : String
         separatorHeader =
@@ -155,7 +165,7 @@ download enableMathSupport glossaryTitle aboutSection glossaryItems =
 
         titleComment : String
         titleComment =
-            glossaryTitle |> GlossaryTitle.raw |> comment
+            title |> GlossaryTitle.raw |> comment
 
         aboutLinksComment : String
         aboutLinksComment =
@@ -169,7 +179,7 @@ download enableMathSupport glossaryTitle aboutSection glossaryItems =
 
         itemsString : String
         itemsString =
-            glossaryItems
+            items
                 |> GlossaryItems.orderedAlphabetically Nothing
                 |> List.map (Tuple.second >> itemToAnki enableMathSupport)
                 |> lines

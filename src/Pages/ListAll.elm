@@ -751,16 +751,9 @@ update msg model =
 
         DownloadAnki ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
-            , case model.common.glossary of
-                Ok glossary ->
-                    Export.Anki.download
-                        model.common.enableMathSupport
-                        (Glossary.title glossary)
-                        (Glossary.aboutSection glossary)
-                        (Glossary.items glossary)
-
-                _ ->
-                    Cmd.none
+            , model.common.glossary
+                |> Result.map (Export.Anki.download model.common.enableMathSupport)
+                |> Result.withDefault Cmd.none
             )
 
         DownloadJson ->
