@@ -13,6 +13,7 @@ import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
 import Data.Glossary as Glossary exposing (Glossary, aboutSection)
 import Data.GlossaryItem.Definition as Definition
+import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItems as GlossaryItems
@@ -68,6 +69,20 @@ itemToMarkdown glossaryItem =
                 |> List.map (Term.markdown >> bold)
                 |> String.join ("\\" ++ crlf)
 
+        tagsString : String
+        tagsString =
+            glossaryItem
+                |> GlossaryItemForHtml.allTags
+                |> List.map Tag.markdown
+                |> String.join ", "
+                |> (\str ->
+                        if not <| String.isEmpty str then
+                            "[Tags: " ++ str ++ "]"
+
+                        else
+                            ""
+                   )
+
         definitions =
             GlossaryItemForHtml.definition glossaryItem
                 |> Maybe.map List.singleton
@@ -100,7 +115,7 @@ itemToMarkdown glossaryItem =
                 |> String.join ", "
                 |> (++) relatedTermsPrefix
     in
-    [ termsString, definitionsString, relatedTermsString ]
+    [ termsString, tagsString, definitionsString, relatedTermsString ]
         |> paragraphs
 
 
