@@ -74,7 +74,7 @@ itemToMarkdown glossaryItem =
                 |> String.join ", "
                 |> (\str ->
                         if not <| String.isEmpty str then
-                            "[Tags: " ++ str ++ "]"
+                            "[" ++ I18n.tags ++ ": " ++ str ++ "]"
 
                         else
                             ""
