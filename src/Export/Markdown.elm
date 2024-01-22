@@ -15,6 +15,7 @@ import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItems as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
+import Data.TagDescription as TagDescription exposing (TagDescription)
 import Extras.HtmlTree
 import Extras.String
 import File.Download as Download
@@ -144,6 +145,30 @@ toString glossary =
                 |> List.map (link >> (++) "* ")
                 |> lines
 
+        tagsString : String
+        tagsString =
+            glossary
+                |> Glossary.items
+                |> GlossaryItems.tagsWithDescriptions
+                |> List.map
+                    (\( tag, tagDescription ) ->
+                        "* "
+                            ++ Tag.markdown tag
+                            ++ " "
+                            ++ Extras.String.emDash
+                            ++ " "
+                            ++ TagDescription.markdown tagDescription
+                    )
+                |> lines
+
+        tagsSection : String
+        tagsSection =
+            if String.isEmpty tagsString then
+                ""
+
+            else
+                lines [ "## Tags", "", tagsString ]
+
         itemsString : String
         itemsString =
             items
@@ -157,6 +182,8 @@ toString glossary =
             , aboutParagraphString
             , aboutLinksString
             , horizontalRule
+            , tagsSection
+            , "## Items"
             , itemsString
             ]
                 |> paragraphs
