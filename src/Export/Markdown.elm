@@ -1,11 +1,8 @@
-module Export.Markdown exposing
-    ( download
-    , toString
-    )
+module Export.Markdown exposing (toString, download)
 
 {-| Functionality for exporting as Markdown.
 
-@docs download
+@docs toString, download
 
 -}
 
@@ -119,6 +116,8 @@ itemToMarkdown glossaryItem =
         |> paragraphs
 
 
+{-| Export a glossary to Markdown format.
+-}
 toString : Glossary -> String
 toString glossary =
     let
