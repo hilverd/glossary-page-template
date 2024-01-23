@@ -14,6 +14,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 
 - Include tags in Markdown export.
+- Add experimental `worker.min.js` script to releases.
 
 ### Changed
 ### Fixed

@@ -23,6 +23,7 @@ jobs:
       - run: pnpm exec elm-verify-examples
       - run: pnpm exec elm-test
       - run: pnpm run build
+      - run: pnpm run build:worker
       - name: Prepare release
         run: ./bin/prepare-release
       - name: Release

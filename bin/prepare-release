@@ -24,6 +24,8 @@ release_tag="$(git describe --tags)"
 release_tag_without_v=$(echo "$release_tag" | sed 's/^v//')
 major=$(echo "$release_tag_without_v" | sed 's/^\([^\.]*\)\.\([^\.]*\)\.\(.*\)$/\1/')
 
+mv worker.umd.js worker.min.js
+
 # Use release number in static asset file names instead of hash
 mv assets/glossary-*.js "glossary-$release_tag".min.js
 mv assets/glossary-*.css "glossary-$release_tag".min.css
@@ -51,13 +53,21 @@ mkdir -p release
 cat > dist/README.md <<EOF
 # Glossary Page Template
 
-This page includes a web interface for making changes that are saved back to the HTML file itself. This is meant to be used _locally_ by a _single user_ at a time and works best if the file is kept under version control.
+This page includes a web interface for making changes that are saved back to the HTML file itself.
+This is meant to be used _locally_ by a _single user_ at a time and works best if the file is kept under version control.
 
 If you're on macOS, Linux, or Cygwin and have Node.js installed, then just run
 
 sed -n '/START OF editor.js\$/,\$p' glossary.html | node
 
 You can hide these instructions altogether by setting the \`data-enable-help-for-making-changes\` attribute to \`false\` on the <div id="glossary-page-container"> element.
+
+## worker.min.js (experimental)
+
+The script worker.min.js provides a way for a Node.js-based backend to perform operations on glossaries.
+This is an experimental feature and may be removed in the future.
+See https://package.elm-lang.org/packages/elm/core/latest/Platform#worker for more information.
+
 EOF
 
 mv dist/glossary-with-cdn-links.html release/glossary.html
