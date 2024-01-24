@@ -12,13 +12,16 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
-
-- Include tags in Markdown export.
-- Add experimental `worker.min.js` script to releases.
-
 ### Changed
 ### Fixed
 ### Removed
+
+## [4.4.0] - 2024-01-24
+
+### Added
+
+- Include tags in Markdown export.
+- Add experimental `worker.min.js` script to releases.
 
 ## [4.3.0] - 2024-01-08
 
@@ -666,7 +669,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.3.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.4.0...HEAD
+[4.4.0]: https://github.com/hilverd/glossary-page-template/compare/v4.3.0...v4.4.0
 [4.3.0]: https://github.com/hilverd/glossary-page-template/compare/v4.2.0...v4.3.0
 [4.2.0]: https://github.com/hilverd/glossary-page-template/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/hilverd/glossary-page-template/compare/v4.0.0...v4.1.0
