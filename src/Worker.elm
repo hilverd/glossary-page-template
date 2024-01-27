@@ -10,11 +10,12 @@ import Platform exposing (worker)
 
 
 type alias Model =
-    Int
+    ()
 
 
 type Msg
     = ApplyGlossaryChanges RawApplyGlossaryChangesRequest
+    | ConvertGlossaryToHtml RawConvertGlossaryToHtmlRequest
 
 
 type alias Resolve =
@@ -38,11 +39,27 @@ type alias ApplyGlossaryChangesRequest =
     }
 
 
+type alias RawConvertGlossaryToHtmlRequest =
+    { glossary : D.Value
+    , resolve : D.Value
+    }
+
+
+type alias ConvertGlossaryToHtmlRequest =
+    { glossary : Glossary
+    }
+
+
 main : Program () Model Msg
 main =
     worker
-        { init = \() -> ( 0, Cmd.none )
-        , subscriptions = \_ -> applyGlossaryChanges ApplyGlossaryChanges
+        { init = \() -> ( (), Cmd.none )
+        , subscriptions =
+            \_ ->
+                Sub.batch
+                    [ applyGlossaryChanges ApplyGlossaryChanges
+                    , convertGlossaryToHtml ConvertGlossaryToHtml
+                    ]
         , update = update
         }
 
@@ -53,8 +70,14 @@ port applyGlossaryChanges : (RawApplyGlossaryChangesRequest -> msg) -> Sub msg
 port resolveApplyGlossaryChanges : ( Resolve, E.Value ) -> Cmd msg
 
 
+port convertGlossaryToHtml : (RawConvertGlossaryToHtmlRequest -> msg) -> Sub msg
+
+
+port resolveConvertGlossaryToHtml : ( Resolve, E.Value ) -> Cmd msg
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg count =
+update msg () =
     case msg of
         ApplyGlossaryChanges rawRequest ->
             case decodeApplyGlossaryChangesRequest rawRequest of
@@ -72,18 +95,43 @@ update msg count =
                         applyChangesResult =
                             Glossary.applyChanges changelist request.glossary
                     in
-                    ( count
+                    ( ()
                     , resolveApplyGlossaryChanges
                         ( rawRequest.resolve
                         , encodeApplyChangesResultToValue applyChangesResult
                         )
                     )
 
-                Err _ ->
-                    ( count
+                Err err ->
+                    ( ()
                     , resolveApplyGlossaryChanges
                         ( rawRequest.resolve
-                        , E.int 500
+                        , E.object [ ( "errorDecodingRequest", err |> D.errorToString |> E.string ) ]
+                        )
+                    )
+
+        ConvertGlossaryToHtml rawRequest ->
+            case decodeConvertGlossaryToHtmlRequest rawRequest of
+                Ok request ->
+                    let
+                        html : String
+                        html =
+                            request.glossary
+                                |> Glossary.toHtmlTree
+                                |> HtmlTree.toHtml
+                    in
+                    ( ()
+                    , resolveConvertGlossaryToHtml
+                        ( rawRequest.resolve
+                        , E.object [ ( "html", E.string html ) ]
+                        )
+                    )
+
+                Err err ->
+                    ( ()
+                    , resolveConvertGlossaryToHtml
+                        ( rawRequest.resolve
+                        , E.object [ ( "errorDecodingRequest", err |> D.errorToString |> E.string ) ]
                         )
                     )
 
@@ -121,7 +169,14 @@ encodeApplyChangesResultToValue result =
                 ]
 
         Glossary.VersionsDoNotMatch ->
-            E.string "VersionsDoNotMatch"
+            E.string "versionsDoNotMatch"
 
         Glossary.LogicalErrorWhenApplyingChanges err ->
-            E.string ("LogicalErrorWhenApplyingChanges: " ++ err)
+            E.object [ ( "logicalError", E.string err ) ]
+
+
+decodeConvertGlossaryToHtmlRequest : RawConvertGlossaryToHtmlRequest -> Result D.Error ConvertGlossaryToHtmlRequest
+decodeConvertGlossaryToHtmlRequest rawRequest =
+    Result.map
+        (\glossary -> { glossary = glossary })
+        (Codec.decodeValue Glossary.codec rawRequest.glossary)

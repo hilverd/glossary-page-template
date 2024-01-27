@@ -12,6 +12,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Add function for converting glossary JSON to HTML to experimental `worker.min.js` script.
+
 ### Changed
 ### Fixed
 ### Removed
