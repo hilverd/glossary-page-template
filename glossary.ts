@@ -1,7 +1,7 @@
 import '@webcomponents/custom-elements';
 import './glossary.css';
 import { Elm } from './src/ApplicationShell.elm';
-import { normaliseWhitespace, untilAsync, waitForElement } from './ts/utilities.ts';
+import { normaliseWhitespace, scrollFragmentIdentifierIntoView, untilAsync, waitForElement } from './ts/utilities.ts';
 
 const katexIsAvailable: boolean = typeof katex != "undefined";
 
@@ -342,5 +342,7 @@ if (containerElement) {
                 }
             );
         }
+
+        scrollFragmentIdentifierIntoView();
     });
 }

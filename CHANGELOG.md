@@ -16,7 +16,11 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Add function for converting glossary JSON to HTML to experimental `worker.min.js` script.
 
 ### Changed
+
 ### Fixed
+
+- Attempt to make jumping to fragment identifier more reliable on initial page load.
+
 ### Removed
 
 ## [4.4.0] - 2024-01-24

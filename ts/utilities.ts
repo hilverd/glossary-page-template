@@ -40,3 +40,15 @@ export function waitForElement(elementId: string): Promise<HTMLElement> {
 export function normaliseWhitespace(s: string): string {
     return s.replace(/\s+/g, ' ').trim();
 }
+
+export function scrollFragmentIdentifierIntoView() {
+    const hash = window.location.hash;
+
+    if (hash !== '') {
+        const elementId = decodeURIComponent(hash.slice(1));
+        const elem = document.getElementById(elementId);
+
+        if (elem)
+            elem.scrollIntoView({ "block": "nearest" });
+    }
+}
