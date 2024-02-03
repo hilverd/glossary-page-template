@@ -10,13 +10,13 @@ import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
 import Data.Glossary as Glossary exposing (Glossary, aboutSection)
 import Data.GlossaryItem.Definition as Definition
-import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItems as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
-import Data.TagDescription as TagDescription exposing (TagDescription)
+import Data.TagDescription as TagDescription
 import Extras.HtmlTree
 import Extras.String
 import File.Download as Download

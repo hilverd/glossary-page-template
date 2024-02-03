@@ -8,15 +8,14 @@ module Export.Anki exposing (download)
 
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
-import Data.AboutSection exposing (AboutSection)
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
-import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
+import Data.GlossaryItems as GlossaryItems
+import Data.GlossaryTitle as GlossaryTitle
 import Extras.HtmlTree
 import File.Download as Download
 import Internationalisation as I18n

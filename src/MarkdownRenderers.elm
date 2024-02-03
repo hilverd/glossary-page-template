@@ -536,7 +536,7 @@ textRenderer enableMathSupport =
             else
                 "`" ++ content ++ "`"
     , link =
-        \{ title, destination } children ->
+        \{ destination } children ->
             -- TODO: handle titles, see https://github.github.com/gfm/#example-494
             "[" ++ escape "]" (escape ")" (String.concat children)) ++ "](" ++ destination ++ ")"
     , image =
@@ -621,7 +621,7 @@ inlineTextRenderer enableMathSupport =
         escape string =
             String.replace string ("\\" ++ string)
     in
-    { heading = \{ level, rawText, children } -> ""
+    { heading = \_ -> ""
     , paragraph = String.concat
     , hardLineBreak = ""
     , blockQuote = always ""
@@ -642,7 +642,7 @@ inlineTextRenderer enableMathSupport =
             else
                 "`" ++ content ++ "`"
     , link =
-        \{ title, destination } children ->
+        \{ destination } children ->
             -- TODO: handle titles, see https://github.github.com/gfm/#example-494
             "[" ++ escape "]" (escape ")" (String.concat children)) ++ "](" ++ destination ++ ")"
     , image = always ""

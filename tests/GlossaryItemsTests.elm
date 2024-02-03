@@ -1,7 +1,7 @@
 module GlossaryItemsTests exposing (suite)
 
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
-import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItem.TermId as TermId

@@ -19,7 +19,7 @@ import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
-import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItem.Term as Term
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId as GlossaryItemId
