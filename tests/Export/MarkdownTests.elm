@@ -103,11 +103,6 @@ crlf =
     "\u{000D}\n"
 
 
-lines : List String -> String
-lines =
-    String.join crlf
-
-
 suite : Test
 suite =
     describe "The Export.Markdown module"
@@ -115,35 +110,36 @@ suite =
             \_ ->
                 let
                     expected =
-                        [ "# Example Glossary"
-                        , ""
-                        , "An example glossary."
-                        , ""
-                        , "---------"
-                        , ""
-                        , "## Tags"
-                        , ""
-                        , "* Computer Science — These are items about computer science."
-                        , "* Finance — These are items about finance."
-                        , ""
-                        , "## Items"
-                        , ""
-                        , "**Default (Computer Science)**\\"
-                        , "**Preset**\\"
-                        , "**Factory preset**"
-                        , ""
-                        , "[Tags: Computer Science]"
-                        , ""
-                        , "The preexisting value of a user-configurable setting."
-                        , ""
-                        , "**Interest rate**\\"
-                        , "**IR**"
-                        , ""
-                        , "[Tags: Finance]"
-                        , ""
-                        , "The amount of interest due per period."
-                        ]
-                            |> lines
+                        """
+# Example Glossary
+
+An example glossary.
+
+---------
+
+## Tags
+
+* Computer Science — These are items about computer science.
+* Finance — These are items about finance.
+
+## Items
+
+**Default (Computer Science)**\\
+**Preset**\\
+**Factory preset**
+
+[Tags: Computer Science]
+
+The preexisting value of a user-configurable setting.
+
+**Interest rate**\\
+**IR**
+
+[Tags: Finance]
+
+The amount of interest due per period."""
+                            |> String.trim
+                            |> String.replace "\n" crlf
                 in
                 glossary
                     |> Export.Markdown.toString
