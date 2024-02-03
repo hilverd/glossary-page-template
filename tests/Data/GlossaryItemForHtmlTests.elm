@@ -1,4 +1,4 @@
-module GlossaryItemForHtmlTests exposing (suite)
+module Data.GlossaryItemForHtmlTests exposing (suite)
 
 import Codec
 import Data.GlossaryItem.Definition as Definition
@@ -28,7 +28,7 @@ defaultComputerScienceItem =
 
 suite : Test
 suite =
-    describe "The GlossaryItemForHtml module"
+    describe "The Data.GlossaryItemForHtml module"
         [ test "can encode and decode to and from JSON values" <|
             \_ ->
                 defaultComputerScienceItem

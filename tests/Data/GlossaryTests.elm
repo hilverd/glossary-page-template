@@ -1,4 +1,4 @@
-module GlossaryTests exposing (suite)
+module Data.GlossaryTests exposing (suite)
 
 import Codec
 import Data.AboutParagraph as AboutParagraph
@@ -174,7 +174,7 @@ glossary =
 
 suite : Test
 suite =
-    describe "The Glossary module"
+    describe "The Data.Glossary module"
         [ test "can encode and decode to and from JSON values" <|
             \_ ->
                 glossary

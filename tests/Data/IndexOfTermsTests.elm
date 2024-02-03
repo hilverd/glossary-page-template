@@ -1,4 +1,4 @@
-module IndexOfTermsTests exposing (suite)
+module Data.IndexOfTermsTests exposing (suite)
 
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
@@ -123,7 +123,7 @@ glossaryItems =
 
 suite : Test
 suite =
-    describe "The IndexOfTerms module"
+    describe "The Data.IndexOfTerms module"
         [ test "sorts terms alphabetically by their first alphabetic character (stripped of any diacritical marks)" <|
             \_ ->
                 glossaryItems

@@ -1,4 +1,4 @@
-module ExportMarkdownTests exposing (suite)
+module Export.MarkdownTests exposing (suite)
 
 import Data.AboutParagraph as AboutParagraph
 import Data.CardWidth as CardWidth

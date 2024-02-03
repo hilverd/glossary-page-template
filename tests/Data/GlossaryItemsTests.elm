@@ -1,4 +1,4 @@
-module GlossaryItemsTests exposing (suite)
+module Data.GlossaryItemsTests exposing (suite)
 
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
@@ -205,7 +205,7 @@ glossaryItems =
 
 suite : Test
 suite =
-    describe "The GlossaryItems module"
+    describe "The Data.GlossaryItems module"
         [ test "inserts tags" <|
             \_ ->
                 let
