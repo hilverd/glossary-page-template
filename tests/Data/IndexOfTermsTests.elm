@@ -15,108 +15,31 @@ termFromBody body =
     Term.fromMarkdown body False
 
 
+glossaryItemForHtml : String -> GlossaryItemForHtml
+glossaryItemForHtml body =
+    GlossaryItemForHtml.create
+        (termFromBody body)
+        []
+        Nothing
+        []
+        (Just (Definition.fromMarkdown body))
+        []
+        False
+        Nothing
+        Nothing
+        Nothing
+
+
 glossaryItems : GlossaryItems
 glossaryItems =
-    let
-        one : GlossaryItemForHtml
-        one =
-            GlossaryItemForHtml.create
-                (termFromBody "Óne")
-                []
-                Nothing
-                []
-                (Just (Definition.fromMarkdown "Óne"))
-                []
-                False
-                Nothing
-                Nothing
-                Nothing
-
-        two : GlossaryItemForHtml
-        two =
-            GlossaryItemForHtml.create
-                (termFromBody "Two")
-                []
-                Nothing
-                []
-                (Just (Definition.fromMarkdown "Two"))
-                []
-                False
-                Nothing
-                Nothing
-                Nothing
-
-        thirtyFourty : GlossaryItemForHtml
-        thirtyFourty =
-            GlossaryItemForHtml.create
-                (termFromBody "3040")
-                []
-                Nothing
-                []
-                (Just (Definition.fromMarkdown "3040"))
-                []
-                False
-                Nothing
-                Nothing
-                Nothing
-
-        three : GlossaryItemForHtml
-        three =
-            GlossaryItemForHtml.create
-                (termFromBody "3Three")
-                []
-                Nothing
-                []
-                (Just (Definition.fromMarkdown "3Three"))
-                []
-                False
-                Nothing
-                Nothing
-                Nothing
-
-        doubleOhSeven : GlossaryItemForHtml
-        doubleOhSeven =
-            GlossaryItemForHtml.create
-                (termFromBody "007")
-                []
-                Nothing
-                []
-                (Just (Definition.fromMarkdown "007"))
-                []
-                False
-                Nothing
-                Nothing
-                Nothing
-
-        omega : GlossaryItemForHtml
-        omega =
-            GlossaryItemForHtml.create
-                (termFromBody "Ω")
-                []
-                Nothing
-                []
-                (Just (Definition.fromMarkdown "Ω"))
-                []
-                False
-                Nothing
-                Nothing
-                Nothing
-
-        future : GlossaryItemForHtml
-        future =
-            GlossaryItemForHtml.create
-                (termFromBody "_future_")
-                []
-                Nothing
-                []
-                (Just (Definition.fromMarkdown "_future_"))
-                []
-                False
-                Nothing
-                Nothing
-                Nothing
-    in
-    [ doubleOhSeven, one, two, thirtyFourty, three, omega, future ]
+    [ glossaryItemForHtml "007"
+    , glossaryItemForHtml "Óne"
+    , glossaryItemForHtml "Two"
+    , glossaryItemForHtml "3040"
+    , glossaryItemForHtml "3Three"
+    , glossaryItemForHtml "Ω"
+    , glossaryItemForHtml "_future_"
+    ]
         |> GlossaryItems.fromList []
         |> Result.withDefault GlossaryItems.empty
 
@@ -126,15 +49,19 @@ suite =
     describe "The Data.IndexOfTerms module"
         [ test "sorts terms alphabetically by their first alphabetic character (stripped of any diacritical marks)" <|
             \_ ->
+                let
+                    preferredTerm body =
+                        IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody body
+                in
                 glossaryItems
                     |> IndexOfTerms.fromGlossaryItems Nothing
                     |> IndexOfTerms.termGroups
                     |> Expect.equal
                         [ { label = "0–9"
                           , entries =
-                                [ IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody "007"
-                                , IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody "3040"
-                                , IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody "3Three"
+                                [ preferredTerm "007"
+                                , preferredTerm "3040"
+                                , preferredTerm "3Three"
                                 ]
                           }
                         , { label = "A", entries = [] }
@@ -142,7 +69,7 @@ suite =
                         , { label = "C", entries = [] }
                         , { label = "D", entries = [] }
                         , { label = "E", entries = [] }
-                        , { label = "F", entries = [ IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody "_future_" ] }
+                        , { label = "F", entries = [ preferredTerm "_future_" ] }
                         , { label = "G", entries = [] }
                         , { label = "H", entries = [] }
                         , { label = "I", entries = [] }
@@ -151,19 +78,19 @@ suite =
                         , { label = "L", entries = [] }
                         , { label = "M", entries = [] }
                         , { label = "N", entries = [] }
-                        , { label = "O", entries = [ IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody "Óne" ] }
+                        , { label = "O", entries = [ preferredTerm "Óne" ] }
                         , { label = "P", entries = [] }
                         , { label = "Q", entries = [] }
                         , { label = "R", entries = [] }
                         , { label = "S", entries = [] }
-                        , { label = "T", entries = [ IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody "Two" ] }
+                        , { label = "T", entries = [ preferredTerm "Two" ] }
                         , { label = "U", entries = [] }
                         , { label = "V", entries = [] }
                         , { label = "W", entries = [] }
                         , { label = "X", entries = [] }
                         , { label = "Y", entries = [] }
                         , { label = "Z", entries = [] }
-                        , { label = "…", entries = [ IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody "Ω" ] }
+                        , { label = "…", entries = [ preferredTerm "Ω" ] }
                         ]
         , test "doesn't include 0–9 and ellipsis if not needed" <|
             \_ ->
