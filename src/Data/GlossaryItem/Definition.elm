@@ -3,7 +3,7 @@ module Data.GlossaryItem.Definition exposing (Definition, fromMarkdown, raw, mar
 {-| A definition for a glossary item.
 
 
-# Definition
+# Definitions
 
 @docs Definition, fromMarkdown, raw, markdown, view, viewInline, htmlTreeForAnki
 

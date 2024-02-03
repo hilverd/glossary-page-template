@@ -1,6 +1,7 @@
 module IndexOfTermsTests exposing (suite)
 
 import Data.GlossaryItem.Definition as Definition
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -131,9 +132,9 @@ suite =
                     |> Expect.equal
                         [ { label = "0–9"
                           , entries =
-                                [ IndexOfTerms.PreferredTerm <| termFromBody "007"
-                                , IndexOfTerms.PreferredTerm <| termFromBody "3040"
-                                , IndexOfTerms.PreferredTerm <| termFromBody "3Three"
+                                [ IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody "007"
+                                , IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody "3040"
+                                , IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody "3Three"
                                 ]
                           }
                         , { label = "A", entries = [] }
@@ -141,7 +142,7 @@ suite =
                         , { label = "C", entries = [] }
                         , { label = "D", entries = [] }
                         , { label = "E", entries = [] }
-                        , { label = "F", entries = [ IndexOfTerms.PreferredTerm <| termFromBody "_future_" ] }
+                        , { label = "F", entries = [ IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody "_future_" ] }
                         , { label = "G", entries = [] }
                         , { label = "H", entries = [] }
                         , { label = "I", entries = [] }
@@ -150,19 +151,19 @@ suite =
                         , { label = "L", entries = [] }
                         , { label = "M", entries = [] }
                         , { label = "N", entries = [] }
-                        , { label = "O", entries = [ IndexOfTerms.PreferredTerm <| termFromBody "Óne" ] }
+                        , { label = "O", entries = [ IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody "Óne" ] }
                         , { label = "P", entries = [] }
                         , { label = "Q", entries = [] }
                         , { label = "R", entries = [] }
                         , { label = "S", entries = [] }
-                        , { label = "T", entries = [ IndexOfTerms.PreferredTerm <| termFromBody "Two" ] }
+                        , { label = "T", entries = [ IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody "Two" ] }
                         , { label = "U", entries = [] }
                         , { label = "V", entries = [] }
                         , { label = "W", entries = [] }
                         , { label = "X", entries = [] }
                         , { label = "Y", entries = [] }
                         , { label = "Z", entries = [] }
-                        , { label = "…", entries = [ IndexOfTerms.PreferredTerm <| termFromBody "Ω" ] }
+                        , { label = "…", entries = [ IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody "Ω" ] }
                         ]
         , test "doesn't include 0–9 and ellipsis if not needed" <|
             \_ ->

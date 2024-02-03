@@ -30,6 +30,7 @@ module GlossaryItemForm exposing
 
 import Array exposing (Array)
 import Data.GlossaryItem.Definition as Definition
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -63,9 +64,9 @@ type GlossaryItemForm
         , disambiguationTagId : Maybe TagId
         , definitionField : DefinitionField
         , relatedTermFields : Array RelatedTermField
-        , termsOutside : List Term
-        , preferredTermsOutside : List Term
-        , preferredTermsOfItemsListingThisItemAsRelated : List Term
+        , termsOutside : List DisambiguatedTerm -- TODO this appears to be the same as preferredTermsOutside
+        , preferredTermsOutside : List DisambiguatedTerm
+        , preferredTermsOfItemsListingThisItemAsRelated : List DisambiguatedTerm
         , needsUpdating : Bool
         , lastUpdatedDate : String
         }
@@ -122,21 +123,21 @@ relatedTermFields glossaryItemForm =
             form.relatedTermFields
 
 
-termsOutside : GlossaryItemForm -> List Term
+termsOutside : GlossaryItemForm -> List DisambiguatedTerm
 termsOutside glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             form.termsOutside
 
 
-preferredTermsOutside : GlossaryItemForm -> List Term
+preferredTermsOutside : GlossaryItemForm -> List DisambiguatedTerm
 preferredTermsOutside glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             form.preferredTermsOutside
 
 
-preferredTermsOfItemsListingThisItemAsRelated : GlossaryItemForm -> List Term
+preferredTermsOfItemsListingThisItemAsRelated : GlossaryItemForm -> List DisambiguatedTerm
 preferredTermsOfItemsListingThisItemAsRelated glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
@@ -166,7 +167,10 @@ validate form =
 
         termIdsOutsideSet : Set String
         termIdsOutsideSet =
-            form |> termsOutside |> List.map (Term.id >> TermId.toString) |> Set.fromList
+            form
+                |> termsOutside
+                |> List.map (DisambiguatedTerm.toTerm >> Term.id >> TermId.toString)
+                |> Set.fromList
 
         termIdsInsideForm : Dict String Int
         termIdsInsideForm =
@@ -192,7 +196,7 @@ validate form =
                 term =
                     Term.fromMarkdown body False
 
-                disambiguatedTerm : Term
+                disambiguatedTerm : DisambiguatedTerm
                 disambiguatedTerm =
                     if isPreferredTerm then
                         form
@@ -211,12 +215,12 @@ validate form =
                                             )
                                         |> List.head
                                         |> Maybe.map (\disambiguationTag -> GlossaryItemForHtml.disambiguatedTerm disambiguationTag term)
-                                        |> Maybe.withDefault term
+                                        |> Maybe.withDefault (DisambiguatedTerm.fromTerm term)
                                 )
-                            |> Maybe.withDefault term
+                            |> Maybe.withDefault (DisambiguatedTerm.fromTerm term)
 
                     else
-                        term
+                        DisambiguatedTerm.fromTerm term
             in
             termField
                 |> TermField.setValidationError
@@ -228,6 +232,7 @@ validate form =
                             termId : String
                             termId =
                                 disambiguatedTerm
+                                    |> DisambiguatedTerm.toTerm
                                     |> Term.id
                                     |> TermId.toString
                         in
@@ -299,7 +304,7 @@ hasValidationErrors form =
         || (form |> relatedTermFields |> hasErrors .validationError)
 
 
-empty : List Term -> List Term -> List ( TagId, Tag ) -> Maybe TagId -> List Term -> GlossaryItemForm
+empty : List DisambiguatedTerm -> List DisambiguatedTerm -> List ( TagId, Tag ) -> Maybe TagId -> List DisambiguatedTerm -> GlossaryItemForm
 empty withTermsOutside withPreferredTermsOutside allTags filterByTag preferredTermsOfItemsListingThisItemAsRelated_ =
     GlossaryItemForm
         { preferredTermField = TermField.empty
@@ -330,11 +335,11 @@ emptyRelatedTermField =
 
 
 fromGlossaryItemForHtml :
-    List Term
-    -> List Term
+    List DisambiguatedTerm
+    -> List DisambiguatedTerm
     -> List ( TagId, Tag )
-    -> List Term
-    -> List Term
+    -> List DisambiguatedTerm
+    -> List DisambiguatedTerm
     -> Maybe TagId
     -> GlossaryItemForHtml
     -> GlossaryItemForm
@@ -370,19 +375,33 @@ fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTe
                 |> List.map (Term.id >> TermId.toString)
                 |> Set.fromList
 
-        termsOutside1 : List Term
+        termsOutside1 : List DisambiguatedTerm
         termsOutside1 =
             List.filter
                 (\existingTerm ->
-                    not <| Set.member (Term.id existingTerm |> TermId.toString) termIdsForItem
+                    not <|
+                        Set.member
+                            (existingTerm
+                                |> DisambiguatedTerm.toTerm
+                                |> Term.id
+                                |> TermId.toString
+                            )
+                            termIdsForItem
                 )
                 existingTerms
 
-        preferredTermsOutside1 : List Term
+        preferredTermsOutside1 : List DisambiguatedTerm
         preferredTermsOutside1 =
             List.filter
                 (\existingTerm ->
-                    not <| Set.member (Term.id existingTerm |> TermId.toString) termIdsForItem
+                    not <|
+                        Set.member
+                            (existingTerm
+                                |> DisambiguatedTerm.toTerm
+                                |> Term.id
+                                |> TermId.toString
+                            )
+                            termIdsForItem
                 )
                 existingPreferredTerms
 
@@ -411,7 +430,7 @@ fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTe
         , definitionField = definitionField_
         , relatedTermFields =
             relatedTerms
-                |> List.map (\term -> RelatedTermField (Just <| Term.id term) Nothing)
+                |> List.map (\term -> RelatedTermField (Just <| Term.id <| DisambiguatedTerm.toTerm term) Nothing)
                 |> Array.fromList
         , termsOutside = termsOutside1
         , preferredTermsOutside = preferredTermsOutside1
@@ -488,7 +507,7 @@ toGlossaryItem glossaryItems form dateTime =
                    )
                 |> Maybe.map Definition.fromMarkdown
 
-        relatedTerms : List Term
+        relatedTerms : List DisambiguatedTerm
         relatedTerms =
             form
                 |> relatedTermFields
@@ -815,7 +834,7 @@ moveRelatedTermDown index glossaryItemForm =
                 |> validate
 
 
-suggestRelatedTerms : GlossaryItemForm -> List Term
+suggestRelatedTerms : GlossaryItemForm -> List DisambiguatedTerm
 suggestRelatedTerms glossaryItemForm =
     let
         relatedTermIdsAlreadyInForm : Set String
@@ -830,12 +849,12 @@ suggestRelatedTerms glossaryItemForm =
                     )
                     Set.empty
 
-        candidateTerms : List Term
+        candidateTerms : List DisambiguatedTerm
         candidateTerms =
             glossaryItemForm
                 |> preferredTermsOutside
                 |> List.filter
-                    (\term -> not <| Set.member (Term.id term |> TermId.toString) relatedTermIdsAlreadyInForm)
+                    (\term -> not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.id |> TermId.toString) relatedTermIdsAlreadyInForm)
 
         definitionFieldBody : String
         definitionFieldBody =
@@ -848,7 +867,7 @@ suggestRelatedTerms glossaryItemForm =
         preferredTermIdsOfItemsListingThisItemAsRelated =
             glossaryItemForm
                 |> preferredTermsOfItemsListingThisItemAsRelated
-                |> List.map (Term.id >> TermId.toString)
+                |> List.map (DisambiguatedTerm.toTerm >> Term.id >> TermId.toString)
                 |> Set.fromList
     in
     candidateTerms
@@ -857,11 +876,11 @@ suggestRelatedTerms glossaryItemForm =
                 let
                     candidateTermAsWord : Regex.Regex
                     candidateTermAsWord =
-                        ("(\\b| )" ++ Extras.Regex.escapeStringForUseInRegex (String.toLower (Term.raw candidateTerm)) ++ "(\\b| )")
+                        ("(\\b| )" ++ Extras.Regex.escapeStringForUseInRegex (String.toLower (candidateTerm |> DisambiguatedTerm.toTerm |> Term.raw)) ++ "(\\b| )")
                             |> Regex.fromString
                             |> Maybe.withDefault Regex.never
                 in
-                Set.member (Term.id candidateTerm |> TermId.toString) preferredTermIdsOfItemsListingThisItemAsRelated
+                Set.member (candidateTerm |> DisambiguatedTerm.toTerm |> Term.id |> TermId.toString) preferredTermIdsOfItemsListingThisItemAsRelated
                     || Regex.contains candidateTermAsWord definitionFieldBody
             )
 

@@ -5,6 +5,7 @@ import Data.AboutParagraph as AboutParagraph
 import Data.CardWidth as CardWidth
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
@@ -80,7 +81,7 @@ defaultFinanceItem =
         (Just financeTag)
         []
         (Just defaultFinanceDefinition)
-        [ Term.fromMarkdown "Loan" False ]
+        [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Loan" False ]
         False
         (Just "2023-10-30T08:25:24.765Z")
         Nothing
@@ -120,7 +121,7 @@ interestRateItem =
         Nothing
         [ financeTag ]
         (Just interestRateDefinition)
-        [ Term.fromMarkdown "Loan" False ]
+        [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Loan" False ]
         False
         (Just "2023-10-30T08:25:30.335Z")
         Nothing
@@ -140,7 +141,7 @@ loanItem =
         Nothing
         [ financeTag ]
         (Just loanDefinition)
-        [ Term.fromMarkdown "Interest rate" False ]
+        [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate" False ]
         False
         (Just "2023-10-30T08:26:18.523Z")
         Nothing

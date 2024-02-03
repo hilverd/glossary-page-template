@@ -1,6 +1,7 @@
 module GlossaryItemsTests exposing (suite)
 
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItem.TermId as TermId
@@ -89,7 +90,7 @@ defaultFinanceItem =
         (Just financeTag)
         []
         (Just defaultFinanceDefinition)
-        [ Term.fromMarkdown "Loan" False ]
+        [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Loan" False ]
         False
         (Just "2023-10-30T08:25:24.765Z")
         Nothing
@@ -129,7 +130,7 @@ interestRateItem =
         Nothing
         [ financeTag ]
         (Just interestRateDefinition)
-        [ Term.fromMarkdown "Loan" False ]
+        [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Loan" False ]
         False
         (Just "2023-10-30T08:25:30.335Z")
         Nothing
@@ -144,7 +145,7 @@ updatedInterestRateItem =
         Nothing
         [ financeTag ]
         (Just interestRateDefinition)
-        [ Term.fromMarkdown "Loan" False ]
+        [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Loan" False ]
         False
         (Just "2023-10-30T08:25:30.335Z")
         Nothing
@@ -164,7 +165,7 @@ loanItem =
         Nothing
         [ financeTag ]
         (Just loanDefinition)
-        [ Term.fromMarkdown "Interest rate" False ]
+        [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate" False ]
         False
         (Just "2023-10-30T08:26:18.523Z")
         Nothing
@@ -179,7 +180,7 @@ updatedLoanItem =
         Nothing
         [ financeTag ]
         (Just loanDefinition)
-        [ Term.fromMarkdown "Interest rate updated" False ]
+        [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate updated" False ]
         False
         (Just "2023-10-30T08:26:18.523Z")
         Nothing
@@ -239,7 +240,7 @@ suite =
                     |> Result.map
                         (List.map
                             (\glossaryItemForHtml ->
-                                ( GlossaryItemForHtml.disambiguatedPreferredTerm glossaryItemForHtml |> Term.raw
+                                ( GlossaryItemForHtml.disambiguatedPreferredTerm glossaryItemForHtml |> DisambiguatedTerm.toTerm |> Term.raw
                                 , GlossaryItemForHtml.allTags glossaryItemForHtml |> List.map Tag.raw
                                 )
                             )
@@ -318,7 +319,7 @@ suite =
                                     Nothing
                                     []
                                     (Just defaultFinanceDefinition)
-                                    [ Term.fromMarkdown "Loan" False ]
+                                    [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Loan" False ]
                                     False
                                     (Just "2023-10-30T08:25:24.765Z")
                                     Nothing
@@ -472,26 +473,26 @@ suite =
             \_ ->
                 glossaryItems
                     |> GlossaryItems.disambiguatedPreferredTerm (GlossaryItemId.create 0)
-                    |> Expect.equal (Just <| Term.fromMarkdown "Default (Computer Science)" False)
+                    |> Expect.equal (Just <| DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Computer Science)" False)
         , test "returns all disambiguated preferred terms" <|
             \_ ->
                 glossaryItems
                     |> GlossaryItems.disambiguatedPreferredTerms Nothing
                     |> Expect.equal
-                        [ Term.fromMarkdown "Default (Computer Science)" False
-                        , Term.fromMarkdown "Default (Finance)" False
-                        , Term.fromMarkdown "Information retrieval" False
-                        , Term.fromMarkdown "Interest rate" False
-                        , Term.fromMarkdown "Loan" False
+                        [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Computer Science)" False
+                        , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False
+                        , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Information retrieval" False
+                        , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate" False
+                        , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Loan" False
                         ]
         , test "returns all disambiguated preferred terms with tag filter applied" <|
             \_ ->
                 glossaryItems
                     |> GlossaryItems.disambiguatedPreferredTerms (Just <| TagId.create 1)
                     |> Expect.equal
-                        [ Term.fromMarkdown "Default (Finance)" False
-                        , Term.fromMarkdown "Interest rate" False
-                        , Term.fromMarkdown "Loan" False
+                        [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False
+                        , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate" False
+                        , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Loan" False
                         ]
         , test "looks up the ID of the item whose disambiguated preferred term has the given ID" <|
             \_ ->
@@ -502,26 +503,26 @@ suite =
             \_ ->
                 glossaryItems
                     |> GlossaryItems.disambiguatedPreferredTermFromId (TermId.fromString "Default_(Finance)")
-                    |> Expect.equal (Just <| Term.fromMarkdown "Default (Finance)" False)
+                    |> Expect.equal (Just <| DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False)
         , test "returns all of the disambiguated preferred terms which have a definition" <|
             \_ ->
                 glossaryItems
                     |> GlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions Nothing
                     |> Expect.equal
-                        [ Term.fromMarkdown "Default (Computer Science)" False
-                        , Term.fromMarkdown "Default (Finance)" False
-                        , Term.fromMarkdown "Information retrieval" False
-                        , Term.fromMarkdown "Interest rate" False
-                        , Term.fromMarkdown "Loan" False
+                        [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Computer Science)" False
+                        , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False
+                        , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Information retrieval" False
+                        , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate" False
+                        , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Loan" False
                         ]
         , test "returns all of the disambiguated preferred terms which have a definition with tag filter applied" <|
             \_ ->
                 glossaryItems
                     |> GlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions (Just <| TagId.create 1)
                     |> Expect.equal
-                        [ Term.fromMarkdown "Default (Finance)" False
-                        , Term.fromMarkdown "Interest rate" False
-                        , Term.fromMarkdown "Loan" False
+                        [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False
+                        , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate" False
+                        , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Loan" False
                         ]
         , test "returns the IDs of the items that list this item as a related one" <|
             \_ ->
@@ -540,22 +541,22 @@ suite =
             \_ ->
                 glossaryItems
                     |> GlossaryItems.disambiguatedPreferredTermFromId (TermId.fromString "Default_(Finance)")
-                    |> Expect.equal (Just <| Term.fromMarkdown "Default (Finance)" False)
+                    |> Expect.equal (Just <| DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False)
         , test "returns a list of pairs associating each alternative term with the disambiguated preferred terms that it appears together with" <|
             \_ ->
                 glossaryItems
                     |> GlossaryItems.disambiguatedPreferredTermsByAlternativeTerm Nothing
                     |> Expect.equal
                         [ ( Term.fromMarkdown "Preset" False
-                          , [ Term.fromMarkdown "Default (Computer Science)" False ]
+                          , [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Computer Science)" False ]
                           )
                         , ( Term.fromMarkdown "IR" True
-                          , [ Term.fromMarkdown "Interest rate" False
-                            , Term.fromMarkdown "Information retrieval" False
+                          , [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate" False
+                            , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Information retrieval" False
                             ]
                           )
                         , ( Term.fromMarkdown "Factory preset" False
-                          , [ Term.fromMarkdown "Default (Computer Science)" False ]
+                          , [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Computer Science)" False ]
                           )
                         ]
         , test "returns items in alphabetical order" <|
@@ -589,7 +590,7 @@ suite =
                             (Just computerScienceTag)
                             []
                             (Just defaultComputerScienceDefinition)
-                            [ Term.fromMarkdown "Default (Finance)" False ]
+                            [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False ]
                             False
                             (Just "2023-09-15T19:58:59.573Z")
                             Nothing

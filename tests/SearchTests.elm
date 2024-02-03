@@ -2,6 +2,7 @@ module SearchTests exposing (suite)
 
 import Components.SearchDialog as SearchDialog
 import Data.GlossaryItem.Definition as Definition
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -26,7 +27,7 @@ loadedGlossaryItems =
                 Nothing
                 []
                 (Just <| Definition.fromMarkdown "The term one")
-                [ Term.fromMarkdown "Second the term" False ]
+                [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Second the term" False ]
                 False
                 Nothing
                 Nothing
@@ -54,7 +55,7 @@ loadedGlossaryItems =
                 Nothing
                 []
                 (Just (Definition.fromMarkdown "The term three"))
-                [ Term.fromMarkdown "Second the term" False ]
+                [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Second the term" False ]
                 False
                 Nothing
                 Nothing

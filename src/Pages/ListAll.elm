@@ -45,10 +45,11 @@ import Data.Editability as Editability exposing (Editability(..))
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml, disambiguatedTerm)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -1031,7 +1032,11 @@ viewSettings glossary model =
 viewTermIndexItem : Bool -> Bool -> IndexOfTerms.Entry -> List (Html Msg)
 viewTermIndexItem enableMathSupport tabbable entry =
     case entry of
-        IndexOfTerms.PreferredTerm term ->
+        IndexOfTerms.PreferredTerm disambiguatedTerm ->
+            let
+                term =
+                    DisambiguatedTerm.toTerm disambiguatedTerm
+            in
             [ li []
                 [ Html.a
                     [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
@@ -1044,7 +1049,11 @@ viewTermIndexItem enableMathSupport tabbable entry =
                 ]
             ]
 
-        IndexOfTerms.AlternativeTerm term preferredTerms ->
+        IndexOfTerms.AlternativeTerm term disambiguatedPreferredTerms ->
+            let
+                preferredTerms =
+                    List.map DisambiguatedTerm.toTerm disambiguatedPreferredTerms
+            in
             li
                 [ Html.Attributes.attribute "style" "margin-top: 1rem" ]
                 [ Html.span
@@ -1429,13 +1438,13 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
         combinedIndexedGlossaryItems =
             List.append indexedGlossaryItems otherIndexedGlossaryItems
 
-        disambiguatedPreferredTermsWithDefinitions : List Term
+        disambiguatedPreferredTermsWithDefinitions : List DisambiguatedTerm
         disambiguatedPreferredTermsWithDefinitions =
             GlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions
                 filterByTag_
                 glossaryItems
 
-        orderItemsFocusedOnTerm : Maybe Term
+        orderItemsFocusedOnTerm : Maybe DisambiguatedTerm
         orderItemsFocusedOnTerm =
             case QueryParameters.orderItemsBy model.common.queryParameters of
                 FocusedOn termId ->
@@ -2046,7 +2055,7 @@ viewManageTagsButton tabbable common =
         ]
 
 
-viewOrderItemsBy : Model -> Int -> Bool -> List Term -> Maybe Term -> Html Msg
+viewOrderItemsBy : Model -> Int -> Bool -> List DisambiguatedTerm -> Maybe DisambiguatedTerm -> Html Msg
 viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTermsWithDefinitions orderItemsFocusedOnTerm =
     let
         tabbable : Bool
@@ -2140,11 +2149,13 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                                     (\disambiguatedPreferredTerm ->
                                         let
                                             preferredTermId =
-                                                Term.id disambiguatedPreferredTerm
+                                                disambiguatedPreferredTerm
+                                                    |> DisambiguatedTerm.toTerm
+                                                    |> Term.id
                                         in
                                         Components.SelectMenu.Choice
                                             (TermId.toString preferredTermId)
-                                            [ text <| Term.inlineText disambiguatedPreferredTerm ]
+                                            [ text <| Term.inlineText <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm ]
                                             (model.mostRecentTermIdForOrderingItemsFocusedOn == Just preferredTermId)
                                     )
                             )
@@ -2157,7 +2168,8 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                 [ class "mt-2 text-gray-700 dark:text-gray-300" ]
                 [ text I18n.explanationForMostMentionedFirst ]
         , Extras.Html.showMaybe
-            (Term.view enableMathSupport []
+            (DisambiguatedTerm.toTerm
+                >> Term.view enableMathSupport []
                 >> I18n.explanationForFocusedOn
             )
             orderItemsFocusedOnTerm
@@ -2227,6 +2239,7 @@ pageTitle model glossary =
                             (\item ->
                                 item
                                     |> GlossaryItemForHtml.disambiguatedPreferredTerm
+                                    |> DisambiguatedTerm.toTerm
                                     |> Term.inlineText
                             )
             in

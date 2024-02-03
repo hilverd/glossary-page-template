@@ -9,6 +9,7 @@ module Data.IndexOfTerms exposing (Entry(..), TermGroup, IndexOfTerms, fromGloss
 
 -}
 
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.TagId exposing (TagId)
@@ -20,8 +21,8 @@ Alternative terms may be associated with multiple items, so they do not link any
 Instead, each alternative term is followed by the list of all preferred terms for items that the alternative term appears in.
 -}
 type Entry
-    = PreferredTerm Term
-    | AlternativeTerm Term (List Term)
+    = PreferredTerm DisambiguatedTerm
+    | AlternativeTerm Term (List DisambiguatedTerm)
 
 
 {-| A group of terms, where `label` is the first character of each item in `terms`.
@@ -43,12 +44,14 @@ type IndexOfTerms
 fromGlossaryItems : Maybe TagId -> GlossaryItems -> IndexOfTerms
 fromGlossaryItems filterByTagId glossaryItems =
     let
-        entryListsByFirstAlphabeticCharacterOrEllpisis : Dict String (List Entry)
-        entryListsByFirstAlphabeticCharacterOrEllpisis =
+        entryListsByFirstAlphabeticCharacterOrEllipsis : Dict String (List Entry)
+        entryListsByFirstAlphabeticCharacterOrEllipsis =
             let
+                disambiguatedPreferredTerms : List DisambiguatedTerm
                 disambiguatedPreferredTerms =
                     GlossaryItems.disambiguatedPreferredTerms filterByTagId glossaryItems
 
+                preferredTermsByAlternativeTerm : List ( Term, List DisambiguatedTerm )
                 preferredTermsByAlternativeTerm =
                     GlossaryItems.disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItems
 
@@ -58,7 +61,7 @@ fromGlossaryItems filterByTagId glossaryItems =
                         |> List.foldl
                             (\preferredTerm result ->
                                 Dict.update
-                                    (Term.indexGroupString preferredTerm)
+                                    (preferredTerm |> DisambiguatedTerm.toTerm |> Term.indexGroupString)
                                     (\termList ->
                                         termList
                                             |> Maybe.map (\terms -> PreferredTerm preferredTerm :: terms)
@@ -73,9 +76,10 @@ fromGlossaryItems filterByTagId glossaryItems =
                 |> List.foldl
                     (\( alternativeTerm, preferredTerms_ ) result ->
                         let
+                            sortedPreferredTerms : List DisambiguatedTerm
                             sortedPreferredTerms =
                                 preferredTerms_
-                                    |> List.sortWith Term.compareAlphabetically
+                                    |> List.sortWith DisambiguatedTerm.compareAlphabetically
 
                             entry =
                                 AlternativeTerm alternativeTerm sortedPreferredTerms
@@ -113,14 +117,14 @@ fromGlossaryItems filterByTagId glossaryItems =
                         )
                         result
                 )
-                entryListsByFirstAlphabeticCharacterOrEllpisis
+                entryListsByFirstAlphabeticCharacterOrEllipsis
                 alphabetAndEllipsis
 
         termForEntry : Entry -> Term
         termForEntry entry =
             case entry of
                 PreferredTerm term ->
-                    term
+                    DisambiguatedTerm.toTerm term
 
                 AlternativeTerm term _ ->
                     term

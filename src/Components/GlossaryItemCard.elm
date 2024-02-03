@@ -5,6 +5,7 @@ import Accessibility.Aria
 import Accessibility.Key
 import Components.Button
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
@@ -53,7 +54,9 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
             let
                 disambiguatedPreferredTerm : Term
                 disambiguatedPreferredTerm =
-                    GlossaryItemForHtml.disambiguatedPreferredTerm glossaryItem
+                    glossaryItem
+                        |> GlossaryItemForHtml.disambiguatedPreferredTerm
+                        |> DisambiguatedTerm.toTerm
 
                 alternativeTerms : List Term
                 alternativeTerms =
@@ -368,7 +371,9 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
         disambiguatedPreferredTermForPreviousOrNext glossaryItem =
             let
                 preferredTerm =
-                    GlossaryItemForHtml.disambiguatedPreferredTerm glossaryItem
+                    glossaryItem
+                        |> GlossaryItemForHtml.disambiguatedPreferredTerm
+                        |> DisambiguatedTerm.toTerm
             in
             if Term.isAbbreviation preferredTerm then
                 Html.abbr []
@@ -386,8 +391,11 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
     Extras.Html.showMaybe
         (\( _, glossaryItem ) ->
             let
+                disambiguatedPreferredTerm : Term
                 disambiguatedPreferredTerm =
-                    GlossaryItemForHtml.disambiguatedPreferredTerm glossaryItem
+                    glossaryItem
+                        |> GlossaryItemForHtml.disambiguatedPreferredTerm
+                        |> DisambiguatedTerm.toTerm
 
                 alternativeTerms =
                     GlossaryItemForHtml.alternativeTerms glossaryItem
@@ -618,7 +626,7 @@ viewGlossaryItemDefinition { enableMathSupport, tabbable } definition =
         ]
 
 
-viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Bool -> Maybe (Term -> msg) -> List Term -> List (Html msg)
+viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Bool -> Maybe (Term -> msg) -> List DisambiguatedTerm -> List (Html msg)
 viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDefinitions onClick relatedTerms =
     if List.isEmpty relatedTerms then
         []
@@ -634,6 +642,7 @@ viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDefin
                     I18n.see ++ ": "
                 )
                 :: (relatedTerms
+                        |> List.map DisambiguatedTerm.toTerm
                         |> List.map
                             (\relatedTerm ->
                                 Html.a

@@ -17,6 +17,7 @@ import Data.Editability as Editability
 import Data.Glossary as Glossary
 import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -116,15 +117,15 @@ init commonModel =
                 tags =
                     GlossaryItems.tagByIdList items
 
-                existingTerms : List Term
+                existingTerms : List DisambiguatedTerm
                 existingTerms =
                     GlossaryItems.disambiguatedPreferredTerms Nothing items
 
-                existingDisambiguatedPreferredTerms : List Term
+                existingDisambiguatedPreferredTerms : List DisambiguatedTerm
                 existingDisambiguatedPreferredTerms =
                     GlossaryItems.disambiguatedPreferredTerms Nothing items
 
-                preferredTermsOfItemsListingThisItemAsRelated : List Term
+                preferredTermsOfItemsListingThisItemAsRelated : List DisambiguatedTerm
                 preferredTermsOfItemsListingThisItemAsRelated =
                     commonModel.maybeId
                         |> Maybe.map
@@ -739,7 +740,7 @@ viewCreateSeeAlsoSingle :
     Bool
     -> Set String
     -> Int
-    -> List Term
+    -> List DisambiguatedTerm
     -> Dict Int Components.DropdownMenu.Model
     -> Int
     -> Form.RelatedTermField
@@ -759,7 +760,7 @@ viewCreateSeeAlsoSingle1 :
     Bool
     -> Set String
     -> Int
-    -> List Term
+    -> List DisambiguatedTerm
     -> Maybe Components.DropdownMenu.Model
     -> RelatedTermIndex
     -> Form.RelatedTermField
@@ -789,15 +790,15 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfR
                 (allTerms
                     |> List.filter
                         (\term ->
-                            (not <| Set.member (Term.id term |> TermId.toString) relatedTermsIdReferences)
-                                || (Just (Term.id term) == relatedTerm.id)
+                            (not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.id |> TermId.toString) relatedTermsIdReferences)
+                                || (Just (term |> DisambiguatedTerm.toTerm |> Term.id) == relatedTerm.id)
                         )
                     |> List.map
                         (\term ->
                             Components.SelectMenu.Choice
-                                (Term.id term |> TermId.toString)
-                                [ text <| Term.inlineText term ]
-                                (Just (Term.id term) == relatedTerm.id)
+                                (term |> DisambiguatedTerm.toTerm |> Term.id |> TermId.toString)
+                                [ text <| Term.inlineText <| DisambiguatedTerm.toTerm term ]
+                                (Just (Term.id <| DisambiguatedTerm.toTerm term) == relatedTerm.id)
                         )
                 )
             , Extras.Html.showIf (numberOfRelatedTerms > 1) <|
@@ -901,7 +902,7 @@ viewCreateSeeAlso :
     -> Array TermField
     -> Array Form.RelatedTermField
     -> Dict Int Components.DropdownMenu.Model
-    -> List Term
+    -> List DisambiguatedTerm
     -> Html Msg
 viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms relatedTermsArray dropdownMenusWithMoreOptionsForRelatedTerms suggestedRelatedTerms =
     let
@@ -913,7 +914,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
         relatedTermsList =
             Array.toList relatedTermsArray
 
-        allPreferredTerms : List Term
+        allPreferredTerms : List DisambiguatedTerm
         allPreferredTerms =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically Nothing
@@ -939,7 +940,19 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
                         |> Set.fromList
                     )
                     (List.length relatedTermsList)
-                    (List.filter (\term -> not <| Set.member (Term.id term |> TermId.toString) termIdsSet) allPreferredTerms)
+                    (List.filter
+                        (\term ->
+                            not <|
+                                Set.member
+                                    (term
+                                        |> DisambiguatedTerm.toTerm
+                                        |> Term.id
+                                        |> TermId.toString
+                                    )
+                                    termIdsSet
+                        )
+                        allPreferredTerms
+                    )
                     dropdownMenusWithMoreOptionsForRelatedTerms
                 )
                 relatedTermsList
@@ -956,7 +969,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
         ]
 
 
-viewAddSuggestedSeeAlso : Bool -> List Term -> Html Msg
+viewAddSuggestedSeeAlso : Bool -> List DisambiguatedTerm -> Html Msg
 viewAddSuggestedSeeAlso enableMathSupport suggestedRelatedTerms =
     div
         []
@@ -972,11 +985,17 @@ viewAddSuggestedSeeAlso enableMathSupport suggestedRelatedTerms =
                         (\suggestedRelatedTerm ->
                             Components.Button.white True
                                 [ class "m-1 text-sm"
-                                , Html.Events.onClick <| PageMsg.Internal (AddRelatedTerm <| Just <| Term.id suggestedRelatedTerm)
+                                , Html.Events.onClick <|
+                                    PageMsg.Internal
+                                        (AddRelatedTerm <|
+                                            Just <|
+                                                Term.id <|
+                                                    DisambiguatedTerm.toTerm suggestedRelatedTerm
+                                        )
                                 ]
                                 [ Icons.plus
                                     [ Svg.Attributes.class "-ml-1 mr-2 h-4 w-4" ]
-                                , Term.view enableMathSupport [] suggestedRelatedTerm
+                                , Term.view enableMathSupport [] (DisambiguatedTerm.toTerm suggestedRelatedTerm)
                                 ]
                         )
                 )
@@ -1090,7 +1109,7 @@ view model =
                 relatedTerms =
                     Form.relatedTermFields model.form
 
-                suggestedRelatedTerms : List Term
+                suggestedRelatedTerms : List DisambiguatedTerm
                 suggestedRelatedTerms =
                     Form.suggestRelatedTerms model.form
 

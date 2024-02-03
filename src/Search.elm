@@ -2,6 +2,7 @@ module Search exposing (search)
 
 import Components.SearchDialog as SearchDialog
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemForHtml as GlossaryItemForHtml
@@ -29,7 +30,7 @@ search enableMathSupport filterByTagId searchString glossaryItems =
         let
             candidates :
                 List
-                    { preferredTerm : Term
+                    { preferredTerm : DisambiguatedTerm
                     , alternativeTerm : Maybe Term
                     , definition : Maybe Definition
                     }
@@ -39,9 +40,11 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                     |> List.concatMap
                         (\( _, item ) ->
                             let
+                                disambiguatedPreferredTerm : DisambiguatedTerm
                                 disambiguatedPreferredTerm =
                                     GlossaryItemForHtml.disambiguatedPreferredTerm item
 
+                                definition : Maybe Definition
                                 definition =
                                     GlossaryItemForHtml.definition item
                             in
@@ -65,19 +68,19 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                             case ( candidate1.alternativeTerm, candidate2.alternativeTerm ) of
                                 ( Just alternativeTerm1, Just alternativeTerm2 ) ->
                                     if alternativeTerm1 == alternativeTerm2 then
-                                        Term.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
+                                        DisambiguatedTerm.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
 
                                     else
                                         Term.compareAlphabetically alternativeTerm1 alternativeTerm2
 
                                 ( Just alternativeTerm1, Nothing ) ->
-                                    Term.compareAlphabetically alternativeTerm1 candidate2.preferredTerm
+                                    Term.compareAlphabetically alternativeTerm1 (DisambiguatedTerm.toTerm candidate2.preferredTerm)
 
                                 ( Nothing, Just alternativeTerm2 ) ->
-                                    Term.compareAlphabetically candidate1.preferredTerm alternativeTerm2
+                                    Term.compareAlphabetically (DisambiguatedTerm.toTerm candidate1.preferredTerm) alternativeTerm2
 
                                 ( Nothing, Nothing ) ->
-                                    Term.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
+                                    DisambiguatedTerm.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
                         )
         in
         candidates
@@ -93,6 +96,7 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                             )
                         |> Maybe.withDefault
                             (preferredTerm
+                                |> DisambiguatedTerm.toTerm
                                 |> Term.inlineText
                                 |> String.toLower
                                 |> String.contains searchStringNormalised
@@ -110,6 +114,7 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                             )
                         |> Maybe.withDefault
                             (preferredTerm
+                                |> DisambiguatedTerm.toTerm
                                 |> Term.inlineText
                                 |> String.toLower
                                 |> String.startsWith searchStringNormalised
@@ -123,7 +128,7 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                     case alternativeTerm of
                         Just alternativeTerm_ ->
                             SearchDialog.searchResult
-                                (Extras.Url.fragmentOnly <| TermId.toString <| Term.id preferredTerm)
+                                (Extras.Url.fragmentOnly <| TermId.toString <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
                                 [ Html.div
                                     [ class "flex flex-col" ]
                                     [ Html.div
@@ -134,7 +139,7 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                                         [ Icons.cornerDownRight
                                             [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400"
                                             ]
-                                        , Term.view enableMathSupport [] preferredTerm
+                                        , Term.view enableMathSupport [] (DisambiguatedTerm.toTerm preferredTerm)
                                         ]
                                     , Extras.Html.showMaybe
                                         (\definition_ ->
@@ -154,12 +159,12 @@ search enableMathSupport filterByTagId searchString glossaryItems =
 
                         Nothing ->
                             SearchDialog.searchResult
-                                (Extras.Url.fragmentOnly <| TermId.toString <| Term.id preferredTerm)
+                                (Extras.Url.fragmentOnly <| TermId.toString <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
                                 [ Html.div
                                     []
                                     [ Html.p
                                         [ class "font-medium" ]
-                                        [ Term.view enableMathSupport [] preferredTerm ]
+                                        [ Term.view enableMathSupport [] (DisambiguatedTerm.toTerm preferredTerm) ]
                                     , Extras.Html.showMaybe
                                         (\definition_ ->
                                             Html.div

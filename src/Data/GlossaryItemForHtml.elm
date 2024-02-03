@@ -39,6 +39,7 @@ It is not the representation used by the editor UI when the application is runni
 
 import Codec exposing (Codec)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
@@ -57,7 +58,7 @@ type GlossaryItemForHtml
         , disambiguationTag : Maybe Tag
         , normalTags : List Tag
         , definition : Maybe Definition
-        , relatedPreferredTerms : List Term
+        , relatedPreferredTerms : List DisambiguatedTerm
         , needsUpdating : Bool
         , lastUpdatedDateAsIso8601 : Maybe String
         , lastUpdatedByName : Maybe String
@@ -73,7 +74,7 @@ create :
     -> Maybe Tag
     -> List Tag
     -> Maybe Definition
-    -> List Term
+    -> List DisambiguatedTerm
     -> Bool
     -> Maybe String
     -> Maybe String
@@ -109,7 +110,7 @@ codec =
             (Codec.nullable <|
                 Codec.map Definition.fromMarkdown Definition.raw Codec.string
             )
-        |> Codec.field "relatedTerms" relatedPreferredTerms (Codec.list Term.codec)
+        |> Codec.field "relatedTerms" relatedPreferredTerms (Codec.list DisambiguatedTerm.codec)
         |> Codec.field "needsUpdating" needsUpdating Codec.bool
         |> Codec.field "lastUpdatedDate" lastUpdatedDateAsIso8601 (Codec.maybe Codec.string)
         |> Codec.field "lastUpdatedByName" lastUpdatedByName (Codec.maybe Codec.string)
@@ -119,7 +120,7 @@ codec =
 
 {-| The disambiguated preferred term for this glossary item.
 -}
-disambiguatedPreferredTerm : GlossaryItemForHtml -> Term
+disambiguatedPreferredTerm : GlossaryItemForHtml -> DisambiguatedTerm
 disambiguatedPreferredTerm glossaryItemForHtml =
     case glossaryItemForHtml of
         GlossaryItemForHtml item ->
@@ -128,7 +129,7 @@ disambiguatedPreferredTerm glossaryItemForHtml =
                     (\disambiguationTag_ ->
                         disambiguatedTerm disambiguationTag_ item.preferredTerm
                     )
-                |> Maybe.withDefault item.preferredTerm
+                |> Maybe.withDefault (DisambiguatedTerm.fromTerm item.preferredTerm)
 
 
 {-| The (non-disambiguated) preferred term for this glossary item.
@@ -153,7 +154,11 @@ alternativeTerms glossaryItemForHtml =
 -}
 allTerms : GlossaryItemForHtml -> List Term
 allTerms glossaryItemForHtml =
-    disambiguatedPreferredTerm glossaryItemForHtml :: alternativeTerms glossaryItemForHtml
+    (glossaryItemForHtml
+        |> disambiguatedPreferredTerm
+        |> DisambiguatedTerm.toTerm
+    )
+        :: alternativeTerms glossaryItemForHtml
 
 
 {-| The disambiguation tag for this glossary item.
@@ -206,7 +211,7 @@ definition glossaryItemForHtml =
 
 {-| The related preferred terms for this glossary item.
 -}
-relatedPreferredTerms : GlossaryItemForHtml -> List Term
+relatedPreferredTerms : GlossaryItemForHtml -> List DisambiguatedTerm
 relatedPreferredTerms glossaryItemForHtml =
     case glossaryItemForHtml of
         GlossaryItemForHtml item ->
@@ -253,6 +258,7 @@ lastUpdatedByEmailAddress glossaryItemForHtml =
 
     import Data.GlossaryItem.Tag as Tag exposing (Tag)
     import Data.GlossaryItem.Term as Term exposing (Term)
+    import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 
     tag : Tag
     tag = Tag.fromMarkdown "Finance"
@@ -261,25 +267,28 @@ lastUpdatedByEmailAddress glossaryItemForHtml =
     term = Term.fromMarkdown "Default" False
 
     disambiguatedTerm tag term
-    --> Term.fromMarkdown "Default (Finance)" False
+    --> DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False
 
 -}
-disambiguatedTerm : Tag -> Term -> Term
+disambiguatedTerm : Tag -> Term -> DisambiguatedTerm
 disambiguatedTerm tag term =
-    Term.updateRaw
-        (\raw0 -> raw0 ++ " (" ++ Tag.raw tag ++ ")")
-        term
+    term
+        |> Term.updateRaw
+            (\raw0 -> raw0 ++ " (" ++ Tag.raw tag ++ ")")
+        |> DisambiguatedTerm.fromTerm
 
 
 preferredTermToHtmlTree : Maybe Tag -> Term -> HtmlTree
 preferredTermToHtmlTree disambiguationTag_ term =
     let
+        disambiguatedTermIdString : String
         disambiguatedTermIdString =
             disambiguationTag_
                 |> Maybe.map
                     (\tag ->
                         disambiguatedTerm tag term
                     )
+                |> Maybe.map DisambiguatedTerm.toTerm
                 |> Maybe.withDefault term
                 |> Term.id
                 |> TermId.toString
@@ -355,15 +364,19 @@ definitionToHtmlTree definition_ =
         [ HtmlTree.Leaf definition_ ]
 
 
-relatedTermToHtmlTree : Term -> HtmlTree
-relatedTermToHtmlTree term =
+relatedTermToHtmlTree : DisambiguatedTerm -> HtmlTree
+relatedTermToHtmlTree disambiguatedTerm_ =
+    let
+        term =
+            DisambiguatedTerm.toTerm disambiguatedTerm_
+    in
     HtmlTree.Node "a"
         True
         [ hrefFromRelatedTerm term ]
         [ HtmlTree.Leaf <| Term.raw term ]
 
 
-nonemptyRelatedTermsToHtmlTree : Bool -> List Term -> HtmlTree
+nonemptyRelatedTermsToHtmlTree : Bool -> List DisambiguatedTerm -> HtmlTree
 nonemptyRelatedTermsToHtmlTree itemHasADefinition relatedTerms_ =
     HtmlTree.Node "dd"
         False

@@ -11,6 +11,7 @@ import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem.Definition as Definition
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
@@ -92,6 +93,7 @@ itemToAnki enableMathSupport glossaryItem =
         back =
             if List.isEmpty definitions then
                 let
+                    relatedTerms : List DisambiguatedTerm
                     relatedTerms =
                         GlossaryItemForHtml.relatedPreferredTerms glossaryItem
                 in
@@ -102,7 +104,12 @@ itemToAnki enableMathSupport glossaryItem =
                     (I18n.see
                         ++ ": "
                         ++ (relatedTerms
-                                |> List.map (Term.htmlTreeForAnki enableMathSupport >> Extras.HtmlTree.toHtml >> escape)
+                                |> List.map
+                                    (DisambiguatedTerm.toTerm
+                                        >> Term.htmlTreeForAnki enableMathSupport
+                                        >> Extras.HtmlTree.toHtml
+                                        >> escape
+                                    )
                                 |> String.join ", "
                            )
                     )

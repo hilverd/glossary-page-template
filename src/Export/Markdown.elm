@@ -10,6 +10,7 @@ import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
 import Data.Glossary as Glossary exposing (Glossary, aboutSection)
 import Data.GlossaryItem.Definition as Definition
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
@@ -109,7 +110,7 @@ itemToMarkdown glossaryItem =
         relatedTermsString : String
         relatedTermsString =
             relatedTerms
-                |> List.map Term.markdown
+                |> List.map (DisambiguatedTerm.toTerm >> Term.markdown)
                 |> String.join ", "
                 |> (++) relatedTermsPrefix
     in
