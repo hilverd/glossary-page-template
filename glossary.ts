@@ -120,10 +120,7 @@ if (containerElement) {
 
     function glossaryItemRelatedTermFromDdElement(ddElement: HTMLElement): any[] {
         return Array.prototype.slice.apply(ddElement.querySelectorAll('a')).map(aElement => {
-            const hrefAttribute: string | null = aElement.getAttribute('href');
-
             return {
-                id: hrefAttribute?.substring(1),
                 isAbbreviation: false, // ignored
                 body: normaliseWhitespace(aElement.textContent || '')
             };
