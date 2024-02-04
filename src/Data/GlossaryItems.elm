@@ -32,6 +32,7 @@ module Data.GlossaryItems exposing
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
+import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -95,15 +96,28 @@ orderByMostMentionedFirst indexedGlossaryItemsForHtml =
             let
                 termAsWord : Regex.Regex
                 termAsWord =
-                    ("\\b" ++ Extras.Regex.escapeStringForUseInRegex (Term.raw term) ++ "\\b")
+                    ("\\b" ++ Extras.Regex.escapeStringForUseInRegex (term |> Term.raw |> RawTerm.toString) ++ "\\b")
                         |> Regex.fromString
                         |> Maybe.withDefault Regex.never
 
                 score : Int
                 score =
-                    (glossaryItem |> GlossaryItemForHtml.allTerms |> List.map (Term.raw >> Regex.find termAsWord >> List.length) |> List.sum)
-                        + (glossaryItem |> GlossaryItemForHtml.definition |> Maybe.map (Definition.raw >> Regex.find termAsWord >> List.length) |> Maybe.withDefault 0)
-                        + (glossaryItem |> GlossaryItemForHtml.relatedPreferredTerms |> List.map (DisambiguatedTerm.toTerm >> Term.raw) |> List.map (Regex.find termAsWord >> List.length) |> List.sum)
+                    (glossaryItem
+                        |> GlossaryItemForHtml.allTerms
+                        |> List.map (Term.raw >> RawTerm.toString >> Regex.find termAsWord >> List.length)
+                        |> List.sum
+                    )
+                        + (glossaryItem
+                            |> GlossaryItemForHtml.definition
+                            |> Maybe.map (Definition.raw >> Regex.find termAsWord >> List.length)
+                            |> Maybe.withDefault 0
+                          )
+                        + (glossaryItem
+                            |> GlossaryItemForHtml.relatedPreferredTerms
+                            |> List.map (DisambiguatedTerm.toTerm >> Term.raw >> RawTerm.toString)
+                            |> List.map (Regex.find termAsWord >> List.length)
+                            |> List.sum
+                          )
             in
             if score > 0 then
                 1
@@ -139,7 +153,7 @@ orderByMostMentionedFirst indexedGlossaryItemsForHtml =
                 |> List.foldl
                     (\( glossaryItemId, term ) result ->
                         Dict.insert
-                            (Term.raw term)
+                            (term |> Term.raw |> RawTerm.toString)
                             (termScore term glossaryItemId)
                             result
                     )
@@ -155,7 +169,7 @@ orderByMostMentionedFirst indexedGlossaryItemsForHtml =
                             >> List.map
                                 (\term ->
                                     termBodyScores
-                                        |> Dict.get (Term.raw term)
+                                        |> Dict.get (term |> Term.raw |> RawTerm.toString)
                                         |> Maybe.withDefault 0
                                 )
                             >> List.sum
@@ -166,8 +180,8 @@ orderByMostMentionedFirst indexedGlossaryItemsForHtml =
 
                     EQ ->
                         compare
-                            (item1 |> GlossaryItemForHtml.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> String.toUpper)
-                            (item2 |> GlossaryItemForHtml.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> String.toUpper)
+                            (item1 |> GlossaryItemForHtml.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString |> String.toUpper)
+                            (item2 |> GlossaryItemForHtml.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString |> String.toUpper)
 
                     GT ->
                         LT
@@ -451,6 +465,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                         Maybe.map
                             (DisambiguatedTerm.toTerm
                                 >> Term.raw
+                                >> RawTerm.toString
                                 >> I18n.thereAreMultipleItemsWithDisambiguatedPreferredTerm
                             )
                             disambiguatedPreferredTerm1
@@ -981,7 +996,9 @@ disambiguatedPreferredTermsByAlternativeTerm filterByTagId ((GlossaryItems items
                                             (\alternativeTerm ( alternativeTermByRaw1, preferredTermsByRawAlternativeTerm1 ) ->
                                                 let
                                                     raw =
-                                                        Term.raw alternativeTerm
+                                                        alternativeTerm
+                                                            |> Term.raw
+                                                            |> RawTerm.toString
                                                 in
                                                 ( Dict.insert raw alternativeTerm alternativeTermByRaw1
                                                 , Dict.update raw

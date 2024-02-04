@@ -13,6 +13,7 @@ The `body` is the actual term.
 -}
 
 import Codec exposing (Codec)
+import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.HtmlTree exposing (HtmlTree)
@@ -53,7 +54,12 @@ stringToIndexGroupString =
 
 {-| Construct a term from a Markdown string and a Boolean indicating whether the term is an abbreviation.
 
-    fromMarkdown "The _ideal_ case" False |> raw --> "The _ideal_ case"
+    import Data.GlossaryItem.RawTerm as RawTerm
+
+    fromMarkdown "The _ideal_ case" False
+    |> raw
+    |> RawTerm.toString
+    --> "The _ideal_ case"
 
 -}
 fromMarkdown : String -> Bool -> Term
@@ -83,7 +89,7 @@ codec : Codec Term
 codec =
     Codec.object
         fromMarkdown
-        |> Codec.field "body" raw Codec.string
+        |> Codec.field "body" (raw >> RawTerm.toString) Codec.string
         |> Codec.field "isAbbreviation" isAbbreviation Codec.bool
         |> Codec.buildObject
 
@@ -115,9 +121,9 @@ isAbbreviation (MarkdownTerm t) =
 
 {-| Retrieve the raw body of a term.
 -}
-raw : Term -> String
+raw : Term -> RawTerm
 raw (MarkdownTerm { body }) =
-    MarkdownFragment.raw body
+    body |> MarkdownFragment.raw |> RawTerm.fromString
 
 
 {-| Retrieve the concatenated inline text of a term.

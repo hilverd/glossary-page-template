@@ -40,6 +40,7 @@ It is not the representation used by the editor UI when the application is runni
 import Codec exposing (Codec)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
+import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId
@@ -279,7 +280,7 @@ preferredTermToHtmlTree disambiguationTag_ term =
                         [ HtmlTree.Node "span"
                             False
                             []
-                            [ HtmlTree.Leaf <| Term.raw term ]
+                            [ HtmlTree.Leaf <| RawTerm.toString <| Term.raw term ]
                         , HtmlTree.Node "span"
                             False
                             [ HtmlTree.Attribute "class" "disambiguation" ]
@@ -287,7 +288,7 @@ preferredTermToHtmlTree disambiguationTag_ term =
                         ]
                     )
                 |> Maybe.withDefault
-                    [ HtmlTree.Leaf (Term.raw term) ]
+                    [ HtmlTree.Leaf (term |> Term.raw |> RawTerm.toString) ]
               )
                 |> (\inner ->
                         let
@@ -319,7 +320,7 @@ alternativeTermToHtmlTree term =
             [ let
                 termHtmlTree : HtmlTree
                 termHtmlTree =
-                    HtmlTree.Leaf (Term.raw term)
+                    HtmlTree.Leaf (term |> Term.raw |> RawTerm.toString)
               in
               if Term.isAbbreviation term then
                 HtmlTree.Node "abbr" True [] [ termHtmlTree ]
@@ -347,7 +348,7 @@ relatedTermToHtmlTree disambiguatedTerm_ =
     HtmlTree.Node "a"
         True
         [ hrefFromRelatedTerm term ]
-        [ HtmlTree.Leaf <| Term.raw term ]
+        [ HtmlTree.Leaf <| RawTerm.toString <| Term.raw term ]
 
 
 nonemptyRelatedTermsToHtmlTree : Bool -> List DisambiguatedTerm -> HtmlTree

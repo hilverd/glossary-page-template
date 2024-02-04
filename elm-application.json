@@ -13,6 +13,7 @@
         "Data.GlossaryChangelist",
         "Data.GlossaryItem.Definition",
         "Data.GlossaryItem.DisambiguatedTerm",
+        "Data.GlossaryItem.RawTerm",
         "Data.GlossaryItem.Tag",
         "Data.GlossaryItem.Term",
         "Data.GlossaryItem",

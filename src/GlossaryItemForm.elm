@@ -31,6 +31,7 @@ module GlossaryItemForm exposing
 import Array exposing (Array)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
+import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -356,7 +357,7 @@ fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTe
                     GlossaryItemForHtml.nonDisambiguatedPreferredTerm item
             in
             TermField.fromString
-                (Term.raw preferredTerm)
+                (preferredTerm |> Term.raw |> RawTerm.toString)
                 (Term.isAbbreviation preferredTerm)
 
         alternativeTermFieldsForItem : List TermField
@@ -364,8 +365,8 @@ fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTe
             item
                 |> GlossaryItemForHtml.alternativeTerms
                 |> List.map
-                    (\alternativeTerms ->
-                        TermField.fromString (Term.raw alternativeTerms) (Term.isAbbreviation alternativeTerms)
+                    (\alternativeTerm ->
+                        TermField.fromString (alternativeTerm |> Term.raw |> RawTerm.toString) (Term.isAbbreviation alternativeTerm)
                     )
 
         termIdsForItem : Set String
@@ -876,7 +877,13 @@ suggestRelatedTerms glossaryItemForm =
                 let
                     candidateTermAsWord : Regex.Regex
                     candidateTermAsWord =
-                        ("(\\b| )" ++ Extras.Regex.escapeStringForUseInRegex (String.toLower (candidateTerm |> DisambiguatedTerm.toTerm |> Term.raw)) ++ "(\\b| )")
+                        ("(\\b| )"
+                            ++ Extras.Regex.escapeStringForUseInRegex
+                                (String.toLower
+                                    (candidateTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
+                                )
+                            ++ "(\\b| )"
+                        )
                             |> Regex.fromString
                             |> Maybe.withDefault Regex.never
                 in
