@@ -17,7 +17,6 @@ module GlossaryItemForm exposing
     , selectRelatedTerm
     , suggestRelatedTerms
     , tagCheckboxes
-    , termBodyToId
     , termFields
     , toGlossaryItem
     , toggleAbbreviation
@@ -31,10 +30,9 @@ module GlossaryItemForm exposing
 import Array exposing (Array)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
-import Data.GlossaryItem.RawTerm as RawTerm
+import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
@@ -52,7 +50,7 @@ import Set exposing (Set)
 
 
 type alias RelatedTermField =
-    { id : Maybe TermId
+    { raw : Maybe RawTerm
     , validationError : Maybe String
     }
 
@@ -166,22 +164,22 @@ validate form =
         cannotBeEmptyMessage =
             I18n.thisFieldCannotBeEmpty
 
-        termIdsOutsideSet : Set String
-        termIdsOutsideSet =
+        rawTermsOutsideSet : Set String
+        rawTermsOutsideSet =
             form
                 |> termsOutside
-                |> List.map (DisambiguatedTerm.toTerm >> Term.id >> TermId.toString)
+                |> List.map (DisambiguatedTerm.toTerm >> Term.raw >> RawTerm.toString)
                 |> Set.fromList
 
-        termIdsInsideForm : Dict String Int
-        termIdsInsideForm =
+        rawTermsInsideForm : Dict String Int
+        rawTermsInsideForm =
             form
                 |> termFields
-                |> Array.map (TermField.raw >> termBodyToId)
+                |> Array.map TermField.raw
                 |> Array.foldl
-                    (\termId ->
+                    (\rawTerm ->
                         Dict.update
-                            termId
+                            rawTerm
                             (Maybe.map ((+) 1) >> Maybe.withDefault 1 >> Just)
                     )
                     Dict.empty
@@ -230,20 +228,20 @@ validate form =
 
                      else
                         let
-                            termId : String
-                            termId =
+                            rawTerm : String
+                            rawTerm =
                                 disambiguatedTerm
                                     |> DisambiguatedTerm.toTerm
-                                    |> Term.id
-                                    |> TermId.toString
+                                    |> Term.raw
+                                    |> RawTerm.toString
                         in
-                        if isPreferredTerm && Set.member termId termIdsOutsideSet then
+                        if isPreferredTerm && Set.member rawTerm rawTermsOutsideSet then
                             Just I18n.thisTermAlreadyExistsElsewhere
 
-                        else if (Dict.get termId termIdsInsideForm |> Maybe.withDefault 0) > 1 then
+                        else if (Dict.get rawTerm rawTermsInsideForm |> Maybe.withDefault 0) > 1 then
                             Just I18n.thisTermOccursMultipleTimes
 
-                        else if ElementIds.reserved termId then
+                        else if ElementIds.reserved rawTerm then
                             Just I18n.thisTermIsReserved
 
                         else
@@ -270,7 +268,7 @@ validate form =
                     (\relatedTermField ->
                         { relatedTermField
                             | validationError =
-                                if relatedTermField.id == Nothing then
+                                if relatedTermField.raw == Nothing then
                                     Just I18n.pleaseSelectAnItem
 
                                 else
@@ -330,7 +328,7 @@ empty withTermsOutside withPreferredTermsOutside allTags filterByTag preferredTe
 
 emptyRelatedTermField : RelatedTermField
 emptyRelatedTermField =
-    { id = Nothing
+    { raw = Nothing
     , validationError = Nothing
     }
 
@@ -369,11 +367,11 @@ fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTe
                         TermField.fromString (alternativeTerm |> Term.raw |> RawTerm.toString) (Term.isAbbreviation alternativeTerm)
                     )
 
-        termIdsForItem : Set String
-        termIdsForItem =
+        rawTermsForItem : Set String
+        rawTermsForItem =
             item
                 |> GlossaryItemForHtml.allTerms
-                |> List.map (Term.id >> TermId.toString)
+                |> List.map (Term.raw >> RawTerm.toString)
                 |> Set.fromList
 
         termsOutside1 : List DisambiguatedTerm
@@ -384,10 +382,10 @@ fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTe
                         Set.member
                             (existingTerm
                                 |> DisambiguatedTerm.toTerm
-                                |> Term.id
-                                |> TermId.toString
+                                |> Term.raw
+                                |> RawTerm.toString
                             )
-                            termIdsForItem
+                            rawTermsForItem
                 )
                 existingTerms
 
@@ -399,10 +397,10 @@ fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTe
                         Set.member
                             (existingTerm
                                 |> DisambiguatedTerm.toTerm
-                                |> Term.id
-                                |> TermId.toString
+                                |> Term.raw
+                                |> RawTerm.toString
                             )
-                            termIdsForItem
+                            rawTermsForItem
                 )
                 existingPreferredTerms
 
@@ -431,7 +429,7 @@ fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTe
         , definitionField = definitionField_
         , relatedTermFields =
             relatedTerms
-                |> List.map (\term -> RelatedTermField (Just <| Term.id <| DisambiguatedTerm.toTerm term) Nothing)
+                |> List.map (\term -> RelatedTermField (Just <| Term.raw <| DisambiguatedTerm.toTerm term) Nothing)
                 |> Array.fromList
         , termsOutside = termsOutside1
         , preferredTermsOutside = preferredTermsOutside1
@@ -440,11 +438,6 @@ fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTe
         , lastUpdatedDate = item |> GlossaryItemForHtml.lastUpdatedDateAsIso8601 |> Maybe.withDefault ""
         }
         |> validate
-
-
-termBodyToId : String -> String
-termBodyToId =
-    String.replace " " "_"
 
 
 toGlossaryItem : GlossaryItems -> GlossaryItemForm -> Maybe String -> GlossaryItemForHtml
@@ -515,11 +508,11 @@ toGlossaryItem glossaryItems form dateTime =
                 |> Array.toList
                 |> List.filterMap
                     (\relatedTermField ->
-                        relatedTermField.id
+                        relatedTermField.raw
                             |> Maybe.andThen
-                                (\termId ->
-                                    GlossaryItems.itemIdFromDisambiguatedPreferredTermId
-                                        termId
+                                (\rawTerm ->
+                                    GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm
+                                        rawTerm
                                         glossaryItems
                                 )
                             |> Maybe.andThen
@@ -714,15 +707,15 @@ formHasDefinitionOrRelatedTerms glossaryItemForm =
             form.definitionField /= DefinitionField.empty || form.relatedTermFields /= Array.empty
 
 
-addRelatedTerm : Maybe TermId -> GlossaryItemForm -> GlossaryItemForm
-addRelatedTerm maybeTermId glossaryItemForm =
+addRelatedTerm : Maybe RawTerm -> GlossaryItemForm -> GlossaryItemForm
+addRelatedTerm maybeRawTerm glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             let
                 relatedTermField : RelatedTermField
                 relatedTermField =
-                    maybeTermId
-                        |> Maybe.map (\termId -> { id = Just termId, validationError = Nothing })
+                    maybeRawTerm
+                        |> Maybe.map (\rawTerm -> { raw = Just rawTerm, validationError = Nothing })
                         |> Maybe.withDefault emptyRelatedTermField
 
                 needsUpdating1 : Bool
@@ -741,15 +734,15 @@ addRelatedTerm maybeTermId glossaryItemForm =
                 |> validate
 
 
-selectRelatedTerm : RelatedTermIndex -> Maybe TermId -> GlossaryItemForm -> GlossaryItemForm
-selectRelatedTerm index relatedTermIdReference glossaryItemForm =
+selectRelatedTerm : RelatedTermIndex -> Maybe RawTerm -> GlossaryItemForm -> GlossaryItemForm
+selectRelatedTerm index relatedRawTerm glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             GlossaryItemForm
                 { form
                     | relatedTermFields =
                         Extras.Array.update
-                            (always <| RelatedTermField relatedTermIdReference Nothing)
+                            (always <| RelatedTermField relatedRawTerm Nothing)
                             (RelatedTermIndex.toInt index)
                             form.relatedTermFields
                 }
@@ -838,14 +831,14 @@ moveRelatedTermDown index glossaryItemForm =
 suggestRelatedTerms : GlossaryItemForm -> List DisambiguatedTerm
 suggestRelatedTerms glossaryItemForm =
     let
-        relatedTermIdsAlreadyInForm : Set String
-        relatedTermIdsAlreadyInForm =
+        relatedRawTermsAlreadyInForm : Set String
+        relatedRawTermsAlreadyInForm =
             glossaryItemForm
                 |> relatedTermFields
                 |> Array.foldl
                     (\relatedTermField result ->
-                        relatedTermField.id
-                            |> Maybe.map (\id -> Set.insert (TermId.toString id) result)
+                        relatedTermField.raw
+                            |> Maybe.map (\rawTerm -> Set.insert (RawTerm.toString rawTerm) result)
                             |> Maybe.withDefault result
                     )
                     Set.empty
@@ -855,7 +848,7 @@ suggestRelatedTerms glossaryItemForm =
             glossaryItemForm
                 |> preferredTermsOutside
                 |> List.filter
-                    (\term -> not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.id |> TermId.toString) relatedTermIdsAlreadyInForm)
+                    (\term -> not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) relatedRawTermsAlreadyInForm)
 
         definitionFieldBody : String
         definitionFieldBody =
@@ -864,11 +857,11 @@ suggestRelatedTerms glossaryItemForm =
                 |> DefinitionField.raw
                 |> String.toLower
 
-        preferredTermIdsOfItemsListingThisItemAsRelated : Set String
-        preferredTermIdsOfItemsListingThisItemAsRelated =
+        preferredRawTermsOfItemsListingThisItemAsRelated : Set String
+        preferredRawTermsOfItemsListingThisItemAsRelated =
             glossaryItemForm
                 |> preferredTermsOfItemsListingThisItemAsRelated
-                |> List.map (DisambiguatedTerm.toTerm >> Term.id >> TermId.toString)
+                |> List.map (DisambiguatedTerm.toTerm >> Term.raw >> RawTerm.toString)
                 |> Set.fromList
     in
     candidateTerms
@@ -887,7 +880,7 @@ suggestRelatedTerms glossaryItemForm =
                             |> Regex.fromString
                             |> Maybe.withDefault Regex.never
                 in
-                Set.member (candidateTerm |> DisambiguatedTerm.toTerm |> Term.id |> TermId.toString) preferredTermIdsOfItemsListingThisItemAsRelated
+                Set.member (candidateTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) preferredRawTermsOfItemsListingThisItemAsRelated
                     || Regex.contains candidateTermAsWord definitionFieldBody
             )
 

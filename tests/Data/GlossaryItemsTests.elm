@@ -312,12 +312,12 @@ suite =
         , test "looks up the ID of the item whose disambiguated preferred term has the given ID" <|
             \_ ->
                 glossaryItems
-                    |> GlossaryItems.itemIdFromDisambiguatedPreferredTermId (TermId.fromString "Default_(Finance)")
+                    |> GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm (RawTerm.fromString "Default (Finance)")
                     |> Expect.equal (Just <| GlossaryItemId.create 1)
         , test "looks up the disambiguated preferred term of the item whose disambiguated preferred term has the given ID" <|
             \_ ->
                 glossaryItems
-                    |> GlossaryItems.disambiguatedPreferredTermFromId (TermId.fromString "Default_(Finance)")
+                    |> GlossaryItems.disambiguatedPreferredTermFromRaw (RawTerm.fromString "Default (Finance)")
                     |> Expect.equal (Just <| DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False)
         , test "returns all of the disambiguated preferred terms which have a definition" <|
             \_ ->
@@ -350,12 +350,12 @@ suite =
         , test "looks up ID of item whose preferred term has given ID" <|
             \_ ->
                 glossaryItems
-                    |> GlossaryItems.itemIdFromDisambiguatedPreferredTermId (TermId.fromString "Default_(Finance)")
+                    |> GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm (RawTerm.fromString "Default (Finance)")
                     |> Expect.equal (Just <| GlossaryItemId.create 1)
         , test "looks up disambiguated preferred term of item whose disambiguated preferred term has given ID" <|
             \_ ->
                 glossaryItems
-                    |> GlossaryItems.disambiguatedPreferredTermFromId (TermId.fromString "Default_(Finance)")
+                    |> GlossaryItems.disambiguatedPreferredTermFromRaw (RawTerm.fromString "Default (Finance)")
                     |> Expect.equal (Just <| DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False)
         , test "returns a list of pairs associating each alternative term with the disambiguated preferred terms that it appears together with" <|
             \_ ->

@@ -46,6 +46,7 @@ import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
+import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
@@ -123,7 +124,7 @@ type alias Model =
     , confirmDeleteId : Maybe GlossaryItemId
     , deleting : Saving
     , savingSettings : Saving
-    , mostRecentTermIdForOrderingItemsFocusedOn : Maybe TermId
+    , mostRecentRawTermForOrderingItemsFocusedOn : Maybe RawTerm
     , resultOfAttemptingToCopyEditorCommandToClipboard : Maybe Bool
     }
 
@@ -196,10 +197,10 @@ init commonModel =
             }
       , deleting = NotCurrentlySaving
       , savingSettings = NotCurrentlySaving
-      , mostRecentTermIdForOrderingItemsFocusedOn =
+      , mostRecentRawTermForOrderingItemsFocusedOn =
             case QueryParameters.orderItemsBy commonModel.queryParameters of
-                FocusedOn termId ->
-                    Just termId
+                FocusedOn rawTerm ->
+                    Just rawTerm
 
                 _ ->
                     Nothing
@@ -404,7 +405,7 @@ update msg model =
                         Ok glossary ->
                             glossary
                                 |> Glossary.items
-                                |> GlossaryItems.itemIdFromDisambiguatedPreferredTermId (Term.id relatedTerm)
+                                |> GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm (Term.raw relatedTerm)
                                 |> Maybe.map
                                     (\index ->
                                         let
@@ -551,14 +552,14 @@ update msg model =
                 common =
                     model.common
 
-                mostRecentTermIdForOrderingItemsFocusedOn1 : Maybe TermId
+                mostRecentTermIdForOrderingItemsFocusedOn1 : Maybe RawTerm
                 mostRecentTermIdForOrderingItemsFocusedOn1 =
                     case orderItemsBy of
-                        FocusedOn termId ->
-                            Just termId
+                        FocusedOn rawTerm ->
+                            Just rawTerm
 
                         _ ->
-                            model.mostRecentTermIdForOrderingItemsFocusedOn
+                            model.mostRecentRawTermForOrderingItemsFocusedOn
 
                 updatedQueryParameters =
                     QueryParameters.setOrderItemsBy orderItemsBy model.common.queryParameters
@@ -568,7 +569,7 @@ update msg model =
             in
             ( { model
                 | common = common1
-                , mostRecentTermIdForOrderingItemsFocusedOn = mostRecentTermIdForOrderingItemsFocusedOn1
+                , mostRecentRawTermForOrderingItemsFocusedOn = mostRecentTermIdForOrderingItemsFocusedOn1
               }
             , common1
                 |> CommonModel.relativeUrl
@@ -1448,7 +1449,7 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
         orderItemsFocusedOnTerm =
             case QueryParameters.orderItemsBy model.common.queryParameters of
                 FocusedOn termId ->
-                    GlossaryItems.disambiguatedPreferredTermFromId termId glossaryItems
+                    GlossaryItems.disambiguatedPreferredTermFromRaw termId glossaryItems
 
                 _ ->
                     Nothing
@@ -2123,12 +2124,12 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                         )
                         tabbable
                         [ id ElementIds.orderItemsFocusedOn
-                        , Html.Attributes.disabled <| model.mostRecentTermIdForOrderingItemsFocusedOn == Nothing
+                        , Html.Attributes.disabled <| model.mostRecentRawTermForOrderingItemsFocusedOn == Nothing
                         , Extras.HtmlAttribute.showMaybe
                             (\termId ->
                                 Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy <| FocusedOn termId
                             )
-                            model.mostRecentTermIdForOrderingItemsFocusedOn
+                            model.mostRecentRawTermForOrderingItemsFocusedOn
                         ]
                     , label
                         [ class "ml-3 inline-flex items-center font-medium text-gray-700 dark:text-gray-300 select-none"
@@ -2141,22 +2142,22 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                         , Components.SelectMenu.render
                             [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect
                             , Components.SelectMenu.ariaLabel I18n.focusOnTerm
-                            , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << TermId.fromString)
+                            , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << RawTerm.fromString)
                             , Components.SelectMenu.enabled tabbable
                             ]
                             (disambiguatedPreferredTermsWithDefinitions
                                 |> List.map
                                     (\disambiguatedPreferredTerm ->
                                         let
-                                            preferredTermId =
+                                            preferredRawTerm =
                                                 disambiguatedPreferredTerm
                                                     |> DisambiguatedTerm.toTerm
-                                                    |> Term.id
+                                                    |> Term.raw
                                         in
                                         Components.SelectMenu.Choice
-                                            (TermId.toString preferredTermId)
+                                            (RawTerm.toString preferredRawTerm)
                                             [ text <| Term.inlineText <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm ]
-                                            (model.mostRecentTermIdForOrderingItemsFocusedOn == Just preferredTermId)
+                                            (model.mostRecentRawTermForOrderingItemsFocusedOn == Just preferredRawTerm)
                                     )
                             )
                         ]
@@ -2326,7 +2327,7 @@ view model =
 
                                                                 FocusedOn termId ->
                                                                     \items_ ->
-                                                                        GlossaryItems.itemIdFromDisambiguatedPreferredTermId termId items_
+                                                                        GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm termId items_
                                                                             |> Maybe.map
                                                                                 (\itemId -> GlossaryItems.orderedFocusedOn filterByTag_ itemId items_)
                                                                             |> Maybe.withDefault ( [], [] )
@@ -2444,7 +2445,7 @@ view model =
                                                 let
                                                     itemId : Maybe GlossaryItemId
                                                     itemId =
-                                                        GlossaryItems.itemIdFromDisambiguatedPreferredTermId termId items
+                                                        GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm termId items
                                                 in
                                                 case itemId of
                                                     Just itemId_ ->

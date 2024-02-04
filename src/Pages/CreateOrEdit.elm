@@ -18,9 +18,10 @@ import Data.Glossary as Glossary
 import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
+import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
-import Data.GlossaryItem.TermId as TermId exposing (TermId)
+import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -88,7 +89,7 @@ type InternalMsg
     | ToggleTagCheckbox Tag
     | UpdateDefinition String
     | SelectDisambiguationTag String
-    | AddRelatedTerm (Maybe TermId)
+    | AddRelatedTerm (Maybe RawTerm)
     | SelectRelatedTerm RelatedTermIndex String
     | DeleteRelatedTerm RelatedTermIndex
     | DropdownMenuWithMoreOptionsForRelatedTermMsg Int Components.DropdownMenu.Msg
@@ -293,11 +294,11 @@ update msg model =
             , Cmd.none
             )
 
-        AddRelatedTerm maybeTermId ->
+        AddRelatedTerm maybeRawTerm ->
             let
                 form : GlossaryItemForm
                 form =
-                    Form.addRelatedTerm maybeTermId model.form
+                    Form.addRelatedTerm maybeRawTerm model.form
 
                 latestRelatedTermIndex : RelatedTermIndex
                 latestRelatedTermIndex =
@@ -312,15 +313,15 @@ update msg model =
 
         SelectRelatedTerm relatedTermIndex selection ->
             let
-                relatedTermIdReference : Maybe TermId
-                relatedTermIdReference =
+                relatedRawTerm : Maybe RawTerm
+                relatedRawTerm =
                     if selection == "" then
                         Nothing
 
                     else
-                        Just <| TermId.fromString selection
+                        Just <| RawTerm.fromString selection
             in
-            ( updateForm (Form.selectRelatedTerm relatedTermIndex relatedTermIdReference) model
+            ( updateForm (Form.selectRelatedTerm relatedTermIndex relatedRawTerm) model
             , Cmd.none
             )
 
@@ -745,10 +746,10 @@ viewCreateSeeAlsoSingle :
     -> Int
     -> Form.RelatedTermField
     -> Html Msg
-viewCreateSeeAlsoSingle showValidationErrors relatedTermsIdReferences numberOfRelatedTerms allTerms dropdownMenusWithMoreOptionsForRelatedTerms index relatedTerm =
+viewCreateSeeAlsoSingle showValidationErrors relatedRawTerms numberOfRelatedTerms allTerms dropdownMenusWithMoreOptionsForRelatedTerms index relatedTerm =
     viewCreateSeeAlsoSingle1
         showValidationErrors
-        relatedTermsIdReferences
+        relatedRawTerms
         numberOfRelatedTerms
         allTerms
         (Dict.get index dropdownMenusWithMoreOptionsForRelatedTerms)
@@ -765,7 +766,7 @@ viewCreateSeeAlsoSingle1 :
     -> RelatedTermIndex
     -> Form.RelatedTermField
     -> Html Msg
-viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfRelatedTerms allTerms maybeDropdownMenuWithMoreOptions index relatedTerm =
+viewCreateSeeAlsoSingle1 showValidationErrors relatedRawTerms numberOfRelatedTerms allTerms maybeDropdownMenuWithMoreOptions index relatedTerm =
     div
         []
         [ div
@@ -790,15 +791,15 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedTermsIdReferences numberOfR
                 (allTerms
                     |> List.filter
                         (\term ->
-                            (not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.id |> TermId.toString) relatedTermsIdReferences)
-                                || (Just (term |> DisambiguatedTerm.toTerm |> Term.id) == relatedTerm.id)
+                            (not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) relatedRawTerms)
+                                || (Just (term |> DisambiguatedTerm.toTerm |> Term.raw) == relatedTerm.raw)
                         )
                     |> List.map
                         (\term ->
                             Components.SelectMenu.Choice
-                                (term |> DisambiguatedTerm.toTerm |> Term.id |> TermId.toString)
+                                (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
                                 [ text <| Term.inlineText <| DisambiguatedTerm.toTerm term ]
-                                (Just (Term.id <| DisambiguatedTerm.toTerm term) == relatedTerm.id)
+                                (Just (Term.raw <| DisambiguatedTerm.toTerm term) == relatedTerm.raw)
                         )
                 )
             , Extras.Html.showIf (numberOfRelatedTerms > 1) <|
@@ -906,9 +907,9 @@ viewCreateSeeAlso :
     -> Html Msg
 viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms relatedTermsArray dropdownMenusWithMoreOptionsForRelatedTerms suggestedRelatedTerms =
     let
-        termIdsSet : Set String
-        termIdsSet =
-            terms |> Array.toList |> List.map (TermField.raw >> Form.termBodyToId) |> Set.fromList
+        rawTermsSet : Set String
+        rawTermsSet =
+            terms |> Array.toList |> List.map TermField.raw |> Set.fromList
 
         relatedTermsList : List Form.RelatedTermField
         relatedTermsList =
@@ -936,7 +937,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
                 (viewCreateSeeAlsoSingle
                     showValidationErrors
                     (relatedTermsList
-                        |> List.filterMap (.id >> Maybe.map TermId.toString)
+                        |> List.filterMap (.raw >> Maybe.map RawTerm.toString)
                         |> Set.fromList
                     )
                     (List.length relatedTermsList)
@@ -946,10 +947,10 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
                                 Set.member
                                     (term
                                         |> DisambiguatedTerm.toTerm
-                                        |> Term.id
-                                        |> TermId.toString
+                                        |> Term.raw
+                                        |> RawTerm.toString
                                     )
-                                    termIdsSet
+                                    rawTermsSet
                         )
                         allPreferredTerms
                     )
@@ -989,7 +990,7 @@ viewAddSuggestedSeeAlso enableMathSupport suggestedRelatedTerms =
                                     PageMsg.Internal
                                         (AddRelatedTerm <|
                                             Just <|
-                                                Term.id <|
+                                                Term.raw <|
                                                     DisambiguatedTerm.toTerm suggestedRelatedTerm
                                         )
                                 ]

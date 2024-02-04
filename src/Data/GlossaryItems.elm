@@ -1,8 +1,9 @@
 module Data.GlossaryItems exposing
     ( GlossaryItems
     , empty, fromList, applyTagsChanges, insert, update, remove
-    , get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+    , get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
+    , disambiguatedPreferredTermFromRaw
     )
 
 {-| The glossary items that make up a glossary.
@@ -20,7 +21,7 @@ module Data.GlossaryItems exposing
 
 # Query
 
-@docs get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromDisambiguatedPreferredTermId, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+@docs get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
 
 
 # Export
@@ -32,10 +33,9 @@ module Data.GlossaryItems exposing
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
-import Data.GlossaryItem.RawTerm as RawTerm
+import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
@@ -64,7 +64,7 @@ type GlossaryItems
         , disambiguationTagIdByItemId : GlossaryItemIdDict (Maybe TagId)
         , normalTagIdsByItemId : GlossaryItemIdDict (List TagId)
         , itemIdsByTagId : TagIdDict (List GlossaryItemId)
-        , itemIdByDisambiguatedPreferredTermId : Dict String GlossaryItemId
+        , itemIdByRawDisambiguatedPreferredTerm : Dict String GlossaryItemId
         , relatedItemIdsById : GlossaryItemIdDict (List GlossaryItemId)
         , orderedAlphabetically : List GlossaryItemId
         , orderedByMostMentionedFirst : List GlossaryItemId
@@ -201,7 +201,7 @@ empty =
         , disambiguationTagIdByItemId = GlossaryItemIdDict.empty
         , normalTagIdsByItemId = GlossaryItemIdDict.empty
         , itemIdsByTagId = TagIdDict.empty
-        , itemIdByDisambiguatedPreferredTermId = Dict.empty
+        , itemIdByRawDisambiguatedPreferredTerm = Dict.empty
         , relatedItemIdsById = GlossaryItemIdDict.empty
         , orderedAlphabetically = []
         , orderedByMostMentionedFirst = []
@@ -220,8 +220,8 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
         indexedGlossaryItemsForHtml =
             List.indexedMap (GlossaryItemId.create >> Tuple.pair) glossaryItemsForHtml
 
-        itemIdByDisambiguatedPreferredTermId_ : DuplicateRejectingDict String GlossaryItemId
-        itemIdByDisambiguatedPreferredTermId_ =
+        itemIdByRawDisambiguatedPreferredTerm_ : DuplicateRejectingDict String GlossaryItemId
+        itemIdByRawDisambiguatedPreferredTerm_ =
             indexedGlossaryItemsForHtml
                 |> List.foldl
                     (\( itemId, item ) ->
@@ -229,8 +229,8 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                             (item
                                 |> GlossaryItemForHtml.disambiguatedPreferredTerm
                                 |> DisambiguatedTerm.toTerm
-                                |> Term.id
-                                |> TermId.toString
+                                |> Term.raw
+                                |> RawTerm.toString
                             )
                             itemId
                     )
@@ -404,8 +404,8 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                             |> List.filterMap
                                 (\relatedPreferredTerm ->
                                     DuplicateRejectingDict.get
-                                        (relatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.id |> TermId.toString)
-                                        itemIdByDisambiguatedPreferredTermId_
+                                        (relatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
+                                        itemIdByRawDisambiguatedPreferredTerm_
                                 )
                             |> GlossaryItemIdDict.insert id
                     )
@@ -427,9 +427,9 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                                 )
                     )
 
-        itemIdByDisambiguatedPreferredTermIdResult : Result String (Dict String GlossaryItemId)
-        itemIdByDisambiguatedPreferredTermIdResult =
-            itemIdByDisambiguatedPreferredTermId_
+        itemIdByRawDisambiguatedPreferredTermResult : Result String (Dict String GlossaryItemId)
+        itemIdByRawDisambiguatedPreferredTermResult =
+            itemIdByRawDisambiguatedPreferredTerm_
                 |> DuplicateRejectingDict.toResult
                 |> Result.mapError
                     (\{ value1 } ->
@@ -480,7 +480,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 |> Result.mapError (\{ key } -> I18n.tagAppearsMultipleTimes key)
     in
     Result.map2
-        (\itemIdByDisambiguatedPreferredTermId1 tagIdByRawTag_ ->
+        (\itemIdByRawDisambiguatedPreferredTerm1 tagIdByRawTag_ ->
             let
                 orderedAlphabetically__ : List GlossaryItemId
                 orderedAlphabetically__ =
@@ -517,7 +517,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 , disambiguationTagIdByItemId = disambiguationTagIdByItemId
                 , normalTagIdsByItemId = sortedNormalTagIdsByItemId
                 , itemIdsByTagId = itemIdsByTagId_
-                , itemIdByDisambiguatedPreferredTermId = itemIdByDisambiguatedPreferredTermId1
+                , itemIdByRawDisambiguatedPreferredTerm = itemIdByRawDisambiguatedPreferredTerm1
                 , relatedItemIdsById = relatedItemIdsById
                 , orderedAlphabetically = orderedAlphabetically__
                 , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
@@ -526,7 +526,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 , nextTagId = nextTagId
                 }
         )
-        itemIdByDisambiguatedPreferredTermIdResult
+        itemIdByRawDisambiguatedPreferredTermResult
         tagIdByRawTagResult
 
 
@@ -596,11 +596,11 @@ insert item ((GlossaryItems items) as glossaryItems) =
             item
                 |> GlossaryItemForHtml.disambiguatedPreferredTerm
                 |> DisambiguatedTerm.toTerm
-                |> Term.id
-                |> (\termId ->
+                |> Term.raw
+                |> (\rawTerm ->
                         itemsAfterInserting
                             |> Result.toMaybe
-                            |> Maybe.andThen (itemIdFromDisambiguatedPreferredTermId termId)
+                            |> Maybe.andThen (itemIdFromRawDisambiguatedPreferredTerm rawTerm)
                    )
                 |> Maybe.withDefault nextItemId
     in
@@ -891,20 +891,20 @@ disambiguatedPreferredTerms filterByTagId ((GlossaryItems items) as glossaryItem
         |> List.sortWith compareDisambiguatedTerms
 
 
-{-| Look up the ID of the item whose disambiguated preferred term has the given ID.
+{-| Look up the ID of the item with the given disambiguated preferred term.
 -}
-itemIdFromDisambiguatedPreferredTermId : TermId -> GlossaryItems -> Maybe GlossaryItemId
-itemIdFromDisambiguatedPreferredTermId termId (GlossaryItems items) =
-    items.itemIdByDisambiguatedPreferredTermId
-        |> Dict.get (TermId.toString termId)
+itemIdFromRawDisambiguatedPreferredTerm : RawTerm -> GlossaryItems -> Maybe GlossaryItemId
+itemIdFromRawDisambiguatedPreferredTerm rawTerm (GlossaryItems items) =
+    items.itemIdByRawDisambiguatedPreferredTerm
+        |> Dict.get (RawTerm.toString rawTerm)
 
 
-{-| Look up the disambiguated preferred term of the item whose disambiguated preferred term has the given ID.
+{-| Look up the disambiguated preferred term of the item with the given disambiguated preferred term.
 -}
-disambiguatedPreferredTermFromId : TermId -> GlossaryItems -> Maybe DisambiguatedTerm
-disambiguatedPreferredTermFromId termId ((GlossaryItems items) as glossaryItems) =
-    items.itemIdByDisambiguatedPreferredTermId
-        |> Dict.get (TermId.toString termId)
+disambiguatedPreferredTermFromRaw : RawTerm -> GlossaryItems -> Maybe DisambiguatedTerm
+disambiguatedPreferredTermFromRaw rawTerm ((GlossaryItems items) as glossaryItems) =
+    items.itemIdByRawDisambiguatedPreferredTerm
+        |> Dict.get (RawTerm.toString rawTerm)
         |> Maybe.andThen
             (\itemId ->
                 glossaryItems

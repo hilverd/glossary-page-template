@@ -1,5 +1,6 @@
 module Data.OrderItemsBy exposing (OrderItemsBy(..), fromQuery, toQueryParameter)
 
+import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Url.Builder
 import Url.Parser.Query
@@ -8,7 +9,7 @@ import Url.Parser.Query
 type OrderItemsBy
     = Alphabetically
     | MostMentionedFirst
-    | FocusedOn TermId
+    | FocusedOn RawTerm
 
 
 fromQuery : Url.Parser.Query.Parser OrderItemsBy
@@ -25,12 +26,12 @@ fromQuery =
                 [ somethingElse ] ->
                     if String.startsWith "focused-on-" somethingElse then
                         let
-                            termId =
+                            rawTerm =
                                 somethingElse
                                     |> String.slice 11 (String.length somethingElse)
-                                    |> TermId.fromString
+                                    |> RawTerm.fromString
                         in
-                        FocusedOn termId
+                        FocusedOn rawTerm
 
                     else
                         Alphabetically
@@ -51,7 +52,7 @@ toQueryParameter orderItemsBy =
                 MostMentionedFirst ->
                     Just "most-mentioned-first"
 
-                FocusedOn termId ->
-                    Just <| "focused-on-" ++ TermId.toString termId
+                FocusedOn rawTerm ->
+                    Just <| "focused-on-" ++ RawTerm.toString rawTerm
     in
     Maybe.map (Url.Builder.string "order-items-by") maybeValue
