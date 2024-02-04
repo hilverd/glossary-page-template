@@ -26,10 +26,8 @@ create =
 {-| Retrieve the underlying value for a tag ID.
 -}
 toInt : TagId -> Int
-toInt tagId =
-    case tagId of
-        TagId id ->
-            id
+toInt (TagId id) =
+    id
 
 
 {-| An encoder/decoder for tag IDs.

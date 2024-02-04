@@ -155,7 +155,5 @@ fromGlossaryItems filterByTagId glossaryItems =
 {-| Get the list of term groups that make up an index of terms.
 -}
 termGroups : IndexOfTerms -> List TermGroup
-termGroups indexOfTerms =
-    case indexOfTerms of
-        IndexOfTerms index ->
-            index
+termGroups (IndexOfTerms index) =
+    index

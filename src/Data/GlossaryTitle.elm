@@ -42,10 +42,8 @@ fromMarkdown =
 {-| Retrieve the raw body of a glossary title.
 -}
 raw : GlossaryTitle -> String
-raw glossaryTitle =
-    case glossaryTitle of
-        MarkdownGlossaryTitle fragment ->
-            MarkdownFragment.raw fragment
+raw (MarkdownGlossaryTitle fragment) =
+    MarkdownFragment.raw fragment
 
 
 {-| An encoder/decoder for a glossary title.
@@ -102,21 +100,17 @@ toFilename extension glossaryTitle =
 
 -}
 inlineText : GlossaryTitle -> String
-inlineText glossaryTitle =
-    case glossaryTitle of
-        MarkdownGlossaryTitle fragment ->
-            fragment
-                |> MarkdownFragment.concatenateInlineText
-                |> Result.withDefault (MarkdownFragment.raw fragment)
+inlineText (MarkdownGlossaryTitle fragment) =
+    fragment
+        |> MarkdownFragment.concatenateInlineText
+        |> Result.withDefault (MarkdownFragment.raw fragment)
 
 
 {-| Convert a glossary title to a string suitable for a Markdown document.
 -}
 markdown : GlossaryTitle -> String
-markdown glossaryTitle =
-    case glossaryTitle of
-        MarkdownGlossaryTitle fragment ->
-            MarkdownFragment.raw fragment
+markdown (MarkdownGlossaryTitle fragment) =
+    MarkdownFragment.raw fragment
 
 
 {-| View a glossary title as HTML.
@@ -138,24 +132,22 @@ markdown glossaryTitle =
 
 -}
 view : Bool -> GlossaryTitle -> Html msg
-view enableMathSupport glossaryTitle =
-    case glossaryTitle of
-        MarkdownGlossaryTitle fragment ->
-            let
-                parsed : Result String (List Block)
-                parsed =
-                    MarkdownFragment.parsed fragment
-            in
-            case parsed of
-                Ok blocks ->
-                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
-                        Ok rendered ->
-                            Html.span
-                                [ class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden text-3xl font-bold leading-tight" ]
-                                rendered
+view enableMathSupport (MarkdownGlossaryTitle fragment) =
+    let
+        parsed : Result String (List Block)
+        parsed =
+            MarkdownFragment.parsed fragment
+    in
+    case parsed of
+        Ok blocks ->
+            case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
+                Ok rendered ->
+                    Html.span
+                        [ class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden text-3xl font-bold leading-tight" ]
+                        rendered
 
-                        Err renderingError ->
-                            text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
+                Err renderingError ->
+                    text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
-                Err parsingError ->
-                    text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
+        Err parsingError ->
+            text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError

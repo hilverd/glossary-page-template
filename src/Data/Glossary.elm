@@ -74,132 +74,106 @@ type Glossary
 {-| Whether or not showing last updated dates for items is enabled.
 -}
 enableLastUpdatedDates : Glossary -> Bool
-enableLastUpdatedDates glossary =
-    case glossary of
-        Glossary glossary_ ->
-            glossary_.enableLastUpdatedDates
+enableLastUpdatedDates (Glossary glossary_) =
+    glossary_.enableLastUpdatedDates
 
 
 {-| Whether or not showing the export menu is enabled.
 -}
 enableExportMenu : Glossary -> Bool
-enableExportMenu glossary =
-    case glossary of
-        Glossary glossary_ ->
-            glossary_.enableExportMenu
+enableExportMenu (Glossary glossary) =
+    glossary.enableExportMenu
 
 
 {-| Whether or not showing buttons for ordering items is enabled.
 -}
 enableOrderItemsButtons : Glossary -> Bool
-enableOrderItemsButtons glossary =
-    case glossary of
-        Glossary glossary_ ->
-            glossary_.enableOrderItemsButtons
+enableOrderItemsButtons (Glossary glossary) =
+    glossary.enableOrderItemsButtons
 
 
 {-| Whether or not help for making changes is enabled.
 -}
 enableHelpForMakingChanges : Glossary -> Bool
-enableHelpForMakingChanges glossary =
-    case glossary of
-        Glossary glossary_ ->
-            glossary_.enableHelpForMakingChanges
+enableHelpForMakingChanges (Glossary glossary) =
+    glossary.enableHelpForMakingChanges
 
 
 {-| Get the card width configuration for a glossary.
 -}
 cardWidth : Glossary -> CardWidth
-cardWidth glossary =
-    case glossary of
-        Glossary glossary_ ->
-            glossary_.cardWidth
+cardWidth (Glossary glossary) =
+    glossary.cardWidth
 
 
 {-| Get the title for a glossary.
 -}
 title : Glossary -> GlossaryTitle
-title glossary =
-    case glossary of
-        Glossary glossary_ ->
-            glossary_.title
+title (Glossary glossary) =
+    glossary.title
 
 
 {-| Get the about section for a glossary.
 -}
 aboutSection : Glossary -> AboutSection
-aboutSection glossary =
-    case glossary of
-        Glossary glossary_ ->
-            glossary_.aboutSection
+aboutSection (Glossary glossary) =
+    glossary.aboutSection
 
 
 {-| Get the items for a glossary.
 -}
 items : Glossary -> GlossaryItems
-items glossary =
-    case glossary of
-        Glossary glossary_ ->
-            glossary_.items
+items (Glossary glossary) =
+    glossary.items
 
 
 {-| Get the version number for a glossary.
 -}
 versionNumber : Glossary -> GlossaryVersionNumber
-versionNumber (Glossary glossary_) =
-    glossary_.versionNumber
+versionNumber (Glossary glossary) =
+    glossary.versionNumber
 
 
 {-| Increment the version number for a glossary.
 -}
 incrementVersionNumber : Glossary -> Glossary
-incrementVersionNumber (Glossary glossary_) =
-    Glossary { glossary_ | versionNumber = GlossaryVersionNumber.increment glossary_.versionNumber }
+incrementVersionNumber (Glossary glossary) =
+    Glossary { glossary | versionNumber = GlossaryVersionNumber.increment glossary.versionNumber }
 
 
 {-| Enable or disable showing of last updated dates for items.
 -}
 setEnableLastUpdatedDates : Bool -> Glossary -> Glossary
-setEnableLastUpdatedDates enable glossary =
-    case glossary of
-        Glossary glossary_ ->
-            Glossary { glossary_ | enableLastUpdatedDates = enable }
+setEnableLastUpdatedDates enable (Glossary glossary) =
+    Glossary { glossary | enableLastUpdatedDates = enable }
 
 
 {-| Toggle showing of last updated dates for items.
 -}
 toggleEnableLastUpdatedDates : Glossary -> Glossary
-toggleEnableLastUpdatedDates glossary =
-    case glossary of
-        Glossary glossary_ ->
-            Glossary { glossary_ | enableLastUpdatedDates = not glossary_.enableLastUpdatedDates }
+toggleEnableLastUpdatedDates (Glossary glossary) =
+    Glossary { glossary | enableLastUpdatedDates = not glossary.enableLastUpdatedDates }
 
 
 {-| Enable or disable showing of the export menu.
 -}
 setEnableExportMenu : Bool -> Glossary -> Glossary
-setEnableExportMenu enable glossary =
-    case glossary of
-        Glossary glossary_ ->
-            Glossary { glossary_ | enableExportMenu = enable }
+setEnableExportMenu enable (Glossary glossary) =
+    Glossary { glossary | enableExportMenu = enable }
 
 
 {-| Toggle showing of the export menu.
 -}
 toggleEnableExportMenu : Glossary -> Glossary
-toggleEnableExportMenu glossary =
-    case glossary of
-        Glossary glossary_ ->
-            Glossary { glossary_ | enableExportMenu = not glossary_.enableExportMenu }
+toggleEnableExportMenu (Glossary glossary) =
+    Glossary { glossary | enableExportMenu = not glossary.enableExportMenu }
 
 
 {-| Enable or disable showing of buttons for ordering items.
 -}
 setEnableOrderItemsButtons : Bool -> Glossary -> Glossary
-setEnableOrderItemsButtons enable glossary =
-    case glossary of
-        Glossary glossary_ ->
-            Glossary { glossary_ | enableOrderItemsButtons = enable }
+setEnableOrderItemsButtons enable (Glossary glossary) =
+    Glossary { glossary | enableOrderItemsButtons = enable }
 
 
 {-| Toggle showing of buttons for ordering items.
@@ -214,46 +188,36 @@ toggleEnableOrderItemsButtons glossary =
 {-| Enable or disable showing help for making changes.
 -}
 setEnableHelpForMakingChanges : Bool -> Glossary -> Glossary
-setEnableHelpForMakingChanges enable glossary =
-    case glossary of
-        Glossary glossary_ ->
-            Glossary { glossary_ | enableHelpForMakingChanges = enable }
+setEnableHelpForMakingChanges enable (Glossary glossary) =
+    Glossary { glossary | enableHelpForMakingChanges = enable }
 
 
 {-| Set the card width configuration for a glossary.
 -}
 setCardWidth : CardWidth -> Glossary -> Glossary
-setCardWidth cardWidth_ glossary =
-    case glossary of
-        Glossary glossary_ ->
-            Glossary { glossary_ | cardWidth = cardWidth_ }
+setCardWidth cardWidth_ (Glossary glossary) =
+    Glossary { glossary | cardWidth = cardWidth_ }
 
 
 {-| Set the title for a glossary.
 -}
 setTitle : GlossaryTitle -> Glossary -> Glossary
-setTitle title_ glossary =
-    case glossary of
-        Glossary glossary_ ->
-            Glossary { glossary_ | title = title_ }
+setTitle title_ (Glossary glossary) =
+    Glossary { glossary | title = title_ }
 
 
 {-| Set the about section for a glossary.
 -}
 setAboutSection : AboutSection -> Glossary -> Glossary
-setAboutSection aboutSection_ glossary =
-    case glossary of
-        Glossary glossary_ ->
-            Glossary { glossary_ | aboutSection = aboutSection_ }
+setAboutSection aboutSection_ (Glossary glossary) =
+    Glossary { glossary | aboutSection = aboutSection_ }
 
 
 {-| Sets the items for a glossary.
 -}
 setItems : GlossaryItems -> Glossary -> Glossary
-setItems items_ glossary =
-    case glossary of
-        Glossary glossary_ ->
-            Glossary { glossary_ | items = items_ }
+setItems items_ (Glossary glossary) =
+    Glossary { glossary | items = items_ }
 
 
 {-| Creates a new glossary with the given configuration.
@@ -473,101 +437,99 @@ remove itemId glossary =
 {-| Represent this glossary as an HTML tree, ready for writing back to the glossary's HTML file.
 -}
 toHtmlTree : Glossary -> HtmlTree
-toHtmlTree glossary =
-    case glossary of
-        Glossary glossary_ ->
-            let
-                tagsWithDescriptions =
-                    GlossaryItems.tagsWithDescriptions glossary_.items
-            in
-            HtmlTree.Node "div"
+toHtmlTree (Glossary glossary) =
+    let
+        tagsWithDescriptions =
+            GlossaryItems.tagsWithDescriptions glossary.items
+    in
+    HtmlTree.Node "div"
+        True
+        [ HtmlTree.Attribute "id" ElementIds.container
+        , HtmlTree.boolAttribute "data-enable-help-for-making-changes" glossary.enableHelpForMakingChanges
+        , HtmlTree.boolAttribute "data-enable-export-menu" glossary.enableExportMenu
+        , HtmlTree.boolAttribute "data-enable-order-items-buttons" glossary.enableOrderItemsButtons
+        , HtmlTree.boolAttribute "data-enable-last-updated-dates" glossary.enableLastUpdatedDates
+        , CardWidth.toHtmlTreeAttribute glossary.cardWidth
+        , GlossaryVersionNumber.toHtmlTreeAttribute glossary.versionNumber
+        ]
+        [ HtmlTree.Node "header"
+            True
+            []
+            [ HtmlTree.Node "h1"
                 True
-                [ HtmlTree.Attribute "id" ElementIds.container
-                , HtmlTree.boolAttribute "data-enable-help-for-making-changes" glossary_.enableHelpForMakingChanges
-                , HtmlTree.boolAttribute "data-enable-export-menu" glossary_.enableExportMenu
-                , HtmlTree.boolAttribute "data-enable-order-items-buttons" glossary_.enableOrderItemsButtons
-                , HtmlTree.boolAttribute "data-enable-last-updated-dates" glossary_.enableLastUpdatedDates
-                , CardWidth.toHtmlTreeAttribute glossary_.cardWidth
-                , GlossaryVersionNumber.toHtmlTreeAttribute glossary_.versionNumber
-                ]
-                [ HtmlTree.Node "header"
+                [ HtmlTree.Attribute "id" ElementIds.title ]
+                [ HtmlTree.Leaf <| GlossaryTitle.raw glossary.title ]
+            ]
+        , HtmlTree.Node "main"
+            True
+            []
+            [ HtmlTree.Node "div"
+                True
+                [ HtmlTree.Attribute "id" ElementIds.about ]
+                [ HtmlTree.Node "p"
+                    False
+                    []
+                    [ HtmlTree.Leaf <| AboutParagraph.raw glossary.aboutSection.paragraph ]
+                , HtmlTree.Node "ul"
                     True
                     []
-                    [ HtmlTree.Node "h1"
-                        True
-                        [ HtmlTree.Attribute "id" ElementIds.title ]
-                        [ HtmlTree.Leaf <| GlossaryTitle.raw glossary_.title ]
-                    ]
-                , HtmlTree.Node "main"
-                    True
-                    []
-                    [ HtmlTree.Node "div"
-                        True
-                        [ HtmlTree.Attribute "id" ElementIds.about ]
-                        [ HtmlTree.Node "p"
-                            False
-                            []
-                            [ HtmlTree.Leaf <| AboutParagraph.raw glossary_.aboutSection.paragraph ]
-                        , HtmlTree.Node "ul"
-                            True
-                            []
-                            (List.map
-                                (\aboutLink ->
-                                    HtmlTree.Node "li"
-                                        True
-                                        []
-                                        [ HtmlTree.Node "a"
-                                            True
-                                            [ HtmlTree.Attribute "target" "_blank"
-                                            , HtmlTree.Attribute "href" <| AboutLink.href aboutLink
-                                            ]
-                                            [ HtmlTree.Leaf <| AboutLink.body aboutLink ]
-                                        ]
-                                )
-                                glossary_.aboutSection.links
-                            )
-                        ]
-                    , HtmlTree.showIf (not <| List.isEmpty tagsWithDescriptions) <|
-                        HtmlTree.Node
-                            "div"
-                            True
-                            [ HtmlTree.Attribute "id" ElementIds.tags ]
-                            [ HtmlTree.Leaf <| I18n.tags ++ ":"
-                            , HtmlTree.Node "dl"
+                    (List.map
+                        (\aboutLink ->
+                            HtmlTree.Node "li"
                                 True
                                 []
-                                (List.map
-                                    (\( tag, description ) ->
-                                        HtmlTree.Node "div"
-                                            True
-                                            []
-                                            [ HtmlTree.Node "dt"
-                                                False
-                                                []
-                                                [ HtmlTree.Leaf <| Tag.raw tag ]
-                                            , HtmlTree.Node "dd"
-                                                False
-                                                []
-                                                [ HtmlTree.Leaf <| TagDescription.raw description ]
-                                            ]
-                                    )
-                                    tagsWithDescriptions
-                                )
-                            ]
-                    , HtmlTree.Node "article"
+                                [ HtmlTree.Node "a"
+                                    True
+                                    [ HtmlTree.Attribute "target" "_blank"
+                                    , HtmlTree.Attribute "href" <| AboutLink.href aboutLink
+                                    ]
+                                    [ HtmlTree.Leaf <| AboutLink.body aboutLink ]
+                                ]
+                        )
+                        glossary.aboutSection.links
+                    )
+                ]
+            , HtmlTree.showIf (not <| List.isEmpty tagsWithDescriptions) <|
+                HtmlTree.Node
+                    "div"
+                    True
+                    [ HtmlTree.Attribute "id" ElementIds.tags ]
+                    [ HtmlTree.Leaf <| I18n.tags ++ ":"
+                    , HtmlTree.Node "dl"
                         True
-                        [ HtmlTree.Attribute "id" ElementIds.items ]
-                        [ HtmlTree.Node "dl"
-                            True
-                            []
-                            (glossary_.items
-                                |> GlossaryItems.orderedAlphabetically Nothing
-                                |> List.map (Tuple.second >> GlossaryItemForHtml.toHtmlTree)
+                        []
+                        (List.map
+                            (\( tag, description ) ->
+                                HtmlTree.Node "div"
+                                    True
+                                    []
+                                    [ HtmlTree.Node "dt"
+                                        False
+                                        []
+                                        [ HtmlTree.Leaf <| Tag.raw tag ]
+                                    , HtmlTree.Node "dd"
+                                        False
+                                        []
+                                        [ HtmlTree.Leaf <| TagDescription.raw description ]
+                                    ]
                             )
-                        ]
+                            tagsWithDescriptions
+                        )
                     ]
-                , HtmlTree.Node "footer"
+            , HtmlTree.Node "article"
+                True
+                [ HtmlTree.Attribute "id" ElementIds.items ]
+                [ HtmlTree.Node "dl"
                     True
                     []
-                    I18n.builtUsingGlossaryPageTemplateHtmlTree
+                    (glossary.items
+                        |> GlossaryItems.orderedAlphabetically Nothing
+                        |> List.map (Tuple.second >> GlossaryItemForHtml.toHtmlTree)
+                    )
                 ]
+            ]
+        , HtmlTree.Node "footer"
+            True
+            []
+            I18n.builtUsingGlossaryPageTemplateHtmlTree
+        ]

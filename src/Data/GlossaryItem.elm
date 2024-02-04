@@ -67,61 +67,47 @@ init preferredTerm_ alternativeTerms_ definition_ needsUpdating_ lastUpdatedDate
 {-| The preferred term for this glossary item.
 -}
 preferredTerm : GlossaryItem -> Term
-preferredTerm glossaryItem =
-    case glossaryItem of
-        GlossaryItem item ->
-            item.preferredTerm
+preferredTerm (GlossaryItem item) =
+    item.preferredTerm
 
 
 {-| The alternative terms for this glossary item.
 -}
 alternativeTerms : GlossaryItem -> List Term
-alternativeTerms glossaryItem =
-    case glossaryItem of
-        GlossaryItem item ->
-            item.alternativeTerms
+alternativeTerms (GlossaryItem item) =
+    item.alternativeTerms
 
 
 {-| The definition for this glossary item.
 -}
 definition : GlossaryItem -> Maybe Definition
-definition glossaryItem =
-    case glossaryItem of
-        GlossaryItem item ->
-            item.definition
+definition (GlossaryItem item) =
+    item.definition
 
 
 {-| The "needs updating" flag for this glossary item.
 -}
 needsUpdating : GlossaryItem -> Bool
-needsUpdating glossaryItem =
-    case glossaryItem of
-        GlossaryItem item ->
-            item.needsUpdating
+needsUpdating (GlossaryItem item) =
+    item.needsUpdating
 
 
 {-| The last updated date for this glossary item.
 -}
 lastUpdatedDateAsIso8601 : GlossaryItem -> Maybe String
-lastUpdatedDateAsIso8601 glossaryItem =
-    case glossaryItem of
-        GlossaryItem item ->
-            item.lastUpdatedDateAsIso8601
+lastUpdatedDateAsIso8601 (GlossaryItem item) =
+    item.lastUpdatedDateAsIso8601
 
 
 {-| The name of the person who last updated this glossary item.
 -}
 lastUpdatedByName : GlossaryItem -> Maybe String
-lastUpdatedByName glossaryItem =
-    case glossaryItem of
-        GlossaryItem item ->
-            item.lastUpdatedByName
+lastUpdatedByName (GlossaryItem item) =
+    item.lastUpdatedByName
 
 
 {-| The email address of the person who last updated this glossary item.
 -}
 lastUpdatedByEmailAddress : GlossaryItem -> Maybe String
-lastUpdatedByEmailAddress glossaryItem =
-    case glossaryItem of
-        GlossaryItem item ->
-            item.lastUpdatedByEmailAddress
+lastUpdatedByEmailAddress (GlossaryItem item) =
+    item.lastUpdatedByEmailAddress

@@ -20,7 +20,6 @@ import Extras.String
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
 import Internationalisation as I18n
-import Markdown.Block exposing (Block)
 import Markdown.Renderer as Renderer
 import MarkdownRenderers
 import String.Normalize
@@ -100,10 +99,8 @@ codec =
 
 -}
 id : Term -> TermId
-id term =
-    case term of
-        MarkdownTerm t ->
-            t.body |> MarkdownFragment.raw |> String.replace " " "_" |> TermId.fromString
+id (MarkdownTerm { body }) =
+    body |> MarkdownFragment.raw |> String.replace " " "_" |> TermId.fromString
 
 
 {-| Retrieve the "is an abbreviation" Boolean of a term.
@@ -112,19 +109,15 @@ id term =
 
 -}
 isAbbreviation : Term -> Bool
-isAbbreviation term =
-    case term of
-        MarkdownTerm t ->
-            t.isAbbreviation
+isAbbreviation (MarkdownTerm t) =
+    t.isAbbreviation
 
 
 {-| Retrieve the raw body of a term.
 -}
 raw : Term -> String
-raw term =
-    case term of
-        MarkdownTerm t ->
-            MarkdownFragment.raw t.body
+raw (MarkdownTerm { body }) =
+    MarkdownFragment.raw body
 
 
 {-| Retrieve the concatenated inline text of a term.
@@ -135,19 +128,15 @@ raw term =
 
 -}
 inlineText : Term -> String
-inlineText term =
-    case term of
-        MarkdownTerm t ->
-            t.inlineText
+inlineText (MarkdownTerm t) =
+    t.inlineText
 
 
 {-| Convert a term to a string suitable for a Markdown document.
 -}
 markdown : Term -> String
-markdown term =
-    case term of
-        MarkdownTerm t ->
-            MarkdownFragment.raw t.body
+markdown (MarkdownTerm { body }) =
+    MarkdownFragment.raw body
 
 
 {-| View a term as HTML.
@@ -169,27 +158,20 @@ markdown term =
 
 -}
 view : Bool -> List (Attribute msg) -> Term -> Html msg
-view enableMathSupport additionalAttributes term =
-    case term of
-        MarkdownTerm t ->
-            let
-                parsed : Result String (List Block)
-                parsed =
-                    MarkdownFragment.parsed t.body
-            in
-            case parsed of
-                Ok blocks ->
-                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
-                        Ok rendered ->
-                            Html.span
-                                (class "prose dark:prose-invert print:prose-neutral dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" :: additionalAttributes)
-                                rendered
+view enableMathSupport additionalAttributes (MarkdownTerm { body }) =
+    case MarkdownFragment.parsed body of
+        Ok blocks ->
+            case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
+                Ok rendered ->
+                    Html.span
+                        (class "prose dark:prose-invert print:prose-neutral dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" :: additionalAttributes)
+                        rendered
 
-                        Err renderingError ->
-                            text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
+                Err renderingError ->
+                    text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
-                Err parsingError ->
-                    text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
+        Err parsingError ->
+            text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
 
 
 {-| The _index group character_ of a term is the character it will be listed under in the index.
@@ -208,10 +190,8 @@ view enableMathSupport additionalAttributes term =
 
 -}
 indexGroupString : Term -> String
-indexGroupString term =
-    case term of
-        MarkdownTerm t ->
-            t.indexGroupString
+indexGroupString (MarkdownTerm t) =
+    t.indexGroupString
 
 
 {-| Compares two terms for ordering them alphabetically.
@@ -244,28 +224,24 @@ compareAlphabetically term1 term2 =
 {-| Update the raw body of a term.
 -}
 updateRaw : (String -> String) -> Term -> Term
-updateRaw f term =
-    case term of
-        MarkdownTerm t ->
-            fromMarkdown
-                (t.body |> MarkdownFragment.raw |> f)
-                t.isAbbreviation
+updateRaw f (MarkdownTerm t) =
+    fromMarkdown
+        (t.body |> MarkdownFragment.raw |> f)
+        t.isAbbreviation
 
 
 {-| Convert a term to an HtmlTree for Anki.
 -}
 htmlTreeForAnki : Bool -> Term -> HtmlTree
-htmlTreeForAnki enableMathSupport term =
-    case term of
-        MarkdownTerm t ->
-            case MarkdownFragment.parsed t.body of
-                Ok blocks ->
-                    case blocks |> Renderer.render (MarkdownRenderers.inlineHtmlTreeRendererForAnki enableMathSupport) of
-                        Ok rendered ->
-                            Extras.HtmlTree.Node "span" False [] rendered
+htmlTreeForAnki enableMathSupport (MarkdownTerm { body }) =
+    case MarkdownFragment.parsed body of
+        Ok blocks ->
+            case blocks |> Renderer.render (MarkdownRenderers.inlineHtmlTreeRendererForAnki enableMathSupport) of
+                Ok rendered ->
+                    Extras.HtmlTree.Node "span" False [] rendered
 
-                        Err renderingError ->
-                            Extras.HtmlTree.Leaf <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
+                Err renderingError ->
+                    Extras.HtmlTree.Leaf <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
-                Err parsingError ->
-                    Extras.HtmlTree.Leaf <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
+        Err parsingError ->
+            Extras.HtmlTree.Leaf <| I18n.failedToParseMarkdown ++ ": " ++ parsingError

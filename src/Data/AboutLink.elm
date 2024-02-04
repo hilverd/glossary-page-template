@@ -39,10 +39,8 @@ codec =
 
 -}
 href : AboutLink -> String
-href aboutLink =
-    case aboutLink of
-        AboutLink link ->
-            link.href
+href (AboutLink link) =
+    link.href
 
 
 {-| Get the `body` part representing the link text.
@@ -52,10 +50,8 @@ href aboutLink =
 
 -}
 body : AboutLink -> String
-body aboutLink =
-    case aboutLink of
-        AboutLink link ->
-            link.body
+body (AboutLink link) =
+    link.body
 
 
 {-| Create an `AboutLink` from a link URL and a link body.

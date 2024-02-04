@@ -41,10 +41,8 @@ fromString raw0 =
 
 -}
 raw : MarkdownFragment -> String
-raw markdownFragment =
-    case markdownFragment of
-        MarkdownFragment fragment ->
-            fragment.raw
+raw (MarkdownFragment fragment) =
+    fragment.raw
 
 
 {-| Retrieve result of parsing this Markdown fragment.
@@ -64,31 +62,25 @@ raw markdownFragment =
 
 -}
 parsed : MarkdownFragment -> Result String (List Block)
-parsed markdownFragment =
-    case markdownFragment of
-        MarkdownFragment fragment ->
-            fragment.parsed
+parsed (MarkdownFragment fragment) =
+    fragment.parsed
 
 
 {-| Transform a Markdown fragment by recursively applying the given function.
 -}
 transform : (Block -> Block) -> MarkdownFragment -> MarkdownFragment
-transform f markdownFragment =
-    case markdownFragment of
-        MarkdownFragment fragment ->
-            MarkdownFragment
-                { raw = fragment.raw
-                , parsed = Result.map (List.map <| Block.walk f) fragment.parsed
-                }
+transform f (MarkdownFragment fragment) =
+    MarkdownFragment
+        { raw = fragment.raw
+        , parsed = Result.map (List.map <| Block.walk f) fragment.parsed
+        }
 
 
 {-| Fold over all inlines within a Markdown fragment to yield a value.
 -}
 inlineFoldl : (Inline -> acc -> acc) -> acc -> MarkdownFragment -> Result String acc
-inlineFoldl f initial markdownFragment =
-    case markdownFragment of
-        MarkdownFragment fragment ->
-            Result.map (Block.inlineFoldl f initial) fragment.parsed
+inlineFoldl f initial (MarkdownFragment fragment) =
+    Result.map (Block.inlineFoldl f initial) fragment.parsed
 
 
 {-| Concatenate the inlines within a Markdown fragment to produce a string.

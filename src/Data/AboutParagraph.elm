@@ -41,19 +41,15 @@ fromMarkdown =
 {-| Retrieve the raw body of an "about" paragraph.
 -}
 raw : AboutParagraph -> String
-raw aboutParagraph =
-    case aboutParagraph of
-        MarkdownAboutParagraph fragment ->
-            MarkdownFragment.raw fragment
+raw (MarkdownAboutParagraph fragment) =
+    MarkdownFragment.raw fragment
 
 
 {-| Convert an "about" paragraph to a string suitable for a Markdown document.
 -}
 markdown : AboutParagraph -> String
-markdown aboutParagraph =
-    case aboutParagraph of
-        MarkdownAboutParagraph fragment ->
-            MarkdownFragment.raw fragment
+markdown (MarkdownAboutParagraph fragment) =
+    MarkdownFragment.raw fragment
 
 
 {-| View an "about" paragraph as HTML.
@@ -77,35 +73,33 @@ markdown aboutParagraph =
 
 -}
 view : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> AboutParagraph -> Html msg
-view { enableMathSupport, makeLinksTabbable } aboutParagraph =
-    case aboutParagraph of
-        MarkdownAboutParagraph fragment ->
-            let
-                parsed : Result String (List Block)
-                parsed =
-                    MarkdownFragment.parsed fragment
-            in
-            case parsed of
-                Ok blocks ->
-                    case
-                        Renderer.render
-                            (MarkdownRenderers.htmlMsgRenderer
-                                { enableMathSupport = enableMathSupport
-                                , makeLinksTabbable = makeLinksTabbable
-                                }
-                            )
-                            blocks
-                    of
-                        Ok rendered ->
-                            Html.div
-                                [ class "prose print:prose-pre:overflow-x-hidden max-w-3xl prose-pre:bg-inherit prose-pre:text-gray-700 prose-pre:border print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]
-                                rendered
+view { enableMathSupport, makeLinksTabbable } (MarkdownAboutParagraph fragment) =
+    let
+        parsed : Result String (List Block)
+        parsed =
+            MarkdownFragment.parsed fragment
+    in
+    case parsed of
+        Ok blocks ->
+            case
+                Renderer.render
+                    (MarkdownRenderers.htmlMsgRenderer
+                        { enableMathSupport = enableMathSupport
+                        , makeLinksTabbable = makeLinksTabbable
+                        }
+                    )
+                    blocks
+            of
+                Ok rendered ->
+                    Html.div
+                        [ class "prose print:prose-pre:overflow-x-hidden max-w-3xl prose-pre:bg-inherit prose-pre:text-gray-700 prose-pre:border print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]
+                        rendered
 
-                        Err renderingError ->
-                            text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
+                Err renderingError ->
+                    text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
-                Err parsingError ->
-                    text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
+        Err parsingError ->
+            text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
 
 
 sanitiseMarkdownFragment : MarkdownFragment -> MarkdownFragment

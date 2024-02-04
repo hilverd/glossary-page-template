@@ -55,10 +55,8 @@ fromMarkdown body =
 {-| Retrieve the raw body of a tag description.
 -}
 raw : TagDescription -> String
-raw tagDescription =
-    case tagDescription of
-        MarkdownTagDescription t ->
-            MarkdownFragment.raw t.body
+raw (MarkdownTagDescription { body }) =
+    MarkdownFragment.raw body
 
 
 {-| An encoder/decoder for tag descriptions.
@@ -76,19 +74,15 @@ codec =
 
 -}
 inlineText : TagDescription -> String
-inlineText tagDescription =
-    case tagDescription of
-        MarkdownTagDescription t ->
-            t.inlineText
+inlineText (MarkdownTagDescription t) =
+    t.inlineText
 
 
 {-| Convert a tag description to a string suitable for a Markdown document.
 -}
 markdown : TagDescription -> String
-markdown tagDescription =
-    case tagDescription of
-        MarkdownTagDescription t ->
-            MarkdownFragment.raw t.body
+markdown (MarkdownTagDescription { body }) =
+    MarkdownFragment.raw body
 
 
 {-| View a tag description as HTML.
@@ -112,32 +106,30 @@ markdown tagDescription =
 
 -}
 view : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> List (Attribute msg) -> TagDescription -> Html msg
-view { enableMathSupport, makeLinksTabbable } additionalAttributes tagDescription =
-    case tagDescription of
-        MarkdownTagDescription t ->
-            let
-                parsed : Result String (List Block)
-                parsed =
-                    MarkdownFragment.parsed t.body
-            in
-            case parsed of
-                Ok blocks ->
-                    case
-                        Renderer.render
-                            (MarkdownRenderers.htmlMsgRenderer
-                                { enableMathSupport = enableMathSupport
-                                , makeLinksTabbable = makeLinksTabbable
-                                }
-                            )
-                            blocks
-                    of
-                        Ok rendered ->
-                            Html.div
-                                (class "prose dark:prose-invert print:prose-neutral dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" :: additionalAttributes)
-                                rendered
+view { enableMathSupport, makeLinksTabbable } additionalAttributes (MarkdownTagDescription { body }) =
+    let
+        parsed : Result String (List Block)
+        parsed =
+            MarkdownFragment.parsed body
+    in
+    case parsed of
+        Ok blocks ->
+            case
+                Renderer.render
+                    (MarkdownRenderers.htmlMsgRenderer
+                        { enableMathSupport = enableMathSupport
+                        , makeLinksTabbable = makeLinksTabbable
+                        }
+                    )
+                    blocks
+            of
+                Ok rendered ->
+                    Html.div
+                        (class "prose dark:prose-invert print:prose-neutral dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" :: additionalAttributes)
+                        rendered
 
-                        Err renderingError ->
-                            text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
+                Err renderingError ->
+                    text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
-                Err parsingError ->
-                    text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
+        Err parsingError ->
+            text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError

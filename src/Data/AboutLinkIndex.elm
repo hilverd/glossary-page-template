@@ -11,7 +11,5 @@ fromInt =
 
 
 toInt : AboutLinkIndex -> Int
-toInt aboutLinkIndex =
-    case aboutLinkIndex of
-        AboutLinkIndex index ->
-            index
+toInt (AboutLinkIndex index) =
+    index

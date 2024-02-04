@@ -562,13 +562,11 @@ applyTagsChanges tagsChanges glossaryItems =
 {-| Insert an item, returning the ID of the new item.
 -}
 insert : GlossaryItemForHtml -> GlossaryItems -> Result String ( GlossaryItemId, GlossaryItems )
-insert item glossaryItems =
+insert item ((GlossaryItems items) as glossaryItems) =
     let
         nextItemId : GlossaryItemId
         nextItemId =
-            case glossaryItems of
-                GlossaryItems items ->
-                    items.nextItemId
+            items.nextItemId
 
         itemsAfterInserting : Result String GlossaryItems
         itemsAfterInserting =
@@ -638,111 +636,107 @@ remove itemId glossaryItems =
 
 
 relatedPreferredTerms_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItemId -> GlossaryItems -> Maybe (List DisambiguatedTerm)
-relatedPreferredTerms_ disambiguatedPreferredTerm_ filterByTagId itemId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            items.relatedItemIdsById
-                |> GlossaryItemIdDict.get itemId
-                |> Maybe.map
-                    (\relatedItemIds ->
-                        relatedItemIds
-                            |> List.filterMap
-                                (\relatedItemId ->
-                                    let
-                                        relatedItemMatchesTagBeingFilteredBy =
-                                            filterByTagId
-                                                |> Maybe.map
-                                                    (\filterByTagId_ ->
-                                                        (items.disambiguationTagIdByItemId
+relatedPreferredTerms_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItems items) as glossaryItems) =
+    items.relatedItemIdsById
+        |> GlossaryItemIdDict.get itemId
+        |> Maybe.map
+            (\relatedItemIds ->
+                relatedItemIds
+                    |> List.filterMap
+                        (\relatedItemId ->
+                            let
+                                relatedItemMatchesTagBeingFilteredBy =
+                                    filterByTagId
+                                        |> Maybe.map
+                                            (\filterByTagId_ ->
+                                                (items.disambiguationTagIdByItemId
+                                                    |> GlossaryItemIdDict.get relatedItemId
+                                                    |> (==) (Just <| Just filterByTagId_)
+                                                )
+                                                    || (items.normalTagIdsByItemId
                                                             |> GlossaryItemIdDict.get relatedItemId
-                                                            |> (==) (Just <| Just filterByTagId_)
-                                                        )
-                                                            || (items.normalTagIdsByItemId
-                                                                    |> GlossaryItemIdDict.get relatedItemId
-                                                                    |> Maybe.map (List.member filterByTagId_)
-                                                                    |> Maybe.withDefault False
-                                                               )
-                                                    )
-                                                |> Maybe.withDefault True
-                                    in
-                                    if relatedItemMatchesTagBeingFilteredBy then
-                                        disambiguatedPreferredTerm_ relatedItemId glossaryItems
+                                                            |> Maybe.map (List.member filterByTagId_)
+                                                            |> Maybe.withDefault False
+                                                       )
+                                            )
+                                        |> Maybe.withDefault True
+                            in
+                            if relatedItemMatchesTagBeingFilteredBy then
+                                disambiguatedPreferredTerm_ relatedItemId glossaryItems
 
-                                    else
-                                        Nothing
-                                )
-                    )
+                            else
+                                Nothing
+                        )
+            )
 
 
 get_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItemId -> GlossaryItems -> Maybe GlossaryItemForHtml
-get_ disambiguatedPreferredTerm_ filterByTagId itemId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            GlossaryItemIdDict.get itemId items.itemById
-                |> Maybe.map
-                    (\item ->
-                        let
-                            preferredTerm : Term
-                            preferredTerm =
-                                GlossaryItem.preferredTerm item
+get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItems items) as glossaryItems) =
+    GlossaryItemIdDict.get itemId items.itemById
+        |> Maybe.map
+            (\item ->
+                let
+                    preferredTerm : Term
+                    preferredTerm =
+                        GlossaryItem.preferredTerm item
 
-                            alternativeTerms =
-                                GlossaryItem.alternativeTerms item
+                    alternativeTerms =
+                        GlossaryItem.alternativeTerms item
 
-                            disambiguationTag =
-                                items.disambiguationTagIdByItemId
-                                    |> GlossaryItemIdDict.get itemId
-                                    |> Maybe.andThen identity
-                                    |> Maybe.andThen
-                                        (\disambiguationTagId ->
-                                            TagIdDict.get disambiguationTagId items.tagById
-                                        )
+                    disambiguationTag =
+                        items.disambiguationTagIdByItemId
+                            |> GlossaryItemIdDict.get itemId
+                            |> Maybe.andThen identity
+                            |> Maybe.andThen
+                                (\disambiguationTagId ->
+                                    TagIdDict.get disambiguationTagId items.tagById
+                                )
 
-                            normalTags =
-                                items.normalTagIdsByItemId
-                                    |> GlossaryItemIdDict.get itemId
-                                    |> Maybe.map
-                                        (List.filterMap
-                                            (\normalTagId ->
-                                                TagIdDict.get normalTagId items.tagById
-                                            )
-                                        )
-                                    |> Maybe.withDefault []
+                    normalTags =
+                        items.normalTagIdsByItemId
+                            |> GlossaryItemIdDict.get itemId
+                            |> Maybe.map
+                                (List.filterMap
+                                    (\normalTagId ->
+                                        TagIdDict.get normalTagId items.tagById
+                                    )
+                                )
+                            |> Maybe.withDefault []
 
-                            definition : Maybe Definition
-                            definition =
-                                GlossaryItem.definition item
+                    definition : Maybe Definition
+                    definition =
+                        GlossaryItem.definition item
 
-                            relatedPreferredTerms : List DisambiguatedTerm
-                            relatedPreferredTerms =
-                                glossaryItems
-                                    |> relatedPreferredTerms_ disambiguatedPreferredTerm_ filterByTagId itemId
-                                    |> Maybe.withDefault []
+                    relatedPreferredTerms : List DisambiguatedTerm
+                    relatedPreferredTerms =
+                        glossaryItems
+                            |> relatedPreferredTerms_ disambiguatedPreferredTerm_ filterByTagId itemId
+                            |> Maybe.withDefault []
 
-                            needsUpdating =
-                                GlossaryItem.needsUpdating item
+                    needsUpdating =
+                        GlossaryItem.needsUpdating item
 
-                            lastUpdatedDateAsIso8601 =
-                                GlossaryItem.lastUpdatedDateAsIso8601 item
+                    lastUpdatedDateAsIso8601 =
+                        GlossaryItem.lastUpdatedDateAsIso8601 item
 
-                            lastUpdatedByName =
-                                GlossaryItem.lastUpdatedByName item
+                    lastUpdatedByName =
+                        GlossaryItem.lastUpdatedByName item
 
-                            lastUpdatedByEmailAddress =
-                                GlossaryItem.lastUpdatedByEmailAddress item
-                        in
-                        GlossaryItemForHtml.create
-                            preferredTerm
-                            alternativeTerms
-                            disambiguationTag
-                            normalTags
-                            definition
-                            relatedPreferredTerms
-                            needsUpdating
-                            lastUpdatedDateAsIso8601
-                            lastUpdatedByName
-                            lastUpdatedByEmailAddress
-                    )
+                    lastUpdatedByEmailAddress =
+                        GlossaryItem.lastUpdatedByEmailAddress item
+                in
+                GlossaryItemForHtml.create
+                    preferredTerm
+                    alternativeTerms
+                    disambiguationTag
+                    normalTags
+                    definition
+                    relatedPreferredTerms
+                    needsUpdating
+                    lastUpdatedDateAsIso8601
+                    lastUpdatedByName
+                    lastUpdatedByEmailAddress
+            )
 
 
 {-| Get the item associated with an ID. If the ID is not found, return `Nothing`.
@@ -755,32 +749,28 @@ get =
 {-| The tags for these glossary items. Tags can exist without being used in any items.
 -}
 tags : GlossaryItems -> List Tag
-tags glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            items.tagById
-                |> TagIdDict.values
-                |> List.sortWith Tag.compareAlphabetically
+tags (GlossaryItems items) =
+    items.tagById
+        |> TagIdDict.values
+        |> List.sortWith Tag.compareAlphabetically
 
 
 {-| The tags for these glossary items along with their IDs and descriptions.
 Tags can exist without being used in any items.
 -}
 tagsWithIdsAndDescriptions : GlossaryItems -> List { id : TagId, tag : Tag, description : TagDescription }
-tagsWithIdsAndDescriptions glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            items.tagDescriptionById
-                |> TagIdDict.toList
-                |> List.filterMap
-                    (\( id, description ) ->
-                        TagIdDict.get id items.tagById
-                            |> Maybe.map (\tag -> { id = id, tag = tag, description = description })
-                    )
-                |> List.sortWith
-                    (\record1 record2 ->
-                        Tag.compareAlphabetically record1.tag record2.tag
-                    )
+tagsWithIdsAndDescriptions (GlossaryItems items) =
+    items.tagDescriptionById
+        |> TagIdDict.toList
+        |> List.filterMap
+            (\( id, description ) ->
+                TagIdDict.get id items.tagById
+                    |> Maybe.map (\tag -> { id = id, tag = tag, description = description })
+            )
+        |> List.sortWith
+            (\record1 record2 ->
+                Tag.compareAlphabetically record1.tag record2.tag
+            )
 
 
 {-| Similar to `tagsWithIdsAndDescriptions` but without IDs being returned.
@@ -795,287 +785,263 @@ tagsWithDescriptions glossaryItems =
 {-| The tags for these glossary items along with their tag IDs.
 -}
 tagByIdList : GlossaryItems -> List ( TagId, Tag )
-tagByIdList glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            TagIdDict.toList items.tagById
+tagByIdList (GlossaryItems items) =
+    TagIdDict.toList items.tagById
 
 
 {-| Look up a tag ID from its contents.
 -}
 tagIdFromTag : Tag -> GlossaryItems -> Maybe TagId
-tagIdFromTag tag glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            Dict.get (Tag.raw tag) items.tagIdByRawTag
+tagIdFromTag tag (GlossaryItems items) =
+    Dict.get (Tag.raw tag) items.tagIdByRawTag
 
 
 {-| Look up a tag from its ID.
 -}
 tagFromId : TagId -> GlossaryItems -> Maybe Tag
-tagFromId tagId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            TagIdDict.get tagId items.tagById
+tagFromId tagId (GlossaryItems items) =
+    TagIdDict.get tagId items.tagById
 
 
 {-| Look up a tag's description from its ID.
 -}
 tagDescriptionFromId : TagId -> GlossaryItems -> Maybe TagDescription
-tagDescriptionFromId tagId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            TagIdDict.get tagId items.tagDescriptionById
+tagDescriptionFromId tagId (GlossaryItems items) =
+    TagIdDict.get tagId items.tagDescriptionById
 
 
 {-| The disambiguated preferred term for the item with the given ID.
 -}
 disambiguatedPreferredTerm : GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm
-disambiguatedPreferredTerm itemId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            let
-                maybePreferredTerm : Maybe Term
-                maybePreferredTerm =
-                    items.itemById
-                        |> GlossaryItemIdDict.get itemId
-                        |> Maybe.map GlossaryItem.preferredTerm
+disambiguatedPreferredTerm itemId (GlossaryItems items) =
+    let
+        maybePreferredTerm : Maybe Term
+        maybePreferredTerm =
+            items.itemById
+                |> GlossaryItemIdDict.get itemId
+                |> Maybe.map GlossaryItem.preferredTerm
 
-                disambiguationTagId : Maybe TagId
-                disambiguationTagId =
-                    items.disambiguationTagIdByItemId
-                        |> GlossaryItemIdDict.get itemId
-                        |> Maybe.andThen identity
+        disambiguationTagId : Maybe TagId
+        disambiguationTagId =
+            items.disambiguationTagIdByItemId
+                |> GlossaryItemIdDict.get itemId
+                |> Maybe.andThen identity
 
-                disambiguationTag : Maybe Tag
-                disambiguationTag =
-                    disambiguationTagId
-                        |> Maybe.andThen
-                            (\disambiguationTagId_ ->
-                                items.tagById
-                                    |> TagIdDict.get disambiguationTagId_
-                            )
-            in
-            maybePreferredTerm
-                |> Maybe.map
-                    (\preferredTerm_ ->
-                        disambiguationTag
-                            |> Maybe.map
-                                (\disambiguationTag_ ->
-                                    GlossaryItemForHtml.disambiguatedTerm disambiguationTag_ preferredTerm_
-                                )
-                            |> Maybe.withDefault (DisambiguatedTerm.fromTerm preferredTerm_)
+        disambiguationTag : Maybe Tag
+        disambiguationTag =
+            disambiguationTagId
+                |> Maybe.andThen
+                    (\disambiguationTagId_ ->
+                        items.tagById
+                            |> TagIdDict.get disambiguationTagId_
                     )
+    in
+    maybePreferredTerm
+        |> Maybe.map
+            (\preferredTerm_ ->
+                disambiguationTag
+                    |> Maybe.map
+                        (\disambiguationTag_ ->
+                            GlossaryItemForHtml.disambiguatedTerm disambiguationTag_ preferredTerm_
+                        )
+                    |> Maybe.withDefault (DisambiguatedTerm.fromTerm preferredTerm_)
+            )
 
 
 {-| All the disambiguated preferred terms in these glossary items.
 -}
 disambiguatedPreferredTerms : Maybe TagId -> GlossaryItems -> List DisambiguatedTerm
-disambiguatedPreferredTerms filterByTagId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            let
-                itemIds : List GlossaryItemId
-                itemIds =
-                    filterByTagId
-                        |> Maybe.map
-                            (\tagId ->
-                                items.itemIdsByTagId
-                                    |> TagIdDict.get tagId
-                                    |> Maybe.withDefault []
-                            )
-                        |> Maybe.withDefault (GlossaryItemIdDict.keys items.itemById)
+disambiguatedPreferredTerms filterByTagId ((GlossaryItems items) as glossaryItems) =
+    let
+        itemIds : List GlossaryItemId
+        itemIds =
+            filterByTagId
+                |> Maybe.map
+                    (\tagId ->
+                        items.itemIdsByTagId
+                            |> TagIdDict.get tagId
+                            |> Maybe.withDefault []
+                    )
+                |> Maybe.withDefault (GlossaryItemIdDict.keys items.itemById)
 
-                compareDisambiguatedTerms : DisambiguatedTerm -> DisambiguatedTerm -> Order
-                compareDisambiguatedTerms t1 t2 =
-                    Term.compareAlphabetically
-                        (DisambiguatedTerm.toTerm t1)
-                        (DisambiguatedTerm.toTerm t2)
-            in
-            itemIds
-                |> List.filterMap
-                    (\itemId -> disambiguatedPreferredTerm itemId glossaryItems)
-                |> List.sortWith compareDisambiguatedTerms
+        compareDisambiguatedTerms : DisambiguatedTerm -> DisambiguatedTerm -> Order
+        compareDisambiguatedTerms t1 t2 =
+            Term.compareAlphabetically
+                (DisambiguatedTerm.toTerm t1)
+                (DisambiguatedTerm.toTerm t2)
+    in
+    itemIds
+        |> List.filterMap
+            (\itemId -> disambiguatedPreferredTerm itemId glossaryItems)
+        |> List.sortWith compareDisambiguatedTerms
 
 
 {-| Look up the ID of the item whose disambiguated preferred term has the given ID.
 -}
 itemIdFromDisambiguatedPreferredTermId : TermId -> GlossaryItems -> Maybe GlossaryItemId
-itemIdFromDisambiguatedPreferredTermId termId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            items.itemIdByDisambiguatedPreferredTermId
-                |> Dict.get (TermId.toString termId)
+itemIdFromDisambiguatedPreferredTermId termId (GlossaryItems items) =
+    items.itemIdByDisambiguatedPreferredTermId
+        |> Dict.get (TermId.toString termId)
 
 
 {-| Look up the disambiguated preferred term of the item whose disambiguated preferred term has the given ID.
 -}
 disambiguatedPreferredTermFromId : TermId -> GlossaryItems -> Maybe DisambiguatedTerm
-disambiguatedPreferredTermFromId termId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            items.itemIdByDisambiguatedPreferredTermId
-                |> Dict.get (TermId.toString termId)
-                |> Maybe.andThen
-                    (\itemId ->
-                        glossaryItems
-                            |> get itemId
-                            |> Maybe.map GlossaryItemForHtml.disambiguatedPreferredTerm
-                    )
+disambiguatedPreferredTermFromId termId ((GlossaryItems items) as glossaryItems) =
+    items.itemIdByDisambiguatedPreferredTermId
+        |> Dict.get (TermId.toString termId)
+        |> Maybe.andThen
+            (\itemId ->
+                glossaryItems
+                    |> get itemId
+                    |> Maybe.map GlossaryItemForHtml.disambiguatedPreferredTerm
+            )
 
 
 {-| All of the disambiguated preferred terms which have a definition.
 -}
 disambiguatedPreferredTermsWhichHaveDefinitions : Maybe TagId -> GlossaryItems -> List DisambiguatedTerm
-disambiguatedPreferredTermsWhichHaveDefinitions filterByTagId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            let
-                itemIdIntsSet : Set Int
-                itemIdIntsSet =
-                    filterByTagId
-                        |> Maybe.andThen (\tagId -> TagIdDict.get tagId items.itemIdsByTagId)
-                        |> Maybe.withDefault (GlossaryItemIdDict.keys items.itemById)
-                        |> List.map GlossaryItemId.toInt
-                        |> Set.fromList
-            in
-            items.itemById
-                |> GlossaryItemIdDict.toList
-                |> List.filterMap
-                    (\( itemId, item ) ->
-                        if
-                            Set.member (GlossaryItemId.toInt itemId) itemIdIntsSet
-                                && GlossaryItem.definition item
-                                /= Nothing
-                        then
-                            disambiguatedPreferredTerm itemId glossaryItems
+disambiguatedPreferredTermsWhichHaveDefinitions filterByTagId ((GlossaryItems items) as glossaryItems) =
+    let
+        itemIdIntsSet : Set Int
+        itemIdIntsSet =
+            filterByTagId
+                |> Maybe.andThen (\tagId -> TagIdDict.get tagId items.itemIdsByTagId)
+                |> Maybe.withDefault (GlossaryItemIdDict.keys items.itemById)
+                |> List.map GlossaryItemId.toInt
+                |> Set.fromList
+    in
+    items.itemById
+        |> GlossaryItemIdDict.toList
+        |> List.filterMap
+            (\( itemId, item ) ->
+                if
+                    Set.member (GlossaryItemId.toInt itemId) itemIdIntsSet
+                        && GlossaryItem.definition item
+                        /= Nothing
+                then
+                    disambiguatedPreferredTerm itemId glossaryItems
 
-                        else
-                            Nothing
-                    )
-                |> List.sortWith DisambiguatedTerm.compareAlphabetically
+                else
+                    Nothing
+            )
+        |> List.sortWith DisambiguatedTerm.compareAlphabetically
 
 
 {-| The IDs of the items that list this item as a related one.
 -}
 relatedForWhichItems : GlossaryItemId -> GlossaryItems -> List GlossaryItemId
-relatedForWhichItems itemId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            items.relatedItemIdsById
-                |> GlossaryItemIdDict.foldl
-                    (\otherItemId relatedItemIds result ->
-                        if List.any ((==) itemId) relatedItemIds then
-                            otherItemId :: result
+relatedForWhichItems itemId (GlossaryItems items) =
+    items.relatedItemIdsById
+        |> GlossaryItemIdDict.foldl
+            (\otherItemId relatedItemIds result ->
+                if List.any ((==) itemId) relatedItemIds then
+                    otherItemId :: result
 
-                        else
-                            result
-                    )
-                    []
+                else
+                    result
+            )
+            []
 
 
 {-| A list of pairs associating each alternative term with the disambiguated preferred terms that it appears together with.
 -}
 disambiguatedPreferredTermsByAlternativeTerm : Maybe TagId -> GlossaryItems -> List ( Term, List DisambiguatedTerm )
-disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            let
-                ( alternativeTermByRaw, preferredTermsByRawAlternativeTerm ) =
-                    items.itemById
-                        |> GlossaryItemIdDict.foldl
-                            (\itemId item ( alternativeTermByRaw_, preferredTermsByRawAlternativeTerm_ ) ->
-                                let
-                                    itemMatchesTag : Bool
-                                    itemMatchesTag =
-                                        filterByTagId
-                                            |> Maybe.map
-                                                (\filterByTagId_ ->
-                                                    (items.disambiguationTagIdByItemId
+disambiguatedPreferredTermsByAlternativeTerm filterByTagId ((GlossaryItems items) as glossaryItems) =
+    let
+        ( alternativeTermByRaw, preferredTermsByRawAlternativeTerm ) =
+            items.itemById
+                |> GlossaryItemIdDict.foldl
+                    (\itemId item ( alternativeTermByRaw_, preferredTermsByRawAlternativeTerm_ ) ->
+                        let
+                            itemMatchesTag : Bool
+                            itemMatchesTag =
+                                filterByTagId
+                                    |> Maybe.map
+                                        (\filterByTagId_ ->
+                                            (items.disambiguationTagIdByItemId
+                                                |> GlossaryItemIdDict.get itemId
+                                                |> Maybe.map (\disambiguationTagId -> disambiguationTagId == Just filterByTagId_)
+                                                |> Maybe.withDefault False
+                                            )
+                                                || (items.normalTagIdsByItemId
                                                         |> GlossaryItemIdDict.get itemId
-                                                        |> Maybe.map (\disambiguationTagId -> disambiguationTagId == Just filterByTagId_)
+                                                        |> Maybe.map (List.member filterByTagId_)
                                                         |> Maybe.withDefault False
+                                                   )
+                                        )
+                                    |> Maybe.withDefault True
+                        in
+                        if itemMatchesTag then
+                            case disambiguatedPreferredTerm itemId glossaryItems of
+                                Just disambiguatedPreferredTerm_ ->
+                                    item
+                                        |> GlossaryItem.alternativeTerms
+                                        |> List.foldl
+                                            (\alternativeTerm ( alternativeTermByRaw1, preferredTermsByRawAlternativeTerm1 ) ->
+                                                let
+                                                    raw =
+                                                        Term.raw alternativeTerm
+                                                in
+                                                ( Dict.insert raw alternativeTerm alternativeTermByRaw1
+                                                , Dict.update raw
+                                                    (\preferredTerms_ ->
+                                                        preferredTerms_
+                                                            |> Maybe.map ((::) disambiguatedPreferredTerm_)
+                                                            |> Maybe.withDefault [ disambiguatedPreferredTerm_ ]
+                                                            |> Just
                                                     )
-                                                        || (items.normalTagIdsByItemId
-                                                                |> GlossaryItemIdDict.get itemId
-                                                                |> Maybe.map (List.member filterByTagId_)
-                                                                |> Maybe.withDefault False
-                                                           )
+                                                    preferredTermsByRawAlternativeTerm1
                                                 )
-                                            |> Maybe.withDefault True
-                                in
-                                if itemMatchesTag then
-                                    case disambiguatedPreferredTerm itemId glossaryItems of
-                                        Just disambiguatedPreferredTerm_ ->
-                                            item
-                                                |> GlossaryItem.alternativeTerms
-                                                |> List.foldl
-                                                    (\alternativeTerm ( alternativeTermByRaw1, preferredTermsByRawAlternativeTerm1 ) ->
-                                                        let
-                                                            raw =
-                                                                Term.raw alternativeTerm
-                                                        in
-                                                        ( Dict.insert raw alternativeTerm alternativeTermByRaw1
-                                                        , Dict.update raw
-                                                            (\preferredTerms_ ->
-                                                                preferredTerms_
-                                                                    |> Maybe.map ((::) disambiguatedPreferredTerm_)
-                                                                    |> Maybe.withDefault [ disambiguatedPreferredTerm_ ]
-                                                                    |> Just
-                                                            )
-                                                            preferredTermsByRawAlternativeTerm1
-                                                        )
-                                                    )
-                                                    ( alternativeTermByRaw_, preferredTermsByRawAlternativeTerm_ )
-
-                                        Nothing ->
+                                            )
                                             ( alternativeTermByRaw_, preferredTermsByRawAlternativeTerm_ )
 
-                                else
+                                Nothing ->
                                     ( alternativeTermByRaw_, preferredTermsByRawAlternativeTerm_ )
-                            )
-                            ( Dict.empty, Dict.empty )
-            in
-            preferredTermsByRawAlternativeTerm
-                |> Dict.foldl
-                    (\rawAlternativeTerm preferredTerms_ result ->
-                        Dict.get rawAlternativeTerm alternativeTermByRaw
-                            |> Maybe.map (\alternativeTerm -> ( alternativeTerm, preferredTerms_ ) :: result)
-                            |> Maybe.withDefault result
+
+                        else
+                            ( alternativeTermByRaw_, preferredTermsByRawAlternativeTerm_ )
                     )
-                    []
+                    ( Dict.empty, Dict.empty )
+    in
+    preferredTermsByRawAlternativeTerm
+        |> Dict.foldl
+            (\rawAlternativeTerm preferredTerms_ result ->
+                Dict.get rawAlternativeTerm alternativeTermByRaw
+                    |> Maybe.map (\alternativeTerm -> ( alternativeTerm, preferredTerms_ ) :: result)
+                    |> Maybe.withDefault result
+            )
+            []
 
 
 toList_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml )
-toList_ disambiguatedPreferredTerm_ filterByTagId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            let
-                itemIdsMatchingTagFilter : Maybe (Set Int)
-                itemIdsMatchingTagFilter =
-                    filterByTagId
-                        |> Maybe.map
-                            (\tagId ->
-                                items.itemIdsByTagId
-                                    |> TagIdDict.get tagId
-                                    |> Maybe.map (List.map GlossaryItemId.toInt >> Set.fromList)
-                                    |> Maybe.withDefault Set.empty
-                            )
-            in
-            List.filterMap
-                (\itemId ->
-                    if
-                        itemIdsMatchingTagFilter
-                            |> Maybe.map (Set.member <| GlossaryItemId.toInt itemId)
-                            |> Maybe.withDefault True
-                    then
-                        glossaryItems
-                            |> get_ disambiguatedPreferredTerm_ filterByTagId itemId
-                            |> Maybe.andThen (Just << Tuple.pair itemId)
+toList_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItems items) as glossaryItems) =
+    let
+        itemIdsMatchingTagFilter : Maybe (Set Int)
+        itemIdsMatchingTagFilter =
+            filterByTagId
+                |> Maybe.map
+                    (\tagId ->
+                        items.itemIdsByTagId
+                            |> TagIdDict.get tagId
+                            |> Maybe.map (List.map GlossaryItemId.toInt >> Set.fromList)
+                            |> Maybe.withDefault Set.empty
+                    )
+    in
+    List.filterMap
+        (\itemId ->
+            if
+                itemIdsMatchingTagFilter
+                    |> Maybe.map (Set.member <| GlossaryItemId.toInt itemId)
+                    |> Maybe.withDefault True
+            then
+                glossaryItems
+                    |> get_ disambiguatedPreferredTerm_ filterByTagId itemId
+                    |> Maybe.andThen (Just << Tuple.pair itemId)
 
-                    else
-                        Nothing
-                )
+            else
+                Nothing
+        )
 
 
 toList : Maybe TagId -> GlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml )
@@ -1084,10 +1050,8 @@ toList =
 
 
 orderedAlphabetically_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItems -> List ( GlossaryItemId, GlossaryItemForHtml )
-orderedAlphabetically_ disambiguatedPreferredTerm_ filterByTagId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            toList_ disambiguatedPreferredTerm_ filterByTagId glossaryItems items.orderedAlphabetically
+orderedAlphabetically_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItems items) as glossaryItems) =
+    toList_ disambiguatedPreferredTerm_ filterByTagId glossaryItems items.orderedAlphabetically
 
 
 {-| Retrieve the glossary items ordered alphabetically.
@@ -1100,10 +1064,8 @@ orderedAlphabetically =
 {-| Retrieve the glossary items ordered by most mentioned first.
 -}
 orderedByMostMentionedFirst : Maybe TagId -> GlossaryItems -> List ( GlossaryItemId, GlossaryItemForHtml )
-orderedByMostMentionedFirst filterByTagId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            toList filterByTagId glossaryItems items.orderedByMostMentionedFirst
+orderedByMostMentionedFirst filterByTagId ((GlossaryItems items) as glossaryItems) =
+    toList filterByTagId glossaryItems items.orderedByMostMentionedFirst
 
 
 {-| Retrieve the glossary items ordered "focused on" a specific item.
@@ -1116,47 +1078,45 @@ orderedFocusedOn :
         ( List ( GlossaryItemId, GlossaryItemForHtml )
         , List ( GlossaryItemId, GlossaryItemForHtml )
         )
-orderedFocusedOn filterByTagId glossaryItemId glossaryItems =
-    case glossaryItems of
-        GlossaryItems items ->
-            let
-                itemIdsGraph : DirectedGraph GlossaryItemId
-                itemIdsGraph =
-                    items.itemById
-                        |> GlossaryItemIdDict.keys
-                        |> List.foldl
-                            DirectedGraph.insertVertex
-                            (DirectedGraph.empty
-                                (GlossaryItemId.toInt >> String.fromInt)
-                                (String.toInt >> Maybe.withDefault 0 >> GlossaryItemId.create)
-                            )
+orderedFocusedOn filterByTagId glossaryItemId ((GlossaryItems items) as glossaryItems) =
+    let
+        itemIdsGraph : DirectedGraph GlossaryItemId
+        itemIdsGraph =
+            items.itemById
+                |> GlossaryItemIdDict.keys
+                |> List.foldl
+                    DirectedGraph.insertVertex
+                    (DirectedGraph.empty
+                        (GlossaryItemId.toInt >> String.fromInt)
+                        (String.toInt >> Maybe.withDefault 0 >> GlossaryItemId.create)
+                    )
 
-                relatedItemsGraph : DirectedGraph GlossaryItemId
-                relatedItemsGraph =
-                    items.relatedItemIdsById
-                        |> GlossaryItemIdDict.foldl
-                            (\id relatedItemIds result ->
-                                let
-                                    itemHasDefinition =
-                                        items.itemById
-                                            |> GlossaryItemIdDict.get id
-                                            |> Maybe.map (GlossaryItem.definition >> (/=) Nothing)
-                                            |> Maybe.withDefault False
-                                in
-                                if itemHasDefinition then
-                                    List.foldl
-                                        (DirectedGraph.insertEdge id)
-                                        result
-                                        relatedItemIds
+        relatedItemsGraph : DirectedGraph GlossaryItemId
+        relatedItemsGraph =
+            items.relatedItemIdsById
+                |> GlossaryItemIdDict.foldl
+                    (\id relatedItemIds result ->
+                        let
+                            itemHasDefinition =
+                                items.itemById
+                                    |> GlossaryItemIdDict.get id
+                                    |> Maybe.map (GlossaryItem.definition >> (/=) Nothing)
+                                    |> Maybe.withDefault False
+                        in
+                        if itemHasDefinition then
+                            List.foldl
+                                (DirectedGraph.insertEdge id)
+                                result
+                                relatedItemIds
 
-                                else
-                                    result
-                            )
-                            itemIdsGraph
+                        else
+                            result
+                    )
+                    itemIdsGraph
 
-                ( ids, otherIds ) =
-                    DirectedGraph.verticesByDistance glossaryItemId relatedItemsGraph
-            in
-            ( toList filterByTagId glossaryItems ids
-            , toList filterByTagId glossaryItems otherIds
-            )
+        ( ids, otherIds ) =
+            DirectedGraph.verticesByDistance glossaryItemId relatedItemsGraph
+    in
+    ( toList filterByTagId glossaryItems ids
+    , toList filterByTagId glossaryItems otherIds
+    )

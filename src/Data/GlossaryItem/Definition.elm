@@ -42,19 +42,15 @@ fromMarkdown =
 {-| Retrieve the raw body of a definition.
 -}
 raw : Definition -> String
-raw definition =
-    case definition of
-        MarkdownDefinition fragment ->
-            MarkdownFragment.raw fragment
+raw (MarkdownDefinition fragment) =
+    MarkdownFragment.raw fragment
 
 
 {-| Convert a definition to a string suitable for a Markdown document.
 -}
 markdown : Definition -> String
-markdown definition =
-    case definition of
-        MarkdownDefinition fragment ->
-            MarkdownFragment.raw fragment
+markdown (MarkdownDefinition fragment) =
+    MarkdownFragment.raw fragment
 
 
 {-| View a definition as HTML.
@@ -78,61 +74,57 @@ markdown definition =
 
 -}
 view : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> Definition -> Html msg
-view { enableMathSupport, makeLinksTabbable } definition =
-    case definition of
-        MarkdownDefinition fragment ->
-            let
-                parsed : Result String (List Block)
-                parsed =
-                    MarkdownFragment.parsed fragment
-            in
-            case parsed of
-                Ok blocks ->
-                    case
-                        Renderer.render
-                            (MarkdownRenderers.htmlMsgRenderer
-                                { enableMathSupport = enableMathSupport
-                                , makeLinksTabbable = makeLinksTabbable
-                                }
-                            )
-                            blocks
-                    of
-                        Ok rendered ->
-                            Html.div
-                                [ class "prose print:prose-pre:overflow-x-hidden max-w-3xl prose-pre:bg-inherit prose-pre:text-gray-700 prose-pre:border print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]
-                                rendered
+view { enableMathSupport, makeLinksTabbable } (MarkdownDefinition fragment) =
+    let
+        parsed : Result String (List Block)
+        parsed =
+            MarkdownFragment.parsed fragment
+    in
+    case parsed of
+        Ok blocks ->
+            case
+                Renderer.render
+                    (MarkdownRenderers.htmlMsgRenderer
+                        { enableMathSupport = enableMathSupport
+                        , makeLinksTabbable = makeLinksTabbable
+                        }
+                    )
+                    blocks
+            of
+                Ok rendered ->
+                    Html.div
+                        [ class "prose print:prose-pre:overflow-x-hidden max-w-3xl prose-pre:bg-inherit prose-pre:text-gray-700 prose-pre:border print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]
+                        rendered
 
-                        Err renderingError ->
-                            text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
+                Err renderingError ->
+                    text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
-                Err parsingError ->
-                    text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
+        Err parsingError ->
+            text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
 
 
 {-| View a definition as inline HTML.
 -}
 viewInline : Bool -> List (Attribute msg) -> Definition -> Html msg
-viewInline enableMathSupport additionalAttributes definition =
-    case definition of
-        MarkdownDefinition fragment ->
-            let
-                parsed : Result String (List Block)
-                parsed =
-                    MarkdownFragment.parsed fragment
-            in
-            case parsed of
-                Ok blocks ->
-                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
-                        Ok rendered ->
-                            Html.span
-                                (class "prose opacity-75 print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal space-x-1" :: additionalAttributes)
-                                rendered
+viewInline enableMathSupport additionalAttributes (MarkdownDefinition fragment) =
+    let
+        parsed : Result String (List Block)
+        parsed =
+            MarkdownFragment.parsed fragment
+    in
+    case parsed of
+        Ok blocks ->
+            case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
+                Ok rendered ->
+                    Html.span
+                        (class "prose opacity-75 print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal space-x-1" :: additionalAttributes)
+                        rendered
 
-                        Err renderingError ->
-                            text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
+                Err renderingError ->
+                    text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
-                Err parsingError ->
-                    text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
+        Err parsingError ->
+            text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
 
 
 htmlTreeRendererForAnki : Bool -> Renderer HtmlTree
@@ -154,20 +146,18 @@ htmlTreeRendererForAnki enableMathSupport =
 {-| Convert a definition to an HtmlTree for Anki.
 -}
 htmlTreeForAnki : Bool -> Definition -> HtmlTree
-htmlTreeForAnki enableMathSupport definition =
-    case definition of
-        MarkdownDefinition fragment ->
-            case MarkdownFragment.parsed fragment of
-                Ok blocks ->
-                    case Renderer.render (htmlTreeRendererForAnki enableMathSupport) blocks of
-                        Ok rendered ->
-                            Extras.HtmlTree.Node "div" False [] rendered
+htmlTreeForAnki enableMathSupport (MarkdownDefinition fragment) =
+    case MarkdownFragment.parsed fragment of
+        Ok blocks ->
+            case Renderer.render (htmlTreeRendererForAnki enableMathSupport) blocks of
+                Ok rendered ->
+                    Extras.HtmlTree.Node "div" False [] rendered
 
-                        Err renderingError ->
-                            Extras.HtmlTree.Leaf <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
+                Err renderingError ->
+                    Extras.HtmlTree.Leaf <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
-                Err parsingError ->
-                    Extras.HtmlTree.Leaf <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
+        Err parsingError ->
+            Extras.HtmlTree.Leaf <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
 
 
 sanitiseMarkdownFragment : MarkdownFragment -> MarkdownFragment

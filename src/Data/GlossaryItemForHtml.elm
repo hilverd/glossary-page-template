@@ -121,33 +121,27 @@ codec =
 {-| The disambiguated preferred term for this glossary item.
 -}
 disambiguatedPreferredTerm : GlossaryItemForHtml -> DisambiguatedTerm
-disambiguatedPreferredTerm glossaryItemForHtml =
-    case glossaryItemForHtml of
-        GlossaryItemForHtml item ->
-            item.disambiguationTag
-                |> Maybe.map
-                    (\disambiguationTag_ ->
-                        disambiguatedTerm disambiguationTag_ item.preferredTerm
-                    )
-                |> Maybe.withDefault (DisambiguatedTerm.fromTerm item.preferredTerm)
+disambiguatedPreferredTerm (GlossaryItemForHtml item) =
+    item.disambiguationTag
+        |> Maybe.map
+            (\disambiguationTag_ ->
+                disambiguatedTerm disambiguationTag_ item.preferredTerm
+            )
+        |> Maybe.withDefault (DisambiguatedTerm.fromTerm item.preferredTerm)
 
 
 {-| The (non-disambiguated) preferred term for this glossary item.
 -}
 nonDisambiguatedPreferredTerm : GlossaryItemForHtml -> Term
-nonDisambiguatedPreferredTerm glossaryItemForHtml =
-    case glossaryItemForHtml of
-        GlossaryItemForHtml item ->
-            item.preferredTerm
+nonDisambiguatedPreferredTerm (GlossaryItemForHtml item) =
+    item.preferredTerm
 
 
 {-| The alternative terms for this glossary item.
 -}
 alternativeTerms : GlossaryItemForHtml -> List Term
-alternativeTerms glossaryItemForHtml =
-    case glossaryItemForHtml of
-        GlossaryItemForHtml item ->
-            item.alternativeTerms
+alternativeTerms (GlossaryItemForHtml item) =
+    item.alternativeTerms
 
 
 {-| The terms of the glossary item, both (disambiguated) preferred and alternative.
@@ -164,94 +158,74 @@ allTerms glossaryItemForHtml =
 {-| The disambiguation tag for this glossary item.
 -}
 disambiguationTag : GlossaryItemForHtml -> Maybe Tag
-disambiguationTag glossaryItemForHtml =
-    case glossaryItemForHtml of
-        GlossaryItemForHtml item ->
-            item.disambiguationTag
+disambiguationTag (GlossaryItemForHtml item) =
+    item.disambiguationTag
 
 
 {-| The normal tags for this glossary item.
 -}
 normalTags : GlossaryItemForHtml -> List Tag
-normalTags glossaryItemForHtml =
-    case glossaryItemForHtml of
-        GlossaryItemForHtml item ->
-            item.normalTags
+normalTags (GlossaryItemForHtml item) =
+    item.normalTags
 
 
 {-| All tags for this glossary item.
 -}
 allTags : GlossaryItemForHtml -> List Tag
-allTags glossaryItemForHtml =
-    case glossaryItemForHtml of
-        GlossaryItemForHtml item ->
-            item.disambiguationTag
-                |> Maybe.map (\disambiguationTag_ -> disambiguationTag_ :: item.normalTags)
-                |> Maybe.withDefault item.normalTags
+allTags (GlossaryItemForHtml item) =
+    item.disambiguationTag
+        |> Maybe.map (\disambiguationTag_ -> disambiguationTag_ :: item.normalTags)
+        |> Maybe.withDefault item.normalTags
 
 
 {-| Whether or not the glossary item has a definition.
 Some items may not have one and instead point to a related item that is preferred.
 -}
 hasADefinition : GlossaryItemForHtml -> Bool
-hasADefinition glossaryItemForHtml =
-    case glossaryItemForHtml of
-        GlossaryItemForHtml item ->
-            item.definition /= Nothing
+hasADefinition (GlossaryItemForHtml item) =
+    item.definition /= Nothing
 
 
 {-| The definition for this glossary item.
 -}
 definition : GlossaryItemForHtml -> Maybe Definition
-definition glossaryItemForHtml =
-    case glossaryItemForHtml of
-        GlossaryItemForHtml item ->
-            item.definition
+definition (GlossaryItemForHtml item) =
+    item.definition
 
 
 {-| The related preferred terms for this glossary item.
 -}
 relatedPreferredTerms : GlossaryItemForHtml -> List DisambiguatedTerm
-relatedPreferredTerms glossaryItemForHtml =
-    case glossaryItemForHtml of
-        GlossaryItemForHtml item ->
-            item.relatedPreferredTerms
+relatedPreferredTerms (GlossaryItemForHtml item) =
+    item.relatedPreferredTerms
 
 
 {-| The "needs updating" flag for this glossary item.
 -}
 needsUpdating : GlossaryItemForHtml -> Bool
-needsUpdating glossaryItemForHtml =
-    case glossaryItemForHtml of
-        GlossaryItemForHtml item ->
-            item.needsUpdating
+needsUpdating (GlossaryItemForHtml item) =
+    item.needsUpdating
 
 
 {-| The last updated date for this glossary item, in ISO 8601 format.
 -}
 lastUpdatedDateAsIso8601 : GlossaryItemForHtml -> Maybe String
-lastUpdatedDateAsIso8601 glossaryItemForHtml =
-    case glossaryItemForHtml of
-        GlossaryItemForHtml item ->
-            item.lastUpdatedDateAsIso8601
+lastUpdatedDateAsIso8601 (GlossaryItemForHtml item) =
+    item.lastUpdatedDateAsIso8601
 
 
 {-| The name of the person who last updated this glossary item.
 -}
 lastUpdatedByName : GlossaryItemForHtml -> Maybe String
-lastUpdatedByName glossaryItemForHtml =
-    case glossaryItemForHtml of
-        GlossaryItemForHtml item ->
-            item.lastUpdatedByName
+lastUpdatedByName (GlossaryItemForHtml item) =
+    item.lastUpdatedByName
 
 
 {-| The email address of the person who last updated this glossary item.
 -}
 lastUpdatedByEmailAddress : GlossaryItemForHtml -> Maybe String
-lastUpdatedByEmailAddress glossaryItemForHtml =
-    case glossaryItemForHtml of
-        GlossaryItemForHtml item ->
-            item.lastUpdatedByEmailAddress
+lastUpdatedByEmailAddress (GlossaryItemForHtml item) =
+    item.lastUpdatedByEmailAddress
 
 
 {-| Disambiguate a term by appending the given tag in parentheses.
@@ -414,63 +388,61 @@ setLastUpdatedBy { name, emailAddress } (GlossaryItemForHtml item) =
 {-| Represent this glossary item as an HTML tree, ready for writing back to the glossary's HTML file.
 -}
 toHtmlTree : GlossaryItemForHtml -> HtmlTree
-toHtmlTree glossaryItem =
-    case glossaryItem of
-        GlossaryItemForHtml item ->
-            let
-                allTags_ =
-                    allTags glossaryItem
-            in
-            HtmlTree.Node "div"
-                True
-                [ HtmlTree.showAttributeMaybe "data-last-updated" identity item.lastUpdatedDateAsIso8601
-                , HtmlTree.showAttributeMaybe "data-last-updated-by-name" identity item.lastUpdatedByName
-                , HtmlTree.showAttributeMaybe "data-last-updated-by-email-address" identity item.lastUpdatedByEmailAddress
-                ]
-                (preferredTermToHtmlTree item.disambiguationTag item.preferredTerm
-                    :: List.map alternativeTermToHtmlTree item.alternativeTerms
-                    ++ (if item.needsUpdating then
-                            [ HtmlTree.Node "dd"
-                                False
-                                [ HtmlTree.Attribute "class" "needs-updating" ]
-                                [ HtmlTree.Node "span"
+toHtmlTree ((GlossaryItemForHtml item) as glossaryItem) =
+    let
+        allTags_ =
+            allTags glossaryItem
+    in
+    HtmlTree.Node "div"
+        True
+        [ HtmlTree.showAttributeMaybe "data-last-updated" identity item.lastUpdatedDateAsIso8601
+        , HtmlTree.showAttributeMaybe "data-last-updated-by-name" identity item.lastUpdatedByName
+        , HtmlTree.showAttributeMaybe "data-last-updated-by-email-address" identity item.lastUpdatedByEmailAddress
+        ]
+        (preferredTermToHtmlTree item.disambiguationTag item.preferredTerm
+            :: List.map alternativeTermToHtmlTree item.alternativeTerms
+            ++ (if item.needsUpdating then
+                    [ HtmlTree.Node "dd"
+                        False
+                        [ HtmlTree.Attribute "class" "needs-updating" ]
+                        [ HtmlTree.Node "span"
+                            False
+                            []
+                            [ HtmlTree.Leaf <| "[" ++ I18n.needsUpdating ++ "]" ]
+                        ]
+                    ]
+
+                else
+                    []
+               )
+            ++ (if List.isEmpty allTags_ then
+                    []
+
+                else
+                    [ HtmlTree.Node "dd"
+                        True
+                        [ HtmlTree.Attribute "class" "tags" ]
+                        (List.map
+                            (\tag ->
+                                HtmlTree.Node "button"
                                     False
-                                    []
-                                    [ HtmlTree.Leaf <| "[" ++ I18n.needsUpdating ++ "]" ]
-                                ]
-                            ]
+                                    [ HtmlTree.Attribute "type" "button" ]
+                                    [ HtmlTree.Leaf <| Tag.raw tag ]
+                            )
+                            allTags_
+                        )
+                    ]
+               )
+            ++ List.map
+                (Definition.raw >> definitionToHtmlTree)
+                (item.definition |> Maybe.map List.singleton |> Maybe.withDefault [])
+            ++ (if List.isEmpty item.relatedPreferredTerms then
+                    []
 
-                        else
-                            []
-                       )
-                    ++ (if List.isEmpty allTags_ then
-                            []
-
-                        else
-                            [ HtmlTree.Node "dd"
-                                True
-                                [ HtmlTree.Attribute "class" "tags" ]
-                                (List.map
-                                    (\tag ->
-                                        HtmlTree.Node "button"
-                                            False
-                                            [ HtmlTree.Attribute "type" "button" ]
-                                            [ HtmlTree.Leaf <| Tag.raw tag ]
-                                    )
-                                    allTags_
-                                )
-                            ]
-                       )
-                    ++ List.map
-                        (Definition.raw >> definitionToHtmlTree)
-                        (item.definition |> Maybe.map List.singleton |> Maybe.withDefault [])
-                    ++ (if List.isEmpty item.relatedPreferredTerms then
-                            []
-
-                        else
-                            [ nonemptyRelatedTermsToHtmlTree
-                                (hasADefinition glossaryItem)
-                                item.relatedPreferredTerms
-                            ]
-                       )
-                )
+                else
+                    [ nonemptyRelatedTermsToHtmlTree
+                        (hasADefinition glossaryItem)
+                        item.relatedPreferredTerms
+                    ]
+               )
+        )

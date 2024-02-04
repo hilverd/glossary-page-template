@@ -11,7 +11,5 @@ fromInt =
 
 
 toInt : RelatedTermIndex -> Int
-toInt relatedTermIndex =
-    case relatedTermIndex of
-        RelatedTermIndex index ->
-            index
+toInt (RelatedTermIndex index) =
+    index

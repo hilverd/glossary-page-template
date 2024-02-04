@@ -26,10 +26,8 @@ create =
 {-| Retrieve the underlying value for a glossary item ID.
 -}
 toInt : GlossaryItemId -> Int
-toInt glossaryItemId =
-    case glossaryItemId of
-        GlossaryItemId id ->
-            id
+toInt (GlossaryItemId id) =
+    id
 
 
 {-| An encoder/decoder for glossary item IDs.

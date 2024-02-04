@@ -68,10 +68,8 @@ codec =
 {-| Retrieve the raw body of a tag.
 -}
 raw : Tag -> String
-raw tag =
-    case tag of
-        MarkdownTag t ->
-            MarkdownFragment.raw t.body
+raw (MarkdownTag { body }) =
+    MarkdownFragment.raw body
 
 
 {-| Retrieve the concatenated inline text of a tag.
@@ -82,19 +80,15 @@ raw tag =
 
 -}
 inlineText : Tag -> String
-inlineText tag =
-    case tag of
-        MarkdownTag t ->
-            t.inlineText
+inlineText (MarkdownTag t) =
+    t.inlineText
 
 
 {-| Convert a tag to a string suitable for a Markdown document.
 -}
 markdown : Tag -> String
-markdown tag =
-    case tag of
-        MarkdownTag t ->
-            MarkdownFragment.raw t.body
+markdown (MarkdownTag { body }) =
+    MarkdownFragment.raw body
 
 
 {-| Compares two tags for ordering them alphabetically.
@@ -135,27 +129,25 @@ compareAlphabetically tag1 tag2 =
 
 -}
 view : Bool -> List (Attribute msg) -> Tag -> Html msg
-view enableMathSupport additionalAttributes tag =
-    case tag of
-        MarkdownTag t ->
-            let
-                parsed : Result String (List Block)
-                parsed =
-                    MarkdownFragment.parsed t.body
-            in
-            case parsed of
-                Ok blocks ->
-                    case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
-                        Ok rendered ->
-                            Html.span
-                                (class "prose dark:prose-invert print:prose-neutral dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" :: additionalAttributes)
-                                rendered
+view enableMathSupport additionalAttributes (MarkdownTag { body }) =
+    let
+        parsed : Result String (List Block)
+        parsed =
+            MarkdownFragment.parsed body
+    in
+    case parsed of
+        Ok blocks ->
+            case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
+                Ok rendered ->
+                    Html.span
+                        (class "prose dark:prose-invert print:prose-neutral dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" :: additionalAttributes)
+                        rendered
 
-                        Err renderingError ->
-                            text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
+                Err renderingError ->
+                    text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError
 
-                Err parsingError ->
-                    text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
+        Err parsingError ->
+            text <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
 
 
 {-| Obtain the tag being filtered by according to query parameters in the URL.
