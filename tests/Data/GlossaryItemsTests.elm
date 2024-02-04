@@ -1,10 +1,9 @@
 module Data.GlossaryItemsTests exposing (suite)
 
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
-import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
+import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
-import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)

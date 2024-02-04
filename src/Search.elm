@@ -4,7 +4,6 @@ import Components.SearchDialog as SearchDialog
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemForHtml as GlossaryItemForHtml
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.TagId exposing (TagId)
@@ -128,7 +127,7 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                     case alternativeTerm of
                         Just alternativeTerm_ ->
                             SearchDialog.searchResult
-                                (Extras.Url.fragmentOnly <| TermId.toString <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
+                                (Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
                                 [ Html.div
                                     [ class "flex flex-col" ]
                                     [ Html.div
@@ -159,7 +158,7 @@ search enableMathSupport filterByTagId searchString glossaryItems =
 
                         Nothing ->
                             SearchDialog.searchResult
-                                (Extras.Url.fragmentOnly <| TermId.toString <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
+                                (Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
                                 [ Html.div
                                     []
                                     [ Html.p

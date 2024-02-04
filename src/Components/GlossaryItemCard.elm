@@ -8,7 +8,6 @@ import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItem.TermId as TermId
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml, lastUpdatedByEmailAddress)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
@@ -572,7 +571,7 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term 
             [ class "group" ]
             [ span [ class "mr-1.5 hidden print:inline" ] [ text "➢" ]
             , Html.dfn
-                [ Extras.HtmlAttribute.showIf showSilcrow <| Html.Attributes.id <| TermId.toString <| Term.id term ]
+                [ Extras.HtmlAttribute.showIf showSilcrow <| Html.Attributes.id <| Term.id term ]
                 [ if Term.isAbbreviation term then
                     Html.abbr []
                         [ viewTerm ]
@@ -584,7 +583,7 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term 
                 span
                     [ class "silcrow invisible group-hover:visible hover:visible print:group-hover:invisible print:hover:invisible" ]
                     [ Html.a
-                        [ term |> Term.id |> TermId.toString |> fragmentOnly |> Html.Attributes.href
+                        [ term |> Term.id |> fragmentOnly |> Html.Attributes.href
                         , target "_self"
                         , Accessibility.Key.tabbable tabbable
                         ]
@@ -650,7 +649,7 @@ viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDefin
                                         "#"
 
                                        else
-                                        relatedTerm |> Term.id |> TermId.toString |> fragmentOnly
+                                        relatedTerm |> Term.id |> fragmentOnly
                                       )
                                         |> Html.Attributes.href
                                     , target "_self"

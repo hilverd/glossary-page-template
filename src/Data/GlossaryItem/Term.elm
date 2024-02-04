@@ -14,7 +14,6 @@ The `body` is the actual term.
 
 import Codec exposing (Codec)
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
-import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.HtmlTree exposing (HtmlTree)
 import Extras.String
@@ -96,17 +95,14 @@ codec =
 
 {-| Produce the ID of a term.
 
-    import Data.GlossaryItem.TermId as TermId
-
     fromMarkdown "Hi there" False
     |> id
-    |> TermId.toString
     --> "Hi_there"
 
 -}
-id : Term -> TermId
+id : Term -> String
 id (MarkdownTerm { body }) =
-    body |> MarkdownFragment.raw |> String.replace " " "_" |> TermId.fromString
+    body |> MarkdownFragment.raw |> String.replace " " "_"
 
 
 {-| Retrieve the "is an abbreviation" Boolean of a term.

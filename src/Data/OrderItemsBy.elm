@@ -1,7 +1,6 @@
 module Data.OrderItemsBy exposing (OrderItemsBy(..), fromQuery, toQueryParameter)
 
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
-import Data.GlossaryItem.TermId as TermId exposing (TermId)
 import Url.Builder
 import Url.Parser.Query
 

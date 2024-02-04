@@ -43,7 +43,6 @@ import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (Disamb
 import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItem.TermId as TermId
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Extras.Url exposing (fragmentOnly)
 import Internationalisation as I18n
@@ -266,7 +265,6 @@ preferredTermToHtmlTree disambiguationTag_ term =
                 |> Maybe.map DisambiguatedTerm.toTerm
                 |> Maybe.withDefault term
                 |> Term.id
-                |> TermId.toString
     in
     HtmlTree.Node "dt"
         True
@@ -372,7 +370,7 @@ nonemptyRelatedTermsToHtmlTree itemHasADefinition relatedTerms_ =
 
 hrefFromRelatedTerm : Term -> HtmlTree.Attribute
 hrefFromRelatedTerm term =
-    HtmlTree.Attribute "href" <| fragmentOnly <| TermId.toString <| Term.id term
+    HtmlTree.Attribute "href" <| fragmentOnly <| Term.id term
 
 
 {-| Set the name and email address of the person who last updated this glossary item.
