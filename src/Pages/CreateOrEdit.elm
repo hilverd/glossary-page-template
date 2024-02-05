@@ -117,10 +117,6 @@ init commonModel =
                 tags =
                     GlossaryItems.tagByIdList items
 
-                existingTerms : List DisambiguatedTerm
-                existingTerms =
-                    GlossaryItems.disambiguatedPreferredTerms Nothing items
-
                 existingDisambiguatedPreferredTerms : List DisambiguatedTerm
                 existingDisambiguatedPreferredTerms =
                     GlossaryItems.disambiguatedPreferredTerms Nothing items
@@ -145,7 +141,6 @@ init commonModel =
                 emptyForm : GlossaryItemForm
                 emptyForm =
                     Form.empty
-                        existingTerms
                         existingDisambiguatedPreferredTerms
                         tags
                         filterByTagId
@@ -166,7 +161,6 @@ init commonModel =
                                                     |> Maybe.andThen (\tag -> GlossaryItems.tagIdFromTag tag items)
                                         in
                                         Form.fromGlossaryItemForHtml
-                                            existingTerms
                                             existingDisambiguatedPreferredTerms
                                             tags
                                             preferredTermsOfItemsListingThisItemAsRelated
@@ -194,7 +188,7 @@ init commonModel =
 
         Err _ ->
             ( { common = commonModel
-              , form = Form.empty [] [] [] Nothing []
+              , form = Form.empty [] [] Nothing []
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
               , dropdownMenusWithMoreOptionsForRelatedTerms = Dict.empty

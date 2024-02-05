@@ -63,7 +63,6 @@ type GlossaryItemForm
         , disambiguationTagId : Maybe TagId
         , definitionField : DefinitionField
         , relatedTermFields : Array RelatedTermField
-        , termsOutside : List DisambiguatedTerm -- TODO this appears to be the same as preferredTermsOutside
         , preferredTermsOutside : List DisambiguatedTerm
         , preferredTermsOfItemsListingThisItemAsRelated : List DisambiguatedTerm
         , needsUpdating : Bool
@@ -122,13 +121,6 @@ relatedTermFields glossaryItemForm =
             form.relatedTermFields
 
 
-termsOutside : GlossaryItemForm -> List DisambiguatedTerm
-termsOutside glossaryItemForm =
-    case glossaryItemForm of
-        GlossaryItemForm form ->
-            form.termsOutside
-
-
 preferredTermsOutside : GlossaryItemForm -> List DisambiguatedTerm
 preferredTermsOutside glossaryItemForm =
     case glossaryItemForm of
@@ -164,10 +156,10 @@ validate form =
         cannotBeEmptyMessage =
             I18n.thisFieldCannotBeEmpty
 
-        rawTermsOutsideSet : Set String
-        rawTermsOutsideSet =
+        rawPreferredTermsOutsideSet : Set String
+        rawPreferredTermsOutsideSet =
             form
-                |> termsOutside
+                |> preferredTermsOutside
                 |> List.map (DisambiguatedTerm.toTerm >> Term.raw >> RawTerm.toString)
                 |> Set.fromList
 
@@ -235,7 +227,7 @@ validate form =
                                     |> Term.raw
                                     |> RawTerm.toString
                         in
-                        if isPreferredTerm && Set.member rawTerm rawTermsOutsideSet then
+                        if isPreferredTerm && Set.member rawTerm rawPreferredTermsOutsideSet then
                             Just I18n.thisTermAlreadyExistsElsewhere
 
                         else if (Dict.get rawTerm rawTermsInsideForm |> Maybe.withDefault 0) > 1 then
@@ -283,7 +275,6 @@ validate form =
         , disambiguationTagId = disambiguationTagId form
         , definitionField = validatedDefinitionField
         , relatedTermFields = validatedRelatedTermFields
-        , termsOutside = termsOutside form
         , preferredTermsOutside = preferredTermsOutside form
         , preferredTermsOfItemsListingThisItemAsRelated = preferredTermsOfItemsListingThisItemAsRelated form
         , needsUpdating = needsUpdating form
@@ -303,8 +294,8 @@ hasValidationErrors form =
         || (form |> relatedTermFields |> hasErrors .validationError)
 
 
-empty : List DisambiguatedTerm -> List DisambiguatedTerm -> List ( TagId, Tag ) -> Maybe TagId -> List DisambiguatedTerm -> GlossaryItemForm
-empty withTermsOutside withPreferredTermsOutside allTags filterByTag preferredTermsOfItemsListingThisItemAsRelated_ =
+empty : List DisambiguatedTerm -> List ( TagId, Tag ) -> Maybe TagId -> List DisambiguatedTerm -> GlossaryItemForm
+empty withPreferredTermsOutside allTags filterByTag preferredTermsOfItemsListingThisItemAsRelated_ =
     GlossaryItemForm
         { preferredTermField = TermField.empty
         , alternativeTermFields = Array.empty
@@ -317,7 +308,6 @@ empty withTermsOutside withPreferredTermsOutside allTags filterByTag preferredTe
         , disambiguationTagId = Nothing
         , definitionField = DefinitionField.empty
         , relatedTermFields = Array.empty
-        , termsOutside = withTermsOutside
         , preferredTermsOutside = withPreferredTermsOutside
         , preferredTermsOfItemsListingThisItemAsRelated = preferredTermsOfItemsListingThisItemAsRelated_
         , needsUpdating = True
@@ -335,14 +325,13 @@ emptyRelatedTermField =
 
 fromGlossaryItemForHtml :
     List DisambiguatedTerm
-    -> List DisambiguatedTerm
     -> List ( TagId, Tag )
     -> List DisambiguatedTerm
     -> List DisambiguatedTerm
     -> Maybe TagId
     -> GlossaryItemForHtml
     -> GlossaryItemForm
-fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTermsOfItemsListingThisItemAsRelated_ relatedTerms disambiguationTagId_ item =
+fromGlossaryItemForHtml existingPreferredTerms allTags preferredTermsOfItemsListingThisItemAsRelated_ relatedTerms disambiguationTagId_ item =
     let
         normalTags : List Tag
         normalTags =
@@ -373,21 +362,6 @@ fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTe
                 |> GlossaryItemForHtml.allTerms
                 |> List.map (Term.raw >> RawTerm.toString)
                 |> Set.fromList
-
-        termsOutside1 : List DisambiguatedTerm
-        termsOutside1 =
-            List.filter
-                (\existingTerm ->
-                    not <|
-                        Set.member
-                            (existingTerm
-                                |> DisambiguatedTerm.toTerm
-                                |> Term.raw
-                                |> RawTerm.toString
-                            )
-                            rawTermsForItem
-                )
-                existingTerms
 
         preferredTermsOutside1 : List DisambiguatedTerm
         preferredTermsOutside1 =
@@ -431,7 +405,6 @@ fromGlossaryItemForHtml existingTerms existingPreferredTerms allTags preferredTe
             relatedTerms
                 |> List.map (\term -> RelatedTermField (Just <| Term.raw <| DisambiguatedTerm.toTerm term) Nothing)
                 |> Array.fromList
-        , termsOutside = termsOutside1
         , preferredTermsOutside = preferredTermsOutside1
         , preferredTermsOfItemsListingThisItemAsRelated = preferredTermsOfItemsListingThisItemAsRelated_
         , needsUpdating = item |> GlossaryItemForHtml.needsUpdating
