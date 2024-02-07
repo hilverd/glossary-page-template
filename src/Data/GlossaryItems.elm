@@ -1,9 +1,8 @@
 module Data.GlossaryItems exposing
     ( GlossaryItems
     , empty, fromList, applyTagsChanges, insert, update, remove
-    , get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
+    , get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
-    , disambiguatedPreferredTermFromRaw
     )
 
 {-| The glossary items that make up a glossary.
@@ -21,7 +20,7 @@ module Data.GlossaryItems exposing
 
 # Query
 
-@docs get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
+@docs get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
 
 
 # Export
