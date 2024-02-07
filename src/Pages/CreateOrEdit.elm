@@ -125,11 +125,7 @@ init commonModel =
                 preferredTermsOfItemsListingThisItemAsRelated =
                     commonModel.maybeId
                         |> Maybe.map
-                            (\id ->
-                                items
-                                    |> GlossaryItems.relatedForWhichItems id
-                                    |> List.filterMap (\id_ -> GlossaryItems.disambiguatedPreferredTerm id_ items)
-                            )
+                            (\id -> GlossaryItems.preferredTermsOfItemsListingThisItemAsRelated id items)
                         |> Maybe.withDefault []
 
                 filterByTagId : Maybe TagId

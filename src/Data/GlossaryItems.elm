@@ -1,7 +1,7 @@
 module Data.GlossaryItems exposing
     ( GlossaryItems
     , empty, fromList, applyTagsChanges, insert, update, remove
-    , get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+    , get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     , disambiguatedPreferredTermFromRaw
     )
@@ -21,7 +21,7 @@ module Data.GlossaryItems exposing
 
 # Query
 
-@docs get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems
+@docs get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, disambiguatedPreferredTermFromId, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
 
 
 # Export
@@ -957,6 +957,15 @@ relatedForWhichItems itemId (GlossaryItems items) =
                     result
             )
             []
+
+
+{-| The disambiguated preferred terms of the items that list this one as a related item.
+-}
+preferredTermsOfItemsListingThisItemAsRelated : GlossaryItemId -> GlossaryItems -> List DisambiguatedTerm
+preferredTermsOfItemsListingThisItemAsRelated id items =
+    items
+        |> relatedForWhichItems id
+        |> List.filterMap (\id_ -> disambiguatedPreferredTerm id_ items)
 
 
 {-| A list of pairs associating each alternative term with the disambiguated preferred terms that it appears together with.
