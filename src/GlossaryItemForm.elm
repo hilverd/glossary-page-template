@@ -34,6 +34,7 @@ import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TagId exposing (TagId)
@@ -294,8 +295,30 @@ hasValidationErrors form =
         || (form |> relatedTermFields |> hasErrors .validationError)
 
 
-empty : List DisambiguatedTerm -> List ( TagId, Tag ) -> Maybe TagId -> List DisambiguatedTerm -> GlossaryItemForm
-empty withPreferredTermsOutside allTags filterByTag preferredTermsOfItemsListingThisItemAsRelated_ =
+empty : GlossaryItems -> Maybe Tag -> GlossaryItemForm
+empty items filterByTag =
+    let
+        tags : List ( TagId, Tag )
+        tags =
+            GlossaryItems.tagByIdList items
+
+        existingDisambiguatedPreferredTerms : List DisambiguatedTerm
+        existingDisambiguatedPreferredTerms =
+            GlossaryItems.disambiguatedPreferredTerms Nothing items
+
+        filterByTagId : Maybe TagId
+        filterByTagId =
+            filterByTag
+                |> Maybe.andThen (\tag -> GlossaryItems.tagIdFromTag tag items)
+    in
+    empty_
+        existingDisambiguatedPreferredTerms
+        tags
+        filterByTagId
+
+
+empty_ : List DisambiguatedTerm -> List ( TagId, Tag ) -> Maybe TagId -> GlossaryItemForm
+empty_ withPreferredTermsOutside allTags filterByTag =
     GlossaryItemForm
         { preferredTermField = TermField.empty
         , alternativeTermFields = Array.empty
@@ -309,7 +332,7 @@ empty withPreferredTermsOutside allTags filterByTag preferredTermsOfItemsListing
         , definitionField = DefinitionField.empty
         , relatedTermFields = Array.empty
         , preferredTermsOutside = withPreferredTermsOutside
-        , preferredTermsOfItemsListingThisItemAsRelated = preferredTermsOfItemsListingThisItemAsRelated_
+        , preferredTermsOfItemsListingThisItemAsRelated = []
         , needsUpdating = True
         , lastUpdatedDate = ""
         }
@@ -323,7 +346,36 @@ emptyRelatedTermField =
     }
 
 
-fromGlossaryItemForHtml :
+fromGlossaryItemForHtml : GlossaryItems -> GlossaryItemId -> GlossaryItemForHtml -> GlossaryItemForm
+fromGlossaryItemForHtml items itemId item =
+    let
+        tags : List ( TagId, Tag )
+        tags =
+            GlossaryItems.tagByIdList items
+
+        existingDisambiguatedPreferredTerms : List DisambiguatedTerm
+        existingDisambiguatedPreferredTerms =
+            GlossaryItems.disambiguatedPreferredTerms Nothing items
+
+        preferredTermsOfItemsListingThisItemAsRelated_ : List DisambiguatedTerm
+        preferredTermsOfItemsListingThisItemAsRelated_ =
+            GlossaryItems.preferredTermsOfItemsListingThisItemAsRelated itemId items
+
+        disambiguationTagId_ : Maybe TagId
+        disambiguationTagId_ =
+            item
+                |> GlossaryItemForHtml.disambiguationTag
+                |> Maybe.andThen (\tag -> GlossaryItems.tagIdFromTag tag items)
+    in
+    fromGlossaryItemForHtml_ existingDisambiguatedPreferredTerms
+        tags
+        preferredTermsOfItemsListingThisItemAsRelated_
+        (GlossaryItemForHtml.relatedPreferredTerms item)
+        disambiguationTagId_
+        item
+
+
+fromGlossaryItemForHtml_ :
     List DisambiguatedTerm
     -> List ( TagId, Tag )
     -> List DisambiguatedTerm
@@ -331,7 +383,7 @@ fromGlossaryItemForHtml :
     -> Maybe TagId
     -> GlossaryItemForHtml
     -> GlossaryItemForm
-fromGlossaryItemForHtml existingPreferredTerms allTags preferredTermsOfItemsListingThisItemAsRelated_ relatedTerms disambiguationTagId_ item =
+fromGlossaryItemForHtml_ existingPreferredTerms allTags preferredTermsOfItemsListingThisItemAsRelated_ relatedTerms disambiguationTagId_ item =
     let
         normalTags : List Tag
         normalTags =

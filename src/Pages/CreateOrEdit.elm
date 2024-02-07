@@ -113,34 +113,11 @@ init commonModel =
                 items =
                     Glossary.items glossary
 
-                tags : List ( TagId, Tag )
-                tags =
-                    GlossaryItems.tagByIdList items
-
-                existingDisambiguatedPreferredTerms : List DisambiguatedTerm
-                existingDisambiguatedPreferredTerms =
-                    GlossaryItems.disambiguatedPreferredTerms Nothing items
-
-                preferredTermsOfItemsListingThisItemAsRelated : List DisambiguatedTerm
-                preferredTermsOfItemsListingThisItemAsRelated =
-                    commonModel.maybeId
-                        |> Maybe.map
-                            (\id -> GlossaryItems.preferredTermsOfItemsListingThisItemAsRelated id items)
-                        |> Maybe.withDefault []
-
-                filterByTagId : Maybe TagId
-                filterByTagId =
-                    commonModel.queryParameters
-                        |> QueryParameters.filterByTag
-                        |> Maybe.andThen (\tag -> GlossaryItems.tagIdFromTag tag items)
-
                 emptyForm : GlossaryItemForm
                 emptyForm =
                     Form.empty
-                        existingDisambiguatedPreferredTerms
-                        tags
-                        filterByTagId
-                        preferredTermsOfItemsListingThisItemAsRelated
+                        items
+                        (QueryParameters.filterByTag commonModel.queryParameters)
 
                 form =
                     Maybe.andThen
@@ -149,19 +126,9 @@ init commonModel =
                                 |> GlossaryItems.get id
                                 |> Maybe.map
                                     (\itemForHtml ->
-                                        let
-                                            disambiguationTagId : Maybe TagId
-                                            disambiguationTagId =
-                                                itemForHtml
-                                                    |> GlossaryItemForHtml.disambiguationTag
-                                                    |> Maybe.andThen (\tag -> GlossaryItems.tagIdFromTag tag items)
-                                        in
                                         Form.fromGlossaryItemForHtml
-                                            existingDisambiguatedPreferredTerms
-                                            tags
-                                            preferredTermsOfItemsListingThisItemAsRelated
-                                            (GlossaryItemForHtml.relatedPreferredTerms itemForHtml)
-                                            disambiguationTagId
+                                            items
+                                            id
                                             itemForHtml
                                     )
                         )
@@ -184,7 +151,7 @@ init commonModel =
 
         Err _ ->
             ( { common = commonModel
-              , form = Form.empty [] [] Nothing []
+              , form = Form.empty GlossaryItems.empty Nothing
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
               , dropdownMenusWithMoreOptionsForRelatedTerms = Dict.empty
