@@ -1426,9 +1426,10 @@ viewCards :
         }
     -> List Tag
     -> GlossaryItems
+    -> Maybe ( Tag, TagDescription )
     -> ( List ( GlossaryItemId, GlossaryItemForHtml ), List ( GlossaryItemId, GlossaryItemForHtml ) )
     -> Html Msg
-viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates } tags glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates } tags glossaryItems filterByTagWithDescription ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
         filterByTag_ : Maybe TagId
         filterByTag_ =
@@ -1464,19 +1465,6 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
                 }
                 model
                 { previous = Nothing, item = Just indexedItem, next = Nothing }
-
-        filterByTagWithDescription : Maybe ( Tag, TagDescription )
-        filterByTagWithDescription =
-            filterByTag_
-                |> Maybe.andThen
-                    (\tagId ->
-                        GlossaryItems.tagFromId tagId glossaryItems
-                            |> Maybe.andThen
-                                (\tag ->
-                                    GlossaryItems.tagDescriptionFromId tagId glossaryItems
-                                        |> Maybe.map (\description -> ( tag, description ))
-                                )
-                    )
 
         totalNumberOfItems : Int
         totalNumberOfItems =
@@ -2271,6 +2259,19 @@ view model =
                 filterByTag_ =
                     filterByTag model
 
+                filterByTagWithDescription : Maybe ( Tag, TagDescription )
+                filterByTagWithDescription =
+                    filterByTag_
+                        |> Maybe.andThen
+                            (\tagId ->
+                                GlossaryItems.tagFromId tagId items
+                                    |> Maybe.andThen
+                                        (\tag ->
+                                            GlossaryItems.tagDescriptionFromId tagId items
+                                                |> Maybe.map (\description -> ( tag, description ))
+                                        )
+                            )
+
                 indexOfTerms : IndexOfTerms
                 indexOfTerms =
                     IndexOfTerms.fromGlossaryItems filterByTag_ items
@@ -2467,6 +2468,7 @@ view model =
                                         }
                                         (GlossaryItems.tags items)
                                         items
+                                        filterByTagWithDescription
                                 ]
                             , Html.footer
                                 []
