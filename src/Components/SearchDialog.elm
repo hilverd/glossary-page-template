@@ -359,9 +359,10 @@ view :
     (Msg -> parentMsg)
     -> Model parentMsg
     -> String
+    -> Maybe (Html parentMsg)
     -> List SearchResult
     -> Html parentMsg
-view toParentMsg model searchString searchResults =
+view toParentMsg model searchString messageAboveSearchResults searchResults =
     let
         model_ :
             { idPrefix : String
@@ -479,6 +480,14 @@ view toParentMsg model searchString searchResults =
                             )
                         ]
                     ]
+                , Extras.Html.showIf (String.trim searchString /= "") <|
+                    Extras.Html.showMaybe
+                        (\messageAboveSearchResults_ ->
+                            div
+                                [ class "px-4 py-2 border-none text-gray-800 dark:text-gray-200" ]
+                                [ messageAboveSearchResults_ ]
+                        )
+                        messageAboveSearchResults
                 , Extras.Html.showIf (not <| List.isEmpty searchResults) <|
                     ul
                         [ Accessibility.Role.listBox

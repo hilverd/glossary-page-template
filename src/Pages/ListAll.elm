@@ -1429,7 +1429,7 @@ viewCards :
     -> Maybe ( Tag, TagDescription )
     -> ( List ( GlossaryItemId, GlossaryItemForHtml ), List ( GlossaryItemId, GlossaryItemForHtml ) )
     -> Html Msg
-viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates } tags glossaryItems filterByTagWithDescription ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates } tags glossaryItems filterByTagWithDescription_ ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
         filterByTag_ : Maybe TagId
         filterByTag_ =
@@ -1480,8 +1480,8 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
         ]
         [ Extras.Html.showMaybe
             (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
-            filterByTagWithDescription
-        , Extras.Html.showIf (filterByTagWithDescription == Nothing) <|
+            filterByTagWithDescription_
+        , Extras.Html.showIf (filterByTagWithDescription_ == Nothing) <|
             viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
         , Extras.Html.showIf (Editability.editing model.common.editability) <|
             div
@@ -1537,6 +1537,21 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
             (PageMsg.Internal << SearchDialogMsg)
             model.searchDialog.model
             model.searchDialog.term
+            (filterByTagWithDescription_
+                |> Maybe.map
+                    (\( tag, _ ) ->
+                        span
+                            [ class "inline-flex items-center" ]
+                            [ Icons.exclamation
+                                [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-800 mr-1.5"
+                                , Accessibility.Aria.hidden True
+                                ]
+                            , text "Filtering by tag \""
+                            , Tag.view enableMathSupport [] tag
+                            , text "\""
+                            ]
+                    )
+            )
             model.searchDialog.results
         , viewConfirmDeleteModal
             model.common.editability
@@ -1986,21 +2001,12 @@ viewCurrentTagFilter { enableMathSupport, tabbable } ( tag, tagDescription ) =
         [ class "pt-3" ]
         [ span
             [ class "print:hidden mr-2 font-medium text-gray-900 dark:text-gray-100" ]
-            [ text I18n.onlyShowingItemsForTag ]
+            [ text I18n.filteringByTag ]
         , Components.Badge.indigoWithBorderAndRemoveButton
             tabbable
             [ class "print:hidden mt-2" ]
             (PageMsg.Internal DoNotFilterByTag)
             [ Tag.view enableMathSupport [] tag ]
-        , div
-            [ class "mt-3 mb-4" ]
-            [ TagDescription.view
-                { enableMathSupport = enableMathSupport
-                , makeLinksTabbable = tabbable
-                }
-                []
-                tagDescription
-            ]
         ]
 
 
@@ -2239,7 +2245,42 @@ pageTitle model glossary =
                 |> Maybe.withDefault glossaryTitle
 
         _ ->
-            glossaryTitle
+            let
+                filterByTagWithDescription_ : Maybe ( Tag, TagDescription )
+                filterByTagWithDescription_ =
+                    filterByTagWithDescription model
+            in
+            filterByTagWithDescription_
+                |> Maybe.map
+                    (\( tag, _ ) ->
+                        Tag.inlineText tag ++ " · " ++ glossaryTitle
+                    )
+                |> Maybe.withDefault glossaryTitle
+
+
+filterByTagWithDescription : Model -> Maybe ( Tag, TagDescription )
+filterByTagWithDescription model =
+    case model.common.glossary of
+        Ok glossary ->
+            let
+                items : GlossaryItems
+                items =
+                    Glossary.items glossary
+            in
+            model
+                |> filterByTag
+                |> Maybe.andThen
+                    (\tagId ->
+                        GlossaryItems.tagFromId tagId items
+                            |> Maybe.andThen
+                                (\tag ->
+                                    GlossaryItems.tagDescriptionFromId tagId items
+                                        |> Maybe.map (\description -> ( tag, description ))
+                                )
+                    )
+
+        _ ->
+            Nothing
 
 
 view : Model -> Document Msg
@@ -2259,18 +2300,9 @@ view model =
                 filterByTag_ =
                     filterByTag model
 
-                filterByTagWithDescription : Maybe ( Tag, TagDescription )
-                filterByTagWithDescription =
-                    filterByTag_
-                        |> Maybe.andThen
-                            (\tagId ->
-                                GlossaryItems.tagFromId tagId items
-                                    |> Maybe.andThen
-                                        (\tag ->
-                                            GlossaryItems.tagDescriptionFromId tagId items
-                                                |> Maybe.map (\description -> ( tag, description ))
-                                        )
-                            )
+                filterByTagWithDescription_ : Maybe ( Tag, TagDescription )
+                filterByTagWithDescription_ =
+                    filterByTagWithDescription model
 
                 indexOfTerms : IndexOfTerms
                 indexOfTerms =
@@ -2417,17 +2449,38 @@ view model =
                                 , Extras.Html.showIf (Editability.editing model.common.editability) <| viewSettings glossary model
                                 , h1
                                     [ id ElementIds.title ]
-                                    [ glossary |> Glossary.title |> GlossaryTitle.view model.common.enableMathSupport ]
+                                    [ filterByTagWithDescription_
+                                        |> Maybe.map
+                                            (\( tag, _ ) ->
+                                                Tag.view
+                                                    model.common.enableMathSupport
+                                                    [ class "text-3xl font-bold leading-tight" ]
+                                                    tag
+                                            )
+                                        |> Maybe.withDefault (glossary |> Glossary.title |> GlossaryTitle.view model.common.enableMathSupport)
+                                    ]
                                 ]
                             , Html.main_
                                 []
-                                [ glossary
-                                    |> Glossary.aboutSection
-                                    |> Components.AboutSection.view
-                                        { enableMathSupport = model.common.enableMathSupport
-                                        , modalDialogShown = not noModalDialogShown_
-                                        }
-                                , Extras.Html.showIf (Editability.editing model.common.editability) <|
+                                [ filterByTagWithDescription_
+                                    |> Maybe.map
+                                        (\( _, tagDescription ) ->
+                                            TagDescription.view
+                                                { enableMathSupport = model.common.enableMathSupport
+                                                , makeLinksTabbable = noModalDialogShown_
+                                                }
+                                                []
+                                                tagDescription
+                                        )
+                                    |> Maybe.withDefault
+                                        (glossary
+                                            |> Glossary.aboutSection
+                                            |> Components.AboutSection.view
+                                                { enableMathSupport = model.common.enableMathSupport
+                                                , modalDialogShown = not noModalDialogShown_
+                                                }
+                                        )
+                                , Extras.Html.showIf (Editability.editing model.common.editability && filterByTagWithDescription_ == Nothing) <|
                                     div
                                         [ class "flex-none mt-2" ]
                                         [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
@@ -2468,7 +2521,7 @@ view model =
                                         }
                                         (GlossaryItems.tags items)
                                         items
-                                        filterByTagWithDescription
+                                        filterByTagWithDescription_
                                 ]
                             , Html.footer
                                 []
