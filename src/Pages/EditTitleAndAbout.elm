@@ -587,8 +587,11 @@ view model =
                                             [ class "text-xl text-center text-gray-800 dark:text-gray-300 px-3 py-0.5 select-none" ]
                                             [ text I18n.preview ]
                                         , h2
-                                            [ class "pb-4 text-2xl font-bold leading-tight text-gray-700 dark:text-gray-300" ]
-                                            [ GlossaryTitle.view model.common.enableMathSupport title1 ]
+                                            [ class "pb-4" ]
+                                            [ GlossaryTitle.view model.common.enableMathSupport
+                                                [ class "text-2xl font-bold leading-tight text-gray-700 dark:text-gray-300" ]
+                                                title1
+                                            ]
                                         , Components.AboutSection.view
                                             { enableMathSupport = model.common.enableMathSupport
                                             , modalDialogShown = False

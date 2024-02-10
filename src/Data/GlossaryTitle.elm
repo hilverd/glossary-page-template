@@ -11,7 +11,7 @@ module Data.GlossaryTitle exposing (GlossaryTitle, fromMarkdown, raw, codec, toF
 
 import Codec exposing (Codec)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
-import Html exposing (Html, text)
+import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
 import Internationalisation as I18n
 import Markdown.Block exposing (Block)
@@ -131,8 +131,8 @@ markdown (MarkdownGlossaryTitle fragment) =
     --> expected
 
 -}
-view : Bool -> GlossaryTitle -> Html msg
-view enableMathSupport (MarkdownGlossaryTitle fragment) =
+view : Bool -> List (Attribute msg) -> GlossaryTitle -> Html msg
+view enableMathSupport additionalAttributes (MarkdownGlossaryTitle fragment) =
     let
         parsed : Result String (List Block)
         parsed =
@@ -143,7 +143,7 @@ view enableMathSupport (MarkdownGlossaryTitle fragment) =
             case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
                 Ok rendered ->
                     Html.span
-                        [ class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden text-3xl font-bold leading-tight" ]
+                        (class "prose print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden" :: additionalAttributes)
                         rendered
 
                 Err renderingError ->

@@ -2457,8 +2457,17 @@ view model =
                                                     [ class "text-3xl font-bold leading-tight" ]
                                                     tag
                                             )
-                                        |> Maybe.withDefault (glossary |> Glossary.title |> GlossaryTitle.view model.common.enableMathSupport)
+                                        |> Maybe.withDefault
+                                            (glossary
+                                                |> Glossary.title
+                                                |> GlossaryTitle.view model.common.enableMathSupport [ class "text-3xl font-bold leading-tight" ]
+                                            )
                                     ]
+                                , Extras.Html.showIf (filterByTagWithDescription_ /= Nothing) <|
+                                    h2
+                                        [ class "mt-2 font-bold leading-tight" ]
+                                        [ glossary |> Glossary.title |> GlossaryTitle.view model.common.enableMathSupport [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
+                                        ]
                                 ]
                             , Html.main_
                                 []
