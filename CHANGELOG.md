@@ -18,6 +18,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Changed
 
 - Make it more obvious when a tag is being filtered by.
+- Rename "Quick search" to just "Search" for consistency.
 
 ### Fixed
 
