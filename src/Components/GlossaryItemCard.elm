@@ -45,9 +45,10 @@ view :
     , enableLastUpdatedDates : Bool
     }
     -> Style msg
+    -> Maybe Tag
     -> GlossaryItemWithPreviousAndNext
     -> Html msg
-view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glossaryItemWithPreviousAndNext =
+view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagBeingFilteredBy glossaryItemWithPreviousAndNext =
     Extras.Html.showMaybe
         (\( index, glossaryItem ) ->
             let
@@ -64,6 +65,10 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                 tags : List Tag
                 tags =
                     GlossaryItemForHtml.allTags glossaryItem
+
+                tagsNotBeingFilteredBy : List Tag
+                tagsNotBeingFilteredBy =
+                    tags |> List.filter (Just >> (/=) tagBeingFilteredBy)
 
                 itemHasSomeDefinitions : Bool
                 itemHasSomeDefinitions =
@@ -153,6 +158,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                 , onClickItem = onClickItem
                                 , onClickRelatedTerm = onClickRelatedTerm
                                 }
+                                tagBeingFilteredBy
                                 glossaryItemWithPreviousAndNext
                             ]
 
@@ -224,7 +230,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                 , onClickTag = Just onClickTag
                                                 , tabbable = tabbable
                                                 }
-                                                tags
+                                                tagsNotBeingFilteredBy
                                             :: List.map
                                                 (viewGlossaryItemDefinition
                                                     { enableMathSupport = enableMathSupport
@@ -329,7 +335,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style glos
                                                 , onClickTag = Just onClickTag
                                                 , tabbable = tabbable
                                                 }
-                                                tags
+                                                tagsNotBeingFilteredBy
                                             :: List.map
                                                 (viewGlossaryItemDefinition
                                                     { enableMathSupport = enableMathSupport
@@ -362,9 +368,10 @@ viewAsSingle :
     , onClickItem : GlossaryItemId -> msg
     , onClickRelatedTerm : Term -> msg
     }
+    -> Maybe Tag
     -> GlossaryItemWithPreviousAndNext
     -> Html msg
-viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRelatedTerm } glossaryItemWithPreviousAndNext =
+viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRelatedTerm } tagBeingFilteredBy glossaryItemWithPreviousAndNext =
     let
         disambiguatedPreferredTermForPreviousOrNext : GlossaryItemForHtml -> Html msg
         disambiguatedPreferredTermForPreviousOrNext glossaryItem =
@@ -399,9 +406,11 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                 alternativeTerms =
                     GlossaryItemForHtml.alternativeTerms glossaryItem
 
-                tags : List Tag
-                tags =
-                    GlossaryItemForHtml.allTags glossaryItem
+                tagsNotBeingFilteredBy : List Tag
+                tagsNotBeingFilteredBy =
+                    glossaryItem
+                        |> GlossaryItemForHtml.allTags
+                        |> List.filter (Just >> (/=) tagBeingFilteredBy)
 
                 definitions =
                     GlossaryItemForHtml.definition glossaryItem
@@ -516,7 +525,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                             , onClickTag = Nothing
                             , tabbable = False
                             }
-                            tags
+                            tagsNotBeingFilteredBy
                         :: List.map
                             (viewGlossaryItemDefinition
                                 { enableMathSupport = enableMathSupport

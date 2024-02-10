@@ -349,7 +349,7 @@ update msg model =
                         Ok glossary ->
                             glossary
                                 |> Glossary.items
-                                |> Search.search model.common.enableMathSupport (filterByTag model) searchString
+                                |> Search.search model.common.enableMathSupport (filterByTagId model) searchString
 
                         Err _ ->
                             []
@@ -833,8 +833,8 @@ update msg model =
             )
 
 
-filterByTag : Model -> Maybe TagId
-filterByTag model =
+filterByTagId : Model -> Maybe TagId
+filterByTagId model =
     case model.common.glossary of
         Ok glossary ->
             let
@@ -1139,9 +1139,10 @@ viewGlossaryItem :
     , shownAsSingle : Bool
     }
     -> Model
+    -> Maybe Tag
     -> GlossaryItemWithPreviousAndNext
     -> Html Msg
-viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle } model itemWithPreviousAndNext =
+viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle } model tagBeingFilteredBy itemWithPreviousAndNext =
     let
         common : CommonModel
         common =
@@ -1163,6 +1164,7 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
                     , shownAsSingle = shownAsSingle
                     }
                 )
+                tagBeingFilteredBy
                 itemWithPreviousAndNext
         )
         itemWithPreviousAndNext.item
@@ -1195,10 +1197,11 @@ itemWithPreviousAndNextForId id indexedGlossaryItems =
 viewSingleItemModalDialog :
     Model
     -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
+    -> Maybe Tag
     -> List ( GlossaryItemId, GlossaryItemForHtml )
     -> Maybe GlossaryItemId
     -> Html Msg
-viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } indexedGlossaryItems =
+viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } tagBeingFilteredBy indexedGlossaryItems =
     Maybe.map
         (\id ->
             let
@@ -1232,6 +1235,7 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
                             , shownAsSingle = True
                             }
                             model
+                            tagBeingFilteredBy
                             itemWithPreviousAndNext
                         ]
                     ]
@@ -1431,9 +1435,13 @@ viewCards :
     -> Html Msg
 viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates } tags glossaryItems filterByTagWithDescription_ ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
-        filterByTag_ : Maybe TagId
-        filterByTag_ =
-            filterByTag model
+        filterByTagId_ : Maybe TagId
+        filterByTagId_ =
+            filterByTagId model
+
+        filterByTag : Maybe Tag
+        filterByTag =
+            filterByTagWithDescription_ |> Maybe.map Tuple.first
 
         combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForHtml )
         combinedIndexedGlossaryItems =
@@ -1442,7 +1450,7 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
         disambiguatedPreferredTermsWithDefinitions : List DisambiguatedTerm
         disambiguatedPreferredTermsWithDefinitions =
             GlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions
-                filterByTag_
+                filterByTagId_
                 glossaryItems
 
         orderItemsFocusedOnTerm : Maybe DisambiguatedTerm
@@ -1464,6 +1472,7 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
                 , shownAsSingle = False
                 }
                 model
+                filterByTag
                 { previous = Nothing, item = Just indexedItem, next = Nothing }
 
         totalNumberOfItems : Int
@@ -1502,7 +1511,7 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
         , Extras.Html.showIf (editable && totalNumberOfItems > recommendedMaximumNumberOfItems) <|
             I18n.glossaryContainsTooManyItems recommendedMaximumNumberOfItems
         , Extras.Html.showIf
-            (List.isEmpty combinedIndexedGlossaryItems && filterByTag_ /= Nothing)
+            (List.isEmpty combinedIndexedGlossaryItems && filterByTagId_ /= Nothing)
           <|
             div
                 [ class "mt-4" ]
@@ -1569,6 +1578,7 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
             , tabbable = tabbable
             , enableLastUpdatedDates = enableLastUpdatedDates
             }
+            filterByTag
             combinedIndexedGlossaryItems
           <|
             case ( model.layout, model.common.maybeId ) of
@@ -2273,7 +2283,7 @@ filterByTagWithDescription model =
                     Glossary.items glossary
             in
             model
-                |> filterByTag
+                |> filterByTagId
                 |> Maybe.andThen
                     (\tagId ->
                         GlossaryItems.tagFromId tagId items
@@ -2303,7 +2313,7 @@ view model =
 
                 filterByTag_ : Maybe TagId
                 filterByTag_ =
-                    filterByTag model
+                    filterByTagId model
 
                 filterByTagWithDescription_ : Maybe ( Tag, TagDescription )
                 filterByTagWithDescription_ =
