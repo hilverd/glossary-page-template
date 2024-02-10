@@ -1541,14 +1541,19 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
                 |> Maybe.map
                     (\( tag, _ ) ->
                         span
-                            [ class "inline-flex items-center" ]
+                            [ class "inline-flex flex-wrap items-center" ]
                             [ Icons.exclamation
                                 [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-800 mr-1.5"
                                 , Accessibility.Aria.hidden True
                                 ]
-                            , text "Filtering by tag \""
-                            , Tag.view enableMathSupport [] tag
-                            , text "\""
+                            , span
+                                [ class "mr-1" ]
+                                [ text I18n.filteringByTag ]
+                            , span []
+                                [ text " \""
+                                , Tag.view enableMathSupport [] tag
+                                , text "\""
+                                ]
                             ]
                     )
             )
@@ -1680,7 +1685,7 @@ viewQuickSearchButton tabbable =
                     , height "24"
                     , Svg.Attributes.class "mr-3 flex-none"
                     ]
-                , text I18n.quickSearch
+                , text I18n.searchPlaceholder
                 , span
                     [ class "ml-auto pl-3 flex-none text-xs font-semibold" ]
                     [ text I18n.ctrlK
