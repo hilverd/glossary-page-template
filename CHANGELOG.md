@@ -12,6 +12,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [4.5.0] - 2024-02-13
+
+### Added
 
 - Add function for converting glossary JSON to HTML to experimental `worker.min.js` script.
 
@@ -24,8 +31,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 
 - Attempt to make jumping to fragment identifier more reliable on initial page load.
-
-### Removed
 
 ## [4.4.0] - 2024-01-24
 
@@ -680,7 +685,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.4.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.5.0...HEAD
+[4.5.0]: https://github.com/hilverd/glossary-page-template/compare/v4.4.0...v4.5.0
 [4.4.0]: https://github.com/hilverd/glossary-page-template/compare/v4.3.0...v4.4.0
 [4.3.0]: https://github.com/hilverd/glossary-page-template/compare/v4.2.0...v4.3.0
 [4.2.0]: https://github.com/hilverd/glossary-page-template/compare/v4.1.0...v4.2.0
