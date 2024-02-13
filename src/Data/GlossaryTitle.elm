@@ -127,7 +127,7 @@ markdown (MarkdownGlossaryTitle fragment) =
                 ]
             ]
 
-    fromMarkdown "The _ideal_ case" |> view False
+    fromMarkdown "The _ideal_ case" |> view False []
     --> expected
 
 -}
