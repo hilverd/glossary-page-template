@@ -16,6 +16,12 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 ### Removed
 
+## [4.5.1] - 2024-02-13
+
+### Fixed
+
+- Fixed typo in test.
+
 ## [4.5.0] - 2024-02-13
 
 ### Added
@@ -685,7 +691,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.5.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.5.1...HEAD
+[4.5.1]: https://github.com/hilverd/glossary-page-template/compare/v4.5.0...v4.5.1
 [4.5.0]: https://github.com/hilverd/glossary-page-template/compare/v4.4.0...v4.5.0
 [4.4.0]: https://github.com/hilverd/glossary-page-template/compare/v4.3.0...v4.4.0
 [4.3.0]: https://github.com/hilverd/glossary-page-template/compare/v4.2.0...v4.3.0
