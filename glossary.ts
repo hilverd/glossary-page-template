@@ -137,6 +137,7 @@ if (containerElement) {
     }
 
     if (window.location.protocol === 'file:') {
+        // Initialising Elm's Browser.application doesn't work in this case, as file:// URLs are not supported (see https://github.com/elm/core/blob/1.0.0/hints/1.md).
         containerElement.innerHTML = `
             <div class="py-4 px-4 text-xl">
             <p>
@@ -144,11 +145,9 @@ if (containerElement) {
             <a target="_blank" href="https://nodejs.org/">Node.js</a>
             installed, then run the following command.
             </p>
-            <pre>
-            <code>
+            <pre><code>
             sed -n '/START OF editor.js$/,$p' glossary.html | FILE=glossary.html node
-            </code>
-            </pre>
+            </code></pre>
             <p>
             Here <code>glossary.html</code> is the name of the current file.
             </p>
