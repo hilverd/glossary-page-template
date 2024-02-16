@@ -4,6 +4,7 @@ module Data.GlossaryItemForHtml exposing
     , disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
     , toHtmlTree
     , disambiguatedTerm
+    , disambiguatedPreferredTermIdString
     )
 
 {-| An item in a glossary as retrieved from the HTML source, and/or suitable for representing as HTML.
@@ -23,7 +24,7 @@ It is not the representation used by the editor UI when the application is runni
 
 # Query
 
-@docs disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
+@docs disambiguatedPreferredTerm, disambiguatedTermIdString, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
 
 
 # Converting to HTML
@@ -128,6 +129,18 @@ disambiguatedPreferredTerm (GlossaryItemForHtml item) =
                 disambiguatedTerm disambiguationTag_ item.preferredTerm
             )
         |> Maybe.withDefault (DisambiguatedTerm.fromTerm item.preferredTerm)
+
+
+{-| The HTML ID of the disambiguated preferred term.
+-}
+disambiguatedPreferredTermIdString : GlossaryItemForHtml -> String
+disambiguatedPreferredTermIdString ((GlossaryItemForHtml item) as glossaryItemForHtml) =
+    glossaryItemForHtml
+        |> disambiguationTag
+        |> Maybe.map (\tag -> disambiguatedTerm tag item.preferredTerm)
+        |> Maybe.map DisambiguatedTerm.toTerm
+        |> Maybe.withDefault item.preferredTerm
+        |> Term.id
 
 
 {-| The (non-disambiguated) preferred term for this glossary item.
@@ -252,26 +265,14 @@ disambiguatedTerm tag term =
         |> DisambiguatedTerm.fromTerm
 
 
-preferredTermToHtmlTree : Maybe Tag -> Term -> HtmlTree
-preferredTermToHtmlTree disambiguationTag_ term =
-    let
-        disambiguatedTermIdString : String
-        disambiguatedTermIdString =
-            disambiguationTag_
-                |> Maybe.map
-                    (\tag ->
-                        disambiguatedTerm tag term
-                    )
-                |> Maybe.map DisambiguatedTerm.toTerm
-                |> Maybe.withDefault term
-                |> Term.id
-    in
+preferredTermToHtmlTree : Maybe Tag -> String -> Term -> HtmlTree
+preferredTermToHtmlTree disambiguationTag_ disambiguatedTermIdString_ term =
     HtmlTree.Node "dt"
         True
         []
         [ HtmlTree.Node "dfn"
             True
-            [ HtmlTree.Attribute "id" disambiguatedTermIdString ]
+            [ HtmlTree.Attribute "id" disambiguatedTermIdString_ ]
             [ (disambiguationTag_
                 |> Maybe.map
                     (\disambiguationTag0 ->
@@ -294,7 +295,7 @@ preferredTermToHtmlTree disambiguationTag_ term =
                             linkedTerm =
                                 HtmlTree.Node "a"
                                     True
-                                    [ HtmlTree.Attribute "href" <| fragmentOnly disambiguatedTermIdString ]
+                                    [ HtmlTree.Attribute "href" <| fragmentOnly disambiguatedTermIdString_ ]
                                     inner
                         in
                         if Term.isAbbreviation term then
@@ -387,10 +388,10 @@ setLastUpdatedBy { name, emailAddress } (GlossaryItemForHtml item) =
 {-| Represent this glossary item as an HTML tree, ready for writing back to the glossary's HTML file.
 -}
 toHtmlTree : GlossaryItemForHtml -> HtmlTree
-toHtmlTree ((GlossaryItemForHtml item) as glossaryItem) =
+toHtmlTree ((GlossaryItemForHtml item) as glossaryItemForHtml) =
     let
         allTags_ =
-            allTags glossaryItem
+            allTags glossaryItemForHtml
     in
     HtmlTree.Node "div"
         True
@@ -398,7 +399,7 @@ toHtmlTree ((GlossaryItemForHtml item) as glossaryItem) =
         , HtmlTree.showAttributeMaybe "data-last-updated-by-name" identity item.lastUpdatedByName
         , HtmlTree.showAttributeMaybe "data-last-updated-by-email-address" identity item.lastUpdatedByEmailAddress
         ]
-        (preferredTermToHtmlTree item.disambiguationTag item.preferredTerm
+        (preferredTermToHtmlTree item.disambiguationTag (disambiguatedPreferredTermIdString glossaryItemForHtml) item.preferredTerm
             :: List.map alternativeTermToHtmlTree item.alternativeTerms
             ++ (if item.needsUpdating then
                     [ HtmlTree.Node "dd"
@@ -440,7 +441,7 @@ toHtmlTree ((GlossaryItemForHtml item) as glossaryItem) =
 
                 else
                     [ nonemptyRelatedTermsToHtmlTree
-                        (hasADefinition glossaryItem)
+                        (hasADefinition glossaryItemForHtml)
                         item.relatedPreferredTerms
                     ]
                )
