@@ -3,7 +3,7 @@ const defaultTheme = require('tailwindcss/defaultTheme')
 module.exports = {
   content: [
     './index.html',
-    './glossary.{css,html,js}',
+    './glossary.{css,html,js,ts}',
     './src/**/*.elm'
   ],
   plugins: [

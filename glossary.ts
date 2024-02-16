@@ -139,16 +139,19 @@ if (containerElement) {
     if (window.location.protocol === 'file:') {
         // Initialising Elm's Browser.application doesn't work in this case, as file:// URLs are not supported (see https://github.com/elm/core/blob/1.0.0/hints/1.md).
         containerElement.innerHTML = `
-            <div class="py-4 px-4 text-xl">
-            <p>
+            <div class="p-8 text-xl">
+            <h1 class="text-3xl font-bold leading-tight">Glossary Page Template</h1>
+            <p class="mt-8 max-w-prose">
+            This page includes a web interface for making changes that are saved back to the HTML file itself.
+            This is meant to be used <strong class="font-semibold">locally</strong> by a <strong class="font-semibold">single user</strong> at a time and works best if the file is kept under version control.
+            </p>
+            <p class="max-w-prose">
             If you're on macOS, Linux, or Cygwin and have
             <a target="_blank" href="https://nodejs.org/">Node.js</a>
             installed, then run the following command.
             </p>
-            <pre><code>
-            sed -n '/START OF editor.js$/,$p' glossary.html | FILE=glossary.html node
-            </code></pre>
-            <p>
+            <pre class="my-8"><code class="select-all">sed -n '/START OF editor.js$/,$p' glossary.html | FILE=glossary.html node</code></pre>
+            <p class="max-w-prose">
             Here <code>glossary.html</code> is the name of the current file.
             </p>
             </div>
