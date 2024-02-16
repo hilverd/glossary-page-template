@@ -100,10 +100,10 @@ init flags url key =
                 |> Result.map Glossary.enableHelpForMakingChanges
                 |> Result.withDefault False
 
-        editorIsRunning : Bool
-        editorIsRunning =
+        usingIncludedBackend : Bool
+        usingIncludedBackend =
             flags
-                |> Decode.decodeValue (Decode.field "editorIsRunning" Decode.bool)
+                |> Decode.decodeValue (Decode.field "usingIncludedBackend" Decode.bool)
                 |> Result.withDefault False
 
         enableSavingChangesInMemory : Bool
@@ -156,7 +156,7 @@ init flags url key =
                 , bearerToken = bearerToken
                 , userName = userName
                 , userEmailAddress = userEmailAddress
-                , editorIsRunning = editorIsRunning
+                , usingIncludedBackend = usingIncludedBackend
                 , currentlyEditing = False
                 }
 

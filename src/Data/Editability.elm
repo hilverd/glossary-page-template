@@ -56,12 +56,12 @@ create :
     , bearerToken : Maybe String
     , userName : Maybe String
     , userEmailAddress : Maybe String
-    , editorIsRunning : Bool
+    , usingIncludedBackend : Bool
     , currentlyEditing : Bool
     }
     -> Editability
-create { enableHelpForMakingChanges, enableSavingChangesInMemory, separateBackendBaseUrl, bearerToken, userName, userEmailAddress, editorIsRunning, currentlyEditing } =
-    case ( ( enableHelpForMakingChanges, enableSavingChangesInMemory ), ( separateBackendBaseUrl, editorIsRunning ) ) of
+create { enableHelpForMakingChanges, enableSavingChangesInMemory, separateBackendBaseUrl, bearerToken, userName, userEmailAddress, usingIncludedBackend, currentlyEditing } =
+    case ( ( enableHelpForMakingChanges, enableSavingChangesInMemory ), ( separateBackendBaseUrl, usingIncludedBackend ) ) of
         ( ( False, False ), ( _, False ) ) ->
             ReadOnly
 

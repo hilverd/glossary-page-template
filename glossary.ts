@@ -164,7 +164,7 @@ if (containerElement) {
                 aboutLinks: aboutLinks,
                 tagsWithDescriptions: tagsWithDescriptions,
                 glossaryItems: glossaryItems,
-                editorIsRunning: (separateBackendBaseUrl != null) || editorIsRunning,
+                usingIncludedBackend: (separateBackendBaseUrl != null) || editorIsRunning,
                 enableHelpForMakingChanges: enableHelpForMakingChanges,
                 enableSavingChangesInMemory: enableSavingChangesInMemory,
                 enableExportMenu: enableExportMenu,
