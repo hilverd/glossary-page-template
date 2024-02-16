@@ -1,3 +1,7 @@
+# The instructions in this file can be tested locally using `gh act` (https://github.com/nektos/act).
+#
+# Any changes should also be reflected in bin/simulate-release.
+
 name: Release
 
 on:
