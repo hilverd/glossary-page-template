@@ -169,7 +169,6 @@ init flags url key =
             , editability = editability
             , enableMathSupport = katexIsAvailable
             , queryParameters = queryParameters
-            , separateBackendBaseUrl = separateBackendBaseUrl
             , maybeId = Nothing
             , fragment = fragment
             , glossary = glossary
