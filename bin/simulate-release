@@ -60,7 +60,7 @@ while (("$#")); do
   shift
 done
 
-cd "$SCRIPT_DIR/../.."
+cd "$SCRIPT_DIR/.."
 
 make-temporary-directory
 
