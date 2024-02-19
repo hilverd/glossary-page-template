@@ -1,10 +1,9 @@
 module Data.GlossaryItemForHtml exposing
     ( GlossaryItemForHtml
     , create, codec, setLastUpdatedBy
-    , disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
+    , disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, disambiguatedPreferredTermIdString, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
     , toHtmlTree
     , disambiguatedTerm
-    , disambiguatedPreferredTermIdString
     )
 
 {-| An item in a glossary as retrieved from the HTML source, and/or suitable for representing as HTML.
@@ -24,7 +23,7 @@ It is not the representation used by the editor UI when the application is runni
 
 # Query
 
-@docs disambiguatedPreferredTerm, disambiguatedTermIdString, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
+@docs disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, disambiguatedPreferredTermIdString, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
 
 
 # Converting to HTML
