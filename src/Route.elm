@@ -1,4 +1,4 @@
-module Route exposing (CommonParameters, Route(..))
+module Route exposing (CommonParameters, Route(..), path)
 
 import Browser.Navigation
 import Data.Editability exposing (Editability)
@@ -29,6 +29,11 @@ type Route
     | CreateOrEdit GlossaryItemId QueryParameters CommonParameters
     | EditTitleAndAbout QueryParameters CommonParameters
     | ManageTags QueryParameters CommonParameters
+
+
+path : Route -> String
+path =
+    urlString Builder.Absolute
 
 
 urlString : Builder.Root -> Route -> String

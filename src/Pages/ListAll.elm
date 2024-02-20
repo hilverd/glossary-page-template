@@ -79,7 +79,6 @@ import Http
 import Icons
 import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
-import PageMsg2 exposing (PageMsg2)
 import Process
 import QueryParameters exposing (QueryParameters)
 import Route exposing (CommonParameters)
@@ -191,10 +190,6 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-type alias Msg2 =
-    PageMsg2 InternalMsg
-
-
 init : CommonModel -> ( Model, Cmd Msg )
 init commonModel =
     ( { common = commonModel
@@ -236,50 +231,6 @@ init commonModel =
             commonModel.fragment
                 |> Maybe.map (Extras.BrowserDom.scrollElementIntoView <| PageMsg.Internal NoOp)
                 |> Maybe.withDefault Cmd.none
-    )
-
-
-init2 : QueryParameters -> Maybe GlossaryItemId -> CommonParameters -> ( Model2, Cmd Msg2 )
-init2 queryParameters maybeGlossaryItemId commonParameters =
-    ( { queryParameters = queryParameters
-      , maybeGlossaryItemId = maybeGlossaryItemId
-      , commonParameters = commonParameters
-      , menuForMobileVisibility = Invisible
-      , layout = ShowAllItems
-      , confirmDeleteId = Nothing
-      , themeDropdownMenu =
-            Components.DropdownMenu.init
-                [ Components.DropdownMenu.id ElementIds.themeDropdownButton ]
-      , exportDropdownMenu =
-            Components.DropdownMenu.init
-                [ Components.DropdownMenu.id ElementIds.exportDropdownButton ]
-      , searchDialog =
-            { term = ""
-            , results = []
-            , model =
-                Components.SearchDialog.init ElementIds.searchDialog
-                    [ Components.SearchDialog.onChangeSearchString (PageMsg.Internal << UpdateSearchString)
-                    , Components.SearchDialog.onShow <| preventBackgroundScrolling ()
-                    , Components.SearchDialog.onHide <| Extras.Task.messageToCommand <| PageMsg.Internal HideSearchDialog
-                    ]
-            }
-      , deleting = NotCurrentlySaving
-      , savingSettings = NotCurrentlySaving
-      , mostRecentRawTermForOrderingItemsFocusedOn =
-            case QueryParameters.orderItemsBy queryParameters of
-                FocusedOn rawTerm ->
-                    Just rawTerm
-
-                _ ->
-                    Nothing
-      , resultOfAttemptingToCopyEditorCommandToClipboard = Nothing
-      }
-    , case maybeGlossaryItemId of
-        Just id ->
-            scrollGlossaryItemIntoView2 id
-
-        Nothing ->
-            Cmd.none
     )
 
 
@@ -1517,11 +1468,6 @@ giveFocusToOuter =
 scrollGlossaryItemIntoView : GlossaryItemId -> Cmd Msg
 scrollGlossaryItemIntoView =
     ElementIds.glossaryItemDiv >> (Extras.BrowserDom.scrollElementIntoView <| PageMsg.Internal NoOp)
-
-
-scrollGlossaryItemIntoView2 : GlossaryItemId -> Cmd Msg2
-scrollGlossaryItemIntoView2 =
-    ElementIds.glossaryItemDiv >> (Extras.BrowserDom.scrollElementIntoView <| PageMsg2.Internal2 NoOp)
 
 
 
