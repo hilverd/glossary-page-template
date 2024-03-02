@@ -43,7 +43,7 @@ main =
         , update = update
         , subscriptions = subscriptions
         , onUrlRequest = UrlRequested
-        , onUrlChange = onUrlChange
+        , onUrlChange = UrlChanged
         }
 
 
@@ -187,6 +187,7 @@ init flags url key =
 type Msg
     = NoOp
     | UrlRequested UrlRequest
+    | UrlChanged Url
     | ListAllMsg Pages.ListAll.Msg
     | CreateOrEditMsg Pages.CreateOrEdit.Msg
     | EditTitleAndAboutMsg Pages.EditTitleAndAbout.Msg
@@ -263,6 +264,9 @@ withoutInternal msg =
         UrlRequested _ ->
             PageMsg.Internal ()
 
+        UrlChanged _ ->
+            PageMsg.Internal ()
+
         NoOp ->
             PageMsg.Internal ()
 
@@ -270,6 +274,7 @@ withoutInternal msg =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, withoutInternal msg, model ) of
+        -- This typically means a link has been clicked
         ( UrlRequested urlRequest, _, { key } ) ->
             case urlRequest of
                 Browser.Internal url ->
@@ -283,6 +288,10 @@ update msg model =
                     ( model
                     , Browser.Navigation.load string
                     )
+
+        -- This typically means the URL has been changed using pushUrl or replaceUrl
+        ( UrlChanged url, _, _ ) ->
+            ( model, Cmd.none )
 
         ( _, NavigateToListAll commonModel, _ ) ->
             let
@@ -375,11 +384,6 @@ update msg model =
 resetViewport : Cmd Msg
 resetViewport =
     Task.perform (always NoOp) <| Dom.setViewport 0 0
-
-
-onUrlChange : Url -> Msg
-onUrlChange _ =
-    NoOp
 
 
 
