@@ -311,10 +311,24 @@ update msg model =
                         maybeFragment =
                             url.fragment
 
+                        maybeId : Maybe GlossaryItemId
+                        maybeId =
+                            case ( maybeFragment, common0.glossary ) of
+                                ( Just fragment, Ok glossary ) ->
+                                    let
+                                        items =
+                                            Glossary.items glossary
+                                    in
+                                    GlossaryItems.itemIdFromFragmentIdentifier fragment items
+
+                                _ ->
+                                    Nothing
+
                         common1 : CommonModel
                         common1 =
                             { common0
                                 | queryParameters = queryParameters
+                                , maybeId = maybeId
                                 , fragment = maybeFragment
                             }
 

@@ -313,7 +313,12 @@ suite =
                 glossaryItems
                     |> GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm (RawTerm.fromString "Default (Finance)")
                     |> Expect.equal (Just <| GlossaryItemId.create 1)
-        , test "looks up the disambiguated preferred term of the item whose disambiguated preferred term has the given ID" <|
+        , test "looks up the ID of the item with the given fragment identifier" <|
+            \_ ->
+                glossaryItems
+                    |> GlossaryItems.itemIdFromFragmentIdentifier "Default_(Finance)"
+                    |> Expect.equal (Just <| GlossaryItemId.create 1)
+        , test "looks up the disambiguated preferred term of the item with the given raw disambiguated preferred term" <|
             \_ ->
                 glossaryItems
                     |> GlossaryItems.disambiguatedPreferredTermFromRaw (RawTerm.fromString "Default (Finance)")
@@ -346,11 +351,6 @@ suite =
                         [ GlossaryItemId.create 3
                         , GlossaryItemId.create 1
                         ]
-        , test "looks up ID of item whose preferred term has given ID" <|
-            \_ ->
-                glossaryItems
-                    |> GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm (RawTerm.fromString "Default (Finance)")
-                    |> Expect.equal (Just <| GlossaryItemId.create 1)
         , test "looks up disambiguated preferred term of item whose disambiguated preferred term has given ID" <|
             \_ ->
                 glossaryItems

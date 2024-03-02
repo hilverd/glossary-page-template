@@ -1,7 +1,7 @@
 module Data.GlossaryItems exposing
     ( GlossaryItems
     , empty, fromList, applyTagsChanges, insert, update, remove
-    , get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
+    , get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
 
@@ -20,7 +20,7 @@ module Data.GlossaryItems exposing
 
 # Query
 
-@docs get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
+@docs get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
 
 
 # Export
@@ -888,7 +888,7 @@ disambiguatedPreferredTerms filterByTagId ((GlossaryItems items) as glossaryItem
         |> List.sortWith compareDisambiguatedTerms
 
 
-{-| Look up the ID of the item with the given disambiguated preferred term.
+{-| Look up the ID of the item with the given raw disambiguated preferred term.
 -}
 itemIdFromRawDisambiguatedPreferredTerm : RawTerm -> GlossaryItems -> Maybe GlossaryItemId
 itemIdFromRawDisambiguatedPreferredTerm rawTerm (GlossaryItems items) =
@@ -896,7 +896,16 @@ itemIdFromRawDisambiguatedPreferredTerm rawTerm (GlossaryItems items) =
         |> Dict.get (rawTerm |> RawTerm.toString |> String.replace " " "_")
 
 
-{-| Look up the disambiguated preferred term of the item with the given disambiguated preferred term.
+{-| Look up the ID of the item with the given fragment identifier.
+-}
+itemIdFromFragmentIdentifier : String -> GlossaryItems -> Maybe GlossaryItemId
+itemIdFromFragmentIdentifier fragmentIdentifier (GlossaryItems items) =
+    Dict.get
+        fragmentIdentifier
+        items.itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm
+
+
+{-| Look up the disambiguated preferred term of the item with the given raw disambiguated preferred term.
 -}
 disambiguatedPreferredTermFromRaw : RawTerm -> GlossaryItems -> Maybe DisambiguatedTerm
 disambiguatedPreferredTermFromRaw rawTerm ((GlossaryItems items) as glossaryItems) =
