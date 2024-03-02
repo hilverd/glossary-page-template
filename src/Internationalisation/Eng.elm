@@ -558,14 +558,14 @@ unableToSaveAsItWouldResultInTheFollowing =
 
 thereAreMultipleItemsWithDisambiguatedPreferredTerm : String -> String
 thereAreMultipleItemsWithDisambiguatedPreferredTerm rawTerm =
-    "there are multiple items with (disambiguated) preferred term \""
+    "there are multiple items with (disambiguated) preferred term identifier \""
         ++ rawTerm
         ++ "\""
 
 
 thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm : String
 thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm =
-    "there are multiple items with the same (disambiguated) preferred term"
+    "there are multiple items with the same (disambiguated) preferred term identifier"
 
 
 tagAppearsMultipleTimes : String -> String

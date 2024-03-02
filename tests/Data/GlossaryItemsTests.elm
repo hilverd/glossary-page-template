@@ -603,5 +603,34 @@ suite =
                         Nothing
                     ]
                     |> Expect.equal
-                        (Err "there are multiple items with (disambiguated) preferred term \"Foo (Finance)\"")
+                        (Err "there are multiple items with (disambiguated) preferred term identifier \"Foo_(Finance)\"")
+        , test "returns error for multiple disambiguated preferred terms with the same fragment identifier" <|
+            \_ ->
+                GlossaryItems.fromList
+                    [ ( financeTag, financeTagDescription ) ]
+                    [ GlossaryItemForHtml.create
+                        (Term.fromMarkdown "Foo" False)
+                        []
+                        (Just financeTag)
+                        []
+                        Nothing
+                        []
+                        False
+                        (Just "2023-10-30T08:25:30.335Z")
+                        Nothing
+                        Nothing
+                    , GlossaryItemForHtml.create
+                        (Term.fromMarkdown "Foo_(Finance)" False)
+                        []
+                        Nothing
+                        []
+                        Nothing
+                        []
+                        False
+                        (Just "2023-10-30T08:25:30.335Z")
+                        Nothing
+                        Nothing
+                    ]
+                    |> Expect.equal
+                        (Err "there are multiple items with (disambiguated) preferred term identifier \"Foo_(Finance)\"")
         ]

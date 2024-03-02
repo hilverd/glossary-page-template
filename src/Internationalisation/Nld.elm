@@ -558,14 +558,14 @@ unableToSaveAsItWouldResultInTheFollowing =
 
 thereAreMultipleItemsWithDisambiguatedPreferredTerm : String -> String
 thereAreMultipleItemsWithDisambiguatedPreferredTerm rawTerm =
-    "er zijn meerdere items met (ondubbelzinnige) voorkeursterm \""
+    "er zijn meerdere items met (ondubbelzinnige) voorkeursterm-identificatie \""
         ++ rawTerm
         ++ "\""
 
 
 thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm : String
 thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm =
-    "er zijn meerdere items met dezelfde (ondubbelzinnige) voorkeursterm"
+    "er zijn meerdere items met dezelfde (ondubbelzinnige) voorkeursterm-identificatie"
 
 
 tagAppearsMultipleTimes : String -> String

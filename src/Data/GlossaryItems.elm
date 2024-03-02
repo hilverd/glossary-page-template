@@ -63,7 +63,7 @@ type GlossaryItems
         , disambiguationTagIdByItemId : GlossaryItemIdDict (Maybe TagId)
         , normalTagIdsByItemId : GlossaryItemIdDict (List TagId)
         , itemIdsByTagId : TagIdDict (List GlossaryItemId)
-        , itemIdByRawDisambiguatedPreferredTerm : Dict String GlossaryItemId
+        , itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm : Dict String GlossaryItemId
         , relatedItemIdsById : GlossaryItemIdDict (List GlossaryItemId)
         , orderedAlphabetically : List GlossaryItemId
         , orderedByMostMentionedFirst : List GlossaryItemId
@@ -200,7 +200,7 @@ empty =
         , disambiguationTagIdByItemId = GlossaryItemIdDict.empty
         , normalTagIdsByItemId = GlossaryItemIdDict.empty
         , itemIdsByTagId = TagIdDict.empty
-        , itemIdByRawDisambiguatedPreferredTerm = Dict.empty
+        , itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm = Dict.empty
         , relatedItemIdsById = GlossaryItemIdDict.empty
         , orderedAlphabetically = []
         , orderedByMostMentionedFirst = []
@@ -219,8 +219,8 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
         indexedGlossaryItemsForHtml =
             List.indexedMap (GlossaryItemId.create >> Tuple.pair) glossaryItemsForHtml
 
-        itemIdByRawDisambiguatedPreferredTerm_ : DuplicateRejectingDict String GlossaryItemId
-        itemIdByRawDisambiguatedPreferredTerm_ =
+        itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_ : DuplicateRejectingDict String GlossaryItemId
+        itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_ =
             indexedGlossaryItemsForHtml
                 |> List.foldl
                     (\( itemId, item ) ->
@@ -228,8 +228,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                             (item
                                 |> GlossaryItemForHtml.disambiguatedPreferredTerm
                                 |> DisambiguatedTerm.toTerm
-                                |> Term.raw
-                                |> RawTerm.toString
+                                |> Term.id
                             )
                             itemId
                     )
@@ -403,8 +402,8 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                             |> List.filterMap
                                 (\relatedPreferredTerm ->
                                     DuplicateRejectingDict.get
-                                        (relatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
-                                        itemIdByRawDisambiguatedPreferredTerm_
+                                        (relatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.id)
+                                        itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_
                                 )
                             |> GlossaryItemIdDict.insert id
                     )
@@ -426,9 +425,9 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                                 )
                     )
 
-        itemIdByRawDisambiguatedPreferredTermResult : Result String (Dict String GlossaryItemId)
-        itemIdByRawDisambiguatedPreferredTermResult =
-            itemIdByRawDisambiguatedPreferredTerm_
+        itemIdByFragmentIdentifierForRawDisambiguatedPreferredTermResult : Result String (Dict String GlossaryItemId)
+        itemIdByFragmentIdentifierForRawDisambiguatedPreferredTermResult =
+            itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_
                 |> DuplicateRejectingDict.toResult
                 |> Result.mapError
                     (\{ value1 } ->
@@ -463,8 +462,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                         in
                         Maybe.map
                             (DisambiguatedTerm.toTerm
-                                >> Term.raw
-                                >> RawTerm.toString
+                                >> Term.id
                                 >> I18n.thereAreMultipleItemsWithDisambiguatedPreferredTerm
                             )
                             disambiguatedPreferredTerm1
@@ -479,7 +477,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 |> Result.mapError (\{ key } -> I18n.tagAppearsMultipleTimes key)
     in
     Result.map2
-        (\itemIdByRawDisambiguatedPreferredTerm1 tagIdByRawTag_ ->
+        (\itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm1 tagIdByRawTag_ ->
             let
                 orderedAlphabetically__ : List GlossaryItemId
                 orderedAlphabetically__ =
@@ -516,7 +514,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 , disambiguationTagIdByItemId = disambiguationTagIdByItemId
                 , normalTagIdsByItemId = sortedNormalTagIdsByItemId
                 , itemIdsByTagId = itemIdsByTagId_
-                , itemIdByRawDisambiguatedPreferredTerm = itemIdByRawDisambiguatedPreferredTerm1
+                , itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm = itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm1
                 , relatedItemIdsById = relatedItemIdsById
                 , orderedAlphabetically = orderedAlphabetically__
                 , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
@@ -525,7 +523,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 , nextTagId = nextTagId
                 }
         )
-        itemIdByRawDisambiguatedPreferredTermResult
+        itemIdByFragmentIdentifierForRawDisambiguatedPreferredTermResult
         tagIdByRawTagResult
 
 
@@ -894,16 +892,16 @@ disambiguatedPreferredTerms filterByTagId ((GlossaryItems items) as glossaryItem
 -}
 itemIdFromRawDisambiguatedPreferredTerm : RawTerm -> GlossaryItems -> Maybe GlossaryItemId
 itemIdFromRawDisambiguatedPreferredTerm rawTerm (GlossaryItems items) =
-    items.itemIdByRawDisambiguatedPreferredTerm
-        |> Dict.get (RawTerm.toString rawTerm)
+    items.itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm
+        |> Dict.get (rawTerm |> RawTerm.toString |> String.replace " " "_")
 
 
 {-| Look up the disambiguated preferred term of the item with the given disambiguated preferred term.
 -}
 disambiguatedPreferredTermFromRaw : RawTerm -> GlossaryItems -> Maybe DisambiguatedTerm
 disambiguatedPreferredTermFromRaw rawTerm ((GlossaryItems items) as glossaryItems) =
-    items.itemIdByRawDisambiguatedPreferredTerm
-        |> Dict.get (RawTerm.toString rawTerm)
+    items.itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm
+        |> Dict.get (rawTerm |> RawTerm.toString |> String.replace " " "_")
         |> Maybe.andThen
             (\itemId ->
                 glossaryItems
