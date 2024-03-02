@@ -42,7 +42,7 @@ main =
         , view = view
         , update = update
         , subscriptions = subscriptions
-        , onUrlRequest = RequestUrl
+        , onUrlRequest = UrlRequested
         , onUrlChange = onUrlChange
         }
 
@@ -186,7 +186,7 @@ init flags url key =
 -}
 type Msg
     = NoOp
-    | RequestUrl UrlRequest
+    | UrlRequested UrlRequest
     | ListAllMsg Pages.ListAll.Msg
     | CreateOrEditMsg Pages.CreateOrEdit.Msg
     | EditTitleAndAboutMsg Pages.EditTitleAndAbout.Msg
@@ -260,7 +260,7 @@ withoutInternal msg =
         ManageTagsMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
-        RequestUrl _ ->
+        UrlRequested _ ->
             PageMsg.Internal ()
 
         NoOp ->
@@ -270,7 +270,7 @@ withoutInternal msg =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, withoutInternal msg, model ) of
-        ( RequestUrl urlRequest, _, { key } ) ->
+        ( UrlRequested urlRequest, _, { key } ) ->
             case urlRequest of
                 Browser.Internal url ->
                     ( model
