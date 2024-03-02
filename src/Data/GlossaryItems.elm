@@ -862,7 +862,7 @@ disambiguatedPreferredTerm itemId (GlossaryItems items) =
 
 {-| All the disambiguated preferred terms in these glossary items.
 -}
-disambiguatedPreferredTerms : Maybe TagId -> GlossaryItems -> List DisambiguatedTerm
+disambiguatedPreferredTerms : Maybe TagId -> GlossaryItems -> List ( GlossaryItemId, DisambiguatedTerm )
 disambiguatedPreferredTerms filterByTagId ((GlossaryItems items) as glossaryItems) =
     let
         itemIds : List GlossaryItemId
@@ -876,15 +876,15 @@ disambiguatedPreferredTerms filterByTagId ((GlossaryItems items) as glossaryItem
                     )
                 |> Maybe.withDefault (GlossaryItemIdDict.keys items.itemById)
 
-        compareDisambiguatedTerms : DisambiguatedTerm -> DisambiguatedTerm -> Order
-        compareDisambiguatedTerms t1 t2 =
+        compareDisambiguatedTerms : ( GlossaryItemId, DisambiguatedTerm ) -> ( GlossaryItemId, DisambiguatedTerm ) -> Order
+        compareDisambiguatedTerms ( _, t1 ) ( _, t2 ) =
             Term.compareAlphabetically
                 (DisambiguatedTerm.toTerm t1)
                 (DisambiguatedTerm.toTerm t2)
     in
     itemIds
         |> List.filterMap
-            (\itemId -> disambiguatedPreferredTerm itemId glossaryItems)
+            (\itemId -> glossaryItems |> disambiguatedPreferredTerm itemId |> Maybe.map (Tuple.pair itemId))
         |> List.sortWith compareDisambiguatedTerms
 
 
@@ -976,7 +976,7 @@ preferredTermsOfItemsListingThisItemAsRelated id items =
 
 {-| A list of pairs associating each alternative term with the disambiguated preferred terms that it appears together with.
 -}
-disambiguatedPreferredTermsByAlternativeTerm : Maybe TagId -> GlossaryItems -> List ( Term, List DisambiguatedTerm )
+disambiguatedPreferredTermsByAlternativeTerm : Maybe TagId -> GlossaryItems -> List ( Term, List ( GlossaryItemId, DisambiguatedTerm ) )
 disambiguatedPreferredTermsByAlternativeTerm filterByTagId ((GlossaryItems items) as glossaryItems) =
     let
         ( alternativeTermByRaw, preferredTermsByRawAlternativeTerm ) =
@@ -1019,8 +1019,8 @@ disambiguatedPreferredTermsByAlternativeTerm filterByTagId ((GlossaryItems items
                                                 , Dict.update raw
                                                     (\preferredTerms_ ->
                                                         preferredTerms_
-                                                            |> Maybe.map ((::) disambiguatedPreferredTerm_)
-                                                            |> Maybe.withDefault [ disambiguatedPreferredTerm_ ]
+                                                            |> Maybe.map ((::) ( itemId, disambiguatedPreferredTerm_ ))
+                                                            |> Maybe.withDefault [ ( itemId, disambiguatedPreferredTerm_ ) ]
                                                             |> Just
                                                     )
                                                     preferredTermsByRawAlternativeTerm1

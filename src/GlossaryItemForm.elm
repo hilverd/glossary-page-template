@@ -304,7 +304,9 @@ empty items filterByTag =
 
         existingDisambiguatedPreferredTerms : List DisambiguatedTerm
         existingDisambiguatedPreferredTerms =
-            GlossaryItems.disambiguatedPreferredTerms Nothing items
+            items
+                |> GlossaryItems.disambiguatedPreferredTerms Nothing
+                |> List.map Tuple.second
 
         filterByTagId : Maybe TagId
         filterByTagId =
@@ -355,7 +357,9 @@ fromGlossaryItemForHtml items itemId item =
 
         existingDisambiguatedPreferredTerms : List DisambiguatedTerm
         existingDisambiguatedPreferredTerms =
-            GlossaryItems.disambiguatedPreferredTerms Nothing items
+            items
+                |> GlossaryItems.disambiguatedPreferredTerms Nothing
+                |> List.map Tuple.second
 
         preferredTermsOfItemsListingThisItemAsRelated_ : List DisambiguatedTerm
         preferredTermsOfItemsListingThisItemAsRelated_ =

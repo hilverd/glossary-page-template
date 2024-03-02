@@ -4,6 +4,7 @@ import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.IndexOfTerms as IndexOfTerms
 import Expect
@@ -51,7 +52,7 @@ suite =
             \_ ->
                 let
                     preferredTerm body =
-                        IndexOfTerms.PreferredTerm <| DisambiguatedTerm.fromTerm <| termFromBody body
+                        IndexOfTerms.PreferredTerm (GlossaryItemId.create -1) <| DisambiguatedTerm.fromTerm <| termFromBody body
                 in
                 glossaryItems
                     |> IndexOfTerms.fromGlossaryItems Nothing

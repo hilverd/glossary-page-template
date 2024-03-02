@@ -1147,6 +1147,7 @@ view model =
                                                     { enableMathSupport = model.common.enableMathSupport, makeLinksTabbable = True, enableLastUpdatedDates = False }
                                                     Components.GlossaryItemCard.Preview
                                                     Nothing
+                                                    Nothing
                                                     { previous = Nothing
                                                     , item = Just ( GlossaryItemId.create -1, newOrUpdatedGlossaryItem )
                                                     , next = Nothing

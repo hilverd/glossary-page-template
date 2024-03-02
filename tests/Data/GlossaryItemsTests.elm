@@ -292,6 +292,7 @@ suite =
             \_ ->
                 glossaryItems
                     |> GlossaryItems.disambiguatedPreferredTerms Nothing
+                    |> List.map Tuple.second
                     |> Expect.equal
                         [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Computer Science)" False
                         , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False
@@ -303,6 +304,7 @@ suite =
             \_ ->
                 glossaryItems
                     |> GlossaryItems.disambiguatedPreferredTerms (Just <| TagId.create 1)
+                    |> List.map Tuple.second
                     |> Expect.equal
                         [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False
                         , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate" False

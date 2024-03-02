@@ -142,6 +142,7 @@ type InternalMsg
     | HideSearchDialog
     | UpdateSearchString String
     | ChangeTheme Theme
+    | JumpToItem GlossaryItemId
     | ChangeLayoutToShowSingle GlossaryItemId
     | ShowRelatedTermAsSingle Term
     | ChangeLayoutToShowAll
@@ -384,6 +385,22 @@ update msg model =
 
                     System ->
                         Nothing
+            )
+
+        JumpToItem itemId ->
+            let
+                common0 =
+                    model.common
+            in
+            ( { model
+                | menuForMobileVisibility = Disappearing
+                , common = { common0 | maybeId = Just itemId }
+              }
+            , Cmd.batch
+                [ Process.sleep 100 |> Task.perform (always <| PageMsg.Internal CompleteHidingMenuForMobile)
+                , allowBackgroundScrolling ()
+                , scrollGlossaryItemIntoView itemId
+                ]
             )
 
         ChangeLayoutToShowSingle index ->
@@ -1033,7 +1050,7 @@ viewSettings glossary model =
 viewTermIndexItem : Bool -> Bool -> IndexOfTerms.Entry -> List (Html Msg)
 viewTermIndexItem enableMathSupport tabbable entry =
     case entry of
-        IndexOfTerms.PreferredTerm disambiguatedTerm ->
+        IndexOfTerms.PreferredTerm itemId disambiguatedTerm ->
             let
                 term =
                     DisambiguatedTerm.toTerm disambiguatedTerm
@@ -1044,7 +1061,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
                     , Html.Attributes.href <| fragmentOnly <| Term.id term
                     , Html.Attributes.target "_self"
                     , Accessibility.Key.tabbable tabbable
-                    , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
+                    , Html.Events.onClick <| PageMsg.Internal <| JumpToItem itemId
                     ]
                     [ Term.view enableMathSupport [] term ]
                 ]
@@ -1053,7 +1070,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
         IndexOfTerms.AlternativeTerm term disambiguatedPreferredTerms ->
             let
                 preferredTerms =
-                    List.map DisambiguatedTerm.toTerm disambiguatedPreferredTerms
+                    List.map (Tuple.mapSecond DisambiguatedTerm.toTerm) disambiguatedPreferredTerms
             in
             li
                 [ Html.Attributes.attribute "style" "margin-top: 1rem" ]
@@ -1065,7 +1082,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
                     ]
                 ]
                 :: List.indexedMap
-                    (\index preferredTerm ->
+                    (\index ( itemId, preferredTerm ) ->
                         li
                             [ Extras.HtmlAttribute.showIf (index + 1 == List.length preferredTerms) <|
                                 Html.Attributes.attribute "style" "margin-bottom: 1rem"
@@ -1079,7 +1096,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
                                 , Html.Attributes.href <| fragmentOnly <| Term.id preferredTerm
                                 , Html.Attributes.target "_self"
                                 , Accessibility.Key.tabbable tabbable
-                                , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
+                                , Html.Events.onClick <| PageMsg.Internal <| JumpToItem itemId
                                 ]
                                 [ span
                                     [ class "inline-flex items-center group-hover:underline" ]
@@ -1166,6 +1183,7 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
                     }
                 )
                 tagBeingFilteredBy
+                model.common.maybeId
                 itemWithPreviousAndNext
         )
         itemWithPreviousAndNext.item

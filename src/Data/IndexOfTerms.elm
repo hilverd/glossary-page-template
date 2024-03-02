@@ -11,6 +11,7 @@ module Data.IndexOfTerms exposing (Entry(..), TermGroup, IndexOfTerms, fromGloss
 
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.TagId exposing (TagId)
 import Dict exposing (Dict)
@@ -21,8 +22,8 @@ Alternative terms may be associated with multiple items, so they do not link any
 Instead, each alternative term is followed by the list of all preferred terms for items that the alternative term appears in.
 -}
 type Entry
-    = PreferredTerm DisambiguatedTerm
-    | AlternativeTerm Term (List DisambiguatedTerm)
+    = PreferredTerm GlossaryItemId DisambiguatedTerm
+    | AlternativeTerm Term (List ( GlossaryItemId, DisambiguatedTerm ))
 
 
 {-| A group of terms, where `label` is the first character of each item in `terms`.
@@ -47,11 +48,11 @@ fromGlossaryItems filterByTagId glossaryItems =
         entryListsByFirstAlphabeticCharacterOrEllipsis : Dict String (List Entry)
         entryListsByFirstAlphabeticCharacterOrEllipsis =
             let
-                disambiguatedPreferredTerms : List DisambiguatedTerm
+                disambiguatedPreferredTerms : List ( GlossaryItemId, DisambiguatedTerm )
                 disambiguatedPreferredTerms =
                     GlossaryItems.disambiguatedPreferredTerms filterByTagId glossaryItems
 
-                preferredTermsByAlternativeTerm : List ( Term, List DisambiguatedTerm )
+                preferredTermsByAlternativeTerm : List ( Term, List ( GlossaryItemId, DisambiguatedTerm ) )
                 preferredTermsByAlternativeTerm =
                     GlossaryItems.disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItems
 
@@ -59,13 +60,13 @@ fromGlossaryItems filterByTagId glossaryItems =
                 resultAfterAddingPreferredTerms =
                     disambiguatedPreferredTerms
                         |> List.foldl
-                            (\preferredTerm result ->
+                            (\( itemId, preferredTerm ) result ->
                                 Dict.update
                                     (preferredTerm |> DisambiguatedTerm.toTerm |> Term.indexGroupString)
                                     (\termList ->
                                         termList
-                                            |> Maybe.map (\terms -> PreferredTerm preferredTerm :: terms)
-                                            |> Maybe.withDefault [ PreferredTerm preferredTerm ]
+                                            |> Maybe.map (\terms -> PreferredTerm itemId preferredTerm :: terms)
+                                            |> Maybe.withDefault [ PreferredTerm itemId preferredTerm ]
                                             |> Just
                                     )
                                     result
@@ -76,10 +77,11 @@ fromGlossaryItems filterByTagId glossaryItems =
                 |> List.foldl
                     (\( alternativeTerm, preferredTerms_ ) result ->
                         let
-                            sortedPreferredTerms : List DisambiguatedTerm
+                            sortedPreferredTerms : List ( GlossaryItemId, DisambiguatedTerm )
                             sortedPreferredTerms =
                                 preferredTerms_
-                                    |> List.sortWith DisambiguatedTerm.compareAlphabetically
+                                    |> List.sortWith
+                                        (\( _, t1 ) ( _, t2 ) -> DisambiguatedTerm.compareAlphabetically t1 t2)
 
                             entry =
                                 AlternativeTerm alternativeTerm sortedPreferredTerms
@@ -123,7 +125,7 @@ fromGlossaryItems filterByTagId glossaryItems =
         termForEntry : Entry -> Term
         termForEntry entry =
             case entry of
-                PreferredTerm term ->
+                PreferredTerm _ term ->
                     DisambiguatedTerm.toTerm term
 
                 AlternativeTerm term _ ->

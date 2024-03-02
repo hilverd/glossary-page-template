@@ -176,10 +176,6 @@
     @apply hover:underline text-indigo-600 dark:text-amber-300 print:text-black;
   }
 
-  dfn:target {
-    @apply bg-amber-100 dark:bg-pink-900;
-  }
-
   dt span.silcrow {
     @apply ml-1.5 select-none;
   }
