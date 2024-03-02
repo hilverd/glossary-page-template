@@ -16,6 +16,10 @@ import Codec
 import CommonModel exposing (CommonModel)
 import Data.Editability as Editability
 import Data.Glossary as Glossary exposing (Glossary)
+import Data.GlossaryItem.RawTerm as RawTerm
+import Data.GlossaryItem.Term as Term
+import Data.GlossaryItemId exposing (GlossaryItemId)
+import Data.GlossaryItems as GlossaryItems
 import Data.Theme as Theme exposing (Theme)
 import Html
 import Json.Decode as Decode
@@ -289,9 +293,39 @@ update msg model =
                     , Browser.Navigation.load string
                     )
 
-        -- This typically means the URL has been changed using pushUrl or replaceUrl
-        ( UrlChanged url, _, _ ) ->
-            ( model, Cmd.none )
+        -- This typically means the URL has been changed using pushUrl or replaceUrl.
+        -- One way this can happen is via the browser's back/forward buttons.
+        ( UrlChanged url, _, { page } ) ->
+            case page of
+                ListAll listAllModel ->
+                    let
+                        common0 : CommonModel
+                        common0 =
+                            listAllModel.common
+
+                        queryParameters : QueryParameters
+                        queryParameters =
+                            QueryParameters.fromUrl url
+
+                        maybeFragment : Maybe String
+                        maybeFragment =
+                            url.fragment
+
+                        common1 : CommonModel
+                        common1 =
+                            { common0
+                                | queryParameters = queryParameters
+                                , fragment = maybeFragment
+                            }
+
+                        listAllModel1 : Pages.ListAll.Model
+                        listAllModel1 =
+                            { listAllModel | common = common1 }
+                    in
+                    ( { model | page = ListAll listAllModel1 }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
         ( _, NavigateToListAll commonModel, _ ) ->
             let

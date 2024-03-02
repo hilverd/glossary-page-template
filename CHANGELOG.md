@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- Fix issues with back/forward buttons.
+
 ### Removed
 
 ## [4.5.1] - 2024-02-13
