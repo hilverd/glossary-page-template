@@ -364,15 +364,15 @@ suite =
                     |> GlossaryItems.disambiguatedPreferredTermsByAlternativeTerm Nothing
                     |> Expect.equal
                         [ ( Term.fromMarkdown "Preset" False
-                          , [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Computer Science)" False ]
+                          , [ ( GlossaryItemId.create 0, DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Computer Science)" False ) ]
                           )
                         , ( Term.fromMarkdown "IR" True
-                          , [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate" False
-                            , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Information retrieval" False
+                          , [ ( GlossaryItemId.create 3, DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate" False )
+                            , ( GlossaryItemId.create 2, DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Information retrieval" False )
                             ]
                           )
                         , ( Term.fromMarkdown "Factory preset" False
-                          , [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Computer Science)" False ]
+                          , [ ( GlossaryItemId.create 0, DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Computer Science)" False ) ]
                           )
                         ]
         , test "returns items in alphabetical order" <|
