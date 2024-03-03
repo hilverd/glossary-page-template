@@ -81,42 +81,38 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                                 ( Nothing, Nothing ) ->
                                     DisambiguatedTerm.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
                         )
+
+            termContainsSearchString : Term -> Bool
+            termContainsSearchString =
+                Term.inlineText
+                    >> String.toLower
+                    >> String.contains searchStringNormalised
+
+            termStartsWithSearchString : Term -> Bool
+            termStartsWithSearchString =
+                Term.inlineText
+                    >> String.toLower
+                    >> String.startsWith searchStringNormalised
         in
         candidates
             |> List.filter
                 (\{ preferredTerm, alternativeTerm } ->
                     alternativeTerm
-                        |> Maybe.map
-                            (\alternativeTerm_ ->
-                                alternativeTerm_
-                                    |> Term.inlineText
-                                    |> String.toLower
-                                    |> String.contains searchStringNormalised
-                            )
+                        |> Maybe.map termContainsSearchString
                         |> Maybe.withDefault
                             (preferredTerm
                                 |> DisambiguatedTerm.toTerm
-                                |> Term.inlineText
-                                |> String.toLower
-                                |> String.contains searchStringNormalised
+                                |> termContainsSearchString
                             )
                 )
             |> List.partition
                 (\{ preferredTerm, alternativeTerm } ->
                     alternativeTerm
-                        |> Maybe.map
-                            (\alternativeTerm_ ->
-                                alternativeTerm_
-                                    |> Term.inlineText
-                                    |> String.toLower
-                                    |> String.startsWith searchStringNormalised
-                            )
+                        |> Maybe.map termStartsWithSearchString
                         |> Maybe.withDefault
                             (preferredTerm
                                 |> DisambiguatedTerm.toTerm
-                                |> Term.inlineText
-                                |> String.toLower
-                                |> String.startsWith searchStringNormalised
+                                |> termStartsWithSearchString
                             )
                 )
             |> (\( whereSearchStringIsPrefix, whereSearchStringIsNotPrefix ) ->
