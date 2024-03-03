@@ -51,7 +51,7 @@ You can get the `hash-here` values from the [release notes](https://github.com/h
 ## Known Limitations
 
 * The integrated editor UI is meant to be run and used by a single local user only. It is not designed to be exposed to untrusted users.
-* In its current state this project is not very suitable for glossaries of more than 500 items. At the moment everything is stored in a single HTML file, and above around 500 items the DOM is arguably too large, the page takes up too much memory in the browser, and performance degrades overall. The number 500 is a rule of thumb — on older devices even that might already be too much. I'm planning to address this.
+* In its current state this project is not very suitable for glossaries of more than (say) 500 items. At the moment everything is stored in a single HTML file, and the DOM size and browser memory usage grows as the number of items does. (I'm planning to address this.)
 
 ## License
 
