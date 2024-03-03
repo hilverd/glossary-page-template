@@ -88,8 +88,8 @@ init flags url key =
                 |> List.reverse
                 |> List.head
 
-        fragment : Maybe String
-        fragment =
+        maybeFragment : Maybe String
+        maybeFragment =
             url.fragment
 
         glossary : Result String Glossary
@@ -97,6 +97,14 @@ init flags url key =
             flags
                 |> Decode.decodeValue (Codec.decoder Glossary.codec)
                 |> Result.mapError Decode.errorToString
+
+        maybeId : Maybe GlossaryItemId
+        maybeId =
+            Maybe.map2
+                glossaryItemIdForFragment
+                maybeFragment
+                (Result.toMaybe glossary)
+                |> Maybe.andThen identity
 
         enableHelpForMakingChanges : Bool
         enableHelpForMakingChanges =
@@ -173,8 +181,8 @@ init flags url key =
             , editability = editability
             , enableMathSupport = katexIsAvailable
             , queryParameters = queryParameters
-            , maybeId = Nothing
-            , fragment = fragment
+            , maybeId = maybeId
+            , fragment = maybeFragment
             , glossary = glossary
             }
 
@@ -275,6 +283,12 @@ withoutInternal msg =
             PageMsg.Internal ()
 
 
+glossaryItemIdForFragment : String -> Glossary -> Maybe GlossaryItemId
+glossaryItemIdForFragment fragment =
+    Glossary.items
+        >> GlossaryItems.itemIdFromFragmentIdentifier fragment
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, withoutInternal msg, model ) of
@@ -313,16 +327,11 @@ update msg model =
 
                         maybeId : Maybe GlossaryItemId
                         maybeId =
-                            case ( maybeFragment, common0.glossary ) of
-                                ( Just fragment, Ok glossary ) ->
-                                    let
-                                        items =
-                                            Glossary.items glossary
-                                    in
-                                    GlossaryItems.itemIdFromFragmentIdentifier fragment items
-
-                                _ ->
-                                    Nothing
+                            Maybe.map2
+                                glossaryItemIdForFragment
+                                maybeFragment
+                                (Result.toMaybe common0.glossary)
+                                |> Maybe.andThen identity
 
                         common1 : CommonModel
                         common1 =
