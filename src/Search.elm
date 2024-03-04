@@ -12,6 +12,7 @@ import Extras.Url
 import Html
 import Html.Attributes exposing (class)
 import Icons
+import Internationalisation exposing (preferredTerm)
 import Svg.Attributes
 
 
@@ -62,25 +63,6 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                                             )
                                    )
                         )
-                    |> List.sortWith
-                        (\candidate1 candidate2 ->
-                            case ( candidate1.alternativeTerm, candidate2.alternativeTerm ) of
-                                ( Just alternativeTerm1, Just alternativeTerm2 ) ->
-                                    if alternativeTerm1 == alternativeTerm2 then
-                                        DisambiguatedTerm.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
-
-                                    else
-                                        Term.compareAlphabetically alternativeTerm1 alternativeTerm2
-
-                                ( Just alternativeTerm1, Nothing ) ->
-                                    Term.compareAlphabetically alternativeTerm1 (DisambiguatedTerm.toTerm candidate2.preferredTerm)
-
-                                ( Nothing, Just alternativeTerm2 ) ->
-                                    Term.compareAlphabetically (DisambiguatedTerm.toTerm candidate1.preferredTerm) alternativeTerm2
-
-                                ( Nothing, Nothing ) ->
-                                    DisambiguatedTerm.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
-                        )
 
             termContainsSearchString : Term -> Bool
             termContainsSearchString =
@@ -93,33 +75,68 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                 Term.inlineText
                     >> String.toLower
                     >> String.startsWith searchStringNormalised
+
+            definitionContainsSearchString : Definition -> Bool
+            definitionContainsSearchString =
+                Definition.inlineText
+                    >> String.toLower
+                    >> String.contains searchStringNormalised
         in
         candidates
-            |> List.filter
-                (\{ preferredTerm, alternativeTerm } ->
-                    alternativeTerm
-                        |> Maybe.map termContainsSearchString
-                        |> Maybe.withDefault
-                            (preferredTerm
-                                |> DisambiguatedTerm.toTerm
-                                |> termContainsSearchString
-                            )
+            |> List.filterMap
+                (\({ preferredTerm, alternativeTerm, definition } as candidate) ->
+                    let
+                        preferredTermAsTerm =
+                            DisambiguatedTerm.toTerm preferredTerm
+                    in
+                    if Maybe.map termContainsSearchString alternativeTerm == Just True then
+                        if Maybe.map termStartsWithSearchString alternativeTerm == Just True then
+                            Just ( candidate, 3 )
+
+                        else
+                            Just ( candidate, 2 )
+
+                    else if termContainsSearchString preferredTermAsTerm then
+                        if termStartsWithSearchString preferredTermAsTerm then
+                            Just ( candidate, 3 )
+
+                        else
+                            Just ( candidate, 2 )
+
+                    else if alternativeTerm == Nothing && Maybe.map definitionContainsSearchString definition == Just True then
+                        Just ( candidate, 1 )
+
+                    else
+                        Nothing
                 )
-            |> List.partition
-                (\{ preferredTerm, alternativeTerm } ->
-                    alternativeTerm
-                        |> Maybe.map termStartsWithSearchString
-                        |> Maybe.withDefault
-                            (preferredTerm
-                                |> DisambiguatedTerm.toTerm
-                                |> termStartsWithSearchString
-                            )
+            |> List.sortWith
+                (\( candidate1, score1 ) ( candidate2, score2 ) ->
+                    if score1 > score2 then
+                        LT
+
+                    else if score1 < score2 then
+                        GT
+
+                    else
+                        case ( candidate1.alternativeTerm, candidate2.alternativeTerm ) of
+                            ( Just alternativeTerm1, Just alternativeTerm2 ) ->
+                                if alternativeTerm1 == alternativeTerm2 then
+                                    DisambiguatedTerm.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
+
+                                else
+                                    Term.compareAlphabetically alternativeTerm1 alternativeTerm2
+
+                            ( Just alternativeTerm1, Nothing ) ->
+                                Term.compareAlphabetically alternativeTerm1 (DisambiguatedTerm.toTerm candidate2.preferredTerm)
+
+                            ( Nothing, Just alternativeTerm2 ) ->
+                                Term.compareAlphabetically (DisambiguatedTerm.toTerm candidate1.preferredTerm) alternativeTerm2
+
+                            ( Nothing, Nothing ) ->
+                                DisambiguatedTerm.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
                 )
-            |> (\( whereSearchStringIsPrefix, whereSearchStringIsNotPrefix ) ->
-                    whereSearchStringIsPrefix ++ whereSearchStringIsNotPrefix
-               )
             |> List.map
-                (\{ preferredTerm, alternativeTerm, definition } ->
+                (\( { preferredTerm, alternativeTerm, definition }, _ ) ->
                     case alternativeTerm of
                         Just alternativeTerm_ ->
                             SearchDialog.searchResult

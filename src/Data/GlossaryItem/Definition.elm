@@ -1,11 +1,11 @@
-module Data.GlossaryItem.Definition exposing (Definition, fromMarkdown, raw, markdown, view, viewInline, htmlTreeForAnki)
+module Data.GlossaryItem.Definition exposing (Definition, fromMarkdown, raw, inlineText, markdown, view, viewInline, htmlTreeForAnki)
 
 {-| A definition for a glossary item.
 
 
 # Definitions
 
-@docs Definition, fromMarkdown, raw, markdown, view, viewInline, htmlTreeForAnki
+@docs Definition, fromMarkdown, raw, inlineText, markdown, view, viewInline, htmlTreeForAnki
 
 -}
 
@@ -23,7 +23,10 @@ import MarkdownRenderers
 {-| A definition for a glossary item.
 -}
 type Definition
-    = MarkdownDefinition MarkdownFragment
+    = MarkdownDefinition
+        { body : MarkdownFragment
+        , inlineText : String
+        }
 
 
 {-| Construct a definition from a Markdown string.
@@ -35,22 +38,50 @@ type Definition
 
 -}
 fromMarkdown : String -> Definition
-fromMarkdown =
-    MarkdownFragment.fromString >> sanitiseMarkdownFragment >> MarkdownDefinition
+fromMarkdown body =
+    let
+        fragment : MarkdownFragment
+        fragment =
+            body
+                |> MarkdownFragment.fromString
+                |> sanitiseMarkdownFragment
+
+        inlineTextConcatenated : String
+        inlineTextConcatenated =
+            fragment
+                |> MarkdownFragment.concatenateInlineText
+                |> Result.withDefault body
+    in
+    MarkdownDefinition
+        { body = fragment
+        , inlineText = inlineTextConcatenated
+        }
 
 
 {-| Retrieve the raw body of a definition.
 -}
 raw : Definition -> String
-raw (MarkdownDefinition fragment) =
-    MarkdownFragment.raw fragment
+raw (MarkdownDefinition { body }) =
+    MarkdownFragment.raw body
+
+
+{-| Retrieve the concatenated inline text of a definition.
+
+    fromMarkdown "*Hello* _there_"
+    |> inlineText
+    --> "Hello there"
+
+-}
+inlineText : Definition -> String
+inlineText (MarkdownDefinition d) =
+    d.inlineText
 
 
 {-| Convert a definition to a string suitable for a Markdown document.
 -}
 markdown : Definition -> String
-markdown (MarkdownDefinition fragment) =
-    MarkdownFragment.raw fragment
+markdown (MarkdownDefinition { body }) =
+    MarkdownFragment.raw body
 
 
 {-| View a definition as HTML.
@@ -74,11 +105,11 @@ markdown (MarkdownDefinition fragment) =
 
 -}
 view : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> Definition -> Html msg
-view { enableMathSupport, makeLinksTabbable } (MarkdownDefinition fragment) =
+view { enableMathSupport, makeLinksTabbable } (MarkdownDefinition { body }) =
     let
         parsed : Result String (List Block)
         parsed =
-            MarkdownFragment.parsed fragment
+            MarkdownFragment.parsed body
     in
     case parsed of
         Ok blocks ->
@@ -106,11 +137,11 @@ view { enableMathSupport, makeLinksTabbable } (MarkdownDefinition fragment) =
 {-| View a definition as inline HTML.
 -}
 viewInline : Bool -> List (Attribute msg) -> Definition -> Html msg
-viewInline enableMathSupport additionalAttributes (MarkdownDefinition fragment) =
+viewInline enableMathSupport additionalAttributes (MarkdownDefinition { body }) =
     let
         parsed : Result String (List Block)
         parsed =
-            MarkdownFragment.parsed fragment
+            MarkdownFragment.parsed body
     in
     case parsed of
         Ok blocks ->
@@ -146,8 +177,8 @@ htmlTreeRendererForAnki enableMathSupport =
 {-| Convert a definition to an HtmlTree for Anki.
 -}
 htmlTreeForAnki : Bool -> Definition -> HtmlTree
-htmlTreeForAnki enableMathSupport (MarkdownDefinition fragment) =
-    case MarkdownFragment.parsed fragment of
+htmlTreeForAnki enableMathSupport (MarkdownDefinition { body }) =
+    case MarkdownFragment.parsed body of
         Ok blocks ->
             case Renderer.render (htmlTreeRendererForAnki enableMathSupport) blocks of
                 Ok rendered ->

@@ -13,6 +13,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+
+- Make search also cover definitions.
+
 ### Fixed
 
 - Prevent having multiple items with the same fragment identifier. The fragment identifier for an item is its disambiguated preferred term, with spaces replaced by underscores.

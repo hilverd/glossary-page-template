@@ -26,7 +26,7 @@ loadedGlossaryItems =
                 []
                 Nothing
                 []
-                (Just <| Definition.fromMarkdown "The term one")
+                (Just <| Definition.fromMarkdown "Apples")
                 [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Second the term" False ]
                 False
                 Nothing
@@ -40,7 +40,7 @@ loadedGlossaryItems =
                 []
                 Nothing
                 []
-                (Just <| Definition.fromMarkdown "Second the term")
+                (Just <| Definition.fromMarkdown "Three pears")
                 []
                 False
                 Nothing
@@ -54,7 +54,7 @@ loadedGlossaryItems =
                 []
                 Nothing
                 []
-                (Just (Definition.fromMarkdown "The term three"))
+                (Just (Definition.fromMarkdown "Oranges"))
                 [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Second the term" False ]
                 False
                 Nothing
@@ -88,6 +88,15 @@ suite =
                         |> Expect.equal
                             [ "#The_term_one"
                             , "#The_term_three"
+                            , "#Second_the_term"
+                            ]
+            , test "also searches definitions, but terms take priority" <|
+                \_ ->
+                    loadedGlossaryItems
+                        |> Search.search False Nothing "three"
+                        |> List.map SearchDialog.searchResultHref
+                        |> Expect.equal
+                            [ "#The_term_three"
                             , "#Second_the_term"
                             ]
             ]
