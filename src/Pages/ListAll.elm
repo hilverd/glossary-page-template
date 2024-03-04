@@ -1722,7 +1722,7 @@ viewQuickSearchButton tabbable =
                 , text I18n.searchPlaceholder
                 , span
                     [ class "ml-auto pl-3 flex-none text-xs font-semibold" ]
-                    [ text I18n.ctrlK
+                    [ text I18n.controlK
                     ]
                 ]
             ]
