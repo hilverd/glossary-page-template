@@ -1663,8 +1663,7 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
                 ]
                 [ nav
                     [ class "px-4 pt-1 pb-6" ]
-                    [ viewBackToTopLink False tabbable
-                    , viewTermIndexFirstCharacterGrid False tabbable termIndex
+                    [ viewTermIndexFirstCharacterGrid False tabbable termIndex
                     , viewIndexOfTerms enableMathSupport tabbable False termIndex
                     ]
                 ]
@@ -1675,22 +1674,22 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
         ]
 
 
-viewBackToTopLink : Bool -> Bool -> Html Msg
-viewBackToTopLink staticSidebar tabbable =
+viewBackToTopLink : Bool -> Html Msg
+viewBackToTopLink staticSidebar =
     div
-        [ class "bg-white dark:bg-slate-900 pb-3 pointer-events-auto text-right" ]
+        [ class "z-50 fixed bottom-0 right-0 p-4" ]
         [ Html.a
             [ href <| fragmentOnly ElementIds.container
             , Extras.HtmlEvents.onClickStopPropagation <|
                 PageMsg.Internal <|
                     BackToTop staticSidebar
-            , Accessibility.Key.tabbable tabbable
+            , Accessibility.Key.tabbable staticSidebar
             ]
             [ span
-                [ class "inline-flex" ]
+                [ class "inline-flex bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 border border-gray-600 dark:border-gray-400 rounded-md p-4 text-xl" ]
                 [ text I18n.backToTop
                 , Icons.arrowUp
-                    [ Svg.Attributes.class "w-5 h-5 ml-2" ]
+                    [ Svg.Attributes.class "w-7 h-7 ml-2" ]
                 ]
             ]
         ]
@@ -1774,9 +1773,6 @@ viewQuickSearchButtonAndLetterGrid { runningOnMacOs, staticSidebar, tabbable } i
         [ div
             [ class "h-7 bg-white dark:bg-slate-900" ]
             []
-        , div
-            [ class "pr-4 bg-white dark:bg-slate-900" ]
-            [ viewBackToTopLink True tabbable ]
         , viewQuickSearchButton { runningOnMacOs = runningOnMacOs, tabbable = tabbable }
         , div
             [ class "px-3 bg-white dark:bg-slate-900" ]
@@ -2464,6 +2460,12 @@ view model =
                         , tabbable = noModalDialogShown_
                         }
                         indexOfTerms
+                    , div
+                        [ class "hidden lg:block" ]
+                        [ viewBackToTopLink True ]
+                    , div
+                        [ class "lg:hidden" ]
+                        [ viewBackToTopLink False ]
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar noModalDialogShown_
