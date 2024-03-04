@@ -3,11 +3,13 @@ module Extras.HtmlEvents exposing
     , KeyValue
     , controlK
     , downArrow
+    , e
     , end
     , enter
     , escape
     , home
     , leftArrow
+    , metaK
     , n
     , onClickPreventDefault
     , onClickPreventDefaultAndStopPropagation
@@ -16,7 +18,7 @@ module Extras.HtmlEvents exposing
     , onEscape
     , preventDefaultOnDecoder
     , rightArrow
-    , upArrow, e
+    , upArrow
     )
 
 import Html exposing (Attribute)
@@ -32,6 +34,7 @@ type KeyValue
 type alias KeyDownEvent =
     { keyValue : KeyValue
     , controlKey : Bool
+    , metaKey : Bool -- on macOS, this is the ⌘ key
     }
 
 
@@ -47,9 +50,10 @@ toKeyValue string =
 
 preventDefaultOnDecoder : (KeyDownEvent -> Maybe ( msg, Bool )) -> Decode.Decoder ( msg, Bool )
 preventDefaultOnDecoder f =
-    Decode.map2 KeyDownEvent
+    Decode.map3 KeyDownEvent
         (Decode.field "key" <| Decode.map toKeyValue <| Decode.string)
         (Decode.field "ctrlKey" <| Decode.bool)
+        (Decode.field "metaKey" <| Decode.bool)
         |> Decode.andThen
             (\code ->
                 case f code of
@@ -65,9 +69,10 @@ detailedKeyDownEventDecoder :
     (KeyDownEvent -> Maybe msg)
     -> Decode.Decoder { message : msg, stopPropagation : Bool, preventDefault : Bool }
 detailedKeyDownEventDecoder f =
-    Decode.map2 KeyDownEvent
+    Decode.map3 KeyDownEvent
         (Decode.field "key" <| Decode.map toKeyValue <| Decode.string)
         (Decode.field "ctrlKey" <| Decode.bool)
+        (Decode.field "metaKey" <| Decode.bool)
         |> Decode.andThen
             (\code ->
                 case f code of
@@ -86,7 +91,7 @@ onKeydown =
 
 withoutModifiers : KeyValue -> KeyDownEvent
 withoutModifiers keyValue =
-    { keyValue = keyValue, controlKey = False }
+    { keyValue = keyValue, controlKey = False, metaKey = False }
 
 
 upArrow : KeyDownEvent
@@ -131,17 +136,22 @@ end =
 
 controlK : KeyDownEvent
 controlK =
-    { keyValue = Character 'k', controlKey = True }
+    { keyValue = Character 'k', controlKey = True, metaKey = False }
+
+
+metaK : KeyDownEvent
+metaK =
+    { keyValue = Character 'k', controlKey = False, metaKey = True }
 
 
 e : KeyDownEvent
 e =
-    { keyValue = Character 'e', controlKey = False }
+    { keyValue = Character 'e', controlKey = False, metaKey = False }
 
 
 n : KeyDownEvent
 n =
-    { keyValue = Character 'n', controlKey = False }
+    { keyValue = Character 'n', controlKey = False, metaKey = False }
 
 
 onEnter : msg -> Attribute msg
