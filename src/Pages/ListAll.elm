@@ -1659,7 +1659,7 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
                 ]
             , div
                 [ id ElementIds.indexForMobile
-                , class "flex-1 h-0 overflow-y-auto"
+                , class "flex-1 h-0 overflow-y-scroll"
                 ]
                 [ nav
                     [ class "px-4 pt-1 pb-6" ]
@@ -1794,7 +1794,7 @@ viewStaticSidebarForDesktop { runningOnMacOs, enableMathSupport, tabbable } term
         ]
         [ div
             [ id ElementIds.staticSidebarForDesktop
-            , class "h-0 flex-1 flex flex-col overflow-y-auto"
+            , class "h-0 flex-1 flex flex-col overflow-y-scroll"
             ]
             [ viewQuickSearchButtonAndLetterGrid
                 { runningOnMacOs = runningOnMacOs
