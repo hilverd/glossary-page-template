@@ -5,6 +5,7 @@ port module Components.SearchDialog exposing
     , SearchResult
     , hide
     , init
+    , makeFirstSearchResultActive
     , onChangeSearchString
     , onHide
     , onShow
@@ -136,6 +137,11 @@ show =
 hide : Msg
 hide =
     StartHiding
+
+
+makeFirstSearchResultActive : Msg
+makeFirstSearchResultActive =
+    MakeSearchResultActive 0
 
 
 update : (Model parentMsg -> parentModel) -> (Msg -> parentMsg) -> Msg -> Model parentMsg -> ( parentModel, Cmd parentMsg )

@@ -340,7 +340,7 @@ update msg model =
             )
 
         UpdateSearchString searchString ->
-            ( let
+            let
                 searchDialog0 : SearchDialog
                 searchDialog0 =
                     model.searchDialog
@@ -355,16 +355,21 @@ update msg model =
 
                         Err _ ->
                             []
-              in
-              { model
-                | searchDialog =
-                    { searchDialog0
-                        | term = searchString
-                        , results = results
+
+                model1 =
+                    { model
+                        | searchDialog =
+                            { searchDialog0
+                                | term = searchString
+                                , results = results
+                            }
                     }
-              }
-            , Cmd.none
-            )
+            in
+            if List.length results > 0 then
+                update (SearchDialogMsg Components.SearchDialog.makeFirstSearchResultActive) model1
+
+            else
+                ( model1, Cmd.none )
 
         ChangeTheme theme ->
             let
