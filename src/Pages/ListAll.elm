@@ -81,7 +81,6 @@ import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
 import Process
 import QueryParameters exposing (QueryParameters)
-import Route exposing (CommonParameters)
 import Save
 import Search
 import Svg.Attributes exposing (fill, height, stroke, width)
