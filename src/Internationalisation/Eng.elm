@@ -446,7 +446,7 @@ controlK =
 
 commandK : String
 commandK =
-    "⌘K"
+    "⌘ K"
 
 
 theseSettingsAreUpdatedInTheHtmlFile : String

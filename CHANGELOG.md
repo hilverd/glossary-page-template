@@ -15,14 +15,15 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Changed
 
 - Make search also cover definitions.
+- Support ⌘K for searching on macOS.
 - Select first search result by default.
 - Upgrade KaTeX to version 0.16.9.
 
 ### Fixed
 
-- Prevent having multiple items with the same fragment identifier. The fragment identifier for an item is its disambiguated preferred term, with spaces replaced by underscores.
-- Stop using [:target](https://developer.mozilla.org/en-US/docs/Web/CSS/:target) as it [doesn't work well with back/forward buttons](https://github.com/whatwg/html/issues/639). Handle highlighting of item that has "focus" in JavaScript instead.
 - Fix issues with back/forward buttons.
+- Stop using [:target](https://developer.mozilla.org/en-US/docs/Web/CSS/:target) for styling item pointed to by fragment identifier, as it [doesn't work well with back/forward buttons](https://github.com/whatwg/html/issues/639). Handle highlighting of item that has "focus" in JavaScript instead.
+- Prevent having multiple items with the same fragment identifier. The fragment identifier for an item is its disambiguated preferred term, with spaces replaced by underscores.
 
 ### Removed
 
