@@ -15,6 +15,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Changed
 
 - Make search also cover definitions.
+- Upgrade KaTeX to version 0.16.9.
 
 ### Fixed
 
