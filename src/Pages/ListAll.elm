@@ -1701,8 +1701,8 @@ viewBackToTopLink staticSidebar tabbable =
         ]
 
 
-viewQuickSearchButton : Bool -> Bool -> Html Msg
-viewQuickSearchButton runningOnMacOs tabbable =
+viewQuickSearchButton : { runningOnMacOs : Bool, tabbable : Bool } -> Html Msg
+viewQuickSearchButton { runningOnMacOs, tabbable } =
     div
         [ class "px-3 pb-4 bg-white dark:bg-slate-900" ]
         [ div
@@ -1770,8 +1770,8 @@ viewTermIndexFirstCharacterGrid staticSidebar tabbable indexOfTerms =
         )
 
 
-viewQuickSearchButtonAndLetterGrid : Bool -> Bool -> IndexOfTerms -> Html Msg
-viewQuickSearchButtonAndLetterGrid staticSidebar tabbable indexOfTerms =
+viewQuickSearchButtonAndLetterGrid : { staticSidebar : Bool, tabbable : Bool } -> IndexOfTerms -> Html Msg
+viewQuickSearchButtonAndLetterGrid { staticSidebar, tabbable } indexOfTerms =
     div
         [ id ElementIds.quickSearchButtonAndLetterGrid
         , class "z-10 -mb-6 sticky top-0 -ml-0.5 pointer-events-none"
@@ -1782,7 +1782,7 @@ viewQuickSearchButtonAndLetterGrid staticSidebar tabbable indexOfTerms =
         , div
             [ class "pr-4 bg-white dark:bg-slate-900" ]
             [ viewBackToTopLink True tabbable ]
-        , viewQuickSearchButton False tabbable
+        , viewQuickSearchButton { runningOnMacOs = False, tabbable = tabbable }
         , div
             [ class "px-3 bg-white dark:bg-slate-900" ]
             [ viewTermIndexFirstCharacterGrid staticSidebar tabbable indexOfTerms ]
@@ -1792,8 +1792,8 @@ viewQuickSearchButtonAndLetterGrid staticSidebar tabbable indexOfTerms =
         ]
 
 
-viewStaticSidebarForDesktop : Bool -> Bool -> IndexOfTerms -> Html Msg
-viewStaticSidebarForDesktop enableMathSupport tabbable termIndex =
+viewStaticSidebarForDesktop : { enableMathSupport : Bool, tabbable : Bool } -> IndexOfTerms -> Html Msg
+viewStaticSidebarForDesktop { enableMathSupport, tabbable } termIndex =
     div
         [ class "hidden print:hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900"
         ]
@@ -1801,7 +1801,7 @@ viewStaticSidebarForDesktop enableMathSupport tabbable termIndex =
             [ id ElementIds.staticSidebarForDesktop
             , class "h-0 flex-1 flex flex-col overflow-y-auto"
             ]
-            [ viewQuickSearchButtonAndLetterGrid True tabbable termIndex
+            [ viewQuickSearchButtonAndLetterGrid { staticSidebar = True, tabbable = tabbable } termIndex
             , nav
                 [ class "px-3" ]
                 [ viewIndexOfTerms enableMathSupport tabbable True termIndex ]
@@ -2458,7 +2458,11 @@ view model =
                         )
                     ]
                     [ viewMenuForMobile model model.common.enableMathSupport noModalDialogShown_ indexOfTerms
-                    , viewStaticSidebarForDesktop model.common.enableMathSupport noModalDialogShown_ indexOfTerms
+                    , viewStaticSidebarForDesktop
+                        { enableMathSupport = model.common.enableMathSupport
+                        , tabbable = noModalDialogShown_
+                        }
+                        indexOfTerms
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar noModalDialogShown_
