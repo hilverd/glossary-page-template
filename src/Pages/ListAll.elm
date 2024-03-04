@@ -138,7 +138,7 @@ type InternalMsg
     | ThemeDropdownMenuMsg Components.DropdownMenu.Msg
     | ExportDropdownMenuMsg Components.DropdownMenu.Msg
     | SearchDialogMsg Components.SearchDialog.Msg
-    | HideSearchDialog
+    | SearchDialogWasHidden
     | UpdateSearchString String
     | ChangeTheme Theme
     | JumpToItem GlossaryItemId
@@ -192,7 +192,7 @@ init commonModel =
                 Components.SearchDialog.init ElementIds.searchDialog
                     [ Components.SearchDialog.onChangeSearchString (PageMsg.Internal << UpdateSearchString)
                     , Components.SearchDialog.onShow <| preventBackgroundScrolling ()
-                    , Components.SearchDialog.onHide <| Extras.Task.messageToCommand <| PageMsg.Internal HideSearchDialog
+                    , Components.SearchDialog.onHide <| Extras.Task.messageToCommand <| PageMsg.Internal SearchDialogWasHidden
                     ]
             }
       , deleting = NotCurrentlySaving
@@ -328,7 +328,7 @@ update msg model =
                 msg_
                 model.searchDialog.model
 
-        HideSearchDialog ->
+        SearchDialogWasHidden ->
             ( let
                 searchDialog0 : SearchDialog
                 searchDialog0 =
