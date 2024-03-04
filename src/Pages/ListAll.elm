@@ -364,11 +364,7 @@ update msg model =
                             }
                     }
             in
-            if List.length results > 0 then
-                update (SearchDialogMsg Components.SearchDialog.makeFirstSearchResultActive) model1
-
-            else
-                ( model1, Cmd.none )
+            update (SearchDialogMsg Components.SearchDialog.searchStringWasJustUpdated) model1
 
         ChangeTheme theme ->
             let

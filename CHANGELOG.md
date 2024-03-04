@@ -24,6 +24,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Fix issues with back/forward buttons.
 - Stop using [:target](https://developer.mozilla.org/en-US/docs/Web/CSS/:target) for styling item pointed to by fragment identifier, as it [doesn't work well with back/forward buttons](https://github.com/whatwg/html/issues/639). Handle highlighting of item that has "focus" in JavaScript instead.
 - Prevent having multiple items with the same fragment identifier. The fragment identifier for an item is its disambiguated preferred term, with spaces replaced by underscores.
+- Prevent search item from being made active just because mouse pointer is already over it.
 
 ### Removed
 

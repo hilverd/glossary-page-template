@@ -5,12 +5,12 @@ port module Components.SearchDialog exposing
     , SearchResult
     , hide
     , init
-    , makeFirstSearchResultActive
     , onChangeSearchString
     , onHide
     , onShow
     , searchResult
     , searchResultHref
+    , searchStringWasJustUpdated
     , show
     , update
     , view
@@ -51,6 +51,7 @@ type Model parentMsg
         { idPrefix : String
         , visibility : GradualVisibility
         , config : Config parentMsg
+        , searchStringWasJustUpdated : Bool
         , activeSearchResultIndex : Maybe SearchResultIndex
         }
 
@@ -85,6 +86,7 @@ init idPrefix properties =
         { idPrefix = idPrefix
         , visibility = Invisible
         , config = configFromProperties properties
+        , searchStringWasJustUpdated = False
         , activeSearchResultIndex = Nothing
         }
 
@@ -95,6 +97,7 @@ innerModel :
         { idPrefix : String
         , visibility : GradualVisibility
         , config : Config parentMsg
+        , searchStringWasJustUpdated : Bool
         , activeSearchResultIndex : Maybe SearchResultIndex
         }
 innerModel model =
@@ -122,7 +125,9 @@ type Msg
     | Show
     | StartHiding
     | CompleteHiding
-    | MakeSearchResultActive SearchResultIndex
+    | SearchStringWasJustUpdated
+    | SearchStringWasNotJustUpdated
+    | MakeSearchResultActive Bool SearchResultIndex
     | MakeSearchResultInactive SearchResultIndex
     | MakePreviousOrNextSearchResultActive Int Bool
     | LoadUrl String
@@ -139,15 +144,21 @@ hide =
     StartHiding
 
 
-makeFirstSearchResultActive : Msg
-makeFirstSearchResultActive =
-    MakeSearchResultActive 0
+searchStringWasJustUpdated : Msg
+searchStringWasJustUpdated =
+    SearchStringWasJustUpdated
 
 
 update : (Model parentMsg -> parentModel) -> (Msg -> parentMsg) -> Msg -> Model parentMsg -> ( parentModel, Cmd parentMsg )
 update updateParentModel toParentMsg msg model =
     let
-        model_ : { idPrefix : String, visibility : GradualVisibility, config : Config parentMsg, activeSearchResultIndex : Maybe SearchResultIndex }
+        model_ :
+            { idPrefix : String
+            , visibility : GradualVisibility
+            , config : Config parentMsg
+            , searchStringWasJustUpdated : Bool
+            , activeSearchResultIndex : Maybe SearchResultIndex
+            }
         model_ =
             innerModel model
 
@@ -175,10 +186,29 @@ update updateParentModel toParentMsg msg model =
                         |> Maybe.withDefault Cmd.none
                     )
 
-                MakeSearchResultActive searchResultIndex ->
-                    ( { model_ | activeSearchResultIndex = Just searchResultIndex }
-                    , scrollSearchResultIntoView <| searchResultId searchResultIndex model_.idPrefix
+                SearchStringWasJustUpdated ->
+                    ( { model_
+                        | searchStringWasJustUpdated = True
+                        , activeSearchResultIndex = Just 0
+                      }
+                    , Process.sleep 200
+                        |> Task.perform (always <| SearchStringWasNotJustUpdated)
+                        |> Cmd.map toParentMsg
                     )
+
+                SearchStringWasNotJustUpdated ->
+                    ( { model_ | searchStringWasJustUpdated = False }, Cmd.none )
+
+                MakeSearchResultActive becauseOfMouseEnter searchResultIndex ->
+                    if becauseOfMouseEnter && model_.searchStringWasJustUpdated then
+                        -- Prevent a search result being made active just because the mouse pointer was already over it.
+                        -- We want to keep the first result (if any) active as the search string was just updated.
+                        ( model_, Cmd.none )
+
+                    else
+                        ( { model_ | activeSearchResultIndex = Just searchResultIndex }
+                        , scrollSearchResultIntoView <| searchResultId searchResultIndex model_.idPrefix
+                        )
 
                 MakeSearchResultInactive searchResultIndex ->
                     ( { model_
@@ -263,6 +293,7 @@ loadUrl :
         { idPrefix : String
         , visibility : GradualVisibility
         , config : Config parentMsg
+        , searchStringWasJustUpdated : Bool
         , activeSearchResultIndex : Maybe SearchResultIndex
         }
     -> String
@@ -270,6 +301,7 @@ loadUrl :
         ( { idPrefix : String
           , visibility : GradualVisibility
           , config : Config parentMsg
+          , searchStringWasJustUpdated : Bool
           , activeSearchResultIndex : Maybe SearchResultIndex
           }
         , Cmd parentMsg
@@ -374,6 +406,7 @@ view toParentMsg model searchString messageAboveSearchResults searchResults =
             { idPrefix : String
             , visibility : GradualVisibility
             , config : Config parentMsg
+            , searchStringWasJustUpdated : Bool
             , activeSearchResultIndex : Maybe SearchResultIndex
             }
         model_ =
@@ -467,13 +500,13 @@ view toParentMsg model searchString messageAboveSearchResults searchResults =
 
                                     else if event == Extras.HtmlEvents.home then
                                         Just
-                                            ( toParentMsg <| MakeSearchResultActive 0
+                                            ( toParentMsg <| MakeSearchResultActive False 0
                                             , True
                                             )
 
                                     else if event == Extras.HtmlEvents.end then
                                         Just
-                                            ( toParentMsg <| MakeSearchResultActive (List.length searchResults - 1)
+                                            ( toParentMsg <| MakeSearchResultActive False (List.length searchResults - 1)
                                             , True
                                             )
 
@@ -511,7 +544,7 @@ view toParentMsg model searchString messageAboveSearchResults searchResults =
                                                 , Accessibility.Role.option
                                                 , Accessibility.Key.tabbable False
                                                 , Html.Attributes.id <| searchResultId index model_.idPrefix
-                                                , Html.Events.onMouseEnter (toParentMsg <| MakeSearchResultActive index)
+                                                , Html.Events.onMouseEnter (toParentMsg <| MakeSearchResultActive True index)
                                                 , Html.Events.onMouseLeave (toParentMsg <| MakeSearchResultInactive index)
                                                 ]
                                                 [ Html.a
