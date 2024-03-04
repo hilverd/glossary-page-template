@@ -77,6 +77,12 @@ type alias Model =
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
 init flags url key =
     let
+        runningOnMacOs : Bool
+        runningOnMacOs =
+            flags
+                |> Decode.decodeValue (Decode.field "runningOnMacOs" Decode.bool)
+                |> Result.withDefault False
+
         queryParameters : QueryParameters
         queryParameters =
             QueryParameters.fromUrl url
@@ -176,6 +182,7 @@ init flags url key =
         common =
             { key = key
             , initialUrl = url
+            , runningOnMacOs = runningOnMacOs
             , filename = filename
             , theme = theme
             , editability = editability

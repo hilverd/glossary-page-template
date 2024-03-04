@@ -12,6 +12,7 @@ import Url exposing (Url)
 type alias CommonModel =
     { key : Key
     , initialUrl : Url
+    , runningOnMacOs : Bool
     , filename : Maybe String
     , theme : Theme
     , editability : Editability

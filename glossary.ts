@@ -3,6 +3,8 @@ import './glossary.css';
 import { Elm } from './src/ApplicationShell.elm';
 import { normaliseWhitespace, scrollFragmentIdentifierIntoView, untilAsync, waitForElement } from './ts/utilities.ts';
 
+const runningOnMacOs: boolean = navigator.userAgent.indexOf('Mac OS X') != -1;
+
 const katexIsAvailable: boolean = typeof katex != "undefined";
 
 const containerElement: HTMLElement | null = document.getElementById('glossary-page-container');
@@ -159,6 +161,7 @@ if (containerElement) {
     } else {
         const app = Elm.ApplicationShell.init({
             flags: {
+                runningOnMacOs: runningOnMacOs,
                 titleString: normaliseWhitespace(titleElement?.textContent || ''),
                 aboutParagraph: aboutParagraph,
                 aboutLinks: aboutLinks,

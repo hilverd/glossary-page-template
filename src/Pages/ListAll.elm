@@ -1701,8 +1701,8 @@ viewBackToTopLink staticSidebar tabbable =
         ]
 
 
-viewQuickSearchButton : Bool -> Html Msg
-viewQuickSearchButton tabbable =
+viewQuickSearchButton : Bool -> Bool -> Html Msg
+viewQuickSearchButton runningOnMacOs tabbable =
     div
         [ class "px-3 pb-4 bg-white dark:bg-slate-900" ]
         [ div
@@ -1722,7 +1722,12 @@ viewQuickSearchButton tabbable =
                 , text I18n.searchPlaceholder
                 , span
                     [ class "ml-auto pl-3 flex-none text-xs font-semibold" ]
-                    [ text I18n.controlK
+                    [ text <|
+                        if runningOnMacOs then
+                            I18n.commandK
+
+                        else
+                            I18n.controlK
                     ]
                 ]
             ]
@@ -1777,7 +1782,7 @@ viewQuickSearchButtonAndLetterGrid staticSidebar tabbable indexOfTerms =
         , div
             [ class "pr-4 bg-white dark:bg-slate-900" ]
             [ viewBackToTopLink True tabbable ]
-        , viewQuickSearchButton tabbable
+        , viewQuickSearchButton False tabbable
         , div
             [ class "px-3 bg-white dark:bg-slate-900" ]
             [ viewTermIndexFirstCharacterGrid staticSidebar tabbable indexOfTerms ]
@@ -2322,6 +2327,15 @@ filterByTagWithDescription model =
             Nothing
 
 
+controlOrCommandK : Bool -> Extras.HtmlEvents.KeyDownEvent
+controlOrCommandK runningOnMacOs =
+    if runningOnMacOs then
+        Extras.HtmlEvents.metaK
+
+    else
+        Extras.HtmlEvents.controlK
+
+
 view : Model -> Document Msg
 view model =
     case model.common.glossary of
@@ -2346,6 +2360,10 @@ view model =
                 indexOfTerms : IndexOfTerms
                 indexOfTerms =
                     IndexOfTerms.fromGlossaryItems filterByTag_ items
+
+                controlOrCommandK_ : Extras.HtmlEvents.KeyDownEvent
+                controlOrCommandK_ =
+                    controlOrCommandK model.common.runningOnMacOs
             in
             { title = pageTitle model glossary
             , body =
@@ -2368,7 +2386,7 @@ view model =
                                             Nothing
 
                                     SearchDialogShown ->
-                                        if event == Extras.HtmlEvents.escape || event == Extras.HtmlEvents.controlK then
+                                        if event == Extras.HtmlEvents.escape || event == controlOrCommandK_ then
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.hide, True )
 
                                         else
@@ -2420,7 +2438,7 @@ view model =
                                                 Nothing
 
                                     NoMenuOrDialogShown ->
-                                        if event == Extras.HtmlEvents.controlK then
+                                        if event == controlOrCommandK_ then
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show, True )
 
                                         else if Editability.canEdit model.common.editability && event == Extras.HtmlEvents.e then
