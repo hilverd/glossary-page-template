@@ -13,6 +13,12 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+### Fixed
+### Removed
+
+## [4.6.0] - 2024-03-04
+
+### Changed
 
 - Make search also cover definitions.
 - Support ⌘K for searching on macOS.
@@ -25,8 +31,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Stop using [:target](https://developer.mozilla.org/en-US/docs/Web/CSS/:target) for styling item pointed to by fragment identifier, as it [doesn't work well with back/forward buttons](https://github.com/whatwg/html/issues/639). Handle highlighting of item that has "focus" in JavaScript instead.
 - Prevent having multiple items with the same fragment identifier. The fragment identifier for an item is its disambiguated preferred term, with spaces replaced by underscores.
 - Prevent search item from being made active just because mouse pointer is already over it.
-
-### Removed
 
 ## [4.5.1] - 2024-02-13
 
@@ -703,7 +707,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.5.1...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.6.0...HEAD
+[4.6.0]: https://github.com/hilverd/glossary-page-template/compare/v4.5.1...v4.6.0
 [4.5.1]: https://github.com/hilverd/glossary-page-template/compare/v4.5.0...v4.5.1
 [4.5.0]: https://github.com/hilverd/glossary-page-template/compare/v4.4.0...v4.5.0
 [4.4.0]: https://github.com/hilverd/glossary-page-template/compare/v4.3.0...v4.4.0
