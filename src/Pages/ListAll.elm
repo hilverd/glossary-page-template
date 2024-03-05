@@ -1183,7 +1183,12 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
                     }
                 )
                 tagBeingFilteredBy
-                model.common.maybeId
+                (if noModalDialogShown model then
+                    model.common.maybeId
+
+                 else
+                    Nothing
+                )
                 itemWithPreviousAndNext
         )
         itemWithPreviousAndNext.item
