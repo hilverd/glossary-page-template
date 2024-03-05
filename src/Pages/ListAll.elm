@@ -1691,10 +1691,10 @@ viewBackToTopLink staticSidebar =
             , Accessibility.Key.tabbable staticSidebar
             ]
             [ span
-                [ class "inline-flex bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 border border-gray-600 dark:border-gray-400 rounded-md p-4 text-xl" ]
+                [ class "inline-flex bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 border border-gray-600 dark:border-gray-400 rounded-md p-3 text-lg" ]
                 [ text I18n.backToTop
                 , Icons.arrowUp
-                    [ Svg.Attributes.class "w-7 h-7 ml-2" ]
+                    [ Svg.Attributes.class "w-6 h-6 ml-2" ]
                 ]
             ]
         ]
