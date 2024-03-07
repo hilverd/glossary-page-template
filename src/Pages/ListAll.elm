@@ -54,6 +54,7 @@ import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
+import Data.GradualVisibility exposing (GradualVisibility(..))
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Saving exposing (Saving(..))
@@ -89,12 +90,6 @@ import Task
 
 
 -- MODEL
-
-
-type GradualVisibility
-    = Visible
-    | Disappearing
-    | Invisible
 
 
 type alias MenuForMobileVisibility =
