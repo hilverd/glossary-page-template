@@ -54,7 +54,7 @@ import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
-import Data.GradualVisibility exposing (GradualVisibility(..))
+import Data.GradualVisibility as GradualVisibility exposing (GradualVisibility)
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Saving exposing (Saving(..))
@@ -81,7 +81,7 @@ import Icons
 import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
 import Process
-import QueryParameters exposing (QueryParameters)
+import QueryParameters
 import Save
 import Search
 import Svg.Attributes exposing (fill, height, stroke, width)
@@ -94,6 +94,12 @@ import Task
 
 type alias MenuForMobileVisibility =
     GradualVisibility
+
+
+type BackToTopLinkVisibility
+    = Visible Int
+    | Disappearing Int
+    | Invisible
 
 
 type alias SearchDialog =
@@ -111,7 +117,7 @@ type Layout
 type alias Model =
     { common : CommonModel
     , menuForMobileVisibility : MenuForMobileVisibility
-    , backToTopLinkVisibilityCounter : Int
+    , backToTopLinkVisibility : BackToTopLinkVisibility
     , themeDropdownMenu : Components.DropdownMenu.Model
     , exportDropdownMenu : Components.DropdownMenu.Model
     , searchDialog : SearchDialog
@@ -138,7 +144,8 @@ type InternalMsg
     | UpdateSearchString String
     | ChangeTheme Theme
     | ScrollingUpWhileFarAwayFromTheTop
-    | HideBackToTopLink Int
+    | StartHidingBackToTopLink Int
+    | CompleteHidingBackToTopLink Int
     | JumpToItem GlossaryItemId
     | ChangeLayoutToShowSingle GlossaryItemId
     | ShowRelatedTermAsSingle Term
@@ -174,8 +181,8 @@ type alias Msg =
 init : CommonModel -> ( Model, Cmd Msg )
 init commonModel =
     ( { common = commonModel
-      , menuForMobileVisibility = Invisible
-      , backToTopLinkVisibilityCounter = 0
+      , menuForMobileVisibility = GradualVisibility.Invisible
+      , backToTopLinkVisibility = Invisible
       , layout = ShowAllItems
       , confirmDeleteId = Nothing
       , themeDropdownMenu =
@@ -265,7 +272,7 @@ update msg model =
             ( { model | common = { common0 | editability = editability1 } }, Cmd.none )
 
         ShowMenuForMobile ->
-            ( { model | menuForMobileVisibility = Visible }
+            ( { model | menuForMobileVisibility = GradualVisibility.Visible }
             , Cmd.batch
                 [ preventBackgroundScrolling ()
                 , Extras.BrowserDom.scrollToTopInElement (PageMsg.Internal NoOp) ElementIds.indexForMobile
@@ -273,7 +280,7 @@ update msg model =
             )
 
         StartHidingMenuForMobile ->
-            ( { model | menuForMobileVisibility = Disappearing }
+            ( { model | menuForMobileVisibility = GradualVisibility.Disappearing }
             , Cmd.batch
                 [ Process.sleep 100 |> Task.perform (always <| PageMsg.Internal CompleteHidingMenuForMobile)
                 , allowBackgroundScrolling ()
@@ -281,7 +288,7 @@ update msg model =
             )
 
         CompleteHidingMenuForMobile ->
-            ( { model | menuForMobileVisibility = Invisible }, Cmd.none )
+            ( { model | menuForMobileVisibility = GradualVisibility.Invisible }, Cmd.none )
 
         BackToTop staticSidebar ->
             let
@@ -294,8 +301,8 @@ update msg model =
                         ElementIds.indexForMobile
             in
             ( { model
-                | menuForMobileVisibility = Disappearing
-                , backToTopLinkVisibilityCounter = 0
+                | menuForMobileVisibility = GradualVisibility.Disappearing
+                , backToTopLinkVisibility = Invisible
               }
             , Cmd.batch
                 [ Extras.BrowserDom.scrollToTopInElement (PageMsg.Internal NoOp) idOfSidebarOrMenu
@@ -394,16 +401,33 @@ update msg model =
 
         ScrollingUpWhileFarAwayFromTheTop ->
             let
-                backToTopLinkVisibilityCounter =
-                    model.backToTopLinkVisibilityCounter + 1
+                counter_ =
+                    case model.backToTopLinkVisibility of
+                        Visible counter ->
+                            counter + 1
+
+                        _ ->
+                            0
+
+                backToTopLinkVisibility =
+                    Visible counter_
             in
-            ( { model | backToTopLinkVisibilityCounter = backToTopLinkVisibilityCounter }
-            , Process.sleep 3000 |> Task.perform (always <| PageMsg.Internal <| HideBackToTopLink backToTopLinkVisibilityCounter)
+            ( { model | backToTopLinkVisibility = backToTopLinkVisibility }
+            , Process.sleep 3000 |> Task.perform (always <| PageMsg.Internal <| StartHidingBackToTopLink counter_)
             )
 
-        HideBackToTopLink backToTopLinkVisibilityCounter ->
-            if model.backToTopLinkVisibilityCounter == backToTopLinkVisibilityCounter then
-                ( { model | backToTopLinkVisibilityCounter = 0 }
+        StartHidingBackToTopLink counter ->
+            if model.backToTopLinkVisibility == Visible counter then
+                ( { model | backToTopLinkVisibility = Disappearing counter }
+                , Process.sleep 300 |> Task.perform (always <| PageMsg.Internal <| CompleteHidingBackToTopLink counter)
+                )
+
+            else
+                ( model, Cmd.none )
+
+        CompleteHidingBackToTopLink counter ->
+            if model.backToTopLinkVisibility == Disappearing counter then
+                ( { model | backToTopLinkVisibility = Invisible }
                 , Cmd.none
                 )
 
@@ -416,7 +440,7 @@ update msg model =
                     model.common
             in
             ( { model
-                | menuForMobileVisibility = Disappearing
+                | menuForMobileVisibility = GradualVisibility.Disappearing
                 , common = { common0 | maybeId = Just itemId }
               }
             , Cmd.batch
@@ -1640,14 +1664,14 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
 viewMenuForMobile : Model -> Bool -> Bool -> IndexOfTerms -> Html Msg
 viewMenuForMobile model enableMathSupport tabbable termIndex =
     div
-        [ class "invisible" |> Extras.HtmlAttribute.showIf (model.menuForMobileVisibility == Invisible)
+        [ class "invisible" |> Extras.HtmlAttribute.showIf (model.menuForMobileVisibility == GradualVisibility.Invisible)
         , class "fixed inset-0 flex z-40 lg:hidden"
         , Accessibility.Role.dialog
         , Accessibility.Aria.modal True
         ]
         [ Html.div
             [ class "fixed inset-0 bg-gray-600 bg-opacity-75"
-            , if model.menuForMobileVisibility == Visible then
+            , if model.menuForMobileVisibility == GradualVisibility.Visible then
                 class "transition-opacity motion-reduce:transition-none ease-linear duration-300 opacity-100"
 
               else
@@ -1658,7 +1682,7 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
             []
         , div
             [ class "relative flex-1 flex flex-col max-w-xs w-full pt-5 bg-white dark:bg-gray-900"
-            , if model.menuForMobileVisibility == Visible then
+            , if model.menuForMobileVisibility == GradualVisibility.Visible then
                 class "transition motion-reduce:transition-none ease-in-out duration-300 transform motion-reduce:transform-none translate-x-0"
 
               else
@@ -1666,7 +1690,7 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
             ]
             [ div
                 [ class "absolute top-0 right-0 -mr-12 pt-2"
-                , if model.menuForMobileVisibility == Visible then
+                , if model.menuForMobileVisibility == GradualVisibility.Visible then
                     class "motion-reduce:transition-none ease-in-out duration-300 opacity-100"
 
                   else
@@ -1702,16 +1726,17 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
         ]
 
 
-viewBackToTopLink : { staticSidebar : Bool, visible : Bool } -> Html Msg
-viewBackToTopLink { staticSidebar, visible } =
+viewBackToTopLink : { staticSidebar : Bool, visibility : BackToTopLinkVisibility } -> Html Msg
+viewBackToTopLink { staticSidebar, visibility } =
     div
         [ class "z-50 fixed bottom-0 right-0 p-4"
-        , class "hidden" |> Extras.HtmlAttribute.showIf (not visible)
-        , if visible then
-            class "transition motion-reduce:transition-none ease-out duration-100 transform motion-reduce:transform-none opacity-100 scale-100"
+        , class "hidden" |> Extras.HtmlAttribute.showIf (visibility == Invisible)
+        , case visibility of
+            Visible _ ->
+                class "transition motion-reduce:transition-none ease-out duration-300 transform motion-reduce:transform-none opacity-100 scale-100"
 
-          else
-            class "transition motion-reduce:transition-none ease-in duration-75 transform motion-reduce:transform-none opacity-0 scale-95"
+            _ ->
+                class "transition motion-reduce:transition-none ease-in duration-300 transform motion-reduce:transform-none opacity-0 scale-95"
         ]
         [ Html.a
             [ href <| fragmentOnly ElementIds.container
@@ -1721,7 +1746,7 @@ viewBackToTopLink { staticSidebar, visible } =
             , Accessibility.Key.tabbable staticSidebar
             ]
             [ span
-                [ class "inline-flex bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 border border-gray-600 dark:border-gray-400 rounded-md p-3 text-lg" ]
+                [ class "inline-flex bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-95 border border-gray-600 dark:border-gray-400 rounded-md p-3 text-lg" ]
                 [ text I18n.backToTop
                 , Icons.arrowUp
                     [ Svg.Attributes.class "w-6 h-6 ml-2" ]
@@ -2258,7 +2283,7 @@ menuOrDialogShown model =
     if Components.SearchDialog.visible model.searchDialog.model then
         SearchDialogShown
 
-    else if model.menuForMobileVisibility == Visible then
+    else if model.menuForMobileVisibility == GradualVisibility.Visible then
         MenuForMobileShown
 
     else if model.layout == ShowSingleItem then
@@ -2497,10 +2522,10 @@ view model =
                         indexOfTerms
                     , div
                         [ class "hidden lg:block" ]
-                        [ viewBackToTopLink { staticSidebar = True, visible = model.backToTopLinkVisibilityCounter > 0 } ]
+                        [ viewBackToTopLink { staticSidebar = True, visibility = model.backToTopLinkVisibility } ]
                     , div
                         [ class "lg:hidden" ]
-                        [ viewBackToTopLink { staticSidebar = False, visible = model.backToTopLinkVisibilityCounter > 0 } ]
+                        [ viewBackToTopLink { staticSidebar = False, visibility = model.backToTopLinkVisibility } ]
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar noModalDialogShown_
