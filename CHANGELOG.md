@@ -15,6 +15,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Changed
 
 - Make link for scrolling back to top more obvious.
+- Show at most 40 search results.
 
 ### Fixed
 ### Removed

@@ -135,6 +135,7 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                             ( Nothing, Nothing ) ->
                                 DisambiguatedTerm.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
                 )
+            |> List.take 40
             |> List.map
                 (\( { preferredTerm, alternativeTerm, definition }, _ ) ->
                     case alternativeTerm of
