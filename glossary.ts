@@ -264,87 +264,110 @@ if (containerElement) {
                 textField.select();
             }
         });
-    }
 
-    function domReady(callback: () => void) {
-        document.readyState === 'interactive' || document.readyState === 'complete' ?
-            callback() : document.addEventListener('DOMContentLoaded', callback);
-    }
-
-    // Prevent FOUC
-    domReady(() => {
-        reflectThemeInClassList();
-
-        document.body.style.visibility = 'visible';
-
-        // Try to keep the focus on the element that receives overall keyboard shortcuts like Control-K
-        document.getElementById("glossary-page-outer")?.focus();
-
-        document.addEventListener("focusout", (e) => {
-            if (e.relatedTarget == null) {
-                document.getElementById("glossary-page-outer")?.focus();
-            }
-        });
-
-        const browserLocale: string =
-            navigator.languages && navigator.languages.length
-                ? navigator.languages[0]
-                : navigator.language;
-
-        const lastUpdatedDateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
-
-        customElements.define('last-updated',
-            class extends HTMLElement {
-                constructor() { super(); }
-                connectedCallback() { this.setTextContent(); }
-                attributeChangedCallback() { this.setTextContent(); }
-                static get observedAttributes() { return ['datetime']; }
-
-                setTextContent() {
-                    const datetimeAttribute: string | null = this.getAttribute('datetime');
-
-                    if (datetimeAttribute)
-                        this.textContent = new Date(datetimeAttribute).toLocaleDateString(browserLocale, lastUpdatedDateOptions);
-                    else
-                        this.textContent = "unknown";
-                }
-            }
-        );
-
-        if (katexIsAvailable) {
-            customElements.define('katex-inline',
-                class extends HTMLElement {
-                    constructor() { super(); }
-                    connectedCallback() { this.setTextContent(); }
-                    attributeChangedCallback() { this.setTextContent(); }
-                    static get observedAttributes() { return ['data-expr']; }
-
-                    setTextContent() {
-                        katex.render(this.dataset.expr, this, {
-                            throwOnError: false
-                        });
-
-                    }
-                }
-            );
-
-            customElements.define('katex-display',
-                class extends HTMLElement {
-                    constructor() { super(); }
-                    connectedCallback() { this.setTextContent(); }
-                    attributeChangedCallback() { this.setTextContent(); }
-                    static get observedAttributes() { return ['data-expr']; }
-
-                    setTextContent() {
-                        katex.render(this.dataset.expr, this, {
-                            displayMode: true,
-                            throwOnError: false
-                        });
-                    }
-                }
-            );
+        function domReady(callback: () => void) {
+            document.readyState === 'interactive' || document.readyState === 'complete' ?
+                callback() : document.addEventListener('DOMContentLoaded', callback);
         }
 
-        scrollFragmentIdentifierIntoView();
-    });
+        // Prevent FOUC
+        domReady(() => {
+            reflectThemeInClassList();
+
+            document.body.style.visibility = 'visible';
+
+            // Try to keep the focus on the element that receives overall keyboard shortcuts like Control-K
+            document.getElementById("glossary-page-outer")?.focus();
+
+            document.addEventListener("focusout", (e) => {
+                if (e.relatedTarget == null) {
+                    document.getElementById("glossary-page-outer")?.focus();
+                }
+            });
+
+            const browserLocale: string =
+                navigator.languages && navigator.languages.length
+                    ? navigator.languages[0]
+                    : navigator.language;
+
+            const lastUpdatedDateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+
+            customElements.define('last-updated',
+                class extends HTMLElement {
+                    constructor() { super(); }
+                    connectedCallback() { this.setTextContent(); }
+                    attributeChangedCallback() { this.setTextContent(); }
+                    static get observedAttributes() { return ['datetime']; }
+
+                    setTextContent() {
+                        const datetimeAttribute: string | null = this.getAttribute('datetime');
+
+                        if (datetimeAttribute)
+                            this.textContent = new Date(datetimeAttribute).toLocaleDateString(browserLocale, lastUpdatedDateOptions);
+                        else
+                            this.textContent = "unknown";
+                    }
+                }
+            );
+
+            if (katexIsAvailable) {
+                customElements.define('katex-inline',
+                    class extends HTMLElement {
+                        constructor() { super(); }
+                        connectedCallback() { this.setTextContent(); }
+                        attributeChangedCallback() { this.setTextContent(); }
+                        static get observedAttributes() { return ['data-expr']; }
+
+                        setTextContent() {
+                            katex.render(this.dataset.expr, this, {
+                                throwOnError: false
+                            });
+
+                        }
+                    }
+                );
+
+                customElements.define('katex-display',
+                    class extends HTMLElement {
+                        constructor() { super(); }
+                        connectedCallback() { this.setTextContent(); }
+                        attributeChangedCallback() { this.setTextContent(); }
+                        static get observedAttributes() { return ['data-expr']; }
+
+                        setTextContent() {
+                            katex.render(this.dataset.expr, this, {
+                                displayMode: true,
+                                throwOnError: false
+                            });
+                        }
+                    }
+                );
+            }
+
+            scrollFragmentIdentifierIntoView();
+
+            let lastKnownScrollPosition = 0;
+            let ticking = 3;
+
+            document.addEventListener("scroll", (event) => {
+                const newScrollPosition = window.scrollY;
+                const scrollingUp = newScrollPosition < lastKnownScrollPosition;
+                const farAwayFromTheTop = document.documentElement.clientHeight * 2 < newScrollPosition;
+
+                lastKnownScrollPosition = newScrollPosition;
+
+                if (scrollingUp && farAwayFromTheTop) {
+                    if (ticking <= 0) {
+                        window.requestAnimationFrame(() => {
+                            app.ports.scrollingUpWhileFarAwayFromTheTop.send(null);
+                            ticking = 3;
+                        });
+                    } else {
+                        ticking -= 1;
+                    }
+                }
+
+            });
+        });
+    }
 }

@@ -116,6 +116,7 @@ type Layout
 type alias Model =
     { common : CommonModel
     , menuForMobileVisibility : MenuForMobileVisibility
+    , backToTopLinkVisibilityCounter : Int
     , themeDropdownMenu : Components.DropdownMenu.Model
     , exportDropdownMenu : Components.DropdownMenu.Model
     , searchDialog : SearchDialog
@@ -141,6 +142,8 @@ type InternalMsg
     | SearchDialogWasHidden
     | UpdateSearchString String
     | ChangeTheme Theme
+    | ScrollingUpWhileFarAwayFromTheTop
+    | HideBackToTopLink Int
     | JumpToItem GlossaryItemId
     | ChangeLayoutToShowSingle GlossaryItemId
     | ShowRelatedTermAsSingle Term
@@ -177,6 +180,7 @@ init : CommonModel -> ( Model, Cmd Msg )
 init commonModel =
     ( { common = commonModel
       , menuForMobileVisibility = Invisible
+      , backToTopLinkVisibilityCounter = 0
       , layout = ShowAllItems
       , confirmDeleteId = Nothing
       , themeDropdownMenu =
@@ -242,6 +246,9 @@ port attemptedToCopyEditorCommandToClipboard : (Bool -> msg) -> Sub msg
 port selectAllInTextFieldWithCommandToRunEditor : () -> Cmd msg
 
 
+port scrollingUpWhileFarAwayFromTheTop : (() -> msg) -> Sub msg
+
+
 
 -- UPDATE
 
@@ -291,7 +298,10 @@ update msg model =
                     else
                         ElementIds.indexForMobile
             in
-            ( { model | menuForMobileVisibility = Disappearing }
+            ( { model
+                | menuForMobileVisibility = Disappearing
+                , backToTopLinkVisibilityCounter = 0
+              }
             , Cmd.batch
                 [ Extras.BrowserDom.scrollToTopInElement (PageMsg.Internal NoOp) idOfSidebarOrMenu
                 , Extras.BrowserDom.scrollToTop <| PageMsg.Internal NoOp
@@ -386,6 +396,24 @@ update msg model =
                     System ->
                         Nothing
             )
+
+        ScrollingUpWhileFarAwayFromTheTop ->
+            let
+                backToTopLinkVisibilityCounter =
+                    model.backToTopLinkVisibilityCounter + 1
+            in
+            ( { model | backToTopLinkVisibilityCounter = backToTopLinkVisibilityCounter }
+            , Process.sleep 3000 |> Task.perform (always <| PageMsg.Internal <| HideBackToTopLink backToTopLinkVisibilityCounter)
+            )
+
+        HideBackToTopLink backToTopLinkVisibilityCounter ->
+            if model.backToTopLinkVisibilityCounter == backToTopLinkVisibilityCounter then
+                ( { model | backToTopLinkVisibilityCounter = 0 }
+                , Cmd.none
+                )
+
+            else
+                ( model, Cmd.none )
 
         JumpToItem itemId ->
             let
@@ -1679,10 +1707,17 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
         ]
 
 
-viewBackToTopLink : Bool -> Html Msg
-viewBackToTopLink staticSidebar =
+viewBackToTopLink : { staticSidebar : Bool, visible : Bool } -> Html Msg
+viewBackToTopLink { staticSidebar, visible } =
     div
-        [ class "z-50 fixed bottom-0 right-0 p-4" ]
+        [ class "z-50 fixed bottom-0 right-0 p-4"
+        , class "hidden" |> Extras.HtmlAttribute.showIf (not visible)
+        , if visible then
+            class "transition motion-reduce:transition-none ease-out duration-100 transform motion-reduce:transform-none opacity-100 scale-100"
+
+          else
+            class "transition motion-reduce:transition-none ease-in duration-75 transform motion-reduce:transform-none opacity-0 scale-95"
+        ]
         [ Html.a
             [ href <| fragmentOnly ElementIds.container
             , Extras.HtmlEvents.onClickStopPropagation <|
@@ -2467,10 +2502,10 @@ view model =
                         indexOfTerms
                     , div
                         [ class "hidden lg:block" ]
-                        [ viewBackToTopLink True ]
+                        [ viewBackToTopLink { staticSidebar = True, visible = model.backToTopLinkVisibilityCounter > 0 } ]
                     , div
                         [ class "lg:hidden" ]
-                        [ viewBackToTopLink False ]
+                        [ viewBackToTopLink { staticSidebar = False, visible = model.backToTopLinkVisibilityCounter > 0 } ]
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ viewTopBar noModalDialogShown_
@@ -2631,4 +2666,5 @@ subscriptions model =
         , Components.DropdownMenu.subscriptions model.exportDropdownMenu
             |> Sub.map (ExportDropdownMenuMsg >> PageMsg.Internal)
         , attemptedToCopyEditorCommandToClipboard (AttemptedToCopyEditorCommandToClipboard >> PageMsg.Internal)
+        , scrollingUpWhileFarAwayFromTheTop (always <| PageMsg.Internal ScrollingUpWhileFarAwayFromTheTop)
         ]
