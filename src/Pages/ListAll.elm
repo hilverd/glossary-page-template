@@ -1553,15 +1553,18 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
         [ Html.Attributes.id ElementIds.items
         , Extras.HtmlAttribute.showIf enableOrderItemsButtons <| class "mt-3 pt-2 border-t border-gray-300 dark:border-gray-700"
         ]
-        [ Extras.Html.showMaybe
-            (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
-            filterByTagWithDescription_
-        , Extras.Html.showIf (filterByTagWithDescription_ == Nothing) <|
-            viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
-        , Extras.Html.showIf (Editability.editing model.common.editability) <|
-            div
-                [ class "flex-none mt-4" ]
-                [ viewManageTagsButton tabbable model.common ]
+        [ div
+            [ class "mb-4" ]
+            [ Extras.Html.showMaybe
+                (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
+                filterByTagWithDescription_
+            , Extras.Html.showIf (filterByTagWithDescription_ == Nothing) <|
+                viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
+            , Extras.Html.showIf (Editability.editing model.common.editability) <|
+                div
+                    [ class "flex-none mt-4" ]
+                    [ viewManageTagsButton tabbable model.common ]
+            ]
         , div
             []
             [ Extras.Html.showIf editable <|
