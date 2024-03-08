@@ -110,11 +110,11 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                         Nothing
                 )
             |> List.sortWith
-                (\( candidate1, score1 ) ( candidate2, score2 ) ->
-                    if score1 > score2 then
+                (\( candidate1, rank1 ) ( candidate2, rank2 ) ->
+                    if rank1 > rank2 then
                         LT
 
-                    else if score1 < score2 then
+                    else if rank1 < rank2 then
                         GT
 
                     else
