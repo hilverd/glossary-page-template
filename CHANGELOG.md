@@ -14,7 +14,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 
-- Make link for scrolling back to top more obvious.
+- Make link for scrolling back to top dynamically appear at bottom right when (probably) needed -- instead of always being visible at the top left.
 - Show at most 40 search results.
 
 ### Fixed
