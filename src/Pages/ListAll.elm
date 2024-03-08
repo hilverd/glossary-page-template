@@ -99,7 +99,7 @@ type alias MenuForMobileVisibility =
 type BackToTopLinkVisibility
     = Visible Int
     | Disappearing Int
-    | Invisible
+    | Invisible Int
 
 
 type alias SearchDialog =
@@ -136,7 +136,7 @@ type InternalMsg
     | ShowMenuForMobile
     | StartHidingMenuForMobile
     | CompleteHidingMenuForMobile
-    | BackToTop Bool
+    | BackToTop Bool Int
     | ThemeDropdownMenuMsg Components.DropdownMenu.Msg
     | ExportDropdownMenuMsg Components.DropdownMenu.Msg
     | SearchDialogMsg Components.SearchDialog.Msg
@@ -182,7 +182,7 @@ init : CommonModel -> ( Model, Cmd Msg )
 init commonModel =
     ( { common = commonModel
       , menuForMobileVisibility = GradualVisibility.Invisible
-      , backToTopLinkVisibility = Invisible
+      , backToTopLinkVisibility = Invisible 0
       , layout = ShowAllItems
       , confirmDeleteId = Nothing
       , themeDropdownMenu =
@@ -290,7 +290,7 @@ update msg model =
         CompleteHidingMenuForMobile ->
             ( { model | menuForMobileVisibility = GradualVisibility.Invisible }, Cmd.none )
 
-        BackToTop staticSidebar ->
+        BackToTop staticSidebar counter ->
             let
                 idOfSidebarOrMenu : String
                 idOfSidebarOrMenu =
@@ -302,7 +302,7 @@ update msg model =
             in
             ( { model
                 | menuForMobileVisibility = GradualVisibility.Disappearing
-                , backToTopLinkVisibility = Invisible
+                , backToTopLinkVisibility = Disappearing counter
               }
             , Cmd.batch
                 [ Extras.BrowserDom.scrollToTopInElement (PageMsg.Internal NoOp) idOfSidebarOrMenu
@@ -402,12 +402,7 @@ update msg model =
         ScrollingUpWhileFarAwayFromTheTop ->
             let
                 counter_ =
-                    case model.backToTopLinkVisibility of
-                        Visible counter ->
-                            counter + 1
-
-                        _ ->
-                            0
+                    backToTopLinkVisibilityCounter model.backToTopLinkVisibility + 1
 
                 backToTopLinkVisibility =
                     Visible counter_
@@ -427,7 +422,7 @@ update msg model =
 
         CompleteHidingBackToTopLink counter ->
             if model.backToTopLinkVisibility == Disappearing counter then
-                ( { model | backToTopLinkVisibility = Invisible }
+                ( { model | backToTopLinkVisibility = Invisible counter }
                 , Cmd.none
                 )
 
@@ -1726,11 +1721,32 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
         ]
 
 
+backToTopLinkVisibilityCounter : BackToTopLinkVisibility -> Int
+backToTopLinkVisibilityCounter backToTopLinkVisibility =
+    case backToTopLinkVisibility of
+        Visible counter ->
+            counter
+
+        Disappearing counter ->
+            counter
+
+        Invisible counter ->
+            counter
+
+
 viewBackToTopLink : { staticSidebar : Bool, visibility : BackToTopLinkVisibility } -> Html Msg
 viewBackToTopLink { staticSidebar, visibility } =
     div
         [ class "z-50 fixed bottom-0 right-0 p-4"
-        , class "hidden" |> Extras.HtmlAttribute.showIf (visibility == Invisible)
+        , class "hidden"
+            |> Extras.HtmlAttribute.showIf
+                (case visibility of
+                    Invisible _ ->
+                        True
+
+                    _ ->
+                        False
+                )
         , case visibility of
             Visible _ ->
                 class "transition motion-reduce:transition-none ease-out duration-300 transform motion-reduce:transform-none opacity-100 scale-100"
@@ -1742,14 +1758,16 @@ viewBackToTopLink { staticSidebar, visibility } =
             [ href <| fragmentOnly ElementIds.container
             , Extras.HtmlEvents.onClickStopPropagation <|
                 PageMsg.Internal <|
-                    BackToTop staticSidebar
+                    BackToTop staticSidebar (backToTopLinkVisibilityCounter visibility)
             , Accessibility.Key.tabbable staticSidebar
             ]
             [ span
                 [ class "inline-flex bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-95 border border-gray-600 dark:border-gray-400 rounded-md p-3 text-lg" ]
                 [ text I18n.backToTop
                 , Icons.arrowUp
-                    [ Svg.Attributes.class "w-6 h-6 ml-2" ]
+                    [ Svg.Attributes.class "w-6 h-6 ml-2"
+                    , Accessibility.Aria.hidden True
+                    ]
                 ]
             ]
         ]
