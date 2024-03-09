@@ -1200,16 +1200,11 @@ viewGlossaryItem :
     , shownAsSingle : Bool
     , noModalDialogShown_ : Bool
     }
-    -> Model
+    -> Maybe GlossaryItemId
     -> Maybe Tag
     -> GlossaryItemWithPreviousAndNext
     -> Html Msg
-viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle, noModalDialogShown_ } model tagBeingFilteredBy itemWithPreviousAndNext =
-    let
-        common : CommonModel
-        common =
-            model.common
-    in
+viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle, noModalDialogShown_ } maybeId tagBeingFilteredBy itemWithPreviousAndNext =
     Extras.Html.showMaybe
         (\( id, _ ) ->
             Components.GlossaryItemCard.view
@@ -1217,7 +1212,7 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
                 (Components.GlossaryItemCard.Normal
                     { tabbable = tabbable
                     , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle id
-                    , onClickEdit = PageMsg.NavigateToCreateOrEdit { common | maybeId = Just id }
+                    , onClickEdit = PageMsg.NavigateToCreateOrEdit <| Just id
                     , onClickDelete = PageMsg.Internal <| ConfirmDelete id
                     , onClickTag = PageMsg.Internal << FilterByTag
                     , onClickItem = PageMsg.Internal << ChangeLayoutToShowSingle
@@ -1228,7 +1223,7 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
                 )
                 tagBeingFilteredBy
                 (if noModalDialogShown_ then
-                    model.common.maybeId
+                    maybeId
 
                  else
                     Nothing
@@ -1303,7 +1298,7 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
                             , shownAsSingle = True
                             , noModalDialogShown_ = noModalDialogShown model
                             }
-                            model
+                            model.common.maybeId
                             tagBeingFilteredBy
                             itemWithPreviousAndNext
                         ]
@@ -1442,13 +1437,13 @@ viewEditTitleAndAboutButton tabbable common =
         ]
 
 
-viewCreateGlossaryItemButtonForEmptyState : Bool -> CommonModel -> Html Msg
-viewCreateGlossaryItemButtonForEmptyState tabbable common =
+viewCreateGlossaryItemButtonForEmptyState : Bool -> Html Msg
+viewCreateGlossaryItemButtonForEmptyState tabbable =
     div
         [ class "pt-4 print:hidden" ]
         [ Components.Button.emptyState
             [ class "p-9"
-            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeId = Nothing }
+            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit Nothing
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.viewGridAdd
@@ -1464,12 +1459,12 @@ viewCreateGlossaryItemButtonForEmptyState tabbable common =
         ]
 
 
-viewCreateGlossaryItemButton : Bool -> CommonModel -> Html Msg
-viewCreateGlossaryItemButton tabbable common =
+viewCreateGlossaryItemButton : Bool -> Html Msg
+viewCreateGlossaryItemButton tabbable =
     div
         [ class "pb-2 print:hidden" ]
         [ Components.Button.secondary
-            [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeId = Nothing }
+            [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit Nothing
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.viewGridAdd
@@ -1541,7 +1536,7 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
                 , shownAsSingle = False
                 , noModalDialogShown_ = noModalDialogShown model
                 }
-                model
+                model.common.maybeId
                 filterByTag
                 { previous = Nothing, item = Just indexedItem, next = Nothing }
 
@@ -1575,10 +1570,10 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
                 div
                     [ class "pt-2" ]
                     [ if List.isEmpty combinedIndexedGlossaryItems then
-                        viewCreateGlossaryItemButtonForEmptyState tabbable model.common
+                        viewCreateGlossaryItemButtonForEmptyState tabbable
 
                       else
-                        viewCreateGlossaryItemButton tabbable model.common
+                        viewCreateGlossaryItemButton tabbable
                     ]
             ]
         , Extras.Html.showIf (editable && totalNumberOfItems > recommendedMaximumNumberOfItems) <|
@@ -2526,12 +2521,7 @@ view model =
                                             Just <| ( PageMsg.Internal MakeChanges, True )
 
                                         else if Editability.editing model.common.editability && event == Extras.HtmlEvents.n then
-                                            let
-                                                common_ : CommonModel
-                                                common_ =
-                                                    model.common
-                                            in
-                                            Just <| ( PageMsg.NavigateToCreateOrEdit { common_ | maybeId = Nothing }, True )
+                                            Just <| ( PageMsg.NavigateToCreateOrEdit Nothing, True )
 
                                         else
                                             Nothing

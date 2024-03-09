@@ -16,8 +16,6 @@ import Codec
 import CommonModel exposing (CommonModel)
 import Data.Editability as Editability
 import Data.Glossary as Glossary exposing (Glossary)
-import Data.GlossaryItem.RawTerm as RawTerm
-import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems
 import Data.Theme as Theme exposing (Theme)
@@ -72,6 +70,22 @@ type alias Model =
     { key : Key
     , page : Page
     }
+
+
+commonModelForPage : Page -> CommonModel
+commonModelForPage page =
+    case page of
+        ListAll { common } ->
+            common
+
+        CreateOrEdit { common } ->
+            common
+
+        EditTitleAndAbout { common } ->
+            common
+
+        ManageTags { common } ->
+            common
 
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
@@ -366,10 +380,13 @@ update msg model =
             , Cmd.map ListAllMsg listAllCmd
             )
 
-        ( _, NavigateToCreateOrEdit commonModel, _ ) ->
+        ( _, NavigateToCreateOrEdit maybeGlossaryItemId, _ ) ->
             let
+                common0 =
+                    commonModelForPage model.page
+
                 ( createOrEditModel, createOrEditCmd ) =
-                    Pages.CreateOrEdit.init commonModel
+                    Pages.CreateOrEdit.init { common0 | maybeId = maybeGlossaryItemId }
             in
             ( { model | page = CreateOrEdit createOrEditModel }
             , Cmd.batch [ resetViewport, Cmd.map CreateOrEditMsg createOrEditCmd ]
