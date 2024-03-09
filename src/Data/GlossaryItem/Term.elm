@@ -40,7 +40,7 @@ stringToIndexGroupString : String -> String
 stringToIndexGroupString =
     String.Normalize.removeDiacritics
         >> String.toUpper
-        >> Extras.String.firstAlphaNumericCharacter
+        >> Extras.String.firstAlphanumericCharacter
         >> Maybe.withDefault "…"
         >> (\result ->
                 if List.member result [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ] then
