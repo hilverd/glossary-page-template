@@ -243,8 +243,8 @@ withoutInternal msg =
         ListAllMsg NavigateToEditTitleAndAbout ->
             PageMsg.NavigateToEditTitleAndAbout
 
-        ListAllMsg (NavigateToManageTags commonModel) ->
-            PageMsg.NavigateToManageTags commonModel
+        ListAllMsg NavigateToManageTags ->
+            PageMsg.NavigateToManageTags
 
         ListAllMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
@@ -258,8 +258,8 @@ withoutInternal msg =
         CreateOrEditMsg NavigateToEditTitleAndAbout ->
             PageMsg.NavigateToEditTitleAndAbout
 
-        CreateOrEditMsg (NavigateToManageTags commonModel) ->
-            PageMsg.NavigateToManageTags commonModel
+        CreateOrEditMsg NavigateToManageTags ->
+            PageMsg.NavigateToManageTags
 
         CreateOrEditMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
@@ -273,8 +273,8 @@ withoutInternal msg =
         EditTitleAndAboutMsg NavigateToEditTitleAndAbout ->
             PageMsg.NavigateToEditTitleAndAbout
 
-        EditTitleAndAboutMsg (NavigateToManageTags commonModel) ->
-            PageMsg.NavigateToManageTags commonModel
+        EditTitleAndAboutMsg NavigateToManageTags ->
+            PageMsg.NavigateToManageTags
 
         EditTitleAndAboutMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
@@ -288,8 +288,8 @@ withoutInternal msg =
         ManageTagsMsg NavigateToEditTitleAndAbout ->
             PageMsg.NavigateToEditTitleAndAbout
 
-        ManageTagsMsg (NavigateToManageTags commonModel) ->
-            PageMsg.NavigateToManageTags commonModel
+        ManageTagsMsg NavigateToManageTags ->
+            PageMsg.NavigateToManageTags
 
         ManageTagsMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
@@ -404,10 +404,13 @@ update msg model =
             , Cmd.batch [ resetViewport, Cmd.map EditTitleAndAboutMsg editTitleAndAboutCmd ]
             )
 
-        ( _, NavigateToManageTags commonModel, _ ) ->
+        ( _, NavigateToManageTags, _ ) ->
             let
+                common0 =
+                    commonModelForPage model.page
+
                 ( manageTagsModel, manageTagsCmd ) =
-                    Pages.ManageTags.init commonModel
+                    Pages.ManageTags.init common0
             in
             ( { model | page = ManageTags manageTagsModel }
             , Cmd.batch [ resetViewport, Cmd.map ManageTagsMsg manageTagsCmd ]

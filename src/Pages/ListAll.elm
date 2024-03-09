@@ -1562,7 +1562,7 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
             , Extras.Html.showIf (Editability.editing model.common.editability) <|
                 div
                     [ class "flex-none mt-4" ]
-                    [ viewManageTagsButton tabbable model.common ]
+                    [ viewManageTagsButton tabbable ]
             ]
         , div
             []
@@ -2152,12 +2152,12 @@ viewAllTagFilters { enableMathSupport, tabbable } tags =
             )
 
 
-viewManageTagsButton : Bool -> CommonModel -> Html Msg
-viewManageTagsButton tabbable common =
+viewManageTagsButton : Bool -> Html Msg
+viewManageTagsButton tabbable =
     div
         [ class "pb-3 print:hidden" ]
         [ Components.Button.text
-            [ Html.Events.onClick <| PageMsg.NavigateToManageTags { common | maybeId = Nothing }
+            [ Html.Events.onClick <| PageMsg.NavigateToManageTags
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.pencil

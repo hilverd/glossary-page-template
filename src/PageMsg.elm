@@ -8,5 +8,5 @@ type PageMsg a
     = NavigateToListAll CommonModel
     | NavigateToCreateOrEdit (Maybe GlossaryItemId)
     | NavigateToEditTitleAndAbout
-    | NavigateToManageTags CommonModel
+    | NavigateToManageTags
     | Internal a
