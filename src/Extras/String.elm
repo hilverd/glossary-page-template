@@ -1,5 +1,5 @@
 module Extras.String exposing
-    ( escapeForMarkdown, preserveOnlyAlphaNumChars, emDash, enDash
+    ( escapeForMarkdown, preserveOnlyAlphaNumChars, emDash, enDash, isRelativeUrl
     , firstAlphanumericCharacter
     )
 
@@ -8,7 +8,7 @@ module Extras.String exposing
 
 # Strings
 
-@docs escapeForMarkdown, firstAlphaNumericCharacter, preserveOnlyAlphaNumChars, emDash, enDash
+@docs escapeForMarkdown, firstAlphaNumericCharacter, preserveOnlyAlphaNumChars, emDash, enDash, isRelativeUrl
 
 -}
 
@@ -85,3 +85,26 @@ emDash =
 enDash : String
 enDash =
     "–"
+
+
+absoluteUrlRegex : Regex.Regex
+absoluteUrlRegex =
+    "^https?:\\/\\/|^\\/\\/"
+        |> Regex.fromStringWith { caseInsensitive = True, multiline = False }
+        |> Maybe.withDefault Regex.never
+
+
+{-| Make a reasonable attempt to determine if the given string is a relative URL.
+
+    isRelativeUrl "/foo/bar" --> True
+
+    isRelativeUrl "foo/bar" --> True
+
+    isRelativeUrl "https://example.com" --> False
+
+    isRelativeUrl "http://example.com" --> False
+
+-}
+isRelativeUrl : String -> Bool
+isRelativeUrl =
+    not << Regex.contains absoluteUrlRegex
