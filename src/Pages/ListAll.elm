@@ -76,6 +76,7 @@ import Extras.Url exposing (fragmentOnly)
 import Html
 import Html.Attributes exposing (class, for, href, id, readonly)
 import Html.Events
+import Html.Lazy
 import Http
 import Icons
 import Internationalisation as I18n
@@ -1611,7 +1612,7 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
             Html.dl
                 []
                 (List.map viewIndexedItem otherIndexedGlossaryItems)
-        , Components.SearchDialog.view
+        , Html.Lazy.lazy5 Components.SearchDialog.view
             (PageMsg.Internal << SearchDialogMsg)
             model.searchDialog.model
             model.searchDialog.term
@@ -1659,17 +1660,17 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
         ]
 
 
-viewMenuForMobile : Model -> Bool -> Bool -> IndexOfTerms -> Html Msg
-viewMenuForMobile model enableMathSupport tabbable termIndex =
+viewMenuForMobile : MenuForMobileVisibility -> Bool -> Bool -> IndexOfTerms -> Html Msg
+viewMenuForMobile menuForMobileVisibility enableMathSupport tabbable termIndex =
     div
-        [ class "invisible" |> Extras.HtmlAttribute.showIf (model.menuForMobileVisibility == GradualVisibility.Invisible)
+        [ class "invisible" |> Extras.HtmlAttribute.showIf (menuForMobileVisibility == GradualVisibility.Invisible)
         , class "fixed inset-0 flex z-40 lg:hidden"
         , Accessibility.Role.dialog
         , Accessibility.Aria.modal True
         ]
         [ Html.div
             [ class "fixed inset-0 bg-gray-600 bg-opacity-75"
-            , if model.menuForMobileVisibility == GradualVisibility.Visible then
+            , if menuForMobileVisibility == GradualVisibility.Visible then
                 class "transition-opacity motion-reduce:transition-none ease-linear duration-300 opacity-100"
 
               else
@@ -1680,7 +1681,7 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
             []
         , div
             [ class "relative flex-1 flex flex-col max-w-xs w-full pt-5 bg-white dark:bg-gray-900"
-            , if model.menuForMobileVisibility == GradualVisibility.Visible then
+            , if menuForMobileVisibility == GradualVisibility.Visible then
                 class "transition motion-reduce:transition-none ease-in-out duration-300 transform motion-reduce:transform-none translate-x-0"
 
               else
@@ -1688,7 +1689,7 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
             ]
             [ div
                 [ class "absolute top-0 right-0 -mr-12 pt-2"
-                , if model.menuForMobileVisibility == GradualVisibility.Visible then
+                , if menuForMobileVisibility == GradualVisibility.Visible then
                     class "motion-reduce:transition-none ease-in-out duration-300 opacity-100"
 
                   else
@@ -1714,7 +1715,7 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
                 [ nav
                     [ class "px-4 pt-1 pb-6" ]
                     [ viewTermIndexFirstCharacterGrid False tabbable termIndex
-                    , viewIndexOfTerms enableMathSupport tabbable False termIndex
+                    , Html.Lazy.lazy4 viewIndexOfTerms enableMathSupport tabbable False termIndex
                     ]
                 ]
             ]
@@ -2534,8 +2535,12 @@ view model =
                             )
                         )
                     ]
-                    [ viewMenuForMobile model model.common.enableMathSupport noModalDialogShown_ indexOfTerms
-                    , viewStaticSidebarForDesktop
+                    [ Html.Lazy.lazy4 viewMenuForMobile
+                        model.menuForMobileVisibility
+                        model.common.enableMathSupport
+                        noModalDialogShown_
+                        indexOfTerms
+                    , Html.Lazy.lazy2 viewStaticSidebarForDesktop
                         { runningOnMacOs = model.common.runningOnMacOs
                         , enableMathSupport = model.common.enableMathSupport
                         , tabbable = noModalDialogShown_
@@ -2543,13 +2548,14 @@ view model =
                         indexOfTerms
                     , div
                         [ class "hidden lg:block" ]
-                        [ viewBackToTopLink { staticSidebar = True, visibility = model.backToTopLinkVisibility } ]
+                        [ Html.Lazy.lazy viewBackToTopLink { staticSidebar = True, visibility = model.backToTopLinkVisibility } ]
                     , div
                         [ class "lg:hidden" ]
-                        [ viewBackToTopLink { staticSidebar = False, visibility = model.backToTopLinkVisibility } ]
+                        [ Html.Lazy.lazy viewBackToTopLink { staticSidebar = False, visibility = model.backToTopLinkVisibility } ]
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
-                        [ viewTopBar noModalDialogShown_
+                        [ Html.Lazy.lazy4 viewTopBar
+                            noModalDialogShown_
                             model.common.theme
                             model.themeDropdownMenu
                             (if Glossary.enableExportMenu glossary then
@@ -2665,7 +2671,7 @@ view model =
                                                                 |> (\lhs -> ( lhs, [] ))
                                                             )
                                        )
-                                    |> viewCards
+                                    |> Html.Lazy.lazy6 viewCards
                                         model
                                         { enableMathSupport = model.common.enableMathSupport
                                         , enableOrderItemsButtons = Glossary.enableOrderItemsButtons glossary
