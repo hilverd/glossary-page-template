@@ -1420,12 +1420,12 @@ viewMakeChangesButton editability tabbable =
         ]
 
 
-viewEditTitleAndAboutButton : Bool -> CommonModel -> Html Msg
-viewEditTitleAndAboutButton tabbable common =
+viewEditTitleAndAboutButton : Bool -> Html Msg
+viewEditTitleAndAboutButton tabbable =
     div
         [ class "pb-3 print:hidden" ]
         [ Components.Button.text
-            [ Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout { common | maybeId = Nothing }
+            [ Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.pencil
@@ -2636,7 +2636,7 @@ view model =
                                 , Extras.Html.showIf (Editability.editing model.common.editability && filterByTagWithDescription_ == Nothing) <|
                                     div
                                         [ class "flex-none mt-2" ]
-                                        [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
+                                        [ viewEditTitleAndAboutButton noModalDialogShown_ ]
                                 , items
                                     |> (case QueryParameters.orderItemsBy model.common.queryParameters of
                                             Alphabetically ->

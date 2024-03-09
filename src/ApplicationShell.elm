@@ -240,8 +240,8 @@ withoutInternal msg =
         ListAllMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
 
-        ListAllMsg (NavigateToEditTitleAndAbout commonModel) ->
-            PageMsg.NavigateToEditTitleAndAbout commonModel
+        ListAllMsg NavigateToEditTitleAndAbout ->
+            PageMsg.NavigateToEditTitleAndAbout
 
         ListAllMsg (NavigateToManageTags commonModel) ->
             PageMsg.NavigateToManageTags commonModel
@@ -255,8 +255,8 @@ withoutInternal msg =
         CreateOrEditMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
 
-        CreateOrEditMsg (NavigateToEditTitleAndAbout commonModel) ->
-            PageMsg.NavigateToEditTitleAndAbout commonModel
+        CreateOrEditMsg NavigateToEditTitleAndAbout ->
+            PageMsg.NavigateToEditTitleAndAbout
 
         CreateOrEditMsg (NavigateToManageTags commonModel) ->
             PageMsg.NavigateToManageTags commonModel
@@ -270,8 +270,8 @@ withoutInternal msg =
         EditTitleAndAboutMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
 
-        EditTitleAndAboutMsg (NavigateToEditTitleAndAbout commonModel) ->
-            PageMsg.NavigateToEditTitleAndAbout commonModel
+        EditTitleAndAboutMsg NavigateToEditTitleAndAbout ->
+            PageMsg.NavigateToEditTitleAndAbout
 
         EditTitleAndAboutMsg (NavigateToManageTags commonModel) ->
             PageMsg.NavigateToManageTags commonModel
@@ -285,8 +285,8 @@ withoutInternal msg =
         ManageTagsMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
 
-        ManageTagsMsg (NavigateToEditTitleAndAbout commonModel) ->
-            PageMsg.NavigateToEditTitleAndAbout commonModel
+        ManageTagsMsg NavigateToEditTitleAndAbout ->
+            PageMsg.NavigateToEditTitleAndAbout
 
         ManageTagsMsg (NavigateToManageTags commonModel) ->
             PageMsg.NavigateToManageTags commonModel
@@ -392,10 +392,13 @@ update msg model =
             , Cmd.batch [ resetViewport, Cmd.map CreateOrEditMsg createOrEditCmd ]
             )
 
-        ( _, NavigateToEditTitleAndAbout commonModel, _ ) ->
+        ( _, NavigateToEditTitleAndAbout, _ ) ->
             let
+                common0 =
+                    commonModelForPage model.page
+
                 ( editTitleAndAboutModel, editTitleAndAboutCmd ) =
-                    Pages.EditTitleAndAbout.init commonModel
+                    Pages.EditTitleAndAbout.init common0
             in
             ( { model | page = EditTitleAndAbout editTitleAndAboutModel }
             , Cmd.batch [ resetViewport, Cmd.map EditTitleAndAboutMsg editTitleAndAboutCmd ]
