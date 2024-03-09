@@ -1198,12 +1198,13 @@ viewGlossaryItem :
     , editable : Bool
     , enableLastUpdatedDates : Bool
     , shownAsSingle : Bool
+    , noModalDialogShown_ : Bool
     }
     -> Model
     -> Maybe Tag
     -> GlossaryItemWithPreviousAndNext
     -> Html Msg
-viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle } model tagBeingFilteredBy itemWithPreviousAndNext =
+viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle, noModalDialogShown_ } model tagBeingFilteredBy itemWithPreviousAndNext =
     let
         common : CommonModel
         common =
@@ -1226,7 +1227,7 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
                     }
                 )
                 tagBeingFilteredBy
-                (if noModalDialogShown model then
+                (if noModalDialogShown_ then
                     model.common.maybeId
 
                  else
@@ -1300,6 +1301,7 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
                             , editable = editable
                             , enableLastUpdatedDates = enableLastUpdatedDates
                             , shownAsSingle = True
+                            , noModalDialogShown_ = noModalDialogShown model
                             }
                             model
                             tagBeingFilteredBy
@@ -1537,6 +1539,7 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
                 , editable = editable
                 , enableLastUpdatedDates = enableLastUpdatedDates
                 , shownAsSingle = False
+                , noModalDialogShown_ = noModalDialogShown model
                 }
                 model
                 filterByTag
