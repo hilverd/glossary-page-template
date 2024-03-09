@@ -1207,7 +1207,8 @@ viewGlossaryItem :
 viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle, noModalDialogShown_ } maybeId tagBeingFilteredBy itemWithPreviousAndNext =
     Extras.Html.showMaybe
         (\( id, _ ) ->
-            Components.GlossaryItemCard.view
+            Html.Lazy.lazy5
+                Components.GlossaryItemCard.view
                 { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable, enableLastUpdatedDates = enableLastUpdatedDates }
                 (Components.GlossaryItemCard.Normal
                     { tabbable = tabbable
