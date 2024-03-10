@@ -82,7 +82,7 @@ import Icons
 import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
 import Process
-import QueryParameters
+import QueryParameters exposing (QueryParameters)
 import Save
 import Search
 import Svg.Attributes exposing (fill, height, stroke, width)
@@ -1485,25 +1485,27 @@ viewCreateGlossaryItemButton tabbable =
 
 
 viewCards :
-    Model
+    { enableMathSupport : Bool
+    , enableOrderItemsButtons : Bool
+    , editable : Bool
+    , tabbable : Bool
+    , enableLastUpdatedDates : Bool
+    , noModalDialogShown_ : Bool
+    , editing : Bool
+    }
     ->
-        { enableMathSupport : Bool
-        , enableOrderItemsButtons : Bool
-        , editable : Bool
-        , tabbable : Bool
-        , enableLastUpdatedDates : Bool
+        { filterByTagId_ : Maybe TagId
+        , tags : List Tag
+        , filterByTagWithDescription_ : Maybe ( Tag, TagDescription )
         }
-    -> List Tag
+    -> QueryParameters
+    -> Maybe GlossaryItemId
+    -> Maybe RawTerm
     -> GlossaryItems
-    -> Maybe ( Tag, TagDescription )
     -> ( List ( GlossaryItemId, GlossaryItemForHtml ), List ( GlossaryItemId, GlossaryItemForHtml ) )
     -> Html Msg
-viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates } tags glossaryItems filterByTagWithDescription_ ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates, noModalDialogShown_, editing } { filterByTagId_, tags, filterByTagWithDescription_ } queryParameters maybeId mostRecentRawTermForOrderingItemsFocusedOn glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
-        filterByTagId_ : Maybe TagId
-        filterByTagId_ =
-            filterByTagId model
-
         filterByTag : Maybe Tag
         filterByTag =
             filterByTagWithDescription_ |> Maybe.map Tuple.first
@@ -1520,7 +1522,7 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
 
         orderItemsFocusedOnTerm : Maybe DisambiguatedTerm
         orderItemsFocusedOnTerm =
-            case QueryParameters.orderItemsBy model.common.queryParameters of
+            case QueryParameters.orderItemsBy queryParameters of
                 FocusedOn termId ->
                     GlossaryItems.disambiguatedPreferredTermFromRaw termId glossaryItems
 
@@ -1535,9 +1537,9 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
                 , editable = editable
                 , enableLastUpdatedDates = enableLastUpdatedDates
                 , shownAsSingle = False
-                , noModalDialogShown_ = noModalDialogShown model
+                , noModalDialogShown_ = noModalDialogShown_
                 }
-                model.common.maybeId
+                maybeId
                 filterByTag
                 { previous = Nothing, item = Just indexedItem, next = Nothing }
 
@@ -1560,7 +1562,7 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
                 filterByTagWithDescription_
             , Extras.Html.showIf (filterByTagWithDescription_ == Nothing) <|
                 viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
-            , Extras.Html.showIf (Editability.editing model.common.editability) <|
+            , Extras.Html.showIf editing <|
                 div
                     [ class "flex-none mt-4" ]
                     [ viewManageTagsButton tabbable ]
@@ -1591,11 +1593,12 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
             )
           <|
             viewOrderItemsBy
-                model
                 totalNumberOfItems
-                enableMathSupport
+                { enableMathSupport = enableMathSupport, tabbable = noModalDialogShown_ }
                 disambiguatedPreferredTermsWithDefinitions
                 orderItemsFocusedOnTerm
+                queryParameters
+                mostRecentRawTermForOrderingItemsFocusedOn
         , Html.dl
             [ class "mt-4" ]
             (List.map viewIndexedItem indexedGlossaryItems)
@@ -1611,51 +1614,6 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
             Html.dl
                 []
                 (List.map viewIndexedItem otherIndexedGlossaryItems)
-        , Html.Lazy.lazy5 Components.SearchDialog.view
-            (PageMsg.Internal << SearchDialogMsg)
-            model.searchDialog.model
-            model.searchDialog.term
-            (filterByTagWithDescription_
-                |> Maybe.map
-                    (\( tag, _ ) ->
-                        span
-                            [ class "inline-flex flex-wrap items-center" ]
-                            [ Icons.exclamation
-                                [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-800 mr-1.5"
-                                , Accessibility.Aria.hidden True
-                                ]
-                            , span
-                                [ class "mr-1" ]
-                                [ text I18n.filteringByTag ]
-                            , span []
-                                [ text " \""
-                                , Tag.view enableMathSupport [] tag
-                                , text "\""
-                                ]
-                            ]
-                    )
-            )
-            model.searchDialog.results
-        , viewConfirmDeleteModal
-            model.common.editability
-            model.confirmDeleteId
-            model.deleting
-        , viewSingleItemModalDialog
-            model
-            { enableMathSupport = enableMathSupport
-            , editable = editable
-            , tabbable = tabbable
-            , enableLastUpdatedDates = enableLastUpdatedDates
-            }
-            filterByTag
-            combinedIndexedGlossaryItems
-          <|
-            case ( model.layout, model.common.maybeId ) of
-                ( ShowSingleItem, Just id ) ->
-                    Just id
-
-                _ ->
-                    Nothing
         ]
 
 
@@ -2170,13 +2128,15 @@ viewManageTagsButton tabbable =
         ]
 
 
-viewOrderItemsBy : Model -> Int -> Bool -> List DisambiguatedTerm -> Maybe DisambiguatedTerm -> Html Msg
-viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTermsWithDefinitions orderItemsFocusedOnTerm =
-    let
-        tabbable : Bool
-        tabbable =
-            noModalDialogShown model
-    in
+viewOrderItemsBy :
+    Int
+    -> { enableMathSupport : Bool, tabbable : Bool }
+    -> List DisambiguatedTerm
+    -> Maybe DisambiguatedTerm
+    -> QueryParameters
+    -> Maybe RawTerm
+    -> Html Msg
+viewOrderItemsBy numberOfItems { enableMathSupport, tabbable } disambiguatedPreferredTermsWithDefinitions orderItemsFocusedOnTerm queryParameters mostRecentRawTermForOrderingItemsFocusedOn =
     div
         [ class "print:hidden pt-4 pb-2" ]
         [ fieldset []
@@ -2197,7 +2157,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                     [ Components.Button.radio
                         "order-items-by"
                         "order-items-alphabetically"
-                        (QueryParameters.orderItemsBy model.common.queryParameters == Alphabetically)
+                        (QueryParameters.orderItemsBy queryParameters == Alphabetically)
                         tabbable
                         [ id ElementIds.orderItemsAlphabetically
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy Alphabetically
@@ -2213,7 +2173,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                     [ Components.Button.radio
                         "order-items-by"
                         "order-items-most-mentioned-first"
-                        (QueryParameters.orderItemsBy model.common.queryParameters == MostMentionedFirst)
+                        (QueryParameters.orderItemsBy queryParameters == MostMentionedFirst)
                         tabbable
                         [ id ElementIds.orderItemsMostMentionedFirst
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy MostMentionedFirst
@@ -2229,7 +2189,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                     [ Components.Button.radio
                         "order-items-by"
                         "order-items-focused-on"
-                        (case QueryParameters.orderItemsBy model.common.queryParameters of
+                        (case QueryParameters.orderItemsBy queryParameters of
                             FocusedOn _ ->
                                 True
 
@@ -2238,12 +2198,12 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                         )
                         tabbable
                         [ id ElementIds.orderItemsFocusedOn
-                        , Html.Attributes.disabled <| model.mostRecentRawTermForOrderingItemsFocusedOn == Nothing
+                        , Html.Attributes.disabled <| mostRecentRawTermForOrderingItemsFocusedOn == Nothing
                         , Extras.HtmlAttribute.showMaybe
                             (\termId ->
                                 Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy <| FocusedOn termId
                             )
-                            model.mostRecentRawTermForOrderingItemsFocusedOn
+                            mostRecentRawTermForOrderingItemsFocusedOn
                         ]
                     , label
                         [ class "ml-3 inline-flex items-center font-medium text-gray-700 dark:text-gray-300 select-none"
@@ -2271,14 +2231,14 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                                         Components.SelectMenu.Choice
                                             (RawTerm.toString preferredRawTerm)
                                             [ text <| Term.inlineText <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm ]
-                                            (model.mostRecentRawTermForOrderingItemsFocusedOn == Just preferredRawTerm)
+                                            (mostRecentRawTermForOrderingItemsFocusedOn == Just preferredRawTerm)
                                     )
                             )
                         ]
                     ]
                 ]
             ]
-        , Extras.Html.showIf (QueryParameters.orderItemsBy model.common.queryParameters == MostMentionedFirst) <|
+        , Extras.Html.showIf (QueryParameters.orderItemsBy queryParameters == MostMentionedFirst) <|
             p
                 [ class "mt-2 text-gray-700 dark:text-gray-300" ]
                 [ text I18n.explanationForMostMentionedFirst ]
@@ -2441,6 +2401,43 @@ view model =
                 controlOrCommandK_ : Extras.HtmlEvents.KeyDownEvent
                 controlOrCommandK_ =
                     controlOrCommandK model.common.runningOnMacOs
+
+                filterByTag : Maybe Tag
+                filterByTag =
+                    filterByTagWithDescription_ |> Maybe.map Tuple.first
+
+                ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+                    items
+                        |> (case QueryParameters.orderItemsBy model.common.queryParameters of
+                                Alphabetically ->
+                                    GlossaryItems.orderedAlphabetically filterByTag_
+                                        >> (\lhs -> ( lhs, [] ))
+
+                                MostMentionedFirst ->
+                                    GlossaryItems.orderedByMostMentionedFirst filterByTag_
+                                        >> (\lhs -> ( lhs, [] ))
+
+                                FocusedOn termId ->
+                                    let
+                                        itemId : Maybe GlossaryItemId
+                                        itemId =
+                                            GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm termId items
+                                    in
+                                    case itemId of
+                                        Just itemId_ ->
+                                            GlossaryItems.orderedFocusedOn filterByTag_ itemId_
+
+                                        Nothing ->
+                                            always
+                                                (items
+                                                    |> GlossaryItems.orderedAlphabetically filterByTag_
+                                                    |> (\lhs -> ( lhs, [] ))
+                                                )
+                           )
+
+                combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForHtml )
+                combinedIndexedGlossaryItems =
+                    List.append indexedGlossaryItems otherIndexedGlossaryItems
             in
             { title = pageTitle model glossary
             , body =
@@ -2665,17 +2662,68 @@ view model =
                                                                 |> (\lhs -> ( lhs, [] ))
                                                             )
                                        )
-                                    |> Html.Lazy.lazy6 viewCards
-                                        model
+                                    |> Html.Lazy.lazy7 viewCards
                                         { enableMathSupport = model.common.enableMathSupport
                                         , enableOrderItemsButtons = Glossary.enableOrderItemsButtons glossary
                                         , editable = Editability.editing model.common.editability
                                         , tabbable = noModalDialogShown_
                                         , enableLastUpdatedDates = Glossary.enableLastUpdatedDates glossary
+                                        , noModalDialogShown_ = noModalDialogShown model
+                                        , editing = Editability.editing model.common.editability
                                         }
-                                        (GlossaryItems.tags items)
+                                        { filterByTagId_ = filterByTagId model
+                                        , tags = GlossaryItems.tags items
+                                        , filterByTagWithDescription_ = filterByTagWithDescription_
+                                        }
+                                        model.common.queryParameters
+                                        model.common.maybeId
+                                        model.mostRecentRawTermForOrderingItemsFocusedOn
                                         items
-                                        filterByTagWithDescription_
+                                , Html.Lazy.lazy5 Components.SearchDialog.view
+                                    (PageMsg.Internal << SearchDialogMsg)
+                                    model.searchDialog.model
+                                    model.searchDialog.term
+                                    (filterByTagWithDescription_
+                                        |> Maybe.map
+                                            (\( tag, _ ) ->
+                                                span
+                                                    [ class "inline-flex flex-wrap items-center" ]
+                                                    [ Icons.exclamation
+                                                        [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-800 mr-1.5"
+                                                        , Accessibility.Aria.hidden True
+                                                        ]
+                                                    , span
+                                                        [ class "mr-1" ]
+                                                        [ text I18n.filteringByTag ]
+                                                    , span []
+                                                        [ text " \""
+                                                        , Tag.view model.common.enableMathSupport [] tag
+                                                        , text "\""
+                                                        ]
+                                                    ]
+                                            )
+                                    )
+                                    model.searchDialog.results
+                                , viewConfirmDeleteModal
+                                    model.common.editability
+                                    model.confirmDeleteId
+                                    model.deleting
+                                , viewSingleItemModalDialog
+                                    model
+                                    { enableMathSupport = model.common.enableMathSupport
+                                    , editable = Editability.editing model.common.editability
+                                    , tabbable = noModalDialogShown_
+                                    , enableLastUpdatedDates = Glossary.enableLastUpdatedDates glossary
+                                    }
+                                    filterByTag
+                                    combinedIndexedGlossaryItems
+                                  <|
+                                    case ( model.layout, model.common.maybeId ) of
+                                        ( ShowSingleItem, Just id ) ->
+                                            Just id
+
+                                        _ ->
+                                            Nothing
                                 ]
                             , Html.footer
                                 []
