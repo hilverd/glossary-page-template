@@ -68,14 +68,6 @@
     @apply font-mono whitespace-pre-wrap mb-5;
   }
 
-  #glossary-page-tags > p > button {
-    @apply rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-2 py-1 text-gray-700 dark:text-gray-200 shadow-sm cursor-default mr-2 mb-2;
-  }
-
-  div#glossary-page-container:not([data-markdown-rendered="true"]) #glossary-page-tags > p > button {
-    @apply font-mono whitespace-pre-wrap;
-  }
-
   article#glossary-page-items dl {
     @apply grid print:block print:space-y-5 gap-5;
   }
@@ -170,6 +162,14 @@
 
   article#glossary-page-items dl dd.related-terms {
     @apply print:mt-2;
+  }
+
+  #glossary-page-tags > p > button {
+    @apply rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-2 py-1 text-gray-700 dark:text-gray-200 shadow-sm cursor-default mr-2 mb-2;
+  }
+
+  div#glossary-page-container:not([data-markdown-rendered="true"]) #glossary-page-tags > p > button {
+    @apply font-mono whitespace-pre-wrap;
   }
 
   a {
