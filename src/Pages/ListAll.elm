@@ -1695,7 +1695,7 @@ backToTopLinkVisibilityCounter backToTopLinkVisibility =
 viewBackToTopLink : { staticSidebar : Bool, visibility : BackToTopLinkVisibility } -> Html Msg
 viewBackToTopLink { staticSidebar, visibility } =
     div
-        [ class "z-50 fixed bottom-0 right-0 p-4"
+        [ class "z-50 fixed bottom-0 right-0 p-4 print:hidden"
         , class "hidden"
             |> Extras.HtmlAttribute.showIf
                 (case visibility of
