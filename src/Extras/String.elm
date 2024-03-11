@@ -1,14 +1,11 @@
-module Extras.String exposing
-    ( escapeForMarkdown, preserveOnlyAlphaNumChars, emDash, enDash, isRelativeUrl
-    , firstAlphanumericCharacter
-    )
+module Extras.String exposing (escapeForMarkdown, firstAlphanumericCharacter, preserveOnlyAlphanumChars, emDash, enDash, isRelativeUrl)
 
 {-| Extra functionality for strings.
 
 
 # Strings
 
-@docs escapeForMarkdown, firstAlphaNumericCharacter, preserveOnlyAlphaNumChars, emDash, enDash, isRelativeUrl
+@docs escapeForMarkdown, firstAlphanumericCharacter, preserveOnlyAlphanumChars, emDash, enDash, isRelativeUrl
 
 -}
 
@@ -68,8 +65,8 @@ nonAlphanumericCharacterRegex =
 
 {-| Strip out any characters that aren't alphanumeric.
 -}
-preserveOnlyAlphaNumChars : String -> String
-preserveOnlyAlphaNumChars =
+preserveOnlyAlphanumChars : String -> String
+preserveOnlyAlphanumChars =
     Regex.replace nonAlphanumericCharacterRegex (always "")
 
 

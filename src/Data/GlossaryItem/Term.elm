@@ -212,13 +212,13 @@ compareAlphabetically term1 term2 =
                 (term1
                     |> inlineText
                     |> String.Normalize.removeDiacritics
-                    |> Extras.String.preserveOnlyAlphaNumChars
+                    |> Extras.String.preserveOnlyAlphanumChars
                     |> String.toUpper
                 )
                 (term2
                     |> inlineText
                     |> String.Normalize.removeDiacritics
-                    |> Extras.String.preserveOnlyAlphaNumChars
+                    |> Extras.String.preserveOnlyAlphanumChars
                     |> String.toUpper
                 )
 

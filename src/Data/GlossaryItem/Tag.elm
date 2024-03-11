@@ -99,13 +99,13 @@ compareAlphabetically tag1 tag2 =
         (tag1
             |> inlineText
             |> String.Normalize.removeDiacritics
-            |> Extras.String.preserveOnlyAlphaNumChars
+            |> Extras.String.preserveOnlyAlphanumChars
             |> String.toUpper
         )
         (tag2
             |> inlineText
             |> String.Normalize.removeDiacritics
-            |> Extras.String.preserveOnlyAlphaNumChars
+            |> Extras.String.preserveOnlyAlphanumChars
             |> String.toUpper
         )
 
