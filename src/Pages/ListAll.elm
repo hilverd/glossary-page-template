@@ -76,6 +76,7 @@ import Extras.Url exposing (fragmentOnly)
 import Html
 import Html.Attributes exposing (class, for, href, id, readonly)
 import Html.Events
+import Html.Keyed
 import Html.Lazy
 import Http
 import Icons
@@ -1207,8 +1208,7 @@ viewGlossaryItem :
 viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle, noModalDialogShown_ } maybeId tagBeingFilteredBy itemWithPreviousAndNext =
     Extras.Html.showMaybe
         (\( id, _ ) ->
-            Html.Lazy.lazy5
-                Components.GlossaryItemCard.view
+            Components.GlossaryItemCard.view
                 { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable, enableLastUpdatedDates = enableLastUpdatedDates }
                 (Components.GlossaryItemCard.Normal
                     { tabbable = tabbable
@@ -1543,6 +1543,12 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
                 filterByTag
                 { previous = Nothing, item = Just indexedItem, next = Nothing }
 
+        viewIndexedItemKeyed : ( GlossaryItemId, GlossaryItemForHtml ) -> ( String, Html Msg )
+        viewIndexedItemKeyed (( _, item ) as indexedItem) =
+            ( GlossaryItemForHtml.disambiguatedPreferredTermIdString item
+            , Html.Lazy.lazy viewIndexedItem indexedItem
+            )
+
         totalNumberOfItems : Int
         totalNumberOfItems =
             List.length combinedIndexedGlossaryItems
@@ -1596,9 +1602,9 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
                 orderItemsFocusedOnTerm
                 queryParameters
                 mostRecentRawTermForOrderingItemsFocusedOn
-        , Html.dl
+        , Html.Keyed.node "dl"
             [ class "mt-4" ]
-            (List.map viewIndexedItem indexedGlossaryItems)
+            (List.map viewIndexedItemKeyed indexedGlossaryItems)
         , Extras.Html.showIf
             ((not <| List.isEmpty indexedGlossaryItems)
                 && (not <| List.isEmpty otherIndexedGlossaryItems)
@@ -1608,9 +1614,9 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
                 [ class "my-10" ]
                 I18n.otherItems
         , Extras.Html.showIf (not <| List.isEmpty otherIndexedGlossaryItems) <|
-            Html.dl
+            Html.Keyed.node "dl"
                 []
-                (List.map viewIndexedItem otherIndexedGlossaryItems)
+                (List.map viewIndexedItemKeyed otherIndexedGlossaryItems)
         ]
 
 
