@@ -181,7 +181,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                         if editable then
                             div
                                 [ class "flex flex-col justify-items-end"
-                                , Extras.HtmlAttribute.showIf hasFocus <| class "outline-offset-2 outline-4 outline-dashed outline-yellow-500 dark:outline-pink-900"
+                                , Extras.HtmlAttribute.showIf hasFocus <| class "outline-offset-2 outline-4 print:outline-none outline-dashed outline-yellow-500 dark:outline-pink-900"
                                 , id <| ElementIds.glossaryItemDiv index
                                 ]
                                 [ div
@@ -288,7 +288,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                         else
                             div
                                 [ class "flex flex-col justify-between"
-                                , Extras.HtmlAttribute.showIf hasFocus <| class "outline-offset-2 outline-4 outline-dashed outline-yellow-500 dark:outline-pink-900"
+                                , Extras.HtmlAttribute.showIf hasFocus <| class "outline-offset-2 outline-4  print:outline-none outline-dashed outline-yellow-500 dark:outline-pink-900"
                                 , id <| ElementIds.glossaryItemDiv index
                                 ]
                                 [ div
@@ -568,7 +568,10 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term 
     let
         viewTerm =
             if isPreferred then
-                Term.view enableMathSupport [] term
+                Term.view
+                    enableMathSupport
+                    [ class "font-semibold not-italic" ]
+                    term
 
             else
                 span
@@ -576,7 +579,7 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term 
                     [ Icons.cornerLeftUp
                         [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-1 mr-1.5 text-gray-400 dark:text-gray-400 print:hidden"
                         ]
-                    , Term.view enableMathSupport [ class "font-normal" ] term
+                    , Term.view enableMathSupport [ class "font-normal not-italic" ] term
                     ]
     in
     div
