@@ -181,7 +181,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                         if editable then
                             div
                                 [ class "flex flex-col justify-items-end"
-                                , Extras.HtmlAttribute.showIf hasFocus <| class "outline-offset-2 outline-4 outline-dashed outline-yellow-500 dark:outline-pink-900"
+                                , Extras.HtmlAttribute.showIf hasFocus <| class "print:outline-none outline-offset-2 outline-4 outline-dashed outline-yellow-500 dark:outline-pink-900"
                                 , id <| ElementIds.glossaryItemDiv index
                                 ]
                                 [ div
@@ -288,7 +288,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                         else
                             div
                                 [ class "flex flex-col justify-between"
-                                , Extras.HtmlAttribute.showIf hasFocus <| class "outline-offset-2 outline-4 outline-dashed outline-yellow-500 dark:outline-pink-900"
+                                , Extras.HtmlAttribute.showIf hasFocus <| class "print:outline-none outline-offset-2 outline-4 outline-dashed outline-yellow-500 dark:outline-pink-900"
                                 , id <| ElementIds.glossaryItemDiv index
                                 ]
                                 [ div
