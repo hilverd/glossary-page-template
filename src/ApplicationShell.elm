@@ -202,13 +202,12 @@ init flags url key =
             , editability = editability
             , enableMathSupport = katexIsAvailable
             , queryParameters = queryParameters
-            , itemWithFocus = itemWithFocus
             , fragment = maybeFragment
             , glossary = glossary
             }
 
         ( listAllModel, listAllCmd ) =
-            Pages.ListAll.init common
+            Pages.ListAll.init common itemWithFocus
     in
     ( { key = key, page = ListAll listAllModel }
     , Cmd.map ListAllMsg listAllCmd
@@ -234,8 +233,8 @@ type Msg
 withoutInternal : Msg -> PageMsg ()
 withoutInternal msg =
     case msg of
-        ListAllMsg (NavigateToListAll commonModel) ->
-            PageMsg.NavigateToListAll commonModel
+        ListAllMsg (NavigateToListAll commonModel itemWithFocus) ->
+            PageMsg.NavigateToListAll commonModel itemWithFocus
 
         ListAllMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
@@ -249,8 +248,8 @@ withoutInternal msg =
         ListAllMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
-        CreateOrEditMsg (NavigateToListAll commonModel) ->
-            PageMsg.NavigateToListAll commonModel
+        CreateOrEditMsg (NavigateToListAll commonModel itemWithFocus) ->
+            PageMsg.NavigateToListAll commonModel itemWithFocus
 
         CreateOrEditMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
@@ -264,8 +263,8 @@ withoutInternal msg =
         CreateOrEditMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
-        EditTitleAndAboutMsg (NavigateToListAll commonModel) ->
-            PageMsg.NavigateToListAll commonModel
+        EditTitleAndAboutMsg (NavigateToListAll commonModel itemWithFocus) ->
+            PageMsg.NavigateToListAll commonModel itemWithFocus
 
         EditTitleAndAboutMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
@@ -279,8 +278,8 @@ withoutInternal msg =
         EditTitleAndAboutMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
-        ManageTagsMsg (NavigateToListAll commonModel) ->
-            PageMsg.NavigateToListAll commonModel
+        ManageTagsMsg (NavigateToListAll commonModel itemWithFocus) ->
+            PageMsg.NavigateToListAll commonModel itemWithFocus
 
         ManageTagsMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
@@ -358,23 +357,25 @@ update msg model =
                         common1 =
                             { common0
                                 | queryParameters = queryParameters
-                                , itemWithFocus = itemWithFocus
                                 , fragment = maybeFragment
                             }
 
                         listAllModel1 : Pages.ListAll.Model
                         listAllModel1 =
-                            { listAllModel | common = common1 }
+                            { listAllModel
+                                | common = common1
+                                , itemWithFocus = itemWithFocus
+                            }
                     in
                     ( { model | page = ListAll listAllModel1 }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
 
-        ( _, NavigateToListAll commonModel, _ ) ->
+        ( _, NavigateToListAll commonModel itemWithFocus, _ ) ->
             let
                 ( listAllModel, listAllCmd ) =
-                    Pages.ListAll.init commonModel
+                    Pages.ListAll.init commonModel itemWithFocus
             in
             ( { model | page = ListAll listAllModel }
             , Cmd.map ListAllMsg listAllCmd

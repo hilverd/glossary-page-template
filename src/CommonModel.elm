@@ -3,7 +3,6 @@ module CommonModel exposing (CommonModel, relativeUrl)
 import Browser.Navigation exposing (Key)
 import Data.Editability exposing (Editability)
 import Data.Glossary exposing (Glossary)
-import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.Theme exposing (Theme)
 import QueryParameters exposing (QueryParameters)
 import Url exposing (Url)
@@ -18,7 +17,6 @@ type alias CommonModel =
     , editability : Editability
     , enableMathSupport : Bool
     , queryParameters : QueryParameters
-    , itemWithFocus : Maybe GlossaryItemId
     , fragment : Maybe String
     , glossary : Result String Glossary
     }

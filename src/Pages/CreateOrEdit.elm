@@ -398,10 +398,8 @@ update msg model =
                                                 model.common
                                         in
                                         PageMsg.NavigateToListAll
-                                            { common0
-                                                | itemWithFocus = itemToGiveFocus
-                                                , glossary = Ok updatedGlossary
-                                            }
+                                            { common0 | glossary = Ok updatedGlossary }
+                                            itemToGiveFocus
                                     )
                         in
                         ( { model | saving = saving }
@@ -1022,7 +1020,7 @@ viewCreateFormFooter model =
             [ Components.Button.white
                 (saving /= SavingInProgress)
                 [ Html.Events.onClick <|
-                    PageMsg.NavigateToListAll common
+                    PageMsg.NavigateToListAll common model.itemBeingEdited
                 ]
                 [ text I18n.cancel ]
             , Components.Button.primary

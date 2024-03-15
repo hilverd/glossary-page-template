@@ -124,6 +124,7 @@ type alias Model =
     , exportDropdownMenu : Components.DropdownMenu.Model
     , searchDialog : SearchDialog
     , layout : Layout
+    , itemWithFocus : Maybe GlossaryItemId
     , confirmDeleteId : Maybe GlossaryItemId
     , deleting : Saving
     , savingSettings : Saving
@@ -180,12 +181,13 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init : CommonModel -> ( Model, Cmd Msg )
-init commonModel =
+init : CommonModel -> Maybe GlossaryItemId -> ( Model, Cmd Msg )
+init commonModel itemWithFocus =
     ( { common = commonModel
       , menuForMobileVisibility = GradualVisibility.Invisible
       , backToTopLinkVisibility = Invisible 0
       , layout = ShowAllItems
+      , itemWithFocus = itemWithFocus
       , confirmDeleteId = Nothing
       , themeDropdownMenu =
             Components.DropdownMenu.init
@@ -214,7 +216,7 @@ init commonModel =
                     Nothing
       , resultOfAttemptingToCopyEditorCommandToClipboard = Nothing
       }
-    , case commonModel.itemWithFocus of
+    , case itemWithFocus of
         Just id ->
             scrollGlossaryItemIntoView id
 
@@ -432,13 +434,9 @@ update msg model =
                 ( model, Cmd.none )
 
         JumpToItem itemId ->
-            let
-                common0 =
-                    model.common
-            in
             ( { model
                 | menuForMobileVisibility = GradualVisibility.Disappearing
-                , common = { common0 | itemWithFocus = Just itemId }
+                , itemWithFocus = Just itemId
               }
             , Cmd.batch
                 [ Process.sleep 100 |> Task.perform (always <| PageMsg.Internal CompleteHidingMenuForMobile)
@@ -448,13 +446,9 @@ update msg model =
             )
 
         ChangeLayoutToShowSingle index ->
-            let
-                common0 =
-                    model.common
-            in
             ( { model
-                | common = { common0 | itemWithFocus = Just index }
-                , layout = ShowSingleItem
+                | layout = ShowSingleItem
+                , itemWithFocus = Just index
               }
             , preventBackgroundScrolling ()
             )
@@ -467,16 +461,7 @@ update msg model =
                             glossary
                                 |> Glossary.items
                                 |> GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm (Term.raw relatedTerm)
-                                |> Maybe.map
-                                    (\index ->
-                                        let
-                                            common0 =
-                                                model.common
-                                        in
-                                        { model
-                                            | common = { common0 | itemWithFocus = Just index }
-                                        }
-                                    )
+                                |> Maybe.map (\index -> { model | itemWithFocus = Just index })
                                 |> Maybe.withDefault model
 
                         _ ->
@@ -488,7 +473,7 @@ update msg model =
             ( { model | layout = ShowAllItems }
             , Cmd.batch
                 [ allowBackgroundScrolling ()
-                , model.common.itemWithFocus
+                , model.itemWithFocus
                     |> Maybe.map (ElementIds.glossaryItemDiv >> scrollElementIntoView)
                     |> Maybe.withDefault Cmd.none
                 ]
@@ -548,11 +533,8 @@ update msg model =
                         ]
             in
             ( { model
-                | common =
-                    { common
-                        | itemWithFocus = Nothing
-                        , glossary = Ok <| updatedGlossary
-                    }
+                | common = { common | glossary = Ok <| updatedGlossary }
+                , itemWithFocus = Nothing
                 , confirmDeleteId = Nothing
                 , deleting = NotCurrentlySaving
                 , savingSettings = NotCurrentlySaving
@@ -692,10 +674,8 @@ update msg model =
                                             model.common
                                     in
                                     PageMsg.NavigateToListAll
-                                        { common0
-                                            | itemWithFocus = itemWithFocus
-                                            , glossary = Ok updatedGlossary
-                                        }
+                                        { common0 | glossary = Ok updatedGlossary }
+                                        itemWithFocus
                                 )
                     in
                     ( { model
@@ -730,10 +710,8 @@ update msg model =
                                             model.common
                                     in
                                     PageMsg.NavigateToListAll
-                                        { common0
-                                            | itemWithFocus = itemWithFocus
-                                            , glossary = Ok updatedGlossary
-                                        }
+                                        { common0 | glossary = Ok updatedGlossary }
+                                        itemWithFocus
                                 )
                     in
                     ( { model
@@ -768,10 +746,8 @@ update msg model =
                                             model.common
                                     in
                                     PageMsg.NavigateToListAll
-                                        { common0
-                                            | itemWithFocus = itemWithFocus
-                                            , glossary = Ok updatedGlossary
-                                        }
+                                        { common0 | glossary = Ok updatedGlossary }
+                                        itemWithFocus
                                 )
                     in
                     ( { model
@@ -1303,7 +1279,7 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
                             , shownAsSingle = True
                             , noModalDialogShown_ = noModalDialogShown model
                             }
-                            model.common.itemWithFocus
+                            model.itemWithFocus
                             tagBeingFilteredBy
                             itemWithPreviousAndNext
                         ]
@@ -2275,7 +2251,7 @@ menuOrDialogShown model =
         MenuForMobileShown
 
     else if model.layout == ShowSingleItem then
-        model.common.itemWithFocus
+        model.itemWithFocus
             |> Maybe.map ViewSingleItemModalDialogShown
             |> Maybe.withDefault NoMenuOrDialogShown
 
@@ -2310,7 +2286,7 @@ pageTitle model glossary =
         glossaryTitle =
             glossary |> Glossary.title |> GlossaryTitle.inlineText
     in
-    case ( model.layout, model.common.itemWithFocus ) of
+    case ( model.layout, model.itemWithFocus ) of
         ( ShowSingleItem, Just id ) ->
             let
                 disambiguatedPreferredTerm =
@@ -2687,7 +2663,7 @@ view model =
                                             , filterByTagWithDescription_ = filterByTagWithDescription_
                                             }
                                             model.common.queryParameters
-                                            model.common.itemWithFocus
+                                            model.itemWithFocus
                                             model.mostRecentRawTermForOrderingItemsFocusedOn
                                             items
                                     , Html.Lazy.lazy5 Components.SearchDialog.view
@@ -2729,7 +2705,7 @@ view model =
                                         filterByTag
                                         combinedIndexedGlossaryItems
                                       <|
-                                        case ( model.layout, model.common.itemWithFocus ) of
+                                        case ( model.layout, model.itemWithFocus ) of
                                             ( ShowSingleItem, Just id ) ->
                                                 Just id
 
