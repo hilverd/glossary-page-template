@@ -1,7 +1,7 @@
 module Data.GlossaryItem exposing
     ( GlossaryItem
     , init
-    , preferredTerm, alternativeTerms, definition, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
+    , id, preferredTerm, alternativeTerms, definition, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
     )
 
 {-| An item in a glossary.
@@ -19,19 +19,21 @@ module Data.GlossaryItem exposing
 
 # Query
 
-@docs preferredTerm, alternativeTerms, definition, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
+@docs id, preferredTerm, alternativeTerms, definition, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
 
 -}
 
 import Data.GlossaryItem.Definition exposing (Definition)
 import Data.GlossaryItem.Term exposing (Term)
+import Data.GlossaryItemId exposing (GlossaryItemId)
 
 
 {-| A glossary item.
 -}
 type GlossaryItem
     = GlossaryItem
-        { preferredTerm : Term
+        { id : Maybe GlossaryItemId
+        , preferredTerm : Term
         , alternativeTerms : List Term
         , definition : Maybe Definition
         , needsUpdating : Bool
@@ -44,7 +46,8 @@ type GlossaryItem
 {-| Create a glossary item from its components.
 -}
 init :
-    Term
+    Maybe GlossaryItemId
+    -> Term
     -> List Term
     -> Maybe Definition
     -> Bool
@@ -52,9 +55,10 @@ init :
     -> Maybe String
     -> Maybe String
     -> GlossaryItem
-init preferredTerm_ alternativeTerms_ definition_ needsUpdating_ lastUpdatedDateAsIso8601_ lastUpdatedByName_ lastUpdatedByEmailAddress_ =
+init id_ preferredTerm_ alternativeTerms_ definition_ needsUpdating_ lastUpdatedDateAsIso8601_ lastUpdatedByName_ lastUpdatedByEmailAddress_ =
     GlossaryItem
-        { preferredTerm = preferredTerm_
+        { id = id_
+        , preferredTerm = preferredTerm_
         , alternativeTerms = alternativeTerms_
         , definition = definition_
         , needsUpdating = needsUpdating_
@@ -62,6 +66,13 @@ init preferredTerm_ alternativeTerms_ definition_ needsUpdating_ lastUpdatedDate
         , lastUpdatedByName = lastUpdatedByName_
         , lastUpdatedByEmailAddress = lastUpdatedByEmailAddress_
         }
+
+
+{-| The ID for this glossary item.
+-}
+id : GlossaryItem -> Maybe GlossaryItemId
+id (GlossaryItem item) =
+    item.id
 
 
 {-| The preferred term for this glossary item.

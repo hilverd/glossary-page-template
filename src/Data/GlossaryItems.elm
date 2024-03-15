@@ -249,6 +249,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                             glossaryItem : GlossaryItem
                             glossaryItem =
                                 GlossaryItem.init
+                                    Nothing
                                     (GlossaryItemForHtml.nonDisambiguatedPreferredTerm glossaryItemForHtml)
                                     (GlossaryItemForHtml.alternativeTerms glossaryItemForHtml)
                                     (GlossaryItemForHtml.definition glossaryItemForHtml)
