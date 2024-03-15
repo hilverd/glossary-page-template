@@ -469,8 +469,8 @@ fromGlossaryItemForHtml_ existingPreferredTerms allTags preferredTermsOfItemsLis
         |> validate
 
 
-toGlossaryItem : GlossaryItems -> GlossaryItemForm -> Maybe String -> GlossaryItemForHtml
-toGlossaryItem glossaryItems form dateTime =
+toGlossaryItem : GlossaryItems -> GlossaryItemForm -> Maybe GlossaryItemId -> Maybe String -> GlossaryItemForHtml
+toGlossaryItem glossaryItems form id dateTime =
     let
         termFieldToTerm : TermField -> Term
         termFieldToTerm termField =
@@ -559,6 +559,7 @@ toGlossaryItem glossaryItems form dateTime =
             dateTime
     in
     GlossaryItemForHtml.create
+        id
         preferredTerm
         alternativeTerms
         disambiguationTag

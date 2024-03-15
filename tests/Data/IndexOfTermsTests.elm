@@ -19,6 +19,7 @@ termFromBody body =
 glossaryItemForHtml : String -> GlossaryItemForHtml
 glossaryItemForHtml body =
     GlossaryItemForHtml.create
+        (GlossaryItemId.create body |> Just)
         (termFromBody body)
         []
         Nothing

@@ -5,6 +5,7 @@ import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Expect
 import Search
@@ -22,6 +23,7 @@ loadedGlossaryItems =
         one : GlossaryItemForHtml
         one =
             GlossaryItemForHtml.create
+                (GlossaryItemId.create "The term one" |> Just)
                 (termFromBody "The term one")
                 []
                 Nothing
@@ -36,6 +38,7 @@ loadedGlossaryItems =
         two : GlossaryItemForHtml
         two =
             GlossaryItemForHtml.create
+                (GlossaryItemId.create "Second the term" |> Just)
                 (termFromBody "Second the term")
                 []
                 Nothing
@@ -50,6 +53,7 @@ loadedGlossaryItems =
         three : GlossaryItemForHtml
         three =
             GlossaryItemForHtml.create
+                (GlossaryItemId.create "The term three" |> Just)
                 (termFromBody "The term three")
                 []
                 Nothing

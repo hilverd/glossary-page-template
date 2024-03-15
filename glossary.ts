@@ -65,6 +65,8 @@ if (containerElement) {
     }
 
     function glossaryItemFromDivElement(glossaryItemDivElement: HTMLElement): any {
+        const id: string | undefined = glossaryItemDivElement.dataset.id;
+
         const dtElements: HTMLElement[] = Array.prototype.slice.apply(glossaryItemDivElement.querySelectorAll('dt'));
         const preferredTermDtElement: HTMLElement | undefined = dtElements[0];
         const alternativeTermsDtElements: HTMLElement[] = dtElements.slice(1);
@@ -95,6 +97,7 @@ if (containerElement) {
         const lastUpdatedByEmailAddress: string | undefined = glossaryItemDivElement.dataset.lastUpdatedByEmailAddress;
 
         return {
+            id: id || self.crypto.randomUUID(),
             preferredTerm: glossaryItemTermFromDtElement(preferredTermDtElement),
             alternativeTerms: alternativeTermsDtElements.map(glossaryItemTermFromDtElement),
             disambiguationTag: hasDisambiguationTag ? tags[0] : null,
@@ -240,8 +243,8 @@ if (containerElement) {
             reflectThemeInClassList();
         });
 
-        app.ports.getCurrentDateTimeForSaving.subscribe(() => {
-            app.ports.receiveCurrentDateTimeForSaving.send(new Date().toISOString());
+        app.ports.getCurrentDateTimeAndNewIdForSaving.subscribe(() => {
+            app.ports.receiveCurrentDateTimeAndNewIdForSaving.send([new Date().toISOString(), self.crypto.randomUUID()]);
         });
 
         app.ports.copyEditorCommandToClipboard.subscribe((textToCopy: string) => {

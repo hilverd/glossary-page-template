@@ -97,7 +97,7 @@ type InternalMsg
     | MoveRelatedTermDown RelatedTermIndex
     | ToggleNeedsUpdating
     | Save
-    | ReceiveCurrentDateTimeForSaving String
+    | ReceiveCurrentDateTimeAndNewIdForSaving ( String, String )
     | FailedToSave Http.Error
 
 
@@ -184,10 +184,10 @@ dropdownMenusWithMoreOptionsForRelatedTermsForForm form =
 -- PORTS
 
 
-port getCurrentDateTimeForSaving : () -> Cmd msg
+port getCurrentDateTimeAndNewIdForSaving : () -> Cmd msg
 
 
-port receiveCurrentDateTimeForSaving : (String -> msg) -> Sub msg
+port receiveCurrentDateTimeAndNewIdForSaving : (( String, String ) -> msg) -> Sub msg
 
 
 
@@ -356,9 +356,9 @@ update msg model =
             )
 
         Save ->
-            ( model, getCurrentDateTimeForSaving () )
+            ( model, getCurrentDateTimeAndNewIdForSaving () )
 
-        ReceiveCurrentDateTimeForSaving dateTime ->
+        ReceiveCurrentDateTimeAndNewIdForSaving ( dateTime, newGlossaryItemIdString ) ->
             case model.common.glossary of
                 Ok glossary ->
                     if Form.hasValidationErrors model.form then
@@ -371,9 +371,17 @@ update msg model =
 
                     else
                         let
+                            newGlossaryItemId : GlossaryItemId
+                            newGlossaryItemId =
+                                GlossaryItemId.create newGlossaryItemIdString
+
                             newOrUpdatedGlossaryItem : GlossaryItemForHtml
                             newOrUpdatedGlossaryItem =
-                                Form.toGlossaryItem (Glossary.items glossary) model.form <| Just dateTime
+                                Form.toGlossaryItem
+                                    (Glossary.items glossary)
+                                    model.form
+                                    (model.itemBeingEdited |> Maybe.withDefault newGlossaryItemId |> Just)
+                                    (Just dateTime)
 
                             changelist =
                                 case model.itemBeingEdited of
@@ -1073,7 +1081,7 @@ view model =
 
                 newOrUpdatedGlossaryItem : GlossaryItemForHtml
                 newOrUpdatedGlossaryItem =
-                    Form.toGlossaryItem items model.form Nothing
+                    Form.toGlossaryItem items model.form (Just <| GlossaryItemId.create "") Nothing
             in
             { title = glossary |> Glossary.title |> GlossaryTitle.inlineText
             , body =
@@ -1176,7 +1184,8 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ receiveCurrentDateTimeForSaving ReceiveCurrentDateTimeForSaving
+        [ ReceiveCurrentDateTimeAndNewIdForSaving
+            |> receiveCurrentDateTimeAndNewIdForSaving
             |> Sub.map PageMsg.Internal
         , model.dropdownMenusWithMoreOptionsForRelatedTerms
             |> Dict.toList

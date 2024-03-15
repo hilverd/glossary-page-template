@@ -68,7 +68,6 @@ type GlossaryItems
         , orderedAlphabetically : List GlossaryItemId
         , orderedByMostMentionedFirst : List GlossaryItemId
         , orderedFocusedOn : Maybe ( GlossaryItemId, ( List GlossaryItemId, List GlossaryItemId ) )
-        , nextItemId : GlossaryItemId
         , nextTagId : TagId
         }
 
@@ -205,7 +204,6 @@ empty =
         , orderedAlphabetically = []
         , orderedByMostMentionedFirst = []
         , orderedFocusedOn = Nothing
-        , nextItemId = GlossaryItemId.create "0"
         , nextTagId = TagId.create 0
         }
 
@@ -249,7 +247,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                             glossaryItem : GlossaryItem
                             glossaryItem =
                                 GlossaryItem.init
-                                    Nothing
+                                    (GlossaryItemForHtml.id glossaryItemForHtml)
                                     (GlossaryItemForHtml.nonDisambiguatedPreferredTerm glossaryItemForHtml)
                                     (GlossaryItemForHtml.alternativeTerms glossaryItemForHtml)
                                     (GlossaryItemForHtml.definition glossaryItemForHtml)
@@ -487,16 +485,6 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 orderedByMostMentionedFirst_ =
                     orderByMostMentionedFirst indexedGlossaryItemsForHtml
 
-                nextItemId : GlossaryItemId
-                nextItemId =
-                    itemById
-                        |> GlossaryItemIdDict.keys
-                        |> List.map (GlossaryItemId.toString >> String.toInt >> Maybe.withDefault 0)
-                        |> List.maximum
-                        |> Maybe.map ((+) 1)
-                        |> Maybe.withDefault 0
-                        |> (String.fromInt >> GlossaryItemId.create)
-
                 nextTagId : TagId
                 nextTagId =
                     tagById
@@ -520,7 +508,6 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 , orderedAlphabetically = orderedAlphabetically__
                 , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
                 , orderedFocusedOn = Nothing
-                , nextItemId = nextItemId
                 , nextTagId = nextTagId
                 }
         )
@@ -575,12 +562,8 @@ applyTagsChanges tagsChanges glossaryItems =
 {-| Insert an item, returning the ID of the new item.
 -}
 insert : GlossaryItemForHtml -> GlossaryItems -> Result String ( GlossaryItemId, GlossaryItems )
-insert item ((GlossaryItems items) as glossaryItems) =
+insert item glossaryItems =
     let
-        nextItemId : GlossaryItemId
-        nextItemId =
-            items.nextItemId
-
         itemsAfterInserting : Result String GlossaryItems
         itemsAfterInserting =
             glossaryItems
@@ -592,15 +575,8 @@ insert item ((GlossaryItems items) as glossaryItems) =
         insertedItemId : GlossaryItemId
         insertedItemId =
             item
-                |> GlossaryItemForHtml.disambiguatedPreferredTerm
-                |> DisambiguatedTerm.toTerm
-                |> Term.raw
-                |> (\rawTerm ->
-                        itemsAfterInserting
-                            |> Result.toMaybe
-                            |> Maybe.andThen (itemIdFromRawDisambiguatedPreferredTerm rawTerm)
-                   )
-                |> Maybe.withDefault nextItemId
+                |> GlossaryItemForHtml.id
+                |> Maybe.withDefault (GlossaryItemId.create "TODO")
     in
     itemsAfterInserting
         |> Result.map (Tuple.pair insertedItemId)
@@ -689,6 +665,10 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItems items) as 
         |> Maybe.map
             (\item ->
                 let
+                    id : Maybe GlossaryItemId
+                    id =
+                        GlossaryItem.id item
+
                     preferredTerm : Term
                     preferredTerm =
                         GlossaryItem.preferredTerm item
@@ -739,6 +719,7 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItems items) as 
                         GlossaryItem.lastUpdatedByEmailAddress item
                 in
                 GlossaryItemForHtml.create
+                    id
                     preferredTerm
                     alternativeTerms
                     disambiguationTag

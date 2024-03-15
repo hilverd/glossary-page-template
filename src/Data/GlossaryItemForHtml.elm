@@ -1,7 +1,7 @@
 module Data.GlossaryItemForHtml exposing
     ( GlossaryItemForHtml
     , create, codec, setLastUpdatedBy
-    , disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, disambiguatedPreferredTermIdString, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
+    , disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, disambiguatedPreferredTermIdString, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
     , toHtmlTree
     , disambiguatedTerm
     )
@@ -23,7 +23,7 @@ It is not the representation used by the editor UI when the application is runni
 
 # Query
 
-@docs disambiguatedPreferredTerm, nonDisambiguatedPreferredTerm, disambiguatedPreferredTermIdString, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
+@docs disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, disambiguatedPreferredTermIdString, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
 
 
 # Converting to HTML
@@ -43,6 +43,7 @@ import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (Disamb
 import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Extras.Url exposing (fragmentOnly)
 import Internationalisation as I18n
@@ -53,7 +54,8 @@ import List
 -}
 type GlossaryItemForHtml
     = GlossaryItemForHtml
-        { preferredTerm : Term
+        { id : Maybe GlossaryItemId
+        , preferredTerm : Term
         , alternativeTerms : List Term
         , disambiguationTag : Maybe Tag
         , normalTags : List Tag
@@ -69,7 +71,8 @@ type GlossaryItemForHtml
 {-| Create a glossary item from its parts.
 -}
 create :
-    Term
+    Maybe GlossaryItemId
+    -> Term
     -> List Term
     -> Maybe Tag
     -> List Tag
@@ -80,9 +83,10 @@ create :
     -> Maybe String
     -> Maybe String
     -> GlossaryItemForHtml
-create preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ definition_ relatedPreferredTerms_ needsUpdating_ lastUpdatedDateAsIso8601_ lastUpdatedByName_ lastUpdatedByEmailAddress_ =
+create id_ preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ definition_ relatedPreferredTerms_ needsUpdating_ lastUpdatedDateAsIso8601_ lastUpdatedByName_ lastUpdatedByEmailAddress_ =
     GlossaryItemForHtml
-        { preferredTerm = preferredTerm_
+        { id = id_
+        , preferredTerm = preferredTerm_
         , alternativeTerms = alternativeTerms_
         , disambiguationTag = disambiguationTag_
         , normalTags = normalTags_
@@ -101,6 +105,7 @@ codec : Codec GlossaryItemForHtml
 codec =
     Codec.object
         create
+        |> Codec.field "id" id (Codec.maybe GlossaryItemId.codec)
         |> Codec.field "preferredTerm" nonDisambiguatedPreferredTerm Term.codec
         |> Codec.field "alternativeTerms" alternativeTerms (Codec.list Term.codec)
         |> Codec.field "disambiguationTag" disambiguationTag (Codec.nullable Tag.codec)
@@ -140,6 +145,13 @@ disambiguatedPreferredTermIdString ((GlossaryItemForHtml item) as glossaryItemFo
         |> Maybe.map DisambiguatedTerm.toTerm
         |> Maybe.withDefault item.preferredTerm
         |> Term.id
+
+
+{-| The ID for this glossary item.
+-}
+id : GlossaryItemForHtml -> Maybe GlossaryItemId
+id (GlossaryItemForHtml item) =
+    item.id
 
 
 {-| The (non-disambiguated) preferred term for this glossary item.
@@ -394,7 +406,8 @@ toHtmlTree ((GlossaryItemForHtml item) as glossaryItemForHtml) =
     in
     HtmlTree.Node "div"
         True
-        [ HtmlTree.showAttributeMaybe "data-last-updated" identity item.lastUpdatedDateAsIso8601
+        [ HtmlTree.showAttributeMaybe "data-id" identity (Maybe.map GlossaryItemId.toString item.id)
+        , HtmlTree.showAttributeMaybe "data-last-updated" identity item.lastUpdatedDateAsIso8601
         , HtmlTree.showAttributeMaybe "data-last-updated-by-name" identity item.lastUpdatedByName
         , HtmlTree.showAttributeMaybe "data-last-updated-by-email-address" identity item.lastUpdatedByEmailAddress
         ]

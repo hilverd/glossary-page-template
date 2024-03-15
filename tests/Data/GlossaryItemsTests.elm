@@ -83,6 +83,7 @@ suite =
                         (Ok <|
                             Just <|
                                 GlossaryItemForHtml.create
+                                    (GlossaryItemId.create "Default (Computer Science)" |> Just)
                                     (Term.fromMarkdown "Default" False)
                                     [ Term.fromMarkdown "Preset" False
                                     , Term.fromMarkdown "Factory preset" False
@@ -128,6 +129,7 @@ suite =
                         (Ok <|
                             Just <|
                                 GlossaryItemForHtml.create
+                                    (GlossaryItemId.create "Default (Finance)" |> Just)
                                     (Term.fromMarkdown "Default" False)
                                     []
                                     Nothing
@@ -401,6 +403,7 @@ suite =
                     defaultComputerScienceItem_ : GlossaryItemForHtml
                     defaultComputerScienceItem_ =
                         GlossaryItemForHtml.create
+                            (GlossaryItemId.create "Default (Computer Science)" |> Just)
                             (Term.fromMarkdown "Default" False)
                             []
                             (Just computerScienceTag)
@@ -415,6 +418,7 @@ suite =
                     defaultFinanceItem_ : GlossaryItemForHtml
                     defaultFinanceItem_ =
                         GlossaryItemForHtml.create
+                            (GlossaryItemId.create "Default (Finance)" |> Just)
                             (Term.fromMarkdown "Default" False)
                             []
                             (Just financeTag)
@@ -442,6 +446,7 @@ suite =
                         (Ok
                             [ ( GlossaryItemId.create "0"
                               , GlossaryItemForHtml.create
+                                    (GlossaryItemId.create "Default (Computer Science)" |> Just)
                                     (Term.fromMarkdown "Default" False)
                                     []
                                     (Just computerScienceTag)
@@ -512,6 +517,7 @@ suite =
                     , ( computerScienceTag, computerScienceTagDescription )
                     ]
                     [ GlossaryItemForHtml.create
+                        (GlossaryItemId.create "Foo (Gardening)" |> Just)
                         (Term.fromMarkdown "Foo" False)
                         []
                         (Just gardeningTag)
@@ -528,6 +534,7 @@ suite =
                         (Ok <|
                             Just <|
                                 GlossaryItemForHtml.create
+                                    (GlossaryItemId.create "Foo (Gardening)" |> Just)
                                     (Term.fromMarkdown "Foo" False)
                                     []
                                     (Just gardeningTag)
@@ -582,6 +589,7 @@ suite =
                 GlossaryItems.fromList
                     [ ( financeTag, financeTagDescription ) ]
                     [ GlossaryItemForHtml.create
+                        (GlossaryItemId.create "Foo (Finance) 1" |> Just)
                         (Term.fromMarkdown "Foo" False)
                         []
                         (Just financeTag)
@@ -593,6 +601,7 @@ suite =
                         Nothing
                         Nothing
                     , GlossaryItemForHtml.create
+                        (GlossaryItemId.create "Foo (Finance) 2" |> Just)
                         (Term.fromMarkdown "Foo (Finance)" False)
                         []
                         Nothing
@@ -611,6 +620,7 @@ suite =
                 GlossaryItems.fromList
                     [ ( financeTag, financeTagDescription ) ]
                     [ GlossaryItemForHtml.create
+                        (GlossaryItemId.create "Foo (Finance)" |> Just)
                         (Term.fromMarkdown "Foo" False)
                         []
                         (Just financeTag)
@@ -622,6 +632,7 @@ suite =
                         Nothing
                         Nothing
                     , GlossaryItemForHtml.create
+                        (GlossaryItemId.create "Foo_(Finance)" |> Just)
                         (Term.fromMarkdown "Foo_(Finance)" False)
                         []
                         Nothing
