@@ -91,7 +91,7 @@ markdown (MarkdownTag { body }) =
     MarkdownFragment.raw body
 
 
-{-| Compares two tags for ordering them alphabetically.
+{-| Compare two tags for ordering them alphabetically.
 -}
 compareAlphabetically : Tag -> Tag -> Order
 compareAlphabetically tag1 tag2 =
