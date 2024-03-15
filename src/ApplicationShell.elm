@@ -118,8 +118,8 @@ init flags url key =
                 |> Decode.decodeValue (Codec.decoder Glossary.codec)
                 |> Result.mapError Decode.errorToString
 
-        maybeId : Maybe GlossaryItemId
-        maybeId =
+        itemWithFocus : Maybe GlossaryItemId
+        itemWithFocus =
             Maybe.map2
                 glossaryItemIdForFragment
                 maybeFragment
@@ -202,7 +202,7 @@ init flags url key =
             , editability = editability
             , enableMathSupport = katexIsAvailable
             , queryParameters = queryParameters
-            , maybeId = maybeId
+            , itemWithFocus = itemWithFocus
             , fragment = maybeFragment
             , glossary = glossary
             }
@@ -346,8 +346,8 @@ update msg model =
                         maybeFragment =
                             url.fragment
 
-                        maybeId : Maybe GlossaryItemId
-                        maybeId =
+                        itemWithFocus : Maybe GlossaryItemId
+                        itemWithFocus =
                             Maybe.map2
                                 glossaryItemIdForFragment
                                 maybeFragment
@@ -358,7 +358,7 @@ update msg model =
                         common1 =
                             { common0
                                 | queryParameters = queryParameters
-                                , maybeId = maybeId
+                                , itemWithFocus = itemWithFocus
                                 , fragment = maybeFragment
                             }
 
@@ -380,13 +380,13 @@ update msg model =
             , Cmd.map ListAllMsg listAllCmd
             )
 
-        ( _, NavigateToCreateOrEdit maybeGlossaryItemId, _ ) ->
+        ( _, NavigateToCreateOrEdit itemWithFocus, _ ) ->
             let
                 common0 =
                     commonModelForPage model.page
 
                 ( createOrEditModel, createOrEditCmd ) =
-                    Pages.CreateOrEdit.init { common0 | maybeId = maybeGlossaryItemId }
+                    Pages.CreateOrEdit.init { common0 | itemWithFocus = itemWithFocus }
             in
             ( { model | page = CreateOrEdit createOrEditModel }
             , Cmd.batch [ resetViewport, Cmd.map CreateOrEditMsg createOrEditCmd ]

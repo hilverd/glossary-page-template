@@ -132,7 +132,7 @@ init commonModel =
                                             itemForHtml
                                     )
                         )
-                        commonModel.maybeId
+                        commonModel.itemWithFocus
                         |> Maybe.withDefault emptyForm
             in
             ( { common = commonModel
@@ -142,7 +142,7 @@ init commonModel =
               , dropdownMenusWithMoreOptionsForRelatedTerms =
                     dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
-            , if commonModel.maybeId == Nothing then
+            , if commonModel.itemWithFocus == Nothing then
                 0 |> TermIndex.fromInt |> giveFocusToTermInputField
 
               else
@@ -377,7 +377,7 @@ update msg model =
                                 model.common
 
                             changelist =
-                                case common.maybeId of
+                                case common.itemWithFocus of
                                     Just id ->
                                         GlossaryChangelist.create
                                             (Glossary.versionNumber glossary)
@@ -400,7 +400,7 @@ update msg model =
                                         in
                                         PageMsg.NavigateToListAll
                                             { common0
-                                                | maybeId = maybeGlossaryItemId
+                                                | itemWithFocus = maybeGlossaryItemId
                                                 , glossary = Ok updatedGlossary
                                             }
                                     )
@@ -1087,7 +1087,7 @@ view model =
                         [ h1
                             [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
                             [ text <|
-                                if model.common.maybeId == Nothing then
+                                if model.common.itemWithFocus == Nothing then
                                     I18n.createANewGlossaryItemCapitalised
 
                                 else

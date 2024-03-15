@@ -160,14 +160,14 @@ update msg model =
                                     glossary
                                     changelist
                                     (PageMsg.Internal << FailedToSave)
-                                    (\( maybeGlossaryItemId, updatedGlossary ) ->
+                                    (\( _, updatedGlossary ) ->
                                         let
                                             common0 =
                                                 model.common
                                         in
                                         PageMsg.NavigateToListAll
                                             { common0
-                                                | maybeId = maybeGlossaryItemId
+                                                | itemWithFocus = Nothing
                                                 , glossary = Ok updatedGlossary
                                             }
                                     )

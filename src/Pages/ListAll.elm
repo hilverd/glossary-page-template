@@ -214,7 +214,7 @@ init commonModel =
                     Nothing
       , resultOfAttemptingToCopyEditorCommandToClipboard = Nothing
       }
-    , case commonModel.maybeId of
+    , case commonModel.itemWithFocus of
         Just id ->
             scrollGlossaryItemIntoView id
 
@@ -438,7 +438,7 @@ update msg model =
             in
             ( { model
                 | menuForMobileVisibility = GradualVisibility.Disappearing
-                , common = { common0 | maybeId = Just itemId }
+                , common = { common0 | itemWithFocus = Just itemId }
               }
             , Cmd.batch
                 [ Process.sleep 100 |> Task.perform (always <| PageMsg.Internal CompleteHidingMenuForMobile)
@@ -453,7 +453,7 @@ update msg model =
                     model.common
             in
             ( { model
-                | common = { common0 | maybeId = Just index }
+                | common = { common0 | itemWithFocus = Just index }
                 , layout = ShowSingleItem
               }
             , preventBackgroundScrolling ()
@@ -474,7 +474,7 @@ update msg model =
                                                 model.common
                                         in
                                         { model
-                                            | common = { common0 | maybeId = Just index }
+                                            | common = { common0 | itemWithFocus = Just index }
                                         }
                                     )
                                 |> Maybe.withDefault model
@@ -488,7 +488,7 @@ update msg model =
             ( { model | layout = ShowAllItems }
             , Cmd.batch
                 [ allowBackgroundScrolling ()
-                , model.common.maybeId
+                , model.common.itemWithFocus
                     |> Maybe.map (ElementIds.glossaryItemDiv >> scrollElementIntoView)
                     |> Maybe.withDefault Cmd.none
                 ]
@@ -682,14 +682,14 @@ update msg model =
                                 glossary
                                 changelist
                                 (PageMsg.Internal << FailedToChangeSettings)
-                                (\( maybeGlossaryItemId, updatedGlossary ) ->
+                                (\( itemWithFocus, updatedGlossary ) ->
                                     let
                                         common0 =
                                             model.common
                                     in
                                     PageMsg.NavigateToListAll
                                         { common0
-                                            | maybeId = maybeGlossaryItemId
+                                            | itemWithFocus = itemWithFocus
                                             , glossary = Ok updatedGlossary
                                         }
                                 )
@@ -720,14 +720,14 @@ update msg model =
                                 glossary
                                 changelist
                                 (PageMsg.Internal << FailedToChangeSettings)
-                                (\( maybeGlossaryItemId, updatedGlossary ) ->
+                                (\( itemWithFocus, updatedGlossary ) ->
                                     let
                                         common0 =
                                             model.common
                                     in
                                     PageMsg.NavigateToListAll
                                         { common0
-                                            | maybeId = maybeGlossaryItemId
+                                            | itemWithFocus = itemWithFocus
                                             , glossary = Ok updatedGlossary
                                         }
                                 )
@@ -758,14 +758,14 @@ update msg model =
                                 glossary
                                 changelist
                                 (PageMsg.Internal << FailedToChangeSettings)
-                                (\( maybeGlossaryItemId, updatedGlossary ) ->
+                                (\( itemWithFocus, updatedGlossary ) ->
                                     let
                                         common0 =
                                             model.common
                                     in
                                     PageMsg.NavigateToListAll
                                         { common0
-                                            | maybeId = maybeGlossaryItemId
+                                            | itemWithFocus = itemWithFocus
                                             , glossary = Ok updatedGlossary
                                         }
                                 )
@@ -1205,7 +1205,7 @@ viewGlossaryItem :
     -> Maybe Tag
     -> GlossaryItemWithPreviousAndNext
     -> Html Msg
-viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle, noModalDialogShown_ } maybeId tagBeingFilteredBy itemWithPreviousAndNext =
+viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle, noModalDialogShown_ } itemWithFocus tagBeingFilteredBy itemWithPreviousAndNext =
     Extras.Html.showMaybe
         (\( id, _ ) ->
             Components.GlossaryItemCard.view
@@ -1224,7 +1224,7 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
                 )
                 tagBeingFilteredBy
                 (if noModalDialogShown_ then
-                    maybeId
+                    itemWithFocus
 
                  else
                     Nothing
@@ -1299,7 +1299,7 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
                             , shownAsSingle = True
                             , noModalDialogShown_ = noModalDialogShown model
                             }
-                            model.common.maybeId
+                            model.common.itemWithFocus
                             tagBeingFilteredBy
                             itemWithPreviousAndNext
                         ]
@@ -1319,7 +1319,7 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
 
 
 viewConfirmDeleteModal : Editability -> Maybe GlossaryItemId -> Saving -> Html Msg
-viewConfirmDeleteModal editability maybeIdOfItemToDelete deleting =
+viewConfirmDeleteModal editability itemToDelete deleting =
     Components.ModalDialog.view
         (PageMsg.Internal CancelDelete)
         ElementIds.confirmDeleteModalTitle
@@ -1374,7 +1374,7 @@ viewConfirmDeleteModal editability maybeIdOfItemToDelete deleting =
                     , Extras.HtmlAttribute.showIf (deleting /= SavingInProgress) <| class "hover:bg-red-700 dark:hover:bg-red-600"
                     , Extras.HtmlAttribute.showMaybe
                         (Html.Events.onClick << PageMsg.Internal << Delete)
-                        maybeIdOfItemToDelete
+                        itemToDelete
                     ]
                     [ text I18n.delete ]
                 , Components.Button.white
@@ -1393,7 +1393,7 @@ viewConfirmDeleteModal editability maybeIdOfItemToDelete deleting =
                 ]
             ]
         )
-        (maybeIdOfItemToDelete /= Nothing)
+        (itemToDelete /= Nothing)
 
 
 viewMakeChangesButton : Editability -> Bool -> Html Msg
@@ -1504,7 +1504,7 @@ viewCards :
     -> GlossaryItems
     -> ( List ( GlossaryItemId, GlossaryItemForHtml ), List ( GlossaryItemId, GlossaryItemForHtml ) )
     -> Html Msg
-viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates, noModalDialogShown_, editing } { filterByTagId_, tags, filterByTagWithDescription_ } queryParameters maybeId mostRecentRawTermForOrderingItemsFocusedOn glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates, noModalDialogShown_, editing } { filterByTagId_, tags, filterByTagWithDescription_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
         filterByTag : Maybe Tag
         filterByTag =
@@ -1539,7 +1539,7 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
                 , shownAsSingle = False
                 , noModalDialogShown_ = noModalDialogShown_
                 }
-                maybeId
+                itemWithFocus
                 filterByTag
                 { previous = Nothing, item = Just indexedItem, next = Nothing }
 
@@ -2271,7 +2271,7 @@ menuOrDialogShown model =
         MenuForMobileShown
 
     else if model.layout == ShowSingleItem then
-        model.common.maybeId
+        model.common.itemWithFocus
             |> Maybe.map ViewSingleItemModalDialogShown
             |> Maybe.withDefault NoMenuOrDialogShown
 
@@ -2306,7 +2306,7 @@ pageTitle model glossary =
         glossaryTitle =
             glossary |> Glossary.title |> GlossaryTitle.inlineText
     in
-    case ( model.layout, model.common.maybeId ) of
+    case ( model.layout, model.common.itemWithFocus ) of
         ( ShowSingleItem, Just id ) ->
             let
                 disambiguatedPreferredTerm =
@@ -2683,7 +2683,7 @@ view model =
                                             , filterByTagWithDescription_ = filterByTagWithDescription_
                                             }
                                             model.common.queryParameters
-                                            model.common.maybeId
+                                            model.common.itemWithFocus
                                             model.mostRecentRawTermForOrderingItemsFocusedOn
                                             items
                                     , Html.Lazy.lazy5 Components.SearchDialog.view
@@ -2725,7 +2725,7 @@ view model =
                                         filterByTag
                                         combinedIndexedGlossaryItems
                                       <|
-                                        case ( model.layout, model.common.maybeId ) of
+                                        case ( model.layout, model.common.itemWithFocus ) of
                                             ( ShowSingleItem, Just id ) ->
                                                 Just id
 

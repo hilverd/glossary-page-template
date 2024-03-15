@@ -49,13 +49,13 @@ view :
     -> Maybe GlossaryItemId
     -> GlossaryItemWithPreviousAndNext
     -> Html msg
-view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagBeingFilteredBy maybeId glossaryItemWithPreviousAndNext =
+view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagBeingFilteredBy itemWithFocus glossaryItemWithPreviousAndNext =
     Extras.Html.showMaybe
         (\( index, glossaryItem ) ->
             let
                 hasFocus : Bool
                 hasFocus =
-                    maybeId == Just index
+                    itemWithFocus == Just index
 
                 disambiguatedPreferredTerm : Term
                 disambiguatedPreferredTerm =

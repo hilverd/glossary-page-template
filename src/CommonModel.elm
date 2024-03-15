@@ -18,7 +18,7 @@ type alias CommonModel =
     , editability : Editability
     , enableMathSupport : Bool
     , queryParameters : QueryParameters
-    , maybeId : Maybe GlossaryItemId
+    , itemWithFocus : Maybe GlossaryItemId
     , fragment : Maybe String
     , glossary : Result String Glossary
     }
