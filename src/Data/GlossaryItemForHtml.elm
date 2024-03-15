@@ -54,7 +54,7 @@ import List
 -}
 type GlossaryItemForHtml
     = GlossaryItemForHtml
-        { id : Maybe GlossaryItemId
+        { id : GlossaryItemId
         , preferredTerm : Term
         , alternativeTerms : List Term
         , disambiguationTag : Maybe Tag
@@ -71,7 +71,7 @@ type GlossaryItemForHtml
 {-| Create a glossary item from its parts.
 -}
 create :
-    Maybe GlossaryItemId
+    GlossaryItemId
     -> Term
     -> List Term
     -> Maybe Tag
@@ -105,7 +105,7 @@ codec : Codec GlossaryItemForHtml
 codec =
     Codec.object
         create
-        |> Codec.field "id" id (Codec.maybe GlossaryItemId.codec)
+        |> Codec.field "id" id GlossaryItemId.codec
         |> Codec.field "preferredTerm" nonDisambiguatedPreferredTerm Term.codec
         |> Codec.field "alternativeTerms" alternativeTerms (Codec.list Term.codec)
         |> Codec.field "disambiguationTag" disambiguationTag (Codec.nullable Tag.codec)
@@ -149,7 +149,7 @@ disambiguatedPreferredTermIdString ((GlossaryItemForHtml item) as glossaryItemFo
 
 {-| The ID for this glossary item.
 -}
-id : GlossaryItemForHtml -> Maybe GlossaryItemId
+id : GlossaryItemForHtml -> GlossaryItemId
 id (GlossaryItemForHtml item) =
     item.id
 
@@ -406,7 +406,7 @@ toHtmlTree ((GlossaryItemForHtml item) as glossaryItemForHtml) =
     in
     HtmlTree.Node "div"
         True
-        [ HtmlTree.showAttributeMaybe "data-id" identity (Maybe.map GlossaryItemId.toString item.id)
+        [ HtmlTree.Attribute "data-id" <| GlossaryItemId.toString item.id
         , HtmlTree.showAttributeMaybe "data-last-updated" identity item.lastUpdatedDateAsIso8601
         , HtmlTree.showAttributeMaybe "data-last-updated-by-name" identity item.lastUpdatedByName
         , HtmlTree.showAttributeMaybe "data-last-updated-by-email-address" identity item.lastUpdatedByEmailAddress

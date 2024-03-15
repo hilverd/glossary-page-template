@@ -32,7 +32,7 @@ import Data.GlossaryItemId exposing (GlossaryItemId)
 -}
 type GlossaryItem
     = GlossaryItem
-        { id : Maybe GlossaryItemId
+        { id : GlossaryItemId
         , preferredTerm : Term
         , alternativeTerms : List Term
         , definition : Maybe Definition
@@ -46,7 +46,7 @@ type GlossaryItem
 {-| Create a glossary item from its components.
 -}
 init :
-    Maybe GlossaryItemId
+    GlossaryItemId
     -> Term
     -> List Term
     -> Maybe Definition
@@ -70,7 +70,7 @@ init id_ preferredTerm_ alternativeTerms_ definition_ needsUpdating_ lastUpdated
 
 {-| The ID for this glossary item.
 -}
-id : GlossaryItem -> Maybe GlossaryItemId
+id : GlossaryItem -> GlossaryItemId
 id (GlossaryItem item) =
     item.id
 

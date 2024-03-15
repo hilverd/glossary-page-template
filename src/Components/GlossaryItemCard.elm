@@ -51,8 +51,12 @@ view :
     -> Html msg
 view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagBeingFilteredBy itemWithFocus glossaryItemWithPreviousAndNext =
     Extras.Html.showMaybe
-        (\( index, glossaryItem ) ->
+        (\glossaryItem ->
             let
+                index : GlossaryItemId
+                index =
+                    GlossaryItemForHtml.id glossaryItem
+
                 hasFocus : Bool
                 hasFocus =
                     itemWithFocus == Just index
@@ -402,7 +406,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                     preferredTerm
     in
     Extras.Html.showMaybe
-        (\( _, glossaryItem ) ->
+        (\glossaryItem ->
             let
                 disambiguatedPreferredTerm : Term
                 disambiguatedPreferredTerm =
@@ -447,9 +451,9 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                         [ class "-mt-px flex w-0 flex-1"
                         ]
                         [ Extras.Html.showMaybe
-                            (\( previousItemIndex, previousItem ) ->
+                            (\previousItem ->
                                 Components.Button.textWrapNormal
-                                    [ Html.Events.onClick <| onClickItem previousItemIndex ]
+                                    [ Html.Events.onClick <| onClickItem <| GlossaryItemForHtml.id previousItem ]
                                     [ Icons.arrowLongLeft
                                         [ Svg.Attributes.class "h-5 w-5 shrink-0" ]
                                     , span
@@ -481,9 +485,9 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                     , Html.div
                         [ class "-mt-px flex w-0 flex-1 justify-end" ]
                         [ Extras.Html.showMaybe
-                            (\( nextItemIndex, nextItem ) ->
+                            (\nextItem ->
                                 Components.Button.textWrapNormal
-                                    [ Html.Events.onClick <| onClickItem nextItemIndex ]
+                                    [ Html.Events.onClick <| onClickItem <| GlossaryItemForHtml.id nextItem ]
                                     [ span
                                         [ class "font-medium" ]
                                         [ disambiguatedPreferredTermForPreviousOrNext nextItem ]

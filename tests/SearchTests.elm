@@ -23,7 +23,7 @@ loadedGlossaryItems =
         one : GlossaryItemForHtml
         one =
             GlossaryItemForHtml.create
-                (GlossaryItemId.create "The term one" |> Just)
+                (GlossaryItemId.create "The term one")
                 (termFromBody "The term one")
                 []
                 Nothing
@@ -38,7 +38,7 @@ loadedGlossaryItems =
         two : GlossaryItemForHtml
         two =
             GlossaryItemForHtml.create
-                (GlossaryItemId.create "Second the term" |> Just)
+                (GlossaryItemId.create "Second the term")
                 (termFromBody "Second the term")
                 []
                 Nothing
@@ -53,7 +53,7 @@ loadedGlossaryItems =
         three : GlossaryItemForHtml
         three =
             GlossaryItemForHtml.create
-                (GlossaryItemId.create "The term three" |> Just)
+                (GlossaryItemId.create "The term three")
                 (termFromBody "The term three")
                 []
                 Nothing

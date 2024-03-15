@@ -469,7 +469,7 @@ fromGlossaryItemForHtml_ existingPreferredTerms allTags preferredTermsOfItemsLis
         |> validate
 
 
-toGlossaryItem : GlossaryItems -> GlossaryItemForm -> Maybe GlossaryItemId -> Maybe String -> GlossaryItemForHtml
+toGlossaryItem : GlossaryItems -> GlossaryItemForm -> GlossaryItemId -> Maybe String -> GlossaryItemForHtml
 toGlossaryItem glossaryItems form id dateTime =
     let
         termFieldToTerm : TermField -> Term

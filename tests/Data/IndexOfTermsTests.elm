@@ -19,7 +19,7 @@ termFromBody body =
 glossaryItemForHtml : String -> GlossaryItemForHtml
 glossaryItemForHtml body =
     GlossaryItemForHtml.create
-        (GlossaryItemId.create body |> Just)
+        (GlossaryItemId.create body)
         (termFromBody body)
         []
         Nothing
@@ -52,8 +52,8 @@ suite =
         [ test "sorts terms alphabetically by their first alphabetic character (stripped of any diacritical marks)" <|
             \_ ->
                 let
-                    preferredTerm id body =
-                        IndexOfTerms.PreferredTerm (GlossaryItemId.create id) <| DisambiguatedTerm.fromTerm <| termFromBody body
+                    preferredTerm body =
+                        IndexOfTerms.PreferredTerm (GlossaryItemId.create body) <| DisambiguatedTerm.fromTerm <| termFromBody body
                 in
                 glossaryItems
                     |> IndexOfTerms.fromGlossaryItems Nothing
@@ -61,9 +61,9 @@ suite =
                     |> Expect.equal
                         [ { label = "0–9"
                           , entries =
-                                [ preferredTerm "0" "007"
-                                , preferredTerm "3" "3040"
-                                , preferredTerm "4" "3Three"
+                                [ preferredTerm "007"
+                                , preferredTerm "3040"
+                                , preferredTerm "3Three"
                                 ]
                           }
                         , { label = "A", entries = [] }
@@ -71,7 +71,7 @@ suite =
                         , { label = "C", entries = [] }
                         , { label = "D", entries = [] }
                         , { label = "E", entries = [] }
-                        , { label = "F", entries = [ preferredTerm "6" "_future_" ] }
+                        , { label = "F", entries = [ preferredTerm "_future_" ] }
                         , { label = "G", entries = [] }
                         , { label = "H", entries = [] }
                         , { label = "I", entries = [] }
@@ -80,19 +80,19 @@ suite =
                         , { label = "L", entries = [] }
                         , { label = "M", entries = [] }
                         , { label = "N", entries = [] }
-                        , { label = "O", entries = [ preferredTerm "1" "Óne" ] }
+                        , { label = "O", entries = [ preferredTerm "Óne" ] }
                         , { label = "P", entries = [] }
                         , { label = "Q", entries = [] }
                         , { label = "R", entries = [] }
                         , { label = "S", entries = [] }
-                        , { label = "T", entries = [ preferredTerm "2" "Two" ] }
+                        , { label = "T", entries = [ preferredTerm "Two" ] }
                         , { label = "U", entries = [] }
                         , { label = "V", entries = [] }
                         , { label = "W", entries = [] }
                         , { label = "X", entries = [] }
                         , { label = "Y", entries = [] }
                         , { label = "Z", entries = [] }
-                        , { label = "…", entries = [ preferredTerm "5" "Ω" ] }
+                        , { label = "…", entries = [ preferredTerm "Ω" ] }
                         ]
         , test "doesn't include 0–9 and ellipsis if not needed" <|
             \_ ->

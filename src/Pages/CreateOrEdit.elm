@@ -380,7 +380,7 @@ update msg model =
                                 Form.toGlossaryItem
                                     (Glossary.items glossary)
                                     model.form
-                                    (model.itemBeingEdited |> Maybe.withDefault newGlossaryItemId |> Just)
+                                    (model.itemBeingEdited |> Maybe.withDefault newGlossaryItemId)
                                     (Just dateTime)
 
                             changelist =
@@ -1081,7 +1081,7 @@ view model =
 
                 newOrUpdatedGlossaryItem : GlossaryItemForHtml
                 newOrUpdatedGlossaryItem =
-                    Form.toGlossaryItem items model.form (Just <| GlossaryItemId.create "") Nothing
+                    Form.toGlossaryItem items model.form (GlossaryItemId.create "") Nothing
             in
             { title = glossary |> Glossary.title |> GlossaryTitle.inlineText
             , body =
@@ -1154,7 +1154,7 @@ view model =
                                                     Nothing
                                                     Nothing
                                                     { previous = Nothing
-                                                    , item = Just ( GlossaryItemId.create "", newOrUpdatedGlossaryItem )
+                                                    , item = Just newOrUpdatedGlossaryItem
                                                     , next = Nothing
                                                     }
                                                 ]

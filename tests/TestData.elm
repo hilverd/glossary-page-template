@@ -63,7 +63,7 @@ defaultComputerScienceDefinition =
 defaultComputerScienceItem : GlossaryItemForHtml
 defaultComputerScienceItem =
     GlossaryItemForHtml.create
-        (GlossaryItemId.create "Default (Computer Science)" |> Just)
+        (GlossaryItemId.create "Default (Computer Science)")
         (Term.fromMarkdown "Default" False)
         [ Term.fromMarkdown "Preset" False
         , Term.fromMarkdown "Factory preset" False
@@ -86,7 +86,7 @@ defaultFinanceDefinition =
 defaultFinanceItem : GlossaryItemForHtml
 defaultFinanceItem =
     GlossaryItemForHtml.create
-        (GlossaryItemId.create "Default (Finance)" |> Just)
+        (GlossaryItemId.create "Default (Finance)")
         (Term.fromMarkdown "Default" False)
         []
         (Just financeTag)
@@ -107,7 +107,7 @@ informationRetrievalDefinition =
 informationRetrievalItem : GlossaryItemForHtml
 informationRetrievalItem =
     GlossaryItemForHtml.create
-        (GlossaryItemId.create "Information retrieval" |> Just)
+        (GlossaryItemId.create "Information retrieval")
         (Term.fromMarkdown "Information retrieval" False)
         [ Term.fromMarkdown "IR" True ]
         Nothing
@@ -128,7 +128,7 @@ interestRateDefinition =
 interestRateItem : GlossaryItemForHtml
 interestRateItem =
     GlossaryItemForHtml.create
-        (GlossaryItemId.create "Interest rate" |> Just)
+        (GlossaryItemId.create "Interest rate")
         (Term.fromMarkdown "Interest rate" False)
         [ Term.fromMarkdown "IR" True ]
         Nothing
@@ -144,7 +144,7 @@ interestRateItem =
 updatedInterestRateItem : GlossaryItemForHtml
 updatedInterestRateItem =
     GlossaryItemForHtml.create
-        (GlossaryItemId.create "Interest rate updated" |> Just)
+        (GlossaryItemId.create "Interest rate updated")
         (Term.fromMarkdown "Interest rate updated" False)
         [ Term.fromMarkdown "IR" True ]
         Nothing
@@ -165,7 +165,7 @@ loanDefinition =
 loanItem : GlossaryItemForHtml
 loanItem =
     GlossaryItemForHtml.create
-        (GlossaryItemId.create "Loan" |> Just)
+        (GlossaryItemId.create "Loan")
         (Term.fromMarkdown "Loan" False)
         []
         Nothing
@@ -181,7 +181,7 @@ loanItem =
 updatedLoanItem : GlossaryItemForHtml
 updatedLoanItem =
     GlossaryItemForHtml.create
-        (GlossaryItemId.create "Loan" |> Just)
+        (GlossaryItemId.create "Loan")
         (Term.fromMarkdown "Loan" False)
         []
         Nothing
