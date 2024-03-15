@@ -380,13 +380,13 @@ update msg model =
             , Cmd.map ListAllMsg listAllCmd
             )
 
-        ( _, NavigateToCreateOrEdit itemWithFocus, _ ) ->
+        ( _, NavigateToCreateOrEdit itemBeingEdited, _ ) ->
             let
                 common0 =
                     commonModelForPage model.page
 
                 ( createOrEditModel, createOrEditCmd ) =
-                    Pages.CreateOrEdit.init { common0 | itemWithFocus = itemWithFocus }
+                    Pages.CreateOrEdit.init common0 itemBeingEdited
             in
             ( { model | page = CreateOrEdit createOrEditModel }
             , Cmd.batch [ resetViewport, Cmd.map CreateOrEditMsg createOrEditCmd ]

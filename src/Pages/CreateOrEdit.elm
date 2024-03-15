@@ -22,7 +22,7 @@ import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.GlossaryItemId as GlossaryItemId
+import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
@@ -58,6 +58,7 @@ import Task
 
 type alias Model =
     { common : CommonModel
+    , itemBeingEdited : Maybe GlossaryItemId
     , form : GlossaryItemForm
     , triedToSaveWhenFormInvalid : Bool
     , saving : Saving
@@ -104,8 +105,8 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init : CommonModel -> ( Model, Cmd Msg )
-init commonModel =
+init : CommonModel -> Maybe GlossaryItemId -> ( Model, Cmd Msg )
+init commonModel itemBeingEdited =
     case commonModel.glossary of
         Ok glossary ->
             let
@@ -132,17 +133,18 @@ init commonModel =
                                             itemForHtml
                                     )
                         )
-                        commonModel.itemWithFocus
+                        itemBeingEdited
                         |> Maybe.withDefault emptyForm
             in
-            ( { common = commonModel
+            ( { itemBeingEdited = itemBeingEdited
+              , common = commonModel
               , form = form
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
               , dropdownMenusWithMoreOptionsForRelatedTerms =
                     dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
-            , if commonModel.itemWithFocus == Nothing then
+            , if itemBeingEdited == Nothing then
                 0 |> TermIndex.fromInt |> giveFocusToTermInputField
 
               else
@@ -150,7 +152,8 @@ init commonModel =
             )
 
         Err _ ->
-            ( { common = commonModel
+            ( { itemBeingEdited = itemBeingEdited
+              , common = commonModel
               , form = Form.empty GlossaryItems.empty Nothing
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
@@ -372,12 +375,8 @@ update msg model =
                             newOrUpdatedGlossaryItem =
                                 Form.toGlossaryItem (Glossary.items glossary) model.form <| Just dateTime
 
-                            common : CommonModel
-                            common =
-                                model.common
-
                             changelist =
-                                case common.itemWithFocus of
+                                case model.itemBeingEdited of
                                     Just id ->
                                         GlossaryChangelist.create
                                             (Glossary.versionNumber glossary)
@@ -393,14 +392,14 @@ update msg model =
                                     glossary
                                     changelist
                                     (PageMsg.Internal << FailedToSave)
-                                    (\( maybeGlossaryItemId, updatedGlossary ) ->
+                                    (\( itemToGiveFocus, updatedGlossary ) ->
                                         let
                                             common0 =
                                                 model.common
                                         in
                                         PageMsg.NavigateToListAll
                                             { common0
-                                                | itemWithFocus = maybeGlossaryItemId
+                                                | itemWithFocus = itemToGiveFocus
                                                 , glossary = Ok updatedGlossary
                                             }
                                     )
@@ -1087,7 +1086,7 @@ view model =
                         [ h1
                             [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
                             [ text <|
-                                if model.common.itemWithFocus == Nothing then
+                                if model.itemBeingEdited == Nothing then
                                     I18n.createANewGlossaryItemCapitalised
 
                                 else

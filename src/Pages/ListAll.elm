@@ -548,7 +548,11 @@ update msg model =
                         ]
             in
             ( { model
-                | common = { common | glossary = Ok <| updatedGlossary }
+                | common =
+                    { common
+                        | itemWithFocus = Nothing
+                        , glossary = Ok <| updatedGlossary
+                    }
                 , confirmDeleteId = Nothing
                 , deleting = NotCurrentlySaving
                 , savingSettings = NotCurrentlySaving
