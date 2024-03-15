@@ -205,7 +205,7 @@ empty =
         , orderedAlphabetically = []
         , orderedByMostMentionedFirst = []
         , orderedFocusedOn = Nothing
-        , nextItemId = GlossaryItemId.create 0
+        , nextItemId = GlossaryItemId.create "0"
         , nextTagId = TagId.create 0
         }
 
@@ -217,7 +217,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
     let
         indexedGlossaryItemsForHtml : List ( GlossaryItemId, GlossaryItemForHtml )
         indexedGlossaryItemsForHtml =
-            List.indexedMap (GlossaryItemId.create >> Tuple.pair) glossaryItemsForHtml
+            List.indexedMap (String.fromInt >> GlossaryItemId.create >> Tuple.pair) glossaryItemsForHtml
 
         itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_ : DuplicateRejectingDict String GlossaryItemId
         itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_ =
@@ -490,11 +490,11 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 nextItemId =
                     itemById
                         |> GlossaryItemIdDict.keys
-                        |> List.map GlossaryItemId.toInt
+                        |> List.map (GlossaryItemId.toString >> String.toInt >> Maybe.withDefault 0)
                         |> List.maximum
                         |> Maybe.map ((+) 1)
                         |> Maybe.withDefault 0
-                        |> GlossaryItemId.create
+                        |> (String.fromInt >> GlossaryItemId.create)
 
                 nextTagId : TagId
                 nextTagId =
@@ -924,12 +924,12 @@ disambiguatedPreferredTermFromRaw rawTerm ((GlossaryItems items) as glossaryItem
 disambiguatedPreferredTermsWhichHaveDefinitions : Maybe TagId -> GlossaryItems -> List DisambiguatedTerm
 disambiguatedPreferredTermsWhichHaveDefinitions filterByTagId ((GlossaryItems items) as glossaryItems) =
     let
-        itemIdIntsSet : Set Int
-        itemIdIntsSet =
+        itemIdsSet : Set String
+        itemIdsSet =
             filterByTagId
                 |> Maybe.andThen (\tagId -> TagIdDict.get tagId items.itemIdsByTagId)
                 |> Maybe.withDefault (GlossaryItemIdDict.keys items.itemById)
-                |> List.map GlossaryItemId.toInt
+                |> List.map GlossaryItemId.toString
                 |> Set.fromList
     in
     items.itemById
@@ -937,7 +937,7 @@ disambiguatedPreferredTermsWhichHaveDefinitions filterByTagId ((GlossaryItems it
         |> List.filterMap
             (\( itemId, item ) ->
                 if
-                    Set.member (GlossaryItemId.toInt itemId) itemIdIntsSet
+                    Set.member (GlossaryItemId.toString itemId) itemIdsSet
                         && GlossaryItem.definition item
                         /= Nothing
                 then
@@ -1049,14 +1049,14 @@ disambiguatedPreferredTermsByAlternativeTerm filterByTagId ((GlossaryItems items
 toList_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml )
 toList_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItems items) as glossaryItems) =
     let
-        itemIdsMatchingTagFilter : Maybe (Set Int)
+        itemIdsMatchingTagFilter : Maybe (Set String)
         itemIdsMatchingTagFilter =
             filterByTagId
                 |> Maybe.map
                     (\tagId ->
                         items.itemIdsByTagId
                             |> TagIdDict.get tagId
-                            |> Maybe.map (List.map GlossaryItemId.toInt >> Set.fromList)
+                            |> Maybe.map (List.map GlossaryItemId.toString >> Set.fromList)
                             |> Maybe.withDefault Set.empty
                     )
     in
@@ -1064,7 +1064,7 @@ toList_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItems items) as glos
         (\itemId ->
             if
                 itemIdsMatchingTagFilter
-                    |> Maybe.map (Set.member <| GlossaryItemId.toInt itemId)
+                    |> Maybe.map (Set.member <| GlossaryItemId.toString itemId)
                     |> Maybe.withDefault True
             then
                 glossaryItems
@@ -1118,10 +1118,7 @@ orderedFocusedOn filterByTagId glossaryItemId ((GlossaryItems items) as glossary
                 |> GlossaryItemIdDict.keys
                 |> List.foldl
                     DirectedGraph.insertVertex
-                    (DirectedGraph.empty
-                        (GlossaryItemId.toInt >> String.fromInt)
-                        (String.toInt >> Maybe.withDefault 0 >> GlossaryItemId.create)
-                    )
+                    (DirectedGraph.empty GlossaryItemId.toString GlossaryItemId.create)
 
         relatedItemsGraph : DirectedGraph GlossaryItemId
         relatedItemsGraph =

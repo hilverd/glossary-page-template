@@ -1149,7 +1149,7 @@ view model =
                                                     Nothing
                                                     Nothing
                                                     { previous = Nothing
-                                                    , item = Just ( GlossaryItemId.create -1, newOrUpdatedGlossaryItem )
+                                                    , item = Just ( GlossaryItemId.create "", newOrUpdatedGlossaryItem )
                                                     , next = Nothing
                                                     }
                                                 ]

@@ -170,7 +170,7 @@ termIndexGroupLabel staticSidebar groupLabel =
 
 glossaryItemDiv : GlossaryItemId -> String
 glossaryItemDiv index =
-    prefixed <| "item-" ++ (index |> GlossaryItemId.toInt |> String.fromInt)
+    prefixed <| "item-" ++ (index |> GlossaryItemId.toString)
 
 
 indexForMobile : String
