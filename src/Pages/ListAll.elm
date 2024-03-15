@@ -50,7 +50,7 @@ import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml, disambiguatedTerm)
-import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
+import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -72,7 +72,7 @@ import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree
 import Extras.Http
 import Extras.Task
-import Extras.Url exposing (fragmentOnly)
+import Extras.Url
 import Html
 import Html.Attributes exposing (class, for, href, id, readonly)
 import Html.Events
@@ -1082,7 +1082,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
             [ li []
                 [ Html.a
                     [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
-                    , Html.Attributes.href <| fragmentOnly <| Term.id term
+                    , Html.Attributes.href <| Extras.Url.fragmentOnly <| Term.id term
                     , Html.Attributes.target "_self"
                     , Accessibility.Key.tabbable tabbable
                     , Html.Events.onClick <| PageMsg.Internal <| JumpToItem itemId
@@ -1117,7 +1117,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
                             ]
                             [ Html.a
                                 [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
-                                , Html.Attributes.href <| fragmentOnly <| Term.id preferredTerm
+                                , Html.Attributes.href <| Extras.Url.fragmentOnly <| Term.id preferredTerm
                                 , Html.Attributes.target "_self"
                                 , Accessibility.Key.tabbable tabbable
                                 , Html.Events.onClick <| PageMsg.Internal <| JumpToItem itemId
@@ -1705,7 +1705,7 @@ viewBackToTopLink { staticSidebar, visibility } =
                 class "transition motion-reduce:transition-none ease-in duration-300 transform motion-reduce:transform-none opacity-0 scale-95"
         ]
         [ Html.a
-            [ href <| fragmentOnly ElementIds.container
+            [ href <| Extras.Url.fragmentOnly ElementIds.container
             , Extras.HtmlEvents.onClickStopPropagation <|
                 PageMsg.Internal <|
                     BackToTop staticSidebar (backToTopLinkVisibilityCounter visibility)

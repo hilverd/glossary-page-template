@@ -28,12 +28,7 @@ relativeUrl commonModel =
         |> QueryParameters.toRelativeUrl
         |> (\urlString ->
                 if urlString == "" then
-                    let
-                        initialUrl =
-                            commonModel.initialUrl
-                    in
-                    { initialUrl | query = Nothing }
-                        |> Url.toString
+                    "?"
 
                 else
                     urlString
