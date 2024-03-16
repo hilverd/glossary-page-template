@@ -387,7 +387,12 @@ applyChange change glossary =
             insert item glossary
                 |> Result.map (\( newItemId, newGlossary ) -> ( Just newItemId, newGlossary ))
 
-        Update itemId item ->
+        Update item ->
+            let
+                itemId : GlossaryItemId
+                itemId =
+                    GlossaryItemForHtml.id item
+            in
             update itemId item glossary
                 |> Result.map (\newGlossary -> ( Just itemId, newGlossary ))
 

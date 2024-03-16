@@ -385,10 +385,10 @@ update msg model =
 
                             changelist =
                                 case model.itemBeingEdited of
-                                    Just id ->
+                                    Just _ ->
                                         GlossaryChangelist.create
                                             (Glossary.versionNumber glossary)
-                                            [ GlossaryChange.Update id newOrUpdatedGlossaryItem ]
+                                            [ GlossaryChange.Update newOrUpdatedGlossaryItem ]
 
                                     Nothing ->
                                         GlossaryChangelist.create

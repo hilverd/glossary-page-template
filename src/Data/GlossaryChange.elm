@@ -29,7 +29,7 @@ type GlossaryChange
     | SetCardWidth CardWidth
     | ChangeTags TagsChanges
     | Insert GlossaryItemForHtml
-    | Update GlossaryItemId GlossaryItemForHtml
+    | Update GlossaryItemForHtml
     | Remove GlossaryItemId
 
 
@@ -64,8 +64,8 @@ codec =
                 Insert itemForHtml ->
                     insert itemForHtml
 
-                Update itemId itemForHtml ->
-                    update itemId itemForHtml
+                Update itemForHtml ->
+                    update itemForHtml
 
                 Remove itemId ->
                     remove itemId
@@ -78,7 +78,7 @@ codec =
         |> Codec.variant1 "SetCardWidth" SetCardWidth CardWidth.codec
         |> Codec.variant1 "ChangeTags" ChangeTags TagsChanges.codec
         |> Codec.variant1 "Insert" Insert GlossaryItemForHtml.codec
-        |> Codec.variant2 "Update" Update GlossaryItemId.codec GlossaryItemForHtml.codec
+        |> Codec.variant1 "Update" Update GlossaryItemForHtml.codec
         |> Codec.variant1 "Remove" Remove GlossaryItemId.codec
         |> Codec.buildCustom
 
@@ -93,10 +93,10 @@ setLastUpdatedBy { name, emailAddress } change =
                 |> GlossaryItemForHtml.setLastUpdatedBy { name = name, emailAddress = emailAddress }
                 |> Insert
 
-        Update itemId itemForHtml ->
+        Update itemForHtml ->
             itemForHtml
                 |> GlossaryItemForHtml.setLastUpdatedBy { name = name, emailAddress = emailAddress }
-                |> Update itemId
+                |> Update
 
         _ ->
             change
