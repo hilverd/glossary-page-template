@@ -228,17 +228,17 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                     )
                     DuplicateRejectingDict.empty
 
-        tagById0 : TagIdDict Tag
-        tagById0 =
+        tagById : TagIdDict Tag
+        tagById =
             tagsWithDescriptions_
                 |> List.map Tuple.first
                 |> List.indexedMap (TagId.create >> Tuple.pair)
                 |> TagIdDict.fromList
 
-        ( itemById, tagById ) =
+        itemById =
             glossaryItemsForHtml
                 |> List.foldl
-                    (\glossaryItemForHtml { itemById_, tagById_, allRawTags, nextTagIdInt } ->
+                    (\glossaryItemForHtml itemById_ ->
                         let
                             glossaryItem : GlossaryItem
                             glossaryItem =
@@ -254,49 +254,10 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
 
                             itemById1 =
                                 GlossaryItemIdDict.insert (GlossaryItem.id glossaryItem) glossaryItem itemById_
-
-                            updated =
-                                glossaryItemForHtml
-                                    |> GlossaryItemForHtml.allTags
-                                    |> List.foldl
-                                        (\tag { tagById1, allRawTags1, nextTagIdInt1 } ->
-                                            let
-                                                rawTag =
-                                                    Tag.raw tag
-                                            in
-                                            if Set.member rawTag allRawTags1 then
-                                                { tagById1 = tagById1
-                                                , allRawTags1 = allRawTags1
-                                                , nextTagIdInt1 = nextTagIdInt1
-                                                }
-
-                                            else
-                                                { tagById1 =
-                                                    TagIdDict.insert
-                                                        (TagId.create nextTagIdInt1)
-                                                        tag
-                                                        tagById1
-                                                , allRawTags1 = Set.insert rawTag allRawTags1
-                                                , nextTagIdInt1 = nextTagIdInt1 + 1
-                                                }
-                                        )
-                                        { tagById1 = tagById_
-                                        , allRawTags1 = allRawTags
-                                        , nextTagIdInt1 = nextTagIdInt
-                                        }
                         in
-                        { itemById_ = itemById1
-                        , tagById_ = updated.tagById1
-                        , allRawTags = updated.allRawTags1
-                        , nextTagIdInt = updated.nextTagIdInt1
-                        }
+                        itemById1
                     )
-                    { itemById_ = GlossaryItemIdDict.empty
-                    , tagById_ = tagById0
-                    , allRawTags = tagById0 |> TagIdDict.values |> List.map Tag.raw |> Set.fromList
-                    , nextTagIdInt = tagById0 |> TagIdDict.nextTagId |> TagId.toInt
-                    }
-                |> (\{ itemById_, tagById_ } -> ( itemById_, tagById_ ))
+                    GlossaryItemIdDict.empty
 
         tagIdByRawTag : DuplicateRejectingDict String TagId
         tagIdByRawTag =
