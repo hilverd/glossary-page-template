@@ -204,7 +204,7 @@ empty =
         , orderedAlphabetically = []
         , orderedByMostMentionedFirst = []
         , orderedFocusedOn = Nothing
-        , nextTagId = TagId.create 0
+        , nextTagId = TagId.create "0"
         }
 
 
@@ -232,7 +232,7 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
         tagById =
             tagsWithDescriptions_
                 |> List.map Tuple.first
-                |> List.indexedMap (TagId.create >> Tuple.pair)
+                |> List.indexedMap (String.fromInt >> TagId.create >> Tuple.pair)
                 |> TagIdDict.fromList
 
         itemById =
@@ -450,10 +450,11 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
                 nextTagId =
                     tagById
                         |> TagIdDict.keys
-                        |> List.map TagId.toInt
+                        |> List.map (TagId.toString >> String.toInt >> Maybe.withDefault 0)
                         |> List.maximum
                         |> Maybe.map ((+) 1)
                         |> Maybe.withDefault 0
+                        |> String.fromInt
                         |> TagId.create
             in
             GlossaryItems

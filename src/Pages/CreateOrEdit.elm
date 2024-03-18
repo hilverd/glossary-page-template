@@ -652,7 +652,7 @@ viewTags enableMathSupport tagCheckboxes =
                     (\( ( tagId, tag ), checked ) ->
                         Components.Badge.indigoWithCheckbox
                             { tabbable = True, checked = checked }
-                            (tagId |> TagId.toInt |> String.fromInt |> (++) "tag-")
+                            (tagId |> TagId.toString |> (++) "tag-")
                             (PageMsg.Internal <| ToggleTagCheckbox tag)
                             [ class "mr-2 mb-2" ]
                             [ Tag.view enableMathSupport [] tag ]

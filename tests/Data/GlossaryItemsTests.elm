@@ -42,8 +42,8 @@ suite =
                     tagsChanges : TagsChanges
                     tagsChanges =
                         TagsChanges.empty
-                            |> TagsChanges.update (TagId.create 0) financeTag financeTagDescription
-                            |> TagsChanges.update (TagId.create 1) computerScienceTag computerScienceTagDescription
+                            |> TagsChanges.update (TagId.create "0") financeTag financeTagDescription
+                            |> TagsChanges.update (TagId.create "1") computerScienceTag computerScienceTagDescription
                 in
                 glossaryItems
                     |> GlossaryItems.applyTagsChanges tagsChanges
@@ -74,7 +74,7 @@ suite =
                     tagsChanges : TagsChanges
                     tagsChanges =
                         TagsChanges.empty
-                            |> TagsChanges.update (TagId.create 0) houseworkTag houseworkTagDescription
+                            |> TagsChanges.update (TagId.create "0") houseworkTag houseworkTagDescription
                 in
                 glossaryItems
                     |> GlossaryItems.applyTagsChanges tagsChanges
@@ -103,7 +103,7 @@ suite =
                     tagsChanges : TagsChanges
                     tagsChanges =
                         TagsChanges.empty
-                            |> TagsChanges.remove (TagId.create 1)
+                            |> TagsChanges.remove (TagId.create "1")
                 in
                 glossaryItems
                     |> GlossaryItems.applyTagsChanges tagsChanges
@@ -120,7 +120,7 @@ suite =
                     tagsChanges : TagsChanges
                     tagsChanges =
                         TagsChanges.empty
-                            |> TagsChanges.remove (TagId.create 1)
+                            |> TagsChanges.remove (TagId.create "1")
                 in
                 glossaryItems
                     |> GlossaryItems.applyTagsChanges tagsChanges
@@ -266,24 +266,24 @@ suite =
                 glossaryItems
                     |> GlossaryItems.tagByIdList
                     |> Expect.equal
-                        [ ( TagId.create 0, computerScienceTag )
-                        , ( TagId.create 1, financeTag )
-                        , ( TagId.create 2, gardeningTag )
+                        [ ( TagId.create "0", computerScienceTag )
+                        , ( TagId.create "1", financeTag )
+                        , ( TagId.create "2", gardeningTag )
                         ]
         , test "looks up a tag ID from its contents" <|
             \_ ->
                 glossaryItems
                     |> GlossaryItems.tagIdFromTag computerScienceTag
-                    |> Expect.equal (Just <| TagId.create 0)
+                    |> Expect.equal (Just <| TagId.create "0")
         , test "looks up a tag from its ID" <|
             \_ ->
                 glossaryItems
-                    |> GlossaryItems.tagFromId (TagId.create 1)
+                    |> GlossaryItems.tagFromId (TagId.create "1")
                     |> Expect.equal (Just financeTag)
         , test "looks up a tag description from its ID" <|
             \_ ->
                 glossaryItems
-                    |> GlossaryItems.tagDescriptionFromId (TagId.create 2)
+                    |> GlossaryItems.tagDescriptionFromId (TagId.create "2")
                     |> Expect.equal (Just gardeningTagDescription)
         , test "returns disambiguated preferred term for item with given ID" <|
             \_ ->
@@ -305,7 +305,7 @@ suite =
         , test "returns all disambiguated preferred terms with tag filter applied" <|
             \_ ->
                 glossaryItems
-                    |> GlossaryItems.disambiguatedPreferredTerms (Just <| TagId.create 1)
+                    |> GlossaryItems.disambiguatedPreferredTerms (Just <| TagId.create "1")
                     |> List.map Tuple.second
                     |> Expect.equal
                         [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False
@@ -341,7 +341,7 @@ suite =
         , test "returns all of the disambiguated preferred terms which have a definition with tag filter applied" <|
             \_ ->
                 glossaryItems
-                    |> GlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions (Just <| TagId.create 1)
+                    |> GlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions (Just <| TagId.create "1")
                     |> Expect.equal
                         [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False
                         , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate" False
@@ -391,7 +391,7 @@ suite =
         , test "returns items in alphabetical order with tag filter applied" <|
             \_ ->
                 glossaryItems
-                    |> GlossaryItems.orderedAlphabetically (Just <| TagId.create 0)
+                    |> GlossaryItems.orderedAlphabetically (Just <| TagId.create "0")
                     |> List.map Tuple.first
                     |> Expect.equal
                         [ GlossaryItemForHtml.id defaultComputerScienceItem
@@ -441,7 +441,7 @@ suite =
                             ]
                 in
                 glossaryItems_
-                    |> Result.map (GlossaryItems.orderedAlphabetically (Just <| TagId.create 0))
+                    |> Result.map (GlossaryItems.orderedAlphabetically (Just <| TagId.create "0"))
                     |> Expect.equal
                         (Ok
                             [ ( GlossaryItemForHtml.id defaultComputerScienceItem
@@ -475,7 +475,7 @@ suite =
         , test "returns items ordered by most mentioned first with tag filter applied" <|
             \_ ->
                 glossaryItems
-                    |> GlossaryItems.orderedByMostMentionedFirst (Just <| TagId.create 1)
+                    |> GlossaryItems.orderedByMostMentionedFirst (Just <| TagId.create "1")
                     |> List.map Tuple.first
                     |> Expect.equal
                         [ GlossaryItemForHtml.id interestRateItem
@@ -499,7 +499,7 @@ suite =
         , test "returns items ordered 'focused on' a specific item with tag filter applied" <|
             \_ ->
                 glossaryItems
-                    |> GlossaryItems.orderedFocusedOn (Just <| TagId.create 1) (GlossaryItemForHtml.id defaultFinanceItem)
+                    |> GlossaryItems.orderedFocusedOn (Just <| TagId.create "1") (GlossaryItemForHtml.id defaultFinanceItem)
                     |> (\( lhs, rhs ) -> ( List.map Tuple.first lhs, List.map Tuple.first rhs ))
                     |> Expect.equal
                         ( [ GlossaryItemForHtml.id defaultFinanceItem
