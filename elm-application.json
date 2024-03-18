@@ -7,6 +7,7 @@
         "ApplicationShell",
         "Data.AboutLink",
         "Data.AboutParagraph",
+        "Data.DescribedTag",
         "Data.Editability",
         "Data.Glossary",
         "Data.GlossaryChange",
