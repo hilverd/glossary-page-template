@@ -1,5 +1,6 @@
 module Data.GlossaryItemsTests exposing (suite)
 
+import Data.DescribedTag as DescribedTag
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Tag as Tag
@@ -14,6 +15,11 @@ import Test exposing (Test, describe, test)
 import TestData exposing (..)
 
 
+houseworkDescribedTag : DescribedTag.DescribedTag
+houseworkDescribedTag =
+    DescribedTag.create houseworkTag houseworkTagDescription
+
+
 suite : Test
 suite =
     describe "The Data.GlossaryItems module"
@@ -23,17 +29,17 @@ suite =
                     tagsChanges : TagsChanges
                     tagsChanges =
                         TagsChanges.empty
-                            |> TagsChanges.insert TestData.houseworkTag TestData.houseworkTagDescription
+                            |> TagsChanges.insert houseworkDescribedTag
                 in
                 glossaryItems
                     |> GlossaryItems.applyTagsChanges tagsChanges
                     |> Result.map GlossaryItems.tagsWithDescriptions
                     |> Expect.equal
                         (Ok
-                            [ ( TestData.computerScienceTag, TestData.computerScienceTagDescription )
-                            , ( TestData.financeTag, TestData.financeTagDescription )
-                            , ( TestData.gardeningTag, TestData.gardeningTagDescription )
-                            , ( TestData.houseworkTag, TestData.houseworkTagDescription )
+                            [ computerScienceDescribedTag
+                            , financeDescribedTag
+                            , gardeningDescribedTag
+                            , houseworkDescribedTag
                             ]
                         )
         , test "updates tags" <|
@@ -42,8 +48,8 @@ suite =
                     tagsChanges : TagsChanges
                     tagsChanges =
                         TagsChanges.empty
-                            |> TagsChanges.update (TagId.create "0") financeTag financeTagDescription
-                            |> TagsChanges.update (TagId.create "1") computerScienceTag computerScienceTagDescription
+                            |> TagsChanges.update (TagId.create "0") financeDescribedTag
+                            |> TagsChanges.update (TagId.create "1") computerScienceDescribedTag
                 in
                 glossaryItems
                     |> GlossaryItems.applyTagsChanges tagsChanges
@@ -74,7 +80,7 @@ suite =
                     tagsChanges : TagsChanges
                     tagsChanges =
                         TagsChanges.empty
-                            |> TagsChanges.update (TagId.create "0") houseworkTag houseworkTagDescription
+                            |> TagsChanges.update (TagId.create "0") houseworkDescribedTag
                 in
                 glossaryItems
                     |> GlossaryItems.applyTagsChanges tagsChanges
@@ -110,8 +116,8 @@ suite =
                     |> Result.map GlossaryItems.tagsWithDescriptions
                     |> Expect.equal
                         (Ok
-                            [ ( computerScienceTag, computerScienceTagDescription )
-                            , ( gardeningTag, gardeningTagDescription )
+                            [ computerScienceDescribedTag
+                            , gardeningDescribedTag
                             ]
                         )
         , test "removes tags from items" <|
@@ -179,9 +185,9 @@ suite =
                 let
                     tagsChanges =
                         TagsChanges.empty
-                            |> TagsChanges.insert gardeningTag gardeningTagDescription
-                            |> TagsChanges.insert financeTag financeTagDescription
-                            |> TagsChanges.insert computerScienceTag computerScienceTagDescription
+                            |> TagsChanges.insert gardeningDescribedTag
+                            |> TagsChanges.insert financeDescribedTag
+                            |> TagsChanges.insert computerScienceDescribedTag
 
                     glossaryItemsForHtml =
                         [ defaultComputerScienceItem
@@ -257,9 +263,9 @@ suite =
                 glossaryItems
                     |> GlossaryItems.tagsWithDescriptions
                     |> Expect.equal
-                        [ ( computerScienceTag, computerScienceTagDescription )
-                        , ( financeTag, financeTagDescription )
-                        , ( gardeningTag, gardeningTagDescription )
+                        [ computerScienceDescribedTag
+                        , financeDescribedTag
+                        , gardeningDescribedTag
                         ]
         , test "gets all tags along with their tag IDs" <|
             \_ ->
@@ -433,8 +439,8 @@ suite =
                     glossaryItems_ : Result String GlossaryItems
                     glossaryItems_ =
                         GlossaryItems.fromList
-                            [ ( computerScienceTag, computerScienceTagDescription )
-                            , ( financeTag, financeTagDescription )
+                            [ computerScienceDescribedTag
+                            , financeDescribedTag
                             ]
                             [ defaultComputerScienceItem_
                             , defaultFinanceItem_
@@ -511,10 +517,10 @@ suite =
         , test "sorts tags in items alphabetically" <|
             \_ ->
                 GlossaryItems.fromList
-                    [ ( financeTag, financeTagDescription )
-                    , ( houseworkTag, houseworkTagDescription )
-                    , ( gardeningTag, gardeningTagDescription )
-                    , ( computerScienceTag, computerScienceTagDescription )
+                    [ financeDescribedTag
+                    , houseworkDescribedTag
+                    , gardeningDescribedTag
+                    , computerScienceDescribedTag
                     ]
                     [ GlossaryItemForHtml.create
                         (GlossaryItemForHtml.id defaultComputerScienceItem)
@@ -549,10 +555,10 @@ suite =
         , test "sorts tags alphabetically" <|
             \_ ->
                 GlossaryItems.fromList
-                    [ ( financeTag, financeTagDescription )
-                    , ( houseworkTag, houseworkTagDescription )
-                    , ( gardeningTag, gardeningTagDescription )
-                    , ( computerScienceTag, computerScienceTagDescription )
+                    [ financeDescribedTag
+                    , houseworkDescribedTag
+                    , gardeningDescribedTag
+                    , computerScienceDescribedTag
                     ]
                     []
                     |> Result.map GlossaryItems.tags
@@ -560,26 +566,26 @@ suite =
         , test "sorts tags with descriptions alphabetically" <|
             \_ ->
                 GlossaryItems.fromList
-                    [ ( financeTag, financeTagDescription )
-                    , ( houseworkTag, houseworkTagDescription )
-                    , ( gardeningTag, gardeningTagDescription )
-                    , ( computerScienceTag, computerScienceTagDescription )
+                    [ financeDescribedTag
+                    , houseworkDescribedTag
+                    , gardeningDescribedTag
+                    , computerScienceDescribedTag
                     ]
                     []
                     |> Result.map GlossaryItems.tagsWithDescriptions
                     |> Expect.equal
                         (Ok
-                            [ ( computerScienceTag, computerScienceTagDescription )
-                            , ( financeTag, financeTagDescription )
-                            , ( gardeningTag, gardeningTagDescription )
-                            , ( houseworkTag, houseworkTagDescription )
+                            [ computerScienceDescribedTag
+                            , financeDescribedTag
+                            , gardeningDescribedTag
+                            , houseworkDescribedTag
                             ]
                         )
         , test "returns error for duplicate tags" <|
             \_ ->
                 GlossaryItems.fromList
-                    [ ( financeTag, financeTagDescription )
-                    , ( financeTag, financeTagDescription )
+                    [ financeDescribedTag
+                    , financeDescribedTag
                     ]
                     []
                     |> Expect.equal
@@ -587,7 +593,7 @@ suite =
         , test "returns error for duplicate disambiguated preferred terms" <|
             \_ ->
                 GlossaryItems.fromList
-                    [ ( financeTag, financeTagDescription ) ]
+                    [ financeDescribedTag ]
                     [ GlossaryItemForHtml.create
                         (GlossaryItemId.create "Foo (Finance) 1")
                         (Term.fromMarkdown "Foo" False)
@@ -618,7 +624,7 @@ suite =
         , test "returns error for multiple disambiguated preferred terms with the same fragment identifier" <|
             \_ ->
                 GlossaryItems.fromList
-                    [ ( financeTag, financeTagDescription ) ]
+                    [ financeDescribedTag ]
                     [ GlossaryItemForHtml.create
                         (GlossaryItemId.create "Foo (Finance)")
                         (Term.fromMarkdown "Foo" False)

@@ -40,6 +40,7 @@ import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.GlossaryChange exposing (GlossaryChange(..))
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
@@ -231,11 +232,11 @@ create :
     -> GlossaryTitle
     -> AboutParagraph
     -> List AboutLink
-    -> List ( Tag, TagDescription )
+    -> List DescribedTag
     -> List GlossaryItemForHtml
     -> GlossaryVersionNumber
     -> Glossary
-create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ title_ aboutParagraph aboutLinks tagsWithDescriptions itemsForHtml versionNumber_ =
+create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ title_ aboutParagraph aboutLinks describedTags itemsForHtml versionNumber_ =
     createWithDefaults
         (Just enableLastUpdatedDates_)
         (Just enableExportMenu_)
@@ -245,7 +246,7 @@ create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enable
         (Just title_)
         (Just aboutParagraph)
         (Just aboutLinks)
-        (Just tagsWithDescriptions)
+        (Just describedTags)
         itemsForHtml
         (Just versionNumber_)
 
@@ -259,11 +260,11 @@ createWithDefaults :
     -> Maybe GlossaryTitle
     -> Maybe AboutParagraph
     -> Maybe (List AboutLink)
-    -> Maybe (List ( Tag, TagDescription ))
+    -> Maybe (List DescribedTag)
     -> List GlossaryItemForHtml
     -> Maybe GlossaryVersionNumber
     -> Glossary
-createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ title_ aboutParagraph aboutLinks tagsWithDescriptions itemsForHtml versionNumber_ =
+createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ title_ aboutParagraph aboutLinks describedTags itemsForHtml versionNumber_ =
     let
         aboutSection_ =
             { paragraph = Maybe.withDefault (AboutParagraph.fromMarkdown I18n.elementNotFound) aboutParagraph
@@ -272,7 +273,7 @@ createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsBut
 
         items_ : Result String GlossaryItems
         items_ =
-            GlossaryItems.fromList (Maybe.withDefault [] tagsWithDescriptions) itemsForHtml
+            GlossaryItems.fromList (Maybe.withDefault [] describedTags) itemsForHtml
     in
     Glossary
         { enableLastUpdatedDates = Maybe.withDefault False enableLastUpdatedDates_
@@ -305,12 +306,12 @@ codec =
             (Codec.list
                 (Codec.object
                     (\tagString descriptionString ->
-                        ( Tag.fromMarkdown tagString
-                        , TagDescription.fromMarkdown descriptionString
-                        )
+                        DescribedTag.create
+                            (Tag.fromMarkdown tagString)
+                            (TagDescription.fromMarkdown descriptionString)
                     )
-                    |> Codec.field "tag" (Tuple.first >> Tag.raw) Codec.string
-                    |> Codec.field "description" (Tuple.second >> TagDescription.raw) Codec.string
+                    |> Codec.field "tag" (DescribedTag.tag >> Tag.raw) Codec.string
+                    |> Codec.field "description" (DescribedTag.description >> TagDescription.raw) Codec.string
                     |> Codec.buildObject
                 )
             )
@@ -504,18 +505,18 @@ toHtmlTree (Glossary glossary) =
                         True
                         []
                         (List.map
-                            (\( tag, description ) ->
+                            (\describedTag ->
                                 HtmlTree.Node "div"
                                     True
                                     []
                                     [ HtmlTree.Node "dt"
                                         False
                                         []
-                                        [ HtmlTree.Leaf <| Tag.raw tag ]
+                                        [ HtmlTree.Leaf <| Tag.raw <| DescribedTag.tag describedTag ]
                                     , HtmlTree.Node "dd"
                                         False
                                         []
-                                        [ HtmlTree.Leaf <| TagDescription.raw description ]
+                                        [ HtmlTree.Leaf <| TagDescription.raw <| DescribedTag.description describedTag ]
                                     ]
                             )
                             tagsWithDescriptions

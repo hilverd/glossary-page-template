@@ -2,6 +2,7 @@ module TestData exposing (..)
 
 import Data.AboutParagraph as AboutParagraph
 import Data.CardWidth as CardWidth
+import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
@@ -9,7 +10,7 @@ import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId as GlossaryItemId
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.GlossaryVersionNumber as GlossaryVersionNumber
 import Data.TagDescription as TagDescription exposing (TagDescription)
@@ -194,20 +195,19 @@ updatedLoanItem =
         Nothing
 
 
-glossaryItems : GlossaryItems
-glossaryItems =
-    GlossaryItems.fromList
-        [ ( computerScienceTag, computerScienceTagDescription )
-        , ( financeTag, financeTagDescription )
-        , ( gardeningTag, gardeningTagDescription )
-        ]
-        [ defaultComputerScienceItem
-        , defaultFinanceItem
-        , informationRetrievalItem
-        , interestRateItem
-        , loanItem
-        ]
-        |> Result.withDefault GlossaryItems.empty
+computerScienceDescribedTag : DescribedTag
+computerScienceDescribedTag =
+    DescribedTag.create computerScienceTag computerScienceTagDescription
+
+
+financeDescribedTag : DescribedTag
+financeDescribedTag =
+    DescribedTag.create financeTag financeTagDescription
+
+
+gardeningDescribedTag : DescribedTag
+gardeningDescribedTag =
+    DescribedTag.create gardeningTag gardeningTagDescription
 
 
 glossary : Glossary
@@ -221,9 +221,9 @@ glossary =
         (GlossaryTitle.fromMarkdown "Example Glossary")
         (AboutParagraph.fromMarkdown "An example glossary.")
         []
-        [ ( computerScienceTag, computerScienceTagDescription )
-        , ( financeTag, financeTagDescription )
-        , ( gardeningTag, gardeningTagDescription )
+        [ computerScienceDescribedTag
+        , financeDescribedTag
+        , gardeningDescribedTag
         ]
         [ defaultComputerScienceItem
         , defaultFinanceItem
@@ -232,3 +232,8 @@ glossary =
         , loanItem
         ]
         GlossaryVersionNumber.initial
+
+
+glossaryItems : GlossaryItems
+glossaryItems =
+    Glossary.items glossary

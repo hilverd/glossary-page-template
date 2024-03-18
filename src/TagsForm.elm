@@ -1,8 +1,9 @@
 module TagsForm exposing (Row(..), TagsForm, addRow, changes, create, deleteRow, hasValidationErrors, rows, updateTag, updateTagDescription)
 
 import Array exposing (Array)
-import Data.GlossaryItem.Tag as Tag exposing (Tag)
-import Data.TagDescription as TagDescription exposing (TagDescription)
+import Data.DescribedTag as DescribedTag exposing (DescribedTag)
+import Data.GlossaryItem.Tag as Tag
+import Data.TagDescription as TagDescription
 import Data.TagId exposing (TagId)
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import Extras.Array
@@ -38,17 +39,19 @@ changes tagsForm =
                     (\row ->
                         case row of
                             Existing { id, tagField, tagDescriptionField } ->
-                                TagsChanges.update id
-                                    (tagField |> TagField.raw |> String.trim |> Tag.fromMarkdown)
-                                    (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
+                                TagsChanges.update id <|
+                                    DescribedTag.create
+                                        (tagField |> TagField.raw |> String.trim |> Tag.fromMarkdown)
+                                        (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
 
                             Deleted tagId ->
                                 TagsChanges.remove tagId
 
                             New { tagField, tagDescriptionField } ->
-                                TagsChanges.insert
-                                    (tagField |> TagField.raw |> String.trim |> Tag.fromMarkdown)
-                                    (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
+                                TagsChanges.insert <|
+                                    DescribedTag.create
+                                        (tagField |> TagField.raw |> String.trim |> Tag.fromMarkdown)
+                                        (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
                     )
                     TagsChanges.empty
 
@@ -60,21 +63,23 @@ rows tagsForm =
             form.rows
 
 
-create : List { id : TagId, tag : Tag, description : TagDescription } -> TagsForm
+create : List { id : TagId, describedTag : DescribedTag } -> TagsForm
 create rows_ =
     TagsForm
         { rows =
             rows_
                 |> List.map
-                    (\{ id, tag, description } ->
+                    (\{ id, describedTag } ->
                         Existing
                             { id = id
                             , tagField =
-                                tag
+                                describedTag
+                                    |> DescribedTag.tag
                                     |> Tag.raw
                                     |> TagField.fromString
                             , tagDescriptionField =
-                                description
+                                describedTag
+                                    |> DescribedTag.description
                                     |> TagDescription.raw
                                     |> TagDescriptionField.fromString
                             }

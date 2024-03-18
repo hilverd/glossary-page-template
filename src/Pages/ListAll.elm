@@ -41,6 +41,7 @@ import Components.SearchDialog
 import Components.SelectMenu
 import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.Editability as Editability exposing (Editability(..))
 import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChange as GlossaryChange
@@ -58,7 +59,7 @@ import Data.GradualVisibility as GradualVisibility exposing (GradualVisibility)
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Saving exposing (Saving(..))
-import Data.TagDescription as TagDescription exposing (TagDescription)
+import Data.TagDescription as TagDescription
 import Data.TagId exposing (TagId)
 import Data.Theme exposing (Theme(..))
 import ElementIds
@@ -1482,7 +1483,7 @@ viewCards :
     ->
         { filterByTagId_ : Maybe TagId
         , tags : List Tag
-        , filterByTagWithDescription_ : Maybe ( Tag, TagDescription )
+        , filterByDescribedTag_ : Maybe DescribedTag
         }
     -> QueryParameters
     -> Maybe GlossaryItemId
@@ -1490,11 +1491,11 @@ viewCards :
     -> GlossaryItems
     -> ( List ( GlossaryItemId, GlossaryItemForHtml ), List ( GlossaryItemId, GlossaryItemForHtml ) )
     -> Html Msg
-viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates, noModalDialogShown_, editing } { filterByTagId_, tags, filterByTagWithDescription_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates, noModalDialogShown_, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
         filterByTag : Maybe Tag
         filterByTag =
-            filterByTagWithDescription_ |> Maybe.map Tuple.first
+            Maybe.map DescribedTag.tag filterByDescribedTag_
 
         combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForHtml )
         combinedIndexedGlossaryItems =
@@ -1548,8 +1549,8 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
             [ class "mb-4" ]
             [ Extras.Html.showMaybe
                 (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
-                filterByTagWithDescription_
-            , Extras.Html.showIf (filterByTagWithDescription_ == Nothing) <|
+                filterByDescribedTag_
+            , Extras.Html.showIf (filterByDescribedTag_ == Nothing) <|
                 viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
             , Extras.Html.showIf editing <|
                 div
@@ -2063,8 +2064,8 @@ viewSelectCardWidth glossary model =
         ]
 
 
-viewCurrentTagFilter : { enableMathSupport : Bool, tabbable : Bool } -> ( Tag, TagDescription ) -> Html Msg
-viewCurrentTagFilter { enableMathSupport, tabbable } ( tag, tagDescription ) =
+viewCurrentTagFilter : { enableMathSupport : Bool, tabbable : Bool } -> DescribedTag -> Html Msg
+viewCurrentTagFilter { enableMathSupport, tabbable } describedTag =
     div
         [ class "pt-3" ]
         [ span
@@ -2074,7 +2075,7 @@ viewCurrentTagFilter { enableMathSupport, tabbable } ( tag, tagDescription ) =
             tabbable
             [ class "print:hidden mt-2" ]
             (PageMsg.Internal DoNotFilterByTag)
-            [ Tag.view enableMathSupport [] tag ]
+            [ Tag.view enableMathSupport [] <| DescribedTag.tag describedTag ]
         ]
 
 
@@ -2316,19 +2317,19 @@ pageTitle model glossary =
 
         _ ->
             let
-                filterByTagWithDescription_ : Maybe ( Tag, TagDescription )
+                filterByTagWithDescription_ : Maybe DescribedTag
                 filterByTagWithDescription_ =
                     filterByTagWithDescription model
             in
             filterByTagWithDescription_
                 |> Maybe.map
-                    (\( tag, _ ) ->
-                        Tag.inlineText tag ++ " · " ++ glossaryTitle
+                    (\describedTag ->
+                        Tag.inlineText (DescribedTag.tag describedTag) ++ " · " ++ glossaryTitle
                     )
                 |> Maybe.withDefault glossaryTitle
 
 
-filterByTagWithDescription : Model -> Maybe ( Tag, TagDescription )
+filterByTagWithDescription : Model -> Maybe DescribedTag
 filterByTagWithDescription model =
     case model.common.glossary of
         Ok glossary ->
@@ -2345,7 +2346,7 @@ filterByTagWithDescription model =
                             |> Maybe.andThen
                                 (\tag ->
                                     GlossaryItems.tagDescriptionFromId tagId items
-                                        |> Maybe.map (\description -> ( tag, description ))
+                                        |> Maybe.map (\description -> DescribedTag.create tag description)
                                 )
                     )
 
@@ -2379,7 +2380,7 @@ view model =
                 filterByTag_ =
                     filterByTagId model
 
-                filterByTagWithDescription_ : Maybe ( Tag, TagDescription )
+                filterByTagWithDescription_ : Maybe DescribedTag
                 filterByTagWithDescription_ =
                     filterByTagWithDescription model
 
@@ -2393,7 +2394,7 @@ view model =
 
                 filterByTag : Maybe Tag
                 filterByTag =
-                    filterByTagWithDescription_ |> Maybe.map Tuple.first
+                    filterByTagWithDescription_ |> Maybe.map DescribedTag.tag
 
                 ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
                     items
@@ -2582,11 +2583,10 @@ view model =
                                     [ id ElementIds.title ]
                                     [ filterByTagWithDescription_
                                         |> Maybe.map
-                                            (\( tag, _ ) ->
-                                                Tag.view
+                                            (DescribedTag.tag
+                                                >> Tag.view
                                                     model.common.enableMathSupport
                                                     [ class "text-3xl font-bold leading-tight" ]
-                                                    tag
                                             )
                                         |> Maybe.withDefault
                                             (glossary
@@ -2604,13 +2604,12 @@ view model =
                                 []
                                 [ filterByTagWithDescription_
                                     |> Maybe.map
-                                        (\( _, tagDescription ) ->
-                                            TagDescription.view
+                                        (DescribedTag.description
+                                            >> TagDescription.view
                                                 { enableMathSupport = model.common.enableMathSupport
                                                 , makeLinksTabbable = noModalDialogShown_
                                                 }
                                                 []
-                                                tagDescription
                                         )
                                     |> Maybe.withDefault
                                         (glossary
@@ -2666,7 +2665,7 @@ view model =
                                             }
                                             { filterByTagId_ = filterByTagId model
                                             , tags = GlossaryItems.tags items
-                                            , filterByTagWithDescription_ = filterByTagWithDescription_
+                                            , filterByDescribedTag_ = filterByTagWithDescription_
                                             }
                                             model.common.queryParameters
                                             model.itemWithFocus
@@ -2678,7 +2677,7 @@ view model =
                                         model.searchDialog.term
                                         (filterByTagWithDescription_
                                             |> Maybe.map
-                                                (\( tag, _ ) ->
+                                                (\describedTag ->
                                                     span
                                                         [ class "inline-flex flex-wrap items-center" ]
                                                         [ Icons.exclamation
@@ -2690,7 +2689,7 @@ view model =
                                                             [ text I18n.filteringByTag ]
                                                         , span []
                                                             [ text " \""
-                                                            , Tag.view model.common.enableMathSupport [] tag
+                                                            , Tag.view model.common.enableMathSupport [] <| DescribedTag.tag describedTag
                                                             , text "\""
                                                             ]
                                                         ]

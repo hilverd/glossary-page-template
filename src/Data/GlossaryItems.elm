@@ -29,6 +29,7 @@ module Data.GlossaryItems exposing
 
 -}
 
+import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.GlossaryItem as GlossaryItem exposing (GlossaryItem)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
@@ -210,8 +211,8 @@ empty =
 
 {-| Convert a list of glossary items for/from HTML into a `GlossaryItems`.
 -}
-fromList : List ( Tag, TagDescription ) -> List GlossaryItemForHtml -> Result String GlossaryItems
-fromList tagsWithDescriptions_ glossaryItemsForHtml =
+fromList : List DescribedTag -> List GlossaryItemForHtml -> Result String GlossaryItems
+fromList describedTags_ glossaryItemsForHtml =
     let
         itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_ : DuplicateRejectingDict String GlossaryItemId
         itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_ =
@@ -230,8 +231,8 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
 
         tagById : TagIdDict Tag
         tagById =
-            tagsWithDescriptions_
-                |> List.map Tuple.first
+            describedTags_
+                |> List.map DescribedTag.tag
                 |> List.indexedMap (String.fromInt >> TagId.create >> Tuple.pair)
                 |> TagIdDict.fromList
 
@@ -270,12 +271,12 @@ fromList tagsWithDescriptions_ glossaryItemsForHtml =
 
         tagDescriptionById : TagIdDict TagDescription
         tagDescriptionById =
-            tagsWithDescriptions_
+            describedTags_
                 |> List.foldl
-                    (\( tag, description ) result ->
+                    (\describedTag result ->
                         tagIdByRawTag
-                            |> DuplicateRejectingDict.get (Tag.raw tag)
-                            |> Maybe.map (\tagId -> TagIdDict.insert tagId description result)
+                            |> DuplicateRejectingDict.get (describedTag |> DescribedTag.tag |> Tag.raw)
+                            |> Maybe.map (\tagId -> TagIdDict.insert tagId (DescribedTag.description describedTag) result)
                             |> Maybe.withDefault result
                     )
                     TagIdDict.empty
@@ -488,7 +489,14 @@ applyTagsChanges tagsChanges glossaryItems =
                 |> List.foldl
                     (\tagsChange result ->
                         case ( result, tagsChange ) of
-                            ( GlossaryItems items, TagsChanges.Insertion tag tagDescription ) ->
+                            ( GlossaryItems items, TagsChanges.Insertion describedTag ) ->
+                                let
+                                    tag =
+                                        DescribedTag.tag describedTag
+
+                                    tagDescription =
+                                        DescribedTag.description describedTag
+                                in
                                 GlossaryItems
                                     { items
                                         | tagById = TagIdDict.insert items.nextTagId tag items.tagById
@@ -497,7 +505,14 @@ applyTagsChanges tagsChanges glossaryItems =
                                         , nextTagId = TagId.increment items.nextTagId
                                     }
 
-                            ( GlossaryItems items, TagsChanges.Update tagId tag tagDescription ) ->
+                            ( GlossaryItems items, TagsChanges.Update tagId describedTag ) ->
+                                let
+                                    tag =
+                                        DescribedTag.tag describedTag
+
+                                    tagDescription =
+                                        DescribedTag.description describedTag
+                                in
                                 GlossaryItems
                                     { items
                                         | tagById = TagIdDict.insert tagId tag items.tagById
@@ -712,28 +727,35 @@ tags (GlossaryItems items) =
 {-| The tags for these glossary items along with their IDs and descriptions.
 Tags can exist without being used in any items.
 -}
-tagsWithIdsAndDescriptions : GlossaryItems -> List { id : TagId, tag : Tag, description : TagDescription }
+tagsWithIdsAndDescriptions : GlossaryItems -> List { id : TagId, describedTag : DescribedTag }
 tagsWithIdsAndDescriptions (GlossaryItems items) =
     items.tagDescriptionById
         |> TagIdDict.toList
         |> List.filterMap
             (\( id, description ) ->
                 TagIdDict.get id items.tagById
-                    |> Maybe.map (\tag -> { id = id, tag = tag, description = description })
+                    |> Maybe.map (\tag -> { id = id, describedTag = DescribedTag.create tag description })
             )
         |> List.sortWith
             (\record1 record2 ->
-                Tag.compareAlphabetically record1.tag record2.tag
+                let
+                    tag1 =
+                        DescribedTag.tag record1.describedTag
+
+                    tag2 =
+                        DescribedTag.tag record2.describedTag
+                in
+                Tag.compareAlphabetically tag1 tag2
             )
 
 
 {-| Similar to `tagsWithIdsAndDescriptions` but without IDs being returned.
 -}
-tagsWithDescriptions : GlossaryItems -> List ( Tag, TagDescription )
+tagsWithDescriptions : GlossaryItems -> List DescribedTag
 tagsWithDescriptions glossaryItems =
     glossaryItems
         |> tagsWithIdsAndDescriptions
-        |> List.map (\{ tag, description } -> ( tag, description ))
+        |> List.map .describedTag
 
 
 {-| The tags for these glossary items along with their tag IDs.
