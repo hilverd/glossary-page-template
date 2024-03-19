@@ -1,33 +1,43 @@
-module Data.DescribedTag exposing (DescribedTag, create, tag, description, codec)
+module Data.DescribedTag exposing (DescribedTag, create, id, tag, description, codec)
 
 {-| A tag used in a glossary together with its description.
 
-@docs DescribedTag, create, tag, description, codec
+@docs DescribedTag, create, id, tag, description, codec
 
 -}
 
 import Codec exposing (Codec)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.TagDescription as TagDescription exposing (TagDescription)
+import Data.TagId as TagId exposing (TagId)
 
 
 {-| A tag together with its description.
 -}
 type DescribedTag
     = DescribedTag
-        { tag : Tag
+        { id : Maybe TagId
+        , tag : Tag
         , description : TagDescription
         }
 
 
 {-| Create a DescribedTag from its parts.
 -}
-create : Tag -> TagDescription -> DescribedTag
-create tag_ description_ =
+create : Maybe TagId -> Tag -> TagDescription -> DescribedTag
+create id_ tag_ description_ =
     DescribedTag
-        { tag = tag_
+        { id = id_
+        , tag = tag_
         , description = description_
         }
+
+
+{-| The ID of a DescribedTag.
+-}
+id : DescribedTag -> Maybe TagId
+id (DescribedTag describedTag) =
+    describedTag.id
 
 
 {-| The tag of a DescribedTag.
@@ -50,6 +60,7 @@ codec : Codec DescribedTag
 codec =
     Codec.object
         create
+        |> Codec.field "id" id (Codec.maybe TagId.codec)
         |> Codec.field "tag" tag Tag.codec
         |> Codec.field "description" description TagDescription.codec
         |> Codec.buildObject

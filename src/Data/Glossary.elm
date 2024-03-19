@@ -43,13 +43,14 @@ import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.GlossaryChange exposing (GlossaryChange(..))
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
-import Data.GlossaryItem.Tag as Tag exposing (Tag)
+import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems, tagsWithDescriptions)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVersionNumber)
-import Data.TagDescription as TagDescription exposing (TagDescription)
+import Data.TagDescription as TagDescription
+import Data.TagId as TagId
 import Data.TagsChanges exposing (TagsChanges)
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
@@ -305,11 +306,13 @@ codec =
             (items >> GlossaryItems.tagsWithDescriptions >> Just)
             (Codec.list
                 (Codec.object
-                    (\tagString descriptionString ->
+                    (\tagIdString tagString descriptionString ->
                         DescribedTag.create
+                            (Maybe.map TagId.create tagIdString)
                             (Tag.fromMarkdown tagString)
                             (TagDescription.fromMarkdown descriptionString)
                     )
+                    |> Codec.optionalField "id" (DescribedTag.id >> Maybe.map TagId.toString) Codec.string
                     |> Codec.field "tag" (DescribedTag.tag >> Tag.raw) Codec.string
                     |> Codec.field "description" (DescribedTag.description >> TagDescription.raw) Codec.string
                     |> Codec.buildObject

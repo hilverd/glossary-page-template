@@ -41,6 +41,7 @@ changes tagsForm =
                             Existing { id, tagField, tagDescriptionField } ->
                                 TagsChanges.update id <|
                                     DescribedTag.create
+                                        (Just id)
                                         (tagField |> TagField.raw |> String.trim |> Tag.fromMarkdown)
                                         (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
 
@@ -50,6 +51,7 @@ changes tagsForm =
                             New { tagField, tagDescriptionField } ->
                                 TagsChanges.insert <|
                                     DescribedTag.create
+                                        Nothing
                                         (tagField |> TagField.raw |> String.trim |> Tag.fromMarkdown)
                                         (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
                     )

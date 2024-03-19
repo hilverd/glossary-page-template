@@ -2346,7 +2346,10 @@ filterByTagWithDescription model =
                             |> Maybe.andThen
                                 (\tag ->
                                     GlossaryItems.tagDescriptionFromId tagId items
-                                        |> Maybe.map (\description -> DescribedTag.create tag description)
+                                        |> Maybe.map
+                                            (\description ->
+                                                DescribedTag.create (Just tagId) tag description
+                                            )
                                 )
                     )
 

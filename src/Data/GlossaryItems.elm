@@ -232,8 +232,24 @@ fromList describedTags_ glossaryItemsForHtml =
         tagById : TagIdDict Tag
         tagById =
             describedTags_
-                |> List.map DescribedTag.tag
-                |> List.indexedMap (String.fromInt >> TagId.create >> Tuple.pair)
+                |> List.indexedMap
+                    (\generatedId describedTag ->
+                        let
+                            id : TagId
+                            id =
+                                DescribedTag.id describedTag
+                                    |> Maybe.withDefault
+                                        (generatedId
+                                            |> String.fromInt
+                                            |> TagId.create
+                                        )
+
+                            tag : Tag
+                            tag =
+                                DescribedTag.tag describedTag
+                        in
+                        ( id, tag )
+                    )
                 |> TagIdDict.fromList
 
         itemById =
@@ -491,17 +507,25 @@ applyTagsChanges tagsChanges glossaryItems =
                         case ( result, tagsChange ) of
                             ( GlossaryItems items, TagsChanges.Insertion describedTag ) ->
                                 let
+                                    id : TagId
+                                    id =
+                                        describedTag
+                                            |> DescribedTag.id
+                                            |> Maybe.withDefault items.nextTagId
+
+                                    tag : Tag
                                     tag =
                                         DescribedTag.tag describedTag
 
+                                    tagDescription : TagDescription
                                     tagDescription =
                                         DescribedTag.description describedTag
                                 in
                                 GlossaryItems
                                     { items
-                                        | tagById = TagIdDict.insert items.nextTagId tag items.tagById
-                                        , tagIdByRawTag = Dict.insert (Tag.raw tag) items.nextTagId items.tagIdByRawTag
-                                        , tagDescriptionById = TagIdDict.insert items.nextTagId tagDescription items.tagDescriptionById
+                                        | tagById = TagIdDict.insert id tag items.tagById
+                                        , tagIdByRawTag = Dict.insert (Tag.raw tag) id items.tagIdByRawTag
+                                        , tagDescriptionById = TagIdDict.insert id tagDescription items.tagDescriptionById
                                         , nextTagId = TagId.increment items.nextTagId
                                     }
 
@@ -734,7 +758,12 @@ tagsWithIdsAndDescriptions (GlossaryItems items) =
         |> List.filterMap
             (\( id, description ) ->
                 TagIdDict.get id items.tagById
-                    |> Maybe.map (\tag -> { id = id, describedTag = DescribedTag.create tag description })
+                    |> Maybe.map
+                        (\tag ->
+                            { id = id
+                            , describedTag = DescribedTag.create (Just id) tag description
+                            }
+                        )
             )
         |> List.sortWith
             (\record1 record2 ->

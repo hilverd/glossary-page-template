@@ -14,6 +14,12 @@ import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.GlossaryVersionNumber as GlossaryVersionNumber
 import Data.TagDescription as TagDescription exposing (TagDescription)
+import Data.TagId as TagId exposing (TagId)
+
+
+computerScienceTagId : TagId
+computerScienceTagId =
+    TagId.create "Computer Science"
 
 
 computerScienceTag : Tag
@@ -26,6 +32,11 @@ computerScienceTagDescription =
     TagDescription.fromMarkdown "These are items about computer science — the study of computation, information, and automation."
 
 
+financeTagId : TagId
+financeTagId =
+    TagId.create "Finance"
+
+
 financeTag : Tag
 financeTag =
     Tag.fromMarkdown "Finance"
@@ -34,6 +45,11 @@ financeTag =
 financeTagDescription : TagDescription
 financeTagDescription =
     TagDescription.fromMarkdown "These are items about finance — the study and discipline of money, currency and capital assets."
+
+
+gardeningTagId : TagId
+gardeningTagId =
+    TagId.create "Gardening"
 
 
 gardeningTag : Tag
@@ -197,17 +213,26 @@ updatedLoanItem =
 
 computerScienceDescribedTag : DescribedTag
 computerScienceDescribedTag =
-    DescribedTag.create computerScienceTag computerScienceTagDescription
+    DescribedTag.create
+        (Just computerScienceTagId)
+        computerScienceTag
+        computerScienceTagDescription
 
 
 financeDescribedTag : DescribedTag
 financeDescribedTag =
-    DescribedTag.create financeTag financeTagDescription
+    DescribedTag.create
+        (Just financeTagId)
+        financeTag
+        financeTagDescription
 
 
 gardeningDescribedTag : DescribedTag
 gardeningDescribedTag =
-    DescribedTag.create gardeningTag gardeningTagDescription
+    DescribedTag.create
+        (Just gardeningTagId)
+        gardeningTag
+        gardeningTagDescription
 
 
 glossary : Glossary
