@@ -17,6 +17,7 @@ import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItems as GlossaryItems
 import Data.Saving exposing (Saving(..))
 import Data.TagDescription as TagDescription
+import Data.TagId as TagId
 import ElementIds
 import Extras.Html
 import Extras.HtmlAttribute
@@ -117,7 +118,7 @@ update msg model =
             let
                 form : TagsForm
                 form =
-                    Form.addRow model.form
+                    Form.addRow (TagId.create "TODO: this needs a generated UUID") model.form
 
                 latestIndex : Int
                 latestIndex =

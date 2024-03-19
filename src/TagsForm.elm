@@ -21,7 +21,8 @@ type Row
         }
     | Deleted TagId
     | New
-        { tagField : TagField
+        { id : TagId
+        , tagField : TagField
         , tagDescriptionField : TagDescriptionField
         }
 
@@ -48,10 +49,10 @@ changes tagsForm =
                             Deleted tagId ->
                                 TagsChanges.remove tagId
 
-                            New { tagField, tagDescriptionField } ->
+                            New { id, tagField, tagDescriptionField } ->
                                 TagsChanges.insert <|
                                     DescribedTag.create
-                                        (TagId.create "TODO: this needs a generated UUID")
+                                        id
                                         (tagField |> TagField.raw |> String.trim |> Tag.fromMarkdown)
                                         (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
                     )
@@ -170,9 +171,10 @@ validate tagsForm =
                         Deleted _ ->
                             row
 
-                        New { tagField, tagDescriptionField } ->
+                        New { id, tagField, tagDescriptionField } ->
                             New
-                                { tagField = validateTagField tagField
+                                { id = id
+                                , tagField = validateTagField tagField
                                 , tagDescriptionField = validateTagDescriptionField tagDescriptionField
                                 }
 
@@ -293,15 +295,20 @@ updateTagDescription index body tagsForm =
                 |> validate
 
 
-addRow : TagsForm -> TagsForm
-addRow tagsForm =
+addRow : TagId -> TagsForm -> TagsForm
+addRow id tagsForm =
     case tagsForm of
         TagsForm form ->
             TagsForm
                 { form
                     | rows =
                         Array.push
-                            (New { tagField = TagField.empty, tagDescriptionField = TagDescriptionField.empty })
+                            (New
+                                { id = id
+                                , tagField = TagField.empty
+                                , tagDescriptionField = TagDescriptionField.empty
+                                }
+                            )
                             form.rows
                 }
                 |> validate
