@@ -308,11 +308,11 @@ codec =
                 (Codec.object
                     (\tagIdString tagString descriptionString ->
                         DescribedTag.create
-                            (Maybe.map TagId.create tagIdString)
+                            (TagId.create tagIdString)
                             (Tag.fromMarkdown tagString)
                             (TagDescription.fromMarkdown descriptionString)
                     )
-                    |> Codec.optionalField "id" (DescribedTag.id >> Maybe.map TagId.toString) Codec.string
+                    |> Codec.field "id" (DescribedTag.id >> TagId.toString) Codec.string
                     |> Codec.field "tag" (DescribedTag.tag >> Tag.raw) Codec.string
                     |> Codec.field "description" (DescribedTag.description >> TagDescription.raw) Codec.string
                     |> Codec.buildObject

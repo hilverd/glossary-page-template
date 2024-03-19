@@ -22,7 +22,7 @@ houseworkTagId =
 
 houseworkDescribedTag : DescribedTag.DescribedTag
 houseworkDescribedTag =
-    DescribedTag.create (Just <| houseworkTagId) houseworkTag houseworkTagDescription
+    DescribedTag.create houseworkTagId houseworkTag houseworkTagDescription
 
 
 suite : Test
@@ -591,7 +591,7 @@ suite =
                 GlossaryItems.fromList
                     [ financeDescribedTag
                     , DescribedTag.create
-                        (Just <| TagId.create "some-other-tag-id")
+                        (TagId.create "some-other-tag-id")
                         financeTag
                         financeTagDescription
                     ]

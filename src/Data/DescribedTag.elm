@@ -16,7 +16,7 @@ import Data.TagId as TagId exposing (TagId)
 -}
 type DescribedTag
     = DescribedTag
-        { id : Maybe TagId
+        { id : TagId
         , tag : Tag
         , description : TagDescription
         }
@@ -24,7 +24,7 @@ type DescribedTag
 
 {-| Create a DescribedTag from its parts.
 -}
-create : Maybe TagId -> Tag -> TagDescription -> DescribedTag
+create : TagId -> Tag -> TagDescription -> DescribedTag
 create id_ tag_ description_ =
     DescribedTag
         { id = id_
@@ -35,7 +35,7 @@ create id_ tag_ description_ =
 
 {-| The ID of a DescribedTag.
 -}
-id : DescribedTag -> Maybe TagId
+id : DescribedTag -> TagId
 id (DescribedTag describedTag) =
     describedTag.id
 
@@ -60,7 +60,7 @@ codec : Codec DescribedTag
 codec =
     Codec.object
         create
-        |> Codec.field "id" id (Codec.maybe TagId.codec)
+        |> Codec.field "id" id TagId.codec
         |> Codec.field "tag" tag Tag.codec
         |> Codec.field "description" description TagDescription.codec
         |> Codec.buildObject

@@ -4,7 +4,7 @@ import Array exposing (Array)
 import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.GlossaryItem.Tag as Tag
 import Data.TagDescription as TagDescription
-import Data.TagId exposing (TagId)
+import Data.TagId as TagId exposing (TagId)
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import Extras.Array
 import Internationalisation as I18n
@@ -41,7 +41,7 @@ changes tagsForm =
                             Existing { id, tagField, tagDescriptionField } ->
                                 TagsChanges.update id <|
                                     DescribedTag.create
-                                        (Just id)
+                                        id
                                         (tagField |> TagField.raw |> String.trim |> Tag.fromMarkdown)
                                         (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
 
@@ -51,7 +51,7 @@ changes tagsForm =
                             New { tagField, tagDescriptionField } ->
                                 TagsChanges.insert <|
                                     DescribedTag.create
-                                        Nothing
+                                        (TagId.create "TODO: this needs a generated UUID")
                                         (tagField |> TagField.raw |> String.trim |> Tag.fromMarkdown)
                                         (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
                     )

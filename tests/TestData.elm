@@ -214,7 +214,7 @@ updatedLoanItem =
 computerScienceDescribedTag : DescribedTag
 computerScienceDescribedTag =
     DescribedTag.create
-        (Just computerScienceTagId)
+        computerScienceTagId
         computerScienceTag
         computerScienceTagDescription
 
@@ -222,7 +222,7 @@ computerScienceDescribedTag =
 financeDescribedTag : DescribedTag
 financeDescribedTag =
     DescribedTag.create
-        (Just financeTagId)
+        financeTagId
         financeTag
         financeTagDescription
 
@@ -230,7 +230,7 @@ financeDescribedTag =
 gardeningDescribedTag : DescribedTag
 gardeningDescribedTag =
     DescribedTag.create
-        (Just gardeningTagId)
+        gardeningTagId
         gardeningTag
         gardeningTagDescription
 

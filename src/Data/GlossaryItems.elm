@@ -232,23 +232,9 @@ fromList describedTags_ glossaryItemsForHtml =
         tagById : TagIdDict Tag
         tagById =
             describedTags_
-                |> List.indexedMap
-                    (\generatedId describedTag ->
-                        let
-                            id : TagId
-                            id =
-                                DescribedTag.id describedTag
-                                    |> Maybe.withDefault
-                                        (generatedId
-                                            |> String.fromInt
-                                            |> TagId.create
-                                        )
-
-                            tag : Tag
-                            tag =
-                                DescribedTag.tag describedTag
-                        in
-                        ( id, tag )
+                |> List.map
+                    (\describedTag ->
+                        ( DescribedTag.id describedTag, DescribedTag.tag describedTag )
                     )
                 |> TagIdDict.fromList
 
@@ -509,9 +495,7 @@ applyTagsChanges tagsChanges glossaryItems =
                                 let
                                     id : TagId
                                     id =
-                                        describedTag
-                                            |> DescribedTag.id
-                                            |> Maybe.withDefault items.nextTagId
+                                        DescribedTag.id describedTag
 
                                     tag : Tag
                                     tag =
@@ -761,7 +745,7 @@ tagsWithIdsAndDescriptions (GlossaryItems items) =
                     |> Maybe.map
                         (\tag ->
                             { id = id
-                            , describedTag = DescribedTag.create (Just id) tag description
+                            , describedTag = DescribedTag.create id tag description
                             }
                         )
             )

@@ -43,6 +43,7 @@ if (containerElement) {
 
     const tagsWithDescriptions: { tag: string, description: string }[] = tagDivElements.map(tagDivElement => {
         return {
+            id: tagDivElement.dataset.id || self.crypto.randomUUID(),
             tag: tagDivElement.querySelector('dt')?.textContent?.trim() || '',
             description: tagDivElement.querySelector('dd')?.textContent?.trim() || ''
         }
