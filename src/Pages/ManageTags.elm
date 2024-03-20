@@ -1,4 +1,4 @@
-module Pages.ManageTags exposing (InternalMsg, Model, Msg, init, subscriptions, update, view)
+port module Pages.ManageTags exposing (InternalMsg, Model, Msg, init, subscriptions, update, view)
 
 import Accessibility exposing (Html, div, form, h1, main_, p, span, text)
 import Accessibility.Aria
@@ -67,6 +67,7 @@ updateForm f model =
 type InternalMsg
     = NoOp
     | AddRow
+    | ReceiveUuidForAddingRow String
     | DeleteRow Int
     | UpdateTag Int String
     | UpdateTagDescription Int String
@@ -105,6 +106,16 @@ init common =
 
 
 
+-- PORTS
+
+
+port generateUuid : () -> Cmd msg
+
+
+port receiveUuidForAddingRow : (String -> msg) -> Sub msg
+
+
+
 -- UPDATE
 
 
@@ -115,10 +126,13 @@ update msg model =
             ( model, Cmd.none )
 
         AddRow ->
+            ( model, generateUuid () )
+
+        ReceiveUuidForAddingRow uuid ->
             let
                 form : TagsForm
                 form =
-                    Form.addRow (TagId.create "TODO: this needs a generated UUID") model.form
+                    Form.addRow (TagId.create uuid) model.form
 
                 latestIndex : Int
                 latestIndex =
@@ -528,4 +542,6 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    ReceiveUuidForAddingRow
+        |> receiveUuidForAddingRow
+        |> Sub.map PageMsg.Internal

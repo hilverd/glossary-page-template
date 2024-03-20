@@ -244,6 +244,10 @@ if (containerElement) {
             reflectThemeInClassList();
         });
 
+        app.ports.generateUuid.subscribe(() => {
+            app.ports.receiveUuidForAddingRow.send(self.crypto.randomUUID());
+        });
+
         app.ports.getCurrentDateTimeAndNewIdForSaving.subscribe(() => {
             app.ports.receiveCurrentDateTimeAndNewIdForSaving.send([new Date().toISOString(), self.crypto.randomUUID()]);
         });
