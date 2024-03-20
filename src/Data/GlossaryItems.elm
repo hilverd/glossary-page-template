@@ -1,7 +1,7 @@
 module Data.GlossaryItems exposing
     ( GlossaryItems
     , empty, fromList, applyTagsChanges, insert, update, remove
-    , get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
+    , get, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
 
@@ -20,7 +20,7 @@ module Data.GlossaryItems exposing
 
 # Query
 
-@docs get, tags, tagsWithIdsAndDescriptions, tagsWithDescriptions, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
+@docs get, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
 
 
 # Export
@@ -40,7 +40,7 @@ import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemFor
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
 import Data.TagDescription exposing (TagDescription)
-import Data.TagId as TagId exposing (TagId)
+import Data.TagId exposing (TagId)
 import Data.TagIdDict as TagIdDict exposing (TagIdDict)
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import Dict exposing (Dict)
@@ -526,7 +526,7 @@ applyTagsChanges tagsChanges glossaryItems =
     resultBeforeValidation
         |> orderedAlphabetically Nothing
         |> List.map Tuple.second
-        |> fromList (tagsWithDescriptions resultBeforeValidation)
+        |> fromList (describedTags resultBeforeValidation)
 
 
 {-| Insert an item, returning the ID of the new item.
@@ -540,7 +540,7 @@ insert item glossaryItems =
                 |> orderedAlphabetically Nothing
                 |> List.map Tuple.second
                 |> (::) item
-                |> fromList (tagsWithDescriptions glossaryItems)
+                |> fromList (describedTags glossaryItems)
 
         insertedItemId : GlossaryItemId
         insertedItemId =
@@ -572,7 +572,7 @@ update itemId item glossaryItems =
                 else
                     item_
             )
-        |> fromList (tagsWithDescriptions glossaryItems)
+        |> fromList (describedTags glossaryItems)
 
 
 {-| Remove the item associated with an ID. Do nothing if the ID is not found.
@@ -589,7 +589,7 @@ remove itemId glossaryItems =
                 else
                     Just itemForHtml
             )
-        |> fromList (tagsWithDescriptions glossaryItems)
+        |> fromList (describedTags glossaryItems)
 
 
 relatedPreferredTerms_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItemId -> GlossaryItems -> Maybe (List DisambiguatedTerm)
@@ -720,40 +720,22 @@ tags (GlossaryItems items) =
 {-| The tags for these glossary items along with their IDs and descriptions.
 Tags can exist without being used in any items.
 -}
-tagsWithIdsAndDescriptions : GlossaryItems -> List { id : TagId, describedTag : DescribedTag }
-tagsWithIdsAndDescriptions (GlossaryItems items) =
+describedTags : GlossaryItems -> List DescribedTag
+describedTags (GlossaryItems items) =
     items.tagDescriptionById
         |> TagIdDict.toList
         |> List.filterMap
             (\( id, description ) ->
                 TagIdDict.get id items.tagById
                     |> Maybe.map
-                        (\tag ->
-                            { id = id
-                            , describedTag = DescribedTag.create id tag description
-                            }
-                        )
+                        (\tag -> DescribedTag.create id tag description)
             )
         |> List.sortWith
-            (\record1 record2 ->
-                let
-                    tag1 =
-                        DescribedTag.tag record1.describedTag
-
-                    tag2 =
-                        DescribedTag.tag record2.describedTag
-                in
-                Tag.compareAlphabetically tag1 tag2
+            (\describedTag1 describedTag2 ->
+                Tag.compareAlphabetically
+                    (DescribedTag.tag describedTag1)
+                    (DescribedTag.tag describedTag2)
             )
-
-
-{-| Similar to `tagsWithIdsAndDescriptions` but without IDs being returned.
--}
-tagsWithDescriptions : GlossaryItems -> List DescribedTag
-tagsWithDescriptions glossaryItems =
-    glossaryItems
-        |> tagsWithIdsAndDescriptions
-        |> List.map .describedTag
 
 
 {-| The tags for these glossary items along with their tag IDs.

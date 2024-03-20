@@ -8,7 +8,7 @@ module Export.Markdown exposing (toString, download)
 
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
-import Data.DescribedTag as DescribedTag exposing (DescribedTag)
+import Data.DescribedTag as DescribedTag
 import Data.Glossary as Glossary exposing (Glossary, aboutSection)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
@@ -151,7 +151,7 @@ toString glossary =
         tagsString =
             glossary
                 |> Glossary.items
-                |> GlossaryItems.tagsWithDescriptions
+                |> GlossaryItems.describedTags
                 |> List.map
                     (\describedTag ->
                         "* "

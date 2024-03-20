@@ -66,15 +66,15 @@ rows tagsForm =
             form.rows
 
 
-create : List { id : TagId, describedTag : DescribedTag } -> TagsForm
+create : List DescribedTag -> TagsForm
 create rows_ =
     TagsForm
         { rows =
             rows_
                 |> List.map
-                    (\{ id, describedTag } ->
+                    (\describedTag ->
                         Existing
-                            { id = id
+                            { id = DescribedTag.id describedTag
                             , tagField =
                                 describedTag
                                     |> DescribedTag.tag

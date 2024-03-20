@@ -46,7 +46,7 @@ import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelis
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId exposing (GlossaryItemId)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems, tagsWithDescriptions)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVersionNumber)
 import Data.TagDescription as TagDescription
@@ -303,7 +303,7 @@ codec =
         |> Codec.optionalField "aboutParagraph" (aboutSection >> .paragraph >> Just) (Codec.map AboutParagraph.fromMarkdown AboutParagraph.raw Codec.string)
         |> Codec.optionalField "aboutLinks" (aboutSection >> .links >> Just) (Codec.list AboutLink.codec)
         |> Codec.optionalField "tagsWithDescriptions"
-            (items >> GlossaryItems.tagsWithDescriptions >> Just)
+            (items >> GlossaryItems.describedTags >> Just)
             (Codec.list
                 (Codec.object
                     (\tagIdString tagString descriptionString ->
@@ -448,8 +448,8 @@ remove itemId glossary =
 toHtmlTree : Glossary -> HtmlTree
 toHtmlTree (Glossary glossary) =
     let
-        tagsWithDescriptions =
-            GlossaryItems.tagsWithDescriptions glossary.items
+        describedTags =
+            GlossaryItems.describedTags glossary.items
     in
     HtmlTree.Node "div"
         True
@@ -498,7 +498,7 @@ toHtmlTree (Glossary glossary) =
                         glossary.aboutSection.links
                     )
                 ]
-            , HtmlTree.showIf (not <| List.isEmpty tagsWithDescriptions) <|
+            , HtmlTree.showIf (not <| List.isEmpty describedTags) <|
                 HtmlTree.Node
                     "div"
                     True
@@ -522,7 +522,7 @@ toHtmlTree (Glossary glossary) =
                                         [ HtmlTree.Leaf <| TagDescription.raw <| DescribedTag.description describedTag ]
                                     ]
                             )
-                            tagsWithDescriptions
+                            describedTags
                         )
                     ]
             , HtmlTree.Node "article"

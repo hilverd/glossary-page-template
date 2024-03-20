@@ -87,7 +87,7 @@ init common =
               , form =
                     glossary
                         |> Glossary.items
-                        |> GlossaryItems.tagsWithIdsAndDescriptions
+                        |> GlossaryItems.describedTags
                         |> Form.create
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving

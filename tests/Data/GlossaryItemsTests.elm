@@ -38,7 +38,7 @@ suite =
                 in
                 glossaryItems
                     |> GlossaryItems.applyTagsChanges tagsChanges
-                    |> Result.map GlossaryItems.tagsWithDescriptions
+                    |> Result.map GlossaryItems.describedTags
                     |> Expect.equal
                         (Ok
                             [ computerScienceDescribedTag
@@ -118,7 +118,7 @@ suite =
                 in
                 glossaryItems
                     |> GlossaryItems.applyTagsChanges tagsChanges
-                    |> Result.map GlossaryItems.tagsWithDescriptions
+                    |> Result.map GlossaryItems.describedTags
                     |> Expect.equal
                         (Ok
                             [ computerScienceDescribedTag
@@ -266,7 +266,7 @@ suite =
         , test "gets all tags along with their descriptions" <|
             \_ ->
                 glossaryItems
-                    |> GlossaryItems.tagsWithDescriptions
+                    |> GlossaryItems.describedTags
                     |> Expect.equal
                         [ computerScienceDescribedTag
                         , financeDescribedTag
@@ -577,7 +577,7 @@ suite =
                     , computerScienceDescribedTag
                     ]
                     []
-                    |> Result.map GlossaryItems.tagsWithDescriptions
+                    |> Result.map GlossaryItems.describedTags
                     |> Expect.equal
                         (Ok
                             [ computerScienceDescribedTag
