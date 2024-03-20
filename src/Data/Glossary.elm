@@ -511,7 +511,7 @@ toHtmlTree (Glossary glossary) =
                             (\describedTag ->
                                 HtmlTree.Node "div"
                                     True
-                                    []
+                                    [ HtmlTree.Attribute "data-id" <| TagId.toString <| DescribedTag.id describedTag ]
                                     [ HtmlTree.Node "dt"
                                         False
                                         []
