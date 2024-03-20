@@ -69,7 +69,6 @@ type GlossaryItems
         , orderedAlphabetically : List GlossaryItemId
         , orderedByMostMentionedFirst : List GlossaryItemId
         , orderedFocusedOn : Maybe ( GlossaryItemId, ( List GlossaryItemId, List GlossaryItemId ) )
-        , nextTagId : TagId
         }
 
 
@@ -205,7 +204,6 @@ empty =
         , orderedAlphabetically = []
         , orderedByMostMentionedFirst = []
         , orderedFocusedOn = Nothing
-        , nextTagId = TagId.create "0"
         }
 
 
@@ -448,17 +446,6 @@ fromList describedTags_ glossaryItemsForHtml =
 
                 orderedByMostMentionedFirst_ =
                     orderByMostMentionedFirst glossaryItemsForHtml
-
-                nextTagId : TagId
-                nextTagId =
-                    tagById
-                        |> TagIdDict.keys
-                        |> List.map (TagId.toString >> String.toInt >> Maybe.withDefault 0)
-                        |> List.maximum
-                        |> Maybe.map ((+) 1)
-                        |> Maybe.withDefault 0
-                        |> String.fromInt
-                        |> TagId.create
             in
             GlossaryItems
                 { itemById = itemById
@@ -473,7 +460,6 @@ fromList describedTags_ glossaryItemsForHtml =
                 , orderedAlphabetically = orderedAlphabetically__
                 , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
                 , orderedFocusedOn = Nothing
-                , nextTagId = nextTagId
                 }
         )
         itemIdByFragmentIdentifierForRawDisambiguatedPreferredTermResult
@@ -510,7 +496,6 @@ applyTagsChanges tagsChanges glossaryItems =
                                         | tagById = TagIdDict.insert id tag items.tagById
                                         , tagIdByRawTag = Dict.insert (Tag.raw tag) id items.tagIdByRawTag
                                         , tagDescriptionById = TagIdDict.insert id tagDescription items.tagDescriptionById
-                                        , nextTagId = TagId.increment items.nextTagId
                                     }
 
                             ( GlossaryItems items, TagsChanges.Update tagId describedTag ) ->
