@@ -600,6 +600,7 @@ suite =
                         (Err "tag \"Finance\" appears multiple times")
         , test "returns error for duplicate disambiguated preferred terms" <|
             \_ ->
+                -- TODO: is this test essentially the same as the one below?
                 GlossaryItems.fromList
                     [ financeDescribedTag ]
                     [ GlossaryItemForHtml.create
