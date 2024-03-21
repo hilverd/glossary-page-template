@@ -4,7 +4,7 @@ import Array exposing (Array)
 import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.GlossaryItem.Tag as Tag
 import Data.TagDescription as TagDescription
-import Data.TagId as TagId exposing (TagId)
+import Data.TagId exposing (TagId)
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import Extras.Array
 import Internationalisation as I18n
