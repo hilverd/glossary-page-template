@@ -192,10 +192,10 @@ orderByMostMentionedFirst glossaryItemsForHtml =
 empty : GlossaryItems
 empty =
     GlossaryItems
-        { itemById = GlossaryItemIdDict.empty
-        , tagById = TagIdDict.empty
+        { tagById = TagIdDict.empty
         , tagIdByRawTag = Dict.empty
         , tagDescriptionById = TagIdDict.empty
+        , itemById = GlossaryItemIdDict.empty
         , disambiguationTagIdByItemId = GlossaryItemIdDict.empty
         , normalTagIdsByItemId = GlossaryItemIdDict.empty
         , itemIdsByTagId = TagIdDict.empty
@@ -212,6 +212,36 @@ empty =
 fromList : List DescribedTag -> List GlossaryItemForUi -> Result String GlossaryItems
 fromList describedTags_ glossaryItemsForHtml =
     let
+        tagById : TagIdDict Tag
+        tagById =
+            describedTags_
+                |> List.map
+                    (\describedTag ->
+                        ( DescribedTag.id describedTag, DescribedTag.tag describedTag )
+                    )
+                |> TagIdDict.fromList
+
+        tagIdByRawTag : DuplicateRejectingDict String TagId
+        tagIdByRawTag =
+            TagIdDict.foldl
+                (\tagId tag ->
+                    DuplicateRejectingDict.insert (Tag.raw tag) tagId
+                )
+                DuplicateRejectingDict.empty
+                tagById
+
+        tagDescriptionById : TagIdDict TagDescription
+        tagDescriptionById =
+            describedTags_
+                |> List.foldl
+                    (\describedTag result ->
+                        tagIdByRawTag
+                            |> DuplicateRejectingDict.get (describedTag |> DescribedTag.tag |> Tag.raw)
+                            |> Maybe.map (\tagId -> TagIdDict.insert tagId (DescribedTag.description describedTag) result)
+                            |> Maybe.withDefault result
+                    )
+                    TagIdDict.empty
+
         itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_ : DuplicateRejectingDict String GlossaryItemId
         itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_ =
             glossaryItemsForHtml
@@ -226,15 +256,6 @@ fromList describedTags_ glossaryItemsForHtml =
                             (GlossaryItemForUi.id item)
                     )
                     DuplicateRejectingDict.empty
-
-        tagById : TagIdDict Tag
-        tagById =
-            describedTags_
-                |> List.map
-                    (\describedTag ->
-                        ( DescribedTag.id describedTag, DescribedTag.tag describedTag )
-                    )
-                |> TagIdDict.fromList
 
         itemById =
             glossaryItemsForHtml
@@ -259,27 +280,6 @@ fromList describedTags_ glossaryItemsForHtml =
                         itemById1
                     )
                     GlossaryItemIdDict.empty
-
-        tagIdByRawTag : DuplicateRejectingDict String TagId
-        tagIdByRawTag =
-            TagIdDict.foldl
-                (\tagId tag ->
-                    DuplicateRejectingDict.insert (Tag.raw tag) tagId
-                )
-                DuplicateRejectingDict.empty
-                tagById
-
-        tagDescriptionById : TagIdDict TagDescription
-        tagDescriptionById =
-            describedTags_
-                |> List.foldl
-                    (\describedTag result ->
-                        tagIdByRawTag
-                            |> DuplicateRejectingDict.get (describedTag |> DescribedTag.tag |> Tag.raw)
-                            |> Maybe.map (\tagId -> TagIdDict.insert tagId (DescribedTag.description describedTag) result)
-                            |> Maybe.withDefault result
-                    )
-                    TagIdDict.empty
 
         ( disambiguationTagIdByItemId, normalTagIdsByItemId ) =
             glossaryItemsForHtml
@@ -448,10 +448,10 @@ fromList describedTags_ glossaryItemsForHtml =
                     orderByMostMentionedFirst glossaryItemsForHtml
             in
             GlossaryItems
-                { itemById = itemById
-                , tagById = tagById
+                { tagById = tagById
                 , tagIdByRawTag = tagIdByRawTag_
                 , tagDescriptionById = tagDescriptionById
+                , itemById = itemById
                 , disambiguationTagIdByItemId = disambiguationTagIdByItemId
                 , normalTagIdsByItemId = sortedNormalTagIdsByItemId
                 , itemIdsByTagId = itemIdsByTagId_
