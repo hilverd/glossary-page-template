@@ -8,7 +8,7 @@ import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml, lastUpdatedByEmailAddress)
+import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi, lastUpdatedByEmailAddress)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import ElementIds
@@ -55,7 +55,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
             let
                 index : GlossaryItemId
                 index =
-                    GlossaryItemForHtml.id glossaryItem
+                    GlossaryItemForUi.id glossaryItem
 
                 hasFocus : Bool
                 hasFocus =
@@ -64,16 +64,16 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                 disambiguatedPreferredTerm : Term
                 disambiguatedPreferredTerm =
                     glossaryItem
-                        |> GlossaryItemForHtml.disambiguatedPreferredTerm
+                        |> GlossaryItemForUi.disambiguatedPreferredTerm
                         |> DisambiguatedTerm.toTerm
 
                 alternativeTerms : List Term
                 alternativeTerms =
-                    GlossaryItemForHtml.alternativeTerms glossaryItem
+                    GlossaryItemForUi.alternativeTerms glossaryItem
 
                 tags : List Tag
                 tags =
-                    GlossaryItemForHtml.allTags glossaryItem
+                    GlossaryItemForUi.allTags glossaryItem
 
                 tagsNotBeingFilteredBy : List Tag
                 tagsNotBeingFilteredBy =
@@ -81,18 +81,18 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
 
                 itemHasSomeDefinitions : Bool
                 itemHasSomeDefinitions =
-                    GlossaryItemForHtml.definition glossaryItem /= Nothing
+                    GlossaryItemForUi.definition glossaryItem /= Nothing
 
                 definitions =
-                    GlossaryItemForHtml.definition glossaryItem
+                    GlossaryItemForUi.definition glossaryItem
                         |> Maybe.map List.singleton
                         |> Maybe.withDefault []
 
                 relatedTerms =
-                    GlossaryItemForHtml.relatedPreferredTerms glossaryItem
+                    GlossaryItemForUi.relatedPreferredTerms glossaryItem
 
                 needsUpdating =
-                    GlossaryItemForHtml.needsUpdating glossaryItem
+                    GlossaryItemForUi.needsUpdating glossaryItem
             in
             case style of
                 Preview ->
@@ -174,13 +174,13 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                     else
                         let
                             lastUpdatedDate =
-                                GlossaryItemForHtml.lastUpdatedDateAsIso8601 glossaryItem
+                                GlossaryItemForUi.lastUpdatedDateAsIso8601 glossaryItem
 
                             lastUpdatedByName =
-                                GlossaryItemForHtml.lastUpdatedByName glossaryItem
+                                GlossaryItemForUi.lastUpdatedByName glossaryItem
 
                             lastUpdatedByEmailAddress =
-                                GlossaryItemForHtml.lastUpdatedByEmailAddress glossaryItem
+                                GlossaryItemForUi.lastUpdatedByEmailAddress glossaryItem
                         in
                         if editable then
                             div
@@ -384,12 +384,12 @@ viewAsSingle :
     -> Html msg
 viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRelatedTerm } tagBeingFilteredBy glossaryItemWithPreviousAndNext =
     let
-        disambiguatedPreferredTermForPreviousOrNext : GlossaryItemForHtml -> Html msg
+        disambiguatedPreferredTermForPreviousOrNext : GlossaryItemForUi -> Html msg
         disambiguatedPreferredTermForPreviousOrNext glossaryItem =
             let
                 preferredTerm =
                     glossaryItem
-                        |> GlossaryItemForHtml.disambiguatedPreferredTerm
+                        |> GlossaryItemForUi.disambiguatedPreferredTerm
                         |> DisambiguatedTerm.toTerm
             in
             if Term.isAbbreviation preferredTerm then
@@ -411,37 +411,37 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                 disambiguatedPreferredTerm : Term
                 disambiguatedPreferredTerm =
                     glossaryItem
-                        |> GlossaryItemForHtml.disambiguatedPreferredTerm
+                        |> GlossaryItemForUi.disambiguatedPreferredTerm
                         |> DisambiguatedTerm.toTerm
 
                 alternativeTerms =
-                    GlossaryItemForHtml.alternativeTerms glossaryItem
+                    GlossaryItemForUi.alternativeTerms glossaryItem
 
                 tagsNotBeingFilteredBy : List Tag
                 tagsNotBeingFilteredBy =
                     glossaryItem
-                        |> GlossaryItemForHtml.allTags
+                        |> GlossaryItemForUi.allTags
                         |> List.filter (Just >> (/=) tagBeingFilteredBy)
 
                 definitions =
-                    GlossaryItemForHtml.definition glossaryItem
+                    GlossaryItemForUi.definition glossaryItem
                         |> Maybe.map List.singleton
                         |> Maybe.withDefault []
 
                 relatedTerms =
-                    GlossaryItemForHtml.relatedPreferredTerms glossaryItem
+                    GlossaryItemForUi.relatedPreferredTerms glossaryItem
 
                 needsUpdating =
-                    GlossaryItemForHtml.needsUpdating glossaryItem
+                    GlossaryItemForUi.needsUpdating glossaryItem
 
                 lastUpdatedDate =
-                    GlossaryItemForHtml.lastUpdatedDateAsIso8601 glossaryItem
+                    GlossaryItemForUi.lastUpdatedDateAsIso8601 glossaryItem
 
                 lastUpdatedByName =
-                    GlossaryItemForHtml.lastUpdatedByName glossaryItem
+                    GlossaryItemForUi.lastUpdatedByName glossaryItem
 
                 lastUpdatedByEmailAddress =
-                    GlossaryItemForHtml.lastUpdatedByEmailAddress glossaryItem
+                    GlossaryItemForUi.lastUpdatedByEmailAddress glossaryItem
             in
             Html.div []
                 [ Html.nav
@@ -453,7 +453,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                         [ Extras.Html.showMaybe
                             (\previousItem ->
                                 Components.Button.textWrapNormal
-                                    [ Html.Events.onClick <| onClickItem <| GlossaryItemForHtml.id previousItem ]
+                                    [ Html.Events.onClick <| onClickItem <| GlossaryItemForUi.id previousItem ]
                                     [ Icons.arrowLongLeft
                                         [ Svg.Attributes.class "h-5 w-5 shrink-0" ]
                                     , span
@@ -487,7 +487,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                         [ Extras.Html.showMaybe
                             (\nextItem ->
                                 Components.Button.textWrapNormal
-                                    [ Html.Events.onClick <| onClickItem <| GlossaryItemForHtml.id nextItem ]
+                                    [ Html.Events.onClick <| onClickItem <| GlossaryItemForUi.id nextItem ]
                                     [ span
                                         [ class "font-medium" ]
                                         [ disambiguatedPreferredTermForPreviousOrNext nextItem ]
@@ -548,7 +548,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                             enableMathSupport
                             False
                             True
-                            (GlossaryItemForHtml.definition glossaryItem /= Nothing)
+                            (GlossaryItemForUi.definition glossaryItem /= Nothing)
                             (Just onClickRelatedTerm)
                             relatedTerms
                     )

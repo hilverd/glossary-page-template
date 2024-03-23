@@ -8,7 +8,7 @@ import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -77,9 +77,9 @@ defaultComputerScienceDefinition =
     Definition.fromMarkdown "The preexisting value of a user-configurable setting that is assigned to a software application, computer program or device. Such settings are also called presets or factory presets, especially for electronic devices."
 
 
-defaultComputerScienceItem : GlossaryItemForHtml
+defaultComputerScienceItem : GlossaryItemForUi
 defaultComputerScienceItem =
-    GlossaryItemForHtml.create
+    GlossaryItemForUi.create
         (GlossaryItemId.create "Default (Computer Science)")
         (Term.fromMarkdown "Default" False)
         [ Term.fromMarkdown "Preset" False
@@ -100,9 +100,9 @@ defaultFinanceDefinition =
     Definition.fromMarkdown "In finance, default is failure to meet the legal obligations (or conditions) of a loan, for example when a home buyer fails to make a mortgage payment, or when a corporation or government fails to pay a bond which has reached maturity. A national or sovereign default is the failure or refusal of a government to repay its national debt."
 
 
-defaultFinanceItem : GlossaryItemForHtml
+defaultFinanceItem : GlossaryItemForUi
 defaultFinanceItem =
-    GlossaryItemForHtml.create
+    GlossaryItemForUi.create
         (GlossaryItemId.create "Default (Finance)")
         (Term.fromMarkdown "Default" False)
         []
@@ -121,9 +121,9 @@ informationRetrievalDefinition =
     Definition.fromMarkdown "Information retrieval (IR) in computing and information science is the process of obtaining information system resources that are relevant to an information need from a collection of those resources. Searches can be based on full-text or other content-based indexing."
 
 
-informationRetrievalItem : GlossaryItemForHtml
+informationRetrievalItem : GlossaryItemForUi
 informationRetrievalItem =
-    GlossaryItemForHtml.create
+    GlossaryItemForUi.create
         (GlossaryItemId.create "Information retrieval")
         (Term.fromMarkdown "Information retrieval" False)
         [ Term.fromMarkdown "IR" True ]
@@ -142,9 +142,9 @@ interestRateDefinition =
     Definition.fromMarkdown "An interest rate is the amount of interest due per period, as a proportion of the amount lent, deposited, or borrowed (called the principal sum). The total interest on an amount lent or borrowed depends on the principal sum, the interest rate, the compounding frequency, and the length of time over which it is lent, deposited, or borrowed."
 
 
-interestRateItem : GlossaryItemForHtml
+interestRateItem : GlossaryItemForUi
 interestRateItem =
-    GlossaryItemForHtml.create
+    GlossaryItemForUi.create
         (GlossaryItemId.create "Interest rate")
         (Term.fromMarkdown "Interest rate" False)
         [ Term.fromMarkdown "IR" True ]
@@ -158,9 +158,9 @@ interestRateItem =
         Nothing
 
 
-updatedInterestRateItem : GlossaryItemForHtml
+updatedInterestRateItem : GlossaryItemForUi
 updatedInterestRateItem =
-    GlossaryItemForHtml.create
+    GlossaryItemForUi.create
         (GlossaryItemId.create "Interest rate updated")
         (Term.fromMarkdown "Interest rate updated" False)
         [ Term.fromMarkdown "IR" True ]
@@ -179,9 +179,9 @@ loanDefinition =
     Definition.fromMarkdown "The transfer of money by one party to another with an agreement to pay it back. The recipient, or borrower, incurs a debt and is usually required to pay interest for the use of the money."
 
 
-loanItem : GlossaryItemForHtml
+loanItem : GlossaryItemForUi
 loanItem =
-    GlossaryItemForHtml.create
+    GlossaryItemForUi.create
         (GlossaryItemId.create "Loan")
         (Term.fromMarkdown "Loan" False)
         []
@@ -195,9 +195,9 @@ loanItem =
         Nothing
 
 
-updatedLoanItem : GlossaryItemForHtml
+updatedLoanItem : GlossaryItemForUi
 updatedLoanItem =
-    GlossaryItemForHtml.create
+    GlossaryItemForUi.create
         (GlossaryItemId.create "Loan")
         (Term.fromMarkdown "Loan" False)
         []

@@ -13,7 +13,7 @@ import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItems as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle
 import Extras.HtmlTree
@@ -68,7 +68,7 @@ paragraphs =
         >> String.join (crlf ++ crlf)
 
 
-itemToAnki : Bool -> GlossaryItemForHtml -> String
+itemToAnki : Bool -> GlossaryItemForUi -> String
 itemToAnki enableMathSupport glossaryItem =
     let
         quote : String -> String
@@ -76,14 +76,14 @@ itemToAnki enableMathSupport glossaryItem =
             "\"" ++ string ++ "\""
 
         definitions =
-            GlossaryItemForHtml.definition glossaryItem
+            GlossaryItemForUi.definition glossaryItem
                 |> Maybe.map List.singleton
                 |> Maybe.withDefault []
 
         front : String
         front =
             glossaryItem
-                |> GlossaryItemForHtml.allTerms
+                |> GlossaryItemForUi.allTerms
                 |> List.map (Term.htmlTreeForAnki enableMathSupport >> Extras.HtmlTree.toHtml >> escape)
                 |> htmlLines
                 |> quote
@@ -94,7 +94,7 @@ itemToAnki enableMathSupport glossaryItem =
                 let
                     relatedTerms : List DisambiguatedTerm
                     relatedTerms =
-                        GlossaryItemForHtml.relatedPreferredTerms glossaryItem
+                        GlossaryItemForUi.relatedPreferredTerms glossaryItem
                 in
                 if List.isEmpty relatedTerms then
                     ""
@@ -122,7 +122,7 @@ itemToAnki enableMathSupport glossaryItem =
 
         tags : String
         tags =
-            GlossaryItemForHtml.allTags glossaryItem
+            GlossaryItemForUi.allTags glossaryItem
                 |> List.map (Tag.inlineText >> String.replace " " "_" >> escape)
                 |> String.join " "
                 |> quote

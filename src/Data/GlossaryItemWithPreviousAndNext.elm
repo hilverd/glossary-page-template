@@ -1,10 +1,10 @@
 module Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 
-import Data.GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemForUi exposing (GlossaryItemForUi)
 
 
 type alias GlossaryItemWithPreviousAndNext =
-    { previous : Maybe GlossaryItemForHtml
-    , item : Maybe GlossaryItemForHtml
-    , next : Maybe GlossaryItemForHtml
+    { previous : Maybe GlossaryItemForUi
+    , item : Maybe GlossaryItemForUi
+    , next : Maybe GlossaryItemForUi
     }

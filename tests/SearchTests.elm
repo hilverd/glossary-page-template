@@ -4,7 +4,7 @@ import Components.SearchDialog as SearchDialog
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Expect
@@ -20,9 +20,9 @@ termFromBody body =
 loadedGlossaryItems : GlossaryItems
 loadedGlossaryItems =
     let
-        one : GlossaryItemForHtml
+        one : GlossaryItemForUi
         one =
-            GlossaryItemForHtml.create
+            GlossaryItemForUi.create
                 (GlossaryItemId.create "The term one")
                 (termFromBody "The term one")
                 []
@@ -35,9 +35,9 @@ loadedGlossaryItems =
                 Nothing
                 Nothing
 
-        two : GlossaryItemForHtml
+        two : GlossaryItemForUi
         two =
-            GlossaryItemForHtml.create
+            GlossaryItemForUi.create
                 (GlossaryItemId.create "Second the term")
                 (termFromBody "Second the term")
                 []
@@ -50,9 +50,9 @@ loadedGlossaryItems =
                 Nothing
                 Nothing
 
-        three : GlossaryItemForHtml
+        three : GlossaryItemForUi
         three =
-            GlossaryItemForHtml.create
+            GlossaryItemForUi.create
                 (GlossaryItemId.create "The term three")
                 (termFromBody "The term three")
                 []

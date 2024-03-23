@@ -50,7 +50,7 @@ import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (Disamb
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml, disambiguatedTerm)
+import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi, disambiguatedTerm)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
@@ -1193,9 +1193,9 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
                 { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable, enableLastUpdatedDates = enableLastUpdatedDates }
                 (Components.GlossaryItemCard.Normal
                     { tabbable = tabbable
-                    , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForHtml.id item
-                    , onClickEdit = PageMsg.NavigateToCreateOrEdit <| Just <| GlossaryItemForHtml.id item
-                    , onClickDelete = PageMsg.Internal <| ConfirmDelete <| GlossaryItemForHtml.id item
+                    , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForUi.id item
+                    , onClickEdit = PageMsg.NavigateToCreateOrEdit <| Just <| GlossaryItemForUi.id item
+                    , onClickDelete = PageMsg.Internal <| ConfirmDelete <| GlossaryItemForUi.id item
                     , onClickTag = PageMsg.Internal << FilterByTag
                     , onClickItem = PageMsg.Internal << ChangeLayoutToShowSingle
                     , onClickRelatedTerm = PageMsg.Internal << ShowRelatedTermAsSingle
@@ -1215,7 +1215,7 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
         itemWithPreviousAndNext.item
 
 
-itemWithPreviousAndNextForId : GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml ) -> GlossaryItemWithPreviousAndNext
+itemWithPreviousAndNextForId : GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForUi ) -> GlossaryItemWithPreviousAndNext
 itemWithPreviousAndNextForId id indexedGlossaryItems =
     let
         indexedGlossaryItemsArray =
@@ -1249,7 +1249,7 @@ viewSingleItemModalDialog :
     Model
     -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
     -> Maybe Tag
-    -> List ( GlossaryItemId, GlossaryItemForHtml )
+    -> List ( GlossaryItemId, GlossaryItemForUi )
     -> Maybe GlossaryItemId
     -> Html Msg
 viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } tagBeingFilteredBy indexedGlossaryItems =
@@ -1489,7 +1489,7 @@ viewCards :
     -> Maybe GlossaryItemId
     -> Maybe RawTerm
     -> GlossaryItems
-    -> ( List ( GlossaryItemId, GlossaryItemForHtml ), List ( GlossaryItemId, GlossaryItemForHtml ) )
+    -> ( List ( GlossaryItemId, GlossaryItemForUi ), List ( GlossaryItemId, GlossaryItemForUi ) )
     -> Html Msg
 viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates, noModalDialogShown_, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
@@ -1497,7 +1497,7 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
         filterByTag =
             Maybe.map DescribedTag.tag filterByDescribedTag_
 
-        combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForHtml )
+        combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForUi )
         combinedIndexedGlossaryItems =
             List.append indexedGlossaryItems otherIndexedGlossaryItems
 
@@ -1516,7 +1516,7 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
                 _ ->
                     Nothing
 
-        viewIndexedItem : ( GlossaryItemId, GlossaryItemForHtml ) -> Html Msg
+        viewIndexedItem : ( GlossaryItemId, GlossaryItemForUi ) -> Html Msg
         viewIndexedItem ( _, item ) =
             viewGlossaryItem
                 { enableMathSupport = enableMathSupport
@@ -1530,9 +1530,9 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
                 filterByTag
                 { previous = Nothing, item = Just item, next = Nothing }
 
-        viewIndexedItemKeyed : ( GlossaryItemId, GlossaryItemForHtml ) -> ( String, Html Msg )
+        viewIndexedItemKeyed : ( GlossaryItemId, GlossaryItemForUi ) -> ( String, Html Msg )
         viewIndexedItemKeyed (( _, item ) as indexedItem) =
-            ( GlossaryItemForHtml.disambiguatedPreferredTermIdString item
+            ( GlossaryItemForUi.disambiguatedPreferredTermIdString item
             , Html.Lazy.lazy viewIndexedItem indexedItem
             )
 
@@ -2303,7 +2303,7 @@ pageTitle model glossary =
                         |> Maybe.map
                             (\item ->
                                 item
-                                    |> GlossaryItemForHtml.disambiguatedPreferredTerm
+                                    |> GlossaryItemForUi.disambiguatedPreferredTerm
                                     |> DisambiguatedTerm.toTerm
                                     |> Term.inlineText
                             )
@@ -2425,7 +2425,7 @@ view model =
                                                 )
                            )
 
-                combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForHtml )
+                combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForUi )
                 combinedIndexedGlossaryItems =
                     List.append indexedGlossaryItems otherIndexedGlossaryItems
             in
@@ -2491,12 +2491,12 @@ view model =
                                             if event == Extras.HtmlEvents.leftArrow then
                                                 itemWithPreviousAndNext.previous
                                                     |> Maybe.map
-                                                        (\newItem -> ( PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForHtml.id newItem, True ))
+                                                        (\newItem -> ( PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForUi.id newItem, True ))
 
                                             else if event == Extras.HtmlEvents.rightArrow then
                                                 itemWithPreviousAndNext.next
                                                     |> Maybe.map
-                                                        (\newItem -> ( PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForHtml.id newItem, True ))
+                                                        (\newItem -> ( PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForUi.id newItem, True ))
 
                                             else
                                                 Nothing

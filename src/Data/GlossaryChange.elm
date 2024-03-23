@@ -12,7 +12,7 @@ module Data.GlossaryChange exposing (GlossaryChange(..), codec, setLastUpdatedBy
 import Codec exposing (Codec)
 import Data.AboutSection as AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
@@ -28,8 +28,8 @@ type GlossaryChange
     | SetAboutSection AboutSection
     | SetCardWidth CardWidth
     | ChangeTags TagsChanges
-    | Insert GlossaryItemForHtml
-    | Update GlossaryItemForHtml
+    | Insert GlossaryItemForUi
+    | Update GlossaryItemForUi
     | Remove GlossaryItemId
 
 
@@ -61,11 +61,11 @@ codec =
                 ChangeTags tagsChanges ->
                     changeTags tagsChanges
 
-                Insert itemForHtml ->
-                    insert itemForHtml
+                Insert itemForUi ->
+                    insert itemForUi
 
-                Update itemForHtml ->
-                    update itemForHtml
+                Update itemForUi ->
+                    update itemForUi
 
                 Remove itemId ->
                     remove itemId
@@ -77,8 +77,8 @@ codec =
         |> Codec.variant1 "SetAboutSection" SetAboutSection AboutSection.codec
         |> Codec.variant1 "SetCardWidth" SetCardWidth CardWidth.codec
         |> Codec.variant1 "ChangeTags" ChangeTags TagsChanges.codec
-        |> Codec.variant1 "Insert" Insert GlossaryItemForHtml.codec
-        |> Codec.variant1 "Update" Update GlossaryItemForHtml.codec
+        |> Codec.variant1 "Insert" Insert GlossaryItemForUi.codec
+        |> Codec.variant1 "Update" Update GlossaryItemForUi.codec
         |> Codec.variant1 "Remove" Remove GlossaryItemId.codec
         |> Codec.buildCustom
 
@@ -88,14 +88,14 @@ codec =
 setLastUpdatedBy : { name : String, emailAddress : String } -> GlossaryChange -> GlossaryChange
 setLastUpdatedBy { name, emailAddress } change =
     case change of
-        Insert itemForHtml ->
-            itemForHtml
-                |> GlossaryItemForHtml.setLastUpdatedBy { name = name, emailAddress = emailAddress }
+        Insert itemForUi ->
+            itemForUi
+                |> GlossaryItemForUi.setLastUpdatedBy { name = name, emailAddress = emailAddress }
                 |> Insert
 
-        Update itemForHtml ->
-            itemForHtml
-                |> GlossaryItemForHtml.setLastUpdatedBy { name = name, emailAddress = emailAddress }
+        Update itemForUi ->
+            itemForUi
+                |> GlossaryItemForUi.setLastUpdatedBy { name = name, emailAddress = emailAddress }
                 |> Update
 
         _ ->

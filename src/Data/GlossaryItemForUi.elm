@@ -1,19 +1,17 @@
-module Data.GlossaryItemForHtml exposing
-    ( GlossaryItemForHtml
+module Data.GlossaryItemForUi exposing
+    ( GlossaryItemForUi
     , create, codec, setLastUpdatedBy
     , disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, disambiguatedPreferredTermIdString, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
     , toHtmlTree
     , disambiguatedTerm
     )
 
-{-| An item in a glossary as retrieved from the HTML source, and/or suitable for representing as HTML.
-This is also the initial representation obtained when the Elm application is invoked by JavaScript.
-It is not the representation used by the editor UI when the application is running -- that is `GlossaryItem`.
+{-| An item in a glossary ready to be used in a view function.
 
 
-# Glossary Items for HTML
+# Glossary Items for the UI
 
-@docs GlossaryItemForHtml
+@docs GlossaryItemForUi
 
 
 # Build
@@ -50,10 +48,10 @@ import Internationalisation as I18n
 import List
 
 
-{-| A glossary item from/for HTML.
+{-| A glossary item for the UI.
 -}
-type GlossaryItemForHtml
-    = GlossaryItemForHtml
+type GlossaryItemForUi
+    = GlossaryItemForUi
         { id : GlossaryItemId
         , preferredTerm : Term
         , alternativeTerms : List Term
@@ -82,9 +80,9 @@ create :
     -> Maybe String
     -> Maybe String
     -> Maybe String
-    -> GlossaryItemForHtml
+    -> GlossaryItemForUi
 create id_ preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ definition_ relatedPreferredTerms_ needsUpdating_ lastUpdatedDateAsIso8601_ lastUpdatedByName_ lastUpdatedByEmailAddress_ =
-    GlossaryItemForHtml
+    GlossaryItemForUi
         { id = id_
         , preferredTerm = preferredTerm_
         , alternativeTerms = alternativeTerms_
@@ -101,7 +99,7 @@ create id_ preferredTerm_ alternativeTerms_ disambiguationTag_ normalTags_ defin
 
 {-| Encode/decode a glossary item to/from its JSON representation.
 -}
-codec : Codec GlossaryItemForHtml
+codec : Codec GlossaryItemForUi
 codec =
     Codec.object
         create
@@ -125,8 +123,8 @@ codec =
 
 {-| The disambiguated preferred term for this glossary item.
 -}
-disambiguatedPreferredTerm : GlossaryItemForHtml -> DisambiguatedTerm
-disambiguatedPreferredTerm (GlossaryItemForHtml item) =
+disambiguatedPreferredTerm : GlossaryItemForUi -> DisambiguatedTerm
+disambiguatedPreferredTerm (GlossaryItemForUi item) =
     item.disambiguationTag
         |> Maybe.map
             (\disambiguationTag_ ->
@@ -137,9 +135,9 @@ disambiguatedPreferredTerm (GlossaryItemForHtml item) =
 
 {-| The HTML ID of the disambiguated preferred term.
 -}
-disambiguatedPreferredTermIdString : GlossaryItemForHtml -> String
-disambiguatedPreferredTermIdString ((GlossaryItemForHtml item) as glossaryItemForHtml) =
-    glossaryItemForHtml
+disambiguatedPreferredTermIdString : GlossaryItemForUi -> String
+disambiguatedPreferredTermIdString ((GlossaryItemForUi item) as glossaryItemForUi) =
+    glossaryItemForUi
         |> disambiguationTag
         |> Maybe.map (\tag -> disambiguatedTerm tag item.preferredTerm)
         |> Maybe.map DisambiguatedTerm.toTerm
@@ -149,54 +147,54 @@ disambiguatedPreferredTermIdString ((GlossaryItemForHtml item) as glossaryItemFo
 
 {-| The ID for this glossary item.
 -}
-id : GlossaryItemForHtml -> GlossaryItemId
-id (GlossaryItemForHtml item) =
+id : GlossaryItemForUi -> GlossaryItemId
+id (GlossaryItemForUi item) =
     item.id
 
 
 {-| The (non-disambiguated) preferred term for this glossary item.
 -}
-nonDisambiguatedPreferredTerm : GlossaryItemForHtml -> Term
-nonDisambiguatedPreferredTerm (GlossaryItemForHtml item) =
+nonDisambiguatedPreferredTerm : GlossaryItemForUi -> Term
+nonDisambiguatedPreferredTerm (GlossaryItemForUi item) =
     item.preferredTerm
 
 
 {-| The alternative terms for this glossary item.
 -}
-alternativeTerms : GlossaryItemForHtml -> List Term
-alternativeTerms (GlossaryItemForHtml item) =
+alternativeTerms : GlossaryItemForUi -> List Term
+alternativeTerms (GlossaryItemForUi item) =
     item.alternativeTerms
 
 
 {-| The terms of the glossary item, both (disambiguated) preferred and alternative.
 -}
-allTerms : GlossaryItemForHtml -> List Term
-allTerms glossaryItemForHtml =
-    (glossaryItemForHtml
+allTerms : GlossaryItemForUi -> List Term
+allTerms glossaryItemForUi =
+    (glossaryItemForUi
         |> disambiguatedPreferredTerm
         |> DisambiguatedTerm.toTerm
     )
-        :: alternativeTerms glossaryItemForHtml
+        :: alternativeTerms glossaryItemForUi
 
 
 {-| The disambiguation tag for this glossary item.
 -}
-disambiguationTag : GlossaryItemForHtml -> Maybe Tag
-disambiguationTag (GlossaryItemForHtml item) =
+disambiguationTag : GlossaryItemForUi -> Maybe Tag
+disambiguationTag (GlossaryItemForUi item) =
     item.disambiguationTag
 
 
 {-| The normal tags for this glossary item.
 -}
-normalTags : GlossaryItemForHtml -> List Tag
-normalTags (GlossaryItemForHtml item) =
+normalTags : GlossaryItemForUi -> List Tag
+normalTags (GlossaryItemForUi item) =
     item.normalTags
 
 
 {-| All tags for this glossary item.
 -}
-allTags : GlossaryItemForHtml -> List Tag
-allTags (GlossaryItemForHtml item) =
+allTags : GlossaryItemForUi -> List Tag
+allTags (GlossaryItemForUi item) =
     item.disambiguationTag
         |> Maybe.map (\disambiguationTag_ -> disambiguationTag_ :: item.normalTags)
         |> Maybe.withDefault item.normalTags
@@ -205,50 +203,50 @@ allTags (GlossaryItemForHtml item) =
 {-| Whether or not the glossary item has a definition.
 Some items may not have one and instead point to a related item that is preferred.
 -}
-hasADefinition : GlossaryItemForHtml -> Bool
-hasADefinition (GlossaryItemForHtml item) =
+hasADefinition : GlossaryItemForUi -> Bool
+hasADefinition (GlossaryItemForUi item) =
     item.definition /= Nothing
 
 
 {-| The definition for this glossary item.
 -}
-definition : GlossaryItemForHtml -> Maybe Definition
-definition (GlossaryItemForHtml item) =
+definition : GlossaryItemForUi -> Maybe Definition
+definition (GlossaryItemForUi item) =
     item.definition
 
 
 {-| The related preferred terms for this glossary item.
 -}
-relatedPreferredTerms : GlossaryItemForHtml -> List DisambiguatedTerm
-relatedPreferredTerms (GlossaryItemForHtml item) =
+relatedPreferredTerms : GlossaryItemForUi -> List DisambiguatedTerm
+relatedPreferredTerms (GlossaryItemForUi item) =
     item.relatedPreferredTerms
 
 
 {-| The "needs updating" flag for this glossary item.
 -}
-needsUpdating : GlossaryItemForHtml -> Bool
-needsUpdating (GlossaryItemForHtml item) =
+needsUpdating : GlossaryItemForUi -> Bool
+needsUpdating (GlossaryItemForUi item) =
     item.needsUpdating
 
 
 {-| The last updated date for this glossary item, in ISO 8601 format.
 -}
-lastUpdatedDateAsIso8601 : GlossaryItemForHtml -> Maybe String
-lastUpdatedDateAsIso8601 (GlossaryItemForHtml item) =
+lastUpdatedDateAsIso8601 : GlossaryItemForUi -> Maybe String
+lastUpdatedDateAsIso8601 (GlossaryItemForUi item) =
     item.lastUpdatedDateAsIso8601
 
 
 {-| The name of the person who last updated this glossary item.
 -}
-lastUpdatedByName : GlossaryItemForHtml -> Maybe String
-lastUpdatedByName (GlossaryItemForHtml item) =
+lastUpdatedByName : GlossaryItemForUi -> Maybe String
+lastUpdatedByName (GlossaryItemForUi item) =
     item.lastUpdatedByName
 
 
 {-| The email address of the person who last updated this glossary item.
 -}
-lastUpdatedByEmailAddress : GlossaryItemForHtml -> Maybe String
-lastUpdatedByEmailAddress (GlossaryItemForHtml item) =
+lastUpdatedByEmailAddress : GlossaryItemForUi -> Maybe String
+lastUpdatedByEmailAddress (GlossaryItemForUi item) =
     item.lastUpdatedByEmailAddress
 
 
@@ -387,9 +385,9 @@ hrefFromRelatedTerm term =
 
 {-| Set the name and email address of the person who last updated this glossary item.
 -}
-setLastUpdatedBy : { name : String, emailAddress : String } -> GlossaryItemForHtml -> GlossaryItemForHtml
-setLastUpdatedBy { name, emailAddress } (GlossaryItemForHtml item) =
-    GlossaryItemForHtml
+setLastUpdatedBy : { name : String, emailAddress : String } -> GlossaryItemForUi -> GlossaryItemForUi
+setLastUpdatedBy { name, emailAddress } (GlossaryItemForUi item) =
+    GlossaryItemForUi
         { item
             | lastUpdatedByName = Just name
             , lastUpdatedByEmailAddress = Just emailAddress
@@ -398,11 +396,11 @@ setLastUpdatedBy { name, emailAddress } (GlossaryItemForHtml item) =
 
 {-| Represent this glossary item as an HTML tree, ready for writing back to the glossary's HTML file.
 -}
-toHtmlTree : GlossaryItemForHtml -> HtmlTree
-toHtmlTree ((GlossaryItemForHtml item) as glossaryItemForHtml) =
+toHtmlTree : GlossaryItemForUi -> HtmlTree
+toHtmlTree ((GlossaryItemForUi item) as glossaryItemForUi) =
     let
         allTags_ =
-            allTags glossaryItemForHtml
+            allTags glossaryItemForUi
     in
     HtmlTree.Node "div"
         True
@@ -411,7 +409,7 @@ toHtmlTree ((GlossaryItemForHtml item) as glossaryItemForHtml) =
         , HtmlTree.showAttributeMaybe "data-last-updated-by-name" identity item.lastUpdatedByName
         , HtmlTree.showAttributeMaybe "data-last-updated-by-email-address" identity item.lastUpdatedByEmailAddress
         ]
-        (preferredTermToHtmlTree item.disambiguationTag (disambiguatedPreferredTermIdString glossaryItemForHtml) item.preferredTerm
+        (preferredTermToHtmlTree item.disambiguationTag (disambiguatedPreferredTermIdString glossaryItemForUi) item.preferredTerm
             :: List.map alternativeTermToHtmlTree item.alternativeTerms
             ++ (if item.needsUpdating then
                     [ HtmlTree.Node "dd"
@@ -453,7 +451,7 @@ toHtmlTree ((GlossaryItemForHtml item) as glossaryItemForHtml) =
 
                 else
                     [ nonemptyRelatedTermsToHtmlTree
-                        (hasADefinition glossaryItemForHtml)
+                        (hasADefinition glossaryItemForUi)
                         item.relatedPreferredTerms
                     ]
                )

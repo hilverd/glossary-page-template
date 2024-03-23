@@ -44,7 +44,7 @@ import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.GlossaryChange exposing (GlossaryChange(..))
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryItem.Tag as Tag
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
@@ -234,7 +234,7 @@ create :
     -> AboutParagraph
     -> List AboutLink
     -> List DescribedTag
-    -> List GlossaryItemForHtml
+    -> List GlossaryItemForUi
     -> GlossaryVersionNumber
     -> Glossary
 create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ title_ aboutParagraph aboutLinks describedTags itemsForHtml versionNumber_ =
@@ -262,7 +262,7 @@ createWithDefaults :
     -> Maybe AboutParagraph
     -> Maybe (List AboutLink)
     -> Maybe (List DescribedTag)
-    -> List GlossaryItemForHtml
+    -> List GlossaryItemForUi
     -> Maybe GlossaryVersionNumber
     -> Glossary
 createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ title_ aboutParagraph aboutLinks describedTags itemsForHtml versionNumber_ =
@@ -320,7 +320,7 @@ codec =
             )
         |> Codec.field "glossaryItems"
             (items >> GlossaryItems.orderedAlphabetically Nothing >> List.map Tuple.second)
-            (Codec.list GlossaryItemForHtml.codec)
+            (Codec.list GlossaryItemForUi.codec)
         |> Codec.optionalNullableField "versionNumber" (versionNumber >> Just) GlossaryVersionNumber.codec
         |> Codec.buildObject
 
@@ -395,7 +395,7 @@ applyChange change glossary =
             let
                 itemId : GlossaryItemId
                 itemId =
-                    GlossaryItemForHtml.id item
+                    GlossaryItemForUi.id item
             in
             update itemId item glossary
                 |> Result.map (\newGlossary -> ( Just itemId, newGlossary ))
@@ -415,7 +415,7 @@ applyTagsChanges tagsChanges glossary =
 
 {-| Insert an item.
 -}
-insert : GlossaryItemForHtml -> Glossary -> Result String ( GlossaryItemId, Glossary )
+insert : GlossaryItemForUi -> Glossary -> Result String ( GlossaryItemId, Glossary )
 insert item glossary =
     glossary
         |> items
@@ -425,7 +425,7 @@ insert item glossary =
 
 {-| Update an item. Do nothing if there is no item with the given ID.
 -}
-update : GlossaryItemId -> GlossaryItemForHtml -> Glossary -> Result String Glossary
+update : GlossaryItemId -> GlossaryItemForUi -> Glossary -> Result String Glossary
 update itemId item glossary =
     glossary
         |> items
@@ -533,7 +533,7 @@ toHtmlTree (Glossary glossary) =
                     []
                     (glossary.items
                         |> GlossaryItems.orderedAlphabetically Nothing
-                        |> List.map (Tuple.second >> GlossaryItemForHtml.toHtmlTree)
+                        |> List.map (Tuple.second >> GlossaryItemForUi.toHtmlTree)
                     )
                 ]
             ]

@@ -21,7 +21,7 @@ import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (Disamb
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -126,11 +126,11 @@ init commonModel itemBeingEdited =
                             items
                                 |> GlossaryItems.get id
                                 |> Maybe.map
-                                    (\itemForHtml ->
-                                        Form.fromGlossaryItemForHtml
+                                    (\itemForUi ->
+                                        Form.fromGlossaryItemForUi
                                             items
                                             id
-                                            itemForHtml
+                                            itemForUi
                                     )
                         )
                         itemBeingEdited
@@ -375,7 +375,7 @@ update msg model =
                             newGlossaryItemId =
                                 GlossaryItemId.create newGlossaryItemIdString
 
-                            newOrUpdatedGlossaryItem : GlossaryItemForHtml
+                            newOrUpdatedGlossaryItem : GlossaryItemForUi
                             newOrUpdatedGlossaryItem =
                                 Form.toGlossaryItem
                                     (Glossary.items glossary)
@@ -880,7 +880,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
         allPreferredTerms =
             glossaryItems
                 |> GlossaryItems.orderedAlphabetically Nothing
-                |> List.map (Tuple.second >> GlossaryItemForHtml.disambiguatedPreferredTerm)
+                |> List.map (Tuple.second >> GlossaryItemForUi.disambiguatedPreferredTerm)
     in
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
@@ -1079,7 +1079,7 @@ view model =
                 items =
                     Glossary.items glossary
 
-                newOrUpdatedGlossaryItem : GlossaryItemForHtml
+                newOrUpdatedGlossaryItem : GlossaryItemForUi
                 newOrUpdatedGlossaryItem =
                     Form.toGlossaryItem items model.form (GlossaryItemId.create "") Nothing
             in

@@ -14,7 +14,7 @@ import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItems as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.TagDescription as TagDescription
@@ -59,20 +59,20 @@ paragraphs =
         >> String.join (crlf ++ crlf)
 
 
-itemToMarkdown : GlossaryItemForHtml -> String
+itemToMarkdown : GlossaryItemForUi -> String
 itemToMarkdown glossaryItem =
     let
         termsString : String
         termsString =
             glossaryItem
-                |> GlossaryItemForHtml.allTerms
+                |> GlossaryItemForUi.allTerms
                 |> List.map (Term.markdown >> bold)
                 |> String.join ("\\" ++ crlf)
 
         tagsString : String
         tagsString =
             glossaryItem
-                |> GlossaryItemForHtml.allTags
+                |> GlossaryItemForUi.allTags
                 |> List.map Tag.markdown
                 |> String.join ", "
                 |> (\str ->
@@ -84,12 +84,12 @@ itemToMarkdown glossaryItem =
                    )
 
         definitions =
-            GlossaryItemForHtml.definition glossaryItem
+            GlossaryItemForUi.definition glossaryItem
                 |> Maybe.map List.singleton
                 |> Maybe.withDefault []
 
         relatedTerms =
-            GlossaryItemForHtml.relatedPreferredTerms glossaryItem
+            GlossaryItemForUi.relatedPreferredTerms glossaryItem
 
         definitionsString : String
         definitionsString =

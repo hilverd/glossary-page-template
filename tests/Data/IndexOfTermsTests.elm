@@ -3,7 +3,7 @@ module Data.IndexOfTermsTests exposing (suite)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.IndexOfTerms as IndexOfTerms
@@ -16,9 +16,9 @@ termFromBody body =
     Term.fromMarkdown body False
 
 
-glossaryItemForHtml : String -> GlossaryItemForHtml
-glossaryItemForHtml body =
-    GlossaryItemForHtml.create
+glossaryItemForUi : String -> GlossaryItemForUi
+glossaryItemForUi body =
+    GlossaryItemForUi.create
         (GlossaryItemId.create body)
         (termFromBody body)
         []
@@ -34,13 +34,13 @@ glossaryItemForHtml body =
 
 glossaryItems : GlossaryItems
 glossaryItems =
-    [ glossaryItemForHtml "007"
-    , glossaryItemForHtml "Óne"
-    , glossaryItemForHtml "Two"
-    , glossaryItemForHtml "3040"
-    , glossaryItemForHtml "3Three"
-    , glossaryItemForHtml "Ω"
-    , glossaryItemForHtml "_future_"
+    [ glossaryItemForUi "007"
+    , glossaryItemForUi "Óne"
+    , glossaryItemForUi "Two"
+    , glossaryItemForUi "3040"
+    , glossaryItemForUi "3Three"
+    , glossaryItemForUi "Ω"
+    , glossaryItemForUi "_future_"
     ]
         |> GlossaryItems.fromList []
         |> Result.withDefault GlossaryItems.empty

@@ -15,7 +15,7 @@
         "Data.GlossaryItem.Tag",
         "Data.GlossaryItem.Term",
         "Data.GlossaryItem",
-        "Data.GlossaryItemForHtml",
+        "Data.GlossaryItemForUi",
         "Data.GlossaryItemId",
         "Data.GlossaryItemIdDict",
         "Data.GlossaryItems",

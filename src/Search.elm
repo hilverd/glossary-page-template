@@ -4,7 +4,7 @@ import Components.SearchDialog as SearchDialog
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItemForHtml as GlossaryItemForHtml
+import Data.GlossaryItemForUi as GlossaryItemForUi
 import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.TagId exposing (TagId)
 import Extras.Html
@@ -42,18 +42,18 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                             let
                                 disambiguatedPreferredTerm : DisambiguatedTerm
                                 disambiguatedPreferredTerm =
-                                    GlossaryItemForHtml.disambiguatedPreferredTerm item
+                                    GlossaryItemForUi.disambiguatedPreferredTerm item
 
                                 definition : Maybe Definition
                                 definition =
-                                    GlossaryItemForHtml.definition item
+                                    GlossaryItemForUi.definition item
                             in
                             { preferredTerm = disambiguatedPreferredTerm
                             , alternativeTerm = Nothing
                             , definition = definition
                             }
                                 :: (item
-                                        |> GlossaryItemForHtml.alternativeTerms
+                                        |> GlossaryItemForUi.alternativeTerms
                                         |> List.map
                                             (\alternativeTerm ->
                                                 { preferredTerm = disambiguatedPreferredTerm

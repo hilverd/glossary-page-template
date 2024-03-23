@@ -36,7 +36,7 @@ import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (Disamb
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
 import Data.TagDescription exposing (TagDescription)
@@ -72,24 +72,24 @@ type GlossaryItems
         }
 
 
-orderAlphabetically : List GlossaryItemForHtml -> List GlossaryItemId
+orderAlphabetically : List GlossaryItemForUi -> List GlossaryItemId
 orderAlphabetically =
     List.sortWith
         (\item1 item2 ->
             Term.compareAlphabetically
-                (item1 |> GlossaryItemForHtml.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm)
-                (item2 |> GlossaryItemForHtml.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm)
+                (item1 |> GlossaryItemForUi.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm)
+                (item2 |> GlossaryItemForUi.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm)
         )
-        >> List.map GlossaryItemForHtml.id
+        >> List.map GlossaryItemForUi.id
 
 
-orderByMostMentionedFirst : List GlossaryItemForHtml -> List GlossaryItemId
+orderByMostMentionedFirst : List GlossaryItemForUi -> List GlossaryItemId
 orderByMostMentionedFirst glossaryItemsForHtml =
     let
         -- Maps a term to a score based on whether or not it occurs in glossaryItem.
         -- This is done in a primitive way. A more sophisticated solution could use stemming
         -- or other techniques.
-        termScoreInItem : Term -> GlossaryItemForHtml -> Int
+        termScoreInItem : Term -> GlossaryItemForUi -> Int
         termScoreInItem term glossaryItem =
             let
                 termAsWord : Regex.Regex
@@ -101,17 +101,17 @@ orderByMostMentionedFirst glossaryItemsForHtml =
                 score : Int
                 score =
                     (glossaryItem
-                        |> GlossaryItemForHtml.allTerms
+                        |> GlossaryItemForUi.allTerms
                         |> List.map (Term.raw >> RawTerm.toString >> Regex.find termAsWord >> List.length)
                         |> List.sum
                     )
                         + (glossaryItem
-                            |> GlossaryItemForHtml.definition
+                            |> GlossaryItemForUi.definition
                             |> Maybe.map (Definition.raw >> Regex.find termAsWord >> List.length)
                             |> Maybe.withDefault 0
                           )
                         + (glossaryItem
-                            |> GlossaryItemForHtml.relatedPreferredTerms
+                            |> GlossaryItemForUi.relatedPreferredTerms
                             |> List.map (DisambiguatedTerm.toTerm >> Term.raw >> RawTerm.toString)
                             |> List.map (Regex.find termAsWord >> List.length)
                             |> List.sum
@@ -130,7 +130,7 @@ orderByMostMentionedFirst glossaryItemsForHtml =
                 |> List.foldl
                     (\glossaryItem result ->
                         result
-                            + (if GlossaryItemForHtml.id glossaryItem == exceptId then
+                            + (if GlossaryItemForUi.id glossaryItem == exceptId then
                                 0
 
                                else
@@ -145,8 +145,8 @@ orderByMostMentionedFirst glossaryItemsForHtml =
                 |> List.concatMap
                     (\glossaryItem ->
                         glossaryItem
-                            |> GlossaryItemForHtml.allTerms
-                            |> List.map (Tuple.pair <| GlossaryItemForHtml.id glossaryItem)
+                            |> GlossaryItemForUi.allTerms
+                            |> List.map (Tuple.pair <| GlossaryItemForUi.id glossaryItem)
                     )
                 |> List.foldl
                     (\( glossaryItemId, term ) result ->
@@ -161,9 +161,9 @@ orderByMostMentionedFirst glossaryItemsForHtml =
         |> List.sortWith
             (\item1 item2 ->
                 let
-                    itemScore : GlossaryItemForHtml -> Int
+                    itemScore : GlossaryItemForUi -> Int
                     itemScore =
-                        GlossaryItemForHtml.allTerms
+                        GlossaryItemForUi.allTerms
                             >> List.map
                                 (\term ->
                                     termBodyScores
@@ -178,13 +178,13 @@ orderByMostMentionedFirst glossaryItemsForHtml =
 
                     EQ ->
                         compare
-                            (item1 |> GlossaryItemForHtml.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString |> String.toUpper)
-                            (item2 |> GlossaryItemForHtml.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString |> String.toUpper)
+                            (item1 |> GlossaryItemForUi.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString |> String.toUpper)
+                            (item2 |> GlossaryItemForUi.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString |> String.toUpper)
 
                     GT ->
                         LT
             )
-        |> List.map GlossaryItemForHtml.id
+        |> List.map GlossaryItemForUi.id
 
 
 {-| The empty set of glossary items.
@@ -209,7 +209,7 @@ empty =
 
 {-| Convert a list of glossary items for/from HTML into a `GlossaryItems`.
 -}
-fromList : List DescribedTag -> List GlossaryItemForHtml -> Result String GlossaryItems
+fromList : List DescribedTag -> List GlossaryItemForUi -> Result String GlossaryItems
 fromList describedTags_ glossaryItemsForHtml =
     let
         itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_ : DuplicateRejectingDict String GlossaryItemId
@@ -219,11 +219,11 @@ fromList describedTags_ glossaryItemsForHtml =
                     (\item ->
                         DuplicateRejectingDict.insert
                             (item
-                                |> GlossaryItemForHtml.disambiguatedPreferredTerm
+                                |> GlossaryItemForUi.disambiguatedPreferredTerm
                                 |> DisambiguatedTerm.toTerm
                                 |> Term.id
                             )
-                            (GlossaryItemForHtml.id item)
+                            (GlossaryItemForUi.id item)
                     )
                     DuplicateRejectingDict.empty
 
@@ -239,19 +239,19 @@ fromList describedTags_ glossaryItemsForHtml =
         itemById =
             glossaryItemsForHtml
                 |> List.foldl
-                    (\glossaryItemForHtml itemById_ ->
+                    (\glossaryItemForUi itemById_ ->
                         let
                             glossaryItem : GlossaryItem
                             glossaryItem =
                                 GlossaryItem.init
-                                    (GlossaryItemForHtml.id glossaryItemForHtml)
-                                    (GlossaryItemForHtml.nonDisambiguatedPreferredTerm glossaryItemForHtml)
-                                    (GlossaryItemForHtml.alternativeTerms glossaryItemForHtml)
-                                    (GlossaryItemForHtml.definition glossaryItemForHtml)
-                                    (GlossaryItemForHtml.needsUpdating glossaryItemForHtml)
-                                    (GlossaryItemForHtml.lastUpdatedDateAsIso8601 glossaryItemForHtml)
-                                    (GlossaryItemForHtml.lastUpdatedByName glossaryItemForHtml)
-                                    (GlossaryItemForHtml.lastUpdatedByEmailAddress glossaryItemForHtml)
+                                    (GlossaryItemForUi.id glossaryItemForUi)
+                                    (GlossaryItemForUi.nonDisambiguatedPreferredTerm glossaryItemForUi)
+                                    (GlossaryItemForUi.alternativeTerms glossaryItemForUi)
+                                    (GlossaryItemForUi.definition glossaryItemForUi)
+                                    (GlossaryItemForUi.needsUpdating glossaryItemForUi)
+                                    (GlossaryItemForUi.lastUpdatedDateAsIso8601 glossaryItemForUi)
+                                    (GlossaryItemForUi.lastUpdatedByName glossaryItemForUi)
+                                    (GlossaryItemForUi.lastUpdatedByEmailAddress glossaryItemForUi)
 
                             itemById1 =
                                 GlossaryItemIdDict.insert (GlossaryItem.id glossaryItem) glossaryItem itemById_
@@ -287,11 +287,11 @@ fromList describedTags_ glossaryItemsForHtml =
                     (\item ( disambiguationTagByItemId_, normalTagsByItemId_ ) ->
                         let
                             id =
-                                GlossaryItemForHtml.id item
+                                GlossaryItemForUi.id item
                         in
                         ( GlossaryItemIdDict.insert id
                             (item
-                                |> GlossaryItemForHtml.disambiguationTag
+                                |> GlossaryItemForUi.disambiguationTag
                                 |> Maybe.andThen
                                     (\disambiguationTag ->
                                         DuplicateRejectingDict.get (Tag.raw disambiguationTag) tagIdByRawTag
@@ -300,7 +300,7 @@ fromList describedTags_ glossaryItemsForHtml =
                             disambiguationTagByItemId_
                         , GlossaryItemIdDict.insert id
                             (item
-                                |> GlossaryItemForHtml.normalTags
+                                |> GlossaryItemForUi.normalTags
                                 |> List.filterMap
                                     (\tag ->
                                         DuplicateRejectingDict.get (Tag.raw tag) tagIdByRawTag
@@ -359,14 +359,14 @@ fromList describedTags_ glossaryItemsForHtml =
                 |> List.foldl
                     (\item ->
                         item
-                            |> GlossaryItemForHtml.relatedPreferredTerms
+                            |> GlossaryItemForUi.relatedPreferredTerms
                             |> List.filterMap
                                 (\relatedPreferredTerm ->
                                     DuplicateRejectingDict.get
                                         (relatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.id)
                                         itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_
                                 )
-                            |> GlossaryItemIdDict.insert (GlossaryItemForHtml.id item)
+                            |> GlossaryItemIdDict.insert (GlossaryItemForUi.id item)
                     )
                     GlossaryItemIdDict.empty
 
@@ -416,7 +416,7 @@ fromList describedTags_ glossaryItemsForHtml =
                                             disambiguationTag1
                                                 |> Maybe.map
                                                     (\tag1 ->
-                                                        GlossaryItemForHtml.disambiguatedTerm tag1 preferredTerm1_
+                                                        GlossaryItemForUi.disambiguatedTerm tag1 preferredTerm1_
                                                     )
                                                 |> Maybe.withDefault (DisambiguatedTerm.fromTerm preferredTerm1_)
                                         )
@@ -531,7 +531,7 @@ applyTagsChanges tagsChanges glossaryItems =
 
 {-| Insert an item, returning the ID of the new item.
 -}
-insert : GlossaryItemForHtml -> GlossaryItems -> Result String ( GlossaryItemId, GlossaryItems )
+insert : GlossaryItemForUi -> GlossaryItems -> Result String ( GlossaryItemId, GlossaryItems )
 insert item glossaryItems =
     let
         itemsAfterInserting : Result String GlossaryItems
@@ -544,7 +544,7 @@ insert item glossaryItems =
 
         insertedItemId : GlossaryItemId
         insertedItemId =
-            GlossaryItemForHtml.id item
+            GlossaryItemForUi.id item
     in
     itemsAfterInserting
         |> Result.map (Tuple.pair insertedItemId)
@@ -552,12 +552,12 @@ insert item glossaryItems =
 
 {-| Update an item. Do nothing if there is no item with the given ID.
 -}
-update : GlossaryItemId -> GlossaryItemForHtml -> GlossaryItems -> Result String GlossaryItems
+update : GlossaryItemId -> GlossaryItemForUi -> GlossaryItems -> Result String GlossaryItems
 update itemId item glossaryItems =
     let
         disambiguatedPreferredTerm_ itemId_ =
             if itemId_ == itemId then
-                always <| Just <| GlossaryItemForHtml.disambiguatedPreferredTerm item
+                always <| Just <| GlossaryItemForUi.disambiguatedPreferredTerm item
 
             else
                 disambiguatedPreferredTerm itemId_
@@ -582,12 +582,12 @@ remove itemId glossaryItems =
     glossaryItems
         |> orderedAlphabetically Nothing
         |> List.filterMap
-            (\( itemId_, itemForHtml ) ->
+            (\( itemId_, itemForUi ) ->
                 if itemId_ == itemId then
                     Nothing
 
                 else
-                    Just itemForHtml
+                    Just itemForUi
             )
         |> fromList (describedTags glossaryItems)
 
@@ -627,7 +627,7 @@ relatedPreferredTerms_ disambiguatedPreferredTerm_ filterByTagId itemId ((Glossa
             )
 
 
-get_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItemId -> GlossaryItems -> Maybe GlossaryItemForHtml
+get_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItemId -> GlossaryItems -> Maybe GlossaryItemForUi
 get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItems items) as glossaryItems) =
     GlossaryItemIdDict.get itemId items.itemById
         |> Maybe.map
@@ -686,7 +686,7 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItems items) as 
                     lastUpdatedByEmailAddress =
                         GlossaryItem.lastUpdatedByEmailAddress item
                 in
-                GlossaryItemForHtml.create
+                GlossaryItemForUi.create
                     id
                     preferredTerm
                     alternativeTerms
@@ -703,7 +703,7 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItems items) as 
 
 {-| Get the item associated with an ID. If the ID is not found, return `Nothing`.
 -}
-get : GlossaryItemId -> GlossaryItems -> Maybe GlossaryItemForHtml
+get : GlossaryItemId -> GlossaryItems -> Maybe GlossaryItemForUi
 get =
     get_ disambiguatedPreferredTerm Nothing
 
@@ -798,7 +798,7 @@ disambiguatedPreferredTerm itemId (GlossaryItems items) =
                 disambiguationTag
                     |> Maybe.map
                         (\disambiguationTag_ ->
-                            GlossaryItemForHtml.disambiguatedTerm disambiguationTag_ preferredTerm_
+                            GlossaryItemForUi.disambiguatedTerm disambiguationTag_ preferredTerm_
                         )
                     |> Maybe.withDefault (DisambiguatedTerm.fromTerm preferredTerm_)
             )
@@ -859,7 +859,7 @@ disambiguatedPreferredTermFromRaw rawTerm ((GlossaryItems items) as glossaryItem
             (\itemId ->
                 glossaryItems
                     |> get itemId
-                    |> Maybe.map GlossaryItemForHtml.disambiguatedPreferredTerm
+                    |> Maybe.map GlossaryItemForUi.disambiguatedPreferredTerm
             )
 
 
@@ -990,7 +990,7 @@ disambiguatedPreferredTermsByAlternativeTerm filterByTagId ((GlossaryItems items
             []
 
 
-toList_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml )
+toList_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForUi )
 toList_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItems items) as glossaryItems) =
     let
         itemIdsMatchingTagFilter : Maybe (Set String)
@@ -1020,26 +1020,26 @@ toList_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItems items) as glos
         )
 
 
-toList : Maybe TagId -> GlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml )
+toList : Maybe TagId -> GlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForUi )
 toList =
     toList_ disambiguatedPreferredTerm
 
 
-orderedAlphabetically_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItems -> List ( GlossaryItemId, GlossaryItemForHtml )
+orderedAlphabetically_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItems -> List ( GlossaryItemId, GlossaryItemForUi )
 orderedAlphabetically_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItems items) as glossaryItems) =
     toList_ disambiguatedPreferredTerm_ filterByTagId glossaryItems items.orderedAlphabetically
 
 
 {-| Retrieve the glossary items ordered alphabetically.
 -}
-orderedAlphabetically : Maybe TagId -> GlossaryItems -> List ( GlossaryItemId, GlossaryItemForHtml )
+orderedAlphabetically : Maybe TagId -> GlossaryItems -> List ( GlossaryItemId, GlossaryItemForUi )
 orderedAlphabetically =
     orderedAlphabetically_ disambiguatedPreferredTerm
 
 
 {-| Retrieve the glossary items ordered by most mentioned first.
 -}
-orderedByMostMentionedFirst : Maybe TagId -> GlossaryItems -> List ( GlossaryItemId, GlossaryItemForHtml )
+orderedByMostMentionedFirst : Maybe TagId -> GlossaryItems -> List ( GlossaryItemId, GlossaryItemForUi )
 orderedByMostMentionedFirst filterByTagId ((GlossaryItems items) as glossaryItems) =
     toList filterByTagId glossaryItems items.orderedByMostMentionedFirst
 
@@ -1051,8 +1051,8 @@ orderedFocusedOn :
     -> GlossaryItemId
     -> GlossaryItems
     ->
-        ( List ( GlossaryItemId, GlossaryItemForHtml )
-        , List ( GlossaryItemId, GlossaryItemForHtml )
+        ( List ( GlossaryItemId, GlossaryItemForUi )
+        , List ( GlossaryItemId, GlossaryItemForUi )
         )
 orderedFocusedOn filterByTagId glossaryItemId ((GlossaryItems items) as glossaryItems) =
     let
