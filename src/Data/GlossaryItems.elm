@@ -57,10 +57,10 @@ import Set exposing (Set)
 -}
 type GlossaryItems
     = GlossaryItems
-        { itemById : GlossaryItemIdDict GlossaryItem
-        , tagById : TagIdDict Tag
+        { tagById : TagIdDict Tag
         , tagIdByRawTag : Dict String TagId
         , tagDescriptionById : TagIdDict TagDescription
+        , itemById : GlossaryItemIdDict GlossaryItem
         , disambiguationTagIdByItemId : GlossaryItemIdDict (Maybe TagId)
         , normalTagIdsByItemId : GlossaryItemIdDict (List TagId)
         , itemIdsByTagId : TagIdDict (List GlossaryItemId)
@@ -70,121 +70,6 @@ type GlossaryItems
         , orderedByMostMentionedFirst : List GlossaryItemId
         , orderedFocusedOn : Maybe ( GlossaryItemId, ( List GlossaryItemId, List GlossaryItemId ) )
         }
-
-
-orderAlphabetically : List GlossaryItemForUi -> List GlossaryItemId
-orderAlphabetically =
-    List.sortWith
-        (\item1 item2 ->
-            Term.compareAlphabetically
-                (item1 |> GlossaryItemForUi.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm)
-                (item2 |> GlossaryItemForUi.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm)
-        )
-        >> List.map GlossaryItemForUi.id
-
-
-orderByMostMentionedFirst : List GlossaryItemForUi -> List GlossaryItemId
-orderByMostMentionedFirst glossaryItemsForHtml =
-    let
-        -- Maps a term to a score based on whether or not it occurs in glossaryItem.
-        -- This is done in a primitive way. A more sophisticated solution could use stemming
-        -- or other techniques.
-        termScoreInItem : Term -> GlossaryItemForUi -> Int
-        termScoreInItem term glossaryItem =
-            let
-                termAsWord : Regex.Regex
-                termAsWord =
-                    ("\\b" ++ Extras.Regex.escapeStringForUseInRegex (term |> Term.raw |> RawTerm.toString) ++ "\\b")
-                        |> Regex.fromString
-                        |> Maybe.withDefault Regex.never
-
-                score : Int
-                score =
-                    (glossaryItem
-                        |> GlossaryItemForUi.allTerms
-                        |> List.map (Term.raw >> RawTerm.toString >> Regex.find termAsWord >> List.length)
-                        |> List.sum
-                    )
-                        + (glossaryItem
-                            |> GlossaryItemForUi.definition
-                            |> Maybe.map (Definition.raw >> Regex.find termAsWord >> List.length)
-                            |> Maybe.withDefault 0
-                          )
-                        + (glossaryItem
-                            |> GlossaryItemForUi.relatedPreferredTerms
-                            |> List.map (DisambiguatedTerm.toTerm >> Term.raw >> RawTerm.toString)
-                            |> List.map (Regex.find termAsWord >> List.length)
-                            |> List.sum
-                          )
-            in
-            if score > 0 then
-                1
-
-            else
-                0
-
-        -- Maps a term to a score based on how often it occurs in glossaryItemsForHtml.
-        termScore : Term -> GlossaryItemId -> Int
-        termScore term exceptId =
-            glossaryItemsForHtml
-                |> List.foldl
-                    (\glossaryItem result ->
-                        result
-                            + (if GlossaryItemForUi.id glossaryItem == exceptId then
-                                0
-
-                               else
-                                termScoreInItem term glossaryItem
-                              )
-                    )
-                    0
-
-        termBodyScores : Dict String Int
-        termBodyScores =
-            glossaryItemsForHtml
-                |> List.concatMap
-                    (\glossaryItem ->
-                        glossaryItem
-                            |> GlossaryItemForUi.allTerms
-                            |> List.map (Tuple.pair <| GlossaryItemForUi.id glossaryItem)
-                    )
-                |> List.foldl
-                    (\( glossaryItemId, term ) result ->
-                        Dict.insert
-                            (term |> Term.raw |> RawTerm.toString)
-                            (termScore term glossaryItemId)
-                            result
-                    )
-                    Dict.empty
-    in
-    glossaryItemsForHtml
-        |> List.sortWith
-            (\item1 item2 ->
-                let
-                    itemScore : GlossaryItemForUi -> Int
-                    itemScore =
-                        GlossaryItemForUi.allTerms
-                            >> List.map
-                                (\term ->
-                                    termBodyScores
-                                        |> Dict.get (term |> Term.raw |> RawTerm.toString)
-                                        |> Maybe.withDefault 0
-                                )
-                            >> List.sum
-                in
-                case compare (itemScore item1) (itemScore item2) of
-                    LT ->
-                        GT
-
-                    EQ ->
-                        compare
-                            (item1 |> GlossaryItemForUi.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString |> String.toUpper)
-                            (item2 |> GlossaryItemForUi.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString |> String.toUpper)
-
-                    GT ->
-                        LT
-            )
-        |> List.map GlossaryItemForUi.id
 
 
 {-| The empty set of glossary items.
@@ -1093,3 +978,118 @@ orderedFocusedOn filterByTagId glossaryItemId ((GlossaryItems items) as glossary
     ( toList filterByTagId glossaryItems ids
     , toList filterByTagId glossaryItems otherIds
     )
+
+
+orderAlphabetically : List GlossaryItemForUi -> List GlossaryItemId
+orderAlphabetically =
+    List.sortWith
+        (\item1 item2 ->
+            Term.compareAlphabetically
+                (item1 |> GlossaryItemForUi.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm)
+                (item2 |> GlossaryItemForUi.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm)
+        )
+        >> List.map GlossaryItemForUi.id
+
+
+orderByMostMentionedFirst : List GlossaryItemForUi -> List GlossaryItemId
+orderByMostMentionedFirst glossaryItemsForHtml =
+    let
+        -- Maps a term to a score based on whether or not it occurs in glossaryItem.
+        -- This is done in a primitive way. A more sophisticated solution could use stemming
+        -- or other techniques.
+        termScoreInItem : Term -> GlossaryItemForUi -> Int
+        termScoreInItem term glossaryItem =
+            let
+                termAsWord : Regex.Regex
+                termAsWord =
+                    ("\\b" ++ Extras.Regex.escapeStringForUseInRegex (term |> Term.raw |> RawTerm.toString) ++ "\\b")
+                        |> Regex.fromString
+                        |> Maybe.withDefault Regex.never
+
+                score : Int
+                score =
+                    (glossaryItem
+                        |> GlossaryItemForUi.allTerms
+                        |> List.map (Term.raw >> RawTerm.toString >> Regex.find termAsWord >> List.length)
+                        |> List.sum
+                    )
+                        + (glossaryItem
+                            |> GlossaryItemForUi.definition
+                            |> Maybe.map (Definition.raw >> Regex.find termAsWord >> List.length)
+                            |> Maybe.withDefault 0
+                          )
+                        + (glossaryItem
+                            |> GlossaryItemForUi.relatedPreferredTerms
+                            |> List.map (DisambiguatedTerm.toTerm >> Term.raw >> RawTerm.toString)
+                            |> List.map (Regex.find termAsWord >> List.length)
+                            |> List.sum
+                          )
+            in
+            if score > 0 then
+                1
+
+            else
+                0
+
+        -- Maps a term to a score based on how often it occurs in glossaryItemsForHtml.
+        termScore : Term -> GlossaryItemId -> Int
+        termScore term exceptId =
+            glossaryItemsForHtml
+                |> List.foldl
+                    (\glossaryItem result ->
+                        result
+                            + (if GlossaryItemForUi.id glossaryItem == exceptId then
+                                0
+
+                               else
+                                termScoreInItem term glossaryItem
+                              )
+                    )
+                    0
+
+        termBodyScores : Dict String Int
+        termBodyScores =
+            glossaryItemsForHtml
+                |> List.concatMap
+                    (\glossaryItem ->
+                        glossaryItem
+                            |> GlossaryItemForUi.allTerms
+                            |> List.map (Tuple.pair <| GlossaryItemForUi.id glossaryItem)
+                    )
+                |> List.foldl
+                    (\( glossaryItemId, term ) result ->
+                        Dict.insert
+                            (term |> Term.raw |> RawTerm.toString)
+                            (termScore term glossaryItemId)
+                            result
+                    )
+                    Dict.empty
+    in
+    glossaryItemsForHtml
+        |> List.sortWith
+            (\item1 item2 ->
+                let
+                    itemScore : GlossaryItemForUi -> Int
+                    itemScore =
+                        GlossaryItemForUi.allTerms
+                            >> List.map
+                                (\term ->
+                                    termBodyScores
+                                        |> Dict.get (term |> Term.raw |> RawTerm.toString)
+                                        |> Maybe.withDefault 0
+                                )
+                            >> List.sum
+                in
+                case compare (itemScore item1) (itemScore item2) of
+                    LT ->
+                        GT
+
+                    EQ ->
+                        compare
+                            (item1 |> GlossaryItemForUi.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString |> String.toUpper)
+                            (item2 |> GlossaryItemForUi.disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString |> String.toUpper)
+
+                    GT ->
+                        LT
+            )
+        |> List.map GlossaryItemForUi.id
