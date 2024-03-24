@@ -22,6 +22,7 @@
         "Data.GlossaryItemId",
         "Data.GlossaryItemIdDict",
         "Data.GlossaryItems",
+        "Data.GlossaryTags",
         "Data.GlossaryTitle",
         "Data.GlossaryVersionNumber",
         "Data.IndexOfTerms",
