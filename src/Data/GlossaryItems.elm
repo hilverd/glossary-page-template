@@ -39,11 +39,11 @@ import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
-import Data.GlossaryTags as GlossaryTags exposing (GlossaryTags)
+import Data.GlossaryTags as GlossaryTags exposing (GlossaryTags, tagIdByRawTag)
 import Data.TagDescription exposing (TagDescription)
 import Data.TagId exposing (TagId)
 import Data.TagIdDict as TagIdDict exposing (TagIdDict)
-import Data.TagsChanges as TagsChanges exposing (TagsChanges)
+import Data.TagsChanges exposing (TagsChanges)
 import Dict exposing (Dict)
 import DirectedGraph exposing (DirectedGraph)
 import DuplicateRejectingDict exposing (DuplicateRejectingDict)
@@ -58,10 +58,7 @@ import Set exposing (Set)
 -}
 type GlossaryItems
     = GlossaryItems
-        { tagById : TagIdDict Tag
-        , tagIdByRawTag : Dict String TagId
-        , tagDescriptionById : TagIdDict TagDescription
-        , tags : GlossaryTags
+        { tags : GlossaryTags
         , itemById : GlossaryItemIdDict GlossaryItem
         , disambiguationTagIdByItemId : GlossaryItemIdDict (Maybe TagId)
         , normalTagIdsByItemId : GlossaryItemIdDict (List TagId)
@@ -79,10 +76,7 @@ type GlossaryItems
 empty : GlossaryItems
 empty =
     GlossaryItems
-        { tagById = TagIdDict.empty
-        , tagIdByRawTag = Dict.empty
-        , tagDescriptionById = TagIdDict.empty
-        , tags = GlossaryTags.empty
+        { tags = GlossaryTags.empty
         , itemById = GlossaryItemIdDict.empty
         , disambiguationTagIdByItemId = GlossaryItemIdDict.empty
         , normalTagIdsByItemId = GlossaryItemIdDict.empty
@@ -110,10 +104,6 @@ fromList describedTags_ glossaryItemsForHtml =
                     tagIdByRawTag : Dict String TagId
                     tagIdByRawTag =
                         GlossaryTags.tagIdByRawTag tags_
-
-                    tagDescriptionById : TagIdDict TagDescription
-                    tagDescriptionById =
-                        GlossaryTags.tagDescriptionById tags_
 
                     itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_ : DuplicateRejectingDict String GlossaryItemId
                     itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_ =
@@ -315,10 +305,7 @@ fromList describedTags_ glossaryItemsForHtml =
                                 orderByMostMentionedFirst glossaryItemsForHtml
                         in
                         GlossaryItems
-                            { tagById = tagById
-                            , tagIdByRawTag = tagIdByRawTag
-                            , tagDescriptionById = tagDescriptionById
-                            , tags = tags_
+                            { tags = tags_
                             , itemById = itemById
                             , disambiguationTagIdByItemId = disambiguationTagIdByItemId
                             , normalTagIdsByItemId = sortedNormalTagIdsByItemId
@@ -337,59 +324,15 @@ fromList describedTags_ glossaryItemsForHtml =
 {-| Apply a set of tags changes.
 -}
 applyTagsChanges : TagsChanges -> GlossaryItems -> Result String GlossaryItems
-applyTagsChanges tagsChanges glossaryItems =
+applyTagsChanges tagsChanges (GlossaryItems items0) =
     let
+        tags1 : GlossaryTags
+        tags1 =
+            GlossaryTags.applyChanges tagsChanges items0.tags
+
+        resultBeforeValidation : GlossaryItems
         resultBeforeValidation =
-            tagsChanges
-                |> TagsChanges.toList
-                |> List.foldl
-                    (\tagsChange result ->
-                        case ( result, tagsChange ) of
-                            ( GlossaryItems items, TagsChanges.Insertion describedTag ) ->
-                                let
-                                    id : TagId
-                                    id =
-                                        DescribedTag.id describedTag
-
-                                    tag : Tag
-                                    tag =
-                                        DescribedTag.tag describedTag
-
-                                    tagDescription : TagDescription
-                                    tagDescription =
-                                        DescribedTag.description describedTag
-                                in
-                                GlossaryItems
-                                    { items
-                                        | tagById = TagIdDict.insert id tag items.tagById
-                                        , tagIdByRawTag = Dict.insert (Tag.raw tag) id items.tagIdByRawTag
-                                        , tagDescriptionById = TagIdDict.insert id tagDescription items.tagDescriptionById
-                                    }
-
-                            ( GlossaryItems items, TagsChanges.Update tagId describedTag ) ->
-                                let
-                                    tag =
-                                        DescribedTag.tag describedTag
-
-                                    tagDescription =
-                                        DescribedTag.description describedTag
-                                in
-                                GlossaryItems
-                                    { items
-                                        | tagById = TagIdDict.insert tagId tag items.tagById
-                                        , tagIdByRawTag = Dict.insert (Tag.raw tag) tagId items.tagIdByRawTag
-                                        , tagDescriptionById = TagIdDict.insert tagId tagDescription items.tagDescriptionById
-                                    }
-
-                            ( GlossaryItems items, TagsChanges.Removal tagId ) ->
-                                GlossaryItems
-                                    { items
-                                        | tagById = TagIdDict.remove tagId items.tagById
-                                        , tagIdByRawTag = Dict.filter (always <| (/=) tagId) items.tagIdByRawTag
-                                        , tagDescriptionById = TagIdDict.remove tagId items.tagDescriptionById
-                                    }
-                    )
-                    glossaryItems
+            GlossaryItems { items0 | tags = tags1 }
     in
     resultBeforeValidation
         |> orderedAlphabetically Nothing
@@ -509,8 +452,13 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItems items) as 
                     preferredTerm =
                         GlossaryItem.preferredTerm item
 
+                    alternativeTerms : List Term
                     alternativeTerms =
                         GlossaryItem.alternativeTerms item
+
+                    tagById : TagIdDict Tag
+                    tagById =
+                        GlossaryTags.tagById items.tags
 
                     disambiguationTag =
                         items.disambiguationTagIdByItemId
@@ -518,7 +466,7 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItems items) as 
                             |> Maybe.andThen identity
                             |> Maybe.andThen
                                 (\disambiguationTagId ->
-                                    TagIdDict.get disambiguationTagId items.tagById
+                                    TagIdDict.get disambiguationTagId tagById
                                 )
 
                     normalTags =
@@ -527,7 +475,7 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItems items) as 
                             |> Maybe.map
                                 (List.filterMap
                                     (\normalTagId ->
-                                        TagIdDict.get normalTagId items.tagById
+                                        TagIdDict.get normalTagId tagById
                                     )
                                 )
                             |> Maybe.withDefault []
@@ -580,7 +528,8 @@ get =
 -}
 tags : GlossaryItems -> List Tag
 tags (GlossaryItems items) =
-    items.tagById
+    items.tags
+        |> GlossaryTags.tagById
         |> TagIdDict.values
         |> List.sortWith Tag.compareAlphabetically
 
@@ -590,11 +539,17 @@ Tags can exist without being used in any items.
 -}
 describedTags : GlossaryItems -> List DescribedTag
 describedTags (GlossaryItems items) =
-    items.tagDescriptionById
+    let
+        tagById : TagIdDict Tag
+        tagById =
+            GlossaryTags.tagById items.tags
+    in
+    items.tags
+        |> GlossaryTags.tagDescriptionById
         |> TagIdDict.toList
         |> List.filterMap
             (\( id, description ) ->
-                TagIdDict.get id items.tagById
+                TagIdDict.get id tagById
                     |> Maybe.map
                         (\tag -> DescribedTag.create id tag description)
             )
@@ -610,28 +565,38 @@ describedTags (GlossaryItems items) =
 -}
 tagByIdList : GlossaryItems -> List ( TagId, Tag )
 tagByIdList (GlossaryItems items) =
-    TagIdDict.toList items.tagById
+    items.tags
+        |> GlossaryTags.tagById
+        |> TagIdDict.toList
 
 
 {-| Look up a tag ID from its contents.
 -}
 tagIdFromTag : Tag -> GlossaryItems -> Maybe TagId
 tagIdFromTag tag (GlossaryItems items) =
-    Dict.get (Tag.raw tag) items.tagIdByRawTag
+    let
+        tagIdByRawTag =
+            GlossaryTags.tagIdByRawTag items.tags
+    in
+    Dict.get (Tag.raw tag) tagIdByRawTag
 
 
 {-| Look up a tag from its ID.
 -}
 tagFromId : TagId -> GlossaryItems -> Maybe Tag
 tagFromId tagId (GlossaryItems items) =
-    TagIdDict.get tagId items.tagById
+    items.tags
+        |> GlossaryTags.tagById
+        |> TagIdDict.get tagId
 
 
 {-| Look up a tag's description from its ID.
 -}
 tagDescriptionFromId : TagId -> GlossaryItems -> Maybe TagDescription
 tagDescriptionFromId tagId (GlossaryItems items) =
-    TagIdDict.get tagId items.tagDescriptionById
+    items.tags
+        |> GlossaryTags.tagDescriptionById
+        |> TagIdDict.get tagId
 
 
 {-| The disambiguated preferred term for the item with the given ID.
@@ -651,13 +616,16 @@ disambiguatedPreferredTerm itemId (GlossaryItems items) =
                 |> GlossaryItemIdDict.get itemId
                 |> Maybe.andThen identity
 
+        tagById : TagIdDict Tag
+        tagById =
+            GlossaryTags.tagById items.tags
+
         disambiguationTag : Maybe Tag
         disambiguationTag =
             disambiguationTagId
                 |> Maybe.andThen
                     (\disambiguationTagId_ ->
-                        items.tagById
-                            |> TagIdDict.get disambiguationTagId_
+                        TagIdDict.get disambiguationTagId_ tagById
                     )
     in
     maybePreferredTerm

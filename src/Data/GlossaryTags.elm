@@ -1,6 +1,6 @@
 module Data.GlossaryTags exposing
     ( GlossaryTags
-    , empty, fromList
+    , empty, fromList, applyChanges
     , tagById, tagIdByRawTag, tagDescriptionById
     )
 
@@ -14,7 +14,7 @@ module Data.GlossaryTags exposing
 
 # Build
 
-@docs empty, fromList
+@docs empty, fromList, applyChanges
 
 
 # Query
@@ -28,6 +28,7 @@ import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.TagDescription exposing (TagDescription)
 import Data.TagId exposing (TagId)
 import Data.TagIdDict as TagIdDict exposing (TagIdDict)
+import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import Dict exposing (Dict)
 import DuplicateRejectingDict exposing (DuplicateRejectingDict)
 import Internationalisation as I18n
@@ -100,6 +101,62 @@ fromList describedTags_ =
                     , tagDescriptionById = tagDescriptionById_
                     }
             )
+
+
+{-| Apply a set of tags changes.
+-}
+applyChanges : TagsChanges -> GlossaryTags -> GlossaryTags
+applyChanges tagsChanges glossaryItems =
+    tagsChanges
+        |> TagsChanges.toList
+        |> List.foldl
+            (\tagsChange result ->
+                case ( result, tagsChange ) of
+                    ( GlossaryTags tags, TagsChanges.Insertion describedTag ) ->
+                        let
+                            id : TagId
+                            id =
+                                DescribedTag.id describedTag
+
+                            tag : Tag
+                            tag =
+                                DescribedTag.tag describedTag
+
+                            tagDescription : TagDescription
+                            tagDescription =
+                                DescribedTag.description describedTag
+                        in
+                        GlossaryTags
+                            { tags
+                                | tagById = TagIdDict.insert id tag tags.tagById
+                                , tagIdByRawTag = Dict.insert (Tag.raw tag) id tags.tagIdByRawTag
+                                , tagDescriptionById = TagIdDict.insert id tagDescription tags.tagDescriptionById
+                            }
+
+                    ( GlossaryTags tags, TagsChanges.Update tagId describedTag ) ->
+                        let
+                            tag =
+                                DescribedTag.tag describedTag
+
+                            tagDescription =
+                                DescribedTag.description describedTag
+                        in
+                        GlossaryTags
+                            { tags
+                                | tagById = TagIdDict.insert tagId tag tags.tagById
+                                , tagIdByRawTag = Dict.insert (Tag.raw tag) tagId tags.tagIdByRawTag
+                                , tagDescriptionById = TagIdDict.insert tagId tagDescription tags.tagDescriptionById
+                            }
+
+                    ( GlossaryTags tags, TagsChanges.Removal tagId ) ->
+                        GlossaryTags
+                            { tags
+                                | tagById = TagIdDict.remove tagId tags.tagById
+                                , tagIdByRawTag = Dict.filter (always <| (/=) tagId) tags.tagIdByRawTag
+                                , tagDescriptionById = TagIdDict.remove tagId tags.tagDescriptionById
+                            }
+            )
+            glossaryItems
 
 
 {-| A dictionary mapping each tag ID to the corresponding tag.
