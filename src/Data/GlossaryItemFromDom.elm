@@ -15,13 +15,12 @@ module Data.GlossaryItemFromDom exposing
 -}
 
 import Codec exposing (Codec)
-import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 
 
 {-| A glossary item read from the DOM.
 -}
 type alias GlossaryItemFromDom =
-    { id : GlossaryItemId
+    { id : String
     , preferredTerm : String
     , alternativeTerms : List String
     , disambiguationTag : Maybe String
@@ -38,7 +37,7 @@ type alias GlossaryItemFromDom =
 {-| Create a glossary item from its parts.
 -}
 create :
-    GlossaryItemId
+    String
     -> String
     -> List String
     -> Maybe String
@@ -71,7 +70,7 @@ codec : Codec GlossaryItemFromDom
 codec =
     Codec.object
         create
-        |> Codec.field "id" .id GlossaryItemId.codec
+        |> Codec.field "id" .id Codec.string
         |> Codec.field "preferredTerm" .preferredTerm Codec.string
         |> Codec.field "alternativeTerms" .alternativeTerms (Codec.list Codec.string)
         |> Codec.field "disambiguationTag" .disambiguationTag (Codec.nullable Codec.string)
