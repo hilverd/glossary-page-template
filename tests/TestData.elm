@@ -9,6 +9,7 @@ import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
+import Data.GlossaryItemFromDom exposing (GlossaryItemFromDom)
 import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
@@ -17,64 +18,124 @@ import Data.TagDescription as TagDescription exposing (TagDescription)
 import Data.TagId as TagId exposing (TagId)
 
 
+computerScienceTagRawId : String
+computerScienceTagRawId =
+    "Computer Science"
+
+
 computerScienceTagId : TagId
 computerScienceTagId =
-    TagId.create "Computer Science"
+    TagId.create computerScienceTagRawId
+
+
+computerScienceRawTag : String
+computerScienceRawTag =
+    "Computer Science"
 
 
 computerScienceTag : Tag
 computerScienceTag =
-    Tag.fromMarkdown "Computer Science"
+    Tag.fromMarkdown computerScienceRawTag
+
+
+computerScienceTagRawDescription : String
+computerScienceTagRawDescription =
+    "These are items about computer science — the study of computation, information, and automation."
 
 
 computerScienceTagDescription : TagDescription
 computerScienceTagDescription =
-    TagDescription.fromMarkdown "These are items about computer science — the study of computation, information, and automation."
+    TagDescription.fromMarkdown computerScienceTagRawDescription
+
+
+financeTagRawId : String
+financeTagRawId =
+    "Finance"
 
 
 financeTagId : TagId
 financeTagId =
-    TagId.create "Finance"
+    TagId.create financeTagRawId
+
+
+financeRawTag : String
+financeRawTag =
+    "Finance"
 
 
 financeTag : Tag
 financeTag =
-    Tag.fromMarkdown "Finance"
+    Tag.fromMarkdown financeRawTag
+
+
+financeTagRawDescription : String
+financeTagRawDescription =
+    "These are items about finance — the study and discipline of money, currency and capital assets."
 
 
 financeTagDescription : TagDescription
 financeTagDescription =
-    TagDescription.fromMarkdown "These are items about finance — the study and discipline of money, currency and capital assets."
+    TagDescription.fromMarkdown financeTagRawDescription
+
+
+gardeningTagRawId : String
+gardeningTagRawId =
+    "Gardening"
 
 
 gardeningTagId : TagId
 gardeningTagId =
-    TagId.create "Gardening"
+    TagId.create gardeningTagRawId
+
+
+gardeningRawTag : String
+gardeningRawTag =
+    "Gardening"
 
 
 gardeningTag : Tag
 gardeningTag =
-    Tag.fromMarkdown "Gardening"
+    Tag.fromMarkdown gardeningRawTag
+
+
+gardeningTagRawDescription : String
+gardeningTagRawDescription =
+    "These are items about gardening — the practice of growing and cultivating plants as part of horticulture."
 
 
 gardeningTagDescription : TagDescription
 gardeningTagDescription =
-    TagDescription.fromMarkdown "These are items about gardening — the practice of growing and cultivating plants as part of horticulture."
+    TagDescription.fromMarkdown gardeningTagRawDescription
+
+
+houseworkRawTag : String
+houseworkRawTag =
+    "Housework"
 
 
 houseworkTag : Tag
 houseworkTag =
-    Tag.fromMarkdown "Housework"
+    Tag.fromMarkdown houseworkRawTag
+
+
+houseworkTagRawDescription : String
+houseworkTagRawDescription =
+    "These are items about housework — the act of overseeing the organisational, day-to-day operations of a house or estate."
 
 
 houseworkTagDescription : TagDescription
 houseworkTagDescription =
-    TagDescription.fromMarkdown "These are items about housework — the act of overseeing the organisational, day-to-day operations of a house or estate."
+    TagDescription.fromMarkdown houseworkTagRawDescription
+
+
+defaultComputerScienceRawDefinition : String
+defaultComputerScienceRawDefinition =
+    "The preexisting value of a user-configurable setting that is assigned to a software application, computer program or device. Such settings are also called presets or factory presets, especially for electronic devices."
 
 
 defaultComputerScienceDefinition : Definition
 defaultComputerScienceDefinition =
-    Definition.fromMarkdown "The preexisting value of a user-configurable setting that is assigned to a software application, computer program or device. Such settings are also called presets or factory presets, especially for electronic devices."
+    Definition.fromMarkdown defaultComputerScienceRawDefinition
 
 
 defaultComputerScienceItem : GlossaryItemForUi
@@ -93,6 +154,22 @@ defaultComputerScienceItem =
         (Just "2023-09-15T19:58:59.573Z")
         Nothing
         Nothing
+
+
+defaultComputerScienceItemFromDom : GlossaryItemFromDom
+defaultComputerScienceItemFromDom =
+    { id = "Default (Computer Science)"
+    , preferredTerm = "Default"
+    , alternativeTerms = [ "Preset", "Factory preset" ]
+    , disambiguationTag = Just computerScienceRawTag
+    , normalTags = []
+    , definition = Just defaultComputerScienceRawDefinition
+    , relatedPreferredTerms = []
+    , needsUpdating = False
+    , lastUpdatedDateAsIso8601 = Just "2023-09-15T19:58:59.573Z"
+    , lastUpdatedByName = Nothing
+    , lastUpdatedByEmailAddress = Nothing
+    }
 
 
 defaultFinanceDefinition : Definition
