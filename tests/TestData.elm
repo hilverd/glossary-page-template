@@ -3,7 +3,9 @@ module TestData exposing (..)
 import Data.AboutParagraph as AboutParagraph
 import Data.CardWidth as CardWidth
 import Data.DescribedTag as DescribedTag exposing (DescribedTag)
+import Data.DescribedTagFromDom exposing (DescribedTagFromDom)
 import Data.Glossary as Glossary exposing (Glossary)
+import Data.GlossaryFromDom exposing (GlossaryFromDom)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
@@ -172,9 +174,14 @@ defaultComputerScienceItemFromDom =
     }
 
 
+defaultFinanceRawDefinition : String
+defaultFinanceRawDefinition =
+    "In finance, default is failure to meet the legal obligations (or conditions) of a loan, for example when a home buyer fails to make a mortgage payment, or when a corporation or government fails to pay a bond which has reached maturity. A national or sovereign default is the failure or refusal of a government to repay its national debt."
+
+
 defaultFinanceDefinition : Definition
 defaultFinanceDefinition =
-    Definition.fromMarkdown "In finance, default is failure to meet the legal obligations (or conditions) of a loan, for example when a home buyer fails to make a mortgage payment, or when a corporation or government fails to pay a bond which has reached maturity. A national or sovereign default is the failure or refusal of a government to repay its national debt."
+    Definition.fromMarkdown defaultFinanceRawDefinition
 
 
 defaultFinanceItem : GlossaryItemForUi
@@ -193,9 +200,30 @@ defaultFinanceItem =
         Nothing
 
 
+defaultFinanceItemFromDom : GlossaryItemFromDom
+defaultFinanceItemFromDom =
+    { id = "Default (Finance)"
+    , preferredTerm = "Default"
+    , alternativeTerms = []
+    , disambiguationTag = Just financeRawTag
+    , normalTags = []
+    , definition = Just defaultFinanceRawDefinition
+    , relatedPreferredTerms = [ "Loan" ]
+    , needsUpdating = False
+    , lastUpdatedDateAsIso8601 = Just "2023-10-30T08:25:24.765Z"
+    , lastUpdatedByName = Nothing
+    , lastUpdatedByEmailAddress = Nothing
+    }
+
+
+informationRetrievalRawDefinition : String
+informationRetrievalRawDefinition =
+    "Information retrieval (IR) in computing and information science is the process of obtaining information system resources that are relevant to an information need from a collection of those resources. Searches can be based on full-text or other content-based indexing."
+
+
 informationRetrievalDefinition : Definition
 informationRetrievalDefinition =
-    Definition.fromMarkdown "Information retrieval (IR) in computing and information science is the process of obtaining information system resources that are relevant to an information need from a collection of those resources. Searches can be based on full-text or other content-based indexing."
+    Definition.fromMarkdown informationRetrievalRawDefinition
 
 
 informationRetrievalItem : GlossaryItemForUi
@@ -214,9 +242,30 @@ informationRetrievalItem =
         Nothing
 
 
+informationRetrievalItemFromDom : GlossaryItemFromDom
+informationRetrievalItemFromDom =
+    { id = "Information retrieval"
+    , preferredTerm = "Information retrieval"
+    , alternativeTerms = [ "IR" ]
+    , disambiguationTag = Nothing
+    , normalTags = [ computerScienceRawTag ]
+    , definition = Just informationRetrievalRawDefinition
+    , relatedPreferredTerms = []
+    , needsUpdating = False
+    , lastUpdatedDateAsIso8601 = Just "2023-09-16T07:09:19.630Z"
+    , lastUpdatedByName = Nothing
+    , lastUpdatedByEmailAddress = Nothing
+    }
+
+
+interestRateRawDefinition : String
+interestRateRawDefinition =
+    "An interest rate is the amount of interest due per period, as a proportion of the amount lent, deposited, or borrowed (called the principal sum). The total interest on an amount lent or borrowed depends on the principal sum, the interest rate, the compounding frequency, and the length of time over which it is lent, deposited, or borrowed."
+
+
 interestRateDefinition : Definition
 interestRateDefinition =
-    Definition.fromMarkdown "An interest rate is the amount of interest due per period, as a proportion of the amount lent, deposited, or borrowed (called the principal sum). The total interest on an amount lent or borrowed depends on the principal sum, the interest rate, the compounding frequency, and the length of time over which it is lent, deposited, or borrowed."
+    Definition.fromMarkdown interestRateRawDefinition
 
 
 interestRateItem : GlossaryItemForUi
@@ -235,6 +284,22 @@ interestRateItem =
         Nothing
 
 
+interestRateItemFromDom : GlossaryItemFromDom
+interestRateItemFromDom =
+    { id = "Interest rate"
+    , preferredTerm = "Interest rate"
+    , alternativeTerms = [ "IR" ]
+    , disambiguationTag = Nothing
+    , normalTags = [ financeRawTag ]
+    , definition = Just interestRateRawDefinition
+    , relatedPreferredTerms = [ "Loan" ]
+    , needsUpdating = False
+    , lastUpdatedDateAsIso8601 = Just "2023-10-30T08:25:30.335Z"
+    , lastUpdatedByName = Nothing
+    , lastUpdatedByEmailAddress = Nothing
+    }
+
+
 updatedInterestRateItem : GlossaryItemForUi
 updatedInterestRateItem =
     GlossaryItemForUi.create
@@ -251,9 +316,14 @@ updatedInterestRateItem =
         Nothing
 
 
+loanRawDefinition : String
+loanRawDefinition =
+    "The transfer of money by one party to another with an agreement to pay it back. The recipient, or borrower, incurs a debt and is usually required to pay interest for the use of the money."
+
+
 loanDefinition : Definition
 loanDefinition =
-    Definition.fromMarkdown "The transfer of money by one party to another with an agreement to pay it back. The recipient, or borrower, incurs a debt and is usually required to pay interest for the use of the money."
+    Definition.fromMarkdown loanRawDefinition
 
 
 loanItem : GlossaryItemForUi
@@ -272,6 +342,22 @@ loanItem =
         Nothing
 
 
+loanItemFromDom : GlossaryItemFromDom
+loanItemFromDom =
+    { id = "Loan"
+    , preferredTerm = "Loan"
+    , alternativeTerms = []
+    , disambiguationTag = Nothing
+    , normalTags = [ financeRawTag ]
+    , definition = Just loanRawDefinition
+    , relatedPreferredTerms = [ "Interest rate" ]
+    , needsUpdating = False
+    , lastUpdatedDateAsIso8601 = Just "2023-10-30T08:26:18.523Z"
+    , lastUpdatedByName = Nothing
+    , lastUpdatedByEmailAddress = Nothing
+    }
+
+
 updatedLoanItem : GlossaryItemForUi
 updatedLoanItem =
     GlossaryItemForUi.create
@@ -288,12 +374,28 @@ updatedLoanItem =
         Nothing
 
 
+computerScienceDescribedTagFromDom : DescribedTagFromDom
+computerScienceDescribedTagFromDom =
+    { id = computerScienceTagRawId
+    , tag = computerScienceRawTag
+    , description = computerScienceTagRawDescription
+    }
+
+
 computerScienceDescribedTag : DescribedTag
 computerScienceDescribedTag =
     DescribedTag.create
         computerScienceTagId
         computerScienceTag
         computerScienceTagDescription
+
+
+financeDescribedTagFromDom : DescribedTagFromDom
+financeDescribedTagFromDom =
+    { id = financeTagRawId
+    , tag = financeRawTag
+    , description = financeTagRawDescription
+    }
 
 
 financeDescribedTag : DescribedTag
@@ -304,12 +406,46 @@ financeDescribedTag =
         financeTagDescription
 
 
+gardeningDescribedTagFromDom : DescribedTagFromDom
+gardeningDescribedTagFromDom =
+    { id = gardeningTagRawId
+    , tag = gardeningRawTag
+    , description = gardeningTagRawDescription
+    }
+
+
 gardeningDescribedTag : DescribedTag
 gardeningDescribedTag =
     DescribedTag.create
         gardeningTagId
         gardeningTag
         gardeningTagDescription
+
+
+glossaryFromDom : GlossaryFromDom
+glossaryFromDom =
+    { enableLastUpdatedDates = True
+    , enableExportMenu = True
+    , enableOrderItemsButtons = True
+    , enableHelpForMakingChanges = False
+    , cardWidth = "intermediate"
+    , title = "Example Glossary"
+    , aboutParagraph = "An example glossary."
+    , aboutLinks = []
+    , tags =
+        [ computerScienceDescribedTagFromDom
+        , financeDescribedTagFromDom
+        , gardeningDescribedTagFromDom
+        ]
+    , items =
+        [ defaultComputerScienceItemFromDom
+        , defaultFinanceItemFromDom
+        , informationRetrievalItemFromDom
+        , interestRateItemFromDom
+        , loanItemFromDom
+        ]
+    , versionNumber = Just 0
+    }
 
 
 glossary : Glossary
