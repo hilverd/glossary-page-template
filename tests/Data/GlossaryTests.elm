@@ -1,7 +1,7 @@
 module Data.GlossaryTests exposing (suite)
 
 import Codec
-import Data.Glossary as Glossary
+import Data.GlossaryForUi as Glossary
 import Expect
 import Test exposing (Test, describe, test)
 import TestData

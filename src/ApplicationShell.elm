@@ -15,7 +15,7 @@ import Browser.Navigation exposing (Key)
 import Codec
 import CommonModel exposing (CommonModel)
 import Data.Editability as Editability
-import Data.Glossary as Glossary exposing (Glossary)
+import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems
 import Data.Theme as Theme exposing (Theme)
@@ -112,10 +112,10 @@ init flags url key =
         maybeFragment =
             url.fragment
 
-        glossary : Result String Glossary
-        glossary =
+        glossaryForUi : Result String GlossaryForUi
+        glossaryForUi =
             flags
-                |> Decode.decodeValue (Codec.decoder Glossary.codec)
+                |> Decode.decodeValue (Codec.decoder GlossaryForUi.codec)
                 |> Result.mapError Decode.errorToString
 
         itemWithFocus : Maybe GlossaryItemId
@@ -123,13 +123,13 @@ init flags url key =
             Maybe.map2
                 glossaryItemIdForFragment
                 maybeFragment
-                (Result.toMaybe glossary)
+                (Result.toMaybe glossaryForUi)
                 |> Maybe.andThen identity
 
         enableHelpForMakingChanges : Bool
         enableHelpForMakingChanges =
-            glossary
-                |> Result.map Glossary.enableHelpForMakingChanges
+            glossaryForUi
+                |> Result.map GlossaryForUi.enableHelpForMakingChanges
                 |> Result.withDefault False
 
         usingIncludedBackend : Bool
@@ -203,7 +203,7 @@ init flags url key =
             , enableMathSupport = katexIsAvailable
             , queryParameters = queryParameters
             , fragment = maybeFragment
-            , glossary = glossary
+            , glossaryForUi = glossaryForUi
             }
 
         ( listAllModel, listAllCmd ) =
@@ -303,9 +303,9 @@ withoutInternal msg =
             PageMsg.Internal ()
 
 
-glossaryItemIdForFragment : String -> Glossary -> Maybe GlossaryItemId
+glossaryItemIdForFragment : String -> GlossaryForUi -> Maybe GlossaryItemId
 glossaryItemIdForFragment fragment =
-    Glossary.items
+    GlossaryForUi.items
         >> GlossaryItems.itemIdFromFragmentIdentifier fragment
 
 
@@ -350,7 +350,7 @@ update msg model =
                             Maybe.map2
                                 glossaryItemIdForFragment
                                 maybeFragment
-                                (Result.toMaybe common0.glossary)
+                                (Result.toMaybe common0.glossaryForUi)
                                 |> Maybe.andThen identity
 
                         common1 : CommonModel

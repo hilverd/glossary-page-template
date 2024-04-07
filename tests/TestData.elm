@@ -4,12 +4,12 @@ import Data.AboutParagraph as AboutParagraph
 import Data.CardWidth as CardWidth
 import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.DescribedTagFromDom exposing (DescribedTagFromDom)
-import Data.Glossary as Glossary exposing (Glossary)
+import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryFromDom exposing (GlossaryFromDom)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
-import Data.GlossaryItem.Term as Term exposing (isAbbreviation)
+import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemFromDom exposing (GlossaryItemFromDom)
 import Data.GlossaryItemId as GlossaryItemId
@@ -451,9 +451,9 @@ glossaryFromDom =
     }
 
 
-glossary : Glossary
+glossary : GlossaryForUi
 glossary =
-    Glossary.create
+    GlossaryForUi.create
         True
         True
         True
@@ -477,4 +477,4 @@ glossary =
 
 glossaryItems : GlossaryItems
 glossaryItems =
-    Glossary.items glossary
+    GlossaryForUi.items glossary

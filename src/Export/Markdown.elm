@@ -9,7 +9,7 @@ module Export.Markdown exposing (toString, download)
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
 import Data.DescribedTag as DescribedTag
-import Data.Glossary as Glossary exposing (Glossary, aboutSection)
+import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Tag as Tag
@@ -121,17 +121,17 @@ itemToMarkdown glossaryItem =
 
 {-| Export a glossary to Markdown format.
 -}
-toString : Glossary -> String
-toString glossary =
+toString : GlossaryForUi -> String
+toString glossaryForUi =
     let
         title =
-            Glossary.title glossary
+            GlossaryForUi.title glossaryForUi
 
         aboutSection =
-            Glossary.aboutSection glossary
+            GlossaryForUi.aboutSection glossaryForUi
 
         items =
-            Glossary.items glossary
+            GlossaryForUi.items glossaryForUi
 
         titleHeadingString : String
         titleHeadingString =
@@ -149,8 +149,8 @@ toString glossary =
 
         tagsString : String
         tagsString =
-            glossary
-                |> Glossary.items
+            glossaryForUi
+                |> GlossaryForUi.items
                 |> GlossaryItems.describedTags
                 |> List.map
                     (\describedTag ->
@@ -196,17 +196,17 @@ toString glossary =
 {-| Export a glossary to a Markdown file.
 This is achieved by producing a [command for downloading](https://package.elm-lang.org/packages/elm/file/latest/File.Download) this file.
 -}
-download : Glossary -> Cmd msg
-download glossary =
+download : GlossaryForUi -> Cmd msg
+download glossaryForUi =
     let
         title : GlossaryTitle
         title =
-            Glossary.title glossary
+            GlossaryForUi.title glossaryForUi
 
         filename : String
         filename =
             GlossaryTitle.toFilename ".md" title
     in
-    glossary
+    glossaryForUi
         |> toString
         |> Download.string filename "text/markdown"

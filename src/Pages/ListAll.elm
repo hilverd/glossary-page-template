@@ -43,9 +43,9 @@ import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.Editability as Editability exposing (Editability(..))
-import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
+import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
@@ -157,7 +157,7 @@ type InternalMsg
     | ConfirmDelete GlossaryItemId
     | CancelDelete
     | Delete GlossaryItemId
-    | Deleted Glossary
+    | Deleted GlossaryForUi
     | FailedToDelete Http.Error
     | JumpToTermIndexGroup Bool String
     | ChangeOrderItemsBy OrderItemsBy
@@ -165,7 +165,7 @@ type InternalMsg
     | ToggleEnableExportMenu
     | ToggleEnableOrderItemsButtons
     | ToggleEnableLastUpdatedDates
-    | ChangedSettings Glossary
+    | ChangedSettings GlossaryForUi
     | FailedToChangeSettings Http.Error
     | DownloadMarkdown
     | DownloadAnki
@@ -363,10 +363,10 @@ update msg model =
 
                 results : List Components.SearchDialog.SearchResult
                 results =
-                    case model.common.glossary of
-                        Ok glossary ->
-                            glossary
-                                |> Glossary.items
+                    case model.common.glossaryForUi of
+                        Ok glossaryForUi ->
+                            glossaryForUi
+                                |> GlossaryForUi.items
                                 |> Search.search model.common.enableMathSupport (filterByTagId model) searchString
 
                         Err _ ->
@@ -457,10 +457,10 @@ update msg model =
         ShowRelatedTermAsSingle relatedTerm ->
             let
                 model1 =
-                    case model.common.glossary of
-                        Ok glossary ->
-                            glossary
-                                |> Glossary.items
+                    case model.common.glossaryForUi of
+                        Ok glossaryForUi ->
+                            glossaryForUi
+                                |> GlossaryForUi.items
                                 |> GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm (Term.raw relatedTerm)
                                 |> Maybe.map (\index -> { model | itemWithFocus = Just index })
                                 |> Maybe.withDefault model
@@ -496,18 +496,18 @@ update msg model =
                 ( { model | deleting = NotCurrentlySaving }, Cmd.none )
 
         Delete id ->
-            case model.common.glossary of
-                Ok glossary ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
                     let
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
-                                (Glossary.versionNumber glossary)
+                                (GlossaryForUi.versionNumber glossaryForUi)
                                 [ GlossaryChange.Remove id ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
-                                glossary
+                                glossaryForUi
                                 changelist
                                 (PageMsg.Internal << FailedToDelete)
                                 (\( _, updatedGlossary ) ->
@@ -521,7 +521,7 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        Deleted updatedGlossary ->
+        Deleted updatedGlossaryForUi ->
             let
                 common : CommonModel
                 common =
@@ -534,7 +534,7 @@ update msg model =
                         ]
             in
             ( { model
-                | common = { common | glossary = Ok <| updatedGlossary }
+                | common = { common | glossaryForUi = Ok <| updatedGlossaryForUi }
                 , itemWithFocus = Nothing
                 , confirmDeleteId = Nothing
                 , deleting = NotCurrentlySaving
@@ -625,18 +625,18 @@ update msg model =
             )
 
         ChangeCardWidth cardWidth ->
-            case model.common.glossary of
-                Ok glossary ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
                     let
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
-                                (Glossary.versionNumber glossary)
+                                (GlossaryForUi.versionNumber glossaryForUi)
                                 [ GlossaryChange.SetCardWidth cardWidth ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
-                                glossary
+                                glossaryForUi
                                 changelist
                                 (PageMsg.Internal << FailedToChangeSettings)
                                 (\( _, updatedGlossary ) ->
@@ -655,27 +655,27 @@ update msg model =
                     ( model, Cmd.none )
 
         ToggleEnableExportMenu ->
-            case model.common.glossary of
-                Ok glossary ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
                     let
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
-                                (Glossary.versionNumber glossary)
+                                (GlossaryForUi.versionNumber glossaryForUi)
                                 [ GlossaryChange.ToggleEnableExportMenu ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
-                                glossary
+                                glossaryForUi
                                 changelist
                                 (PageMsg.Internal << FailedToChangeSettings)
-                                (\( itemWithFocus, updatedGlossary ) ->
+                                (\( itemWithFocus, updatedGlossaryForUi ) ->
                                     let
                                         common0 =
                                             model.common
                                     in
                                     PageMsg.NavigateToListAll
-                                        { common0 | glossary = Ok updatedGlossary }
+                                        { common0 | glossaryForUi = Ok updatedGlossaryForUi }
                                         itemWithFocus
                                 )
                     in
@@ -691,27 +691,27 @@ update msg model =
                     ( model, Cmd.none )
 
         ToggleEnableOrderItemsButtons ->
-            case model.common.glossary of
-                Ok glossary ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
                     let
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
-                                (Glossary.versionNumber glossary)
+                                (GlossaryForUi.versionNumber glossaryForUi)
                                 [ GlossaryChange.ToggleEnableOrderItemsButtons ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
-                                glossary
+                                glossaryForUi
                                 changelist
                                 (PageMsg.Internal << FailedToChangeSettings)
-                                (\( itemWithFocus, updatedGlossary ) ->
+                                (\( itemWithFocus, updatedGlossaryForUi ) ->
                                     let
                                         common0 =
                                             model.common
                                     in
                                     PageMsg.NavigateToListAll
-                                        { common0 | glossary = Ok updatedGlossary }
+                                        { common0 | glossaryForUi = Ok updatedGlossaryForUi }
                                         itemWithFocus
                                 )
                     in
@@ -727,27 +727,27 @@ update msg model =
                     ( model, Cmd.none )
 
         ToggleEnableLastUpdatedDates ->
-            case model.common.glossary of
-                Ok glossary ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
                     let
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
-                                (Glossary.versionNumber glossary)
+                                (GlossaryForUi.versionNumber glossaryForUi)
                                 [ GlossaryChange.ToggleEnableLastUpdatedDates ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
-                                glossary
+                                glossaryForUi
                                 changelist
                                 (PageMsg.Internal << FailedToChangeSettings)
-                                (\( itemWithFocus, updatedGlossary ) ->
+                                (\( itemWithFocus, updatedGlossaryForUi ) ->
                                     let
                                         common0 =
                                             model.common
                                     in
                                     PageMsg.NavigateToListAll
-                                        { common0 | glossary = Ok updatedGlossary }
+                                        { common0 | glossaryForUi = Ok updatedGlossaryForUi }
                                         itemWithFocus
                                 )
                     in
@@ -762,14 +762,14 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        ChangedSettings updatedGlossary ->
+        ChangedSettings updatedGlossaryForUi ->
             let
                 common : CommonModel
                 common =
                     model.common
             in
             ( { model
-                | common = { common | glossary = Ok <| updatedGlossary }
+                | common = { common | glossaryForUi = Ok <| updatedGlossaryForUi }
                 , savingSettings = NotCurrentlySaving
               }
             , if common.editability == Editability.EditingInMemory then
@@ -788,23 +788,23 @@ update msg model =
 
         DownloadMarkdown ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
-            , model.common.glossary
+            , model.common.glossaryForUi
                 |> Result.map Export.Markdown.download
                 |> Result.withDefault Cmd.none
             )
 
         DownloadAnki ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
-            , model.common.glossary
+            , model.common.glossaryForUi
                 |> Result.map (Export.Anki.download model.common.enableMathSupport)
                 |> Result.withDefault Cmd.none
             )
 
         DownloadJson ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
-            , case model.common.glossary of
-                Ok glossary ->
-                    Export.Json.download glossary
+            , case model.common.glossaryForUi of
+                Ok glossaryForUi ->
+                    Export.Json.download glossaryForUi
 
                 _ ->
                     Cmd.none
@@ -878,8 +878,8 @@ update msg model =
 
 filterByTagId : Model -> Maybe TagId
 filterByTagId model =
-    case model.common.glossary of
-        Ok glossary ->
+    case model.common.glossaryForUi of
+        Ok glossaryForUi ->
             let
                 queryParametersTag : Maybe Tag
                 queryParametersTag =
@@ -888,7 +888,7 @@ filterByTagId model =
             in
             queryParametersTag
                 |> Maybe.andThen
-                    (\tag -> glossary |> Glossary.items |> GlossaryItems.tagIdFromTag tag)
+                    (\tag -> glossaryForUi |> GlossaryForUi.items |> GlossaryItems.tagIdFromTag tag)
 
         _ ->
             Nothing
@@ -975,8 +975,8 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
         ]
 
 
-viewSettings : Glossary -> Model -> Html Msg
-viewSettings glossary model =
+viewSettings : GlossaryForUi -> Model -> Html Msg
+viewSettings glossaryForUi model =
     let
         errorDiv : String -> Html msg
         errorDiv message =
@@ -1026,12 +1026,12 @@ viewSettings glossary model =
                         [ viewSelectInputSyntax model.common.enableMathSupport ]
                 , div
                     [ class "mt-6 pb-2" ]
-                    [ viewSelectCardWidth glossary model
+                    [ viewSelectCardWidth glossaryForUi model
                     ]
                 , div
                     [ class "mt-6 pb-2" ]
                     [ Components.Button.toggle
-                        (Glossary.enableExportMenu glossary)
+                        (GlossaryForUi.enableExportMenu glossaryForUi)
                         ElementIds.showExportMenuLabel
                         [ Html.Events.onClick <| PageMsg.Internal ToggleEnableExportMenu ]
                         [ span
@@ -1042,7 +1042,7 @@ viewSettings glossary model =
                 , div
                     [ class "mt-6 pb-2" ]
                     [ Components.Button.toggle
-                        (Glossary.enableOrderItemsButtons glossary)
+                        (GlossaryForUi.enableOrderItemsButtons glossaryForUi)
                         ElementIds.showOrderItemsButtons
                         [ Html.Events.onClick <| PageMsg.Internal ToggleEnableOrderItemsButtons ]
                         [ span
@@ -1053,7 +1053,7 @@ viewSettings glossary model =
                 , div
                     [ class "mt-6 pb-2" ]
                     [ Components.Button.toggle
-                        (Glossary.enableLastUpdatedDates glossary)
+                        (GlossaryForUi.enableLastUpdatedDates glossaryForUi)
                         ElementIds.showLastUpdatedDatesLabel
                         [ Html.Events.onClick <| PageMsg.Internal ToggleEnableLastUpdatedDates ]
                         [ span
@@ -1992,8 +1992,8 @@ viewSelectInputSyntax enableMathSupport =
         ]
 
 
-viewSelectCardWidth : Glossary -> Model -> Html Msg
-viewSelectCardWidth glossary model =
+viewSelectCardWidth : GlossaryForUi -> Model -> Html Msg
+viewSelectCardWidth glossaryForUi model =
     let
         tabbable : Bool
         tabbable =
@@ -2001,7 +2001,7 @@ viewSelectCardWidth glossary model =
 
         cardWidth : CardWidth
         cardWidth =
-            Glossary.cardWidth glossary
+            GlossaryForUi.cardWidth glossaryForUi
     in
     div
         []
@@ -2287,18 +2287,18 @@ noModalDialogShown model =
             True
 
 
-pageTitle : Model -> Glossary -> String
-pageTitle model glossary =
+pageTitle : Model -> GlossaryForUi -> String
+pageTitle model glossaryForUi =
     let
         glossaryTitle =
-            glossary |> Glossary.title |> GlossaryTitle.inlineText
+            glossaryForUi |> GlossaryForUi.title |> GlossaryTitle.inlineText
     in
     case ( model.layout, model.itemWithFocus ) of
         ( ShowSingleItem, Just id ) ->
             let
                 disambiguatedPreferredTerm =
-                    glossary
-                        |> Glossary.items
+                    glossaryForUi
+                        |> GlossaryForUi.items
                         |> GlossaryItems.get id
                         |> Maybe.map
                             (\item ->
@@ -2331,12 +2331,12 @@ pageTitle model glossary =
 
 filterByTagWithDescription : Model -> Maybe DescribedTag
 filterByTagWithDescription model =
-    case model.common.glossary of
-        Ok glossary ->
+    case model.common.glossaryForUi of
+        Ok glossaryForUi ->
             let
                 items : GlossaryItems
                 items =
-                    Glossary.items glossary
+                    GlossaryForUi.items glossaryForUi
             in
             model
                 |> filterByTagId
@@ -2365,8 +2365,8 @@ controlOrCommandK runningOnMacOs =
 
 view : Model -> Document Msg
 view model =
-    case model.common.glossary of
-        Ok glossary ->
+    case model.common.glossaryForUi of
+        Ok glossaryForUi ->
             let
                 noModalDialogShown_ : Bool
                 noModalDialogShown_ =
@@ -2374,7 +2374,7 @@ view model =
 
                 items : GlossaryItems
                 items =
-                    Glossary.items glossary
+                    GlossaryForUi.items glossaryForUi
 
                 filterByTag_ : Maybe TagId
                 filterByTag_ =
@@ -2429,7 +2429,7 @@ view model =
                 combinedIndexedGlossaryItems =
                     List.append indexedGlossaryItems otherIndexedGlossaryItems
             in
-            { title = pageTitle model glossary
+            { title = pageTitle model glossaryForUi
             , body =
                 [ Html.div
                     [ class "min-h-full focus:outline-none"
@@ -2539,7 +2539,7 @@ view model =
                             noModalDialogShown_
                             model.common.theme
                             model.themeDropdownMenu
-                            (if Glossary.enableExportMenu glossary then
+                            (if GlossaryForUi.enableExportMenu glossaryForUi then
                                 Just model.exportDropdownMenu
 
                              else
@@ -2549,13 +2549,13 @@ view model =
                             [ Html.Attributes.id ElementIds.container
                             , class "relative"
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
-                            , glossary |> Glossary.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
+                            , glossaryForUi |> GlossaryForUi.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
                             ]
                             [ header [] <|
                                 let
                                     showExportButton : Bool
                                     showExportButton =
-                                        Glossary.enableExportMenu glossary
+                                        GlossaryForUi.enableExportMenu glossaryForUi
                                 in
                                 [ div
                                     [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
@@ -2578,7 +2578,7 @@ view model =
                                     ]
                                 , viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
                                     |> Extras.Html.showIf (model.common.editability == ReadOnlyWithHelpForMakingChanges)
-                                , Extras.Html.showIf (Editability.editing model.common.editability) <| viewSettings glossary model
+                                , Extras.Html.showIf (Editability.editing model.common.editability) <| viewSettings glossaryForUi model
                                 , h1
                                     [ id ElementIds.title ]
                                     [ filterByTagWithDescription_
@@ -2589,15 +2589,15 @@ view model =
                                                     [ class "text-3xl font-bold leading-tight" ]
                                             )
                                         |> Maybe.withDefault
-                                            (glossary
-                                                |> Glossary.title
+                                            (glossaryForUi
+                                                |> GlossaryForUi.title
                                                 |> GlossaryTitle.view model.common.enableMathSupport [ class "text-3xl font-bold leading-tight" ]
                                             )
                                     ]
                                 , Extras.Html.showIf (filterByTagWithDescription_ /= Nothing) <|
                                     h2
                                         [ class "mt-2 font-bold leading-tight" ]
-                                        [ glossary |> Glossary.title |> GlossaryTitle.view model.common.enableMathSupport [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
+                                        [ glossaryForUi |> GlossaryForUi.title |> GlossaryTitle.view model.common.enableMathSupport [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
                                         ]
                                 ]
                             , Html.main_
@@ -2612,8 +2612,8 @@ view model =
                                                 []
                                         )
                                     |> Maybe.withDefault
-                                        (glossary
-                                            |> Glossary.aboutSection
+                                        (glossaryForUi
+                                            |> GlossaryForUi.aboutSection
                                             |> Components.AboutSection.view
                                                 { enableMathSupport = model.common.enableMathSupport
                                                 , modalDialogShown = not noModalDialogShown_
@@ -2625,7 +2625,7 @@ view model =
                                         [ viewEditTitleAndAboutButton noModalDialogShown_ ]
                                 , Html.article
                                     [ Html.Attributes.id ElementIds.items
-                                    , Extras.HtmlAttribute.showIf (Glossary.enableOrderItemsButtons glossary) <| class "mt-3 pt-2 border-t border-gray-300 dark:border-gray-700"
+                                    , Extras.HtmlAttribute.showIf (GlossaryForUi.enableOrderItemsButtons glossaryForUi) <| class "mt-3 pt-2 border-t border-gray-300 dark:border-gray-700"
                                     ]
                                     [ items
                                         |> (case QueryParameters.orderItemsBy model.common.queryParameters of
@@ -2656,10 +2656,10 @@ view model =
                                            )
                                         |> Html.Lazy.lazy7 viewCards
                                             { enableMathSupport = model.common.enableMathSupport
-                                            , enableOrderItemsButtons = Glossary.enableOrderItemsButtons glossary
+                                            , enableOrderItemsButtons = GlossaryForUi.enableOrderItemsButtons glossaryForUi
                                             , editable = Editability.editing model.common.editability
                                             , tabbable = noModalDialogShown_
-                                            , enableLastUpdatedDates = Glossary.enableLastUpdatedDates glossary
+                                            , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
                                             , noModalDialogShown_ = noModalDialogShown model
                                             , editing = Editability.editing model.common.editability
                                             }
@@ -2705,7 +2705,7 @@ view model =
                                         { enableMathSupport = model.common.enableMathSupport
                                         , editable = Editability.editing model.common.editability
                                         , tabbable = noModalDialogShown_
-                                        , enableLastUpdatedDates = Glossary.enableLastUpdatedDates glossary
+                                        , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
                                         }
                                         filterByTag
                                         combinedIndexedGlossaryItems

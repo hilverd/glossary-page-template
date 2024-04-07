@@ -14,9 +14,9 @@ import Components.GlossaryItemCard
 import Components.SelectMenu
 import Components.Spinner
 import Data.Editability as Editability
-import Data.Glossary as Glossary
 import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist
+import Data.GlossaryForUi as Glossary
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
@@ -107,12 +107,12 @@ type alias Msg =
 
 init : CommonModel -> Maybe GlossaryItemId -> ( Model, Cmd Msg )
 init commonModel itemBeingEdited =
-    case commonModel.glossary of
-        Ok glossary ->
+    case commonModel.glossaryForUi of
+        Ok glossaryForUi ->
             let
                 items : GlossaryItems
                 items =
-                    Glossary.items glossary
+                    Glossary.items glossaryForUi
 
                 emptyForm : GlossaryItemForm
                 emptyForm =
@@ -359,8 +359,8 @@ update msg model =
             ( model, getCurrentDateTimeAndNewIdForSaving () )
 
         ReceiveCurrentDateTimeAndNewIdForSaving ( dateTime, newGlossaryItemIdString ) ->
-            case model.common.glossary of
-                Ok glossary ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
@@ -378,7 +378,7 @@ update msg model =
                             newOrUpdatedGlossaryItem : GlossaryItemForUi
                             newOrUpdatedGlossaryItem =
                                 Form.toGlossaryItem
-                                    (Glossary.items glossary)
+                                    (Glossary.items glossaryForUi)
                                     model.form
                                     (model.itemBeingEdited |> Maybe.withDefault newGlossaryItemId)
                                     (Just dateTime)
@@ -387,26 +387,26 @@ update msg model =
                                 case model.itemBeingEdited of
                                     Just _ ->
                                         GlossaryChangelist.create
-                                            (Glossary.versionNumber glossary)
+                                            (Glossary.versionNumber glossaryForUi)
                                             [ GlossaryChange.Update newOrUpdatedGlossaryItem ]
 
                                     Nothing ->
                                         GlossaryChangelist.create
-                                            (Glossary.versionNumber glossary)
+                                            (Glossary.versionNumber glossaryForUi)
                                             [ GlossaryChange.Insert newOrUpdatedGlossaryItem ]
 
                             ( saving, cmd ) =
                                 Save.changeAndSave model.common.editability
-                                    glossary
+                                    glossaryForUi
                                     changelist
                                     (PageMsg.Internal << FailedToSave)
-                                    (\( itemToGiveFocus, updatedGlossary ) ->
+                                    (\( itemToGiveFocus, updatedGlossaryForUi ) ->
                                         let
                                             common0 =
                                                 model.common
                                         in
                                         PageMsg.NavigateToListAll
-                                            { common0 | glossary = Ok updatedGlossary }
+                                            { common0 | glossaryForUi = Ok updatedGlossaryForUi }
                                             itemToGiveFocus
                                     )
                         in
@@ -1052,8 +1052,8 @@ viewCreateFormFooter model =
 
 view : Model -> Document Msg
 view model =
-    case model.common.glossary of
-        Ok glossary ->
+    case model.common.glossaryForUi of
+        Ok glossaryForUi ->
             let
                 terms : Array TermField
                 terms =
@@ -1077,13 +1077,13 @@ view model =
 
                 items : GlossaryItems
                 items =
-                    Glossary.items glossary
+                    Glossary.items glossaryForUi
 
                 newOrUpdatedGlossaryItem : GlossaryItemForUi
                 newOrUpdatedGlossaryItem =
                     Form.toGlossaryItem items model.form (GlossaryItemId.create "") Nothing
             in
-            { title = glossary |> Glossary.title |> GlossaryTitle.inlineText
+            { title = glossaryForUi |> Glossary.title |> GlossaryTitle.inlineText
             , body =
                 [ div
                     [ class "container mx-auto px-6 pb-16 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]

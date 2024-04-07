@@ -1,8 +1,8 @@
 port module Worker exposing (main)
 
 import Codec
-import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
+import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Extras.HtmlTree as HtmlTree
 import Json.Decode as D
 import Json.Encode as E
@@ -32,7 +32,7 @@ type alias RawApplyGlossaryChangesRequest =
 
 
 type alias ApplyGlossaryChangesRequest =
-    { glossary : Glossary
+    { glossary : GlossaryForUi
     , changelist : GlossaryChangelist
     , updatedByName : String
     , updatedByEmailAddress : String
@@ -46,7 +46,7 @@ type alias RawConvertGlossaryToHtmlRequest =
 
 
 type alias ConvertGlossaryToHtmlRequest =
-    { glossary : Glossary
+    { glossary : GlossaryForUi
     }
 
 
@@ -91,9 +91,9 @@ update msg () =
                                     , emailAddress = request.updatedByEmailAddress
                                     }
 
-                        applyChangesResult : Glossary.ApplyChangesResult
+                        applyChangesResult : GlossaryForUi.ApplyChangesResult
                         applyChangesResult =
-                            Glossary.applyChanges changelist request.glossary
+                            GlossaryForUi.applyChanges changelist request.glossary
                     in
                     ( ()
                     , resolveApplyGlossaryChanges
@@ -117,7 +117,7 @@ update msg () =
                         html : String
                         html =
                             request.glossary
-                                |> Glossary.toHtmlTree
+                                |> GlossaryForUi.toHtmlTree
                                 |> HtmlTree.toHtml
                     in
                     ( ()
@@ -146,32 +146,32 @@ decodeApplyGlossaryChangesRequest rawRequest =
             , updatedByEmailAddress = updatedByEmailAddress
             }
         )
-        (Codec.decodeValue Glossary.codec rawRequest.glossary)
+        (Codec.decodeValue GlossaryForUi.codec rawRequest.glossary)
         (Codec.decodeValue GlossaryChangelist.codec rawRequest.changelist)
         (D.decodeValue D.string rawRequest.updatedByName)
         (D.decodeValue D.string rawRequest.updatedByEmailAddress)
 
 
-encodeApplyChangesResultToValue : Glossary.ApplyChangesResult -> E.Value
+encodeApplyChangesResultToValue : GlossaryForUi.ApplyChangesResult -> E.Value
 encodeApplyChangesResultToValue result =
     case result of
-        Glossary.ChangesApplied ( _, glossary ) ->
+        GlossaryForUi.ChangesApplied ( _, glossary ) ->
             E.object
                 [ ( "newGlossaryJson"
-                  , Codec.encodeToValue Glossary.codec glossary
+                  , Codec.encodeToValue GlossaryForUi.codec glossary
                   )
                 , ( "newGlossaryHtml"
                   , glossary
-                        |> Glossary.toHtmlTree
+                        |> GlossaryForUi.toHtmlTree
                         |> HtmlTree.toHtml
                         |> E.string
                   )
                 ]
 
-        Glossary.VersionsDoNotMatch ->
+        GlossaryForUi.VersionsDoNotMatch ->
             E.string "versionsDoNotMatch"
 
-        Glossary.LogicalErrorWhenApplyingChanges err ->
+        GlossaryForUi.LogicalErrorWhenApplyingChanges err ->
             E.object [ ( "logicalError", E.string err ) ]
 
 
@@ -179,4 +179,4 @@ decodeConvertGlossaryToHtmlRequest : RawConvertGlossaryToHtmlRequest -> Result D
 decodeConvertGlossaryToHtmlRequest rawRequest =
     Result.map
         (\glossary -> { glossary = glossary })
-        (Codec.decodeValue Glossary.codec rawRequest.glossary)
+        (Codec.decodeValue GlossaryForUi.codec rawRequest.glossary)

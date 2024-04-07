@@ -15,9 +15,9 @@ import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
 import Data.Editability as Editability
-import Data.Glossary as Glossary
 import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist
+import Data.GlossaryForUi as Glossary
 import Data.GlossaryTitle as GlossaryTitle
 import Data.Saving exposing (Saving(..))
 import ElementIds
@@ -67,10 +67,10 @@ type alias Msg =
 
 init : CommonModel -> ( Model, Cmd Msg )
 init common =
-    case common.glossary of
-        Ok glossary ->
+    case common.glossaryForUi of
+        Ok glossaryForUi ->
             ( { common = common
-              , form = Form.create (Glossary.title glossary) (Glossary.aboutSection glossary)
+              , form = Form.create (Glossary.title glossaryForUi) (Glossary.aboutSection glossaryForUi)
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
               }
@@ -135,8 +135,8 @@ update msg model =
             ( { model | form = Form.deleteAboutLink aboutLinkIndex model.form }, Cmd.none )
 
         Save ->
-            case model.common.glossary of
-                Ok glossary ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
@@ -149,23 +149,23 @@ update msg model =
                         let
                             changelist =
                                 GlossaryChangelist.create
-                                    (Glossary.versionNumber glossary)
+                                    (Glossary.versionNumber glossaryForUi)
                                     [ GlossaryChange.SetTitle <| titleFromForm model.form
                                     , GlossaryChange.SetAboutSection <| aboutSectionFromForm model.form
                                     ]
 
                             ( saving, cmd ) =
                                 Save.changeAndSave model.common.editability
-                                    glossary
+                                    glossaryForUi
                                     changelist
                                     (PageMsg.Internal << FailedToSave)
-                                    (\( _, updatedGlossary ) ->
+                                    (\( _, updatedGlossaryForUi ) ->
                                         let
                                             common0 =
                                                 model.common
                                         in
                                         PageMsg.NavigateToListAll
-                                            { common0 | glossary = Ok updatedGlossary }
+                                            { common0 | glossaryForUi = Ok updatedGlossaryForUi }
                                             Nothing
                                     )
                         in

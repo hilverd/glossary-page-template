@@ -8,7 +8,7 @@ module Export.Anki exposing (download)
 
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
-import Data.Glossary as Glossary exposing (Glossary)
+import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag
@@ -133,17 +133,17 @@ itemToAnki enableMathSupport glossaryItem =
 {-| Export a glossary with to a [text file suitable for Anki](https://docs.ankiweb.net/importing.html#text-files).
 This is achieved by producing a [command for downloading](https://package.elm-lang.org/packages/elm/file/latest/File.Download) this file.
 -}
-download : Bool -> Glossary -> Cmd msg
-download enableMathSupport glossary =
+download : Bool -> GlossaryForUi -> Cmd msg
+download enableMathSupport glossaryForUi =
     let
         title =
-            Glossary.title glossary
+            GlossaryForUi.title glossaryForUi
 
         aboutSection =
-            Glossary.aboutSection glossary
+            GlossaryForUi.aboutSection glossaryForUi
 
         items =
-            Glossary.items glossary
+            GlossaryForUi.items glossaryForUi
 
         filename : String
         filename =
