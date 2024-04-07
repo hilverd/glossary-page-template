@@ -95,11 +95,11 @@ codec =
         |> Codec.field "enableOrderItemsButtons" .enableOrderItemsButtons Codec.bool
         |> Codec.field "enableHelpForMakingChanges" .enableHelpForMakingChanges Codec.bool
         |> Codec.field "cardWidth" .cardWidth Codec.string
-        |> Codec.field "title" .title Codec.string
+        |> Codec.field "titleString" .title Codec.string
         |> Codec.field "aboutParagraph" .aboutParagraph Codec.string
         |> Codec.field "aboutLinks" .aboutLinks (Codec.list aboutLinkCodec)
-        |> Codec.field "tags" .tags (Codec.list DescribedTagFromDom.codec)
-        |> Codec.field "items" .items (Codec.list GlossaryItemFromDom.codec)
+        |> Codec.field "tagsWithDescriptions" .tags (Codec.list DescribedTagFromDom.codec)
+        |> Codec.field "glossaryItems" .items (Codec.list GlossaryItemFromDom.codec)
         |> Codec.field "versionNumber" .versionNumber (Codec.maybe Codec.int)
         |> Codec.buildObject
 
