@@ -9,7 +9,7 @@ import Data.GlossaryFromDom exposing (GlossaryFromDom)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
-import Data.GlossaryItem.Term as Term
+import Data.GlossaryItem.Term as Term exposing (isAbbreviation)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemFromDom exposing (GlossaryItemFromDom)
 import Data.GlossaryItemId as GlossaryItemId
@@ -161,8 +161,11 @@ defaultComputerScienceItem =
 defaultComputerScienceItemFromDom : GlossaryItemFromDom
 defaultComputerScienceItemFromDom =
     { id = "Default (Computer Science)"
-    , preferredTerm = "Default"
-    , alternativeTerms = [ "Preset", "Factory preset" ]
+    , preferredTerm = { isAbbreviation = False, body = "Default" }
+    , alternativeTerms =
+        [ { isAbbreviation = False, body = "Preset" }
+        , { isAbbreviation = False, body = "Factory preset" }
+        ]
     , disambiguationTag = Just computerScienceRawTag
     , normalTags = []
     , definition = Just defaultComputerScienceRawDefinition
@@ -203,12 +206,12 @@ defaultFinanceItem =
 defaultFinanceItemFromDom : GlossaryItemFromDom
 defaultFinanceItemFromDom =
     { id = "Default (Finance)"
-    , preferredTerm = "Default"
+    , preferredTerm = { isAbbreviation = False, body = "Default" }
     , alternativeTerms = []
     , disambiguationTag = Just financeRawTag
     , normalTags = []
     , definition = Just defaultFinanceRawDefinition
-    , relatedPreferredTerms = [ "Loan" ]
+    , relatedPreferredTerms = [ { isAbbreviation = False, body = "Loan" } ]
     , needsUpdating = False
     , lastUpdatedDateAsIso8601 = Just "2023-10-30T08:25:24.765Z"
     , lastUpdatedByName = Nothing
@@ -245,8 +248,8 @@ informationRetrievalItem =
 informationRetrievalItemFromDom : GlossaryItemFromDom
 informationRetrievalItemFromDom =
     { id = "Information retrieval"
-    , preferredTerm = "Information retrieval"
-    , alternativeTerms = [ "IR" ]
+    , preferredTerm = { isAbbreviation = False, body = "Information retrieval" }
+    , alternativeTerms = [ { isAbbreviation = False, body = "IR" } ]
     , disambiguationTag = Nothing
     , normalTags = [ computerScienceRawTag ]
     , definition = Just informationRetrievalRawDefinition
@@ -287,12 +290,12 @@ interestRateItem =
 interestRateItemFromDom : GlossaryItemFromDom
 interestRateItemFromDom =
     { id = "Interest rate"
-    , preferredTerm = "Interest rate"
-    , alternativeTerms = [ "IR" ]
+    , preferredTerm = { isAbbreviation = False, body = "Interest rate" }
+    , alternativeTerms = [ { isAbbreviation = True, body = "IR" } ]
     , disambiguationTag = Nothing
     , normalTags = [ financeRawTag ]
     , definition = Just interestRateRawDefinition
-    , relatedPreferredTerms = [ "Loan" ]
+    , relatedPreferredTerms = [ { isAbbreviation = False, body = "Loan" } ]
     , needsUpdating = False
     , lastUpdatedDateAsIso8601 = Just "2023-10-30T08:25:30.335Z"
     , lastUpdatedByName = Nothing
@@ -345,12 +348,12 @@ loanItem =
 loanItemFromDom : GlossaryItemFromDom
 loanItemFromDom =
     { id = "Loan"
-    , preferredTerm = "Loan"
+    , preferredTerm = { isAbbreviation = False, body = "Loan" }
     , alternativeTerms = []
     , disambiguationTag = Nothing
     , normalTags = [ financeRawTag ]
     , definition = Just loanRawDefinition
-    , relatedPreferredTerms = [ "Interest rate" ]
+    , relatedPreferredTerms = [ { isAbbreviation = False, body = "Interest rate" } ]
     , needsUpdating = False
     , lastUpdatedDateAsIso8601 = Just "2023-10-30T08:26:18.523Z"
     , lastUpdatedByName = Nothing
