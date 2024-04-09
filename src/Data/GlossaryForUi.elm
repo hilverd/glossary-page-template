@@ -227,19 +227,12 @@ setItems items_ (GlossaryForUi glossaryForUi) =
 -}
 fromGlossaryFromDom : GlossaryFromDom -> GlossaryForUi
 fromGlossaryFromDom glossaryFromDom =
-    let
-        cardWidth_ : CardWidth
-        cardWidth_ =
-            glossaryFromDom.cardWidth
-                |> Codec.decodeString CardWidth.codec
-                |> Result.withDefault CardWidth.Compact
-    in
     create
         glossaryFromDom.enableLastUpdatedDates
         glossaryFromDom.enableExportMenu
         glossaryFromDom.enableOrderItemsButtons
         glossaryFromDom.enableHelpForMakingChanges
-        cardWidth_
+        glossaryFromDom.cardWidth
         (GlossaryTitle.fromMarkdown glossaryFromDom.title)
         (AboutParagraph.fromMarkdown glossaryFromDom.aboutParagraph)
         (List.map (\aboutLinkFromDom -> AboutLink.create aboutLinkFromDom.href aboutLinkFromDom.body) glossaryFromDom.aboutLinks)

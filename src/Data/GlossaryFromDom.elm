@@ -21,6 +21,7 @@ module Data.GlossaryFromDom exposing
 -}
 
 import Codec exposing (Codec)
+import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.DescribedTagFromDom as DescribedTagFromDom exposing (DescribedTagFromDom)
 import Data.GlossaryItemFromDom as GlossaryItemFromDom exposing (GlossaryItemFromDom)
 import ElementIds
@@ -35,7 +36,7 @@ type alias GlossaryFromDom =
     , enableExportMenu : Bool
     , enableOrderItemsButtons : Bool
     , enableHelpForMakingChanges : Bool
-    , cardWidth : String
+    , cardWidth : CardWidth
     , title : String
     , aboutParagraph : String
     , aboutLinks : List { href : String, body : String }
@@ -52,7 +53,7 @@ create :
     -> Bool
     -> Bool
     -> Bool
-    -> String
+    -> CardWidth
     -> String
     -> String
     -> List { href : String, body : String }
@@ -94,7 +95,7 @@ codec =
         |> Codec.field "enableExportMenu" .enableExportMenu Codec.bool
         |> Codec.field "enableOrderItemsButtons" .enableOrderItemsButtons Codec.bool
         |> Codec.field "enableHelpForMakingChanges" .enableHelpForMakingChanges Codec.bool
-        |> Codec.field "cardWidth" .cardWidth Codec.string
+        |> Codec.field "cardWidth" .cardWidth CardWidth.codec
         |> Codec.field "titleString" .title Codec.string
         |> Codec.field "aboutParagraph" .aboutParagraph Codec.string
         |> Codec.field "aboutLinks" .aboutLinks (Codec.list aboutLinkCodec)
@@ -115,7 +116,7 @@ toHtmlTree describedTags glossaryFromDom =
         , HtmlTree.boolAttribute "data-enable-export-menu" glossaryFromDom.enableExportMenu
         , HtmlTree.boolAttribute "data-enable-order-items-buttons" glossaryFromDom.enableOrderItemsButtons
         , HtmlTree.boolAttribute "data-enable-last-updated-dates" glossaryFromDom.enableLastUpdatedDates
-        , HtmlTree.Attribute "data-card-width" glossaryFromDom.cardWidth
+        , CardWidth.toHtmlTreeAttribute glossaryFromDom.cardWidth
         , HtmlTree.showAttributeMaybe "data-version-number" String.fromInt glossaryFromDom.versionNumber
         ]
         [ HtmlTree.Node "header"

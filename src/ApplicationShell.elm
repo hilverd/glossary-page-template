@@ -16,6 +16,7 @@ import Codec
 import CommonModel exposing (CommonModel)
 import Data.Editability as Editability
 import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
+import Data.GlossaryFromDom as GlossaryFromDom
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItems as GlossaryItems
 import Data.Theme as Theme exposing (Theme)
@@ -115,8 +116,9 @@ init flags url key =
         glossaryForUi : Result String GlossaryForUi
         glossaryForUi =
             flags
-                |> Decode.decodeValue (Codec.decoder GlossaryForUi.codec)
+                |> Decode.decodeValue (Codec.decoder GlossaryFromDom.codec)
                 |> Result.mapError Decode.errorToString
+                |> Result.map GlossaryForUi.fromGlossaryFromDom
 
         itemWithFocus : Maybe GlossaryItemId
         itemWithFocus =
