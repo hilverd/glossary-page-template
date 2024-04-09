@@ -1,6 +1,6 @@
 module Data.GlossaryForUi exposing
     ( GlossaryForUi
-    , create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setTitle, setAboutSection, setItems
+    , create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setTitle, setAboutSection, setItems, fromGlossaryFromDom
     , ApplyChangesResult(..), applyChanges
     , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, title, aboutSection, items, versionNumber
     , toHtmlTree
@@ -16,7 +16,7 @@ module Data.GlossaryForUi exposing
 
 # Build
 
-@docs create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setTitle, setAboutSection, setItems
+@docs create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setTitle, setAboutSection, setItems, fromGlossaryFromDom
 
 
 # Apply Changes
@@ -43,6 +43,7 @@ import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.GlossaryChange exposing (GlossaryChange(..))
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
+import Data.GlossaryFromDom exposing (GlossaryFromDom)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId exposing (GlossaryItemId)
@@ -215,11 +216,50 @@ setAboutSection aboutSection_ (GlossaryForUi glossaryForUi) =
     GlossaryForUi { glossaryForUi | aboutSection = aboutSection_ }
 
 
-{-| Sets the items for a GlossaryForUi.
+{-| Set the items for a GlossaryForUi.
 -}
 setItems : GlossaryItems -> GlossaryForUi -> GlossaryForUi
 setItems items_ (GlossaryForUi glossaryForUi) =
     GlossaryForUi { glossaryForUi | items = items_ }
+
+
+{-| Build a GlossaryForUi from a GlossaryFromDom.
+-}
+fromGlossaryFromDom : GlossaryFromDom -> GlossaryForUi
+fromGlossaryFromDom glossaryFromDom =
+    let
+        cardWidth_ : CardWidth
+        cardWidth_ =
+            glossaryFromDom.cardWidth
+                |> Codec.decodeString CardWidth.codec
+                |> Result.withDefault CardWidth.Compact
+    in
+    create
+        glossaryFromDom.enableLastUpdatedDates
+        glossaryFromDom.enableExportMenu
+        glossaryFromDom.enableOrderItemsButtons
+        glossaryFromDom.enableHelpForMakingChanges
+        cardWidth_
+        (GlossaryTitle.fromMarkdown glossaryFromDom.title)
+        (AboutParagraph.fromMarkdown glossaryFromDom.aboutParagraph)
+        (List.map (\aboutLinkFromDom -> AboutLink.create aboutLinkFromDom.href aboutLinkFromDom.body) glossaryFromDom.aboutLinks)
+        (List.map
+            (\describedTagFromDom ->
+                DescribedTag.create
+                    (TagId.create describedTagFromDom.id)
+                    (Tag.fromMarkdown describedTagFromDom.tag)
+                    (TagDescription.fromMarkdown describedTagFromDom.description)
+            )
+            glossaryFromDom.tags
+        )
+        (List.map
+            GlossaryItemForUi.fromGlossaryItemFromDom
+            glossaryFromDom.items
+        )
+        (glossaryFromDom.versionNumber
+            |> Maybe.map GlossaryVersionNumber.create
+            |> Maybe.withDefault GlossaryVersionNumber.initial
+        )
 
 
 {-| Creates a new GlossaryForUi with the given configuration.

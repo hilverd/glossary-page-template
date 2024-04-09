@@ -1,6 +1,6 @@
 module Data.GlossaryItemForUi exposing
     ( GlossaryItemForUi
-    , create, codec, setLastUpdatedBy
+    , create, codec, fromGlossaryItemFromDom, setLastUpdatedBy
     , disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, disambiguatedPreferredTermIdString, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
     , toHtmlTree
     , disambiguatedTerm
@@ -16,7 +16,7 @@ module Data.GlossaryItemForUi exposing
 
 # Build
 
-@docs create, codec, setLastUpdatedBy
+@docs create, codec, fromGlossaryItemFromDom, setLastUpdatedBy
 
 
 # Query
@@ -41,6 +41,7 @@ import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (Disamb
 import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItemFromDom exposing (GlossaryItemFromDom)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Extras.Url exposing (fragmentOnly)
@@ -64,6 +65,42 @@ type GlossaryItemForUi
         , lastUpdatedByName : Maybe String
         , lastUpdatedByEmailAddress : Maybe String
         }
+
+
+{-| Build a GlossaryItemForUi from a GlossaryItemFromDom.
+-}
+fromGlossaryItemFromDom : GlossaryItemFromDom -> GlossaryItemForUi
+fromGlossaryItemFromDom glossaryItemFromDom =
+    create
+        (GlossaryItemId.create glossaryItemFromDom.id)
+        (Term.fromMarkdown
+            glossaryItemFromDom.preferredTerm.body
+            glossaryItemFromDom.preferredTerm.isAbbreviation
+        )
+        (List.map
+            (\termFromDom ->
+                Term.fromMarkdown
+                    termFromDom.body
+                    termFromDom.isAbbreviation
+            )
+            glossaryItemFromDom.alternativeTerms
+        )
+        (Maybe.map Tag.fromMarkdown glossaryItemFromDom.disambiguationTag)
+        (List.map Tag.fromMarkdown glossaryItemFromDom.normalTags)
+        (Maybe.map Definition.fromMarkdown glossaryItemFromDom.definition)
+        (List.map
+            (\termFromDom ->
+                Term.fromMarkdown
+                    termFromDom.body
+                    termFromDom.isAbbreviation
+                    |> DisambiguatedTerm.fromTerm
+            )
+            glossaryItemFromDom.relatedPreferredTerms
+        )
+        glossaryItemFromDom.needsUpdating
+        glossaryItemFromDom.lastUpdatedDateAsIso8601
+        glossaryItemFromDom.lastUpdatedByName
+        glossaryItemFromDom.lastUpdatedByEmailAddress
 
 
 {-| Create a glossary item from its parts.
