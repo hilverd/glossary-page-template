@@ -23,7 +23,7 @@ import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.Saving exposing (Saving(..))
@@ -110,7 +110,7 @@ init commonModel itemBeingEdited =
     case commonModel.glossaryForUi of
         Ok glossaryForUi ->
             let
-                items : GlossaryItems
+                items : GlossaryItemsForUi
                 items =
                     Glossary.items glossaryForUi
 
@@ -124,7 +124,7 @@ init commonModel itemBeingEdited =
                     Maybe.andThen
                         (\id ->
                             items
-                                |> GlossaryItems.get id
+                                |> GlossaryItemsForUi.get id
                                 |> Maybe.map
                                     (\itemForUi ->
                                         Form.fromGlossaryItemForUi
@@ -154,7 +154,7 @@ init commonModel itemBeingEdited =
         Err _ ->
             ( { itemBeingEdited = itemBeingEdited
               , common = commonModel
-              , form = Form.empty GlossaryItems.empty Nothing
+              , form = Form.empty GlossaryItemsForUi.empty Nothing
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
               , dropdownMenusWithMoreOptionsForRelatedTerms = Dict.empty
@@ -860,13 +860,13 @@ viewAddRelatedTermButtonForEmptyState =
 viewCreateSeeAlso :
     Bool
     -> Bool
-    -> GlossaryItems
+    -> GlossaryItemsForUi
     -> Array TermField
     -> Array Form.RelatedTermField
     -> Dict Int Components.DropdownMenu.Model
     -> List DisambiguatedTerm
     -> Html Msg
-viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms relatedTermsArray dropdownMenusWithMoreOptionsForRelatedTerms suggestedRelatedTerms =
+viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItemsForUi terms relatedTermsArray dropdownMenusWithMoreOptionsForRelatedTerms suggestedRelatedTerms =
     let
         rawTermsSet : Set String
         rawTermsSet =
@@ -878,8 +878,8 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
 
         allPreferredTerms : List DisambiguatedTerm
         allPreferredTerms =
-            glossaryItems
-                |> GlossaryItems.orderedAlphabetically Nothing
+            glossaryItemsForUi
+                |> GlossaryItemsForUi.orderedAlphabetically Nothing
                 |> List.map (Tuple.second >> GlossaryItemForUi.disambiguatedPreferredTerm)
     in
     div
@@ -1075,7 +1075,7 @@ view model =
                 suggestedRelatedTerms =
                     Form.suggestRelatedTerms model.form
 
-                items : GlossaryItems
+                items : GlossaryItemsForUi
                 items =
                     Glossary.items glossaryForUi
 

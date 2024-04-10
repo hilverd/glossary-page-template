@@ -21,7 +21,7 @@
         "Data.GlossaryItemFromDom",
         "Data.GlossaryItemId",
         "Data.GlossaryItemIdDict",
-        "Data.GlossaryItems",
+        "Data.GlossaryItemsForUi",
         "Data.GlossaryTags",
         "Data.GlossaryTitle",
         "Data.GlossaryVersionNumber",

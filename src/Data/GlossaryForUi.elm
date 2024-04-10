@@ -47,7 +47,7 @@ import Data.GlossaryFromDom exposing (GlossaryFromDom)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId exposing (GlossaryItemId)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVersionNumber)
 import Data.TagDescription as TagDescription
@@ -69,7 +69,7 @@ type GlossaryForUi
         , cardWidth : CardWidth
         , title : GlossaryTitle
         , aboutSection : AboutSection
-        , items : GlossaryItems
+        , items : GlossaryItemsForUi
         , versionNumber : GlossaryVersionNumber
         }
 
@@ -125,7 +125,7 @@ aboutSection (GlossaryForUi glossaryForUi) =
 
 {-| Get the items for a GlossaryForUi.
 -}
-items : GlossaryForUi -> GlossaryItems
+items : GlossaryForUi -> GlossaryItemsForUi
 items (GlossaryForUi glossaryForUi) =
     glossaryForUi.items
 
@@ -218,7 +218,7 @@ setAboutSection aboutSection_ (GlossaryForUi glossaryForUi) =
 
 {-| Set the items for a GlossaryForUi.
 -}
-setItems : GlossaryItems -> GlossaryForUi -> GlossaryForUi
+setItems : GlossaryItemsForUi -> GlossaryForUi -> GlossaryForUi
 setItems items_ (GlossaryForUi glossaryForUi) =
     GlossaryForUi { glossaryForUi | items = items_ }
 
@@ -305,9 +305,9 @@ createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsBut
             , links = Maybe.withDefault [] aboutLinks
             }
 
-        items_ : Result String GlossaryItems
+        items_ : Result String GlossaryItemsForUi
         items_ =
-            GlossaryItems.fromList (Maybe.withDefault [] describedTags) itemsForHtml
+            GlossaryItemsForUi.fromList (Maybe.withDefault [] describedTags) itemsForHtml
     in
     GlossaryForUi
         { enableLastUpdatedDates = Maybe.withDefault False enableLastUpdatedDates_
@@ -317,7 +317,7 @@ createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsBut
         , cardWidth = Maybe.withDefault CardWidth.Compact cardWidth_
         , title = Maybe.withDefault (GlossaryTitle.fromMarkdown I18n.elementNotFound) title_
         , aboutSection = aboutSection_
-        , items = Result.withDefault GlossaryItems.empty items_
+        , items = Result.withDefault GlossaryItemsForUi.empty items_
         , versionNumber = Maybe.withDefault GlossaryVersionNumber.initial versionNumber_
         }
 
@@ -336,7 +336,7 @@ codec =
         |> Codec.optionalField "aboutParagraph" (aboutSection >> .paragraph >> Just) (Codec.map AboutParagraph.fromMarkdown AboutParagraph.raw Codec.string)
         |> Codec.optionalField "aboutLinks" (aboutSection >> .links >> Just) (Codec.list AboutLink.codec)
         |> Codec.optionalField "tagsWithDescriptions"
-            (items >> GlossaryItems.describedTags >> Just)
+            (items >> GlossaryItemsForUi.describedTags >> Just)
             (Codec.list
                 (Codec.object
                     (\tagIdString tagString descriptionString ->
@@ -352,7 +352,7 @@ codec =
                 )
             )
         |> Codec.field "glossaryItems"
-            (items >> GlossaryItems.orderedAlphabetically Nothing >> List.map Tuple.second)
+            (items >> GlossaryItemsForUi.orderedAlphabetically Nothing >> List.map Tuple.second)
             (Codec.list GlossaryItemForUi.codec)
         |> Codec.optionalNullableField "versionNumber" (versionNumber >> Just) GlossaryVersionNumber.codec
         |> Codec.buildObject
@@ -442,7 +442,7 @@ applyTagsChanges : TagsChanges -> GlossaryForUi -> Result String GlossaryForUi
 applyTagsChanges tagsChanges glossaryForUi =
     glossaryForUi
         |> items
-        |> GlossaryItems.applyTagsChanges tagsChanges
+        |> GlossaryItemsForUi.applyTagsChanges tagsChanges
         |> Result.map (\items_ -> setItems items_ glossaryForUi)
 
 
@@ -452,7 +452,7 @@ insert : GlossaryItemForUi -> GlossaryForUi -> Result String ( GlossaryItemId, G
 insert item glossaryForUi =
     glossaryForUi
         |> items
-        |> GlossaryItems.insert item
+        |> GlossaryItemsForUi.insert item
         |> Result.map (\( newItemId, items_ ) -> ( newItemId, setItems items_ glossaryForUi ))
 
 
@@ -462,7 +462,7 @@ update : GlossaryItemId -> GlossaryItemForUi -> GlossaryForUi -> Result String G
 update itemId item glossaryForUi =
     glossaryForUi
         |> items
-        |> GlossaryItems.update itemId item
+        |> GlossaryItemsForUi.update itemId item
         |> Result.map (\items_ -> setItems items_ glossaryForUi)
 
 
@@ -472,7 +472,7 @@ remove : GlossaryItemId -> GlossaryForUi -> Result String GlossaryForUi
 remove itemId glossaryForUi =
     glossaryForUi
         |> items
-        |> GlossaryItems.remove itemId
+        |> GlossaryItemsForUi.remove itemId
         |> Result.map (\items_ -> setItems items_ glossaryForUi)
 
 
@@ -482,7 +482,7 @@ toHtmlTree : GlossaryForUi -> HtmlTree
 toHtmlTree (GlossaryForUi glossaryForUi) =
     let
         describedTags =
-            GlossaryItems.describedTags glossaryForUi.items
+            GlossaryItemsForUi.describedTags glossaryForUi.items
     in
     HtmlTree.Node "div"
         True
@@ -565,7 +565,7 @@ toHtmlTree (GlossaryForUi glossaryForUi) =
                     True
                     []
                     (glossaryForUi.items
-                        |> GlossaryItems.orderedAlphabetically Nothing
+                        |> GlossaryItemsForUi.orderedAlphabetically Nothing
                         |> List.map (Tuple.second >> GlossaryItemForUi.toHtmlTree)
                     )
                 ]

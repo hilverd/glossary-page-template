@@ -6,7 +6,7 @@ import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Expect
 import Search
 import Test exposing (Test, describe, test)
@@ -17,8 +17,8 @@ termFromBody body =
     Term.fromMarkdown body False
 
 
-loadedGlossaryItems : GlossaryItems
-loadedGlossaryItems =
+loadedGlossaryItemsForUi : GlossaryItemsForUi
+loadedGlossaryItemsForUi =
     let
         one : GlossaryItemForUi
         one =
@@ -66,8 +66,8 @@ loadedGlossaryItems =
                 Nothing
     in
     [ one, two, three ]
-        |> GlossaryItems.fromList []
-        |> Result.withDefault GlossaryItems.empty
+        |> GlossaryItemsForUi.fromList []
+        |> Result.withDefault GlossaryItemsForUi.empty
 
 
 suite : Test
@@ -76,7 +76,7 @@ suite =
         [ describe "Search.search"
             [ test "returns search results sorted by relevance for a given search string" <|
                 \_ ->
-                    loadedGlossaryItems
+                    loadedGlossaryItemsForUi
                         |> Search.search False Nothing "term"
                         |> List.map SearchDialog.searchResultHref
                         |> Expect.equal
@@ -86,7 +86,7 @@ suite =
                             ]
             , test "terms for which the search string is a prefix are ranked higher than other terms" <|
                 \_ ->
-                    loadedGlossaryItems
+                    loadedGlossaryItemsForUi
                         |> Search.search False Nothing "the"
                         |> List.map SearchDialog.searchResultHref
                         |> Expect.equal
@@ -96,7 +96,7 @@ suite =
                             ]
             , test "also searches definitions, but terms take priority" <|
                 \_ ->
-                    loadedGlossaryItems
+                    loadedGlossaryItemsForUi
                         |> Search.search False Nothing "three"
                         |> List.map SearchDialog.searchResultHref
                         |> Expect.equal

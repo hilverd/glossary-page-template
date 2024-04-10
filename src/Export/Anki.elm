@@ -14,7 +14,7 @@ import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (Disamb
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
-import Data.GlossaryItems as GlossaryItems
+import Data.GlossaryItemsForUi as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle
 import Extras.HtmlTree
 import File.Download as Download

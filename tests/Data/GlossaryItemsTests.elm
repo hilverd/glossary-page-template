@@ -7,7 +7,7 @@ import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.TagId as TagId
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import Expect
@@ -36,9 +36,9 @@ suite =
                         TagsChanges.empty
                             |> TagsChanges.insert houseworkDescribedTag
                 in
-                glossaryItems
-                    |> GlossaryItems.applyTagsChanges tagsChanges
-                    |> Result.map GlossaryItems.describedTags
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.applyTagsChanges tagsChanges
+                    |> Result.map GlossaryItemsForUi.describedTags
                     |> Expect.equal
                         (Ok
                             [ computerScienceDescribedTag
@@ -56,9 +56,9 @@ suite =
                             |> TagsChanges.update computerScienceTagId financeDescribedTag
                             |> TagsChanges.update financeTagId computerScienceDescribedTag
                 in
-                glossaryItems
-                    |> GlossaryItems.applyTagsChanges tagsChanges
-                    |> Result.map (GlossaryItems.orderedAlphabetically Nothing >> List.map Tuple.second)
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.applyTagsChanges tagsChanges
+                    |> Result.map (GlossaryItemsForUi.orderedAlphabetically Nothing >> List.map Tuple.second)
                     |> Result.map
                         (List.map
                             (\glossaryItemForUi ->
@@ -87,9 +87,9 @@ suite =
                         TagsChanges.empty
                             |> TagsChanges.update computerScienceTagId houseworkDescribedTag
                 in
-                glossaryItems
-                    |> GlossaryItems.applyTagsChanges tagsChanges
-                    |> Result.map (GlossaryItems.get <| GlossaryItemForUi.id defaultComputerScienceItem)
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.applyTagsChanges tagsChanges
+                    |> Result.map (GlossaryItemsForUi.get <| GlossaryItemForUi.id defaultComputerScienceItem)
                     |> Expect.equal
                         (Ok <|
                             Just <|
@@ -116,9 +116,9 @@ suite =
                         TagsChanges.empty
                             |> TagsChanges.remove financeTagId
                 in
-                glossaryItems
-                    |> GlossaryItems.applyTagsChanges tagsChanges
-                    |> Result.map GlossaryItems.describedTags
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.applyTagsChanges tagsChanges
+                    |> Result.map GlossaryItemsForUi.describedTags
                     |> Expect.equal
                         (Ok
                             [ computerScienceDescribedTag
@@ -133,9 +133,9 @@ suite =
                         TagsChanges.empty
                             |> TagsChanges.remove financeTagId
                 in
-                glossaryItems
-                    |> GlossaryItems.applyTagsChanges tagsChanges
-                    |> Result.map (GlossaryItems.get <| GlossaryItemForUi.id defaultFinanceItem)
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.applyTagsChanges tagsChanges
+                    |> Result.map (GlossaryItemsForUi.get <| GlossaryItemForUi.id defaultFinanceItem)
                     |> Expect.equal
                         (Ok <|
                             Just <|
@@ -154,10 +154,10 @@ suite =
                         )
         , test "removes and inserts items" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.remove (GlossaryItemForUi.id defaultComputerScienceItem)
-                    |> Result.andThen (GlossaryItems.insert defaultComputerScienceItem)
-                    |> Result.map (\( _, updatedItems ) -> GlossaryItems.orderedAlphabetically Nothing updatedItems)
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.remove (GlossaryItemForUi.id defaultComputerScienceItem)
+                    |> Result.andThen (GlossaryItemsForUi.insert defaultComputerScienceItem)
+                    |> Result.map (\( _, updatedItems ) -> GlossaryItemsForUi.orderedAlphabetically Nothing updatedItems)
                     |> Expect.equal
                         (Ok
                             [ ( GlossaryItemForUi.id defaultComputerScienceItem, defaultComputerScienceItem )
@@ -169,9 +169,9 @@ suite =
                         )
         , test "updates items" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.update (GlossaryItemForUi.id interestRateItem) updatedInterestRateItem
-                    |> Result.map (GlossaryItems.orderedAlphabetically Nothing)
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.update (GlossaryItemForUi.id interestRateItem) updatedInterestRateItem
+                    |> Result.map (GlossaryItemsForUi.orderedAlphabetically Nothing)
                     |> Expect.equal
                         (Ok
                             [ ( GlossaryItemForUi.id defaultComputerScienceItem, defaultComputerScienceItem )
@@ -194,7 +194,7 @@ suite =
                             |> TagsChanges.insert financeDescribedTag
                             |> TagsChanges.insert computerScienceDescribedTag
 
-                    glossaryItemsForHtml =
+                    glossaryItems =
                         [ defaultComputerScienceItem
                         , defaultFinanceItem
                         , informationRetrievalItem
@@ -202,26 +202,26 @@ suite =
                         , loanItem
                         ]
                 in
-                GlossaryItems.empty
-                    |> GlossaryItems.applyTagsChanges tagsChanges
+                GlossaryItemsForUi.empty
+                    |> GlossaryItemsForUi.applyTagsChanges tagsChanges
                     |> (\result ->
                             List.foldl
                                 (\item ->
                                     Result.andThen
                                         (\items ->
-                                            GlossaryItems.insert item items
+                                            GlossaryItemsForUi.insert item items
                                                 |> Result.map Tuple.second
                                         )
                                 )
                                 result
-                                glossaryItemsForHtml
+                                glossaryItems
                        )
                     |> (\result ->
                             let
-                                itemId : GlossaryItemForUi -> GlossaryItems -> GlossaryItemId
+                                itemId : GlossaryItemForUi -> GlossaryItemsForUi -> GlossaryItemId
                                 itemId glossaryItemForUi result_ =
                                     result_
-                                        |> GlossaryItems.orderedAlphabetically Nothing
+                                        |> GlossaryItemsForUi.orderedAlphabetically Nothing
                                         |> List.filterMap
                                             (\( id, glossaryItemForUi_ ) ->
                                                 if GlossaryItemForUi.definition glossaryItemForUi_ == GlossaryItemForUi.definition glossaryItemForUi then
@@ -233,12 +233,12 @@ suite =
                                         |> List.head
                                         |> Maybe.withDefault (GlossaryItemId.create "")
                             in
-                            glossaryItemsForHtml
+                            glossaryItems
                                 |> List.foldl
                                     (\glossaryItemForUi result1 ->
                                         Result.andThen
                                             (\result1_ ->
-                                                GlossaryItems.update
+                                                GlossaryItemsForUi.update
                                                     (itemId glossaryItemForUi result1_)
                                                     glossaryItemForUi
                                                     result1_
@@ -247,26 +247,26 @@ suite =
                                     )
                                     result
                        )
-                    |> Result.map (GlossaryItems.orderedAlphabetically Nothing)
+                    |> Result.map (GlossaryItemsForUi.orderedAlphabetically Nothing)
                     |> Expect.equal
-                        (glossaryItems
-                            |> GlossaryItems.orderedAlphabetically Nothing
+                        (glossaryItemsForUi
+                            |> GlossaryItemsForUi.orderedAlphabetically Nothing
                             |> Ok
                         )
         , test "gets items by ID" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.get (GlossaryItemForUi.id defaultComputerScienceItem)
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.get (GlossaryItemForUi.id defaultComputerScienceItem)
                     |> Expect.equal (Just defaultComputerScienceItem)
         , test "gets all tags" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.tags
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.tags
                     |> Expect.equal [ computerScienceTag, financeTag, gardeningTag ]
         , test "gets all tags along with their descriptions" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.describedTags
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.describedTags
                     |> Expect.equal
                         [ computerScienceDescribedTag
                         , financeDescribedTag
@@ -274,8 +274,8 @@ suite =
                         ]
         , test "gets all tags along with their tag IDs" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.tagByIdList
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.tagByIdList
                     |> Expect.equal
                         [ ( computerScienceTagId, computerScienceTag )
                         , ( financeTagId, financeTag )
@@ -283,28 +283,28 @@ suite =
                         ]
         , test "looks up a tag ID from its contents" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.tagIdFromTag computerScienceTag
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.tagIdFromTag computerScienceTag
                     |> Expect.equal (Just computerScienceTagId)
         , test "looks up a tag from its ID" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.tagFromId financeTagId
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.tagFromId financeTagId
                     |> Expect.equal (Just financeTag)
         , test "looks up a tag description from its ID" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.tagDescriptionFromId gardeningTagId
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.tagDescriptionFromId gardeningTagId
                     |> Expect.equal (Just gardeningTagDescription)
         , test "returns disambiguated preferred term for item with given ID" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.disambiguatedPreferredTerm (GlossaryItemForUi.id defaultComputerScienceItem)
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.disambiguatedPreferredTerm (GlossaryItemForUi.id defaultComputerScienceItem)
                     |> Expect.equal (Just <| DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Computer Science)" False)
         , test "returns all disambiguated preferred terms" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.disambiguatedPreferredTerms Nothing
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.disambiguatedPreferredTerms Nothing
                     |> List.map Tuple.second
                     |> Expect.equal
                         [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Computer Science)" False
@@ -315,8 +315,8 @@ suite =
                         ]
         , test "returns all disambiguated preferred terms with tag filter applied" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.disambiguatedPreferredTerms (Just financeTagId)
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.disambiguatedPreferredTerms (Just financeTagId)
                     |> List.map Tuple.second
                     |> Expect.equal
                         [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False
@@ -325,23 +325,23 @@ suite =
                         ]
         , test "looks up the ID of the item whose disambiguated preferred term has the given ID" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm (RawTerm.fromString "Default (Finance)")
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm (RawTerm.fromString "Default (Finance)")
                     |> Expect.equal (Just <| GlossaryItemForUi.id defaultFinanceItem)
         , test "looks up the ID of the item with the given fragment identifier" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.itemIdFromFragmentIdentifier "Default_(Finance)"
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.itemIdFromFragmentIdentifier "Default_(Finance)"
                     |> Expect.equal (Just <| GlossaryItemForUi.id defaultFinanceItem)
         , test "looks up the disambiguated preferred term of the item with the given raw disambiguated preferred term" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.disambiguatedPreferredTermFromRaw (RawTerm.fromString "Default (Finance)")
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.disambiguatedPreferredTermFromRaw (RawTerm.fromString "Default (Finance)")
                     |> Expect.equal (Just <| DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False)
         , test "returns all of the disambiguated preferred terms which have a definition" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions Nothing
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.disambiguatedPreferredTermsWhichHaveDefinitions Nothing
                     |> Expect.equal
                         [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Computer Science)" False
                         , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False
@@ -351,8 +351,8 @@ suite =
                         ]
         , test "returns all of the disambiguated preferred terms which have a definition with tag filter applied" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions (Just financeTagId)
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.disambiguatedPreferredTermsWhichHaveDefinitions (Just financeTagId)
                     |> Expect.equal
                         [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False
                         , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate" False
@@ -360,21 +360,21 @@ suite =
                         ]
         , test "returns the IDs of the items that list this item as a related one" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.relatedForWhichItems (GlossaryItemForUi.id loanItem)
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.relatedForWhichItems (GlossaryItemForUi.id loanItem)
                     |> Expect.equal
                         [ GlossaryItemForUi.id interestRateItem
                         , GlossaryItemForUi.id defaultFinanceItem
                         ]
         , test "looks up disambiguated preferred term of item whose disambiguated preferred term has given ID" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.disambiguatedPreferredTermFromRaw (RawTerm.fromString "Default (Finance)")
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.disambiguatedPreferredTermFromRaw (RawTerm.fromString "Default (Finance)")
                     |> Expect.equal (Just <| DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Finance)" False)
         , test "returns a list of pairs associating each alternative term with the disambiguated preferred terms that it appears together with" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.disambiguatedPreferredTermsByAlternativeTerm Nothing
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.disambiguatedPreferredTermsByAlternativeTerm Nothing
                     |> Expect.equal
                         [ ( Term.fromMarkdown "Preset" False
                           , [ ( GlossaryItemForUi.id defaultComputerScienceItem, DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Default (Computer Science)" False ) ]
@@ -390,8 +390,8 @@ suite =
                         ]
         , test "returns items in alphabetical order" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.orderedAlphabetically Nothing
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.orderedAlphabetically Nothing
                     |> Expect.equal
                         [ ( GlossaryItemForUi.id defaultComputerScienceItem, defaultComputerScienceItem )
                         , ( GlossaryItemForUi.id defaultFinanceItem, defaultFinanceItem )
@@ -401,8 +401,8 @@ suite =
                         ]
         , test "returns items in alphabetical order with tag filter applied" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.orderedAlphabetically (Just computerScienceTagId)
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.orderedAlphabetically (Just computerScienceTagId)
                     |> List.map Tuple.first
                     |> Expect.equal
                         [ GlossaryItemForUi.id defaultComputerScienceItem
@@ -441,9 +441,9 @@ suite =
                             Nothing
                             Nothing
 
-                    glossaryItems_ : Result String GlossaryItems
+                    glossaryItems_ : Result String GlossaryItemsForUi
                     glossaryItems_ =
-                        GlossaryItems.fromList
+                        GlossaryItemsForUi.fromList
                             [ computerScienceDescribedTag
                             , financeDescribedTag
                             ]
@@ -452,7 +452,7 @@ suite =
                             ]
                 in
                 glossaryItems_
-                    |> Result.map (GlossaryItems.orderedAlphabetically (Just computerScienceTagId))
+                    |> Result.map (GlossaryItemsForUi.orderedAlphabetically (Just computerScienceTagId))
                     |> Expect.equal
                         (Ok
                             [ ( GlossaryItemForUi.id defaultComputerScienceItem
@@ -473,8 +473,8 @@ suite =
                         )
         , test "returns items ordered by most mentioned first" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.orderedByMostMentionedFirst Nothing
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.orderedByMostMentionedFirst Nothing
                     |> List.map Tuple.first
                     |> Expect.equal
                         [ GlossaryItemForUi.id interestRateItem
@@ -485,8 +485,8 @@ suite =
                         ]
         , test "returns items ordered by most mentioned first with tag filter applied" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.orderedByMostMentionedFirst (Just financeTagId)
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.orderedByMostMentionedFirst (Just financeTagId)
                     |> List.map Tuple.first
                     |> Expect.equal
                         [ GlossaryItemForUi.id interestRateItem
@@ -495,8 +495,8 @@ suite =
                         ]
         , test "returns items ordered 'focused on' a specific item" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.orderedFocusedOn Nothing (GlossaryItemForUi.id defaultFinanceItem)
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.orderedFocusedOn Nothing (GlossaryItemForUi.id defaultFinanceItem)
                     |> (\( lhs, rhs ) -> ( List.map Tuple.first lhs, List.map Tuple.first rhs ))
                     |> Expect.equal
                         ( [ GlossaryItemForUi.id defaultFinanceItem
@@ -509,8 +509,8 @@ suite =
                         )
         , test "returns items ordered 'focused on' a specific item with tag filter applied" <|
             \_ ->
-                glossaryItems
-                    |> GlossaryItems.orderedFocusedOn (Just financeTagId) (GlossaryItemForUi.id defaultFinanceItem)
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.orderedFocusedOn (Just financeTagId) (GlossaryItemForUi.id defaultFinanceItem)
                     |> (\( lhs, rhs ) -> ( List.map Tuple.first lhs, List.map Tuple.first rhs ))
                     |> Expect.equal
                         ( [ GlossaryItemForUi.id defaultFinanceItem
@@ -521,7 +521,7 @@ suite =
                         )
         , test "sorts tags in items alphabetically" <|
             \_ ->
-                GlossaryItems.fromList
+                GlossaryItemsForUi.fromList
                     [ financeDescribedTag
                     , houseworkDescribedTag
                     , gardeningDescribedTag
@@ -540,7 +540,7 @@ suite =
                         Nothing
                         Nothing
                     ]
-                    |> Result.map (GlossaryItems.get <| GlossaryItemForUi.id defaultComputerScienceItem)
+                    |> Result.map (GlossaryItemsForUi.get <| GlossaryItemForUi.id defaultComputerScienceItem)
                     |> Expect.equal
                         (Ok <|
                             Just <|
@@ -559,25 +559,25 @@ suite =
                         )
         , test "sorts tags alphabetically" <|
             \_ ->
-                GlossaryItems.fromList
+                GlossaryItemsForUi.fromList
                     [ financeDescribedTag
                     , houseworkDescribedTag
                     , gardeningDescribedTag
                     , computerScienceDescribedTag
                     ]
                     []
-                    |> Result.map GlossaryItems.tags
+                    |> Result.map GlossaryItemsForUi.tags
                     |> Expect.equal (Ok [ computerScienceTag, financeTag, gardeningTag, houseworkTag ])
         , test "sorts tags with descriptions alphabetically" <|
             \_ ->
-                GlossaryItems.fromList
+                GlossaryItemsForUi.fromList
                     [ financeDescribedTag
                     , houseworkDescribedTag
                     , gardeningDescribedTag
                     , computerScienceDescribedTag
                     ]
                     []
-                    |> Result.map GlossaryItems.describedTags
+                    |> Result.map GlossaryItemsForUi.describedTags
                     |> Expect.equal
                         (Ok
                             [ computerScienceDescribedTag
@@ -588,7 +588,7 @@ suite =
                         )
         , test "returns error for duplicate tags" <|
             \_ ->
-                GlossaryItems.fromList
+                GlossaryItemsForUi.fromList
                     [ financeDescribedTag
                     , DescribedTag.create
                         (TagId.create "some-other-tag-id")
@@ -601,7 +601,7 @@ suite =
         , test "returns error for duplicate disambiguated preferred terms" <|
             \_ ->
                 -- TODO: is this test essentially the same as the one below?
-                GlossaryItems.fromList
+                GlossaryItemsForUi.fromList
                     [ financeDescribedTag ]
                     [ GlossaryItemForUi.create
                         (GlossaryItemId.create "Foo (Finance) 1")
@@ -632,7 +632,7 @@ suite =
                         (Err "there are multiple items with (disambiguated) preferred term identifier \"Foo_(Finance)\"")
         , test "returns error for multiple disambiguated preferred terms with the same fragment identifier" <|
             \_ ->
-                GlossaryItems.fromList
+                GlossaryItemsForUi.fromList
                     [ financeDescribedTag ]
                     [ GlossaryItemForUi.create
                         (GlossaryItemId.create "Foo (Finance)")

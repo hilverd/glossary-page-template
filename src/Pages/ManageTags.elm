@@ -14,7 +14,7 @@ import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist
 import Data.GlossaryForUi as Glossary
 import Data.GlossaryItem.Tag as Tag
-import Data.GlossaryItems as GlossaryItems
+import Data.GlossaryItemsForUi as GlossaryItems
 import Data.Saving exposing (Saving(..))
 import Data.TagDescription as TagDescription
 import Data.TagId as TagId

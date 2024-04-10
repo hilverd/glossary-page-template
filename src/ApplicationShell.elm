@@ -18,7 +18,7 @@ import Data.Editability as Editability
 import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryFromDom as GlossaryFromDom
 import Data.GlossaryItemId exposing (GlossaryItemId)
-import Data.GlossaryItems as GlossaryItems
+import Data.GlossaryItemsForUi as GlossaryItems
 import Data.Theme as Theme exposing (Theme)
 import Html
 import Json.Decode as Decode

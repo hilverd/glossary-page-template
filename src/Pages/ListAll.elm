@@ -53,7 +53,7 @@ import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi, disambiguatedTerm)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.GradualVisibility as GradualVisibility exposing (GradualVisibility)
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
@@ -461,7 +461,7 @@ update msg model =
                         Ok glossaryForUi ->
                             glossaryForUi
                                 |> GlossaryForUi.items
-                                |> GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm (Term.raw relatedTerm)
+                                |> GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm (Term.raw relatedTerm)
                                 |> Maybe.map (\index -> { model | itemWithFocus = Just index })
                                 |> Maybe.withDefault model
 
@@ -888,7 +888,7 @@ filterByTagId model =
             in
             queryParametersTag
                 |> Maybe.andThen
-                    (\tag -> glossaryForUi |> GlossaryForUi.items |> GlossaryItems.tagIdFromTag tag)
+                    (\tag -> glossaryForUi |> GlossaryForUi.items |> GlossaryItemsForUi.tagIdFromTag tag)
 
         _ ->
             Nothing
@@ -1488,10 +1488,10 @@ viewCards :
     -> QueryParameters
     -> Maybe GlossaryItemId
     -> Maybe RawTerm
-    -> GlossaryItems
+    -> GlossaryItemsForUi
     -> ( List ( GlossaryItemId, GlossaryItemForUi ), List ( GlossaryItemId, GlossaryItemForUi ) )
     -> Html Msg
-viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates, noModalDialogShown_, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryItems ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates, noModalDialogShown_, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
         filterByTag : Maybe Tag
         filterByTag =
@@ -1503,15 +1503,15 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
 
         disambiguatedPreferredTermsWithDefinitions : List DisambiguatedTerm
         disambiguatedPreferredTermsWithDefinitions =
-            GlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions
+            GlossaryItemsForUi.disambiguatedPreferredTermsWhichHaveDefinitions
                 filterByTagId_
-                glossaryItems
+                glossaryItemsForUi
 
         orderItemsFocusedOnTerm : Maybe DisambiguatedTerm
         orderItemsFocusedOnTerm =
             case QueryParameters.orderItemsBy queryParameters of
                 FocusedOn termId ->
-                    GlossaryItems.disambiguatedPreferredTermFromRaw termId glossaryItems
+                    GlossaryItemsForUi.disambiguatedPreferredTermFromRaw termId glossaryItemsForUi
 
                 _ ->
                     Nothing
@@ -2299,7 +2299,7 @@ pageTitle model glossaryForUi =
                 disambiguatedPreferredTerm =
                     glossaryForUi
                         |> GlossaryForUi.items
-                        |> GlossaryItems.get id
+                        |> GlossaryItemsForUi.get id
                         |> Maybe.map
                             (\item ->
                                 item
@@ -2334,7 +2334,7 @@ filterByTagWithDescription model =
     case model.common.glossaryForUi of
         Ok glossaryForUi ->
             let
-                items : GlossaryItems
+                items : GlossaryItemsForUi
                 items =
                     GlossaryForUi.items glossaryForUi
             in
@@ -2342,10 +2342,10 @@ filterByTagWithDescription model =
                 |> filterByTagId
                 |> Maybe.andThen
                     (\tagId ->
-                        GlossaryItems.tagFromId tagId items
+                        GlossaryItemsForUi.tagFromId tagId items
                             |> Maybe.andThen
                                 (\tag ->
-                                    GlossaryItems.tagDescriptionFromId tagId items
+                                    GlossaryItemsForUi.tagDescriptionFromId tagId items
                                         |> Maybe.map (DescribedTag.create tagId tag)
                                 )
                     )
@@ -2372,7 +2372,7 @@ view model =
                 noModalDialogShown_ =
                     noModalDialogShown model
 
-                items : GlossaryItems
+                items : GlossaryItemsForUi
                 items =
                     GlossaryForUi.items glossaryForUi
 
@@ -2400,27 +2400,27 @@ view model =
                     items
                         |> (case QueryParameters.orderItemsBy model.common.queryParameters of
                                 Alphabetically ->
-                                    GlossaryItems.orderedAlphabetically filterByTag_
+                                    GlossaryItemsForUi.orderedAlphabetically filterByTag_
                                         >> (\lhs -> ( lhs, [] ))
 
                                 MostMentionedFirst ->
-                                    GlossaryItems.orderedByMostMentionedFirst filterByTag_
+                                    GlossaryItemsForUi.orderedByMostMentionedFirst filterByTag_
                                         >> (\lhs -> ( lhs, [] ))
 
                                 FocusedOn termId ->
                                     let
                                         itemId : Maybe GlossaryItemId
                                         itemId =
-                                            GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm termId items
+                                            GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm termId items
                                     in
                                     case itemId of
                                         Just itemId_ ->
-                                            GlossaryItems.orderedFocusedOn filterByTag_ itemId_
+                                            GlossaryItemsForUi.orderedFocusedOn filterByTag_ itemId_
 
                                         Nothing ->
                                             always
                                                 (items
-                                                    |> GlossaryItems.orderedAlphabetically filterByTag_
+                                                    |> GlossaryItemsForUi.orderedAlphabetically filterByTag_
                                                     |> (\lhs -> ( lhs, [] ))
                                                 )
                            )
@@ -2473,16 +2473,16 @@ view model =
                                                     items
                                                         |> (case QueryParameters.orderItemsBy model.common.queryParameters of
                                                                 Alphabetically ->
-                                                                    GlossaryItems.orderedAlphabetically filterByTag_
+                                                                    GlossaryItemsForUi.orderedAlphabetically filterByTag_
 
                                                                 MostMentionedFirst ->
-                                                                    GlossaryItems.orderedByMostMentionedFirst filterByTag_
+                                                                    GlossaryItemsForUi.orderedByMostMentionedFirst filterByTag_
 
                                                                 FocusedOn termId ->
                                                                     \items_ ->
-                                                                        GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm termId items_
+                                                                        GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm termId items_
                                                                             |> Maybe.map
-                                                                                (\itemId -> GlossaryItems.orderedFocusedOn filterByTag_ itemId items_)
+                                                                                (\itemId -> GlossaryItemsForUi.orderedFocusedOn filterByTag_ itemId items_)
                                                                             |> Maybe.withDefault ( [], [] )
                                                                             |> (\( lhs, rhs ) -> List.append lhs rhs)
                                                            )
@@ -2630,27 +2630,27 @@ view model =
                                     [ items
                                         |> (case QueryParameters.orderItemsBy model.common.queryParameters of
                                                 Alphabetically ->
-                                                    GlossaryItems.orderedAlphabetically filterByTag_
+                                                    GlossaryItemsForUi.orderedAlphabetically filterByTag_
                                                         >> (\lhs -> ( lhs, [] ))
 
                                                 MostMentionedFirst ->
-                                                    GlossaryItems.orderedByMostMentionedFirst filterByTag_
+                                                    GlossaryItemsForUi.orderedByMostMentionedFirst filterByTag_
                                                         >> (\lhs -> ( lhs, [] ))
 
                                                 FocusedOn termId ->
                                                     let
                                                         itemId : Maybe GlossaryItemId
                                                         itemId =
-                                                            GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm termId items
+                                                            GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm termId items
                                                     in
                                                     case itemId of
                                                         Just itemId_ ->
-                                                            GlossaryItems.orderedFocusedOn filterByTag_ itemId_
+                                                            GlossaryItemsForUi.orderedFocusedOn filterByTag_ itemId_
 
                                                         Nothing ->
                                                             always
                                                                 (items
-                                                                    |> GlossaryItems.orderedAlphabetically filterByTag_
+                                                                    |> GlossaryItemsForUi.orderedAlphabetically filterByTag_
                                                                     |> (\lhs -> ( lhs, [] ))
                                                                 )
                                            )
@@ -2664,7 +2664,7 @@ view model =
                                             , editing = Editability.editing model.common.editability
                                             }
                                             { filterByTagId_ = filterByTagId model
-                                            , tags = GlossaryItems.tags items
+                                            , tags = GlossaryItemsForUi.tags items
                                             , filterByDescribedTag_ = filterByTagWithDescription_
                                             }
                                             model.common.queryParameters

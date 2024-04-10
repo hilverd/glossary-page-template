@@ -1,16 +1,16 @@
-module Data.GlossaryItems exposing
-    ( GlossaryItems
+module Data.GlossaryItemsForUi exposing
+    ( GlossaryItemsForUi
     , empty, fromList, applyTagsChanges, insert, update, remove
     , get, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
 
-{-| The glossary items that make up a glossary.
+{-| The glossary items that make up a glossary, ready to be used in a view function.
 
 
-# Glossary Items
+# Glossary Items for the UI
 
-@docs GlossaryItems
+@docs GlossaryItemsForUi
 
 
 # Build
@@ -56,8 +56,8 @@ import Set exposing (Set)
 
 {-| A set of glossary items.
 -}
-type GlossaryItems
-    = GlossaryItems
+type GlossaryItemsForUi
+    = GlossaryItemsForUi
         { tags : GlossaryTags
         , itemById : GlossaryItemIdDict GlossaryItem
         , disambiguationTagIdByItemId : GlossaryItemIdDict (Maybe TagId)
@@ -73,9 +73,9 @@ type GlossaryItems
 
 {-| The empty set of glossary items.
 -}
-empty : GlossaryItems
+empty : GlossaryItemsForUi
 empty =
-    GlossaryItems
+    GlossaryItemsForUi
         { tags = GlossaryTags.empty
         , itemById = GlossaryItemIdDict.empty
         , disambiguationTagIdByItemId = GlossaryItemIdDict.empty
@@ -91,8 +91,8 @@ empty =
 
 {-| Convert a list of glossary items for/from HTML into a `GlossaryItems`.
 -}
-fromList : List DescribedTag -> List GlossaryItemForUi -> Result String GlossaryItems
-fromList describedTags_ glossaryItemsForHtml =
+fromList : List DescribedTag -> List GlossaryItemForUi -> Result String GlossaryItemsForUi
+fromList describedTags_ glossaryItemsForUi =
     GlossaryTags.fromList describedTags_
         |> Result.andThen
             (\tags_ ->
@@ -107,7 +107,7 @@ fromList describedTags_ glossaryItemsForHtml =
 
                     itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_ : DuplicateRejectingDict String GlossaryItemId
                     itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm_ =
-                        glossaryItemsForHtml
+                        glossaryItemsForUi
                             |> List.foldl
                                 (\item ->
                                     DuplicateRejectingDict.insert
@@ -121,7 +121,7 @@ fromList describedTags_ glossaryItemsForHtml =
                                 DuplicateRejectingDict.empty
 
                     itemById =
-                        glossaryItemsForHtml
+                        glossaryItemsForUi
                             |> List.foldl
                                 (\glossaryItemForUi itemById_ ->
                                     let
@@ -145,7 +145,7 @@ fromList describedTags_ glossaryItemsForHtml =
                                 GlossaryItemIdDict.empty
 
                     ( disambiguationTagIdByItemId, normalTagIdsByItemId ) =
-                        glossaryItemsForHtml
+                        glossaryItemsForUi
                             |> List.foldl
                                 (\item ( disambiguationTagByItemId_, normalTagsByItemId_ ) ->
                                     let
@@ -218,7 +218,7 @@ fromList describedTags_ glossaryItemsForHtml =
 
                     relatedItemIdsById : GlossaryItemIdDict (List GlossaryItemId)
                     relatedItemIdsById =
-                        glossaryItemsForHtml
+                        glossaryItemsForUi
                             |> List.foldl
                                 (\item ->
                                     item
@@ -299,12 +299,12 @@ fromList describedTags_ glossaryItemsForHtml =
                         let
                             orderedAlphabetically__ : List GlossaryItemId
                             orderedAlphabetically__ =
-                                orderAlphabetically glossaryItemsForHtml
+                                orderAlphabetically glossaryItemsForUi
 
                             orderedByMostMentionedFirst_ =
-                                orderByMostMentionedFirst glossaryItemsForHtml
+                                orderByMostMentionedFirst glossaryItemsForUi
                         in
-                        GlossaryItems
+                        GlossaryItemsForUi
                             { tags = tags_
                             , itemById = itemById
                             , disambiguationTagIdByItemId = disambiguationTagIdByItemId
@@ -323,16 +323,16 @@ fromList describedTags_ glossaryItemsForHtml =
 
 {-| Apply a set of tags changes.
 -}
-applyTagsChanges : TagsChanges -> GlossaryItems -> Result String GlossaryItems
-applyTagsChanges tagsChanges (GlossaryItems items0) =
+applyTagsChanges : TagsChanges -> GlossaryItemsForUi -> Result String GlossaryItemsForUi
+applyTagsChanges tagsChanges (GlossaryItemsForUi glossaryItemsForUi0) =
     let
         tags1 : GlossaryTags
         tags1 =
-            GlossaryTags.applyChanges tagsChanges items0.tags
+            GlossaryTags.applyChanges tagsChanges glossaryItemsForUi0.tags
 
-        resultBeforeValidation : GlossaryItems
+        resultBeforeValidation : GlossaryItemsForUi
         resultBeforeValidation =
-            GlossaryItems { items0 | tags = tags1 }
+            GlossaryItemsForUi { glossaryItemsForUi0 | tags = tags1 }
     in
     resultBeforeValidation
         |> orderedAlphabetically Nothing
@@ -342,16 +342,16 @@ applyTagsChanges tagsChanges (GlossaryItems items0) =
 
 {-| Insert an item, returning the ID of the new item.
 -}
-insert : GlossaryItemForUi -> GlossaryItems -> Result String ( GlossaryItemId, GlossaryItems )
-insert item glossaryItems =
+insert : GlossaryItemForUi -> GlossaryItemsForUi -> Result String ( GlossaryItemId, GlossaryItemsForUi )
+insert item glossaryItemsForUi =
     let
-        itemsAfterInserting : Result String GlossaryItems
+        itemsAfterInserting : Result String GlossaryItemsForUi
         itemsAfterInserting =
-            glossaryItems
+            glossaryItemsForUi
                 |> orderedAlphabetically Nothing
                 |> List.map Tuple.second
                 |> (::) item
-                |> fromList (describedTags glossaryItems)
+                |> fromList (describedTags glossaryItemsForUi)
 
         insertedItemId : GlossaryItemId
         insertedItemId =
@@ -363,8 +363,8 @@ insert item glossaryItems =
 
 {-| Update an item. Do nothing if there is no item with the given ID.
 -}
-update : GlossaryItemId -> GlossaryItemForUi -> GlossaryItems -> Result String GlossaryItems
-update itemId item glossaryItems =
+update : GlossaryItemId -> GlossaryItemForUi -> GlossaryItemsForUi -> Result String GlossaryItemsForUi
+update itemId item glossaryItemsForUi =
     let
         disambiguatedPreferredTerm_ itemId_ =
             if itemId_ == itemId then
@@ -373,7 +373,7 @@ update itemId item glossaryItems =
             else
                 disambiguatedPreferredTerm itemId_
     in
-    glossaryItems
+    glossaryItemsForUi
         |> orderedAlphabetically_ disambiguatedPreferredTerm_ Nothing
         |> List.map
             (\( itemId_, item_ ) ->
@@ -383,14 +383,14 @@ update itemId item glossaryItems =
                 else
                     item_
             )
-        |> fromList (describedTags glossaryItems)
+        |> fromList (describedTags glossaryItemsForUi)
 
 
 {-| Remove the item associated with an ID. Do nothing if the ID is not found.
 -}
-remove : GlossaryItemId -> GlossaryItems -> Result String GlossaryItems
-remove itemId glossaryItems =
-    glossaryItems
+remove : GlossaryItemId -> GlossaryItemsForUi -> Result String GlossaryItemsForUi
+remove itemId glossaryItemsForUi =
+    glossaryItemsForUi
         |> orderedAlphabetically Nothing
         |> List.filterMap
             (\( itemId_, itemForUi ) ->
@@ -400,11 +400,11 @@ remove itemId glossaryItems =
                 else
                     Just itemForUi
             )
-        |> fromList (describedTags glossaryItems)
+        |> fromList (describedTags glossaryItemsForUi)
 
 
-relatedPreferredTerms_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItemId -> GlossaryItems -> Maybe (List DisambiguatedTerm)
-relatedPreferredTerms_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItems items) as glossaryItems) =
+relatedPreferredTerms_ : (GlossaryItemId -> GlossaryItemsForUi -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItemId -> GlossaryItemsForUi -> Maybe (List DisambiguatedTerm)
+relatedPreferredTerms_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
     items.relatedItemIdsById
         |> GlossaryItemIdDict.get itemId
         |> Maybe.map
@@ -430,7 +430,7 @@ relatedPreferredTerms_ disambiguatedPreferredTerm_ filterByTagId itemId ((Glossa
                                         |> Maybe.withDefault True
                             in
                             if relatedItemMatchesTagBeingFilteredBy then
-                                disambiguatedPreferredTerm_ relatedItemId glossaryItems
+                                disambiguatedPreferredTerm_ relatedItemId glossaryItemsForUi
 
                             else
                                 Nothing
@@ -438,8 +438,8 @@ relatedPreferredTerms_ disambiguatedPreferredTerm_ filterByTagId itemId ((Glossa
             )
 
 
-get_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItemId -> GlossaryItems -> Maybe GlossaryItemForUi
-get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItems items) as glossaryItems) =
+get_ : (GlossaryItemId -> GlossaryItemsForUi -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItemId -> GlossaryItemsForUi -> Maybe GlossaryItemForUi
+get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
     GlossaryItemIdDict.get itemId items.itemById
         |> Maybe.map
             (\item ->
@@ -486,7 +486,7 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItems items) as 
 
                     relatedPreferredTerms : List DisambiguatedTerm
                     relatedPreferredTerms =
-                        glossaryItems
+                        glossaryItemsForUi
                             |> relatedPreferredTerms_ disambiguatedPreferredTerm_ filterByTagId itemId
                             |> Maybe.withDefault []
 
@@ -519,15 +519,15 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItems items) as 
 
 {-| Get the item associated with an ID. If the ID is not found, return `Nothing`.
 -}
-get : GlossaryItemId -> GlossaryItems -> Maybe GlossaryItemForUi
+get : GlossaryItemId -> GlossaryItemsForUi -> Maybe GlossaryItemForUi
 get =
     get_ disambiguatedPreferredTerm Nothing
 
 
 {-| The tags for these glossary items. Tags can exist without being used in any items.
 -}
-tags : GlossaryItems -> List Tag
-tags (GlossaryItems items) =
+tags : GlossaryItemsForUi -> List Tag
+tags (GlossaryItemsForUi items) =
     items.tags
         |> GlossaryTags.tagById
         |> TagIdDict.values
@@ -537,8 +537,8 @@ tags (GlossaryItems items) =
 {-| The tags for these glossary items along with their IDs and descriptions.
 Tags can exist without being used in any items.
 -}
-describedTags : GlossaryItems -> List DescribedTag
-describedTags (GlossaryItems items) =
+describedTags : GlossaryItemsForUi -> List DescribedTag
+describedTags (GlossaryItemsForUi items) =
     let
         tagById : TagIdDict Tag
         tagById =
@@ -563,8 +563,8 @@ describedTags (GlossaryItems items) =
 
 {-| The tags for these glossary items along with their tag IDs.
 -}
-tagByIdList : GlossaryItems -> List ( TagId, Tag )
-tagByIdList (GlossaryItems items) =
+tagByIdList : GlossaryItemsForUi -> List ( TagId, Tag )
+tagByIdList (GlossaryItemsForUi items) =
     items.tags
         |> GlossaryTags.tagById
         |> TagIdDict.toList
@@ -572,8 +572,8 @@ tagByIdList (GlossaryItems items) =
 
 {-| Look up a tag ID from its contents.
 -}
-tagIdFromTag : Tag -> GlossaryItems -> Maybe TagId
-tagIdFromTag tag (GlossaryItems items) =
+tagIdFromTag : Tag -> GlossaryItemsForUi -> Maybe TagId
+tagIdFromTag tag (GlossaryItemsForUi items) =
     let
         tagIdByRawTag =
             GlossaryTags.tagIdByRawTag items.tags
@@ -583,8 +583,8 @@ tagIdFromTag tag (GlossaryItems items) =
 
 {-| Look up a tag from its ID.
 -}
-tagFromId : TagId -> GlossaryItems -> Maybe Tag
-tagFromId tagId (GlossaryItems items) =
+tagFromId : TagId -> GlossaryItemsForUi -> Maybe Tag
+tagFromId tagId (GlossaryItemsForUi items) =
     items.tags
         |> GlossaryTags.tagById
         |> TagIdDict.get tagId
@@ -592,8 +592,8 @@ tagFromId tagId (GlossaryItems items) =
 
 {-| Look up a tag's description from its ID.
 -}
-tagDescriptionFromId : TagId -> GlossaryItems -> Maybe TagDescription
-tagDescriptionFromId tagId (GlossaryItems items) =
+tagDescriptionFromId : TagId -> GlossaryItemsForUi -> Maybe TagDescription
+tagDescriptionFromId tagId (GlossaryItemsForUi items) =
     items.tags
         |> GlossaryTags.tagDescriptionById
         |> TagIdDict.get tagId
@@ -601,8 +601,8 @@ tagDescriptionFromId tagId (GlossaryItems items) =
 
 {-| The disambiguated preferred term for the item with the given ID.
 -}
-disambiguatedPreferredTerm : GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm
-disambiguatedPreferredTerm itemId (GlossaryItems items) =
+disambiguatedPreferredTerm : GlossaryItemId -> GlossaryItemsForUi -> Maybe DisambiguatedTerm
+disambiguatedPreferredTerm itemId (GlossaryItemsForUi items) =
     let
         maybePreferredTerm : Maybe Term
         maybePreferredTerm =
@@ -642,8 +642,8 @@ disambiguatedPreferredTerm itemId (GlossaryItems items) =
 
 {-| All the disambiguated preferred terms in these glossary items.
 -}
-disambiguatedPreferredTerms : Maybe TagId -> GlossaryItems -> List ( GlossaryItemId, DisambiguatedTerm )
-disambiguatedPreferredTerms filterByTagId ((GlossaryItems items) as glossaryItems) =
+disambiguatedPreferredTerms : Maybe TagId -> GlossaryItemsForUi -> List ( GlossaryItemId, DisambiguatedTerm )
+disambiguatedPreferredTerms filterByTagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
     let
         itemIds : List GlossaryItemId
         itemIds =
@@ -664,22 +664,22 @@ disambiguatedPreferredTerms filterByTagId ((GlossaryItems items) as glossaryItem
     in
     itemIds
         |> List.filterMap
-            (\itemId -> glossaryItems |> disambiguatedPreferredTerm itemId |> Maybe.map (Tuple.pair itemId))
+            (\itemId -> glossaryItemsForUi |> disambiguatedPreferredTerm itemId |> Maybe.map (Tuple.pair itemId))
         |> List.sortWith compareDisambiguatedTerms
 
 
 {-| Look up the ID of the item with the given raw disambiguated preferred term.
 -}
-itemIdFromRawDisambiguatedPreferredTerm : RawTerm -> GlossaryItems -> Maybe GlossaryItemId
-itemIdFromRawDisambiguatedPreferredTerm rawTerm (GlossaryItems items) =
+itemIdFromRawDisambiguatedPreferredTerm : RawTerm -> GlossaryItemsForUi -> Maybe GlossaryItemId
+itemIdFromRawDisambiguatedPreferredTerm rawTerm (GlossaryItemsForUi items) =
     items.itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm
         |> Dict.get (rawTerm |> RawTerm.toString |> String.replace " " "_")
 
 
 {-| Look up the ID of the item with the given fragment identifier.
 -}
-itemIdFromFragmentIdentifier : String -> GlossaryItems -> Maybe GlossaryItemId
-itemIdFromFragmentIdentifier fragmentIdentifier (GlossaryItems items) =
+itemIdFromFragmentIdentifier : String -> GlossaryItemsForUi -> Maybe GlossaryItemId
+itemIdFromFragmentIdentifier fragmentIdentifier (GlossaryItemsForUi items) =
     Dict.get
         fragmentIdentifier
         items.itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm
@@ -687,13 +687,13 @@ itemIdFromFragmentIdentifier fragmentIdentifier (GlossaryItems items) =
 
 {-| Look up the disambiguated preferred term of the item with the given raw disambiguated preferred term.
 -}
-disambiguatedPreferredTermFromRaw : RawTerm -> GlossaryItems -> Maybe DisambiguatedTerm
-disambiguatedPreferredTermFromRaw rawTerm ((GlossaryItems items) as glossaryItems) =
+disambiguatedPreferredTermFromRaw : RawTerm -> GlossaryItemsForUi -> Maybe DisambiguatedTerm
+disambiguatedPreferredTermFromRaw rawTerm ((GlossaryItemsForUi items) as glossaryItemsForUi) =
     items.itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm
         |> Dict.get (rawTerm |> RawTerm.toString |> String.replace " " "_")
         |> Maybe.andThen
             (\itemId ->
-                glossaryItems
+                glossaryItemsForUi
                     |> get itemId
                     |> Maybe.map GlossaryItemForUi.disambiguatedPreferredTerm
             )
@@ -701,8 +701,8 @@ disambiguatedPreferredTermFromRaw rawTerm ((GlossaryItems items) as glossaryItem
 
 {-| All of the disambiguated preferred terms which have a definition.
 -}
-disambiguatedPreferredTermsWhichHaveDefinitions : Maybe TagId -> GlossaryItems -> List DisambiguatedTerm
-disambiguatedPreferredTermsWhichHaveDefinitions filterByTagId ((GlossaryItems items) as glossaryItems) =
+disambiguatedPreferredTermsWhichHaveDefinitions : Maybe TagId -> GlossaryItemsForUi -> List DisambiguatedTerm
+disambiguatedPreferredTermsWhichHaveDefinitions filterByTagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
     let
         itemIdsSet : Set String
         itemIdsSet =
@@ -721,7 +721,7 @@ disambiguatedPreferredTermsWhichHaveDefinitions filterByTagId ((GlossaryItems it
                         && GlossaryItem.definition item
                         /= Nothing
                 then
-                    disambiguatedPreferredTerm itemId glossaryItems
+                    disambiguatedPreferredTerm itemId glossaryItemsForUi
 
                 else
                     Nothing
@@ -731,8 +731,8 @@ disambiguatedPreferredTermsWhichHaveDefinitions filterByTagId ((GlossaryItems it
 
 {-| The IDs of the items that list this item as a related one.
 -}
-relatedForWhichItems : GlossaryItemId -> GlossaryItems -> List GlossaryItemId
-relatedForWhichItems itemId (GlossaryItems items) =
+relatedForWhichItems : GlossaryItemId -> GlossaryItemsForUi -> List GlossaryItemId
+relatedForWhichItems itemId (GlossaryItemsForUi items) =
     items.relatedItemIdsById
         |> GlossaryItemIdDict.foldl
             (\otherItemId relatedItemIds result ->
@@ -747,17 +747,17 @@ relatedForWhichItems itemId (GlossaryItems items) =
 
 {-| The disambiguated preferred terms of the items that list this one as a related item.
 -}
-preferredTermsOfItemsListingThisItemAsRelated : GlossaryItemId -> GlossaryItems -> List DisambiguatedTerm
-preferredTermsOfItemsListingThisItemAsRelated id items =
-    items
+preferredTermsOfItemsListingThisItemAsRelated : GlossaryItemId -> GlossaryItemsForUi -> List DisambiguatedTerm
+preferredTermsOfItemsListingThisItemAsRelated id glossaryItemsForUi =
+    glossaryItemsForUi
         |> relatedForWhichItems id
-        |> List.filterMap (\id_ -> disambiguatedPreferredTerm id_ items)
+        |> List.filterMap (\id_ -> disambiguatedPreferredTerm id_ glossaryItemsForUi)
 
 
 {-| A list of pairs associating each alternative term with the disambiguated preferred terms that it appears together with.
 -}
-disambiguatedPreferredTermsByAlternativeTerm : Maybe TagId -> GlossaryItems -> List ( Term, List ( GlossaryItemId, DisambiguatedTerm ) )
-disambiguatedPreferredTermsByAlternativeTerm filterByTagId ((GlossaryItems items) as glossaryItems) =
+disambiguatedPreferredTermsByAlternativeTerm : Maybe TagId -> GlossaryItemsForUi -> List ( Term, List ( GlossaryItemId, DisambiguatedTerm ) )
+disambiguatedPreferredTermsByAlternativeTerm filterByTagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
     let
         ( alternativeTermByRaw, preferredTermsByRawAlternativeTerm ) =
             items.itemById
@@ -783,7 +783,7 @@ disambiguatedPreferredTermsByAlternativeTerm filterByTagId ((GlossaryItems items
                                     |> Maybe.withDefault True
                         in
                         if itemMatchesTag then
-                            case disambiguatedPreferredTerm itemId glossaryItems of
+                            case disambiguatedPreferredTerm itemId glossaryItemsForUi of
                                 Just disambiguatedPreferredTerm_ ->
                                     item
                                         |> GlossaryItem.alternativeTerms
@@ -826,8 +826,8 @@ disambiguatedPreferredTermsByAlternativeTerm filterByTagId ((GlossaryItems items
             []
 
 
-toList_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForUi )
-toList_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItems items) as glossaryItems) =
+toList_ : (GlossaryItemId -> GlossaryItemsForUi -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItemsForUi -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForUi )
+toList_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
     let
         itemIdsMatchingTagFilter : Maybe (Set String)
         itemIdsMatchingTagFilter =
@@ -847,7 +847,7 @@ toList_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItems items) as glos
                     |> Maybe.map (Set.member <| GlossaryItemId.toString itemId)
                     |> Maybe.withDefault True
             then
-                glossaryItems
+                glossaryItemsForUi
                     |> get_ disambiguatedPreferredTerm_ filterByTagId itemId
                     |> Maybe.andThen (Just << Tuple.pair itemId)
 
@@ -856,28 +856,28 @@ toList_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItems items) as glos
         )
 
 
-toList : Maybe TagId -> GlossaryItems -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForUi )
+toList : Maybe TagId -> GlossaryItemsForUi -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForUi )
 toList =
     toList_ disambiguatedPreferredTerm
 
 
-orderedAlphabetically_ : (GlossaryItemId -> GlossaryItems -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItems -> List ( GlossaryItemId, GlossaryItemForUi )
-orderedAlphabetically_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItems items) as glossaryItems) =
-    toList_ disambiguatedPreferredTerm_ filterByTagId glossaryItems items.orderedAlphabetically
+orderedAlphabetically_ : (GlossaryItemId -> GlossaryItemsForUi -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItemsForUi -> List ( GlossaryItemId, GlossaryItemForUi )
+orderedAlphabetically_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
+    toList_ disambiguatedPreferredTerm_ filterByTagId glossaryItemsForUi items.orderedAlphabetically
 
 
 {-| Retrieve the glossary items ordered alphabetically.
 -}
-orderedAlphabetically : Maybe TagId -> GlossaryItems -> List ( GlossaryItemId, GlossaryItemForUi )
+orderedAlphabetically : Maybe TagId -> GlossaryItemsForUi -> List ( GlossaryItemId, GlossaryItemForUi )
 orderedAlphabetically =
     orderedAlphabetically_ disambiguatedPreferredTerm
 
 
 {-| Retrieve the glossary items ordered by most mentioned first.
 -}
-orderedByMostMentionedFirst : Maybe TagId -> GlossaryItems -> List ( GlossaryItemId, GlossaryItemForUi )
-orderedByMostMentionedFirst filterByTagId ((GlossaryItems items) as glossaryItems) =
-    toList filterByTagId glossaryItems items.orderedByMostMentionedFirst
+orderedByMostMentionedFirst : Maybe TagId -> GlossaryItemsForUi -> List ( GlossaryItemId, GlossaryItemForUi )
+orderedByMostMentionedFirst filterByTagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
+    toList filterByTagId glossaryItemsForUi items.orderedByMostMentionedFirst
 
 
 {-| Retrieve the glossary items ordered "focused on" a specific item.
@@ -885,12 +885,12 @@ orderedByMostMentionedFirst filterByTagId ((GlossaryItems items) as glossaryItem
 orderedFocusedOn :
     Maybe TagId
     -> GlossaryItemId
-    -> GlossaryItems
+    -> GlossaryItemsForUi
     ->
         ( List ( GlossaryItemId, GlossaryItemForUi )
         , List ( GlossaryItemId, GlossaryItemForUi )
         )
-orderedFocusedOn filterByTagId glossaryItemId ((GlossaryItems items) as glossaryItems) =
+orderedFocusedOn filterByTagId glossaryItemId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
     let
         itemIdsGraph : DirectedGraph GlossaryItemId
         itemIdsGraph =
@@ -926,8 +926,8 @@ orderedFocusedOn filterByTagId glossaryItemId ((GlossaryItems items) as glossary
         ( ids, otherIds ) =
             DirectedGraph.verticesByDistance glossaryItemId relatedItemsGraph
     in
-    ( toList filterByTagId glossaryItems ids
-    , toList filterByTagId glossaryItems otherIds
+    ( toList filterByTagId glossaryItemsForUi ids
+    , toList filterByTagId glossaryItemsForUi otherIds
     )
 
 
@@ -943,7 +943,7 @@ orderAlphabetically =
 
 
 orderByMostMentionedFirst : List GlossaryItemForUi -> List GlossaryItemId
-orderByMostMentionedFirst glossaryItemsForHtml =
+orderByMostMentionedFirst glossaryItemsForUi =
     let
         -- Maps a term to a score based on whether or not it occurs in glossaryItem.
         -- This is done in a primitive way. A more sophisticated solution could use stemming
@@ -982,10 +982,10 @@ orderByMostMentionedFirst glossaryItemsForHtml =
             else
                 0
 
-        -- Maps a term to a score based on how often it occurs in glossaryItemsForHtml.
+        -- Maps a term to a score based on how often it occurs in glossaryItemsForUi.
         termScore : Term -> GlossaryItemId -> Int
         termScore term exceptId =
-            glossaryItemsForHtml
+            glossaryItemsForUi
                 |> List.foldl
                     (\glossaryItem result ->
                         result
@@ -1000,7 +1000,7 @@ orderByMostMentionedFirst glossaryItemsForHtml =
 
         termBodyScores : Dict String Int
         termBodyScores =
-            glossaryItemsForHtml
+            glossaryItemsForUi
                 |> List.concatMap
                     (\glossaryItem ->
                         glossaryItem
@@ -1016,7 +1016,7 @@ orderByMostMentionedFirst glossaryItemsForHtml =
                     )
                     Dict.empty
     in
-    glossaryItemsForHtml
+    glossaryItemsForUi
         |> List.sortWith
             (\item1 item2 ->
                 let

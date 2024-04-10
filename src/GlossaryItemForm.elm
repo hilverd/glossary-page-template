@@ -35,7 +35,7 @@ import Data.GlossaryItem.Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId exposing (GlossaryItemId)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItemsForUi as GlossaryItems exposing (GlossaryItemsForUi)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TagId exposing (TagId)
 import Data.TermIndex as TermIndex exposing (TermIndex)
@@ -295,7 +295,7 @@ hasValidationErrors form =
         || (form |> relatedTermFields |> hasErrors .validationError)
 
 
-empty : GlossaryItems -> Maybe Tag -> GlossaryItemForm
+empty : GlossaryItemsForUi -> Maybe Tag -> GlossaryItemForm
 empty items filterByTag =
     let
         tags : List ( TagId, Tag )
@@ -348,7 +348,7 @@ emptyRelatedTermField =
     }
 
 
-fromGlossaryItemForUi : GlossaryItems -> GlossaryItemId -> GlossaryItemForUi -> GlossaryItemForm
+fromGlossaryItemForUi : GlossaryItemsForUi -> GlossaryItemId -> GlossaryItemForUi -> GlossaryItemForm
 fromGlossaryItemForUi items itemId item =
     let
         tags : List ( TagId, Tag )
@@ -469,7 +469,7 @@ fromGlossaryItemForUi_ existingPreferredTerms allTags preferredTermsOfItemsListi
         |> validate
 
 
-toGlossaryItem : GlossaryItems -> GlossaryItemForm -> GlossaryItemId -> Maybe String -> GlossaryItemForUi
+toGlossaryItem : GlossaryItemsForUi -> GlossaryItemForm -> GlossaryItemId -> Maybe String -> GlossaryItemForUi
 toGlossaryItem glossaryItems form id dateTime =
     let
         termFieldToTerm : TermField -> Term

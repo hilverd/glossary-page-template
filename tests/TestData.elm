@@ -13,7 +13,7 @@ import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemFromDom exposing (GlossaryItemFromDom)
 import Data.GlossaryItemId as GlossaryItemId
-import Data.GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.GlossaryVersionNumber as GlossaryVersionNumber
 import Data.TagDescription as TagDescription exposing (TagDescription)
@@ -475,6 +475,6 @@ glossary =
         GlossaryVersionNumber.initial
 
 
-glossaryItems : GlossaryItems
-glossaryItems =
+glossaryItemsForUi : GlossaryItemsForUi
+glossaryItemsForUi =
     GlossaryForUi.items glossary

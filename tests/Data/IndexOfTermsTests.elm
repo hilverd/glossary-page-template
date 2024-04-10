@@ -5,7 +5,7 @@ import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.IndexOfTerms as IndexOfTerms
 import Expect
 import Test exposing (Test, describe, test)
@@ -32,7 +32,7 @@ glossaryItemForUi body =
         Nothing
 
 
-glossaryItems : GlossaryItems
+glossaryItems : GlossaryItemsForUi
 glossaryItems =
     [ glossaryItemForUi "007"
     , glossaryItemForUi "Óne"
@@ -42,8 +42,8 @@ glossaryItems =
     , glossaryItemForUi "Ω"
     , glossaryItemForUi "_future_"
     ]
-        |> GlossaryItems.fromList []
-        |> Result.withDefault GlossaryItems.empty
+        |> GlossaryItemsForUi.fromList []
+        |> Result.withDefault GlossaryItemsForUi.empty
 
 
 suite : Test
@@ -97,7 +97,7 @@ suite =
         , test "doesn't include 0–9 and ellipsis if not needed" <|
             \_ ->
                 []
-                    |> GlossaryItems.fromList []
+                    |> GlossaryItemsForUi.fromList []
                     |> Result.map (IndexOfTerms.fromGlossaryItems Nothing)
                     |> Result.map IndexOfTerms.termGroups
                     |> Expect.equal

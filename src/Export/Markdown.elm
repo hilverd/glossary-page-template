@@ -15,7 +15,7 @@ import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
-import Data.GlossaryItems as GlossaryItems
+import Data.GlossaryItemsForUi as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.TagDescription as TagDescription
 import Extras.HtmlTree
