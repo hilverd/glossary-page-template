@@ -2,7 +2,7 @@ module Data.GlossaryItemForUi exposing
     ( GlossaryItemForUi
     , create, codec, fromGlossaryItemFromDom, setLastUpdatedBy
     , disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, disambiguatedPreferredTermIdString, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
-    , toHtmlTree
+    , toGlossaryItemFromDom, toHtmlTree
     , disambiguatedTerm
     )
 
@@ -26,7 +26,7 @@ module Data.GlossaryItemForUi exposing
 
 # Converting to HTML
 
-@docs toHtmlTree
+@docs toGlossaryItemFromDom, toHtmlTree
 
 
 # Utilities
@@ -429,6 +429,27 @@ setLastUpdatedBy { name, emailAddress } (GlossaryItemForUi item) =
             | lastUpdatedByName = Just name
             , lastUpdatedByEmailAddress = Just emailAddress
         }
+
+
+{-| Convert this glossary item to a GlossaryItemFromDom.
+-}
+toGlossaryItemFromDom : GlossaryItemForUi -> GlossaryItemFromDom
+toGlossaryItemFromDom (GlossaryItemForUi item) =
+    { id = GlossaryItemId.toString item.id
+    , preferredTerm = Term.toTermFromDom item.preferredTerm
+    , alternativeTerms = List.map Term.toTermFromDom item.alternativeTerms
+    , disambiguationTag = Maybe.map Tag.raw item.disambiguationTag
+    , normalTags = List.map Tag.raw item.normalTags
+    , definition = Maybe.map Definition.raw item.definition
+    , relatedPreferredTerms =
+        List.map
+            (DisambiguatedTerm.toTerm >> Term.toTermFromDom)
+            item.relatedPreferredTerms
+    , needsUpdating = item.needsUpdating
+    , lastUpdatedDateAsIso8601 = item.lastUpdatedDateAsIso8601
+    , lastUpdatedByName = item.lastUpdatedByName
+    , lastUpdatedByEmailAddress = item.lastUpdatedByEmailAddress
+    }
 
 
 {-| Represent this glossary item as an HTML tree, ready for writing back to the glossary's HTML file.

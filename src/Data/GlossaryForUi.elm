@@ -3,7 +3,7 @@ module Data.GlossaryForUi exposing
     , create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setTitle, setAboutSection, setItems, fromGlossaryFromDom
     , ApplyChangesResult(..), applyChanges
     , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, title, aboutSection, items, versionNumber
-    , toHtmlTree
+    , toGlossaryFromDom, toHtmlTree
     )
 
 {-| A glossary ready to be used in a view function.
@@ -31,7 +31,7 @@ module Data.GlossaryForUi exposing
 
 # Export
 
-@docs toHtmlTree
+@docs toGlossaryFromDom, toHtmlTree
 
 -}
 
@@ -474,6 +474,46 @@ remove itemId glossaryForUi =
         |> items
         |> GlossaryItemsForUi.remove itemId
         |> Result.map (\items_ -> setItems items_ glossaryForUi)
+
+
+{-| Convert this glossary to a GlossaryFromDom.
+-}
+toGlossaryFromDom : GlossaryForUi -> GlossaryFromDom
+toGlossaryFromDom (GlossaryForUi glossaryForUi) =
+    { enableLastUpdatedDates = glossaryForUi.enableLastUpdatedDates
+    , enableExportMenu = glossaryForUi.enableExportMenu
+    , enableOrderItemsButtons = glossaryForUi.enableOrderItemsButtons
+    , enableHelpForMakingChanges = glossaryForUi.enableHelpForMakingChanges
+    , cardWidth = glossaryForUi.cardWidth
+    , title = glossaryForUi.title |> GlossaryTitle.raw
+    , aboutParagraph = glossaryForUi.aboutSection.paragraph |> AboutParagraph.raw
+    , aboutLinks =
+        glossaryForUi.aboutSection.links
+            |> List.map
+                (\aboutLink ->
+                    { href = AboutLink.href aboutLink
+                    , body = AboutLink.body aboutLink
+                    }
+                )
+    , tags =
+        glossaryForUi.items
+            |> GlossaryItemsForUi.describedTags
+            |> List.map
+                (\describedTag ->
+                    { id = describedTag |> DescribedTag.id |> TagId.toString
+                    , tag = describedTag |> DescribedTag.tag |> Tag.raw
+                    , description = describedTag |> DescribedTag.description |> TagDescription.raw
+                    }
+                )
+    , items =
+        glossaryForUi.items
+            |> GlossaryItemsForUi.orderedAlphabetically Nothing
+            |> List.map (Tuple.second >> GlossaryItemForUi.toGlossaryItemFromDom)
+    , versionNumber =
+        glossaryForUi.versionNumber
+            |> GlossaryVersionNumber.toInt
+            |> Just
+    }
 
 
 {-| Represent this glossary as an HTML tree, ready for writing back to the glossary's HTML file.
