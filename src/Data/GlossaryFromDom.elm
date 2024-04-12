@@ -42,7 +42,7 @@ type alias GlossaryFromDom =
     , aboutLinks : List { href : String, body : String }
     , tags : List DescribedTagFromDom
     , items : List GlossaryItemFromDom
-    , versionNumber : Maybe Int
+    , versionNumber : Int
     }
 
 
@@ -59,7 +59,7 @@ create :
     -> List { href : String, body : String }
     -> List DescribedTagFromDom
     -> List GlossaryItemFromDom
-    -> Maybe Int
+    -> Int
     -> GlossaryFromDom
 create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ title_ aboutParagraph_ aboutLinks_ tags_ items_ versionNumber_ =
     { enableLastUpdatedDates = enableLastUpdatedDates_
@@ -101,7 +101,7 @@ codec =
         |> Codec.field "aboutLinks" .aboutLinks (Codec.list aboutLinkCodec)
         |> Codec.field "tagsWithDescriptions" .tags (Codec.list DescribedTagFromDom.codec)
         |> Codec.field "glossaryItems" .items (Codec.list GlossaryItemFromDom.codec)
-        |> Codec.field "versionNumber" .versionNumber (Codec.maybe Codec.int)
+        |> Codec.field "versionNumber" .versionNumber Codec.int
         |> Codec.buildObject
 
 
@@ -117,7 +117,7 @@ toHtmlTree describedTags glossaryFromDom =
         , HtmlTree.boolAttribute "data-enable-order-items-buttons" glossaryFromDom.enableOrderItemsButtons
         , HtmlTree.boolAttribute "data-enable-last-updated-dates" glossaryFromDom.enableLastUpdatedDates
         , CardWidth.toHtmlTreeAttribute glossaryFromDom.cardWidth
-        , HtmlTree.showAttributeMaybe "data-version-number" String.fromInt glossaryFromDom.versionNumber
+        , HtmlTree.Attribute "data-version-number" <| String.fromInt glossaryFromDom.versionNumber
         ]
         [ HtmlTree.Node "header"
             True

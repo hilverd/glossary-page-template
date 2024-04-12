@@ -177,7 +177,7 @@ if (containerElement) {
                 enableExportMenu: enableExportMenu,
                 enableOrderItemsButtons: enableOrderItemsButtons,
                 enableLastUpdatedDates: enableLastUpdatedDates,
-                versionNumber: versionNumber,
+                versionNumber: versionNumber || 0,
                 separateBackendBaseUrl: separateBackendBaseUrl,
                 bearerToken: bearerToken,
                 userName: userName,

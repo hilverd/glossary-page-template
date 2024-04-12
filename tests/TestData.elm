@@ -447,7 +447,7 @@ glossaryFromDom =
         , interestRateItemFromDom
         , loanItemFromDom
         ]
-    , versionNumber = Just 0
+    , versionNumber = 0
     }
 
 

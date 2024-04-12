@@ -249,10 +249,7 @@ fromGlossaryFromDom glossaryFromDom =
             GlossaryItemForUi.fromGlossaryItemFromDom
             glossaryFromDom.items
         )
-        (glossaryFromDom.versionNumber
-            |> Maybe.map GlossaryVersionNumber.create
-            |> Maybe.withDefault GlossaryVersionNumber.initial
-        )
+        (GlossaryVersionNumber.create glossaryFromDom.versionNumber)
 
 
 {-| Creates a new GlossaryForUi with the given configuration.
@@ -509,10 +506,7 @@ toGlossaryFromDom (GlossaryForUi glossaryForUi) =
         glossaryForUi.items
             |> GlossaryItemsForUi.orderedAlphabetically Nothing
             |> List.map (Tuple.second >> GlossaryItemForUi.toGlossaryItemFromDom)
-    , versionNumber =
-        glossaryForUi.versionNumber
-            |> GlossaryVersionNumber.toInt
-            |> Just
+    , versionNumber = GlossaryVersionNumber.toInt glossaryForUi.versionNumber
     }
 
 
