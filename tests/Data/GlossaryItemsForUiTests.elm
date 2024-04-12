@@ -1,4 +1,4 @@
-module Data.GlossaryItemsTests exposing (houseworkTagId, suite)
+module Data.GlossaryItemsForUiTests exposing (houseworkTagId, suite)
 
 import Data.DescribedTag as DescribedTag
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
@@ -27,7 +27,7 @@ houseworkDescribedTag =
 
 suite : Test
 suite =
-    describe "The Data.GlossaryItems module"
+    describe "The Data.GlossaryItemsForUi module"
         [ test "inserts tags" <|
             \_ ->
                 let
