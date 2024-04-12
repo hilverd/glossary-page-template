@@ -13,6 +13,7 @@ import Codec
 import Data.Editability exposing (Editability(..))
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
+import Data.GlossaryFromDom as GlossaryFromDom
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.Saving exposing (Saving(..))
 import Extras.HtmlTree as HtmlTree
@@ -90,7 +91,8 @@ patchHtmlFile ( maybeGlossaryItemId, glossary ) errorMsg successMsg =
         , url = "/"
         , body =
             glossary
-                |> GlossaryForUi.toHtmlTree
+                |> GlossaryForUi.toGlossaryFromDom
+                |> GlossaryFromDom.toHtmlTree
                 |> HtmlTree.toHtmlReplacementString
                 |> Http.stringBody "text/html"
         , expect =

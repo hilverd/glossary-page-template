@@ -2,7 +2,7 @@ module Data.GlossaryItemForUi exposing
     ( GlossaryItemForUi
     , create, codec, fromGlossaryItemFromDom, setLastUpdatedBy
     , disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, disambiguatedPreferredTermIdString, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
-    , toGlossaryItemFromDom, toHtmlTree
+    , toGlossaryItemFromDom
     , disambiguatedTerm
     )
 
@@ -24,9 +24,9 @@ module Data.GlossaryItemForUi exposing
 @docs disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, disambiguatedPreferredTermIdString, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
 
 
-# Converting to HTML
+# Exporting
 
-@docs toGlossaryItemFromDom, toHtmlTree
+@docs toGlossaryItemFromDom
 
 
 # Utilities
@@ -450,67 +450,3 @@ toGlossaryItemFromDom (GlossaryItemForUi item) =
     , lastUpdatedByName = item.lastUpdatedByName
     , lastUpdatedByEmailAddress = item.lastUpdatedByEmailAddress
     }
-
-
-{-| Represent this glossary item as an HTML tree, ready for writing back to the glossary's HTML file.
--}
-toHtmlTree : GlossaryItemForUi -> HtmlTree
-toHtmlTree ((GlossaryItemForUi item) as glossaryItemForUi) =
-    let
-        allTags_ =
-            allTags glossaryItemForUi
-    in
-    HtmlTree.Node "div"
-        True
-        [ HtmlTree.Attribute "data-id" <| GlossaryItemId.toString item.id
-        , HtmlTree.showAttributeMaybe "data-last-updated" identity item.lastUpdatedDateAsIso8601
-        , HtmlTree.showAttributeMaybe "data-last-updated-by-name" identity item.lastUpdatedByName
-        , HtmlTree.showAttributeMaybe "data-last-updated-by-email-address" identity item.lastUpdatedByEmailAddress
-        ]
-        (preferredTermToHtmlTree item.disambiguationTag (disambiguatedPreferredTermIdString glossaryItemForUi) item.preferredTerm
-            :: List.map alternativeTermToHtmlTree item.alternativeTerms
-            ++ (if item.needsUpdating then
-                    [ HtmlTree.Node "dd"
-                        False
-                        [ HtmlTree.Attribute "class" "needs-updating" ]
-                        [ HtmlTree.Node "span"
-                            False
-                            []
-                            [ HtmlTree.Leaf <| "[" ++ I18n.needsUpdating ++ "]" ]
-                        ]
-                    ]
-
-                else
-                    []
-               )
-            ++ (if List.isEmpty allTags_ then
-                    []
-
-                else
-                    [ HtmlTree.Node "dd"
-                        True
-                        [ HtmlTree.Attribute "class" "tags" ]
-                        (List.map
-                            (\tag ->
-                                HtmlTree.Node "button"
-                                    False
-                                    [ HtmlTree.Attribute "type" "button" ]
-                                    [ HtmlTree.Leaf <| Tag.raw tag ]
-                            )
-                            allTags_
-                        )
-                    ]
-               )
-            ++ List.map
-                (Definition.raw >> definitionToHtmlTree)
-                (item.definition |> Maybe.map List.singleton |> Maybe.withDefault [])
-            ++ (if List.isEmpty item.relatedPreferredTerms then
-                    []
-
-                else
-                    [ nonemptyRelatedTermsToHtmlTree
-                        (hasADefinition glossaryItemForUi)
-                        item.relatedPreferredTerms
-                    ]
-               )
-        )

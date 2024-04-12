@@ -107,8 +107,8 @@ codec =
 
 {-| Represent this GlossaryFromDom as an HTML tree, ready for writing back to the glossary's HTML file.
 -}
-toHtmlTree : List DescribedTagFromDom -> GlossaryFromDom -> HtmlTree
-toHtmlTree describedTags glossaryFromDom =
+toHtmlTree : GlossaryFromDom -> HtmlTree
+toHtmlTree glossaryFromDom =
     HtmlTree.Node "div"
         True
         [ HtmlTree.Attribute "id" ElementIds.container
@@ -156,7 +156,7 @@ toHtmlTree describedTags glossaryFromDom =
                         glossaryFromDom.aboutLinks
                     )
                 ]
-            , HtmlTree.showIf (not <| List.isEmpty describedTags) <|
+            , HtmlTree.showIf (not <| List.isEmpty glossaryFromDom.tags) <|
                 HtmlTree.Node
                     "div"
                     True
@@ -180,7 +180,7 @@ toHtmlTree describedTags glossaryFromDom =
                                         [ HtmlTree.Leaf describedTag.description ]
                                     ]
                             )
-                            describedTags
+                            glossaryFromDom.tags
                         )
                     ]
             , HtmlTree.Node "article"

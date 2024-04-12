@@ -3,7 +3,7 @@ module Data.GlossaryForUi exposing
     , create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setTitle, setAboutSection, setItems, fromGlossaryFromDom
     , ApplyChangesResult(..), applyChanges
     , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, title, aboutSection, items, versionNumber
-    , toGlossaryFromDom, toHtmlTree
+    , toGlossaryFromDom
     )
 
 {-| A glossary ready to be used in a view function.
@@ -31,7 +31,7 @@ module Data.GlossaryForUi exposing
 
 # Export
 
-@docs toGlossaryFromDom, toHtmlTree
+@docs toGlossaryFromDom
 
 -}
 
@@ -53,8 +53,6 @@ import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVer
 import Data.TagDescription as TagDescription
 import Data.TagId as TagId
 import Data.TagsChanges exposing (TagsChanges)
-import ElementIds
-import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Internationalisation as I18n
 
 
@@ -508,104 +506,3 @@ toGlossaryFromDom (GlossaryForUi glossaryForUi) =
             |> List.map (Tuple.second >> GlossaryItemForUi.toGlossaryItemFromDom)
     , versionNumber = GlossaryVersionNumber.toInt glossaryForUi.versionNumber
     }
-
-
-{-| Represent this glossary as an HTML tree, ready for writing back to the glossary's HTML file.
--}
-toHtmlTree : GlossaryForUi -> HtmlTree
-toHtmlTree (GlossaryForUi glossaryForUi) =
-    let
-        describedTags =
-            GlossaryItemsForUi.describedTags glossaryForUi.items
-    in
-    HtmlTree.Node "div"
-        True
-        [ HtmlTree.Attribute "id" ElementIds.container
-        , HtmlTree.boolAttribute "data-enable-help-for-making-changes" glossaryForUi.enableHelpForMakingChanges
-        , HtmlTree.boolAttribute "data-enable-export-menu" glossaryForUi.enableExportMenu
-        , HtmlTree.boolAttribute "data-enable-order-items-buttons" glossaryForUi.enableOrderItemsButtons
-        , HtmlTree.boolAttribute "data-enable-last-updated-dates" glossaryForUi.enableLastUpdatedDates
-        , CardWidth.toHtmlTreeAttribute glossaryForUi.cardWidth
-        , GlossaryVersionNumber.toHtmlTreeAttribute glossaryForUi.versionNumber
-        ]
-        [ HtmlTree.Node "header"
-            True
-            []
-            [ HtmlTree.Node "h1"
-                True
-                [ HtmlTree.Attribute "id" ElementIds.title ]
-                [ HtmlTree.Leaf <| GlossaryTitle.raw glossaryForUi.title ]
-            ]
-        , HtmlTree.Node "main"
-            True
-            []
-            [ HtmlTree.Node "div"
-                True
-                [ HtmlTree.Attribute "id" ElementIds.about ]
-                [ HtmlTree.Node "p"
-                    False
-                    []
-                    [ HtmlTree.Leaf <| AboutParagraph.raw glossaryForUi.aboutSection.paragraph ]
-                , HtmlTree.Node "ul"
-                    True
-                    []
-                    (List.map
-                        (\aboutLink ->
-                            HtmlTree.Node "li"
-                                True
-                                []
-                                [ HtmlTree.Node "a"
-                                    True
-                                    [ HtmlTree.Attribute "target" "_blank"
-                                    , HtmlTree.Attribute "href" <| AboutLink.href aboutLink
-                                    ]
-                                    [ HtmlTree.Leaf <| AboutLink.body aboutLink ]
-                                ]
-                        )
-                        glossaryForUi.aboutSection.links
-                    )
-                ]
-            , HtmlTree.showIf (not <| List.isEmpty describedTags) <|
-                HtmlTree.Node
-                    "div"
-                    True
-                    [ HtmlTree.Attribute "id" ElementIds.tags ]
-                    [ HtmlTree.Leaf <| I18n.tags ++ ":"
-                    , HtmlTree.Node "dl"
-                        True
-                        []
-                        (List.map
-                            (\describedTag ->
-                                HtmlTree.Node "div"
-                                    True
-                                    [ HtmlTree.Attribute "data-id" <| TagId.toString <| DescribedTag.id describedTag ]
-                                    [ HtmlTree.Node "dt"
-                                        False
-                                        []
-                                        [ HtmlTree.Leaf <| Tag.raw <| DescribedTag.tag describedTag ]
-                                    , HtmlTree.Node "dd"
-                                        False
-                                        []
-                                        [ HtmlTree.Leaf <| TagDescription.raw <| DescribedTag.description describedTag ]
-                                    ]
-                            )
-                            describedTags
-                        )
-                    ]
-            , HtmlTree.Node "article"
-                True
-                [ HtmlTree.Attribute "id" ElementIds.items ]
-                [ HtmlTree.Node "dl"
-                    True
-                    []
-                    (glossaryForUi.items
-                        |> GlossaryItemsForUi.orderedAlphabetically Nothing
-                        |> List.map (Tuple.second >> GlossaryItemForUi.toHtmlTree)
-                    )
-                ]
-            ]
-        , HtmlTree.Node "footer"
-            True
-            []
-            I18n.builtUsingGlossaryPageTemplateHtmlTree
-        ]

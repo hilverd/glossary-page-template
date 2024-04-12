@@ -3,6 +3,7 @@ port module Worker exposing (main)
 import Codec
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
+import Data.GlossaryFromDom as GlossaryFromDom
 import Extras.HtmlTree as HtmlTree
 import Json.Decode as D
 import Json.Encode as E
@@ -117,7 +118,8 @@ update msg () =
                         html : String
                         html =
                             request.glossary
-                                |> GlossaryForUi.toHtmlTree
+                                |> GlossaryForUi.toGlossaryFromDom
+                                |> GlossaryFromDom.toHtmlTree
                                 |> HtmlTree.toHtml
                     in
                     ( ()
@@ -162,7 +164,8 @@ encodeApplyChangesResultToValue result =
                   )
                 , ( "newGlossaryHtml"
                   , glossary
-                        |> GlossaryForUi.toHtmlTree
+                        |> GlossaryForUi.toGlossaryFromDom
+                        |> GlossaryFromDom.toHtmlTree
                         |> HtmlTree.toHtml
                         |> E.string
                   )
