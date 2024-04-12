@@ -38,14 +38,10 @@ module Data.GlossaryItemForUi exposing
 import Codec exposing (Codec)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
-import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemFromDom exposing (GlossaryItemFromDom)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
-import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
-import Extras.Url exposing (fragmentOnly)
-import Internationalisation as I18n
 import List
 
 
@@ -237,14 +233,6 @@ allTags (GlossaryItemForUi item) =
         |> Maybe.withDefault item.normalTags
 
 
-{-| Whether or not the glossary item has a definition.
-Some items may not have one and instead point to a related item that is preferred.
--}
-hasADefinition : GlossaryItemForUi -> Bool
-hasADefinition (GlossaryItemForUi item) =
-    item.definition /= Nothing
-
-
 {-| The definition for this glossary item.
 -}
 definition : GlossaryItemForUi -> Maybe Definition
@@ -309,115 +297,6 @@ disambiguatedTerm tag term =
         |> Term.updateRaw
             (\raw0 -> raw0 ++ " (" ++ Tag.raw tag ++ ")")
         |> DisambiguatedTerm.fromTerm
-
-
-preferredTermToHtmlTree : Maybe Tag -> String -> Term -> HtmlTree
-preferredTermToHtmlTree disambiguationTag_ disambiguatedTermIdString_ term =
-    HtmlTree.Node "dt"
-        True
-        []
-        [ HtmlTree.Node "dfn"
-            True
-            [ HtmlTree.Attribute "id" disambiguatedTermIdString_ ]
-            [ (disambiguationTag_
-                |> Maybe.map
-                    (\disambiguationTag0 ->
-                        [ HtmlTree.Node "span"
-                            False
-                            []
-                            [ HtmlTree.Leaf <| RawTerm.toString <| Term.raw term ]
-                        , HtmlTree.Node "span"
-                            False
-                            [ HtmlTree.Attribute "class" "disambiguation" ]
-                            [ HtmlTree.Leaf <| "(" ++ Tag.raw disambiguationTag0 ++ ")" ]
-                        ]
-                    )
-                |> Maybe.withDefault
-                    [ HtmlTree.Leaf (term |> Term.raw |> RawTerm.toString) ]
-              )
-                |> (\inner ->
-                        let
-                            linkedTerm : HtmlTree
-                            linkedTerm =
-                                HtmlTree.Node "a"
-                                    True
-                                    [ HtmlTree.Attribute "href" <| fragmentOnly disambiguatedTermIdString_ ]
-                                    inner
-                        in
-                        if Term.isAbbreviation term then
-                            HtmlTree.Node "abbr" True [] [ linkedTerm ]
-
-                        else
-                            linkedTerm
-                   )
-            ]
-        ]
-
-
-alternativeTermToHtmlTree : Term -> HtmlTree
-alternativeTermToHtmlTree term =
-    HtmlTree.Node "dt"
-        True
-        []
-        [ HtmlTree.Node "dfn"
-            True
-            []
-            [ let
-                termHtmlTree : HtmlTree
-                termHtmlTree =
-                    HtmlTree.Leaf (term |> Term.raw |> RawTerm.toString)
-              in
-              if Term.isAbbreviation term then
-                HtmlTree.Node "abbr" True [] [ termHtmlTree ]
-
-              else
-                termHtmlTree
-            ]
-        ]
-
-
-definitionToHtmlTree : String -> HtmlTree
-definitionToHtmlTree definition_ =
-    HtmlTree.Node "dd"
-        False
-        []
-        [ HtmlTree.Leaf definition_ ]
-
-
-relatedTermToHtmlTree : DisambiguatedTerm -> HtmlTree
-relatedTermToHtmlTree disambiguatedTerm_ =
-    let
-        term =
-            DisambiguatedTerm.toTerm disambiguatedTerm_
-    in
-    HtmlTree.Node "a"
-        True
-        [ hrefFromRelatedTerm term ]
-        [ HtmlTree.Leaf <| RawTerm.toString <| Term.raw term ]
-
-
-nonemptyRelatedTermsToHtmlTree : Bool -> List DisambiguatedTerm -> HtmlTree
-nonemptyRelatedTermsToHtmlTree itemHasADefinition relatedTerms_ =
-    HtmlTree.Node "dd"
-        False
-        [ HtmlTree.Attribute "class" "related-terms" ]
-        (HtmlTree.Leaf
-            (if itemHasADefinition then
-                I18n.seeAlso ++ ": "
-
-             else
-                I18n.see ++ ": "
-            )
-            :: (relatedTerms_
-                    |> List.map relatedTermToHtmlTree
-                    |> List.intersperse (HtmlTree.Leaf ", ")
-               )
-        )
-
-
-hrefFromRelatedTerm : Term -> HtmlTree.Attribute
-hrefFromRelatedTerm term =
-    HtmlTree.Attribute "href" <| fragmentOnly <| Term.id term
 
 
 {-| Set the name and email address of the person who last updated this glossary item.
