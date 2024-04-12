@@ -8,6 +8,7 @@ module Export.Json exposing (download)
 
 import Codec
 import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
+import Data.GlossaryFromDom as GlossaryFromDom
 import Data.GlossaryTitle as GlossaryTitle
 import File.Download as Download
 
@@ -24,6 +25,8 @@ download glossaryForUi =
 
         content : String
         content =
-            Codec.encodeToString 2 GlossaryForUi.codec glossaryForUi
+            glossaryForUi
+                |> GlossaryForUi.toGlossaryFromDom
+                |> Codec.encodeToString 2 GlossaryFromDom.codec
     in
     Download.string filename "application/json" content
