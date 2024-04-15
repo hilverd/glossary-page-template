@@ -48,15 +48,26 @@ changeAndSave editability glossary changelist_ errorMsg successMsg =
 
                 _ ->
                     changelist_
+
+        resultOfApplyingChanges : GlossaryFromDom.ApplyChangesResult
+        resultOfApplyingChanges =
+            glossary
+                |> GlossaryForUi.toGlossaryFromDom
+                |> GlossaryFromDom.applyChanges changelist
     in
-    case GlossaryForUi.applyChanges changelist glossary of
-        GlossaryForUi.ChangesApplied resultOfApplyingChanges ->
+    case resultOfApplyingChanges of
+        GlossaryFromDom.ChangesApplied result ->
+            let
+                result_ : ( Maybe GlossaryItemId, GlossaryForUi )
+                result_ =
+                    Tuple.mapSecond GlossaryForUi.fromGlossaryFromDom result
+            in
             case editability of
                 EditingInMemory ->
-                    ( NotCurrentlySaving, successMsg resultOfApplyingChanges |> Extras.Task.messageToCommand )
+                    ( NotCurrentlySaving, successMsg result_ |> Extras.Task.messageToCommand )
 
                 EditingWithIncludedBackend ->
-                    ( SavingInProgress, patchHtmlFile resultOfApplyingChanges errorMsg successMsg )
+                    ( SavingInProgress, patchHtmlFile result_ errorMsg successMsg )
 
                 EditingWithSeparateBackend { baseUrl, bearerToken } ->
                     ( SavingInProgress
@@ -64,7 +75,7 @@ changeAndSave editability glossary changelist_ errorMsg successMsg =
                         baseUrl
                         bearerToken
                         changelist
-                        resultOfApplyingChanges
+                        result_
                         errorMsg
                         successMsg
                     )
@@ -72,10 +83,10 @@ changeAndSave editability glossary changelist_ errorMsg successMsg =
                 _ ->
                     ( NotCurrentlySaving, Cmd.none )
 
-        GlossaryForUi.VersionsDoNotMatch ->
+        GlossaryFromDom.VersionsDoNotMatch ->
             ( SavingFailed I18n.otherChangesWereMadePleaseReload, Cmd.none )
 
-        GlossaryForUi.LogicalErrorWhenApplyingChanges err ->
+        GlossaryFromDom.LogicalErrorWhenApplyingChanges err ->
             ( SavingNotAttempted err, Cmd.none )
 
 
