@@ -327,7 +327,7 @@ remove itemId glossaryFromDom =
         items_ =
             List.filter (.id >> (/=) itemIdString) glossaryFromDom.items
     in
-    if List.length items_ == List.length glossaryFromDom.items then
+    if List.length items_ < List.length glossaryFromDom.items then
         Ok { glossaryFromDom | items = items_ }
 
     else

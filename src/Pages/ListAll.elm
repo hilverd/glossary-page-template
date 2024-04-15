@@ -45,7 +45,7 @@ import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.Editability as Editability exposing (Editability(..))
 import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
-import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
+import Data.GlossaryForUi as GlossaryForUi exposing (ApplyChangesResult(..), GlossaryForUi)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
@@ -1062,6 +1062,9 @@ viewSettings glossaryForUi model =
                         ]
                     ]
                 , case model.savingSettings of
+                    SavingNotAttempted errorMessage ->
+                        errorDiv <| I18n.failedToSave ++ " — " ++ errorMessage ++ "."
+
                     SavingFailed errorMessage ->
                         errorDiv <| I18n.failedToSave ++ " — " ++ errorMessage ++ "."
 
@@ -1343,6 +1346,14 @@ viewConfirmDeleteModal editability itemToDelete deleting =
                     [ class "mt-5 sm:mt-4 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                     [ text I18n.savingChangesInMemoryMessage ]
             , case deleting of
+                SavingNotAttempted errorMessage ->
+                    div
+                        [ class "flex justify-end mt-2" ]
+                        [ p
+                            [ class "text-red-600 dark:text-red-400" ]
+                            [ text <| I18n.failedToSave ++ " — " ++ errorMessage ++ "." ]
+                        ]
+
                 SavingFailed errorMessage ->
                     div
                         [ class "flex justify-end mt-2" ]

@@ -173,7 +173,7 @@ if (containerElement) {
                 glossaryItems: glossaryItems,
                 usingIncludedBackend: (separateBackendBaseUrl != null) || editorIsRunning,
                 enableHelpForMakingChanges: enableHelpForMakingChanges,
-                enableSavingChangesInMemory: enableSavingChangesInMemory,
+                enableSavingChangesInMemory: true || enableSavingChangesInMemory,
                 enableExportMenu: enableExportMenu,
                 enableOrderItemsButtons: enableOrderItemsButtons,
                 enableLastUpdatedDates: enableLastUpdatedDates,
