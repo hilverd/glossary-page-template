@@ -1,6 +1,7 @@
 module Data.GlossaryFromDom exposing
     ( GlossaryFromDom
     , create, codec
+    , ApplyChangesResult(..), applyChanges
     , toHtmlTree
     )
 
@@ -12,6 +13,11 @@ module Data.GlossaryFromDom exposing
 # Build
 
 @docs create, codec
+
+
+# Apply Changes
+
+@docs ApplyChangesResult, applyChanges
 
 
 # Export
@@ -27,10 +33,12 @@ import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.DescribedTag as DescribedTag
 import Data.DescribedTagFromDom as DescribedTagFromDom exposing (DescribedTagFromDom)
 import Data.GlossaryChange exposing (GlossaryChange(..))
+import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItemFromDom as GlossaryItemFromDom exposing (GlossaryItemFromDom)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryTitle as GlossaryTitle
+import Data.GlossaryVersionNumber as GlossaryVersionNumber
 import Data.TagDescription as TagDescription
 import Data.TagId as TagId
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
@@ -324,6 +332,60 @@ remove itemId glossaryFromDom =
 
     else
         Err <| I18n.thereIsNoItemWithId itemIdString
+
+
+{-| Increment the version number for a GlossaryForUi.
+-}
+incrementVersionNumber : GlossaryFromDom -> GlossaryFromDom
+incrementVersionNumber glossaryFromDom =
+    { glossaryFromDom
+        | versionNumber =
+            glossaryFromDom.versionNumber
+                |> GlossaryVersionNumber.create
+                |> GlossaryVersionNumber.increment
+                |> GlossaryVersionNumber.toInt
+    }
+
+
+{-| The result of applying a sequence of changes to a glossary.
+-}
+type ApplyChangesResult
+    = VersionsDoNotMatch
+    | LogicalErrorWhenApplyingChanges String
+    | ChangesApplied ( Maybe GlossaryItemId, GlossaryFromDom )
+
+
+{-| Apply a sequence of changes to a glossary, returning a new glossary or an error message.
+
+A change can be inserting, updating, or removing an item, or modifying tags.
+
+If the change is successful, the new glossary is returned along with the ID of the
+item that was inserted, if any.
+
+-}
+applyChanges : GlossaryChangelist -> GlossaryFromDom -> ApplyChangesResult
+applyChanges changes glossaryFromDom =
+    let
+        currentVersionNumber =
+            GlossaryVersionNumber.create glossaryFromDom.versionNumber
+    in
+    if GlossaryChangelist.applyToVersionNumber changes /= currentVersionNumber then
+        VersionsDoNotMatch
+
+    else
+        changes
+            |> GlossaryChangelist.body
+            |> List.foldl
+                (\change -> Result.andThen (Tuple.second >> applyChange change))
+                (Ok ( Nothing, incrementVersionNumber glossaryFromDom ))
+            |> (\result ->
+                    case result of
+                        Ok result_ ->
+                            ChangesApplied result_
+
+                        Err err ->
+                            LogicalErrorWhenApplyingChanges err
+               )
 
 
 applyChange : GlossaryChange -> GlossaryFromDom -> Result String ( Maybe GlossaryItemId, GlossaryFromDom )
