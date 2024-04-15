@@ -1,7 +1,6 @@
 module Data.GlossaryForUi exposing
     ( GlossaryForUi
-    , create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setTitle, setAboutSection, setItems, fromGlossaryFromDom
-    , ApplyChangesResult(..), applyChanges
+    , create, fromGlossaryFromDom
     , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, title, aboutSection, items, versionNumber
     , toGlossaryFromDom
     )
@@ -16,12 +15,7 @@ module Data.GlossaryForUi exposing
 
 # Build
 
-@docs create, codec, setEnableLastUpdatedDates, toggleEnableLastUpdatedDates, setEnableExportMenu, toggleEnableExportMenu, setEnableOrderItemsButtons, toggleEnableOrderItemsButtons, setEnableHelpForMakingChanges, setCardWidth, setTitle, setAboutSection, setItems, fromGlossaryFromDom
-
-
-# Apply Changes
-
-@docs ApplyChangesResult, applyChanges
+@docs create, fromGlossaryFromDom
 
 
 # Query
@@ -35,24 +29,20 @@ module Data.GlossaryForUi exposing
 
 -}
 
-import Codec exposing (Codec)
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.GlossaryChange exposing (GlossaryChange(..))
-import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryFromDom exposing (GlossaryFromDom)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
-import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVersionNumber)
 import Data.TagDescription as TagDescription
 import Data.TagId as TagId
-import Data.TagsChanges exposing (TagsChanges)
 import Internationalisation as I18n
 
 
@@ -133,92 +123,6 @@ items (GlossaryForUi glossaryForUi) =
 versionNumber : GlossaryForUi -> GlossaryVersionNumber
 versionNumber (GlossaryForUi glossaryForUi) =
     glossaryForUi.versionNumber
-
-
-{-| Increment the version number for a GlossaryForUi.
--}
-incrementVersionNumber : GlossaryForUi -> GlossaryForUi
-incrementVersionNumber (GlossaryForUi glossaryForUi) =
-    GlossaryForUi { glossaryForUi | versionNumber = GlossaryVersionNumber.increment glossaryForUi.versionNumber }
-
-
-{-| Enable or disable showing of last updated dates for items.
--}
-setEnableLastUpdatedDates : Bool -> GlossaryForUi -> GlossaryForUi
-setEnableLastUpdatedDates enable (GlossaryForUi glossaryForUi) =
-    GlossaryForUi { glossaryForUi | enableLastUpdatedDates = enable }
-
-
-{-| Toggle showing of last updated dates for items.
--}
-toggleEnableLastUpdatedDates : GlossaryForUi -> GlossaryForUi
-toggleEnableLastUpdatedDates (GlossaryForUi glossaryForUi) =
-    GlossaryForUi { glossaryForUi | enableLastUpdatedDates = not glossaryForUi.enableLastUpdatedDates }
-
-
-{-| Enable or disable showing of the export menu.
--}
-setEnableExportMenu : Bool -> GlossaryForUi -> GlossaryForUi
-setEnableExportMenu enable (GlossaryForUi glossaryForUi) =
-    GlossaryForUi { glossaryForUi | enableExportMenu = enable }
-
-
-{-| Toggle showing of the export menu.
--}
-toggleEnableExportMenu : GlossaryForUi -> GlossaryForUi
-toggleEnableExportMenu (GlossaryForUi glossaryForUi) =
-    GlossaryForUi { glossaryForUi | enableExportMenu = not glossaryForUi.enableExportMenu }
-
-
-{-| Enable or disable showing of buttons for ordering items.
--}
-setEnableOrderItemsButtons : Bool -> GlossaryForUi -> GlossaryForUi
-setEnableOrderItemsButtons enable (GlossaryForUi glossaryForUi) =
-    GlossaryForUi { glossaryForUi | enableOrderItemsButtons = enable }
-
-
-{-| Toggle showing of buttons for ordering items.
--}
-toggleEnableOrderItemsButtons : GlossaryForUi -> GlossaryForUi
-toggleEnableOrderItemsButtons glossaryForUi =
-    case glossaryForUi of
-        GlossaryForUi glossary_ ->
-            GlossaryForUi { glossary_ | enableOrderItemsButtons = not glossary_.enableOrderItemsButtons }
-
-
-{-| Enable or disable showing help for making changes.
--}
-setEnableHelpForMakingChanges : Bool -> GlossaryForUi -> GlossaryForUi
-setEnableHelpForMakingChanges enable (GlossaryForUi glossary) =
-    GlossaryForUi { glossary | enableHelpForMakingChanges = enable }
-
-
-{-| Set the card width configuration for a GlossaryForUi.
--}
-setCardWidth : CardWidth -> GlossaryForUi -> GlossaryForUi
-setCardWidth cardWidth_ (GlossaryForUi glossaryForUi) =
-    GlossaryForUi { glossaryForUi | cardWidth = cardWidth_ }
-
-
-{-| Set the title for a GlossaryForUi.
--}
-setTitle : GlossaryTitle -> GlossaryForUi -> GlossaryForUi
-setTitle title_ (GlossaryForUi glossaryForUi) =
-    GlossaryForUi { glossaryForUi | title = title_ }
-
-
-{-| Set the about section for a GlossaryForUi.
--}
-setAboutSection : AboutSection -> GlossaryForUi -> GlossaryForUi
-setAboutSection aboutSection_ (GlossaryForUi glossaryForUi) =
-    GlossaryForUi { glossaryForUi | aboutSection = aboutSection_ }
-
-
-{-| Set the items for a GlossaryForUi.
--}
-setItems : GlossaryItemsForUi -> GlossaryForUi -> GlossaryForUi
-setItems items_ (GlossaryForUi glossaryForUi) =
-    GlossaryForUi { glossaryForUi | items = items_ }
 
 
 {-| Build a GlossaryForUi from a GlossaryFromDom.
@@ -315,160 +219,6 @@ createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsBut
         , items = Result.withDefault GlossaryItemsForUi.empty items_
         , versionNumber = Maybe.withDefault GlossaryVersionNumber.initial versionNumber_
         }
-
-
-{-| An encoder/decoder for a GlossaryForUi.
--}
-codec : Codec GlossaryForUi
-codec =
-    Codec.object createWithDefaults
-        |> Codec.optionalField "enableLastUpdatedDates" (enableLastUpdatedDates >> Just) Codec.bool
-        |> Codec.optionalField "enableExportMenu" (enableExportMenu >> Just) Codec.bool
-        |> Codec.optionalField "enableOrderItemsButtons" (enableOrderItemsButtons >> Just) Codec.bool
-        |> Codec.optionalField "enableHelpForMakingChanges" (enableHelpForMakingChanges >> Just) Codec.bool
-        |> Codec.optionalField "cardWidth" (cardWidth >> Just) CardWidth.codec
-        |> Codec.optionalField "titleString" (title >> Just) GlossaryTitle.codec
-        |> Codec.optionalField "aboutParagraph" (aboutSection >> .paragraph >> Just) (Codec.map AboutParagraph.fromMarkdown AboutParagraph.raw Codec.string)
-        |> Codec.optionalField "aboutLinks" (aboutSection >> .links >> Just) (Codec.list AboutLink.codec)
-        |> Codec.optionalField "tagsWithDescriptions"
-            (items >> GlossaryItemsForUi.describedTags >> Just)
-            (Codec.list
-                (Codec.object
-                    (\tagIdString tagString descriptionString ->
-                        DescribedTag.create
-                            (TagId.create tagIdString)
-                            (Tag.fromMarkdown tagString)
-                            (TagDescription.fromMarkdown descriptionString)
-                    )
-                    |> Codec.field "id" (DescribedTag.id >> TagId.toString) Codec.string
-                    |> Codec.field "tag" (DescribedTag.tag >> Tag.raw) Codec.string
-                    |> Codec.field "description" (DescribedTag.description >> TagDescription.raw) Codec.string
-                    |> Codec.buildObject
-                )
-            )
-        |> Codec.field "glossaryItems"
-            (items >> GlossaryItemsForUi.orderedAlphabetically Nothing >> List.map Tuple.second)
-            (Codec.list GlossaryItemForUi.codec)
-        |> Codec.optionalNullableField "versionNumber" (versionNumber >> Just) GlossaryVersionNumber.codec
-        |> Codec.buildObject
-
-
-{-| The result of applying a sequence of changes to a glossary.
--}
-type ApplyChangesResult
-    = VersionsDoNotMatch
-    | LogicalErrorWhenApplyingChanges String
-    | ChangesApplied ( Maybe GlossaryItemId, GlossaryForUi )
-
-
-{-| Apply a sequence of changes to a glossary, returning a new glossary or an error message.
-
-A change can be inserting, updating, or removing an item, or modifying tags.
-
-If the change is successful, the new glossary is returned along with the ID of the
-item that was inserted, if any.
-
--}
-applyChanges : GlossaryChangelist -> GlossaryForUi -> ApplyChangesResult
-applyChanges changes glossaryForUi =
-    if GlossaryChangelist.applyToVersionNumber changes /= versionNumber glossaryForUi then
-        VersionsDoNotMatch
-
-    else
-        changes
-            |> GlossaryChangelist.body
-            |> List.foldl
-                (\change -> Result.andThen (Tuple.second >> applyChange change))
-                (Ok ( Nothing, incrementVersionNumber glossaryForUi ))
-            |> (\result ->
-                    case result of
-                        Ok result_ ->
-                            ChangesApplied result_
-
-                        Err err ->
-                            LogicalErrorWhenApplyingChanges err
-               )
-
-
-applyChange : GlossaryChange -> GlossaryForUi -> Result String ( Maybe GlossaryItemId, GlossaryForUi )
-applyChange change glossaryForUi =
-    case change of
-        ToggleEnableLastUpdatedDates ->
-            Ok <| ( Nothing, toggleEnableLastUpdatedDates glossaryForUi )
-
-        ToggleEnableExportMenu ->
-            Ok <| ( Nothing, toggleEnableExportMenu glossaryForUi )
-
-        ToggleEnableOrderItemsButtons ->
-            Ok ( Nothing, toggleEnableOrderItemsButtons glossaryForUi )
-
-        SetTitle title_ ->
-            Ok ( Nothing, setTitle title_ glossaryForUi )
-
-        SetAboutSection aboutSection_ ->
-            Ok ( Nothing, setAboutSection aboutSection_ glossaryForUi )
-
-        SetCardWidth cardWidth_ ->
-            Ok ( Nothing, setCardWidth cardWidth_ glossaryForUi )
-
-        ChangeTags tagsChanges ->
-            applyTagsChanges tagsChanges glossaryForUi
-                |> Result.map (\newGlossary -> ( Nothing, newGlossary ))
-
-        Insert item ->
-            insert (GlossaryItemForUi.fromGlossaryItemFromDom item) glossaryForUi
-                |> Result.map (\( newItemId, newGlossary ) -> ( Just newItemId, newGlossary ))
-
-        Update item ->
-            let
-                itemId : GlossaryItemId
-                itemId =
-                    GlossaryItemId.create item.id
-            in
-            update itemId (GlossaryItemForUi.fromGlossaryItemFromDom item) glossaryForUi
-                |> Result.map (\newGlossary -> ( Just itemId, newGlossary ))
-
-        Remove itemId ->
-            remove itemId glossaryForUi
-                |> Result.map (\newGlossary -> ( Nothing, newGlossary ))
-
-
-applyTagsChanges : TagsChanges -> GlossaryForUi -> Result String GlossaryForUi
-applyTagsChanges tagsChanges glossaryForUi =
-    glossaryForUi
-        |> items
-        |> GlossaryItemsForUi.applyTagsChanges tagsChanges
-        |> Result.map (\items_ -> setItems items_ glossaryForUi)
-
-
-{-| Insert an item.
--}
-insert : GlossaryItemForUi -> GlossaryForUi -> Result String ( GlossaryItemId, GlossaryForUi )
-insert item glossaryForUi =
-    glossaryForUi
-        |> items
-        |> GlossaryItemsForUi.insert item
-        |> Result.map (\( newItemId, items_ ) -> ( newItemId, setItems items_ glossaryForUi ))
-
-
-{-| Update an item. Do nothing if there is no item with the given ID.
--}
-update : GlossaryItemId -> GlossaryItemForUi -> GlossaryForUi -> Result String GlossaryForUi
-update itemId item glossaryForUi =
-    glossaryForUi
-        |> items
-        |> GlossaryItemsForUi.update itemId item
-        |> Result.map (\items_ -> setItems items_ glossaryForUi)
-
-
-{-| Remove the item associated with an ID. Do nothing if the ID is not found.
--}
-remove : GlossaryItemId -> GlossaryForUi -> Result String GlossaryForUi
-remove itemId glossaryForUi =
-    glossaryForUi
-        |> items
-        |> GlossaryItemsForUi.remove itemId
-        |> Result.map (\items_ -> setItems items_ glossaryForUi)
 
 
 {-| Convert this glossary to a GlossaryFromDom.

@@ -45,7 +45,7 @@ import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.Editability as Editability exposing (Editability(..))
 import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
-import Data.GlossaryForUi as GlossaryForUi exposing (ApplyChangesResult(..), GlossaryForUi)
+import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
