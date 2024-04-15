@@ -46,7 +46,7 @@ import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelis
 import Data.GlossaryFromDom exposing (GlossaryFromDom)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
-import Data.GlossaryItemId exposing (GlossaryItemId)
+import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVersionNumber)
@@ -416,16 +416,16 @@ applyChange change glossaryForUi =
                 |> Result.map (\newGlossary -> ( Nothing, newGlossary ))
 
         Insert item ->
-            insert item glossaryForUi
+            insert (GlossaryItemForUi.fromGlossaryItemFromDom item) glossaryForUi
                 |> Result.map (\( newItemId, newGlossary ) -> ( Just newItemId, newGlossary ))
 
         Update item ->
             let
                 itemId : GlossaryItemId
                 itemId =
-                    GlossaryItemForUi.id item
+                    GlossaryItemId.create item.id
             in
-            update itemId item glossaryForUi
+            update itemId (GlossaryItemForUi.fromGlossaryItemFromDom item) glossaryForUi
                 |> Result.map (\newGlossary -> ( Just itemId, newGlossary ))
 
         Remove itemId ->

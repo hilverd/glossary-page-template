@@ -21,9 +21,19 @@ module Data.GlossaryFromDom exposing
 -}
 
 import Codec exposing (Codec)
+import Data.AboutLink as AboutLink
+import Data.AboutParagraph as AboutParagraph
 import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.DescribedTag as DescribedTag
 import Data.DescribedTagFromDom as DescribedTagFromDom exposing (DescribedTagFromDom)
+import Data.GlossaryChange exposing (GlossaryChange(..))
+import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItemFromDom as GlossaryItemFromDom exposing (GlossaryItemFromDom)
+import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
+import Data.GlossaryTitle as GlossaryTitle
+import Data.TagDescription as TagDescription
+import Data.TagId as TagId
+import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Internationalisation as I18n
@@ -103,6 +113,276 @@ codec =
         |> Codec.field "glossaryItems" .items (Codec.list GlossaryItemFromDom.codec)
         |> Codec.field "versionNumber" .versionNumber Codec.int
         |> Codec.buildObject
+
+
+applyTagsChanges : TagsChanges -> GlossaryFromDom -> Result String GlossaryFromDom
+applyTagsChanges tagsChanges glossaryFromDom =
+    tagsChanges
+        |> TagsChanges.toList
+        |> List.foldl
+            (\tagsChange result ->
+                case ( tagsChange, result ) of
+                    ( TagsChanges.Insertion describedTag, Ok glossaryFromDom_ ) ->
+                        let
+                            id : String
+                            id =
+                                describedTag |> DescribedTag.id |> TagId.toString
+
+                            tag : String
+                            tag =
+                                describedTag |> DescribedTag.tag |> Tag.raw
+
+                            description : String
+                            description =
+                                describedTag |> DescribedTag.description |> TagDescription.raw
+
+                            describedTagFromDom : DescribedTagFromDom
+                            describedTagFromDom =
+                                { id = id
+                                , tag = tag
+                                , description = description
+                                }
+                        in
+                        if List.any (.id >> (==) id) glossaryFromDom_.tags then
+                            Err <| I18n.thereIsAlreadyATagWithId id
+
+                        else if List.any (.tag >> (==) tag) glossaryFromDom_.tags then
+                            Err <| I18n.thereIsAlreadyATag tag
+
+                        else
+                            let
+                                tags_ : List DescribedTagFromDom
+                                tags_ =
+                                    describedTagFromDom :: glossaryFromDom_.tags
+                            in
+                            Ok { glossaryFromDom_ | tags = tags_ }
+
+                    ( TagsChanges.Update tagId describedTag, Ok glossaryFromDom_ ) ->
+                        let
+                            id : String
+                            id =
+                                tagId |> TagId.toString
+
+                            updatedTag : String
+                            updatedTag =
+                                describedTag |> DescribedTag.tag |> Tag.raw
+
+                            updatedDescription : String
+                            updatedDescription =
+                                describedTag |> DescribedTag.description |> TagDescription.raw
+                        in
+                        if
+                            List.any
+                                (\existingTagFromDom ->
+                                    existingTagFromDom.id == id && existingTagFromDom.tag == updatedTag
+                                )
+                                glossaryFromDom_.tags
+                        then
+                            Err <| I18n.thereIsAlreadyATag updatedTag
+
+                        else if List.all (.id >> (/=) id) glossaryFromDom_.tags then
+                            Err <| I18n.thereIsNoTagWithId id
+
+                        else
+                            glossaryFromDom_.tags
+                                |> List.filter (.id >> (==) id)
+                                |> List.head
+                                |> Maybe.map
+                                    (\oldDescribedTagFromDom ->
+                                        let
+                                            items_ : List GlossaryItemFromDom
+                                            items_ =
+                                                glossaryFromDom.items
+                                                    |> List.map
+                                                        (\glossaryItemFromDom ->
+                                                            let
+                                                                disambiguationTag_ : Maybe String
+                                                                disambiguationTag_ =
+                                                                    if glossaryItemFromDom.disambiguationTag == Just oldDescribedTagFromDom.tag then
+                                                                        Just updatedTag
+
+                                                                    else
+                                                                        glossaryItemFromDom.disambiguationTag
+
+                                                                normalTags_ =
+                                                                    glossaryItemFromDom.normalTags
+                                                                        |> List.map
+                                                                            (\normalTag ->
+                                                                                if normalTag == oldDescribedTagFromDom.tag then
+                                                                                    updatedTag
+
+                                                                                else
+                                                                                    normalTag
+                                                                            )
+                                                            in
+                                                            { glossaryItemFromDom
+                                                                | disambiguationTag = disambiguationTag_
+                                                                , normalTags = normalTags_
+                                                            }
+                                                        )
+
+                                            tags_ =
+                                                glossaryFromDom_.tags
+                                                    |> List.map
+                                                        (\existingTagFromDom ->
+                                                            if existingTagFromDom.id == id then
+                                                                { existingTagFromDom
+                                                                    | tag = updatedTag
+                                                                    , description = updatedDescription
+                                                                }
+
+                                                            else
+                                                                existingTagFromDom
+                                                        )
+                                        in
+                                        Ok
+                                            { glossaryFromDom_
+                                                | tags = tags_
+                                                , items = items_
+                                            }
+                                    )
+                                |> Maybe.withDefault
+                                    (Err <| I18n.thereIsNoTagWithId id)
+
+                    ( TagsChanges.Removal tagId, Ok glossaryFromDom_ ) ->
+                        let
+                            id : String
+                            id =
+                                tagId |> TagId.toString
+                        in
+                        if List.all (.id >> (/=) id) glossaryFromDom_.tags then
+                            Err <| I18n.thereIsNoTagWithId id
+
+                        else
+                            let
+                                tags_ =
+                                    List.filter (.id >> (/=) id) glossaryFromDom_.tags
+                            in
+                            Ok { glossaryFromDom_ | tags = tags_ }
+
+                    ( _, Err err ) ->
+                        Err err
+            )
+            (Ok glossaryFromDom)
+
+
+{-| Insert an item.
+-}
+insert : GlossaryItemFromDom -> GlossaryFromDom -> Result String ( GlossaryItemId, GlossaryFromDom )
+insert glossaryItemFromDom glossaryFromDom =
+    if List.any (.id >> (==) glossaryItemFromDom.id) glossaryFromDom.items then
+        Err <| I18n.thereIsAlreadyAnItemWithId glossaryItemFromDom.id
+
+    else
+        let
+            fragmentIdentifierForDisambiguatedPreferredTerm : String
+            fragmentIdentifierForDisambiguatedPreferredTerm =
+                GlossaryItemFromDom.disambiguatedPreferredTermIdString glossaryItemFromDom
+        in
+        if
+            List.any
+                (\glossaryItemFromDom_ ->
+                    GlossaryItemFromDom.disambiguatedPreferredTermIdString glossaryItemFromDom_
+                        == fragmentIdentifierForDisambiguatedPreferredTerm
+                )
+                glossaryFromDom.items
+        then
+            Err <| I18n.thereIsAlreadyAnItemWithDisambiguatedPreferredTermId fragmentIdentifierForDisambiguatedPreferredTerm
+
+        else
+            Ok
+                ( glossaryItemFromDom.id |> GlossaryItemId.create
+                , { glossaryFromDom
+                    | items = glossaryItemFromDom :: glossaryFromDom.items
+                  }
+                )
+
+
+{-| Update an item.
+-}
+update : GlossaryItemId -> GlossaryItemFromDom -> GlossaryFromDom -> Result String GlossaryFromDom
+update itemId glossaryItemFromDom glossaryFromDom =
+    glossaryFromDom
+        |> remove itemId
+        |> Result.andThen (insert glossaryItemFromDom)
+        |> Result.map Tuple.second
+
+
+{-| Remove the item associated with an ID.
+-}
+remove : GlossaryItemId -> GlossaryFromDom -> Result String GlossaryFromDom
+remove itemId glossaryFromDom =
+    let
+        itemIdString =
+            GlossaryItemId.toString itemId
+
+        items_ =
+            List.filter (.id >> (/=) itemIdString) glossaryFromDom.items
+    in
+    if List.length items_ == List.length glossaryFromDom.items then
+        Ok { glossaryFromDom | items = items_ }
+
+    else
+        Err <| I18n.thereIsNoItemWithId itemIdString
+
+
+applyChange : GlossaryChange -> GlossaryFromDom -> Result String ( Maybe GlossaryItemId, GlossaryFromDom )
+applyChange change glossaryFromDom =
+    case change of
+        ToggleEnableLastUpdatedDates ->
+            Ok <|
+                ( Nothing
+                , { glossaryFromDom | enableLastUpdatedDates = not glossaryFromDom.enableLastUpdatedDates }
+                )
+
+        ToggleEnableExportMenu ->
+            Ok <| ( Nothing, { glossaryFromDom | enableExportMenu = not glossaryFromDom.enableExportMenu } )
+
+        ToggleEnableOrderItemsButtons ->
+            Ok ( Nothing, { glossaryFromDom | enableOrderItemsButtons = not glossaryFromDom.enableOrderItemsButtons } )
+
+        SetTitle title_ ->
+            Ok ( Nothing, { glossaryFromDom | title = GlossaryTitle.raw title_ } )
+
+        SetAboutSection aboutSection_ ->
+            Ok
+                ( Nothing
+                , { glossaryFromDom
+                    | aboutParagraph = aboutSection_.paragraph |> AboutParagraph.raw
+                    , aboutLinks =
+                        aboutSection_.links
+                            |> List.map
+                                (\aboutLink ->
+                                    { href = AboutLink.href aboutLink
+                                    , body = AboutLink.body aboutLink
+                                    }
+                                )
+                  }
+                )
+
+        SetCardWidth cardWidth_ ->
+            Ok ( Nothing, { glossaryFromDom | cardWidth = cardWidth_ } )
+
+        ChangeTags tagsChanges ->
+            applyTagsChanges tagsChanges glossaryFromDom
+                |> Result.map (\newGlossary -> ( Nothing, newGlossary ))
+
+        Insert item ->
+            insert item glossaryFromDom
+                |> Result.map (\( newItemId, newGlossary ) -> ( Just newItemId, newGlossary ))
+
+        Update item ->
+            let
+                itemId : GlossaryItemId
+                itemId =
+                    GlossaryItemId.create item.id
+            in
+            update itemId item glossaryFromDom
+                |> Result.map (\newGlossary -> ( Just itemId, newGlossary ))
+
+        Remove itemId ->
+            remove itemId glossaryFromDom
+                |> Result.map (\newGlossary -> ( Nothing, newGlossary ))
 
 
 {-| Represent this GlossaryFromDom as an HTML tree, ready for writing back to the glossary's HTML file.

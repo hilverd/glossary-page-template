@@ -388,12 +388,12 @@ update msg model =
                                     Just _ ->
                                         GlossaryChangelist.create
                                             (Glossary.versionNumber glossaryForUi)
-                                            [ GlossaryChange.Update newOrUpdatedGlossaryItem ]
+                                            [ GlossaryChange.Update (GlossaryItemForUi.toGlossaryItemFromDom newOrUpdatedGlossaryItem) ]
 
                                     Nothing ->
                                         GlossaryChangelist.create
                                             (Glossary.versionNumber glossaryForUi)
-                                            [ GlossaryChange.Insert newOrUpdatedGlossaryItem ]
+                                            [ GlossaryChange.Insert (GlossaryItemForUi.toGlossaryItemFromDom newOrUpdatedGlossaryItem) ]
 
                             ( saving, cmd ) =
                                 Save.changeAndSave model.common.editability

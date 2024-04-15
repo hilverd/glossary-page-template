@@ -12,7 +12,7 @@ module Data.GlossaryChange exposing (GlossaryChange(..), codec, setLastUpdatedBy
 import Codec exposing (Codec)
 import Data.AboutSection as AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
-import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
+import Data.GlossaryItemFromDom as GlossaryItemFromDom exposing (GlossaryItemFromDom)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
@@ -28,8 +28,8 @@ type GlossaryChange
     | SetAboutSection AboutSection
     | SetCardWidth CardWidth
     | ChangeTags TagsChanges
-    | Insert GlossaryItemForUi
-    | Update GlossaryItemForUi
+    | Insert GlossaryItemFromDom
+    | Update GlossaryItemFromDom
     | Remove GlossaryItemId
 
 
@@ -77,8 +77,8 @@ codec =
         |> Codec.variant1 "SetAboutSection" SetAboutSection AboutSection.codec
         |> Codec.variant1 "SetCardWidth" SetCardWidth CardWidth.codec
         |> Codec.variant1 "ChangeTags" ChangeTags TagsChanges.codec
-        |> Codec.variant1 "Insert" Insert GlossaryItemForUi.codec
-        |> Codec.variant1 "Update" Update GlossaryItemForUi.codec
+        |> Codec.variant1 "Insert" Insert GlossaryItemFromDom.codec
+        |> Codec.variant1 "Update" Update GlossaryItemFromDom.codec
         |> Codec.variant1 "Remove" Remove GlossaryItemId.codec
         |> Codec.buildCustom
 
@@ -88,14 +88,12 @@ codec =
 setLastUpdatedBy : { name : String, emailAddress : String } -> GlossaryChange -> GlossaryChange
 setLastUpdatedBy { name, emailAddress } change =
     case change of
-        Insert itemForUi ->
-            itemForUi
-                |> GlossaryItemForUi.setLastUpdatedBy { name = name, emailAddress = emailAddress }
+        Insert itemFromDom ->
+            { itemFromDom | lastUpdatedByName = Just name, lastUpdatedByEmailAddress = Just emailAddress }
                 |> Insert
 
-        Update itemForUi ->
-            itemForUi
-                |> GlossaryItemForUi.setLastUpdatedBy { name = name, emailAddress = emailAddress }
+        Update itemFromDom ->
+            { itemFromDom | lastUpdatedByName = Just name, lastUpdatedByEmailAddress = Just emailAddress }
                 |> Update
 
         _ ->

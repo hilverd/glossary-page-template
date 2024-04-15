@@ -1,6 +1,7 @@
 module Data.GlossaryItemFromDom exposing
     ( GlossaryItemFromDom
     , create, codec
+    , disambiguatedPreferredTermIdString
     , toHtmlTree
     )
 
@@ -12,6 +13,11 @@ module Data.GlossaryItemFromDom exposing
 # Build
 
 @docs create, codec
+
+
+# Query
+
+@docs disambiguatedPreferredTermIdString
 
 
 # Export
