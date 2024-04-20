@@ -34,6 +34,8 @@ create isAbbreviation_ body_ =
     }
 
 
+{-| Return the fragment identifier for this term.
+-}
 id : TermFromDom -> String
 id termFromDom =
     termFromDom.body |> String.replace " " "_"

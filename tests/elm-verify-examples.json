@@ -16,6 +16,7 @@
         "Data.GlossaryItem.RawTerm",
         "Data.GlossaryItem.Tag",
         "Data.GlossaryItem.Term",
+        "Data.GlossaryItem.TermFromDom",
         "Data.GlossaryItem",
         "Data.GlossaryItemForUi",
         "Data.GlossaryItemFromDom",
