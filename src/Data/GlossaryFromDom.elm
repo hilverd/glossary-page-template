@@ -42,6 +42,7 @@ import Data.GlossaryVersionNumber as GlossaryVersionNumber
 import Data.TagDescription as TagDescription
 import Data.TagId as TagId
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
+import Dict exposing (Dict)
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Internationalisation as I18n
@@ -125,153 +126,140 @@ codec =
 
 applyTagsChanges : TagsChanges -> GlossaryFromDom -> Result String GlossaryFromDom
 applyTagsChanges tagsChanges glossaryFromDom =
-    tagsChanges
-        |> TagsChanges.toList
-        |> List.foldl
-            (\tagsChange result ->
-                case ( tagsChange, result ) of
-                    ( TagsChanges.Insertion describedTag, Ok glossaryFromDom_ ) ->
-                        let
-                            id : String
-                            id =
-                                describedTag |> DescribedTag.id |> TagId.toString
+    let
+        originalTagToTagId : Dict String String
+        originalTagToTagId =
+            glossaryFromDom.tags
+                |> List.foldl
+                    (\describedTag -> Dict.insert describedTag.tag describedTag.id)
+                    Dict.empty
 
-                            tag : String
-                            tag =
-                                describedTag |> DescribedTag.tag |> Tag.raw
+        tagIdToDescribedTagFromDom0 : Dict String DescribedTagFromDom
+        tagIdToDescribedTagFromDom0 =
+            List.foldl
+                (\describedTag result ->
+                    Dict.insert describedTag.id describedTag result
+                )
+                Dict.empty
+                glossaryFromDom.tags
 
-                            description : String
-                            description =
-                                describedTag |> DescribedTag.description |> TagDescription.raw
+        tagIdToDescribedTagFromDom1 : Result String (Dict String DescribedTagFromDom)
+        tagIdToDescribedTagFromDom1 =
+            tagsChanges
+                |> TagsChanges.toList
+                |> List.foldl
+                    (\tagsChange result ->
+                        case ( tagsChange, result ) of
+                            ( TagsChanges.Insertion describedTag, Ok tagIdToDescribedTagFromDom ) ->
+                                let
+                                    id : String
+                                    id =
+                                        describedTag |> DescribedTag.id |> TagId.toString
 
-                            describedTagFromDom : DescribedTagFromDom
-                            describedTagFromDom =
-                                { id = id
-                                , tag = tag
-                                , description = description
-                                }
-                        in
-                        if List.any (.id >> (==) id) glossaryFromDom_.tags then
-                            Err <| I18n.thereIsAlreadyATagWithId id
+                                    tag : String
+                                    tag =
+                                        describedTag |> DescribedTag.tag |> Tag.raw
 
-                        else if List.any (.tag >> (==) tag) glossaryFromDom_.tags then
-                            Err <| I18n.thereIsAlreadyATag tag
+                                    describedTagFromDom : DescribedTagFromDom
+                                    describedTagFromDom =
+                                        { id = id
+                                        , tag = tag
+                                        , description = describedTag |> DescribedTag.description |> TagDescription.raw
+                                        }
+                                in
+                                if Dict.member id tagIdToDescribedTagFromDom then
+                                    Err <| I18n.thereIsAlreadyATagWithId id
 
-                        else
-                            let
-                                tags_ : List DescribedTagFromDom
-                                tags_ =
-                                    describedTagFromDom :: glossaryFromDom_.tags
-                            in
-                            Ok { glossaryFromDom_ | tags = tags_ }
+                                else if tagIdToDescribedTagFromDom |> Dict.toList |> List.map Tuple.second |> List.any (.tag >> (==) tag) then
+                                    Err <| I18n.thereIsAlreadyATag tag
 
-                    ( TagsChanges.Update tagId describedTag, Ok glossaryFromDom_ ) ->
-                        let
-                            id : String
-                            id =
-                                tagId |> TagId.toString
+                                else
+                                    Ok <| Dict.insert id describedTagFromDom tagIdToDescribedTagFromDom
 
-                            updatedTag : String
-                            updatedTag =
-                                describedTag |> DescribedTag.tag |> Tag.raw
+                            ( TagsChanges.Update tagId describedTag, Ok tagIdToDescribedTagFromDom ) ->
+                                let
+                                    id : String
+                                    id =
+                                        tagId |> TagId.toString
 
-                            updatedDescription : String
-                            updatedDescription =
-                                describedTag |> DescribedTag.description |> TagDescription.raw
-                        in
-                        if
-                            List.any
-                                (\existingTagFromDom ->
-                                    existingTagFromDom.id == id && existingTagFromDom.tag == updatedTag
+                                    updatedTag : String
+                                    updatedTag =
+                                        describedTag |> DescribedTag.tag |> Tag.raw
+
+                                    describedTagFromDom : DescribedTagFromDom
+                                    describedTagFromDom =
+                                        { id = id
+                                        , tag = updatedTag
+                                        , description = describedTag |> DescribedTag.description |> TagDescription.raw
+                                        }
+                                in
+                                if
+                                    tagIdToDescribedTagFromDom
+                                        |> Dict.toList
+                                        |> List.map Tuple.second
+                                        |> List.any
+                                            (\existingDescribedTagFromDom ->
+                                                (existingDescribedTagFromDom.id == id) && (existingDescribedTagFromDom.tag == updatedTag)
+                                            )
+                                then
+                                    Err <| I18n.thereIsAlreadyATag updatedTag
+
+                                else if tagIdToDescribedTagFromDom |> Dict.keys |> List.all ((/=) id) then
+                                    Err <| I18n.thereIsNoTagWithId id
+
+                                else
+                                    Ok (Dict.update id (always <| Just describedTagFromDom) tagIdToDescribedTagFromDom)
+
+                            ( TagsChanges.Removal tagId, Ok tagIdToDescribedTagFromDom ) ->
+                                let
+                                    id : String
+                                    id =
+                                        tagId |> TagId.toString
+                                in
+                                if tagIdToDescribedTagFromDom |> Dict.keys |> List.all ((/=) id) then
+                                    Err <| I18n.thereIsNoTagWithId id
+
+                                else
+                                    Ok <| Dict.remove id tagIdToDescribedTagFromDom
+
+                            ( _, Err _ ) ->
+                                result
+                    )
+                    (Ok tagIdToDescribedTagFromDom0)
+
+        currentTagForPreviousTag : String -> String
+        currentTagForPreviousTag previousTag =
+            tagIdToDescribedTagFromDom1
+                |> Result.map
+                    (\tagIdToDescribedTagFromDom ->
+                        Dict.get previousTag originalTagToTagId
+                            |> Maybe.andThen (\originalTagId -> Dict.get originalTagId tagIdToDescribedTagFromDom)
+                            |> Maybe.map .tag
+                            |> Maybe.withDefault previousTag
+                    )
+                |> Result.withDefault previousTag
+    in
+    tagIdToDescribedTagFromDom1
+        |> Result.map
+            (\tagIdToDescribedTagFromDom ->
+                let
+                    items1 : List GlossaryItemFromDom
+                    items1 =
+                        glossaryFromDom.items
+                            |> List.map
+                                (\item ->
+                                    { item
+                                        | disambiguationTag = item.disambiguationTag |> Maybe.map currentTagForPreviousTag
+                                        , normalTags = item.normalTags |> List.map currentTagForPreviousTag
+                                    }
                                 )
-                                glossaryFromDom_.tags
-                        then
-                            Err <| I18n.thereIsAlreadyATag updatedTag
 
-                        else if List.all (.id >> (/=) id) glossaryFromDom_.tags then
-                            Err <| I18n.thereIsNoTagWithId id
-
-                        else
-                            glossaryFromDom_.tags
-                                |> List.filter (.id >> (==) id)
-                                |> List.head
-                                |> Maybe.map
-                                    (\oldDescribedTagFromDom ->
-                                        let
-                                            items_ : List GlossaryItemFromDom
-                                            items_ =
-                                                glossaryFromDom.items
-                                                    |> List.map
-                                                        (\glossaryItemFromDom ->
-                                                            let
-                                                                disambiguationTag_ : Maybe String
-                                                                disambiguationTag_ =
-                                                                    if glossaryItemFromDom.disambiguationTag == Just oldDescribedTagFromDom.tag then
-                                                                        Just updatedTag
-
-                                                                    else
-                                                                        glossaryItemFromDom.disambiguationTag
-
-                                                                normalTags_ =
-                                                                    glossaryItemFromDom.normalTags
-                                                                        |> List.map
-                                                                            (\normalTag ->
-                                                                                if normalTag == oldDescribedTagFromDom.tag then
-                                                                                    updatedTag
-
-                                                                                else
-                                                                                    normalTag
-                                                                            )
-                                                            in
-                                                            { glossaryItemFromDom
-                                                                | disambiguationTag = disambiguationTag_
-                                                                , normalTags = normalTags_
-                                                            }
-                                                        )
-
-                                            tags_ =
-                                                glossaryFromDom_.tags
-                                                    |> List.map
-                                                        (\existingTagFromDom ->
-                                                            if existingTagFromDom.id == id then
-                                                                { existingTagFromDom
-                                                                    | tag = updatedTag
-                                                                    , description = updatedDescription
-                                                                }
-
-                                                            else
-                                                                existingTagFromDom
-                                                        )
-                                        in
-                                        Ok
-                                            { glossaryFromDom_
-                                                | tags = tags_
-                                                , items = items_
-                                            }
-                                    )
-                                |> Maybe.withDefault
-                                    (Err <| I18n.thereIsNoTagWithId id)
-
-                    ( TagsChanges.Removal tagId, Ok glossaryFromDom_ ) ->
-                        let
-                            id : String
-                            id =
-                                tagId |> TagId.toString
-                        in
-                        if List.all (.id >> (/=) id) glossaryFromDom_.tags then
-                            Err <| I18n.thereIsNoTagWithId id
-
-                        else
-                            let
-                                tags_ =
-                                    List.filter (.id >> (/=) id) glossaryFromDom_.tags
-                            in
-                            Ok { glossaryFromDom_ | tags = tags_ }
-
-                    ( _, Err err ) ->
-                        Err err
+                    tags1 : List DescribedTagFromDom
+                    tags1 =
+                        Dict.values tagIdToDescribedTagFromDom
+                in
+                { glossaryFromDom | tags = tags1, items = items1 }
             )
-            (Ok glossaryFromDom)
 
 
 {-| Insert an item.

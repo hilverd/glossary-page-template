@@ -70,10 +70,65 @@ suite =
                                 ( Nothing
                                 , { glossaryFromDom
                                     | tags =
-                                        [ houseworkDescribedTagFromDom
-                                        , computerScienceDescribedTagFromDom
+                                        [ computerScienceDescribedTagFromDom
                                         , financeDescribedTagFromDom
                                         , gardeningDescribedTagFromDom
+                                        , houseworkDescribedTagFromDom
+                                        ]
+                                    , versionNumber =
+                                        GlossaryVersionNumber.initial
+                                            |> GlossaryVersionNumber.increment
+                                            |> GlossaryVersionNumber.toInt
+                                  }
+                                )
+                            )
+            , test "that update tags" <|
+                \_ ->
+                    let
+                        tagsChanges : TagsChanges
+                        tagsChanges =
+                            TagsChanges.empty
+                                |> TagsChanges.update computerScienceTagId financeDescribedTag
+                                |> TagsChanges.update financeTagId computerScienceDescribedTag
+
+                        changeList =
+                            GlossaryChangelist.create
+                                GlossaryVersionNumber.initial
+                                [ GlossaryChange.ChangeTags tagsChanges ]
+                    in
+                    glossaryFromDom
+                        |> GlossaryFromDom.applyChanges changeList
+                        |> Expect.equal
+                            (ChangesApplied
+                                ( Nothing
+                                , { glossaryFromDom
+                                    | tags =
+                                        [ { computerScienceDescribedTagFromDom
+                                            | tag = financeRawTag
+                                            , description = financeTagRawDescription
+                                          }
+                                        , { financeDescribedTagFromDom
+                                            | tag = computerScienceRawTag
+                                            , description = computerScienceTagRawDescription
+                                          }
+                                        , gardeningDescribedTagFromDom
+                                        ]
+                                    , items =
+                                        [ { defaultComputerScienceItemFromDom
+                                            | disambiguationTag = Just financeRawTag
+                                          }
+                                        , { defaultFinanceItemFromDom
+                                            | disambiguationTag = Just computerScienceRawTag
+                                          }
+                                        , { informationRetrievalItemFromDom
+                                            | normalTags = [ financeRawTag ]
+                                          }
+                                        , { interestRateItemFromDom
+                                            | normalTags = [ computerScienceRawTag ]
+                                          }
+                                        , { loanItemFromDom
+                                            | normalTags = [ computerScienceRawTag ]
+                                          }
                                         ]
                                     , versionNumber =
                                         GlossaryVersionNumber.initial
