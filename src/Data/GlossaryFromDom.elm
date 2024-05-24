@@ -216,7 +216,7 @@ applyTagsChanges tagsChanges glossaryFromDom =
                     )
                     (Ok tagIdToDescribedTagFromDom0)
 
-        currentTagForPreviousTag : String -> String
+        currentTagForPreviousTag : String -> Maybe String
         currentTagForPreviousTag previousTag =
             tagIdToDescribedTagFromDom1
                 |> Result.map
@@ -224,9 +224,8 @@ applyTagsChanges tagsChanges glossaryFromDom =
                         Dict.get previousTag originalTagToTagId
                             |> Maybe.andThen (\originalTagId -> Dict.get originalTagId tagIdToDescribedTagFromDom)
                             |> Maybe.map .tag
-                            |> Maybe.withDefault previousTag
                     )
-                |> Result.withDefault previousTag
+                |> Result.withDefault (Just previousTag)
     in
     tagIdToDescribedTagFromDom1
         |> Result.map
@@ -238,8 +237,8 @@ applyTagsChanges tagsChanges glossaryFromDom =
                             |> List.map
                                 (\item ->
                                     { item
-                                        | disambiguationTag = item.disambiguationTag |> Maybe.map currentTagForPreviousTag
-                                        , normalTags = item.normalTags |> List.map currentTagForPreviousTag
+                                        | disambiguationTag = item.disambiguationTag |> Maybe.andThen currentTagForPreviousTag
+                                        , normalTags = item.normalTags |> List.filterMap currentTagForPreviousTag
                                     }
                                 )
 

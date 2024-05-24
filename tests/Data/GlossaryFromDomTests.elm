@@ -137,6 +137,47 @@ suite =
                                   }
                                 )
                             )
+            , test "that remove tags" <|
+                \_ ->
+                    let
+                        tagsChanges : TagsChanges
+                        tagsChanges =
+                            TagsChanges.empty
+                                |> TagsChanges.remove computerScienceTagId
+
+                        changeList =
+                            GlossaryChangelist.create
+                                GlossaryVersionNumber.initial
+                                [ GlossaryChange.ChangeTags tagsChanges ]
+                    in
+                    glossaryFromDom
+                        |> GlossaryFromDom.applyChanges changeList
+                        |> Expect.equal
+                            (ChangesApplied
+                                ( Nothing
+                                , { glossaryFromDom
+                                    | tags =
+                                        [ financeDescribedTagFromDom
+                                        , gardeningDescribedTagFromDom
+                                        ]
+                                    , items =
+                                        [ { defaultComputerScienceItemFromDom
+                                            | disambiguationTag = Nothing
+                                          }
+                                        , defaultFinanceItemFromDom
+                                        , { informationRetrievalItemFromDom
+                                            | normalTags = []
+                                          }
+                                        , interestRateItemFromDom
+                                        , loanItemFromDom
+                                        ]
+                                    , versionNumber =
+                                        GlossaryVersionNumber.initial
+                                            |> GlossaryVersionNumber.increment
+                                            |> GlossaryVersionNumber.toInt
+                                  }
+                                )
+                            )
             , test "unless the version in the changelist does not match the one in the glossary" <|
                 \_ ->
                     let
