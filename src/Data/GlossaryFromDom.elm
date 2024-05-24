@@ -193,18 +193,7 @@ applyTagsChanges tagsChanges glossaryFromDom =
                                         , description = describedTag |> DescribedTag.description |> TagDescription.raw
                                         }
                                 in
-                                if
-                                    tagIdToDescribedTagFromDom
-                                        |> Dict.toList
-                                        |> List.map Tuple.second
-                                        |> List.any
-                                            (\existingDescribedTagFromDom ->
-                                                (existingDescribedTagFromDom.id == id) && (existingDescribedTagFromDom.tag == updatedTag)
-                                            )
-                                then
-                                    Err <| I18n.thereIsAlreadyATag updatedTag
-
-                                else if tagIdToDescribedTagFromDom |> Dict.keys |> List.all ((/=) id) then
+                                if tagIdToDescribedTagFromDom |> Dict.keys |> List.all ((/=) id) then
                                     Err <| I18n.thereIsNoTagWithId id
 
                                 else
