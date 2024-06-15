@@ -1,4 +1,4 @@
-module Internationalisation.Eng exposing (abbreviation, about, addLinkButton, addRelatedItem, addTagButton, addTermButton, alphabetically, alternativeTerm, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, builtUsingGlossaryPageTemplateHtmlTree, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, chooseWhichTagShouldBeUsedToDistinguishThisItem, closeSidebar, commandK, controlK, copyToClipboard, createANewGlossaryItem, createANewGlossaryItemCapitalised, definition, delete, deleteItem, description, disambiguationTag, disambiguationTagOptional, edit, editGlossaryItemCapitalised, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, elementNotFound, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToParseMarkdown, failedToRenderMarkdown, failedToSave, filteringByTag, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, json, links, listTheGroupOfTermsBeingDefined, loadingEllipsis, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, miscellaneous, mostMentionedFirst, moveDown, moveUp, needsUpdating, noMatchingItemsFound, noResultsFound, none, openOptions, openSidebar, orderItems, otherChangesWereMadePleaseReload, otherItems, pleaseSelect, pleaseSelectAnItem, pointToAnyRelatedItems, preferredTerm, preview, provideADefinitionForThisGroupOfTerms, readMore, relatedItem, relatedItems, runTheFollowingCommand, save, search, searchPlaceholder, see, seeAlso, selectAllTagsThatApplyToThisItem, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, showSavingChangesInMemoryMessage, somethingWentWrong, suggestions, tag, tagAppearsMultipleTimes, tags, term, terms, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, thereIsAlreadyATag, thereIsAlreadyATagWithId, thereIsAlreadyAnItemWithDisambiguatedPreferredTermId, thereIsAlreadyAnItemWithId, thereIsNoItemWithId, thereIsNoTagWithId, theseSettingsAreUpdatedInTheHtmlFile, thisFieldCannotBeEmpty, thisFileIsMeantToBeImportedIntoAnki, thisTagIsADuplicateOfAnEarlierOne, thisTermAlreadyExistsElsewhere, thisTermIsReserved, thisTermOccursMultipleTimes, title, unableToSaveAsItWouldResultInTheFollowing, unauthorisedPleaseReload, unknownCardWidth, unknownTheme, updatedOn, url, viewAsSingleItem, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
+module Internationalisation.Eng exposing (abbreviation, about, addLinkButton, addRelatedItem, addTagButton, addTermButton, alphabetically, alternativeTerm, ankiDeck, areYouSureYouWantToDeleteThisItem, backToTop, builtUsingGlossaryPageTemplate, builtUsingGlossaryPageTemplateHtmlTree, cancel, cardWidth, cardWidthCompact, cardWidthIntermediate, cardWidthWide, chooseWhichTagShouldBeUsedToDistinguishThisItem, closeSidebar, commandK, controlK, copyToClipboard, createANewGlossaryItem, createANewGlossaryItemCapitalised, definition, delete, deleteItem, description, disambiguationTag, disambiguationTagOptional, edit, editGlossaryItemCapitalised, editTitleAndAboutSectionButton, editTitleAndAboutSectionHeading, elementNotFound, example, explanationForFocusedOn, explanationForMostMentionedFirst, export, failedToParseMarkdown, failedToRenderMarkdown, failedToSave, filteringByTag, focusOnTerm, focusedOn, glossaryCapitalised, glossaryContainsTooManyItems, howToEnableMathSupport, howToMakeChangesTitle, httpErrorDescription, json, links, listTheGroupOfTermsBeingDefined, loadingEllipsis, makeChanges, manageTags, manageTagsTitle, markdownAndTeXSupported, mathSupportIsEnabled, miscellaneous, mostMentionedFirst, moveDown, moveUp, needsUpdating, noMatchingItemsFound, noResultsFound, none, openOptions, openSidebar, orderItems, otherChangesWereMadePleaseReload, otherItems, pleaseSelect, pleaseSelectAnItem, pointToAnyRelatedItems, preferredTerm, preferredTermCannotAlsoAppearAsAnAlternativeTerm, preview, provideADefinitionForThisGroupOfTerms, readMore, relatedItem, relatedItems, runTheFollowingCommand, save, search, searchPlaceholder, see, seeAlso, selectAllTagsThatApplyToThisItem, settings, showExportMenu, showLastUpdatedDates, showOrderItemsButtons, showSavingChangesInMemoryMessage, somethingWentWrong, suggestions, tag, tagAppearsMultipleTimes, tags, term, terms, textLabel, themeDark, themeLight, themeSystem, thereAreErrorsOnThisFormSeeAbove, thereAreMultipleItemsWithDisambiguatedPreferredTerm, thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm, thereIsAlreadyATag, thereIsAlreadyATagWithId, thereIsAlreadyAnItemWithDisambiguatedPreferredTermId, thereIsAlreadyAnItemWithId, thereIsNoItemWithId, thereIsNoTagWithId, theseSettingsAreUpdatedInTheHtmlFile, thisAlternativeTermOccursMultipleTimes, thisFieldCannotBeEmpty, thisFileIsMeantToBeImportedIntoAnki, thisTagIsADuplicateOfAnEarlierOne, thisTermAlreadyExistsElsewhere, thisTermIsReserved, thisTermOccursMultipleTimes, title, unableToSaveAsItWouldResultInTheFollowing, unauthorisedPleaseReload, unknownCardWidth, unknownTheme, updatedOn, url, viewAsSingleItem, webInterfaceDescription, whyTagsMayBeUseful, youCanHideTheseInstructions, youCanUseTagsToAttachLabels)
 
 {-| User interface text in the English language.
 -}
@@ -563,14 +563,14 @@ unableToSaveAsItWouldResultInTheFollowing =
 
 thereAreMultipleItemsWithDisambiguatedPreferredTerm : String -> String
 thereAreMultipleItemsWithDisambiguatedPreferredTerm rawTerm =
-    "there are multiple items with (disambiguated) preferred term identifier \""
+    "There are multiple items with (disambiguated) preferred term identifier \""
         ++ rawTerm
         ++ "\""
 
 
 thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm : String
 thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm =
-    "there are multiple items with the same (disambiguated) preferred term identifier"
+    "There are multiple items with the same (disambiguated) preferred term identifier"
 
 
 tagAppearsMultipleTimes : String -> String
@@ -788,6 +788,16 @@ thisTermAlreadyExistsElsewhere =
 thisTermOccursMultipleTimes : String
 thisTermOccursMultipleTimes =
     "This term occurs multiple times"
+
+
+thisAlternativeTermOccursMultipleTimes : String -> String -> String
+thisAlternativeTermOccursMultipleTimes alternativeTerm_ preferredTerm_ =
+    "The alternative term \"" ++ alternativeTerm_ ++ "\" occurs multiple times in the item with preferred term \"" ++ preferredTerm_ ++ "\"."
+
+
+preferredTermCannotAlsoAppearAsAnAlternativeTerm : String -> String
+preferredTermCannotAlsoAppearAsAnAlternativeTerm term_ =
+    "A preferred term cannot also appear as an alternative term: \"" ++ term_ ++ "\"."
 
 
 thisTermIsReserved : String

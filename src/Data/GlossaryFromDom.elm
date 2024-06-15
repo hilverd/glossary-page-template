@@ -34,7 +34,9 @@ import Data.DescribedTag as DescribedTag
 import Data.DescribedTagFromDom as DescribedTagFromDom exposing (DescribedTagFromDom)
 import Data.GlossaryChange exposing (GlossaryChange(..))
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
+import Data.GlossaryItem exposing (alternativeTerms)
 import Data.GlossaryItem.Tag as Tag
+import Data.GlossaryItem.TermFromDom as TermFromDom exposing (TermFromDom)
 import Data.GlossaryItemFromDom as GlossaryItemFromDom exposing (GlossaryItemFromDom)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryTitle as GlossaryTitle
@@ -43,9 +45,11 @@ import Data.TagDescription as TagDescription
 import Data.TagId as TagId
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import Dict exposing (Dict)
+import DuplicateRejectingDict exposing (DuplicateRejectingDict)
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
-import Internationalisation as I18n
+import Internationalisation as I18n exposing (preferredTerm)
+import Set exposing (Set)
 
 
 {-| A glossary read from the DOM.
@@ -354,6 +358,7 @@ applyChanges changes glossaryFromDom =
             |> List.foldl
                 (\change -> Result.andThen (Tuple.second >> applyChange change))
                 (Ok ( Nothing, incrementVersionNumber glossaryFromDom ))
+            |> Result.andThen validateAfterApplyingChanges
             |> (\result ->
                     case result of
                         Ok result_ ->
@@ -362,6 +367,117 @@ applyChanges changes glossaryFromDom =
                         Err err ->
                             LogicalErrorWhenApplyingChanges err
                )
+
+
+validateAfterApplyingChanges : ( Maybe GlossaryItemId, GlossaryFromDom ) -> Result String ( Maybe GlossaryItemId, GlossaryFromDom )
+validateAfterApplyingChanges ( maybeGlossaryItemId, glossaryFromDom ) =
+    let
+        reservedTerms : List String
+        reservedTerms =
+            glossaryFromDom.items
+                |> List.map (\item -> item.preferredTerm :: item.alternativeTerms)
+                |> List.concat
+                |> List.filter (TermFromDom.id >> ElementIds.reserved)
+                |> List.map .body
+
+        itemsWithDuplicateAlternativeTerms : List { preferredTerm : String, alternativeTerm : String }
+        itemsWithDuplicateAlternativeTerms =
+            glossaryFromDom.items
+                |> List.filterMap
+                    (\glossaryItemFromDom ->
+                        case
+                            glossaryItemFromDom.alternativeTerms
+                                |> List.foldl
+                                    (\alternativeTermFromDom ->
+                                        DuplicateRejectingDict.insert alternativeTermFromDom.body ()
+                                    )
+                                    DuplicateRejectingDict.empty
+                                |> DuplicateRejectingDict.toResult
+                        of
+                            Ok _ ->
+                                Nothing
+
+                            Err { key } ->
+                                Just
+                                    { preferredTerm = glossaryItemFromDom.preferredTerm.body
+                                    , alternativeTerm = key
+                                    }
+                    )
+
+        duplicateDisambiguatedPreferredTermFragmentIdentifier : Maybe String
+        duplicateDisambiguatedPreferredTermFragmentIdentifier =
+            case
+                glossaryFromDom.items
+                    |> List.foldl
+                        (\glossaryItemFromDom ->
+                            let
+                                fragmentIdentifier =
+                                    GlossaryItemFromDom.disambiguatedPreferredTermIdString glossaryItemFromDom
+                            in
+                            DuplicateRejectingDict.insert
+                                fragmentIdentifier
+                                ()
+                        )
+                        DuplicateRejectingDict.empty
+                    |> DuplicateRejectingDict.toResult
+            of
+                Ok _ ->
+                    Nothing
+
+                Err { key } ->
+                    Just key
+
+        alternativeTerms : Set String
+        alternativeTerms =
+            glossaryFromDom.items
+                |> List.foldl
+                    (\glossaryItemFromDom result ->
+                        glossaryItemFromDom.alternativeTerms
+                            |> List.foldl
+                                (.body >> Set.insert)
+                                result
+                    )
+                    Set.empty
+
+        preferredTermsThatAlsoAppearAsAnAlternativeTerm : List String
+        preferredTermsThatAlsoAppearAsAnAlternativeTerm =
+            glossaryFromDom.items
+                |> List.filterMap
+                    (\glossaryItemFromDom ->
+                        let
+                            preferredTerm =
+                                glossaryItemFromDom.preferredTerm.body
+                        in
+                        if Set.member preferredTerm alternativeTerms then
+                            Just preferredTerm
+
+                        else
+                            Nothing
+                    )
+    in
+    case
+        ( ( List.head reservedTerms
+          , List.head itemsWithDuplicateAlternativeTerms
+          )
+        , ( duplicateDisambiguatedPreferredTermFragmentIdentifier
+          , List.head preferredTermsThatAlsoAppearAsAnAlternativeTerm
+          )
+        )
+    of
+        ( ( Just reservedTerm, _ ), _ ) ->
+            Err <| I18n.thisTermIsReserved ++ ": " ++ reservedTerm
+
+        ( ( _, Just { preferredTerm, alternativeTerm } ), _ ) ->
+            Err <| I18n.thisAlternativeTermOccursMultipleTimes alternativeTerm preferredTerm
+
+        ( _, ( Just duplicateDisambiguatedPreferredTermFragmentIdentifier_, _ ) ) ->
+            Err <| I18n.thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm ++ " \"" ++ duplicateDisambiguatedPreferredTermFragmentIdentifier_ ++ "\""
+
+        ( _, ( _, Just preferredTermThatAlsoAppearsAsAnAlternativeTerm ) ) ->
+            Err <| I18n.preferredTermCannotAlsoAppearAsAnAlternativeTerm preferredTermThatAlsoAppearsAsAnAlternativeTerm
+
+        _ ->
+            Ok ( maybeGlossaryItemId, glossaryFromDom )
 
 
 applyChange : GlossaryChange -> GlossaryFromDom -> Result String ( Maybe GlossaryItemId, GlossaryFromDom )

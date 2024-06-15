@@ -61,7 +61,7 @@ prefixed =
 
 reserved : String -> Bool
 reserved =
-    String.startsWith prefix
+    String.toLower >> String.startsWith prefix
 
 
 container : String

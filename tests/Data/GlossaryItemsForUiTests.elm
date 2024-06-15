@@ -629,7 +629,7 @@ suite =
                         Nothing
                     ]
                     |> Expect.equal
-                        (Err "there are multiple items with (disambiguated) preferred term identifier \"Foo_(Finance)\"")
+                        (Err "There are multiple items with (disambiguated) preferred term identifier \"Foo_(Finance)\"")
         , test "returns error for multiple disambiguated preferred terms with the same fragment identifier" <|
             \_ ->
                 GlossaryItemsForUi.fromList
@@ -660,5 +660,5 @@ suite =
                         Nothing
                     ]
                     |> Expect.equal
-                        (Err "there are multiple items with (disambiguated) preferred term identifier \"Foo_(Finance)\"")
+                        (Err "There are multiple items with (disambiguated) preferred term identifier \"Foo_(Finance)\"")
         ]

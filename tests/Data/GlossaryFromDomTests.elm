@@ -189,6 +189,23 @@ suite =
                     Expect.equal
                         VersionsDoNotMatch
                         (GlossaryFromDom.applyChanges changelist TestData.glossaryFromDom)
+            , test "unless the tag updates result in multiple items with the same (disambiguated) preferred term identifier" <|
+                \_ ->
+                    let
+                        tagsChanges : TagsChanges
+                        tagsChanges =
+                            TagsChanges.empty
+                                |> TagsChanges.update computerScienceTagId financeDescribedTag
+
+                        changeList =
+                            GlossaryChangelist.create
+                                GlossaryVersionNumber.initial
+                                [ GlossaryChange.ChangeTags tagsChanges ]
+                    in
+                    glossaryFromDom
+                        |> GlossaryFromDom.applyChanges changeList
+                        |> Expect.equal
+                            (LogicalErrorWhenApplyingChanges "There are multiple items with the same (disambiguated) preferred term identifier \"Default_(Finance)\"")
             ]
         ]
 
@@ -199,7 +216,6 @@ suite =
    TODO Test these constraints:
 
    * a term cannot start with "glossary-page-" (after changing to lowercase)
-   * no two distinct items can have the same disambiguated preferred term (fragment) identifier
    * an item's preferred term cannot be the same as an alternative term in any item
    * an item cannot have two identical alternative terms
 -}
