@@ -1,6 +1,6 @@
 module Data.GlossaryItemsForUi exposing
     ( GlossaryItemsForUi
-    , empty, fromList, applyTagsChanges, insert, update, remove
+    , empty, fromList
     , get, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
@@ -43,7 +43,6 @@ import Data.GlossaryTags as GlossaryTags exposing (GlossaryTags, tagIdByRawTag)
 import Data.TagDescription exposing (TagDescription)
 import Data.TagId exposing (TagId)
 import Data.TagIdDict as TagIdDict exposing (TagIdDict)
-import Data.TagsChanges exposing (TagsChanges)
 import Dict exposing (Dict)
 import DirectedGraph exposing (DirectedGraph)
 import DuplicateRejectingDict exposing (DuplicateRejectingDict)
@@ -319,88 +318,6 @@ fromList describedTags_ glossaryItemsForUi =
                     )
                     itemIdByFragmentIdentifierForRawDisambiguatedPreferredTermResult
             )
-
-
-{-| Apply a set of tags changes.
--}
-applyTagsChanges : TagsChanges -> GlossaryItemsForUi -> Result String GlossaryItemsForUi
-applyTagsChanges tagsChanges (GlossaryItemsForUi glossaryItemsForUi0) =
-    let
-        tags1 : GlossaryTags
-        tags1 =
-            GlossaryTags.applyChanges tagsChanges glossaryItemsForUi0.tags
-
-        resultBeforeValidation : GlossaryItemsForUi
-        resultBeforeValidation =
-            GlossaryItemsForUi { glossaryItemsForUi0 | tags = tags1 }
-    in
-    resultBeforeValidation
-        |> orderedAlphabetically Nothing
-        |> List.map Tuple.second
-        |> fromList (describedTags resultBeforeValidation)
-
-
-{-| Insert an item, returning the ID of the new item.
--}
-insert : GlossaryItemForUi -> GlossaryItemsForUi -> Result String ( GlossaryItemId, GlossaryItemsForUi )
-insert item glossaryItemsForUi =
-    let
-        itemsAfterInserting : Result String GlossaryItemsForUi
-        itemsAfterInserting =
-            glossaryItemsForUi
-                |> orderedAlphabetically Nothing
-                |> List.map Tuple.second
-                |> (::) item
-                |> fromList (describedTags glossaryItemsForUi)
-
-        insertedItemId : GlossaryItemId
-        insertedItemId =
-            GlossaryItemForUi.id item
-    in
-    itemsAfterInserting
-        |> Result.map (Tuple.pair insertedItemId)
-
-
-{-| Update an item. Do nothing if there is no item with the given ID.
--}
-update : GlossaryItemId -> GlossaryItemForUi -> GlossaryItemsForUi -> Result String GlossaryItemsForUi
-update itemId item glossaryItemsForUi =
-    let
-        disambiguatedPreferredTerm_ itemId_ =
-            if itemId_ == itemId then
-                always <| Just <| GlossaryItemForUi.disambiguatedPreferredTerm item
-
-            else
-                disambiguatedPreferredTerm itemId_
-    in
-    glossaryItemsForUi
-        |> orderedAlphabetically_ disambiguatedPreferredTerm_ Nothing
-        |> List.map
-            (\( itemId_, item_ ) ->
-                if itemId_ == itemId then
-                    item
-
-                else
-                    item_
-            )
-        |> fromList (describedTags glossaryItemsForUi)
-
-
-{-| Remove the item associated with an ID. Do nothing if the ID is not found.
--}
-remove : GlossaryItemId -> GlossaryItemsForUi -> Result String GlossaryItemsForUi
-remove itemId glossaryItemsForUi =
-    glossaryItemsForUi
-        |> orderedAlphabetically Nothing
-        |> List.filterMap
-            (\( itemId_, itemForUi ) ->
-                if itemId_ == itemId then
-                    Nothing
-
-                else
-                    Just itemForUi
-            )
-        |> fromList (describedTags glossaryItemsForUi)
 
 
 relatedPreferredTerms_ : (GlossaryItemId -> GlossaryItemsForUi -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItemId -> GlossaryItemsForUi -> Maybe (List DisambiguatedTerm)
