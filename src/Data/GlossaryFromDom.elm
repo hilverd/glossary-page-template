@@ -36,7 +36,7 @@ import Data.GlossaryChange exposing (GlossaryChange(..))
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryItem exposing (alternativeTerms)
 import Data.GlossaryItem.Tag as Tag
-import Data.GlossaryItem.TermFromDom as TermFromDom exposing (TermFromDom)
+import Data.GlossaryItem.TermFromDom as TermFromDom
 import Data.GlossaryItemFromDom as GlossaryItemFromDom exposing (GlossaryItemFromDom)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryTitle as GlossaryTitle
@@ -45,7 +45,7 @@ import Data.TagDescription as TagDescription
 import Data.TagId as TagId
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import Dict exposing (Dict)
-import DuplicateRejectingDict exposing (DuplicateRejectingDict)
+import DuplicateRejectingDict
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Internationalisation as I18n exposing (preferredTerm)
