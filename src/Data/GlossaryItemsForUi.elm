@@ -15,7 +15,7 @@ module Data.GlossaryItemsForUi exposing
 
 # Build
 
-@docs empty, fromList, applyTagsChanges, insert, update, remove
+@docs empty, fromList
 
 
 # Query
