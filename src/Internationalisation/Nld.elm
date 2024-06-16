@@ -797,7 +797,7 @@ thisAlternativeTermOccursMultipleTimes alternativeTerm_ preferredTerm_ =
 
 preferredTermCannotAlsoAppearAsAnAlternativeTerm : String -> String
 preferredTermCannotAlsoAppearAsAnAlternativeTerm term_ =
-    "Een voorkeursterm mag niet ook voorkomen als een alternatieve term: \"" ++ term_ ++ "\"."
+    "Een voorkeursterm mag niet ook voorkomen als een alternatieve term: \"" ++ term_ ++ "\""
 
 
 thisTermIsReserved : String
