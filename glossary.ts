@@ -161,7 +161,9 @@ if (containerElement) {
             Here <code>glossary.html</code> is the name of the current file.
             </p>
             </div>
-        `
+        `;
+
+        document.body.style.visibility = 'visible';
     } else {
         const app = Elm.ApplicationShell.init({
             flags: {
