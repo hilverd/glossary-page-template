@@ -86,6 +86,27 @@ suite =
                         |> GlossaryFromDom.applyChanges changeList
                         |> Expect.equal
                             (LogicalErrorWhenApplyingChanges "A preferred term cannot also appear as an alternative term: \"Loan\"")
+            , test "unless an item has two identical alternative terms" <|
+                \_ ->
+                    let
+                        changeList =
+                            GlossaryChangelist.create
+                                GlossaryVersionNumber.initial
+                                [ GlossaryChange.Insert
+                                    { loanItemFromDom
+                                        | id = "some-id"
+                                        , preferredTerm = TermFromDom.create False "Foo"
+                                        , alternativeTerms =
+                                            [ TermFromDom.create False "Bar"
+                                            , TermFromDom.create False "Bar"
+                                            ]
+                                    }
+                                ]
+                    in
+                    glossaryFromDom
+                        |> GlossaryFromDom.applyChanges changeList
+                        |> Expect.equal
+                            (LogicalErrorWhenApplyingChanges "The alternative term \"Bar\" occurs multiple times in the item with preferred term \"Foo\".")
             , test "that insert tags" <|
                 \_ ->
                     let
@@ -244,12 +265,3 @@ suite =
                             (LogicalErrorWhenApplyingChanges "There are multiple items with the same (disambiguated) preferred term identifier \"Default_(Finance)\"")
             ]
         ]
-
-
-
-{-
-
-   TODO Test these constraints:
-
-   * an item cannot have two identical alternative terms
--}
