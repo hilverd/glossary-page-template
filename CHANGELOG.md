@@ -16,6 +16,12 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 ### Removed
 
+## [5.0.2] - 2024-06-21
+
+### Fixed
+
+- Fix instructions visibility issue when `file:` URL is opened.
+
 ## [5.0.1] - 2024-06-21
 
 This version contains the changes that were originally released in 4.7.0 (and then temporarily reverted in 4.7.1).
@@ -742,7 +748,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.0.1...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.0.2...HEAD
+[5.0.2]: https://github.com/hilverd/glossary-page-template/compare/v5.0.1...v5.0.2
 [5.0.1]: https://github.com/hilverd/glossary-page-template/compare/v4.7.1...v5.0.1
 [4.7.1]: https://github.com/hilverd/glossary-page-template/compare/v4.7.0...v4.7.1
 [4.7.0]: https://github.com/hilverd/glossary-page-template/compare/v4.6.0...v4.7.0
