@@ -16,6 +16,16 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 ### Removed
 
+## [4.7.0] - 2024-06-21
+
+### Changed
+
+- Make link for scrolling back to top dynamically appear at bottom right when (probably) needed -- instead of always being visible at the top left.
+- Open external links in a new tab.
+- Show at most 40 search results.
+- Upgrade KaTeX to version 0.16.10.
+- Make `worker.min.js` script more performant by removing UI specific concerns.
+
 ## [4.6.0] - 2024-03-04
 
 ### Changed
@@ -707,7 +717,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.6.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.7.0...HEAD
+[4.7.0]: https://github.com/hilverd/glossary-page-template/compare/v4.6.0...v4.7.0
 [4.6.0]: https://github.com/hilverd/glossary-page-template/compare/v4.5.1...v4.6.0
 [4.5.1]: https://github.com/hilverd/glossary-page-template/compare/v4.5.0...v4.5.1
 [4.5.0]: https://github.com/hilverd/glossary-page-template/compare/v4.4.0...v4.5.0
