@@ -68,6 +68,24 @@ suite =
                         |> GlossaryFromDom.applyChanges changeList
                         |> Expect.equal
                             (LogicalErrorWhenApplyingChanges "This term is reserved: Glossary-Page-Foo")
+            , test "unless an item's preferred term is the same as an alternative term in any item" <|
+                \_ ->
+                    let
+                        changeList =
+                            GlossaryChangelist.create
+                                GlossaryVersionNumber.initial
+                                [ GlossaryChange.Insert
+                                    { loanItemFromDom
+                                        | id = "some-id"
+                                        , preferredTerm = TermFromDom.create False "Foo"
+                                        , alternativeTerms = [ TermFromDom.create False "Loan" ]
+                                    }
+                                ]
+                    in
+                    glossaryFromDom
+                        |> GlossaryFromDom.applyChanges changeList
+                        |> Expect.equal
+                            (LogicalErrorWhenApplyingChanges "A preferred term cannot also appear as an alternative term: \"Loan\"")
             , test "that insert tags" <|
                 \_ ->
                     let
@@ -233,6 +251,5 @@ suite =
 
    TODO Test these constraints:
 
-   * an item's preferred term cannot be the same as an alternative term in any item
    * an item cannot have two identical alternative terms
 -}
