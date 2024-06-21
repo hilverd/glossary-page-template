@@ -20,6 +20,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Fixed
 
+- Fix bug that always switched on saving changes in memory.
 - Fix instructions visibility issue when `file:` URL is opened.
 
 ## [5.0.1] - 2024-06-21
