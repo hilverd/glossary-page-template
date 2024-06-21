@@ -17,6 +17,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Make link for scrolling back to top dynamically appear at bottom right when (probably) needed -- instead of always being visible at the top left.
 - Open external links in a new tab.
 - Show at most 40 search results.
+- Upgrade KaTeX to version 0.16.10.
 - Make `worker.min.js` script more performant by removing UI specific concerns.
 
 ### Fixed
