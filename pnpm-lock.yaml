@@ -47,8 +47,8 @@ devDependencies:
     specifier: 0.19.1-revision12
     version: 0.19.1-revision12
   elm-verify-examples:
-    specifier: ^5.3.0
-    version: 5.3.0
+    specifier: ^6.0.3
+    version: 6.0.3
   postcss:
     specifier: ^8.4.38
     version: 8.4.38
@@ -1197,32 +1197,15 @@ packages:
       xmlbuilder: 15.1.1
     dev: true
 
-  /elm-test@0.19.1-revision9:
-    resolution: {integrity: sha512-lvHJbh16sy7oUBBPIEMN+0v6dGDZFmfvwq+V+TnGPk5ZlI64vcykx8E8+zLt/E+Ja42UKMMXXgN1ZHQ1V6Ic2Q==}
-    engines: {node: '>=12.20.0'}
+  /elm-verify-examples@6.0.3:
+    resolution: {integrity: sha512-VgZpUwYik+d7u9ZDLhbTEMN/MIE7qJ9OQRtreGmwE9ehr+JSJvnKcpZwGILIHjiNWjZqarx4d6vA2OtLZm48AA==}
     hasBin: true
     dependencies:
       chalk: 4.1.2
-      chokidar: 3.6.0
-      commander: 9.5.0
-      cross-spawn: 7.0.3
-      elm-solve-deps-wasm: 1.0.2
-      glob: 8.1.0
-      graceful-fs: 4.2.11
-      split: 1.0.1
-      which: 2.0.2
-      xmlbuilder: 15.1.1
-    dev: true
-
-  /elm-verify-examples@5.3.0:
-    resolution: {integrity: sha512-6TG+4L/yEamiHpxVQUJPRgHoeEOmk5LhWuVRECMHTKPpvuM2BCYMGwCMUGJ0Wh64RW8oERIdnicsvUDlvDwiTg==}
-    hasBin: true
-    dependencies:
-      chalk: 4.1.2
-      elm-test: 0.19.1-revision9
       fs-extra: 11.2.0
+      glob: 10.4.2
       mkdirp: 3.0.1
-      rimraf: 5.0.5
+      rimraf: 5.0.7
       yargs: 17.7.2
     dev: true
 
@@ -1452,14 +1435,6 @@ packages:
       - supports-color
     dev: true
 
-  /foreground-child@3.1.1:
-    resolution: {integrity: sha512-TMKDUnIte6bfb5nWv7V/caI169OHgvwjb7V4WkeUvbQQdjr5rWKqHFiKWb/fcOwB+CzBT+qbWjvj+DVwRskpIg==}
-    engines: {node: '>=14'}
-    dependencies:
-      cross-spawn: 7.0.3
-      signal-exit: 4.1.0
-    dev: true
-
   /foreground-child@3.2.1:
     resolution: {integrity: sha512-PXUUyLqrR2XCWICfv6ukppP96sdFwWbNEnfEMt7jNsISjMsvaLNinAHNDYyvkyU+SZG2BTSbT5NjG+vZslfGTA==}
     engines: {node: '>=14'}
@@ -1573,18 +1548,6 @@ packages:
     engines: {node: '>=10.13.0'}
     dependencies:
       is-glob: 4.0.3
-    dev: true
-
-  /glob@10.3.12:
-    resolution: {integrity: sha512-TCNv8vJ+xz4QiqTpfOJA7HvYv+tNIRHKfUWw/q+v2jdgN4ebz+KY9tGx5J4rHP0o84mNP+ApH66HRX8us3Khqg==}
-    engines: {node: '>=16 || 14 >=14.17'}
-    hasBin: true
-    dependencies:
-      foreground-child: 3.1.1
-      jackspeak: 2.3.6
-      minimatch: 9.0.4
-      minipass: 7.0.4
-      path-scurry: 1.10.2
     dev: true
 
   /glob@10.4.2:
@@ -1858,15 +1821,6 @@ packages:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
     dev: true
 
-  /jackspeak@2.3.6:
-    resolution: {integrity: sha512-N3yCS/NegsOBokc8GAdM8UcmfsKiSS8cipheD/nivzr700H+nsMOxJjQnvwOcRYVuFkdH0wGUvW2WbXGmrZGbQ==}
-    engines: {node: '>=14'}
-    dependencies:
-      '@isaacs/cliui': 8.0.2
-    optionalDependencies:
-      '@pkgjs/parseargs': 0.11.0
-    dev: true
-
   /jackspeak@3.4.0:
     resolution: {integrity: sha512-JVYhQnN59LVPFCEcVa2C3CrEKYacvjRfqIQl+h8oi91aLYQVWRYbxjPcv1bUiUy/kLmQaANrYfNMCO3kuEDHfw==}
     engines: {node: '>=14'}
@@ -1982,11 +1936,6 @@ packages:
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dev: true
 
-  /lru-cache@10.2.0:
-    resolution: {integrity: sha512-2bIM8x+VAf6JT4bKAljS1qUWgMsqZRPGJS6FSahIMPVvctcNhyVp7AJu7quxOW9jwkryBReKZY5tY5JYv2n/7Q==}
-    engines: {node: 14 || >=16.14}
-    dev: true
-
   /lru-cache@10.2.2:
     resolution: {integrity: sha512-9hp3Vp2/hFQUiIwKo8XCeFVnrg8Pk3TYNPIR7tJADKi5YfcF7vEaK7avFHTlSy3kOKYaJQaalfEo6YuXdceBOQ==}
     engines: {node: 14 || >=16.14}
@@ -2097,11 +2046,6 @@ packages:
 
   /minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
-    dev: true
-
-  /minipass@7.0.4:
-    resolution: {integrity: sha512-jYofLM5Dam9279rdkWzqHozUo4ybjdZmCsDHePy5V/PbBcVMiSZR97gmAy45aqi8CK1lG2ECd356FU86avfwUQ==}
-    engines: {node: '>=16 || 14 >=14.17'}
     dev: true
 
   /minipass@7.1.2:
@@ -2332,14 +2276,6 @@ packages:
 
   /path-parse@1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
-    dev: true
-
-  /path-scurry@1.10.2:
-    resolution: {integrity: sha512-7xTavNy5RQXnsjANvVvMkEjvloOinkAjv/Z6Ildz9v2RinZ4SBKTWFOVRbaF8p0vpHnyjV/UwNDdKuUv6M5qcA==}
-    engines: {node: '>=16 || 14 >=14.17'}
-    dependencies:
-      lru-cache: 10.2.0
-      minipass: 7.0.4
     dev: true
 
   /path-scurry@1.11.1:
@@ -2681,14 +2617,6 @@ packages:
     hasBin: true
     dependencies:
       glob: 7.2.3
-    dev: true
-
-  /rimraf@5.0.5:
-    resolution: {integrity: sha512-CqDakW+hMe/Bz202FPEymy68P+G50RfMQK+Qo5YUqc9SPipvbGjCGKd0RSKEelbsfQuw3g5NZDSrlZZAJurH1A==}
-    engines: {node: '>=14'}
-    hasBin: true
-    dependencies:
-      glob: 10.3.12
     dev: true
 
   /rimraf@5.0.7:
