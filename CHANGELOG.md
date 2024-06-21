@@ -16,6 +16,10 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 ### Removed
 
+## [4.7.1] - 2024-06-21
+
+This release brings back version 4.6.0. The changes for 4.7.0 should have been released as a new major version, as there are breaking changes.
+
 ## [4.7.0] - 2024-06-21
 
 ### Changed
@@ -717,7 +721,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.7.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.7.1...HEAD
+[4.7.1]: https://github.com/hilverd/glossary-page-template/compare/v4.7.0...v4.7.1
 [4.7.0]: https://github.com/hilverd/glossary-page-template/compare/v4.6.0...v4.7.0
 [4.6.0]: https://github.com/hilverd/glossary-page-template/compare/v4.5.1...v4.6.0
 [4.5.1]: https://github.com/hilverd/glossary-page-template/compare/v4.5.0...v4.5.1
