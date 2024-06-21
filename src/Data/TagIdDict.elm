@@ -42,7 +42,7 @@ import Dict exposing (Dict)
 {-| A dictionary of tag IDs and values.
 -}
 type TagIdDict a
-    = TagIdDict (Dict String a)
+    = TagIdDict (Dict Int a)
 
 
 {-| Create an empty dictionary.
@@ -57,7 +57,7 @@ empty =
 insert : TagId -> v -> TagIdDict v -> TagIdDict v
 insert tagId value (TagIdDict dict) =
     dict
-        |> Dict.insert (TagId.toString tagId) value
+        |> Dict.insert (TagId.toInt tagId) value
         |> TagIdDict
 
 
@@ -66,7 +66,7 @@ insert tagId value (TagIdDict dict) =
 update : TagId -> (Maybe v -> Maybe v) -> TagIdDict v -> TagIdDict v
 update tagId f (TagIdDict dict) =
     dict
-        |> Dict.update (TagId.toString tagId) f
+        |> Dict.update (TagId.toInt tagId) f
         |> TagIdDict
 
 
@@ -76,7 +76,7 @@ no changes are made.
 remove : TagId -> TagIdDict v -> TagIdDict v
 remove tagId (TagIdDict dict) =
     dict
-        |> Dict.remove (TagId.toString tagId)
+        |> Dict.remove (TagId.toInt tagId)
         |> TagIdDict
 
 
@@ -87,7 +87,7 @@ This is useful when you are not sure if a key will be in the dictionary.
 get : TagId -> TagIdDict v -> Maybe v
 get tagId (TagIdDict dict) =
     dict
-        |> Dict.get (TagId.toString tagId)
+        |> Dict.get (TagId.toInt tagId)
 
 
 {-| Compute the next tag ID to be used for inserting a new item.
@@ -96,11 +96,9 @@ nextTagId : TagIdDict v -> TagId
 nextTagId (TagIdDict dict) =
     dict
         |> Dict.keys
-        |> List.map (String.toInt >> Maybe.withDefault 0)
         |> List.maximum
         |> Maybe.map ((+) 1)
         |> Maybe.withDefault 0
-        |> String.fromInt
         |> TagId.create
 
 
@@ -139,7 +137,7 @@ fromList list =
     list
         |> List.map
             (\( tagId, value ) ->
-                ( TagId.toString tagId, value )
+                ( TagId.toInt tagId, value )
             )
         |> Dict.fromList
         |> TagIdDict

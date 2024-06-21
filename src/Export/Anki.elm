@@ -8,13 +8,13 @@ module Export.Anki exposing (download)
 
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
-import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
+import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
-import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
-import Data.GlossaryItemsForUi as GlossaryItems
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItems as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle
 import Extras.HtmlTree
 import File.Download as Download
@@ -68,7 +68,7 @@ paragraphs =
         >> String.join (crlf ++ crlf)
 
 
-itemToAnki : Bool -> GlossaryItemForUi -> String
+itemToAnki : Bool -> GlossaryItemForHtml -> String
 itemToAnki enableMathSupport glossaryItem =
     let
         quote : String -> String
@@ -76,14 +76,14 @@ itemToAnki enableMathSupport glossaryItem =
             "\"" ++ string ++ "\""
 
         definitions =
-            GlossaryItemForUi.definition glossaryItem
+            GlossaryItemForHtml.definition glossaryItem
                 |> Maybe.map List.singleton
                 |> Maybe.withDefault []
 
         front : String
         front =
             glossaryItem
-                |> GlossaryItemForUi.allTerms
+                |> GlossaryItemForHtml.allTerms
                 |> List.map (Term.htmlTreeForAnki enableMathSupport >> Extras.HtmlTree.toHtml >> escape)
                 |> htmlLines
                 |> quote
@@ -94,7 +94,7 @@ itemToAnki enableMathSupport glossaryItem =
                 let
                     relatedTerms : List DisambiguatedTerm
                     relatedTerms =
-                        GlossaryItemForUi.relatedPreferredTerms glossaryItem
+                        GlossaryItemForHtml.relatedPreferredTerms glossaryItem
                 in
                 if List.isEmpty relatedTerms then
                     ""
@@ -122,7 +122,7 @@ itemToAnki enableMathSupport glossaryItem =
 
         tags : String
         tags =
-            GlossaryItemForUi.allTags glossaryItem
+            GlossaryItemForHtml.allTags glossaryItem
                 |> List.map (Tag.inlineText >> String.replace " " "_" >> escape)
                 |> String.join " "
                 |> quote
@@ -133,17 +133,17 @@ itemToAnki enableMathSupport glossaryItem =
 {-| Export a glossary with to a [text file suitable for Anki](https://docs.ankiweb.net/importing.html#text-files).
 This is achieved by producing a [command for downloading](https://package.elm-lang.org/packages/elm/file/latest/File.Download) this file.
 -}
-download : Bool -> GlossaryForUi -> Cmd msg
-download enableMathSupport glossaryForUi =
+download : Bool -> Glossary -> Cmd msg
+download enableMathSupport glossary =
     let
         title =
-            GlossaryForUi.title glossaryForUi
+            Glossary.title glossary
 
         aboutSection =
-            GlossaryForUi.aboutSection glossaryForUi
+            Glossary.aboutSection glossary
 
         items =
-            GlossaryForUi.items glossaryForUi
+            Glossary.items glossary
 
         filename : String
         filename =

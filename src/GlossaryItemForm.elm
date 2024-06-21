@@ -8,7 +8,7 @@ module GlossaryItemForm exposing
     , deleteTerm
     , disambiguationTagId
     , empty
-    , fromGlossaryItemForUi
+    , fromGlossaryItemForHtml
     , hasValidationErrors
     , moveRelatedTermDown
     , moveRelatedTermUp
@@ -33,9 +33,9 @@ import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (Disamb
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
 import Data.GlossaryItemId exposing (GlossaryItemId)
-import Data.GlossaryItemsForUi as GlossaryItems exposing (GlossaryItemsForUi)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TagId exposing (TagId)
 import Data.TermIndex as TermIndex exposing (TermIndex)
@@ -206,7 +206,7 @@ validate form =
                                                     Nothing
                                             )
                                         |> List.head
-                                        |> Maybe.map (\disambiguationTag -> GlossaryItemForUi.disambiguatedTerm disambiguationTag term)
+                                        |> Maybe.map (\disambiguationTag -> GlossaryItemForHtml.disambiguatedTerm disambiguationTag term)
                                         |> Maybe.withDefault (DisambiguatedTerm.fromTerm term)
                                 )
                             |> Maybe.withDefault (DisambiguatedTerm.fromTerm term)
@@ -295,7 +295,7 @@ hasValidationErrors form =
         || (form |> relatedTermFields |> hasErrors .validationError)
 
 
-empty : GlossaryItemsForUi -> Maybe Tag -> GlossaryItemForm
+empty : GlossaryItems -> Maybe Tag -> GlossaryItemForm
 empty items filterByTag =
     let
         tags : List ( TagId, Tag )
@@ -348,8 +348,8 @@ emptyRelatedTermField =
     }
 
 
-fromGlossaryItemForUi : GlossaryItemsForUi -> GlossaryItemId -> GlossaryItemForUi -> GlossaryItemForm
-fromGlossaryItemForUi items itemId item =
+fromGlossaryItemForHtml : GlossaryItems -> GlossaryItemId -> GlossaryItemForHtml -> GlossaryItemForm
+fromGlossaryItemForHtml items itemId item =
     let
         tags : List ( TagId, Tag )
         tags =
@@ -368,36 +368,36 @@ fromGlossaryItemForUi items itemId item =
         disambiguationTagId_ : Maybe TagId
         disambiguationTagId_ =
             item
-                |> GlossaryItemForUi.disambiguationTag
+                |> GlossaryItemForHtml.disambiguationTag
                 |> Maybe.andThen (\tag -> GlossaryItems.tagIdFromTag tag items)
     in
-    fromGlossaryItemForUi_ existingDisambiguatedPreferredTerms
+    fromGlossaryItemForHtml_ existingDisambiguatedPreferredTerms
         tags
         preferredTermsOfItemsListingThisItemAsRelated_
-        (GlossaryItemForUi.relatedPreferredTerms item)
+        (GlossaryItemForHtml.relatedPreferredTerms item)
         disambiguationTagId_
         item
 
 
-fromGlossaryItemForUi_ :
+fromGlossaryItemForHtml_ :
     List DisambiguatedTerm
     -> List ( TagId, Tag )
     -> List DisambiguatedTerm
     -> List DisambiguatedTerm
     -> Maybe TagId
-    -> GlossaryItemForUi
+    -> GlossaryItemForHtml
     -> GlossaryItemForm
-fromGlossaryItemForUi_ existingPreferredTerms allTags preferredTermsOfItemsListingThisItemAsRelated_ relatedTerms disambiguationTagId_ item =
+fromGlossaryItemForHtml_ existingPreferredTerms allTags preferredTermsOfItemsListingThisItemAsRelated_ relatedTerms disambiguationTagId_ item =
     let
         normalTags : List Tag
         normalTags =
-            GlossaryItemForUi.normalTags item
+            GlossaryItemForHtml.normalTags item
 
         preferredTermFieldForItem : TermField
         preferredTermFieldForItem =
             let
                 preferredTerm =
-                    GlossaryItemForUi.nonDisambiguatedPreferredTerm item
+                    GlossaryItemForHtml.nonDisambiguatedPreferredTerm item
             in
             TermField.fromString
                 (preferredTerm |> Term.raw |> RawTerm.toString)
@@ -406,7 +406,7 @@ fromGlossaryItemForUi_ existingPreferredTerms allTags preferredTermsOfItemsListi
         alternativeTermFieldsForItem : List TermField
         alternativeTermFieldsForItem =
             item
-                |> GlossaryItemForUi.alternativeTerms
+                |> GlossaryItemForHtml.alternativeTerms
                 |> List.map
                     (\alternativeTerm ->
                         TermField.fromString (alternativeTerm |> Term.raw |> RawTerm.toString) (Term.isAbbreviation alternativeTerm)
@@ -415,7 +415,7 @@ fromGlossaryItemForUi_ existingPreferredTerms allTags preferredTermsOfItemsListi
         rawTermsForItem : Set String
         rawTermsForItem =
             item
-                |> GlossaryItemForUi.allTerms
+                |> GlossaryItemForHtml.allTerms
                 |> List.map (Term.raw >> RawTerm.toString)
                 |> Set.fromList
 
@@ -437,7 +437,7 @@ fromGlossaryItemForUi_ existingPreferredTerms allTags preferredTermsOfItemsListi
         definitionField_ : DefinitionField
         definitionField_ =
             item
-                |> GlossaryItemForUi.definition
+                |> GlossaryItemForHtml.definition
                 |> Maybe.map
                     (\definitionElem ->
                         definitionElem
@@ -463,14 +463,14 @@ fromGlossaryItemForUi_ existingPreferredTerms allTags preferredTermsOfItemsListi
                 |> Array.fromList
         , preferredTermsOutside = preferredTermsOutside1
         , preferredTermsOfItemsListingThisItemAsRelated = preferredTermsOfItemsListingThisItemAsRelated_
-        , needsUpdating = item |> GlossaryItemForUi.needsUpdating
-        , lastUpdatedDate = item |> GlossaryItemForUi.lastUpdatedDateAsIso8601 |> Maybe.withDefault ""
+        , needsUpdating = item |> GlossaryItemForHtml.needsUpdating
+        , lastUpdatedDate = item |> GlossaryItemForHtml.lastUpdatedDateAsIso8601 |> Maybe.withDefault ""
         }
         |> validate
 
 
-toGlossaryItem : GlossaryItemsForUi -> GlossaryItemForm -> GlossaryItemId -> Maybe String -> GlossaryItemForUi
-toGlossaryItem glossaryItems form id dateTime =
+toGlossaryItem : GlossaryItems -> GlossaryItemForm -> Maybe String -> GlossaryItemForHtml
+toGlossaryItem glossaryItems form dateTime =
     let
         termFieldToTerm : TermField -> Term
         termFieldToTerm termField =
@@ -558,8 +558,7 @@ toGlossaryItem glossaryItems form id dateTime =
         lastUpdatedDate_ =
             dateTime
     in
-    GlossaryItemForUi.create
-        id
+    GlossaryItemForHtml.create
         preferredTerm
         alternativeTerms
         disambiguationTag

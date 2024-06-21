@@ -1,7 +1,7 @@
-module Data.GlossaryItemForUiTests exposing (suite)
+module Data.GlossaryItemForHtmlTests exposing (suite)
 
 import Codec
-import Data.GlossaryItemForUi as GlossaryItemForUi
+import Data.GlossaryItemForHtml as GlossaryItemForHtml
 import Expect
 import Test exposing (Test, describe, test)
 import TestData
@@ -9,17 +9,17 @@ import TestData
 
 suite : Test
 suite =
-    describe "The Data.GlossaryItemForUi module"
+    describe "The Data.GlossaryItemForHtml module"
         [ test "can encode and decode to and from JSON values" <|
             \_ ->
                 TestData.defaultComputerScienceItem
-                    |> Codec.encodeToValue GlossaryItemForUi.codec
-                    |> Codec.decodeValue GlossaryItemForUi.codec
+                    |> Codec.encodeToValue GlossaryItemForHtml.codec
+                    |> Codec.decodeValue GlossaryItemForHtml.codec
                     |> Expect.equal (Ok TestData.defaultComputerScienceItem)
         , test "can encode and decode to and from JSON strings" <|
             \_ ->
                 TestData.defaultComputerScienceItem
-                    |> Codec.encodeToString 2 GlossaryItemForUi.codec
-                    |> Codec.decodeString GlossaryItemForUi.codec
+                    |> Codec.encodeToString 2 GlossaryItemForHtml.codec
+                    |> Codec.decodeString GlossaryItemForHtml.codec
                     |> Expect.equal (Ok TestData.defaultComputerScienceItem)
         ]

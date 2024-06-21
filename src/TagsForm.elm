@@ -1,9 +1,8 @@
 module TagsForm exposing (Row(..), TagsForm, addRow, changes, create, deleteRow, hasValidationErrors, rows, updateTag, updateTagDescription)
 
 import Array exposing (Array)
-import Data.DescribedTag as DescribedTag exposing (DescribedTag)
-import Data.GlossaryItem.Tag as Tag
-import Data.TagDescription as TagDescription
+import Data.GlossaryItem.Tag as Tag exposing (Tag)
+import Data.TagDescription as TagDescription exposing (TagDescription)
 import Data.TagId exposing (TagId)
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import Extras.Array
@@ -21,8 +20,7 @@ type Row
         }
     | Deleted TagId
     | New
-        { id : TagId
-        , tagField : TagField
+        { tagField : TagField
         , tagDescriptionField : TagDescriptionField
         }
 
@@ -40,21 +38,17 @@ changes tagsForm =
                     (\row ->
                         case row of
                             Existing { id, tagField, tagDescriptionField } ->
-                                TagsChanges.update id <|
-                                    DescribedTag.create
-                                        id
-                                        (tagField |> TagField.raw |> String.trim |> Tag.fromMarkdown)
-                                        (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
+                                TagsChanges.update id
+                                    (tagField |> TagField.raw |> String.trim |> Tag.fromMarkdown)
+                                    (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
 
                             Deleted tagId ->
                                 TagsChanges.remove tagId
 
-                            New { id, tagField, tagDescriptionField } ->
-                                TagsChanges.insert <|
-                                    DescribedTag.create
-                                        id
-                                        (tagField |> TagField.raw |> String.trim |> Tag.fromMarkdown)
-                                        (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
+                            New { tagField, tagDescriptionField } ->
+                                TagsChanges.insert
+                                    (tagField |> TagField.raw |> String.trim |> Tag.fromMarkdown)
+                                    (tagDescriptionField |> TagDescriptionField.raw |> String.trim |> TagDescription.fromMarkdown)
                     )
                     TagsChanges.empty
 
@@ -66,23 +60,21 @@ rows tagsForm =
             form.rows
 
 
-create : List DescribedTag -> TagsForm
+create : List { id : TagId, tag : Tag, description : TagDescription } -> TagsForm
 create rows_ =
     TagsForm
         { rows =
             rows_
                 |> List.map
-                    (\describedTag ->
+                    (\{ id, tag, description } ->
                         Existing
-                            { id = DescribedTag.id describedTag
+                            { id = id
                             , tagField =
-                                describedTag
-                                    |> DescribedTag.tag
+                                tag
                                     |> Tag.raw
                                     |> TagField.fromString
                             , tagDescriptionField =
-                                describedTag
-                                    |> DescribedTag.description
+                                description
                                     |> TagDescription.raw
                                     |> TagDescriptionField.fromString
                             }
@@ -171,10 +163,9 @@ validate tagsForm =
                         Deleted _ ->
                             row
 
-                        New { id, tagField, tagDescriptionField } ->
+                        New { tagField, tagDescriptionField } ->
                             New
-                                { id = id
-                                , tagField = validateTagField tagField
+                                { tagField = validateTagField tagField
                                 , tagDescriptionField = validateTagDescriptionField tagDescriptionField
                                 }
 
@@ -295,20 +286,15 @@ updateTagDescription index body tagsForm =
                 |> validate
 
 
-addRow : TagId -> TagsForm -> TagsForm
-addRow id tagsForm =
+addRow : TagsForm -> TagsForm
+addRow tagsForm =
     case tagsForm of
         TagsForm form ->
             TagsForm
                 { form
                     | rows =
                         Array.push
-                            (New
-                                { id = id
-                                , tagField = TagField.empty
-                                , tagDescriptionField = TagDescriptionField.empty
-                                }
-                            )
+                            (New { tagField = TagField.empty, tagDescriptionField = TagDescriptionField.empty })
                             form.rows
                 }
                 |> validate

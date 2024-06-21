@@ -1,12 +1,11 @@
 module PageMsg exposing (PageMsg(..))
 
 import CommonModel exposing (CommonModel)
-import Data.GlossaryItemId exposing (GlossaryItemId)
 
 
 type PageMsg a
-    = NavigateToListAll CommonModel (Maybe GlossaryItemId)
-    | NavigateToCreateOrEdit (Maybe GlossaryItemId)
-    | NavigateToEditTitleAndAbout
-    | NavigateToManageTags
+    = NavigateToListAll CommonModel
+    | NavigateToCreateOrEdit CommonModel
+    | NavigateToEditTitleAndAbout CommonModel
+    | NavigateToManageTags CommonModel
     | Internal a

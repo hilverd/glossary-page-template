@@ -12,7 +12,6 @@ module MarkdownRenderers exposing (anchorTagHtmlTreeRenderer, htmlMsgRenderer, h
 import Accessibility.Key
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
-import Extras.String
 import Html exposing (Html)
 import Html.Attributes as Attr exposing (class)
 import Markdown.Block as Block
@@ -52,19 +51,10 @@ viewAnchorTag :
     -> List (Html msg)
     -> Html msg
 viewAnchorTag tabbable href target style renderedChildren =
-    let
-        isAbsoluteUrl : Bool
-        isAbsoluteUrl =
-            href
-                |> Maybe.map Extras.String.isRelativeUrl
-                |> (==) (Just False)
-    in
     Html.a
         [ Accessibility.Key.tabbable tabbable
         , Extras.HtmlAttribute.showMaybe Attr.href href
         , Extras.HtmlAttribute.showMaybe Attr.target target
-        , Extras.HtmlAttribute.showIf (isAbsoluteUrl && target == Nothing) <| Attr.target "_blank"
-        , Extras.HtmlAttribute.showIf (isAbsoluteUrl && target == Nothing) <| Attr.rel "noopener noreferrer"
         , Extras.HtmlAttribute.showMaybe (Attr.attribute "style") style
         ]
         renderedChildren
@@ -101,18 +91,12 @@ htmlMsgRenderer { enableMathSupport, makeLinksTabbable } =
                     Html.code [] [ Html.text content ]
         , link =
             \link content ->
-                let
-                    isAbsoluteUrl =
-                        not <| Extras.String.isRelativeUrl link.destination
-                in
                 case link.title of
                     Just title ->
                         Html.a
                             [ Attr.href link.destination
                             , Attr.title title
                             , Accessibility.Key.tabbable makeLinksTabbable
-                            , Extras.HtmlAttribute.showIf isAbsoluteUrl <| Attr.target "_blank"
-                            , Extras.HtmlAttribute.showIf isAbsoluteUrl <| Attr.rel "noopener noreferrer"
                             ]
                             content
 
@@ -120,8 +104,6 @@ htmlMsgRenderer { enableMathSupport, makeLinksTabbable } =
                         Html.a
                             [ Attr.href link.destination
                             , Accessibility.Key.tabbable makeLinksTabbable
-                            , Extras.HtmlAttribute.showIf isAbsoluteUrl <| Attr.target "_blank"
-                            , Extras.HtmlAttribute.showIf isAbsoluteUrl <| Attr.rel "noopener noreferrer"
                             ]
                             content
         , codeBlock =

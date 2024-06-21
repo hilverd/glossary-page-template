@@ -8,14 +8,13 @@ module Export.Markdown exposing (toString, download)
 
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
-import Data.DescribedTag as DescribedTag
-import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
+import Data.Glossary as Glossary exposing (Glossary, aboutSection)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
-import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
-import Data.GlossaryItemsForUi as GlossaryItems
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItems as GlossaryItems
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.TagDescription as TagDescription
 import Extras.HtmlTree
@@ -59,20 +58,20 @@ paragraphs =
         >> String.join (crlf ++ crlf)
 
 
-itemToMarkdown : GlossaryItemForUi -> String
+itemToMarkdown : GlossaryItemForHtml -> String
 itemToMarkdown glossaryItem =
     let
         termsString : String
         termsString =
             glossaryItem
-                |> GlossaryItemForUi.allTerms
+                |> GlossaryItemForHtml.allTerms
                 |> List.map (Term.markdown >> bold)
                 |> String.join ("\\" ++ crlf)
 
         tagsString : String
         tagsString =
             glossaryItem
-                |> GlossaryItemForUi.allTags
+                |> GlossaryItemForHtml.allTags
                 |> List.map Tag.markdown
                 |> String.join ", "
                 |> (\str ->
@@ -84,12 +83,12 @@ itemToMarkdown glossaryItem =
                    )
 
         definitions =
-            GlossaryItemForUi.definition glossaryItem
+            GlossaryItemForHtml.definition glossaryItem
                 |> Maybe.map List.singleton
                 |> Maybe.withDefault []
 
         relatedTerms =
-            GlossaryItemForUi.relatedPreferredTerms glossaryItem
+            GlossaryItemForHtml.relatedPreferredTerms glossaryItem
 
         definitionsString : String
         definitionsString =
@@ -121,17 +120,17 @@ itemToMarkdown glossaryItem =
 
 {-| Export a glossary to Markdown format.
 -}
-toString : GlossaryForUi -> String
-toString glossaryForUi =
+toString : Glossary -> String
+toString glossary =
     let
         title =
-            GlossaryForUi.title glossaryForUi
+            Glossary.title glossary
 
         aboutSection =
-            GlossaryForUi.aboutSection glossaryForUi
+            Glossary.aboutSection glossary
 
         items =
-            GlossaryForUi.items glossaryForUi
+            Glossary.items glossary
 
         titleHeadingString : String
         titleHeadingString =
@@ -149,17 +148,17 @@ toString glossaryForUi =
 
         tagsString : String
         tagsString =
-            glossaryForUi
-                |> GlossaryForUi.items
-                |> GlossaryItems.describedTags
+            glossary
+                |> Glossary.items
+                |> GlossaryItems.tagsWithDescriptions
                 |> List.map
-                    (\describedTag ->
+                    (\( tag, tagDescription ) ->
                         "* "
-                            ++ (Tag.markdown <| DescribedTag.tag describedTag)
+                            ++ Tag.markdown tag
                             ++ " "
                             ++ Extras.String.emDash
                             ++ " "
-                            ++ (TagDescription.markdown <| DescribedTag.description describedTag)
+                            ++ TagDescription.markdown tagDescription
                     )
                 |> lines
 
@@ -196,17 +195,17 @@ toString glossaryForUi =
 {-| Export a glossary to a Markdown file.
 This is achieved by producing a [command for downloading](https://package.elm-lang.org/packages/elm/file/latest/File.Download) this file.
 -}
-download : GlossaryForUi -> Cmd msg
-download glossaryForUi =
+download : Glossary -> Cmd msg
+download glossary =
     let
         title : GlossaryTitle
         title =
-            GlossaryForUi.title glossaryForUi
+            Glossary.title glossary
 
         filename : String
         filename =
             GlossaryTitle.toFilename ".md" title
     in
-    glossaryForUi
+    glossary
         |> toString
         |> Download.string filename "text/markdown"

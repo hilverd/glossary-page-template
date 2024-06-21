@@ -4,9 +4,8 @@ import Components.SearchDialog as SearchDialog
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
-import Data.GlossaryItemId as GlossaryItemId
-import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
+import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Expect
 import Search
 import Test exposing (Test, describe, test)
@@ -17,13 +16,12 @@ termFromBody body =
     Term.fromMarkdown body False
 
 
-loadedGlossaryItemsForUi : GlossaryItemsForUi
-loadedGlossaryItemsForUi =
+loadedGlossaryItems : GlossaryItems
+loadedGlossaryItems =
     let
-        one : GlossaryItemForUi
+        one : GlossaryItemForHtml
         one =
-            GlossaryItemForUi.create
-                (GlossaryItemId.create "The term one")
+            GlossaryItemForHtml.create
                 (termFromBody "The term one")
                 []
                 Nothing
@@ -35,10 +33,9 @@ loadedGlossaryItemsForUi =
                 Nothing
                 Nothing
 
-        two : GlossaryItemForUi
+        two : GlossaryItemForHtml
         two =
-            GlossaryItemForUi.create
-                (GlossaryItemId.create "Second the term")
+            GlossaryItemForHtml.create
                 (termFromBody "Second the term")
                 []
                 Nothing
@@ -50,10 +47,9 @@ loadedGlossaryItemsForUi =
                 Nothing
                 Nothing
 
-        three : GlossaryItemForUi
+        three : GlossaryItemForHtml
         three =
-            GlossaryItemForUi.create
-                (GlossaryItemId.create "The term three")
+            GlossaryItemForHtml.create
                 (termFromBody "The term three")
                 []
                 Nothing
@@ -66,8 +62,8 @@ loadedGlossaryItemsForUi =
                 Nothing
     in
     [ one, two, three ]
-        |> GlossaryItemsForUi.fromList []
-        |> Result.withDefault GlossaryItemsForUi.empty
+        |> GlossaryItems.fromList []
+        |> Result.withDefault GlossaryItems.empty
 
 
 suite : Test
@@ -76,7 +72,7 @@ suite =
         [ describe "Search.search"
             [ test "returns search results sorted by relevance for a given search string" <|
                 \_ ->
-                    loadedGlossaryItemsForUi
+                    loadedGlossaryItems
                         |> Search.search False Nothing "term"
                         |> List.map SearchDialog.searchResultHref
                         |> Expect.equal
@@ -86,7 +82,7 @@ suite =
                             ]
             , test "terms for which the search string is a prefix are ranked higher than other terms" <|
                 \_ ->
-                    loadedGlossaryItemsForUi
+                    loadedGlossaryItems
                         |> Search.search False Nothing "the"
                         |> List.map SearchDialog.searchResultHref
                         |> Expect.equal
@@ -96,7 +92,7 @@ suite =
                             ]
             , test "also searches definitions, but terms take priority" <|
                 \_ ->
-                    loadedGlossaryItemsForUi
+                    loadedGlossaryItems
                         |> Search.search False Nothing "three"
                         |> List.map SearchDialog.searchResultHref
                         |> Expect.equal

@@ -23,7 +23,6 @@ import Accessibility.Key
 import Accessibility.Role
 import Array
 import Browser.Navigation
-import Data.GradualVisibility exposing (GradualVisibility(..))
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
@@ -39,6 +38,12 @@ import Task
 
 
 -- MODEL
+
+
+type GradualVisibility
+    = Visible
+    | Disappearing
+    | Invisible
 
 
 type Model parentMsg

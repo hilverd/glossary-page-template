@@ -1,9 +1,9 @@
-module Data.GlossaryItemId exposing (GlossaryItemId, create, toString, codec)
+module Data.GlossaryItemId exposing (GlossaryItemId, create, toInt, codec)
 
 {-| An identifier for a glossary item.
 These are used to keep track of items in `GlossaryItems` so that those can be changed safely.
 
-@docs GlossaryItemId, create, toString, codec
+@docs GlossaryItemId, create, toInt, codec
 
 -}
 
@@ -13,20 +13,20 @@ import Codec exposing (Codec)
 {-| An opaque type representing the ID of a glossary item.
 -}
 type GlossaryItemId
-    = GlossaryItemId String
+    = GlossaryItemId Int
 
 
 {-| Create a glossary item ID.
 -}
-create : String -> GlossaryItemId
+create : Int -> GlossaryItemId
 create =
     GlossaryItemId
 
 
 {-| Retrieve the underlying value for a glossary item ID.
 -}
-toString : GlossaryItemId -> String
-toString (GlossaryItemId id) =
+toInt : GlossaryItemId -> Int
+toInt (GlossaryItemId id) =
     id
 
 
@@ -34,4 +34,4 @@ toString (GlossaryItemId id) =
 -}
 codec : Codec GlossaryItemId
 codec =
-    Codec.map create toString Codec.string
+    Codec.map create toInt Codec.int

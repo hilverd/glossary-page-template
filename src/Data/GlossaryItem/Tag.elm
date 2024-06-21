@@ -91,7 +91,7 @@ markdown (MarkdownTag { body }) =
     MarkdownFragment.raw body
 
 
-{-| Compare two tags for ordering them alphabetically.
+{-| Compares two tags for ordering them alphabetically.
 -}
 compareAlphabetically : Tag -> Tag -> Order
 compareAlphabetically tag1 tag2 =
@@ -99,13 +99,13 @@ compareAlphabetically tag1 tag2 =
         (tag1
             |> inlineText
             |> String.Normalize.removeDiacritics
-            |> Extras.String.preserveOnlyAlphanumChars
+            |> Extras.String.preserveOnlyAlphaNumChars
             |> String.toUpper
         )
         (tag2
             |> inlineText
             |> String.Normalize.removeDiacritics
-            |> Extras.String.preserveOnlyAlphanumChars
+            |> Extras.String.preserveOnlyAlphaNumChars
             |> String.toUpper
         )
 

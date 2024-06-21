@@ -61,7 +61,7 @@ prefixed =
 
 reserved : String -> Bool
 reserved =
-    String.toLower >> String.startsWith prefix
+    String.startsWith prefix
 
 
 container : String
@@ -170,7 +170,7 @@ termIndexGroupLabel staticSidebar groupLabel =
 
 glossaryItemDiv : GlossaryItemId -> String
 glossaryItemDiv index =
-    prefixed <| "item-" ++ (index |> GlossaryItemId.toString)
+    prefixed <| "item-" ++ (index |> GlossaryItemId.toInt |> String.fromInt)
 
 
 indexForMobile : String

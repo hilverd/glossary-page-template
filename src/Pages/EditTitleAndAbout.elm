@@ -15,9 +15,10 @@ import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
 import Data.Editability as Editability
+import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist
-import Data.GlossaryForUi as Glossary
+import Data.GlossaryItems exposing (GlossaryItems)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.Saving exposing (Saving(..))
 import ElementIds
@@ -67,10 +68,10 @@ type alias Msg =
 
 init : CommonModel -> ( Model, Cmd Msg )
 init common =
-    case common.glossaryForUi of
-        Ok glossaryForUi ->
+    case common.glossary of
+        Ok glossary ->
             ( { common = common
-              , form = Form.create (Glossary.title glossaryForUi) (Glossary.aboutSection glossaryForUi)
+              , form = Form.create (Glossary.title glossary) (Glossary.aboutSection glossary)
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
               }
@@ -135,8 +136,8 @@ update msg model =
             ( { model | form = Form.deleteAboutLink aboutLinkIndex model.form }, Cmd.none )
 
         Save ->
-            case model.common.glossaryForUi of
-                Ok glossaryForUi ->
+            case model.common.glossary of
+                Ok glossary ->
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
@@ -149,24 +150,26 @@ update msg model =
                         let
                             changelist =
                                 GlossaryChangelist.create
-                                    (Glossary.versionNumber glossaryForUi)
+                                    (Glossary.versionNumber glossary)
                                     [ GlossaryChange.SetTitle <| titleFromForm model.form
                                     , GlossaryChange.SetAboutSection <| aboutSectionFromForm model.form
                                     ]
 
                             ( saving, cmd ) =
                                 Save.changeAndSave model.common.editability
-                                    glossaryForUi
+                                    glossary
                                     changelist
                                     (PageMsg.Internal << FailedToSave)
-                                    (\( _, updatedGlossaryForUi ) ->
+                                    (\( maybeGlossaryItemId, updatedGlossary ) ->
                                         let
                                             common0 =
                                                 model.common
                                         in
                                         PageMsg.NavigateToListAll
-                                            { common0 | glossaryForUi = Ok updatedGlossaryForUi }
-                                            Nothing
+                                            { common0
+                                                | maybeId = maybeGlossaryItemId
+                                                , glossary = Ok updatedGlossary
+                                            }
                                     )
                         in
                         ( { model | saving = saving }
@@ -477,8 +480,8 @@ orMaybe first second =
             second
 
 
-viewCreateFormFooter : Model -> Bool -> Html Msg
-viewCreateFormFooter model showValidationErrors =
+viewCreateFormFooter : Model -> Bool -> GlossaryItems -> Html Msg
+viewCreateFormFooter model showValidationErrors glossaryItems =
     let
         form =
             model.form
@@ -494,6 +497,19 @@ viewCreateFormFooter model showValidationErrors =
                     [ class "text-red-600 dark:text-red-400" ]
                     [ text message ]
                 ]
+
+        common : CommonModel
+        common =
+            model.common
+
+        updatedGlossary : Result String Glossary
+        updatedGlossary =
+            case common.glossary of
+                Ok glossary ->
+                    Ok <| Glossary.setItems glossaryItems glossary
+
+                error ->
+                    error
     in
     div
         [ class "pt-5 lg:border-t dark:border-gray-700 flex flex-col items-center" ]
@@ -508,7 +524,7 @@ viewCreateFormFooter model showValidationErrors =
             [ Components.Button.white
                 (saving /= SavingInProgress)
                 [ Html.Events.onClick <|
-                    PageMsg.NavigateToListAll model.common Nothing
+                    PageMsg.NavigateToListAll { common | glossary = updatedGlossary }
                 ]
                 [ text I18n.cancel ]
             , Components.Button.primary
@@ -532,64 +548,71 @@ viewCreateFormFooter model showValidationErrors =
 
 view : Model -> Document Msg
 view model =
-    let
-        title1 : GlossaryTitle.GlossaryTitle
-        title1 =
-            titleFromForm model.form
+    case model.common.glossary of
+        Ok glossary ->
+            let
+                title1 : GlossaryTitle.GlossaryTitle
+                title1 =
+                    titleFromForm model.form
 
-        aboutSection : AboutSection
-        aboutSection =
-            aboutSectionFromForm model.form
-    in
-    { title = GlossaryTitle.inlineText title1
-    , body =
-        [ div
-            [ class "container mx-auto px-6 pb-12 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
-            [ main_
-                []
-                [ h1
-                    [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
-                    [ text I18n.editTitleAndAboutSectionHeading
-                    ]
-                , form
-                    [ class "pt-7" ]
-                    [ div
-                        [ class "lg:flex lg:space-x-8" ]
-                        [ div
-                            [ class "lg:w-1/2 space-y-7 lg:space-y-8" ]
-                            [ viewEditTitle model.common.enableMathSupport model.triedToSaveWhenFormInvalid <| Form.titleField model.form
-                            , viewEditAboutParagraph model.common.enableMathSupport model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
-                            , viewEditAboutLinks model.triedToSaveWhenFormInvalid <| Form.aboutLinkFields model.form
+                aboutSection : AboutSection
+                aboutSection =
+                    aboutSectionFromForm model.form
+            in
+            { title = GlossaryTitle.inlineText title1
+            , body =
+                [ div
+                    [ class "container mx-auto px-6 pb-12 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
+                    [ main_
+                        []
+                        [ h1
+                            [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
+                            [ text I18n.editTitleAndAboutSectionHeading
                             ]
-                        , div
-                            [ class "mt-8 lg:w-1/2 lg:mt-0 text-gray-900 dark:text-gray-100" ]
-                            [ Html.fieldset
-                                [ class "border border-solid rounded-md border-gray-300 dark:border-gray-700 p-4" ]
-                                [ Html.legend
-                                    [ class "text-xl text-center text-gray-800 dark:text-gray-300 px-3 py-0.5 select-none" ]
-                                    [ text I18n.preview ]
-                                , h2
-                                    [ class "pb-4" ]
-                                    [ GlossaryTitle.view model.common.enableMathSupport
-                                        [ class "text-2xl font-bold leading-tight text-gray-700 dark:text-gray-300" ]
-                                        title1
+                        , form
+                            [ class "pt-7" ]
+                            [ div
+                                [ class "lg:flex lg:space-x-8" ]
+                                [ div
+                                    [ class "lg:w-1/2 space-y-7 lg:space-y-8" ]
+                                    [ viewEditTitle model.common.enableMathSupport model.triedToSaveWhenFormInvalid <| Form.titleField model.form
+                                    , viewEditAboutParagraph model.common.enableMathSupport model.triedToSaveWhenFormInvalid <| Form.aboutParagraphField model.form
+                                    , viewEditAboutLinks model.triedToSaveWhenFormInvalid <| Form.aboutLinkFields model.form
                                     ]
-                                , Components.AboutSection.view
-                                    { enableMathSupport = model.common.enableMathSupport
-                                    , modalDialogShown = False
-                                    }
-                                    aboutSection
+                                , div
+                                    [ class "mt-8 lg:w-1/2 lg:mt-0 text-gray-900 dark:text-gray-100" ]
+                                    [ Html.fieldset
+                                        [ class "border border-solid rounded-md border-gray-300 dark:border-gray-700 p-4" ]
+                                        [ Html.legend
+                                            [ class "text-xl text-center text-gray-800 dark:text-gray-300 px-3 py-0.5 select-none" ]
+                                            [ text I18n.preview ]
+                                        , h2
+                                            [ class "pb-4" ]
+                                            [ GlossaryTitle.view model.common.enableMathSupport
+                                                [ class "text-2xl font-bold leading-tight text-gray-700 dark:text-gray-300" ]
+                                                title1
+                                            ]
+                                        , Components.AboutSection.view
+                                            { enableMathSupport = model.common.enableMathSupport
+                                            , modalDialogShown = False
+                                            }
+                                            aboutSection
+                                        ]
+                                    ]
                                 ]
+                            , div
+                                [ class "mt-4 lg:mt-8" ]
+                                [ viewCreateFormFooter model model.triedToSaveWhenFormInvalid (Glossary.items glossary) ]
                             ]
                         ]
-                    , div
-                        [ class "mt-4 lg:mt-8" ]
-                        [ viewCreateFormFooter model model.triedToSaveWhenFormInvalid ]
                     ]
                 ]
-            ]
-        ]
-    }
+            }
+
+        Err _ ->
+            { title = I18n.glossaryCapitalised
+            , body = [ text I18n.somethingWentWrong ]
+            }
 
 
 

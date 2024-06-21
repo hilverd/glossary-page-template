@@ -12,7 +12,7 @@ module Data.IndexOfTerms exposing (Entry(..), TermGroup, IndexOfTerms, fromGloss
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemId exposing (GlossaryItemId)
-import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
+import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
 import Data.TagId exposing (TagId)
 import Dict exposing (Dict)
 
@@ -42,19 +42,19 @@ type IndexOfTerms
 
 {-| Create an index of terms from glossary items.
 -}
-fromGlossaryItems : Maybe TagId -> GlossaryItemsForUi -> IndexOfTerms
-fromGlossaryItems filterByTagId glossaryItemsForUi =
+fromGlossaryItems : Maybe TagId -> GlossaryItems -> IndexOfTerms
+fromGlossaryItems filterByTagId glossaryItems =
     let
         entryListsByFirstAlphabeticCharacterOrEllipsis : Dict String (List Entry)
         entryListsByFirstAlphabeticCharacterOrEllipsis =
             let
                 disambiguatedPreferredTerms : List ( GlossaryItemId, DisambiguatedTerm )
                 disambiguatedPreferredTerms =
-                    GlossaryItemsForUi.disambiguatedPreferredTerms filterByTagId glossaryItemsForUi
+                    GlossaryItems.disambiguatedPreferredTerms filterByTagId glossaryItems
 
                 preferredTermsByAlternativeTerm : List ( Term, List ( GlossaryItemId, DisambiguatedTerm ) )
                 preferredTermsByAlternativeTerm =
-                    GlossaryItemsForUi.disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItemsForUi
+                    GlossaryItems.disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItems
 
                 resultAfterAddingPreferredTerms : Dict String (List Entry)
                 resultAfterAddingPreferredTerms =

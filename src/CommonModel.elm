@@ -2,7 +2,8 @@ module CommonModel exposing (CommonModel, relativeUrl)
 
 import Browser.Navigation exposing (Key)
 import Data.Editability exposing (Editability)
-import Data.GlossaryForUi exposing (GlossaryForUi)
+import Data.Glossary exposing (Glossary)
+import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.Theme exposing (Theme)
 import QueryParameters exposing (QueryParameters)
 import Url exposing (Url)
@@ -17,8 +18,9 @@ type alias CommonModel =
     , editability : Editability
     , enableMathSupport : Bool
     , queryParameters : QueryParameters
+    , maybeId : Maybe GlossaryItemId
     , fragment : Maybe String
-    , glossaryForUi : Result String GlossaryForUi
+    , glossary : Result String Glossary
     }
 
 
@@ -28,7 +30,12 @@ relativeUrl commonModel =
         |> QueryParameters.toRelativeUrl
         |> (\urlString ->
                 if urlString == "" then
-                    "?"
+                    let
+                        initialUrl =
+                            commonModel.initialUrl
+                    in
+                    { initialUrl | query = Nothing }
+                        |> Url.toString
 
                 else
                     urlString
