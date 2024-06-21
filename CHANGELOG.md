@@ -16,6 +16,27 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 ### Removed
 
+## [5.0.0] - 2024-06-21
+
+This version contains the changes that were originally released in 4.7.0 (and then temporarily reverted in 4.7.1).
+
+The **breaking** change is that there are now stricter validation rules around preferred and alternative terms. In particular, a preferred term cannot also appear as an alternative term in any item.
+
+If your glossary does not violate this rule then upgrading should hopefully be easy. Otherwise, you can follow the steps below.
+
+1. Upgrade to 5.0.0
+2. Edit the glossary and save without making any changes
+3. If this doesn't get past the validation, revert back to version 4.7.1 and then make the necessary changes
+4. Go back to step 1.
+
+### Changed
+
+- Make link for scrolling back to top dynamically appear at bottom right when (probably) needed -- instead of always being visible at the top left.
+- Open external links in a new tab.
+- Show at most 40 search results.
+- Upgrade KaTeX to version 0.16.10.
+- Make the `worker.min.js` script more performant by removing UI specific concerns.
+
 ## [4.7.1] - 2024-06-21
 
 This release brings back version 4.6.0. The changes for 4.7.0 should have been released as a new major version, as there are breaking changes.
@@ -28,7 +49,7 @@ This release brings back version 4.6.0. The changes for 4.7.0 should have been r
 - Open external links in a new tab.
 - Show at most 40 search results.
 - Upgrade KaTeX to version 0.16.10.
-- Make `worker.min.js` script more performant by removing UI specific concerns.
+- Make the `worker.min.js` script more performant by removing UI specific concerns.
 
 ## [4.6.0] - 2024-03-04
 
@@ -721,7 +742,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v4.7.1...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.0.0...HEAD
+[5.0.0]: https://github.com/hilverd/glossary-page-template/compare/v4.7.1...v5.0.0
 [4.7.1]: https://github.com/hilverd/glossary-page-template/compare/v4.7.0...v4.7.1
 [4.7.0]: https://github.com/hilverd/glossary-page-template/compare/v4.6.0...v4.7.0
 [4.6.0]: https://github.com/hilverd/glossary-page-template/compare/v4.5.1...v4.6.0
