@@ -6,6 +6,7 @@ import Data.DescribedTagFromDom exposing (DescribedTagFromDom)
 import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryFromDom as GlossaryFromDom exposing (ApplyChangesResult(..))
+import Data.GlossaryItem.TermFromDom as TermFromDom
 import Data.GlossaryVersionNumber as GlossaryVersionNumber
 import Data.TagId as TagId exposing (TagId)
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
@@ -50,7 +51,24 @@ suite =
                         |> Expect.equal (Ok TestData.glossaryFromDom)
             ]
         , describe "can apply changes"
-            [ test "that insert tags" <|
+            [ test "unless any term starts with 'glossary-page-' (after changing to lowercase)" <|
+                \_ ->
+                    let
+                        changeList =
+                            GlossaryChangelist.create
+                                GlossaryVersionNumber.initial
+                                [ GlossaryChange.Insert
+                                    { loanItemFromDom
+                                        | id = "some-id"
+                                        , preferredTerm = TermFromDom.create False "Glossary-Page-Foo"
+                                    }
+                                ]
+                    in
+                    glossaryFromDom
+                        |> GlossaryFromDom.applyChanges changeList
+                        |> Expect.equal
+                            (LogicalErrorWhenApplyingChanges "This term is reserved: Glossary-Page-Foo")
+            , test "that insert tags" <|
                 \_ ->
                     let
                         tagsChanges : TagsChanges
@@ -215,7 +233,6 @@ suite =
 
    TODO Test these constraints:
 
-   * a term cannot start with "glossary-page-" (after changing to lowercase)
    * an item's preferred term cannot be the same as an alternative term in any item
    * an item cannot have two identical alternative terms
 -}
