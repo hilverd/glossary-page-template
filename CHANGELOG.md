@@ -16,7 +16,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 ### Removed
 
-## [5.0.0] - 2024-06-21
+## [5.0.1] - 2024-06-21
 
 This version contains the changes that were originally released in 4.7.0 (and then temporarily reverted in 4.7.1).
 
@@ -24,7 +24,7 @@ The **breaking** change is that there are now stricter validation rules around p
 
 If your glossary does not violate this rule then upgrading should hopefully be easy. Otherwise, you can follow the steps below.
 
-1. Upgrade to 5.0.0
+1. Upgrade to 5.0.1
 2. Edit the glossary and save without making any changes
 3. If this doesn't get past the validation, revert back to version 4.7.1 and then make the necessary changes
 4. Go back to step 1.
@@ -742,8 +742,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.0.0...HEAD
-[5.0.0]: https://github.com/hilverd/glossary-page-template/compare/v4.7.1...v5.0.0
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.0.1...HEAD
+[5.0.1]: https://github.com/hilverd/glossary-page-template/compare/v4.7.1...v5.0.1
 [4.7.1]: https://github.com/hilverd/glossary-page-template/compare/v4.7.0...v4.7.1
 [4.7.0]: https://github.com/hilverd/glossary-page-template/compare/v4.6.0...v4.7.0
 [4.6.0]: https://github.com/hilverd/glossary-page-template/compare/v4.5.1...v4.6.0
