@@ -1,4 +1,4 @@
-module Pages.ManageTags exposing (InternalMsg, Model, Msg, init, subscriptions, update, view)
+port module Pages.ManageTags exposing (InternalMsg, Model, Msg, init, subscriptions, update, view)
 
 import Accessibility exposing (Html, div, form, h1, main_, p, span, text)
 import Accessibility.Aria
@@ -10,13 +10,14 @@ import Components.Button
 import Components.Form
 import Components.Spinner
 import Data.Editability as Editability
-import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist
+import Data.GlossaryForUi as Glossary
 import Data.GlossaryItem.Tag as Tag
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItemsForUi as GlossaryItems
 import Data.Saving exposing (Saving(..))
 import Data.TagDescription as TagDescription
+import Data.TagId as TagId
 import ElementIds
 import Extras.Html
 import Extras.HtmlAttribute
@@ -66,6 +67,7 @@ updateForm f model =
 type InternalMsg
     = NoOp
     | AddRow
+    | ReceiveUuidForAddingRow String
     | DeleteRow Int
     | UpdateTag Int String
     | UpdateTagDescription Int String
@@ -79,13 +81,13 @@ type alias Msg =
 
 init : CommonModel -> ( Model, Cmd Msg )
 init common =
-    case common.glossary of
-        Ok glossary ->
+    case common.glossaryForUi of
+        Ok glossaryForUi ->
             ( { common = common
               , form =
-                    glossary
+                    glossaryForUi
                         |> Glossary.items
-                        |> GlossaryItems.tagsWithIdsAndDescriptions
+                        |> GlossaryItems.describedTags
                         |> Form.create
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
@@ -104,6 +106,16 @@ init common =
 
 
 
+-- PORTS
+
+
+port generateUuid : () -> Cmd msg
+
+
+port receiveUuidForAddingRow : (String -> msg) -> Sub msg
+
+
+
 -- UPDATE
 
 
@@ -114,10 +126,13 @@ update msg model =
             ( model, Cmd.none )
 
         AddRow ->
+            ( model, generateUuid () )
+
+        ReceiveUuidForAddingRow uuid ->
             let
                 form : TagsForm
                 form =
-                    Form.addRow model.form
+                    Form.addRow (TagId.create uuid) model.form
 
                 latestIndex : Int
                 latestIndex =
@@ -137,8 +152,8 @@ update msg model =
             ( updateForm (Form.updateTagDescription index body) model, Cmd.none )
 
         Save ->
-            case model.common.glossary of
-                Ok glossary ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
@@ -152,24 +167,22 @@ update msg model =
                             changelist : GlossaryChangelist.GlossaryChangelist
                             changelist =
                                 GlossaryChangelist.create
-                                    (Glossary.versionNumber glossary)
+                                    (Glossary.versionNumber glossaryForUi)
                                     [ GlossaryChange.ChangeTags <| Form.changes model.form ]
 
                             ( saving, cmd ) =
                                 Save.changeAndSave model.common.editability
-                                    glossary
+                                    glossaryForUi
                                     changelist
                                     (PageMsg.Internal << FailedToSave)
-                                    (\( maybeGlossaryItemId, updatedGlossary ) ->
+                                    (\( _, updatedGlossaryForUi ) ->
                                         let
                                             common0 =
                                                 model.common
                                         in
                                         PageMsg.NavigateToListAll
-                                            { common0
-                                                | maybeId = maybeGlossaryItemId
-                                                , glossary = Ok updatedGlossary
-                                            }
+                                            { common0 | glossaryForUi = Ok updatedGlossaryForUi }
+                                            Nothing
                                     )
                         in
                         ( { model | saving = saving }
@@ -413,8 +426,8 @@ viewEditTags { enableMathSupport, tabbable, showValidationErrors } tagsFormRowsA
         ]
 
 
-viewFooter : Model -> Bool -> GlossaryItems -> Html Msg
-viewFooter model showValidationErrors glossaryItems =
+viewFooter : Model -> Bool -> Html Msg
+viewFooter model showValidationErrors =
     let
         form =
             model.form
@@ -430,19 +443,6 @@ viewFooter model showValidationErrors glossaryItems =
                     [ class "text-red-600 dark:text-red-400" ]
                     [ text message ]
                 ]
-
-        common : CommonModel
-        common =
-            model.common
-
-        updatedGlossary : Result String Glossary
-        updatedGlossary =
-            case common.glossary of
-                Ok glossary ->
-                    Ok <| Glossary.setItems glossaryItems glossary
-
-                error ->
-                    error
     in
     div
         [ class "pt-5 lg:border-t dark:border-gray-700 flex flex-col items-center" ]
@@ -468,7 +468,7 @@ viewFooter model showValidationErrors glossaryItems =
             [ Components.Button.white
                 (saving /= SavingInProgress)
                 [ Html.Events.onClick <|
-                    PageMsg.NavigateToListAll { common | glossary = updatedGlossary }
+                    PageMsg.NavigateToListAll model.common Nothing
                 ]
                 [ text I18n.cancel ]
             , Components.Button.primary
@@ -492,55 +492,48 @@ viewFooter model showValidationErrors glossaryItems =
 
 view : Model -> Document Msg
 view model =
-    case model.common.glossary of
-        Ok glossary ->
-            { title = I18n.manageTagsTitle
-            , body =
-                [ div
-                    [ class "container mx-auto px-6 pb-12 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
-                    [ main_
-                        []
-                        [ h1
-                            [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
-                            [ text I18n.manageTagsTitle
-                            ]
-                        , p
-                            [ class "mt-6 max-w-prose text-gray-900 dark:text-gray-100" ]
-                            [ text I18n.youCanUseTagsToAttachLabels ]
-                        , Html.details
-                            []
-                            [ Html.summary
-                                [ class "mt-2 mb-1 items-center font-medium text-gray-900 dark:text-gray-100 select-none" ]
-                                [ span
-                                    [ class "ml-2" ]
-                                    [ text I18n.readMore ]
-                                ]
-                            , div
-                                [ class "mb-1 max-w-prose text-gray-900 dark:text-gray-100" ]
-                                [ text I18n.whyTagsMayBeUseful ]
-                            ]
-                        , form
-                            [ class "pt-7" ]
-                            [ model.form
-                                |> Form.rows
-                                |> viewEditTags
-                                    { enableMathSupport = model.common.enableMathSupport
-                                    , tabbable = True
-                                    , showValidationErrors = model.triedToSaveWhenFormInvalid
-                                    }
-                            , div
-                                [ class "mt-4 lg:mt-8" ]
-                                [ glossary |> Glossary.items |> viewFooter model model.triedToSaveWhenFormInvalid ]
-                            ]
+    { title = I18n.manageTagsTitle
+    , body =
+        [ div
+            [ class "container mx-auto px-6 pb-12 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
+            [ main_
+                []
+                [ h1
+                    [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
+                    [ text I18n.manageTagsTitle
+                    ]
+                , p
+                    [ class "mt-6 max-w-prose text-gray-900 dark:text-gray-100" ]
+                    [ text I18n.youCanUseTagsToAttachLabels ]
+                , Html.details
+                    []
+                    [ Html.summary
+                        [ class "mt-2 mb-1 items-center font-medium text-gray-900 dark:text-gray-100 select-none" ]
+                        [ span
+                            [ class "ml-2" ]
+                            [ text I18n.readMore ]
                         ]
+                    , div
+                        [ class "mb-1 max-w-prose text-gray-900 dark:text-gray-100" ]
+                        [ text I18n.whyTagsMayBeUseful ]
+                    ]
+                , form
+                    [ class "pt-7" ]
+                    [ model.form
+                        |> Form.rows
+                        |> viewEditTags
+                            { enableMathSupport = model.common.enableMathSupport
+                            , tabbable = True
+                            , showValidationErrors = model.triedToSaveWhenFormInvalid
+                            }
+                    , div
+                        [ class "mt-4 lg:mt-8" ]
+                        [ viewFooter model model.triedToSaveWhenFormInvalid ]
                     ]
                 ]
-            }
-
-        Err _ ->
-            { title = I18n.manageTagsTitle
-            , body = [ text I18n.somethingWentWrong ]
-            }
+            ]
+        ]
+    }
 
 
 
@@ -549,4 +542,6 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    ReceiveUuidForAddingRow
+        |> receiveUuidForAddingRow
+        |> Sub.map PageMsg.Internal

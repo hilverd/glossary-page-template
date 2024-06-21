@@ -14,16 +14,16 @@ import Components.GlossaryItemCard
 import Components.SelectMenu
 import Components.Spinner
 import Data.Editability as Editability
-import Data.Glossary as Glossary
 import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist
+import Data.GlossaryForUi as Glossary
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml)
-import Data.GlossaryItemId as GlossaryItemId
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
+import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
+import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.GlossaryTitle as GlossaryTitle
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.Saving exposing (Saving(..))
@@ -58,6 +58,7 @@ import Task
 
 type alias Model =
     { common : CommonModel
+    , itemBeingEdited : Maybe GlossaryItemId
     , form : GlossaryItemForm
     , triedToSaveWhenFormInvalid : Bool
     , saving : Saving
@@ -96,7 +97,7 @@ type InternalMsg
     | MoveRelatedTermDown RelatedTermIndex
     | ToggleNeedsUpdating
     | Save
-    | ReceiveCurrentDateTimeForSaving String
+    | ReceiveCurrentDateTimeAndNewIdForSaving ( String, String )
     | FailedToSave Http.Error
 
 
@@ -104,14 +105,14 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init : CommonModel -> ( Model, Cmd Msg )
-init commonModel =
-    case commonModel.glossary of
-        Ok glossary ->
+init : CommonModel -> Maybe GlossaryItemId -> ( Model, Cmd Msg )
+init commonModel itemBeingEdited =
+    case commonModel.glossaryForUi of
+        Ok glossaryForUi ->
             let
-                items : GlossaryItems
+                items : GlossaryItemsForUi
                 items =
-                    Glossary.items glossary
+                    Glossary.items glossaryForUi
 
                 emptyForm : GlossaryItemForm
                 emptyForm =
@@ -123,26 +124,27 @@ init commonModel =
                     Maybe.andThen
                         (\id ->
                             items
-                                |> GlossaryItems.get id
+                                |> GlossaryItemsForUi.get id
                                 |> Maybe.map
-                                    (\itemForHtml ->
-                                        Form.fromGlossaryItemForHtml
+                                    (\itemForUi ->
+                                        Form.fromGlossaryItemForUi
                                             items
                                             id
-                                            itemForHtml
+                                            itemForUi
                                     )
                         )
-                        commonModel.maybeId
+                        itemBeingEdited
                         |> Maybe.withDefault emptyForm
             in
-            ( { common = commonModel
+            ( { itemBeingEdited = itemBeingEdited
+              , common = commonModel
               , form = form
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
               , dropdownMenusWithMoreOptionsForRelatedTerms =
                     dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
-            , if commonModel.maybeId == Nothing then
+            , if itemBeingEdited == Nothing then
                 0 |> TermIndex.fromInt |> giveFocusToTermInputField
 
               else
@@ -150,8 +152,9 @@ init commonModel =
             )
 
         Err _ ->
-            ( { common = commonModel
-              , form = Form.empty GlossaryItems.empty Nothing
+            ( { itemBeingEdited = itemBeingEdited
+              , common = commonModel
+              , form = Form.empty GlossaryItemsForUi.empty Nothing
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
               , dropdownMenusWithMoreOptionsForRelatedTerms = Dict.empty
@@ -181,10 +184,10 @@ dropdownMenusWithMoreOptionsForRelatedTermsForForm form =
 -- PORTS
 
 
-port getCurrentDateTimeForSaving : () -> Cmd msg
+port getCurrentDateTimeAndNewIdForSaving : () -> Cmd msg
 
 
-port receiveCurrentDateTimeForSaving : (String -> msg) -> Sub msg
+port receiveCurrentDateTimeAndNewIdForSaving : (( String, String ) -> msg) -> Sub msg
 
 
 
@@ -353,11 +356,11 @@ update msg model =
             )
 
         Save ->
-            ( model, getCurrentDateTimeForSaving () )
+            ( model, getCurrentDateTimeAndNewIdForSaving () )
 
-        ReceiveCurrentDateTimeForSaving dateTime ->
-            case model.common.glossary of
-                Ok glossary ->
+        ReceiveCurrentDateTimeAndNewIdForSaving ( dateTime, newGlossaryItemIdString ) ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
                     if Form.hasValidationErrors model.form then
                         ( { model
                             | triedToSaveWhenFormInvalid = True
@@ -368,41 +371,43 @@ update msg model =
 
                     else
                         let
-                            newOrUpdatedGlossaryItem : GlossaryItemForHtml
-                            newOrUpdatedGlossaryItem =
-                                Form.toGlossaryItem (Glossary.items glossary) model.form <| Just dateTime
+                            newGlossaryItemId : GlossaryItemId
+                            newGlossaryItemId =
+                                GlossaryItemId.create newGlossaryItemIdString
 
-                            common : CommonModel
-                            common =
-                                model.common
+                            newOrUpdatedGlossaryItem : GlossaryItemForUi
+                            newOrUpdatedGlossaryItem =
+                                Form.toGlossaryItem
+                                    (Glossary.items glossaryForUi)
+                                    model.form
+                                    (model.itemBeingEdited |> Maybe.withDefault newGlossaryItemId)
+                                    (Just dateTime)
 
                             changelist =
-                                case common.maybeId of
-                                    Just id ->
+                                case model.itemBeingEdited of
+                                    Just _ ->
                                         GlossaryChangelist.create
-                                            (Glossary.versionNumber glossary)
-                                            [ GlossaryChange.Update id newOrUpdatedGlossaryItem ]
+                                            (Glossary.versionNumber glossaryForUi)
+                                            [ GlossaryChange.Update (GlossaryItemForUi.toGlossaryItemFromDom newOrUpdatedGlossaryItem) ]
 
                                     Nothing ->
                                         GlossaryChangelist.create
-                                            (Glossary.versionNumber glossary)
-                                            [ GlossaryChange.Insert newOrUpdatedGlossaryItem ]
+                                            (Glossary.versionNumber glossaryForUi)
+                                            [ GlossaryChange.Insert (GlossaryItemForUi.toGlossaryItemFromDom newOrUpdatedGlossaryItem) ]
 
                             ( saving, cmd ) =
                                 Save.changeAndSave model.common.editability
-                                    glossary
+                                    glossaryForUi
                                     changelist
                                     (PageMsg.Internal << FailedToSave)
-                                    (\( maybeGlossaryItemId, updatedGlossary ) ->
+                                    (\( itemToGiveFocus, updatedGlossaryForUi ) ->
                                         let
                                             common0 =
                                                 model.common
                                         in
                                         PageMsg.NavigateToListAll
-                                            { common0
-                                                | maybeId = maybeGlossaryItemId
-                                                , glossary = Ok updatedGlossary
-                                            }
+                                            { common0 | glossaryForUi = Ok updatedGlossaryForUi }
+                                            itemToGiveFocus
                                     )
                         in
                         ( { model | saving = saving }
@@ -647,7 +652,7 @@ viewTags enableMathSupport tagCheckboxes =
                     (\( ( tagId, tag ), checked ) ->
                         Components.Badge.indigoWithCheckbox
                             { tabbable = True, checked = checked }
-                            (tagId |> TagId.toInt |> String.fromInt |> (++) "tag-")
+                            (tagId |> TagId.toString |> (++) "tag-")
                             (PageMsg.Internal <| ToggleTagCheckbox tag)
                             [ class "mr-2 mb-2" ]
                             [ Tag.view enableMathSupport [] tag ]
@@ -855,13 +860,13 @@ viewAddRelatedTermButtonForEmptyState =
 viewCreateSeeAlso :
     Bool
     -> Bool
-    -> GlossaryItems
+    -> GlossaryItemsForUi
     -> Array TermField
     -> Array Form.RelatedTermField
     -> Dict Int Components.DropdownMenu.Model
     -> List DisambiguatedTerm
     -> Html Msg
-viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms relatedTermsArray dropdownMenusWithMoreOptionsForRelatedTerms suggestedRelatedTerms =
+viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItemsForUi terms relatedTermsArray dropdownMenusWithMoreOptionsForRelatedTerms suggestedRelatedTerms =
     let
         rawTermsSet : Set String
         rawTermsSet =
@@ -873,9 +878,9 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItems terms rel
 
         allPreferredTerms : List DisambiguatedTerm
         allPreferredTerms =
-            glossaryItems
-                |> GlossaryItems.orderedAlphabetically Nothing
-                |> List.map (Tuple.second >> GlossaryItemForHtml.disambiguatedPreferredTerm)
+            glossaryItemsForUi
+                |> GlossaryItemsForUi.orderedAlphabetically Nothing
+                |> List.map (Tuple.second >> GlossaryItemForUi.disambiguatedPreferredTerm)
     in
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
@@ -1023,7 +1028,7 @@ viewCreateFormFooter model =
             [ Components.Button.white
                 (saving /= SavingInProgress)
                 [ Html.Events.onClick <|
-                    PageMsg.NavigateToListAll common
+                    PageMsg.NavigateToListAll common model.itemBeingEdited
                 ]
                 [ text I18n.cancel ]
             , Components.Button.primary
@@ -1047,8 +1052,8 @@ viewCreateFormFooter model =
 
 view : Model -> Document Msg
 view model =
-    case model.common.glossary of
-        Ok glossary ->
+    case model.common.glossaryForUi of
+        Ok glossaryForUi ->
             let
                 terms : Array TermField
                 terms =
@@ -1070,15 +1075,15 @@ view model =
                 suggestedRelatedTerms =
                     Form.suggestRelatedTerms model.form
 
-                items : GlossaryItems
+                items : GlossaryItemsForUi
                 items =
-                    Glossary.items glossary
+                    Glossary.items glossaryForUi
 
-                newOrUpdatedGlossaryItem : GlossaryItemForHtml
+                newOrUpdatedGlossaryItem : GlossaryItemForUi
                 newOrUpdatedGlossaryItem =
-                    Form.toGlossaryItem items model.form Nothing
+                    Form.toGlossaryItem items model.form (GlossaryItemId.create "") Nothing
             in
-            { title = glossary |> Glossary.title |> GlossaryTitle.inlineText
+            { title = glossaryForUi |> Glossary.title |> GlossaryTitle.inlineText
             , body =
                 [ div
                     [ class "container mx-auto px-6 pb-16 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
@@ -1087,7 +1092,7 @@ view model =
                         [ h1
                             [ class "text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 print:text-black pt-6" ]
                             [ text <|
-                                if model.common.maybeId == Nothing then
+                                if model.itemBeingEdited == Nothing then
                                     I18n.createANewGlossaryItemCapitalised
 
                                 else
@@ -1149,7 +1154,7 @@ view model =
                                                     Nothing
                                                     Nothing
                                                     { previous = Nothing
-                                                    , item = Just ( GlossaryItemId.create -1, newOrUpdatedGlossaryItem )
+                                                    , item = Just newOrUpdatedGlossaryItem
                                                     , next = Nothing
                                                     }
                                                 ]
@@ -1179,7 +1184,8 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ receiveCurrentDateTimeForSaving ReceiveCurrentDateTimeForSaving
+        [ ReceiveCurrentDateTimeAndNewIdForSaving
+            |> receiveCurrentDateTimeAndNewIdForSaving
             |> Sub.map PageMsg.Internal
         , model.dropdownMenusWithMoreOptionsForRelatedTerms
             |> Dict.toList

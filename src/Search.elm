@@ -4,8 +4,8 @@ import Components.SearchDialog as SearchDialog
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItemForHtml as GlossaryItemForHtml
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItemForUi as GlossaryItemForUi
+import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.TagId exposing (TagId)
 import Extras.Html
 import Extras.Url
@@ -16,8 +16,8 @@ import Internationalisation exposing (preferredTerm)
 import Svg.Attributes
 
 
-search : Bool -> Maybe TagId -> String -> GlossaryItems -> List SearchDialog.SearchResult
-search enableMathSupport filterByTagId searchString glossaryItems =
+search : Bool -> Maybe TagId -> String -> GlossaryItemsForUi -> List SearchDialog.SearchResult
+search enableMathSupport filterByTagId searchString glossaryItemsForUi =
     let
         searchStringNormalised : String
         searchStringNormalised =
@@ -35,25 +35,25 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                     , definition : Maybe Definition
                     }
             candidates =
-                glossaryItems
-                    |> GlossaryItems.orderedAlphabetically filterByTagId
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.orderedAlphabetically filterByTagId
                     |> List.concatMap
                         (\( _, item ) ->
                             let
                                 disambiguatedPreferredTerm : DisambiguatedTerm
                                 disambiguatedPreferredTerm =
-                                    GlossaryItemForHtml.disambiguatedPreferredTerm item
+                                    GlossaryItemForUi.disambiguatedPreferredTerm item
 
                                 definition : Maybe Definition
                                 definition =
-                                    GlossaryItemForHtml.definition item
+                                    GlossaryItemForUi.definition item
                             in
                             { preferredTerm = disambiguatedPreferredTerm
                             , alternativeTerm = Nothing
                             , definition = definition
                             }
                                 :: (item
-                                        |> GlossaryItemForHtml.alternativeTerms
+                                        |> GlossaryItemForUi.alternativeTerms
                                         |> List.map
                                             (\alternativeTerm ->
                                                 { preferredTerm = disambiguatedPreferredTerm
@@ -110,11 +110,11 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                         Nothing
                 )
             |> List.sortWith
-                (\( candidate1, score1 ) ( candidate2, score2 ) ->
-                    if score1 > score2 then
+                (\( candidate1, rank1 ) ( candidate2, rank2 ) ->
+                    if rank1 > rank2 then
                         LT
 
-                    else if score1 < score2 then
+                    else if rank1 < rank2 then
                         GT
 
                     else
@@ -135,6 +135,7 @@ search enableMathSupport filterByTagId searchString glossaryItems =
                             ( Nothing, Nothing ) ->
                                 DisambiguatedTerm.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
                 )
+            |> List.take 40
             |> List.map
                 (\( { preferredTerm, alternativeTerm, definition }, _ ) ->
                     case alternativeTerm of

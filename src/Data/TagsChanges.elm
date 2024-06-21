@@ -25,8 +25,7 @@ This mainly exists to support tricky (but legal) combinations of changes such as
 -}
 
 import Codec exposing (Codec)
-import Data.GlossaryItem.Tag as Tag exposing (Tag)
-import Data.TagDescription as TagDescription exposing (TagDescription)
+import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.TagId as TagId exposing (TagId)
 import Data.TagIdDict as TagIdDict exposing (TagIdDict)
 
@@ -34,8 +33,8 @@ import Data.TagIdDict as TagIdDict exposing (TagIdDict)
 {-| A single change to the tags in a glossary.
 -}
 type TagsChange
-    = Insertion Tag TagDescription
-    | Update TagId Tag TagDescription
+    = Insertion DescribedTag
+    | Update TagId DescribedTag
     | Removal TagId
 
 
@@ -44,23 +43,23 @@ tagsChangeCodec =
     Codec.custom
         (\insertion_ update_ removal_ value ->
             case value of
-                Insertion tag tagDescription ->
-                    insertion_ tag tagDescription
+                Insertion describedTag ->
+                    insertion_ describedTag
 
-                Update tagId tag tagDescription ->
-                    update_ tagId tag tagDescription
+                Update tagId describedTag ->
+                    update_ tagId describedTag
 
                 Removal tagId ->
                     removal_ tagId
         )
-        |> Codec.variant2 "Insertion" Insertion Tag.codec TagDescription.codec
-        |> Codec.variant3 "Update" Update TagId.codec Tag.codec TagDescription.codec
+        |> Codec.variant1 "Insertion" Insertion DescribedTag.codec
+        |> Codec.variant2 "Update" Update TagId.codec DescribedTag.codec
         |> Codec.variant1 "Removal" Removal TagId.codec
         |> Codec.buildCustom
 
 
 type UpdateOrRemoval_
-    = Update_ Tag TagDescription
+    = Update_ DescribedTag
     | Removal_
 
 
@@ -68,7 +67,7 @@ type UpdateOrRemoval_
 -}
 type TagsChanges
     = TagsChanges
-        { insertions : List { tag : Tag, description : TagDescription }
+        { insertions : List DescribedTag
         , updatesAndRemovals : TagIdDict UpdateOrRemoval_
         }
 
@@ -89,8 +88,7 @@ toList tagsChanges =
             let
                 insertions : List TagsChange
                 insertions =
-                    changes.insertions
-                        |> List.map (\{ tag, description } -> Insertion tag description)
+                    List.map Insertion changes.insertions
 
                 updatesAndRemovals : List TagsChange
                 updatesAndRemovals =
@@ -99,8 +97,8 @@ toList tagsChanges =
                         |> List.map
                             (\( tagId, updateOrRemoval ) ->
                                 case updateOrRemoval of
-                                    Update_ tag tagDescription ->
-                                        Update tagId tag tagDescription
+                                    Update_ describedTag ->
+                                        Update tagId describedTag
 
                                     Removal_ ->
                                         Removal tagId
@@ -111,31 +109,24 @@ toList tagsChanges =
 
 {-| Add an insertion to this set of tags changes.
 -}
-insert : Tag -> TagDescription -> TagsChanges -> TagsChanges
-insert tag tagDescription tagsChanges =
+insert : DescribedTag -> TagsChanges -> TagsChanges
+insert describedTag tagsChanges =
     case tagsChanges of
         TagsChanges changes ->
-            TagsChanges <|
-                { changes
-                    | insertions =
-                        { tag = tag, description = tagDescription }
-                            :: changes.insertions
-                }
+            TagsChanges { changes | insertions = describedTag :: changes.insertions }
 
 
 {-| Add an update to this set of tags changes.
 -}
-update : TagId -> Tag -> TagDescription -> TagsChanges -> TagsChanges
-update tagId tag tagDescription tagsChanges =
+update : TagId -> DescribedTag -> TagsChanges -> TagsChanges
+update tagId describedTag tagsChanges =
     case tagsChanges of
         TagsChanges changes ->
             TagsChanges <|
                 { changes
                     | updatesAndRemovals =
                         changes.updatesAndRemovals
-                            |> TagIdDict.insert
-                                tagId
-                                (Update_ tag tagDescription)
+                            |> TagIdDict.insert tagId (Update_ describedTag)
                 }
 
 
@@ -157,11 +148,11 @@ fromList tagsChangeList =
     List.foldl
         (\tagsChange result ->
             case tagsChange of
-                Insertion tag tagDescription ->
-                    insert tag tagDescription result
+                Insertion describedTag ->
+                    insert describedTag result
 
-                Update tagId tag tagDescription ->
-                    update tagId tag tagDescription result
+                Update tagId describedTag ->
+                    update tagId describedTag result
 
                 Removal tagId ->
                     remove tagId result

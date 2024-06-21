@@ -41,23 +41,25 @@ import Components.SearchDialog
 import Components.SelectMenu
 import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.Editability as Editability exposing (Editability(..))
-import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
+import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItemForHtml as GlossaryItemForHtml exposing (GlossaryItemForHtml, disambiguatedTerm)
+import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi, disambiguatedTerm)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
-import Data.GlossaryItems as GlossaryItems exposing (GlossaryItems)
+import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.GlossaryTitle as GlossaryTitle
+import Data.GradualVisibility as GradualVisibility exposing (GradualVisibility)
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Saving exposing (Saving(..))
-import Data.TagDescription as TagDescription exposing (TagDescription)
+import Data.TagDescription as TagDescription
 import Data.TagId exposing (TagId)
 import Data.Theme exposing (Theme(..))
 import ElementIds
@@ -71,10 +73,12 @@ import Extras.HtmlEvents
 import Extras.HtmlTree as HtmlTree
 import Extras.Http
 import Extras.Task
-import Extras.Url exposing (fragmentOnly)
+import Extras.Url
 import Html
 import Html.Attributes exposing (class, for, href, id, readonly)
 import Html.Events
+import Html.Keyed
+import Html.Lazy
 import Http
 import Icons
 import Internationalisation as I18n
@@ -91,14 +95,14 @@ import Task
 -- MODEL
 
 
-type GradualVisibility
-    = Visible
-    | Disappearing
-    | Invisible
-
-
 type alias MenuForMobileVisibility =
     GradualVisibility
+
+
+type BackToTopLinkVisibility
+    = Visible Int
+    | Disappearing Int
+    | Invisible Int
 
 
 type alias SearchDialog =
@@ -116,10 +120,12 @@ type Layout
 type alias Model =
     { common : CommonModel
     , menuForMobileVisibility : MenuForMobileVisibility
+    , backToTopLinkVisibility : BackToTopLinkVisibility
     , themeDropdownMenu : Components.DropdownMenu.Model
     , exportDropdownMenu : Components.DropdownMenu.Model
     , searchDialog : SearchDialog
     , layout : Layout
+    , itemWithFocus : Maybe GlossaryItemId
     , confirmDeleteId : Maybe GlossaryItemId
     , deleting : Saving
     , savingSettings : Saving
@@ -134,13 +140,16 @@ type InternalMsg
     | ShowMenuForMobile
     | StartHidingMenuForMobile
     | CompleteHidingMenuForMobile
-    | BackToTop Bool
+    | BackToTop Bool Int
     | ThemeDropdownMenuMsg Components.DropdownMenu.Msg
     | ExportDropdownMenuMsg Components.DropdownMenu.Msg
     | SearchDialogMsg Components.SearchDialog.Msg
     | SearchDialogWasHidden
     | UpdateSearchString String
     | ChangeTheme Theme
+    | ScrollingUpWhileFarAwayFromTheTop
+    | StartHidingBackToTopLink Int
+    | CompleteHidingBackToTopLink Int
     | JumpToItem GlossaryItemId
     | ChangeLayoutToShowSingle GlossaryItemId
     | ShowRelatedTermAsSingle Term
@@ -148,7 +157,7 @@ type InternalMsg
     | ConfirmDelete GlossaryItemId
     | CancelDelete
     | Delete GlossaryItemId
-    | Deleted Glossary
+    | Deleted GlossaryForUi
     | FailedToDelete Http.Error
     | JumpToTermIndexGroup Bool String
     | ChangeOrderItemsBy OrderItemsBy
@@ -156,7 +165,7 @@ type InternalMsg
     | ToggleEnableExportMenu
     | ToggleEnableOrderItemsButtons
     | ToggleEnableLastUpdatedDates
-    | ChangedSettings Glossary
+    | ChangedSettings GlossaryForUi
     | FailedToChangeSettings Http.Error
     | DownloadMarkdown
     | DownloadAnki
@@ -173,11 +182,13 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init : CommonModel -> ( Model, Cmd Msg )
-init commonModel =
+init : CommonModel -> Maybe GlossaryItemId -> ( Model, Cmd Msg )
+init commonModel itemWithFocus =
     ( { common = commonModel
-      , menuForMobileVisibility = Invisible
+      , menuForMobileVisibility = GradualVisibility.Invisible
+      , backToTopLinkVisibility = Invisible 0
       , layout = ShowAllItems
+      , itemWithFocus = itemWithFocus
       , confirmDeleteId = Nothing
       , themeDropdownMenu =
             Components.DropdownMenu.init
@@ -206,7 +217,7 @@ init commonModel =
                     Nothing
       , resultOfAttemptingToCopyEditorCommandToClipboard = Nothing
       }
-    , case commonModel.maybeId of
+    , case itemWithFocus of
         Just id ->
             scrollGlossaryItemIntoView id
 
@@ -242,6 +253,9 @@ port attemptedToCopyEditorCommandToClipboard : (Bool -> msg) -> Sub msg
 port selectAllInTextFieldWithCommandToRunEditor : () -> Cmd msg
 
 
+port scrollingUpWhileFarAwayFromTheTop : (() -> msg) -> Sub msg
+
+
 
 -- UPDATE
 
@@ -263,7 +277,7 @@ update msg model =
             ( { model | common = { common0 | editability = editability1 } }, Cmd.none )
 
         ShowMenuForMobile ->
-            ( { model | menuForMobileVisibility = Visible }
+            ( { model | menuForMobileVisibility = GradualVisibility.Visible }
             , Cmd.batch
                 [ preventBackgroundScrolling ()
                 , Extras.BrowserDom.scrollToTopInElement (PageMsg.Internal NoOp) ElementIds.indexForMobile
@@ -271,7 +285,7 @@ update msg model =
             )
 
         StartHidingMenuForMobile ->
-            ( { model | menuForMobileVisibility = Disappearing }
+            ( { model | menuForMobileVisibility = GradualVisibility.Disappearing }
             , Cmd.batch
                 [ Process.sleep 100 |> Task.perform (always <| PageMsg.Internal CompleteHidingMenuForMobile)
                 , allowBackgroundScrolling ()
@@ -279,9 +293,9 @@ update msg model =
             )
 
         CompleteHidingMenuForMobile ->
-            ( { model | menuForMobileVisibility = Invisible }, Cmd.none )
+            ( { model | menuForMobileVisibility = GradualVisibility.Invisible }, Cmd.none )
 
-        BackToTop staticSidebar ->
+        BackToTop staticSidebar counter ->
             let
                 idOfSidebarOrMenu : String
                 idOfSidebarOrMenu =
@@ -291,7 +305,10 @@ update msg model =
                     else
                         ElementIds.indexForMobile
             in
-            ( { model | menuForMobileVisibility = Disappearing }
+            ( { model
+                | menuForMobileVisibility = GradualVisibility.Disappearing
+                , backToTopLinkVisibility = Disappearing counter
+              }
             , Cmd.batch
                 [ Extras.BrowserDom.scrollToTopInElement (PageMsg.Internal NoOp) idOfSidebarOrMenu
                 , Extras.BrowserDom.scrollToTop <| PageMsg.Internal NoOp
@@ -346,10 +363,10 @@ update msg model =
 
                 results : List Components.SearchDialog.SearchResult
                 results =
-                    case model.common.glossary of
-                        Ok glossary ->
-                            glossary
-                                |> Glossary.items
+                    case model.common.glossaryForUi of
+                        Ok glossaryForUi ->
+                            glossaryForUi
+                                |> GlossaryForUi.items
                                 |> Search.search model.common.enableMathSupport (filterByTagId model) searchString
 
                         Err _ ->
@@ -387,14 +404,40 @@ update msg model =
                         Nothing
             )
 
-        JumpToItem itemId ->
+        ScrollingUpWhileFarAwayFromTheTop ->
             let
-                common0 =
-                    model.common
+                counter_ =
+                    backToTopLinkVisibilityCounter model.backToTopLinkVisibility + 1
+
+                backToTopLinkVisibility =
+                    Visible counter_
             in
+            ( { model | backToTopLinkVisibility = backToTopLinkVisibility }
+            , Process.sleep 3000 |> Task.perform (always <| PageMsg.Internal <| StartHidingBackToTopLink counter_)
+            )
+
+        StartHidingBackToTopLink counter ->
+            if model.backToTopLinkVisibility == Visible counter then
+                ( { model | backToTopLinkVisibility = Disappearing counter }
+                , Process.sleep 300 |> Task.perform (always <| PageMsg.Internal <| CompleteHidingBackToTopLink counter)
+                )
+
+            else
+                ( model, Cmd.none )
+
+        CompleteHidingBackToTopLink counter ->
+            if model.backToTopLinkVisibility == Disappearing counter then
+                ( { model | backToTopLinkVisibility = Invisible counter }
+                , Cmd.none
+                )
+
+            else
+                ( model, Cmd.none )
+
+        JumpToItem itemId ->
             ( { model
-                | menuForMobileVisibility = Disappearing
-                , common = { common0 | maybeId = Just itemId }
+                | menuForMobileVisibility = GradualVisibility.Disappearing
+                , itemWithFocus = Just itemId
               }
             , Cmd.batch
                 [ Process.sleep 100 |> Task.perform (always <| PageMsg.Internal CompleteHidingMenuForMobile)
@@ -404,13 +447,9 @@ update msg model =
             )
 
         ChangeLayoutToShowSingle index ->
-            let
-                common0 =
-                    model.common
-            in
             ( { model
-                | common = { common0 | maybeId = Just index }
-                , layout = ShowSingleItem
+                | layout = ShowSingleItem
+                , itemWithFocus = Just index
               }
             , preventBackgroundScrolling ()
             )
@@ -418,21 +457,12 @@ update msg model =
         ShowRelatedTermAsSingle relatedTerm ->
             let
                 model1 =
-                    case model.common.glossary of
-                        Ok glossary ->
-                            glossary
-                                |> Glossary.items
-                                |> GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm (Term.raw relatedTerm)
-                                |> Maybe.map
-                                    (\index ->
-                                        let
-                                            common0 =
-                                                model.common
-                                        in
-                                        { model
-                                            | common = { common0 | maybeId = Just index }
-                                        }
-                                    )
+                    case model.common.glossaryForUi of
+                        Ok glossaryForUi ->
+                            glossaryForUi
+                                |> GlossaryForUi.items
+                                |> GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm (Term.raw relatedTerm)
+                                |> Maybe.map (\index -> { model | itemWithFocus = Just index })
                                 |> Maybe.withDefault model
 
                         _ ->
@@ -444,7 +474,7 @@ update msg model =
             ( { model | layout = ShowAllItems }
             , Cmd.batch
                 [ allowBackgroundScrolling ()
-                , model.common.maybeId
+                , model.itemWithFocus
                     |> Maybe.map (ElementIds.glossaryItemDiv >> scrollElementIntoView)
                     |> Maybe.withDefault Cmd.none
                 ]
@@ -466,18 +496,18 @@ update msg model =
                 ( { model | deleting = NotCurrentlySaving }, Cmd.none )
 
         Delete id ->
-            case model.common.glossary of
-                Ok glossary ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
                     let
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
-                                (Glossary.versionNumber glossary)
+                                (GlossaryForUi.versionNumber glossaryForUi)
                                 [ GlossaryChange.Remove id ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
-                                glossary
+                                glossaryForUi
                                 changelist
                                 (PageMsg.Internal << FailedToDelete)
                                 (\( _, updatedGlossary ) ->
@@ -491,7 +521,7 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        Deleted updatedGlossary ->
+        Deleted updatedGlossaryForUi ->
             let
                 common : CommonModel
                 common =
@@ -504,7 +534,8 @@ update msg model =
                         ]
             in
             ( { model
-                | common = { common | glossary = Ok <| updatedGlossary }
+                | common = { common | glossaryForUi = Ok <| updatedGlossaryForUi }
+                , itemWithFocus = Nothing
                 , confirmDeleteId = Nothing
                 , deleting = NotCurrentlySaving
                 , savingSettings = NotCurrentlySaving
@@ -594,18 +625,18 @@ update msg model =
             )
 
         ChangeCardWidth cardWidth ->
-            case model.common.glossary of
-                Ok glossary ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
                     let
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
-                                (Glossary.versionNumber glossary)
+                                (GlossaryForUi.versionNumber glossaryForUi)
                                 [ GlossaryChange.SetCardWidth cardWidth ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
-                                glossary
+                                glossaryForUi
                                 changelist
                                 (PageMsg.Internal << FailedToChangeSettings)
                                 (\( _, updatedGlossary ) ->
@@ -624,30 +655,28 @@ update msg model =
                     ( model, Cmd.none )
 
         ToggleEnableExportMenu ->
-            case model.common.glossary of
-                Ok glossary ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
                     let
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
-                                (Glossary.versionNumber glossary)
+                                (GlossaryForUi.versionNumber glossaryForUi)
                                 [ GlossaryChange.ToggleEnableExportMenu ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
-                                glossary
+                                glossaryForUi
                                 changelist
                                 (PageMsg.Internal << FailedToChangeSettings)
-                                (\( maybeGlossaryItemId, updatedGlossary ) ->
+                                (\( itemWithFocus, updatedGlossaryForUi ) ->
                                     let
                                         common0 =
                                             model.common
                                     in
                                     PageMsg.NavigateToListAll
-                                        { common0
-                                            | maybeId = maybeGlossaryItemId
-                                            , glossary = Ok updatedGlossary
-                                        }
+                                        { common0 | glossaryForUi = Ok updatedGlossaryForUi }
+                                        itemWithFocus
                                 )
                     in
                     ( { model
@@ -662,30 +691,28 @@ update msg model =
                     ( model, Cmd.none )
 
         ToggleEnableOrderItemsButtons ->
-            case model.common.glossary of
-                Ok glossary ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
                     let
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
-                                (Glossary.versionNumber glossary)
+                                (GlossaryForUi.versionNumber glossaryForUi)
                                 [ GlossaryChange.ToggleEnableOrderItemsButtons ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
-                                glossary
+                                glossaryForUi
                                 changelist
                                 (PageMsg.Internal << FailedToChangeSettings)
-                                (\( maybeGlossaryItemId, updatedGlossary ) ->
+                                (\( itemWithFocus, updatedGlossaryForUi ) ->
                                     let
                                         common0 =
                                             model.common
                                     in
                                     PageMsg.NavigateToListAll
-                                        { common0
-                                            | maybeId = maybeGlossaryItemId
-                                            , glossary = Ok updatedGlossary
-                                        }
+                                        { common0 | glossaryForUi = Ok updatedGlossaryForUi }
+                                        itemWithFocus
                                 )
                     in
                     ( { model
@@ -700,30 +727,28 @@ update msg model =
                     ( model, Cmd.none )
 
         ToggleEnableLastUpdatedDates ->
-            case model.common.glossary of
-                Ok glossary ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
                     let
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
-                                (Glossary.versionNumber glossary)
+                                (GlossaryForUi.versionNumber glossaryForUi)
                                 [ GlossaryChange.ToggleEnableLastUpdatedDates ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
-                                glossary
+                                glossaryForUi
                                 changelist
                                 (PageMsg.Internal << FailedToChangeSettings)
-                                (\( maybeGlossaryItemId, updatedGlossary ) ->
+                                (\( itemWithFocus, updatedGlossaryForUi ) ->
                                     let
                                         common0 =
                                             model.common
                                     in
                                     PageMsg.NavigateToListAll
-                                        { common0
-                                            | maybeId = maybeGlossaryItemId
-                                            , glossary = Ok updatedGlossary
-                                        }
+                                        { common0 | glossaryForUi = Ok updatedGlossaryForUi }
+                                        itemWithFocus
                                 )
                     in
                     ( { model
@@ -737,14 +762,14 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        ChangedSettings updatedGlossary ->
+        ChangedSettings updatedGlossaryForUi ->
             let
                 common : CommonModel
                 common =
                     model.common
             in
             ( { model
-                | common = { common | glossary = Ok <| updatedGlossary }
+                | common = { common | glossaryForUi = Ok <| updatedGlossaryForUi }
                 , savingSettings = NotCurrentlySaving
               }
             , if common.editability == Editability.EditingInMemory then
@@ -763,23 +788,23 @@ update msg model =
 
         DownloadMarkdown ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
-            , model.common.glossary
+            , model.common.glossaryForUi
                 |> Result.map Export.Markdown.download
                 |> Result.withDefault Cmd.none
             )
 
         DownloadAnki ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
-            , model.common.glossary
+            , model.common.glossaryForUi
                 |> Result.map (Export.Anki.download model.common.enableMathSupport)
                 |> Result.withDefault Cmd.none
             )
 
         DownloadJson ->
             ( { model | exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu }
-            , case model.common.glossary of
-                Ok glossary ->
-                    Export.Json.download glossary
+            , case model.common.glossaryForUi of
+                Ok glossaryForUi ->
+                    Export.Json.download glossaryForUi
 
                 _ ->
                     Cmd.none
@@ -853,8 +878,8 @@ update msg model =
 
 filterByTagId : Model -> Maybe TagId
 filterByTagId model =
-    case model.common.glossary of
-        Ok glossary ->
+    case model.common.glossaryForUi of
+        Ok glossaryForUi ->
             let
                 queryParametersTag : Maybe Tag
                 queryParametersTag =
@@ -863,7 +888,7 @@ filterByTagId model =
             in
             queryParametersTag
                 |> Maybe.andThen
-                    (\tag -> glossary |> Glossary.items |> GlossaryItems.tagIdFromTag tag)
+                    (\tag -> glossaryForUi |> GlossaryForUi.items |> GlossaryItemsForUi.tagIdFromTag tag)
 
         _ ->
             Nothing
@@ -950,8 +975,8 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
         ]
 
 
-viewSettings : Glossary -> Model -> Html Msg
-viewSettings glossary model =
+viewSettings : GlossaryForUi -> Model -> Html Msg
+viewSettings glossaryForUi model =
     let
         errorDiv : String -> Html msg
         errorDiv message =
@@ -1001,12 +1026,12 @@ viewSettings glossary model =
                         [ viewSelectInputSyntax model.common.enableMathSupport ]
                 , div
                     [ class "mt-6 pb-2" ]
-                    [ viewSelectCardWidth glossary model
+                    [ viewSelectCardWidth glossaryForUi model
                     ]
                 , div
                     [ class "mt-6 pb-2" ]
                     [ Components.Button.toggle
-                        (Glossary.enableExportMenu glossary)
+                        (GlossaryForUi.enableExportMenu glossaryForUi)
                         ElementIds.showExportMenuLabel
                         [ Html.Events.onClick <| PageMsg.Internal ToggleEnableExportMenu ]
                         [ span
@@ -1017,7 +1042,7 @@ viewSettings glossary model =
                 , div
                     [ class "mt-6 pb-2" ]
                     [ Components.Button.toggle
-                        (Glossary.enableOrderItemsButtons glossary)
+                        (GlossaryForUi.enableOrderItemsButtons glossaryForUi)
                         ElementIds.showOrderItemsButtons
                         [ Html.Events.onClick <| PageMsg.Internal ToggleEnableOrderItemsButtons ]
                         [ span
@@ -1028,7 +1053,7 @@ viewSettings glossary model =
                 , div
                     [ class "mt-6 pb-2" ]
                     [ Components.Button.toggle
-                        (Glossary.enableLastUpdatedDates glossary)
+                        (GlossaryForUi.enableLastUpdatedDates glossaryForUi)
                         ElementIds.showLastUpdatedDatesLabel
                         [ Html.Events.onClick <| PageMsg.Internal ToggleEnableLastUpdatedDates ]
                         [ span
@@ -1037,6 +1062,9 @@ viewSettings glossary model =
                         ]
                     ]
                 , case model.savingSettings of
+                    SavingNotAttempted errorMessage ->
+                        errorDiv <| I18n.failedToSave ++ " — " ++ errorMessage ++ "."
+
                     SavingFailed errorMessage ->
                         errorDiv <| I18n.failedToSave ++ " — " ++ errorMessage ++ "."
 
@@ -1058,7 +1086,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
             [ li []
                 [ Html.a
                     [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
-                    , Html.Attributes.href <| fragmentOnly <| Term.id term
+                    , Html.Attributes.href <| Extras.Url.fragmentOnly <| Term.id term
                     , Html.Attributes.target "_self"
                     , Accessibility.Key.tabbable tabbable
                     , Html.Events.onClick <| PageMsg.Internal <| JumpToItem itemId
@@ -1093,7 +1121,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
                             ]
                             [ Html.a
                                 [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
-                                , Html.Attributes.href <| fragmentOnly <| Term.id preferredTerm
+                                , Html.Attributes.href <| Extras.Url.fragmentOnly <| Term.id preferredTerm
                                 , Html.Attributes.target "_self"
                                 , Accessibility.Key.tabbable tabbable
                                 , Html.Events.onClick <| PageMsg.Internal <| JumpToItem itemId
@@ -1155,26 +1183,22 @@ viewGlossaryItem :
     , editable : Bool
     , enableLastUpdatedDates : Bool
     , shownAsSingle : Bool
+    , noModalDialogShown_ : Bool
     }
-    -> Model
+    -> Maybe GlossaryItemId
     -> Maybe Tag
     -> GlossaryItemWithPreviousAndNext
     -> Html Msg
-viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle } model tagBeingFilteredBy itemWithPreviousAndNext =
-    let
-        common : CommonModel
-        common =
-            model.common
-    in
+viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle, noModalDialogShown_ } itemWithFocus tagBeingFilteredBy itemWithPreviousAndNext =
     Extras.Html.showMaybe
-        (\( id, _ ) ->
+        (\item ->
             Components.GlossaryItemCard.view
                 { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable, enableLastUpdatedDates = enableLastUpdatedDates }
                 (Components.GlossaryItemCard.Normal
                     { tabbable = tabbable
-                    , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle id
-                    , onClickEdit = PageMsg.NavigateToCreateOrEdit { common | maybeId = Just id }
-                    , onClickDelete = PageMsg.Internal <| ConfirmDelete id
+                    , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForUi.id item
+                    , onClickEdit = PageMsg.NavigateToCreateOrEdit <| Just <| GlossaryItemForUi.id item
+                    , onClickDelete = PageMsg.Internal <| ConfirmDelete <| GlossaryItemForUi.id item
                     , onClickTag = PageMsg.Internal << FilterByTag
                     , onClickItem = PageMsg.Internal << ChangeLayoutToShowSingle
                     , onClickRelatedTerm = PageMsg.Internal << ShowRelatedTermAsSingle
@@ -1183,13 +1207,18 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
                     }
                 )
                 tagBeingFilteredBy
-                model.common.maybeId
+                (if noModalDialogShown_ then
+                    itemWithFocus
+
+                 else
+                    Nothing
+                )
                 itemWithPreviousAndNext
         )
         itemWithPreviousAndNext.item
 
 
-itemWithPreviousAndNextForId : GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForHtml ) -> GlossaryItemWithPreviousAndNext
+itemWithPreviousAndNextForId : GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForUi ) -> GlossaryItemWithPreviousAndNext
 itemWithPreviousAndNextForId id indexedGlossaryItems =
     let
         indexedGlossaryItemsArray =
@@ -1211,13 +1240,19 @@ itemWithPreviousAndNextForId id indexedGlossaryItems =
                     { previous = previous, item = item, next = next }
             )
             { previous = Nothing, item = Nothing, next = Nothing }
+        |> (\result ->
+                { previous = Maybe.map Tuple.second result.previous
+                , item = Maybe.map Tuple.second result.item
+                , next = Maybe.map Tuple.second result.next
+                }
+           )
 
 
 viewSingleItemModalDialog :
     Model
     -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
     -> Maybe Tag
-    -> List ( GlossaryItemId, GlossaryItemForHtml )
+    -> List ( GlossaryItemId, GlossaryItemForUi )
     -> Maybe GlossaryItemId
     -> Html Msg
 viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } tagBeingFilteredBy indexedGlossaryItems =
@@ -1252,8 +1287,9 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
                             , editable = editable
                             , enableLastUpdatedDates = enableLastUpdatedDates
                             , shownAsSingle = True
+                            , noModalDialogShown_ = noModalDialogShown model
                             }
-                            model
+                            model.itemWithFocus
                             tagBeingFilteredBy
                             itemWithPreviousAndNext
                         ]
@@ -1273,7 +1309,7 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
 
 
 viewConfirmDeleteModal : Editability -> Maybe GlossaryItemId -> Saving -> Html Msg
-viewConfirmDeleteModal editability maybeIdOfItemToDelete deleting =
+viewConfirmDeleteModal editability itemToDelete deleting =
     Components.ModalDialog.view
         (PageMsg.Internal CancelDelete)
         ElementIds.confirmDeleteModalTitle
@@ -1310,6 +1346,14 @@ viewConfirmDeleteModal editability maybeIdOfItemToDelete deleting =
                     [ class "mt-5 sm:mt-4 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
                     [ text I18n.savingChangesInMemoryMessage ]
             , case deleting of
+                SavingNotAttempted errorMessage ->
+                    div
+                        [ class "flex justify-end mt-2" ]
+                        [ p
+                            [ class "text-red-600 dark:text-red-400" ]
+                            [ text <| I18n.failedToSave ++ " — " ++ errorMessage ++ "." ]
+                        ]
+
                 SavingFailed errorMessage ->
                     div
                         [ class "flex justify-end mt-2" ]
@@ -1328,7 +1372,7 @@ viewConfirmDeleteModal editability maybeIdOfItemToDelete deleting =
                     , Extras.HtmlAttribute.showIf (deleting /= SavingInProgress) <| class "hover:bg-red-700 dark:hover:bg-red-600"
                     , Extras.HtmlAttribute.showMaybe
                         (Html.Events.onClick << PageMsg.Internal << Delete)
-                        maybeIdOfItemToDelete
+                        itemToDelete
                     ]
                     [ text I18n.delete ]
                 , Components.Button.white
@@ -1347,7 +1391,7 @@ viewConfirmDeleteModal editability maybeIdOfItemToDelete deleting =
                 ]
             ]
         )
-        (maybeIdOfItemToDelete /= Nothing)
+        (itemToDelete /= Nothing)
 
 
 viewMakeChangesButton : Editability -> Bool -> Html Msg
@@ -1375,12 +1419,12 @@ viewMakeChangesButton editability tabbable =
         ]
 
 
-viewEditTitleAndAboutButton : Bool -> CommonModel -> Html Msg
-viewEditTitleAndAboutButton tabbable common =
+viewEditTitleAndAboutButton : Bool -> Html Msg
+viewEditTitleAndAboutButton tabbable =
     div
         [ class "pb-3 print:hidden" ]
         [ Components.Button.text
-            [ Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout { common | maybeId = Nothing }
+            [ Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.pencil
@@ -1392,13 +1436,13 @@ viewEditTitleAndAboutButton tabbable common =
         ]
 
 
-viewCreateGlossaryItemButtonForEmptyState : Bool -> CommonModel -> Html Msg
-viewCreateGlossaryItemButtonForEmptyState tabbable common =
+viewCreateGlossaryItemButtonForEmptyState : Bool -> Html Msg
+viewCreateGlossaryItemButtonForEmptyState tabbable =
     div
         [ class "pt-4 print:hidden" ]
         [ Components.Button.emptyState
             [ class "p-9"
-            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeId = Nothing }
+            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit Nothing
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.viewGridAdd
@@ -1414,12 +1458,12 @@ viewCreateGlossaryItemButtonForEmptyState tabbable common =
         ]
 
 
-viewCreateGlossaryItemButton : Bool -> CommonModel -> Html Msg
-viewCreateGlossaryItemButton tabbable common =
+viewCreateGlossaryItemButton : Bool -> Html Msg
+viewCreateGlossaryItemButton tabbable =
     div
         [ class "pb-2 print:hidden" ]
         [ Components.Button.secondary
-            [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit { common | maybeId = Nothing }
+            [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit Nothing
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.viewGridAdd
@@ -1439,60 +1483,69 @@ viewCreateGlossaryItemButton tabbable common =
 
 
 viewCards :
-    Model
+    { enableMathSupport : Bool
+    , enableOrderItemsButtons : Bool
+    , editable : Bool
+    , tabbable : Bool
+    , enableLastUpdatedDates : Bool
+    , noModalDialogShown_ : Bool
+    , editing : Bool
+    }
     ->
-        { enableMathSupport : Bool
-        , enableOrderItemsButtons : Bool
-        , editable : Bool
-        , tabbable : Bool
-        , enableLastUpdatedDates : Bool
+        { filterByTagId_ : Maybe TagId
+        , tags : List Tag
+        , filterByDescribedTag_ : Maybe DescribedTag
         }
-    -> List Tag
-    -> GlossaryItems
-    -> Maybe ( Tag, TagDescription )
-    -> ( List ( GlossaryItemId, GlossaryItemForHtml ), List ( GlossaryItemId, GlossaryItemForHtml ) )
+    -> QueryParameters
+    -> Maybe GlossaryItemId
+    -> Maybe RawTerm
+    -> GlossaryItemsForUi
+    -> ( List ( GlossaryItemId, GlossaryItemForUi ), List ( GlossaryItemId, GlossaryItemForUi ) )
     -> Html Msg
-viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates } tags glossaryItems filterByTagWithDescription_ ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates, noModalDialogShown_, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
-        filterByTagId_ : Maybe TagId
-        filterByTagId_ =
-            filterByTagId model
-
         filterByTag : Maybe Tag
         filterByTag =
-            filterByTagWithDescription_ |> Maybe.map Tuple.first
+            Maybe.map DescribedTag.tag filterByDescribedTag_
 
-        combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForHtml )
+        combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForUi )
         combinedIndexedGlossaryItems =
             List.append indexedGlossaryItems otherIndexedGlossaryItems
 
         disambiguatedPreferredTermsWithDefinitions : List DisambiguatedTerm
         disambiguatedPreferredTermsWithDefinitions =
-            GlossaryItems.disambiguatedPreferredTermsWhichHaveDefinitions
+            GlossaryItemsForUi.disambiguatedPreferredTermsWhichHaveDefinitions
                 filterByTagId_
-                glossaryItems
+                glossaryItemsForUi
 
         orderItemsFocusedOnTerm : Maybe DisambiguatedTerm
         orderItemsFocusedOnTerm =
-            case QueryParameters.orderItemsBy model.common.queryParameters of
+            case QueryParameters.orderItemsBy queryParameters of
                 FocusedOn termId ->
-                    GlossaryItems.disambiguatedPreferredTermFromRaw termId glossaryItems
+                    GlossaryItemsForUi.disambiguatedPreferredTermFromRaw termId glossaryItemsForUi
 
                 _ ->
                     Nothing
 
-        viewIndexedItem : ( GlossaryItemId, GlossaryItemForHtml ) -> Html Msg
-        viewIndexedItem indexedItem =
+        viewIndexedItem : ( GlossaryItemId, GlossaryItemForUi ) -> Html Msg
+        viewIndexedItem ( _, item ) =
             viewGlossaryItem
                 { enableMathSupport = enableMathSupport
                 , tabbable = tabbable
                 , editable = editable
                 , enableLastUpdatedDates = enableLastUpdatedDates
                 , shownAsSingle = False
+                , noModalDialogShown_ = noModalDialogShown_
                 }
-                model
+                itemWithFocus
                 filterByTag
-                { previous = Nothing, item = Just indexedItem, next = Nothing }
+                { previous = Nothing, item = Just item, next = Nothing }
+
+        viewIndexedItemKeyed : ( GlossaryItemId, GlossaryItemForUi ) -> ( String, Html Msg )
+        viewIndexedItemKeyed (( _, item ) as indexedItem) =
+            ( GlossaryItemForUi.disambiguatedPreferredTermIdString item
+            , Html.Lazy.lazy viewIndexedItem indexedItem
+            )
 
         totalNumberOfItems : Int
         totalNumberOfItems =
@@ -1502,29 +1555,29 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
         recommendedMaximumNumberOfItems =
             500
     in
-    Html.article
-        [ Html.Attributes.id ElementIds.items
-        , Extras.HtmlAttribute.showIf enableOrderItemsButtons <| class "mt-3 pt-2 border-t border-gray-300 dark:border-gray-700"
-        ]
-        [ Extras.Html.showMaybe
-            (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
-            filterByTagWithDescription_
-        , Extras.Html.showIf (filterByTagWithDescription_ == Nothing) <|
-            viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
-        , Extras.Html.showIf (Editability.editing model.common.editability) <|
-            div
-                [ class "flex-none mt-4" ]
-                [ viewManageTagsButton tabbable model.common ]
+    div []
+        [ div
+            [ class "mb-4" ]
+            [ Extras.Html.showMaybe
+                (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
+                filterByDescribedTag_
+            , Extras.Html.showIf (filterByDescribedTag_ == Nothing) <|
+                viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
+            , Extras.Html.showIf editing <|
+                div
+                    [ class "flex-none mt-4" ]
+                    [ viewManageTagsButton tabbable ]
+            ]
         , div
             []
             [ Extras.Html.showIf editable <|
                 div
                     [ class "pt-2" ]
                     [ if List.isEmpty combinedIndexedGlossaryItems then
-                        viewCreateGlossaryItemButtonForEmptyState tabbable model.common
+                        viewCreateGlossaryItemButtonForEmptyState tabbable
 
                       else
-                        viewCreateGlossaryItemButton tabbable model.common
+                        viewCreateGlossaryItemButton tabbable
                     ]
             ]
         , Extras.Html.showIf (editable && totalNumberOfItems > recommendedMaximumNumberOfItems) <|
@@ -1541,14 +1594,15 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
             )
           <|
             viewOrderItemsBy
-                model
                 totalNumberOfItems
-                enableMathSupport
+                { enableMathSupport = enableMathSupport, tabbable = noModalDialogShown_ }
                 disambiguatedPreferredTermsWithDefinitions
                 orderItemsFocusedOnTerm
-        , Html.dl
+                queryParameters
+                mostRecentRawTermForOrderingItemsFocusedOn
+        , Html.Keyed.node "dl"
             [ class "mt-4" ]
-            (List.map viewIndexedItem indexedGlossaryItems)
+            (List.map viewIndexedItemKeyed indexedGlossaryItems)
         , Extras.Html.showIf
             ((not <| List.isEmpty indexedGlossaryItems)
                 && (not <| List.isEmpty otherIndexedGlossaryItems)
@@ -1558,68 +1612,23 @@ viewCards model { enableMathSupport, enableOrderItemsButtons, editable, tabbable
                 [ class "my-10" ]
                 I18n.otherItems
         , Extras.Html.showIf (not <| List.isEmpty otherIndexedGlossaryItems) <|
-            Html.dl
+            Html.Keyed.node "dl"
                 []
-                (List.map viewIndexedItem otherIndexedGlossaryItems)
-        , Components.SearchDialog.view
-            (PageMsg.Internal << SearchDialogMsg)
-            model.searchDialog.model
-            model.searchDialog.term
-            (filterByTagWithDescription_
-                |> Maybe.map
-                    (\( tag, _ ) ->
-                        span
-                            [ class "inline-flex flex-wrap items-center" ]
-                            [ Icons.exclamation
-                                [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-800 mr-1.5"
-                                , Accessibility.Aria.hidden True
-                                ]
-                            , span
-                                [ class "mr-1" ]
-                                [ text I18n.filteringByTag ]
-                            , span []
-                                [ text " \""
-                                , Tag.view enableMathSupport [] tag
-                                , text "\""
-                                ]
-                            ]
-                    )
-            )
-            model.searchDialog.results
-        , viewConfirmDeleteModal
-            model.common.editability
-            model.confirmDeleteId
-            model.deleting
-        , viewSingleItemModalDialog
-            model
-            { enableMathSupport = enableMathSupport
-            , editable = editable
-            , tabbable = tabbable
-            , enableLastUpdatedDates = enableLastUpdatedDates
-            }
-            filterByTag
-            combinedIndexedGlossaryItems
-          <|
-            case ( model.layout, model.common.maybeId ) of
-                ( ShowSingleItem, Just id ) ->
-                    Just id
-
-                _ ->
-                    Nothing
+                (List.map viewIndexedItemKeyed otherIndexedGlossaryItems)
         ]
 
 
-viewMenuForMobile : Model -> Bool -> Bool -> IndexOfTerms -> Html Msg
-viewMenuForMobile model enableMathSupport tabbable termIndex =
+viewMenuForMobile : MenuForMobileVisibility -> Bool -> Bool -> IndexOfTerms -> Html Msg
+viewMenuForMobile menuForMobileVisibility enableMathSupport tabbable termIndex =
     div
-        [ class "invisible" |> Extras.HtmlAttribute.showIf (model.menuForMobileVisibility == Invisible)
+        [ class "invisible" |> Extras.HtmlAttribute.showIf (menuForMobileVisibility == GradualVisibility.Invisible)
         , class "fixed inset-0 flex z-40 lg:hidden"
         , Accessibility.Role.dialog
         , Accessibility.Aria.modal True
         ]
         [ Html.div
             [ class "fixed inset-0 bg-gray-600 bg-opacity-75"
-            , if model.menuForMobileVisibility == Visible then
+            , if menuForMobileVisibility == GradualVisibility.Visible then
                 class "transition-opacity motion-reduce:transition-none ease-linear duration-300 opacity-100"
 
               else
@@ -1630,7 +1639,7 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
             []
         , div
             [ class "relative flex-1 flex flex-col max-w-xs w-full pt-5 bg-white dark:bg-gray-900"
-            , if model.menuForMobileVisibility == Visible then
+            , if menuForMobileVisibility == GradualVisibility.Visible then
                 class "transition motion-reduce:transition-none ease-in-out duration-300 transform motion-reduce:transform-none translate-x-0"
 
               else
@@ -1638,7 +1647,7 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
             ]
             [ div
                 [ class "absolute top-0 right-0 -mr-12 pt-2"
-                , if model.menuForMobileVisibility == Visible then
+                , if menuForMobileVisibility == GradualVisibility.Visible then
                     class "motion-reduce:transition-none ease-in-out duration-300 opacity-100"
 
                   else
@@ -1659,13 +1668,12 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
                 ]
             , div
                 [ id ElementIds.indexForMobile
-                , class "flex-1 h-0 overflow-y-auto"
+                , class "flex-1 h-0 overflow-y-scroll"
                 ]
                 [ nav
                     [ class "px-4 pt-1 pb-6" ]
-                    [ viewBackToTopLink False tabbable
-                    , viewTermIndexFirstCharacterGrid False tabbable termIndex
-                    , viewIndexOfTerms enableMathSupport tabbable False termIndex
+                    [ viewTermIndexFirstCharacterGrid False tabbable termIndex
+                    , Html.Lazy.lazy4 viewIndexOfTerms enableMathSupport tabbable False termIndex
                     ]
                 ]
             ]
@@ -1675,22 +1683,53 @@ viewMenuForMobile model enableMathSupport tabbable termIndex =
         ]
 
 
-viewBackToTopLink : Bool -> Bool -> Html Msg
-viewBackToTopLink staticSidebar tabbable =
+backToTopLinkVisibilityCounter : BackToTopLinkVisibility -> Int
+backToTopLinkVisibilityCounter backToTopLinkVisibility =
+    case backToTopLinkVisibility of
+        Visible counter ->
+            counter
+
+        Disappearing counter ->
+            counter
+
+        Invisible counter ->
+            counter
+
+
+viewBackToTopLink : { staticSidebar : Bool, visibility : BackToTopLinkVisibility } -> Html Msg
+viewBackToTopLink { staticSidebar, visibility } =
     div
-        [ class "bg-white dark:bg-slate-900 pb-3 pointer-events-auto text-right" ]
+        [ class "z-50 fixed bottom-0 right-0 p-4 print:hidden"
+        , class "hidden"
+            |> Extras.HtmlAttribute.showIf
+                (case visibility of
+                    Invisible _ ->
+                        True
+
+                    _ ->
+                        False
+                )
+        , case visibility of
+            Visible _ ->
+                class "transition motion-reduce:transition-none ease-out duration-300 transform motion-reduce:transform-none opacity-100 scale-100"
+
+            _ ->
+                class "transition motion-reduce:transition-none ease-in duration-300 transform motion-reduce:transform-none opacity-0 scale-95"
+        ]
         [ Html.a
-            [ href <| fragmentOnly ElementIds.container
+            [ href <| Extras.Url.fragmentOnly ElementIds.container
             , Extras.HtmlEvents.onClickStopPropagation <|
                 PageMsg.Internal <|
-                    BackToTop staticSidebar
-            , Accessibility.Key.tabbable tabbable
+                    BackToTop staticSidebar (backToTopLinkVisibilityCounter visibility)
+            , Accessibility.Key.tabbable staticSidebar
             ]
             [ span
-                [ class "inline-flex" ]
+                [ class "inline-flex bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-95 border border-gray-600 dark:border-gray-400 rounded-md p-3 text-lg" ]
                 [ text I18n.backToTop
                 , Icons.arrowUp
-                    [ Svg.Attributes.class "w-5 h-5 ml-2" ]
+                    [ Svg.Attributes.class "w-6 h-6 ml-2"
+                    , Accessibility.Aria.hidden True
+                    ]
                 ]
             ]
         ]
@@ -1774,9 +1813,6 @@ viewQuickSearchButtonAndLetterGrid { runningOnMacOs, staticSidebar, tabbable } i
         [ div
             [ class "h-7 bg-white dark:bg-slate-900" ]
             []
-        , div
-            [ class "pr-4 bg-white dark:bg-slate-900" ]
-            [ viewBackToTopLink True tabbable ]
         , viewQuickSearchButton { runningOnMacOs = runningOnMacOs, tabbable = tabbable }
         , div
             [ class "px-3 bg-white dark:bg-slate-900" ]
@@ -1794,7 +1830,7 @@ viewStaticSidebarForDesktop { runningOnMacOs, enableMathSupport, tabbable } term
         ]
         [ div
             [ id ElementIds.staticSidebarForDesktop
-            , class "h-0 flex-1 flex flex-col overflow-y-auto"
+            , class "h-0 flex-1 flex flex-col overflow-y-scroll"
             ]
             [ viewQuickSearchButtonAndLetterGrid
                 { runningOnMacOs = runningOnMacOs
@@ -1967,8 +2003,8 @@ viewSelectInputSyntax enableMathSupport =
         ]
 
 
-viewSelectCardWidth : Glossary -> Model -> Html Msg
-viewSelectCardWidth glossary model =
+viewSelectCardWidth : GlossaryForUi -> Model -> Html Msg
+viewSelectCardWidth glossaryForUi model =
     let
         tabbable : Bool
         tabbable =
@@ -1976,7 +2012,7 @@ viewSelectCardWidth glossary model =
 
         cardWidth : CardWidth
         cardWidth =
-            Glossary.cardWidth glossary
+            GlossaryForUi.cardWidth glossaryForUi
     in
     div
         []
@@ -2039,8 +2075,8 @@ viewSelectCardWidth glossary model =
         ]
 
 
-viewCurrentTagFilter : { enableMathSupport : Bool, tabbable : Bool } -> ( Tag, TagDescription ) -> Html Msg
-viewCurrentTagFilter { enableMathSupport, tabbable } ( tag, tagDescription ) =
+viewCurrentTagFilter : { enableMathSupport : Bool, tabbable : Bool } -> DescribedTag -> Html Msg
+viewCurrentTagFilter { enableMathSupport, tabbable } describedTag =
     div
         [ class "pt-3" ]
         [ span
@@ -2050,7 +2086,7 @@ viewCurrentTagFilter { enableMathSupport, tabbable } ( tag, tagDescription ) =
             tabbable
             [ class "print:hidden mt-2" ]
             (PageMsg.Internal DoNotFilterByTag)
-            [ Tag.view enableMathSupport [] tag ]
+            [ Tag.view enableMathSupport [] <| DescribedTag.tag describedTag ]
         ]
 
 
@@ -2076,12 +2112,12 @@ viewAllTagFilters { enableMathSupport, tabbable } tags =
             )
 
 
-viewManageTagsButton : Bool -> CommonModel -> Html Msg
-viewManageTagsButton tabbable common =
+viewManageTagsButton : Bool -> Html Msg
+viewManageTagsButton tabbable =
     div
         [ class "pb-3 print:hidden" ]
         [ Components.Button.text
-            [ Html.Events.onClick <| PageMsg.NavigateToManageTags { common | maybeId = Nothing }
+            [ Html.Events.onClick <| PageMsg.NavigateToManageTags
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.pencil
@@ -2093,13 +2129,15 @@ viewManageTagsButton tabbable common =
         ]
 
 
-viewOrderItemsBy : Model -> Int -> Bool -> List DisambiguatedTerm -> Maybe DisambiguatedTerm -> Html Msg
-viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTermsWithDefinitions orderItemsFocusedOnTerm =
-    let
-        tabbable : Bool
-        tabbable =
-            noModalDialogShown model
-    in
+viewOrderItemsBy :
+    Int
+    -> { enableMathSupport : Bool, tabbable : Bool }
+    -> List DisambiguatedTerm
+    -> Maybe DisambiguatedTerm
+    -> QueryParameters
+    -> Maybe RawTerm
+    -> Html Msg
+viewOrderItemsBy numberOfItems { enableMathSupport, tabbable } disambiguatedPreferredTermsWithDefinitions orderItemsFocusedOnTerm queryParameters mostRecentRawTermForOrderingItemsFocusedOn =
     div
         [ class "print:hidden pt-4 pb-2" ]
         [ fieldset []
@@ -2120,7 +2158,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                     [ Components.Button.radio
                         "order-items-by"
                         "order-items-alphabetically"
-                        (QueryParameters.orderItemsBy model.common.queryParameters == Alphabetically)
+                        (QueryParameters.orderItemsBy queryParameters == Alphabetically)
                         tabbable
                         [ id ElementIds.orderItemsAlphabetically
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy Alphabetically
@@ -2136,7 +2174,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                     [ Components.Button.radio
                         "order-items-by"
                         "order-items-most-mentioned-first"
-                        (QueryParameters.orderItemsBy model.common.queryParameters == MostMentionedFirst)
+                        (QueryParameters.orderItemsBy queryParameters == MostMentionedFirst)
                         tabbable
                         [ id ElementIds.orderItemsMostMentionedFirst
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy MostMentionedFirst
@@ -2152,7 +2190,7 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                     [ Components.Button.radio
                         "order-items-by"
                         "order-items-focused-on"
-                        (case QueryParameters.orderItemsBy model.common.queryParameters of
+                        (case QueryParameters.orderItemsBy queryParameters of
                             FocusedOn _ ->
                                 True
 
@@ -2161,12 +2199,12 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                         )
                         tabbable
                         [ id ElementIds.orderItemsFocusedOn
-                        , Html.Attributes.disabled <| model.mostRecentRawTermForOrderingItemsFocusedOn == Nothing
+                        , Html.Attributes.disabled <| mostRecentRawTermForOrderingItemsFocusedOn == Nothing
                         , Extras.HtmlAttribute.showMaybe
                             (\termId ->
                                 Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy <| FocusedOn termId
                             )
-                            model.mostRecentRawTermForOrderingItemsFocusedOn
+                            mostRecentRawTermForOrderingItemsFocusedOn
                         ]
                     , label
                         [ class "ml-3 inline-flex items-center font-medium text-gray-700 dark:text-gray-300 select-none"
@@ -2194,14 +2232,14 @@ viewOrderItemsBy model numberOfItems enableMathSupport disambiguatedPreferredTer
                                         Components.SelectMenu.Choice
                                             (RawTerm.toString preferredRawTerm)
                                             [ text <| Term.inlineText <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm ]
-                                            (model.mostRecentRawTermForOrderingItemsFocusedOn == Just preferredRawTerm)
+                                            (mostRecentRawTermForOrderingItemsFocusedOn == Just preferredRawTerm)
                                     )
                             )
                         ]
                     ]
                 ]
             ]
-        , Extras.Html.showIf (QueryParameters.orderItemsBy model.common.queryParameters == MostMentionedFirst) <|
+        , Extras.Html.showIf (QueryParameters.orderItemsBy queryParameters == MostMentionedFirst) <|
             p
                 [ class "mt-2 text-gray-700 dark:text-gray-300" ]
                 [ text I18n.explanationForMostMentionedFirst ]
@@ -2227,11 +2265,11 @@ menuOrDialogShown model =
     if Components.SearchDialog.visible model.searchDialog.model then
         SearchDialogShown
 
-    else if model.menuForMobileVisibility == Visible then
+    else if model.menuForMobileVisibility == GradualVisibility.Visible then
         MenuForMobileShown
 
     else if model.layout == ShowSingleItem then
-        model.common.maybeId
+        model.itemWithFocus
             |> Maybe.map ViewSingleItemModalDialogShown
             |> Maybe.withDefault NoMenuOrDialogShown
 
@@ -2260,23 +2298,23 @@ noModalDialogShown model =
             True
 
 
-pageTitle : Model -> Glossary -> String
-pageTitle model glossary =
+pageTitle : Model -> GlossaryForUi -> String
+pageTitle model glossaryForUi =
     let
         glossaryTitle =
-            glossary |> Glossary.title |> GlossaryTitle.inlineText
+            glossaryForUi |> GlossaryForUi.title |> GlossaryTitle.inlineText
     in
-    case ( model.layout, model.common.maybeId ) of
+    case ( model.layout, model.itemWithFocus ) of
         ( ShowSingleItem, Just id ) ->
             let
                 disambiguatedPreferredTerm =
-                    glossary
-                        |> Glossary.items
-                        |> GlossaryItems.get id
+                    glossaryForUi
+                        |> GlossaryForUi.items
+                        |> GlossaryItemsForUi.get id
                         |> Maybe.map
                             (\item ->
                                 item
-                                    |> GlossaryItemForHtml.disambiguatedPreferredTerm
+                                    |> GlossaryItemForUi.disambiguatedPreferredTerm
                                     |> DisambiguatedTerm.toTerm
                                     |> Term.inlineText
                             )
@@ -2290,36 +2328,36 @@ pageTitle model glossary =
 
         _ ->
             let
-                filterByTagWithDescription_ : Maybe ( Tag, TagDescription )
+                filterByTagWithDescription_ : Maybe DescribedTag
                 filterByTagWithDescription_ =
                     filterByTagWithDescription model
             in
             filterByTagWithDescription_
                 |> Maybe.map
-                    (\( tag, _ ) ->
-                        Tag.inlineText tag ++ " · " ++ glossaryTitle
+                    (\describedTag ->
+                        Tag.inlineText (DescribedTag.tag describedTag) ++ " · " ++ glossaryTitle
                     )
                 |> Maybe.withDefault glossaryTitle
 
 
-filterByTagWithDescription : Model -> Maybe ( Tag, TagDescription )
+filterByTagWithDescription : Model -> Maybe DescribedTag
 filterByTagWithDescription model =
-    case model.common.glossary of
-        Ok glossary ->
+    case model.common.glossaryForUi of
+        Ok glossaryForUi ->
             let
-                items : GlossaryItems
+                items : GlossaryItemsForUi
                 items =
-                    Glossary.items glossary
+                    GlossaryForUi.items glossaryForUi
             in
             model
                 |> filterByTagId
                 |> Maybe.andThen
                     (\tagId ->
-                        GlossaryItems.tagFromId tagId items
+                        GlossaryItemsForUi.tagFromId tagId items
                             |> Maybe.andThen
                                 (\tag ->
-                                    GlossaryItems.tagDescriptionFromId tagId items
-                                        |> Maybe.map (\description -> ( tag, description ))
+                                    GlossaryItemsForUi.tagDescriptionFromId tagId items
+                                        |> Maybe.map (DescribedTag.create tagId tag)
                                 )
                     )
 
@@ -2338,22 +2376,22 @@ controlOrCommandK runningOnMacOs =
 
 view : Model -> Document Msg
 view model =
-    case model.common.glossary of
-        Ok glossary ->
+    case model.common.glossaryForUi of
+        Ok glossaryForUi ->
             let
                 noModalDialogShown_ : Bool
                 noModalDialogShown_ =
                     noModalDialogShown model
 
-                items : GlossaryItems
+                items : GlossaryItemsForUi
                 items =
-                    Glossary.items glossary
+                    GlossaryForUi.items glossaryForUi
 
                 filterByTag_ : Maybe TagId
                 filterByTag_ =
                     filterByTagId model
 
-                filterByTagWithDescription_ : Maybe ( Tag, TagDescription )
+                filterByTagWithDescription_ : Maybe DescribedTag
                 filterByTagWithDescription_ =
                     filterByTagWithDescription model
 
@@ -2364,8 +2402,45 @@ view model =
                 controlOrCommandK_ : Extras.HtmlEvents.KeyDownEvent
                 controlOrCommandK_ =
                     controlOrCommandK model.common.runningOnMacOs
+
+                filterByTag : Maybe Tag
+                filterByTag =
+                    filterByTagWithDescription_ |> Maybe.map DescribedTag.tag
+
+                ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+                    items
+                        |> (case QueryParameters.orderItemsBy model.common.queryParameters of
+                                Alphabetically ->
+                                    GlossaryItemsForUi.orderedAlphabetically filterByTag_
+                                        >> (\lhs -> ( lhs, [] ))
+
+                                MostMentionedFirst ->
+                                    GlossaryItemsForUi.orderedByMostMentionedFirst filterByTag_
+                                        >> (\lhs -> ( lhs, [] ))
+
+                                FocusedOn termId ->
+                                    let
+                                        itemId : Maybe GlossaryItemId
+                                        itemId =
+                                            GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm termId items
+                                    in
+                                    case itemId of
+                                        Just itemId_ ->
+                                            GlossaryItemsForUi.orderedFocusedOn filterByTag_ itemId_
+
+                                        Nothing ->
+                                            always
+                                                (items
+                                                    |> GlossaryItemsForUi.orderedAlphabetically filterByTag_
+                                                    |> (\lhs -> ( lhs, [] ))
+                                                )
+                           )
+
+                combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForUi )
+                combinedIndexedGlossaryItems =
+                    List.append indexedGlossaryItems otherIndexedGlossaryItems
             in
-            { title = pageTitle model glossary
+            { title = pageTitle model glossaryForUi
             , body =
                 [ Html.div
                     [ class "min-h-full focus:outline-none"
@@ -2409,16 +2484,16 @@ view model =
                                                     items
                                                         |> (case QueryParameters.orderItemsBy model.common.queryParameters of
                                                                 Alphabetically ->
-                                                                    GlossaryItems.orderedAlphabetically filterByTag_
+                                                                    GlossaryItemsForUi.orderedAlphabetically filterByTag_
 
                                                                 MostMentionedFirst ->
-                                                                    GlossaryItems.orderedByMostMentionedFirst filterByTag_
+                                                                    GlossaryItemsForUi.orderedByMostMentionedFirst filterByTag_
 
                                                                 FocusedOn termId ->
                                                                     \items_ ->
-                                                                        GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm termId items_
+                                                                        GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm termId items_
                                                                             |> Maybe.map
-                                                                                (\itemId -> GlossaryItems.orderedFocusedOn filterByTag_ itemId items_)
+                                                                                (\itemId -> GlossaryItemsForUi.orderedFocusedOn filterByTag_ itemId items_)
                                                                             |> Maybe.withDefault ( [], [] )
                                                                             |> (\( lhs, rhs ) -> List.append lhs rhs)
                                                            )
@@ -2427,12 +2502,12 @@ view model =
                                             if event == Extras.HtmlEvents.leftArrow then
                                                 itemWithPreviousAndNext.previous
                                                     |> Maybe.map
-                                                        (\( newIndex, _ ) -> ( PageMsg.Internal <| ChangeLayoutToShowSingle newIndex, True ))
+                                                        (\newItem -> ( PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForUi.id newItem, True ))
 
                                             else if event == Extras.HtmlEvents.rightArrow then
                                                 itemWithPreviousAndNext.next
                                                     |> Maybe.map
-                                                        (\( newIndex, _ ) -> ( PageMsg.Internal <| ChangeLayoutToShowSingle newIndex, True ))
+                                                        (\newItem -> ( PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForUi.id newItem, True ))
 
                                             else
                                                 Nothing
@@ -2445,31 +2520,37 @@ view model =
                                             Just <| ( PageMsg.Internal MakeChanges, True )
 
                                         else if Editability.editing model.common.editability && event == Extras.HtmlEvents.n then
-                                            let
-                                                common_ : CommonModel
-                                                common_ =
-                                                    model.common
-                                            in
-                                            Just <| ( PageMsg.NavigateToCreateOrEdit { common_ | maybeId = Nothing }, True )
+                                            Just <| ( PageMsg.NavigateToCreateOrEdit Nothing, True )
 
                                         else
                                             Nothing
                             )
                         )
                     ]
-                    [ viewMenuForMobile model model.common.enableMathSupport noModalDialogShown_ indexOfTerms
-                    , viewStaticSidebarForDesktop
+                    [ Html.Lazy.lazy4 viewMenuForMobile
+                        model.menuForMobileVisibility
+                        model.common.enableMathSupport
+                        noModalDialogShown_
+                        indexOfTerms
+                    , Html.Lazy.lazy2 viewStaticSidebarForDesktop
                         { runningOnMacOs = model.common.runningOnMacOs
                         , enableMathSupport = model.common.enableMathSupport
                         , tabbable = noModalDialogShown_
                         }
                         indexOfTerms
                     , div
+                        [ class "hidden lg:block" ]
+                        [ Html.Lazy.lazy viewBackToTopLink { staticSidebar = True, visibility = model.backToTopLinkVisibility } ]
+                    , div
+                        [ class "lg:hidden" ]
+                        [ Html.Lazy.lazy viewBackToTopLink { staticSidebar = False, visibility = model.backToTopLinkVisibility } ]
+                    , div
                         [ class "lg:pl-64 flex flex-col" ]
-                        [ viewTopBar noModalDialogShown_
+                        [ Html.Lazy.lazy4 viewTopBar
+                            noModalDialogShown_
                             model.common.theme
                             model.themeDropdownMenu
-                            (if Glossary.enableExportMenu glossary then
+                            (if GlossaryForUi.enableExportMenu glossaryForUi then
                                 Just model.exportDropdownMenu
 
                              else
@@ -2479,13 +2560,13 @@ view model =
                             [ Html.Attributes.id ElementIds.container
                             , class "relative"
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
-                            , glossary |> Glossary.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
+                            , glossaryForUi |> GlossaryForUi.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
                             ]
                             [ header [] <|
                                 let
                                     showExportButton : Bool
                                     showExportButton =
-                                        Glossary.enableExportMenu glossary
+                                        GlossaryForUi.enableExportMenu glossaryForUi
                                 in
                                 [ div
                                     [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
@@ -2508,44 +2589,42 @@ view model =
                                     ]
                                 , viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
                                     |> Extras.Html.showIf (model.common.editability == ReadOnlyWithHelpForMakingChanges)
-                                , Extras.Html.showIf (Editability.editing model.common.editability) <| viewSettings glossary model
+                                , Extras.Html.showIf (Editability.editing model.common.editability) <| viewSettings glossaryForUi model
                                 , h1
                                     [ id ElementIds.title ]
                                     [ filterByTagWithDescription_
                                         |> Maybe.map
-                                            (\( tag, _ ) ->
-                                                Tag.view
+                                            (DescribedTag.tag
+                                                >> Tag.view
                                                     model.common.enableMathSupport
                                                     [ class "text-3xl font-bold leading-tight" ]
-                                                    tag
                                             )
                                         |> Maybe.withDefault
-                                            (glossary
-                                                |> Glossary.title
+                                            (glossaryForUi
+                                                |> GlossaryForUi.title
                                                 |> GlossaryTitle.view model.common.enableMathSupport [ class "text-3xl font-bold leading-tight" ]
                                             )
                                     ]
                                 , Extras.Html.showIf (filterByTagWithDescription_ /= Nothing) <|
                                     h2
                                         [ class "mt-2 font-bold leading-tight" ]
-                                        [ glossary |> Glossary.title |> GlossaryTitle.view model.common.enableMathSupport [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
+                                        [ glossaryForUi |> GlossaryForUi.title |> GlossaryTitle.view model.common.enableMathSupport [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
                                         ]
                                 ]
                             , Html.main_
                                 []
                                 [ filterByTagWithDescription_
                                     |> Maybe.map
-                                        (\( _, tagDescription ) ->
-                                            TagDescription.view
+                                        (DescribedTag.description
+                                            >> TagDescription.view
                                                 { enableMathSupport = model.common.enableMathSupport
                                                 , makeLinksTabbable = noModalDialogShown_
                                                 }
                                                 []
-                                                tagDescription
                                         )
                                     |> Maybe.withDefault
-                                        (glossary
-                                            |> Glossary.aboutSection
+                                        (glossaryForUi
+                                            |> GlossaryForUi.aboutSection
                                             |> Components.AboutSection.view
                                                 { enableMathSupport = model.common.enableMathSupport
                                                 , modalDialogShown = not noModalDialogShown_
@@ -2554,45 +2633,101 @@ view model =
                                 , Extras.Html.showIf (Editability.editing model.common.editability && filterByTagWithDescription_ == Nothing) <|
                                     div
                                         [ class "flex-none mt-2" ]
-                                        [ viewEditTitleAndAboutButton noModalDialogShown_ model.common ]
-                                , items
-                                    |> (case QueryParameters.orderItemsBy model.common.queryParameters of
-                                            Alphabetically ->
-                                                GlossaryItems.orderedAlphabetically filterByTag_
-                                                    >> (\lhs -> ( lhs, [] ))
+                                        [ viewEditTitleAndAboutButton noModalDialogShown_ ]
+                                , Html.article
+                                    [ Html.Attributes.id ElementIds.items
+                                    , Extras.HtmlAttribute.showIf (GlossaryForUi.enableOrderItemsButtons glossaryForUi) <| class "mt-3 pt-2 border-t border-gray-300 dark:border-gray-700"
+                                    ]
+                                    [ items
+                                        |> (case QueryParameters.orderItemsBy model.common.queryParameters of
+                                                Alphabetically ->
+                                                    GlossaryItemsForUi.orderedAlphabetically filterByTag_
+                                                        >> (\lhs -> ( lhs, [] ))
 
-                                            MostMentionedFirst ->
-                                                GlossaryItems.orderedByMostMentionedFirst filterByTag_
-                                                    >> (\lhs -> ( lhs, [] ))
+                                                MostMentionedFirst ->
+                                                    GlossaryItemsForUi.orderedByMostMentionedFirst filterByTag_
+                                                        >> (\lhs -> ( lhs, [] ))
 
-                                            FocusedOn termId ->
-                                                let
-                                                    itemId : Maybe GlossaryItemId
-                                                    itemId =
-                                                        GlossaryItems.itemIdFromRawDisambiguatedPreferredTerm termId items
-                                                in
-                                                case itemId of
-                                                    Just itemId_ ->
-                                                        GlossaryItems.orderedFocusedOn filterByTag_ itemId_
+                                                FocusedOn termId ->
+                                                    let
+                                                        itemId : Maybe GlossaryItemId
+                                                        itemId =
+                                                            GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm termId items
+                                                    in
+                                                    case itemId of
+                                                        Just itemId_ ->
+                                                            GlossaryItemsForUi.orderedFocusedOn filterByTag_ itemId_
 
-                                                    Nothing ->
-                                                        always
-                                                            (items
-                                                                |> GlossaryItems.orderedAlphabetically filterByTag_
-                                                                |> (\lhs -> ( lhs, [] ))
-                                                            )
-                                       )
-                                    |> viewCards
+                                                        Nothing ->
+                                                            always
+                                                                (items
+                                                                    |> GlossaryItemsForUi.orderedAlphabetically filterByTag_
+                                                                    |> (\lhs -> ( lhs, [] ))
+                                                                )
+                                           )
+                                        |> Html.Lazy.lazy7 viewCards
+                                            { enableMathSupport = model.common.enableMathSupport
+                                            , enableOrderItemsButtons = GlossaryForUi.enableOrderItemsButtons glossaryForUi
+                                            , editable = Editability.editing model.common.editability
+                                            , tabbable = noModalDialogShown_
+                                            , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
+                                            , noModalDialogShown_ = noModalDialogShown model
+                                            , editing = Editability.editing model.common.editability
+                                            }
+                                            { filterByTagId_ = filterByTagId model
+                                            , tags = GlossaryItemsForUi.tags items
+                                            , filterByDescribedTag_ = filterByTagWithDescription_
+                                            }
+                                            model.common.queryParameters
+                                            model.itemWithFocus
+                                            model.mostRecentRawTermForOrderingItemsFocusedOn
+                                            items
+                                    , Html.Lazy.lazy5 Components.SearchDialog.view
+                                        (PageMsg.Internal << SearchDialogMsg)
+                                        model.searchDialog.model
+                                        model.searchDialog.term
+                                        (filterByTagWithDescription_
+                                            |> Maybe.map
+                                                (\describedTag ->
+                                                    span
+                                                        [ class "inline-flex flex-wrap items-center" ]
+                                                        [ Icons.exclamation
+                                                            [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-800 mr-1.5"
+                                                            , Accessibility.Aria.hidden True
+                                                            ]
+                                                        , span
+                                                            [ class "mr-1" ]
+                                                            [ text I18n.filteringByTag ]
+                                                        , span []
+                                                            [ text " \""
+                                                            , Tag.view model.common.enableMathSupport [] <| DescribedTag.tag describedTag
+                                                            , text "\""
+                                                            ]
+                                                        ]
+                                                )
+                                        )
+                                        model.searchDialog.results
+                                    , viewConfirmDeleteModal
+                                        model.common.editability
+                                        model.confirmDeleteId
+                                        model.deleting
+                                    , viewSingleItemModalDialog
                                         model
                                         { enableMathSupport = model.common.enableMathSupport
-                                        , enableOrderItemsButtons = Glossary.enableOrderItemsButtons glossary
                                         , editable = Editability.editing model.common.editability
                                         , tabbable = noModalDialogShown_
-                                        , enableLastUpdatedDates = Glossary.enableLastUpdatedDates glossary
+                                        , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
                                         }
-                                        (GlossaryItems.tags items)
-                                        items
-                                        filterByTagWithDescription_
+                                        filterByTag
+                                        combinedIndexedGlossaryItems
+                                      <|
+                                        case ( model.layout, model.itemWithFocus ) of
+                                            ( ShowSingleItem, Just id ) ->
+                                                Just id
+
+                                            _ ->
+                                                Nothing
+                                    ]
                                 ]
                             , Html.footer
                                 []
@@ -2624,4 +2759,5 @@ subscriptions model =
         , Components.DropdownMenu.subscriptions model.exportDropdownMenu
             |> Sub.map (ExportDropdownMenuMsg >> PageMsg.Internal)
         , attemptedToCopyEditorCommandToClipboard (AttemptedToCopyEditorCommandToClipboard >> PageMsg.Internal)
+        , scrollingUpWhileFarAwayFromTheTop (always <| PageMsg.Internal ScrollingUpWhileFarAwayFromTheTop)
         ]

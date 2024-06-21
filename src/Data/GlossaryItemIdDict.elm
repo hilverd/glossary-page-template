@@ -42,7 +42,7 @@ import Dict exposing (Dict)
 {-| A dictionary of glossary item IDs and values.
 -}
 type GlossaryItemIdDict a
-    = GlossaryItemIdDict (Dict Int a)
+    = GlossaryItemIdDict (Dict String a)
 
 
 {-| Create an empty dictionary.
@@ -57,7 +57,7 @@ empty =
 insert : GlossaryItemId -> v -> GlossaryItemIdDict v -> GlossaryItemIdDict v
 insert glossaryItemId value (GlossaryItemIdDict dict) =
     dict
-        |> Dict.insert (GlossaryItemId.toInt glossaryItemId) value
+        |> Dict.insert (GlossaryItemId.toString glossaryItemId) value
         |> GlossaryItemIdDict
 
 
@@ -68,7 +68,7 @@ This is useful when you are not sure if a key will be in the dictionary.
 get : GlossaryItemId -> GlossaryItemIdDict v -> Maybe v
 get glossaryItemId (GlossaryItemIdDict dict) =
     dict
-        |> Dict.get (GlossaryItemId.toInt glossaryItemId)
+        |> Dict.get (GlossaryItemId.toString glossaryItemId)
 
 
 {-| Get all of the keys in a dictionary, sorted from lowest to highest.

@@ -20,6 +20,7 @@ import Accessibility.Role
 import Array
 import Browser.Events as Events
 import Components.Button
+import Data.GradualVisibility exposing (GradualVisibility(..))
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Html
@@ -35,12 +36,6 @@ import Task
 
 
 -- MODEL
-
-
-type GradualVisibility
-    = Visible
-    | Disappearing
-    | Invisible
 
 
 type Model

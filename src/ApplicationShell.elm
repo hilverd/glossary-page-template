@@ -15,11 +15,10 @@ import Browser.Navigation exposing (Key)
 import Codec
 import CommonModel exposing (CommonModel)
 import Data.Editability as Editability
-import Data.Glossary as Glossary exposing (Glossary)
-import Data.GlossaryItem.RawTerm as RawTerm
-import Data.GlossaryItem.Term as Term
+import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
+import Data.GlossaryFromDom as GlossaryFromDom
 import Data.GlossaryItemId exposing (GlossaryItemId)
-import Data.GlossaryItems as GlossaryItems
+import Data.GlossaryItemsForUi as GlossaryItems
 import Data.Theme as Theme exposing (Theme)
 import Html
 import Json.Decode as Decode
@@ -74,6 +73,22 @@ type alias Model =
     }
 
 
+commonModelForPage : Page -> CommonModel
+commonModelForPage page =
+    case page of
+        ListAll { common } ->
+            common
+
+        CreateOrEdit { common } ->
+            common
+
+        EditTitleAndAbout { common } ->
+            common
+
+        ManageTags { common } ->
+            common
+
+
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
 init flags url key =
     let
@@ -98,24 +113,25 @@ init flags url key =
         maybeFragment =
             url.fragment
 
-        glossary : Result String Glossary
-        glossary =
+        glossaryForUi : Result String GlossaryForUi
+        glossaryForUi =
             flags
-                |> Decode.decodeValue (Codec.decoder Glossary.codec)
+                |> Decode.decodeValue (Codec.decoder GlossaryFromDom.codec)
                 |> Result.mapError Decode.errorToString
+                |> Result.map GlossaryForUi.fromGlossaryFromDom
 
-        maybeId : Maybe GlossaryItemId
-        maybeId =
+        itemWithFocus : Maybe GlossaryItemId
+        itemWithFocus =
             Maybe.map2
                 glossaryItemIdForFragment
                 maybeFragment
-                (Result.toMaybe glossary)
+                (Result.toMaybe glossaryForUi)
                 |> Maybe.andThen identity
 
         enableHelpForMakingChanges : Bool
         enableHelpForMakingChanges =
-            glossary
-                |> Result.map Glossary.enableHelpForMakingChanges
+            glossaryForUi
+                |> Result.map GlossaryForUi.enableHelpForMakingChanges
                 |> Result.withDefault False
 
         usingIncludedBackend : Bool
@@ -188,13 +204,12 @@ init flags url key =
             , editability = editability
             , enableMathSupport = katexIsAvailable
             , queryParameters = queryParameters
-            , maybeId = maybeId
             , fragment = maybeFragment
-            , glossary = glossary
+            , glossaryForUi = glossaryForUi
             }
 
         ( listAllModel, listAllCmd ) =
-            Pages.ListAll.init common
+            Pages.ListAll.init common itemWithFocus
     in
     ( { key = key, page = ListAll listAllModel }
     , Cmd.map ListAllMsg listAllCmd
@@ -220,62 +235,62 @@ type Msg
 withoutInternal : Msg -> PageMsg ()
 withoutInternal msg =
     case msg of
-        ListAllMsg (NavigateToListAll commonModel) ->
-            PageMsg.NavigateToListAll commonModel
+        ListAllMsg (NavigateToListAll commonModel itemWithFocus) ->
+            PageMsg.NavigateToListAll commonModel itemWithFocus
 
         ListAllMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
 
-        ListAllMsg (NavigateToEditTitleAndAbout commonModel) ->
-            PageMsg.NavigateToEditTitleAndAbout commonModel
+        ListAllMsg NavigateToEditTitleAndAbout ->
+            PageMsg.NavigateToEditTitleAndAbout
 
-        ListAllMsg (NavigateToManageTags commonModel) ->
-            PageMsg.NavigateToManageTags commonModel
+        ListAllMsg NavigateToManageTags ->
+            PageMsg.NavigateToManageTags
 
         ListAllMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
-        CreateOrEditMsg (NavigateToListAll commonModel) ->
-            PageMsg.NavigateToListAll commonModel
+        CreateOrEditMsg (NavigateToListAll commonModel itemWithFocus) ->
+            PageMsg.NavigateToListAll commonModel itemWithFocus
 
         CreateOrEditMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
 
-        CreateOrEditMsg (NavigateToEditTitleAndAbout commonModel) ->
-            PageMsg.NavigateToEditTitleAndAbout commonModel
+        CreateOrEditMsg NavigateToEditTitleAndAbout ->
+            PageMsg.NavigateToEditTitleAndAbout
 
-        CreateOrEditMsg (NavigateToManageTags commonModel) ->
-            PageMsg.NavigateToManageTags commonModel
+        CreateOrEditMsg NavigateToManageTags ->
+            PageMsg.NavigateToManageTags
 
         CreateOrEditMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
-        EditTitleAndAboutMsg (NavigateToListAll commonModel) ->
-            PageMsg.NavigateToListAll commonModel
+        EditTitleAndAboutMsg (NavigateToListAll commonModel itemWithFocus) ->
+            PageMsg.NavigateToListAll commonModel itemWithFocus
 
         EditTitleAndAboutMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
 
-        EditTitleAndAboutMsg (NavigateToEditTitleAndAbout commonModel) ->
-            PageMsg.NavigateToEditTitleAndAbout commonModel
+        EditTitleAndAboutMsg NavigateToEditTitleAndAbout ->
+            PageMsg.NavigateToEditTitleAndAbout
 
-        EditTitleAndAboutMsg (NavigateToManageTags commonModel) ->
-            PageMsg.NavigateToManageTags commonModel
+        EditTitleAndAboutMsg NavigateToManageTags ->
+            PageMsg.NavigateToManageTags
 
         EditTitleAndAboutMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
-        ManageTagsMsg (NavigateToListAll commonModel) ->
-            PageMsg.NavigateToListAll commonModel
+        ManageTagsMsg (NavigateToListAll commonModel itemWithFocus) ->
+            PageMsg.NavigateToListAll commonModel itemWithFocus
 
         ManageTagsMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
 
-        ManageTagsMsg (NavigateToEditTitleAndAbout commonModel) ->
-            PageMsg.NavigateToEditTitleAndAbout commonModel
+        ManageTagsMsg NavigateToEditTitleAndAbout ->
+            PageMsg.NavigateToEditTitleAndAbout
 
-        ManageTagsMsg (NavigateToManageTags commonModel) ->
-            PageMsg.NavigateToManageTags commonModel
+        ManageTagsMsg NavigateToManageTags ->
+            PageMsg.NavigateToManageTags
 
         ManageTagsMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
@@ -290,9 +305,9 @@ withoutInternal msg =
             PageMsg.Internal ()
 
 
-glossaryItemIdForFragment : String -> Glossary -> Maybe GlossaryItemId
+glossaryItemIdForFragment : String -> GlossaryForUi -> Maybe GlossaryItemId
 glossaryItemIdForFragment fragment =
-    Glossary.items
+    GlossaryForUi.items
         >> GlossaryItems.itemIdFromFragmentIdentifier fragment
 
 
@@ -332,62 +347,73 @@ update msg model =
                         maybeFragment =
                             url.fragment
 
-                        maybeId : Maybe GlossaryItemId
-                        maybeId =
+                        itemWithFocus : Maybe GlossaryItemId
+                        itemWithFocus =
                             Maybe.map2
                                 glossaryItemIdForFragment
                                 maybeFragment
-                                (Result.toMaybe common0.glossary)
+                                (Result.toMaybe common0.glossaryForUi)
                                 |> Maybe.andThen identity
 
                         common1 : CommonModel
                         common1 =
                             { common0
                                 | queryParameters = queryParameters
-                                , maybeId = maybeId
                                 , fragment = maybeFragment
                             }
 
                         listAllModel1 : Pages.ListAll.Model
                         listAllModel1 =
-                            { listAllModel | common = common1 }
+                            { listAllModel
+                                | common = common1
+                                , itemWithFocus = itemWithFocus
+                            }
                     in
                     ( { model | page = ListAll listAllModel1 }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
 
-        ( _, NavigateToListAll commonModel, _ ) ->
+        ( _, NavigateToListAll commonModel itemWithFocus, _ ) ->
             let
                 ( listAllModel, listAllCmd ) =
-                    Pages.ListAll.init commonModel
+                    Pages.ListAll.init commonModel itemWithFocus
             in
             ( { model | page = ListAll listAllModel }
             , Cmd.map ListAllMsg listAllCmd
             )
 
-        ( _, NavigateToCreateOrEdit commonModel, _ ) ->
+        ( _, NavigateToCreateOrEdit itemBeingEdited, _ ) ->
             let
+                common0 =
+                    commonModelForPage model.page
+
                 ( createOrEditModel, createOrEditCmd ) =
-                    Pages.CreateOrEdit.init commonModel
+                    Pages.CreateOrEdit.init common0 itemBeingEdited
             in
             ( { model | page = CreateOrEdit createOrEditModel }
             , Cmd.batch [ resetViewport, Cmd.map CreateOrEditMsg createOrEditCmd ]
             )
 
-        ( _, NavigateToEditTitleAndAbout commonModel, _ ) ->
+        ( _, NavigateToEditTitleAndAbout, _ ) ->
             let
+                common0 =
+                    commonModelForPage model.page
+
                 ( editTitleAndAboutModel, editTitleAndAboutCmd ) =
-                    Pages.EditTitleAndAbout.init commonModel
+                    Pages.EditTitleAndAbout.init common0
             in
             ( { model | page = EditTitleAndAbout editTitleAndAboutModel }
             , Cmd.batch [ resetViewport, Cmd.map EditTitleAndAboutMsg editTitleAndAboutCmd ]
             )
 
-        ( _, NavigateToManageTags commonModel, _ ) ->
+        ( _, NavigateToManageTags, _ ) ->
             let
+                common0 =
+                    commonModelForPage model.page
+
                 ( manageTagsModel, manageTagsCmd ) =
-                    Pages.ManageTags.init commonModel
+                    Pages.ManageTags.init common0
             in
             ( { model | page = ManageTags manageTagsModel }
             , Cmd.batch [ resetViewport, Cmd.map ManageTagsMsg manageTagsCmd ]

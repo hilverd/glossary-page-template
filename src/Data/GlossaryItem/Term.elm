@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, fromMarkdown, codec, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki)
+module Data.GlossaryItem.Term exposing (Term, fromMarkdown, codec, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki, toTermFromDom)
 
 {-| A term in a glossary item.
 A term's `id` is used to be able to refer to this term (as a related one) from other glossary items.
@@ -8,12 +8,13 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, fromMarkdown, codec, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki
+@docs Term, fromMarkdown, codec, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki, toTermFromDom
 
 -}
 
 import Codec exposing (Codec)
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
+import Data.GlossaryItem.TermFromDom exposing (TermFromDom)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.HtmlTree exposing (HtmlTree)
 import Extras.String
@@ -40,7 +41,7 @@ stringToIndexGroupString : String -> String
 stringToIndexGroupString =
     String.Normalize.removeDiacritics
         >> String.toUpper
-        >> Extras.String.firstAlphaNumericCharacter
+        >> Extras.String.firstAlphanumericCharacter
         >> Maybe.withDefault "…"
         >> (\result ->
                 if List.member result [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ] then
@@ -212,13 +213,13 @@ compareAlphabetically term1 term2 =
                 (term1
                     |> inlineText
                     |> String.Normalize.removeDiacritics
-                    |> Extras.String.preserveOnlyAlphaNumChars
+                    |> Extras.String.preserveOnlyAlphanumChars
                     |> String.toUpper
                 )
                 (term2
                     |> inlineText
                     |> String.Normalize.removeDiacritics
-                    |> Extras.String.preserveOnlyAlphaNumChars
+                    |> Extras.String.preserveOnlyAlphanumChars
                     |> String.toUpper
                 )
 
@@ -247,3 +248,12 @@ htmlTreeForAnki enableMathSupport (MarkdownTerm { body }) =
 
         Err parsingError ->
             Extras.HtmlTree.Leaf <| I18n.failedToParseMarkdown ++ ": " ++ parsingError
+
+
+{-| Convert a term to a TermFromDom.
+-}
+toTermFromDom : Term -> TermFromDom
+toTermFromDom (MarkdownTerm term) =
+    { isAbbreviation = term.isAbbreviation
+    , body = MarkdownFragment.raw term.body
+    }

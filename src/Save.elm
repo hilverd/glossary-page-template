@@ -11,8 +11,9 @@ module Save exposing (changeAndSave)
 
 import Codec
 import Data.Editability exposing (Editability(..))
-import Data.Glossary as Glossary exposing (Glossary)
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
+import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
+import Data.GlossaryFromDom as GlossaryFromDom
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.Saving exposing (Saving(..))
 import Extras.HtmlTree as HtmlTree
@@ -25,10 +26,10 @@ import Internationalisation as I18n
 -}
 changeAndSave :
     Editability
-    -> Glossary
+    -> GlossaryForUi
     -> GlossaryChangelist
     -> (Http.Error -> msg)
-    -> (( Maybe GlossaryItemId, Glossary ) -> msg)
+    -> (( Maybe GlossaryItemId, GlossaryForUi ) -> msg)
     -> ( Saving, Cmd msg )
 changeAndSave editability glossary changelist_ errorMsg successMsg =
     let
@@ -47,15 +48,26 @@ changeAndSave editability glossary changelist_ errorMsg successMsg =
 
                 _ ->
                     changelist_
+
+        resultOfApplyingChanges : GlossaryFromDom.ApplyChangesResult
+        resultOfApplyingChanges =
+            glossary
+                |> GlossaryForUi.toGlossaryFromDom
+                |> GlossaryFromDom.applyChanges changelist
     in
-    case Glossary.applyChanges changelist glossary of
-        Glossary.ChangesApplied resultOfApplyingChanges ->
+    case resultOfApplyingChanges of
+        GlossaryFromDom.ChangesApplied result ->
+            let
+                result_ : ( Maybe GlossaryItemId, GlossaryForUi )
+                result_ =
+                    Tuple.mapSecond GlossaryForUi.fromGlossaryFromDom result
+            in
             case editability of
                 EditingInMemory ->
-                    ( NotCurrentlySaving, successMsg resultOfApplyingChanges |> Extras.Task.messageToCommand )
+                    ( NotCurrentlySaving, successMsg result_ |> Extras.Task.messageToCommand )
 
                 EditingWithIncludedBackend ->
-                    ( SavingInProgress, patchHtmlFile resultOfApplyingChanges errorMsg successMsg )
+                    ( SavingInProgress, patchHtmlFile result_ errorMsg successMsg )
 
                 EditingWithSeparateBackend { baseUrl, bearerToken } ->
                     ( SavingInProgress
@@ -63,7 +75,7 @@ changeAndSave editability glossary changelist_ errorMsg successMsg =
                         baseUrl
                         bearerToken
                         changelist
-                        resultOfApplyingChanges
+                        result_
                         errorMsg
                         successMsg
                     )
@@ -71,17 +83,17 @@ changeAndSave editability glossary changelist_ errorMsg successMsg =
                 _ ->
                     ( NotCurrentlySaving, Cmd.none )
 
-        Glossary.VersionsDoNotMatch ->
+        GlossaryFromDom.VersionsDoNotMatch ->
             ( SavingFailed I18n.otherChangesWereMadePleaseReload, Cmd.none )
 
-        Glossary.LogicalErrorWhenApplyingChanges err ->
+        GlossaryFromDom.LogicalErrorWhenApplyingChanges err ->
             ( SavingNotAttempted err, Cmd.none )
 
 
 patchHtmlFile :
-    ( Maybe GlossaryItemId, Glossary )
+    ( Maybe GlossaryItemId, GlossaryForUi )
     -> (Http.Error -> msg)
-    -> (( Maybe GlossaryItemId, Glossary ) -> msg)
+    -> (( Maybe GlossaryItemId, GlossaryForUi ) -> msg)
     -> Cmd msg
 patchHtmlFile ( maybeGlossaryItemId, glossary ) errorMsg successMsg =
     Http.request
@@ -90,7 +102,8 @@ patchHtmlFile ( maybeGlossaryItemId, glossary ) errorMsg successMsg =
         , url = "/"
         , body =
             glossary
-                |> Glossary.toHtmlTree
+                |> GlossaryForUi.toGlossaryFromDom
+                |> GlossaryFromDom.toHtmlTree
                 |> HtmlTree.toHtmlReplacementString
                 |> Http.stringBody "text/html"
         , expect =
@@ -112,9 +125,9 @@ sendChangesAsPatch :
     String
     -> Maybe String
     -> GlossaryChangelist
-    -> ( Maybe GlossaryItemId, Glossary )
+    -> ( Maybe GlossaryItemId, GlossaryForUi )
     -> (Http.Error -> msg)
-    -> (( Maybe GlossaryItemId, Glossary ) -> msg)
+    -> (( Maybe GlossaryItemId, GlossaryForUi ) -> msg)
     -> Cmd msg
 sendChangesAsPatch baseUrl bearerToken changelist ( maybeGlossaryItemId, glossary ) errorMsg successMsg =
     let
