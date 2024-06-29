@@ -16,10 +16,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8.11.0
-      - uses: actions/setup-node@v3
+          version: 9.4.0
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
@@ -31,7 +31,7 @@ jobs:
       - name: Prepare release
         run: ./bin/prepare-release
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: release/*
