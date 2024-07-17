@@ -171,11 +171,11 @@ suite =
                                         , gardeningDescribedTagFromDom
                                         ]
                                     , items =
-                                        [ { defaultComputerScienceItemFromDom
-                                            | disambiguationTag = Just financeRawTag
-                                          }
-                                        , { defaultFinanceItemFromDom
+                                        [ { defaultFinanceItemFromDom
                                             | disambiguationTag = Just computerScienceRawTag
+                                          }
+                                        , { defaultComputerScienceItemFromDom
+                                            | disambiguationTag = Just financeRawTag
                                           }
                                         , { informationRetrievalItemFromDom
                                             | normalTags = [ financeRawTag ]

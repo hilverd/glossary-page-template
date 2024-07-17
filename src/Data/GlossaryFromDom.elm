@@ -362,7 +362,16 @@ applyChanges changes glossaryFromDom =
             |> (\result ->
                     case result of
                         Ok result_ ->
-                            ChangesApplied result_
+                            let
+                                sortedItems =
+                                    result_
+                                        |> Tuple.second
+                                        |> .items
+                                        |> List.sortBy GlossaryItemFromDom.disambiguatedPreferredTermIdString
+                            in
+                            result_
+                                |> Tuple.mapSecond (\glossaryFromDom_ -> { glossaryFromDom_ | items = sortedItems })
+                                |> ChangesApplied
 
                         Err err ->
                             LogicalErrorWhenApplyingChanges err

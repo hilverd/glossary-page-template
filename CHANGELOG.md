@@ -17,6 +17,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Upgrade GitHub Actions.
 
 ### Fixed
+
+- When using the `worker.min.js` script, ensure that items are sorted by the IDs of their disambiguated preferred terms.
+
 ### Removed
 
 ## [5.0.2] - 2024-06-21
