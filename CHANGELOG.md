@@ -13,14 +13,18 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+### Fixed
+### Removed
+
+## [5.0.3] - 2024-07-17
+
+### Changed
 
 - Upgrade GitHub Actions.
 
 ### Fixed
 
 - When using the `worker.min.js` script, ensure that items are sorted by the IDs of their disambiguated preferred terms.
-
-### Removed
 
 ## [5.0.2] - 2024-06-21
 
@@ -755,7 +759,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.0.2...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.0.3...HEAD
+[5.0.3]: https://github.com/hilverd/glossary-page-template/compare/v5.0.2...v5.0.3
 [5.0.2]: https://github.com/hilverd/glossary-page-template/compare/v5.0.1...v5.0.2
 [5.0.1]: https://github.com/hilverd/glossary-page-template/compare/v4.7.1...v5.0.1
 [4.7.1]: https://github.com/hilverd/glossary-page-template/compare/v4.7.0...v4.7.1
