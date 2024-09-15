@@ -177,7 +177,12 @@ var filePath = '.' + req.url.replace(/\?.*$/g, '');
 
 ## [4.0.0] - 2023-11-24
 
-This release introduces support for _tags_, improves support for items that have terms in common, and removes support for "plain text" in favour of Markdown. It contains **breaking** changes that should only affect you if you have items with multiple definitions or are using plain text.
+This release introduces support for _tags_, improves support for items that have terms in common, and removes support for "plain text" in favour of Markdown. It contains **breaking** changes that should only affect you if
+
+* you have items with multiple definitions or are using plain text, or
+* you are opening the glossary as a file in a browser (using a `file://` URL).
+
+The latter now only shows the (initial) help message, and to see the actual glossary you will need to either use the built-in editor or "host" the `glossary.html` file using e.g. `python3 -m http.server 8000`.
 
 Download [glossary.html](https://github.com/hilverd/glossary-page-template/releases/latest/download/glossary.html) to see some examples of the new features.
 
