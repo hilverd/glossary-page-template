@@ -1,5 +1,5 @@
+import path from 'path'
 import { defineConfig } from 'vite'
-const path = require('path')
 import elmPlugin from 'vite-plugin-elm'
 
 export default defineConfig({
