@@ -21,7 +21,7 @@ This project makes it easy to create a glossary as a single HTML page that can b
 
 ## Getting Started
 
-Download `glossary.html` from the [latest release](https://github.com/hilverd/glossary-page-template/releases/latest) and open it in a browser.
+Download [`glossary.html`](https://github.com/hilverd/glossary-page-template/releases/latest/download/glossary.html) from the [latest release](https://github.com/hilverd/glossary-page-template/releases/latest) and open it in a browser.
 
 ### Static assets
 
