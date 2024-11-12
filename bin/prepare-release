@@ -24,7 +24,7 @@ release_tag="$(git describe --tags)"
 release_tag_without_v=$(echo "$release_tag" | sed 's/^v//')
 major=$(echo "$release_tag_without_v" | sed 's/^\([^\.]*\)\.\([^\.]*\)\.\(.*\)$/\1/')
 
-mv worker.umd.js worker.min.js
+mv worker.umd.cjs worker.min.js
 
 # Use release number in static asset file names instead of hash
 mv assets/glossary-*.js "glossary-$release_tag".min.js
