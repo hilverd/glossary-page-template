@@ -30,6 +30,16 @@ mv worker.umd.cjs worker.min.js
 mv assets/glossary-*.js "glossary-$release_tag".min.js
 mv assets/glossary-*.css "glossary-$release_tag".min.css
 
+# This is a hack to allow a glossary HTML file to be viewed directly in a browser.
+# Elm will fail when trying to initialise a `Browser.application` for `file://` URLs.
+# The command below makes `file://` URLs look like `http://example.com/...` ones.
+# See also https://github.com/elm/core/blob/1.0.0/hints/1.md
+sed -i \
+  -e 's! \([a-zA-Z0-9]\+([a-zA-Z0-9]\+\.location\.href\))\.a||! \1).a||\1.replace(/^file:\\/\\//, "http://example.com")).a||!' \
+  "glossary-$release_tag".min.js
+
+grep -q 'example\.com' "glossary-$release_tag".min.js || fail 'Failed to apply Browser.application hack'
+
 for template in glossary empty; do
   cat $template.html | \
     sed 's!/assets/glossary-[^\.]*.js!'"glossary-$release_tag"'.min.js!' | \

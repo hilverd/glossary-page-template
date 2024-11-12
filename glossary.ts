@@ -142,242 +142,218 @@ if (containerElement) {
         }
     }
 
-    if (window.location.protocol === 'file:') {
-        // Initialising Elm's Browser.application doesn't work in this case, as file:// URLs are not supported (see https://github.com/elm/core/blob/1.0.0/hints/1.md).
-        containerElement.innerHTML = `
-            <div class="p-8 text-xl">
-            <h1 class="text-3xl font-bold leading-tight">Glossary Page Template</h1>
-            <p class="mt-8 max-w-prose">
-            This page includes a web interface for making changes that are saved back to the HTML file itself.
-            This is meant to be used <strong class="font-semibold">locally</strong> by a <strong class="font-semibold">single user</strong> at a time and works best if the file is kept under version control.
-            </p>
-            <p class="max-w-prose">
-            If you're on macOS, Linux, or Cygwin and have
-            <a target="_blank" href="https://nodejs.org/">Node.js</a>
-            installed, then run the following command.
-            </p>
-            <pre class="my-8"><code class="select-all">sed -n '/START OF editor.js$/,$p' glossary.html | FILE=glossary.html node</code></pre>
-            <p class="max-w-prose">
-            Here <code>glossary.html</code> is the name of the current file.
-            </p>
-            </div>
-        `;
+    const app = Elm.ApplicationShell.init({
+        flags: {
+            runningOnMacOs: runningOnMacOs,
+            titleString: normaliseWhitespace(titleElement?.textContent || ''),
+            aboutParagraph: aboutParagraph,
+            aboutLinks: aboutLinks,
+            tagsWithDescriptions: tagsWithDescriptions,
+            glossaryItems: glossaryItems,
+            usingIncludedBackend: (separateBackendBaseUrl != null) || editorIsRunning,
+            enableHelpForMakingChanges: enableHelpForMakingChanges,
+            enableSavingChangesInMemory: enableSavingChangesInMemory,
+            enableExportMenu: enableExportMenu,
+            enableOrderItemsButtons: enableOrderItemsButtons,
+            enableLastUpdatedDates: enableLastUpdatedDates,
+            versionNumber: versionNumber || 0,
+            separateBackendBaseUrl: separateBackendBaseUrl,
+            bearerToken: bearerToken,
+            userName: userName,
+            userEmailAddress: userEmailAddress,
+            theme: localStorage.glossaryPageTheme || 'system',
+            cardWidth: cardWidth,
+            katexIsAvailable: katexIsAvailable
+        }
+    });
+
+    function allowBackgroundScrolling() {
+        document.querySelector('body')?.classList.toggle('overflow-hidden', false);
+    }
+
+    app.ports.allowBackgroundScrolling.subscribe(() => {
+        allowBackgroundScrolling();
+    });
+
+    app.ports.preventBackgroundScrolling.subscribe(() => {
+        document.querySelector('body')?.classList.toggle('overflow-hidden', true);
+    });
+
+    app.ports.scrollElementIntoView.subscribe((elementId: string) => {
+        const elem: HTMLElement | null = document.getElementById(elementId);
+
+        if (elem) {
+            elem.scrollIntoView({ block: "nearest" });
+        } else {
+            // Do this just in case, as it seems that there might be situations where the background is left "locked".
+            allowBackgroundScrolling();
+        }
+    });
+
+    app.ports.giveSearchFieldFocusOnceItIsPresent.subscribe((elementId: string) => {
+        waitForElement(elementId).then(async (element) => {
+            try {
+                await untilAsync(() => {
+                    if (element)
+                        element.focus();
+
+                    document.activeElement === document.getElementById(elementId);
+                }, 50, 2000)
+            } catch (e) {
+                // ignore
+            }
+        });
+    });
+
+    app.ports.scrollSearchResultIntoView.subscribe((elementId: string) => {
+        const elem: HTMLElement | null = document.getElementById(elementId);
+
+        if (elem) {
+            elem.scrollIntoView({ block: "nearest" });
+        }
+    });
+
+    app.ports.changeTheme.subscribe((themeName: string) => {
+        if (themeName) {
+            localStorage.glossaryPageTheme = themeName;
+        } else {
+            localStorage.removeItem('glossaryPageTheme');
+        }
+
+        reflectThemeInClassList();
+    });
+
+    app.ports.generateUuid.subscribe(() => {
+        app.ports.receiveUuidForAddingRow.send(self.crypto.randomUUID());
+    });
+
+    app.ports.getCurrentDateTimeAndNewIdForSaving.subscribe(() => {
+        app.ports.receiveCurrentDateTimeAndNewIdForSaving.send([new Date().toISOString(), self.crypto.randomUUID()]);
+    });
+
+    app.ports.copyEditorCommandToClipboard.subscribe((textToCopy: string) => {
+        navigator.clipboard.writeText(textToCopy).then(
+            () => {
+                app.ports.attemptedToCopyEditorCommandToClipboard.send(true);
+            },
+            () => {
+                app.ports.attemptedToCopyEditorCommandToClipboard.send(false);
+            },
+        );
+    });
+
+    app.ports.selectAllInTextFieldWithCommandToRunEditor.subscribe(() => {
+        const element: HTMLElement | null = document.getElementById("glossary-page-text-field-with-command-to-run-editor");
+
+        if (element instanceof HTMLInputElement) {
+            const textField = element;
+
+            textField.select();
+        }
+    });
+
+    function domReady(callback: () => void) {
+        document.readyState === 'interactive' || document.readyState === 'complete' ?
+            callback() : document.addEventListener('DOMContentLoaded', callback);
+    }
+
+    // Prevent FOUC
+    domReady(() => {
+        reflectThemeInClassList();
 
         document.body.style.visibility = 'visible';
-    } else {
-        const app = Elm.ApplicationShell.init({
-            flags: {
-                runningOnMacOs: runningOnMacOs,
-                titleString: normaliseWhitespace(titleElement?.textContent || ''),
-                aboutParagraph: aboutParagraph,
-                aboutLinks: aboutLinks,
-                tagsWithDescriptions: tagsWithDescriptions,
-                glossaryItems: glossaryItems,
-                usingIncludedBackend: (separateBackendBaseUrl != null) || editorIsRunning,
-                enableHelpForMakingChanges: enableHelpForMakingChanges,
-                enableSavingChangesInMemory: enableSavingChangesInMemory,
-                enableExportMenu: enableExportMenu,
-                enableOrderItemsButtons: enableOrderItemsButtons,
-                enableLastUpdatedDates: enableLastUpdatedDates,
-                versionNumber: versionNumber || 0,
-                separateBackendBaseUrl: separateBackendBaseUrl,
-                bearerToken: bearerToken,
-                userName: userName,
-                userEmailAddress: userEmailAddress,
-                theme: localStorage.glossaryPageTheme || 'system',
-                cardWidth: cardWidth,
-                katexIsAvailable: katexIsAvailable
+
+        // Try to keep the focus on the element that receives overall keyboard shortcuts like Control-K
+        document.getElementById("glossary-page-outer")?.focus();
+
+        document.addEventListener("focusout", (e) => {
+            if (e.relatedTarget == null) {
+                document.getElementById("glossary-page-outer")?.focus();
             }
         });
 
-        function allowBackgroundScrolling() {
-            document.querySelector('body')?.classList.toggle('overflow-hidden', false);
-        }
+        const browserLocale: string =
+            navigator.languages && navigator.languages.length
+                ? navigator.languages[0]
+                : navigator.language;
 
-        app.ports.allowBackgroundScrolling.subscribe(() => {
-            allowBackgroundScrolling();
-        });
+        const lastUpdatedDateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
 
-        app.ports.preventBackgroundScrolling.subscribe(() => {
-            document.querySelector('body')?.classList.toggle('overflow-hidden', true);
-        });
+        customElements.define('last-updated',
+            class extends HTMLElement {
+                constructor() { super(); }
+                connectedCallback() { this.setTextContent(); }
+                attributeChangedCallback() { this.setTextContent(); }
+                static get observedAttributes() { return ['datetime']; }
 
-        app.ports.scrollElementIntoView.subscribe((elementId: string) => {
-            const elem: HTMLElement | null = document.getElementById(elementId);
+                setTextContent() {
+                    const datetimeAttribute: string | null = this.getAttribute('datetime');
 
-            if (elem) {
-                elem.scrollIntoView({ block: "nearest" });
-            } else {
-                // Do this just in case, as it seems that there might be situations where the background is left "locked".
-                allowBackgroundScrolling();
-            }
-        });
-
-        app.ports.giveSearchFieldFocusOnceItIsPresent.subscribe((elementId: string) => {
-            waitForElement(elementId).then(async (element) => {
-                try {
-                    await untilAsync(() => {
-                        if (element)
-                            element.focus();
-
-                        document.activeElement === document.getElementById(elementId);
-                    }, 50, 2000)
-                } catch (e) {
-                    // ignore
+                    if (datetimeAttribute)
+                        this.textContent = new Date(datetimeAttribute).toLocaleDateString(browserLocale, lastUpdatedDateOptions);
+                    else
+                        this.textContent = "unknown";
                 }
-            });
-        });
-
-        app.ports.scrollSearchResultIntoView.subscribe((elementId: string) => {
-            const elem: HTMLElement | null = document.getElementById(elementId);
-
-            if (elem) {
-                elem.scrollIntoView({ block: "nearest" });
             }
-        });
+        );
 
-        app.ports.changeTheme.subscribe((themeName: string) => {
-            if (themeName) {
-                localStorage.glossaryPageTheme = themeName;
-            } else {
-                localStorage.removeItem('glossaryPageTheme');
-            }
-
-            reflectThemeInClassList();
-        });
-
-        app.ports.generateUuid.subscribe(() => {
-            app.ports.receiveUuidForAddingRow.send(self.crypto.randomUUID());
-        });
-
-        app.ports.getCurrentDateTimeAndNewIdForSaving.subscribe(() => {
-            app.ports.receiveCurrentDateTimeAndNewIdForSaving.send([new Date().toISOString(), self.crypto.randomUUID()]);
-        });
-
-        app.ports.copyEditorCommandToClipboard.subscribe((textToCopy: string) => {
-            navigator.clipboard.writeText(textToCopy).then(
-                () => {
-                    app.ports.attemptedToCopyEditorCommandToClipboard.send(true);
-                },
-                () => {
-                    app.ports.attemptedToCopyEditorCommandToClipboard.send(false);
-                },
-            );
-        });
-
-        app.ports.selectAllInTextFieldWithCommandToRunEditor.subscribe(() => {
-            const element: HTMLElement | null = document.getElementById("glossary-page-text-field-with-command-to-run-editor");
-
-            if (element instanceof HTMLInputElement) {
-                const textField = element;
-
-                textField.select();
-            }
-        });
-
-        function domReady(callback: () => void) {
-            document.readyState === 'interactive' || document.readyState === 'complete' ?
-                callback() : document.addEventListener('DOMContentLoaded', callback);
-        }
-
-        // Prevent FOUC
-        domReady(() => {
-            reflectThemeInClassList();
-
-            document.body.style.visibility = 'visible';
-
-            // Try to keep the focus on the element that receives overall keyboard shortcuts like Control-K
-            document.getElementById("glossary-page-outer")?.focus();
-
-            document.addEventListener("focusout", (e) => {
-                if (e.relatedTarget == null) {
-                    document.getElementById("glossary-page-outer")?.focus();
-                }
-            });
-
-            const browserLocale: string =
-                navigator.languages && navigator.languages.length
-                    ? navigator.languages[0]
-                    : navigator.language;
-
-            const lastUpdatedDateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
-
-            customElements.define('last-updated',
+        if (katexIsAvailable) {
+            customElements.define('katex-inline',
                 class extends HTMLElement {
                     constructor() { super(); }
                     connectedCallback() { this.setTextContent(); }
                     attributeChangedCallback() { this.setTextContent(); }
-                    static get observedAttributes() { return ['datetime']; }
+                    static get observedAttributes() { return ['data-expr']; }
 
                     setTextContent() {
-                        const datetimeAttribute: string | null = this.getAttribute('datetime');
+                        katex.render(this.dataset.expr, this, {
+                            throwOnError: false
+                        });
 
-                        if (datetimeAttribute)
-                            this.textContent = new Date(datetimeAttribute).toLocaleDateString(browserLocale, lastUpdatedDateOptions);
-                        else
-                            this.textContent = "unknown";
                     }
                 }
             );
 
-            if (katexIsAvailable) {
-                customElements.define('katex-inline',
-                    class extends HTMLElement {
-                        constructor() { super(); }
-                        connectedCallback() { this.setTextContent(); }
-                        attributeChangedCallback() { this.setTextContent(); }
-                        static get observedAttributes() { return ['data-expr']; }
+            customElements.define('katex-display',
+                class extends HTMLElement {
+                    constructor() { super(); }
+                    connectedCallback() { this.setTextContent(); }
+                    attributeChangedCallback() { this.setTextContent(); }
+                    static get observedAttributes() { return ['data-expr']; }
 
-                        setTextContent() {
-                            katex.render(this.dataset.expr, this, {
-                                throwOnError: false
-                            });
-
-                        }
-                    }
-                );
-
-                customElements.define('katex-display',
-                    class extends HTMLElement {
-                        constructor() { super(); }
-                        connectedCallback() { this.setTextContent(); }
-                        attributeChangedCallback() { this.setTextContent(); }
-                        static get observedAttributes() { return ['data-expr']; }
-
-                        setTextContent() {
-                            katex.render(this.dataset.expr, this, {
-                                displayMode: true,
-                                throwOnError: false
-                            });
-                        }
-                    }
-                );
-            }
-
-            scrollFragmentIdentifierIntoView();
-
-            let lastKnownScrollPosition = 0;
-            let ticking = 3;
-
-            document.addEventListener("scroll", (event) => {
-                const newScrollPosition = window.scrollY;
-                const scrollingUp = newScrollPosition < lastKnownScrollPosition;
-                const farAwayFromTheTop = document.documentElement.clientHeight * 2 < newScrollPosition;
-
-                lastKnownScrollPosition = newScrollPosition;
-
-                if (scrollingUp && farAwayFromTheTop) {
-                    if (ticking <= 0) {
-                        window.requestAnimationFrame(() => {
-                            app.ports.scrollingUpWhileFarAwayFromTheTop.send(null);
-                            ticking = 3;
+                    setTextContent() {
+                        katex.render(this.dataset.expr, this, {
+                            displayMode: true,
+                            throwOnError: false
                         });
-                    } else {
-                        ticking -= 1;
                     }
                 }
+            );
+        }
 
-            });
+        scrollFragmentIdentifierIntoView();
+
+        let lastKnownScrollPosition = 0;
+        let ticking = 3;
+
+        document.addEventListener("scroll", (event) => {
+            const newScrollPosition = window.scrollY;
+            const scrollingUp = newScrollPosition < lastKnownScrollPosition;
+            const farAwayFromTheTop = document.documentElement.clientHeight * 2 < newScrollPosition;
+
+            lastKnownScrollPosition = newScrollPosition;
+
+            if (scrollingUp && farAwayFromTheTop) {
+                if (ticking <= 0) {
+                    window.requestAnimationFrame(() => {
+                        app.ports.scrollingUpWhileFarAwayFromTheTop.send(null);
+                        ticking = 3;
+                    });
+                } else {
+                    ticking -= 1;
+                }
+            }
+
         });
-    }
+    });
 }
