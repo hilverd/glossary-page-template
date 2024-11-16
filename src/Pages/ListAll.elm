@@ -1014,53 +1014,36 @@ viewSettings glossaryForUi model =
                     class "opacity-25"
                 ]
                 [ Extras.Html.showIf (model.common.editability == EditingWithIncludedBackend) <|
-                    div
-                        [ class "" ]
-                        [ p
-                            [ class "mt-3 max-w-xl" ]
-                            [ text I18n.theseSettingsAreUpdatedInTheHtmlFile
-                            ]
+                    p
+                        [ class "mt-3 max-w-xl" ]
+                        [ text I18n.theseSettingsAreUpdatedInTheHtmlFile
                         ]
                 , Extras.Html.showIf (model.common.editability == EditingWithIncludedBackend) <|
-                    div
-                        [ class "" ]
-                        [ viewSelectInputSyntax model.common.enableMathSupport ]
-                , div
-                    [ class "" ]
-                    [ viewSelectCardWidth glossaryForUi model
+                    viewSelectInputSyntax model.common.enableMathSupport
+                , viewSelectCardWidth glossaryForUi model
+                , Components.Button.toggle
+                    (GlossaryForUi.enableExportMenu glossaryForUi)
+                    ElementIds.showExportMenuLabel
+                    [ Html.Events.onClick <| PageMsg.Internal ToggleEnableExportMenu ]
+                    [ span
+                        [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                        [ text I18n.showExportMenu ]
                     ]
-                , div
-                    [ class "" ]
-                    [ Components.Button.toggle
-                        (GlossaryForUi.enableExportMenu glossaryForUi)
-                        ElementIds.showExportMenuLabel
-                        [ Html.Events.onClick <| PageMsg.Internal ToggleEnableExportMenu ]
-                        [ span
-                            [ class "font-medium text-gray-900 dark:text-gray-300" ]
-                            [ text I18n.showExportMenu ]
-                        ]
+                , Components.Button.toggle
+                    (GlossaryForUi.enableOrderItemsButtons glossaryForUi)
+                    ElementIds.showOrderItemsButtons
+                    [ Html.Events.onClick <| PageMsg.Internal ToggleEnableOrderItemsButtons ]
+                    [ span
+                        [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                        [ text I18n.showOrderItemsButtons ]
                     ]
-                , div
-                    [ class "" ]
-                    [ Components.Button.toggle
-                        (GlossaryForUi.enableOrderItemsButtons glossaryForUi)
-                        ElementIds.showOrderItemsButtons
-                        [ Html.Events.onClick <| PageMsg.Internal ToggleEnableOrderItemsButtons ]
-                        [ span
-                            [ class "font-medium text-gray-900 dark:text-gray-300" ]
-                            [ text I18n.showOrderItemsButtons ]
-                        ]
-                    ]
-                , div
-                    [ class "" ]
-                    [ Components.Button.toggle
-                        (GlossaryForUi.enableLastUpdatedDates glossaryForUi)
-                        ElementIds.showLastUpdatedDatesLabel
-                        [ Html.Events.onClick <| PageMsg.Internal ToggleEnableLastUpdatedDates ]
-                        [ span
-                            [ class "font-medium text-gray-900 dark:text-gray-300" ]
-                            [ text I18n.showLastUpdatedDates ]
-                        ]
+                , Components.Button.toggle
+                    (GlossaryForUi.enableLastUpdatedDates glossaryForUi)
+                    ElementIds.showLastUpdatedDatesLabel
+                    [ Html.Events.onClick <| PageMsg.Internal ToggleEnableLastUpdatedDates ]
+                    [ span
+                        [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                        [ text I18n.showLastUpdatedDates ]
                     ]
                 , case model.savingSettings of
                     SavingNotAttempted errorMessage ->
@@ -1105,9 +1088,7 @@ viewTermIndexItem enableMathSupport tabbable entry =
                 [ Html.Attributes.attribute "style" "margin-top: 1rem" ]
                 [ Html.span
                     [ class "block border-l pl-4 -ml-px border-transparent select-none" ]
-                    [ Term.view enableMathSupport
-                        [ class "" ]
-                        term
+                    [ Term.view enableMathSupport [] term
                     ]
                 ]
                 :: List.indexedMap
