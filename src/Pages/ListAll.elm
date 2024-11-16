@@ -1003,18 +1003,19 @@ viewSettings glossaryForUi model =
                         (model.savingSettings == SavingInProgress)
                     ]
             , summary
-                [ class "mb-1 text-lg leading-6 items-center font-medium text-gray-900 dark:text-gray-100 select-none" ]
+                [ class "pb-1 text-lg leading-6 items-center font-medium text-gray-900 dark:text-gray-100 select-none" ]
                 [ span
                     [ class "ml-2" ]
                     [ text I18n.settings ]
                 ]
             , div
-                [ Extras.HtmlAttribute.showIf (model.savingSettings == SavingInProgress) <|
+                [ class "space-y-8 py-4"
+                , Extras.HtmlAttribute.showIf (model.savingSettings == SavingInProgress) <|
                     class "opacity-25"
                 ]
                 [ Extras.Html.showIf (model.common.editability == EditingWithIncludedBackend) <|
                     div
-                        [ class "mt-6" ]
+                        [ class "" ]
                         [ p
                             [ class "mt-3 max-w-xl" ]
                             [ text I18n.theseSettingsAreUpdatedInTheHtmlFile
@@ -1022,14 +1023,14 @@ viewSettings glossaryForUi model =
                         ]
                 , Extras.Html.showIf (model.common.editability == EditingWithIncludedBackend) <|
                     div
-                        [ class "mt-6 pb-2" ]
+                        [ class "" ]
                         [ viewSelectInputSyntax model.common.enableMathSupport ]
                 , div
-                    [ class "mt-6 pb-2" ]
+                    [ class "" ]
                     [ viewSelectCardWidth glossaryForUi model
                     ]
                 , div
-                    [ class "mt-6 pb-2" ]
+                    [ class "" ]
                     [ Components.Button.toggle
                         (GlossaryForUi.enableExportMenu glossaryForUi)
                         ElementIds.showExportMenuLabel
@@ -1040,7 +1041,7 @@ viewSettings glossaryForUi model =
                         ]
                     ]
                 , div
-                    [ class "mt-6 pb-2" ]
+                    [ class "" ]
                     [ Components.Button.toggle
                         (GlossaryForUi.enableOrderItemsButtons glossaryForUi)
                         ElementIds.showOrderItemsButtons
@@ -1051,7 +1052,7 @@ viewSettings glossaryForUi model =
                         ]
                     ]
                 , div
-                    [ class "mt-6 pb-2" ]
+                    [ class "" ]
                     [ Components.Button.toggle
                         (GlossaryForUi.enableLastUpdatedDates glossaryForUi)
                         ElementIds.showLastUpdatedDatesLabel
