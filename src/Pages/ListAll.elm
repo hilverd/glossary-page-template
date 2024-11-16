@@ -162,6 +162,7 @@ type InternalMsg
     | JumpToTermIndexGroup Bool String
     | ChangeOrderItemsBy OrderItemsBy
     | ChangeCardWidth CardWidth
+    | ChangeDefaultTheme Theme
     | ToggleEnableExportMenu
     | ToggleEnableOrderItemsButtons
     | ToggleEnableLastUpdatedDates
@@ -401,7 +402,7 @@ update msg model =
                         Just "dark"
 
                     System ->
-                        Nothing
+                        Just "system"
             )
 
         ScrollingUpWhileFarAwayFromTheTop ->
@@ -633,6 +634,36 @@ update msg model =
                             GlossaryChangelist.create
                                 (GlossaryForUi.versionNumber glossaryForUi)
                                 [ GlossaryChange.SetCardWidth cardWidth ]
+
+                        ( saving, cmd ) =
+                            Save.changeAndSave model.common.editability
+                                glossaryForUi
+                                changelist
+                                (PageMsg.Internal << FailedToChangeSettings)
+                                (\( _, updatedGlossary ) ->
+                                    PageMsg.Internal <| ChangedSettings updatedGlossary
+                                )
+                    in
+                    ( { model
+                        | confirmDeleteId = Nothing
+                        , deleting = NotCurrentlySaving
+                        , savingSettings = saving
+                      }
+                    , cmd
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        ChangeDefaultTheme defaultTheme ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
+                    let
+                        changelist : GlossaryChangelist
+                        changelist =
+                            GlossaryChangelist.create
+                                (GlossaryForUi.versionNumber glossaryForUi)
+                                [ GlossaryChange.SetDefaultTheme defaultTheme ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
@@ -1021,6 +1052,7 @@ viewSettings glossaryForUi model =
                 , Extras.Html.showIf (model.common.editability == EditingWithIncludedBackend) <|
                     viewSelectInputSyntax model.common.enableMathSupport
                 , viewSelectCardWidth glossaryForUi model
+                , viewSelectDefaultTheme glossaryForUi model
                 , Components.Button.toggle
                     (GlossaryForUi.enableExportMenu glossaryForUi)
                     ElementIds.showExportMenuLabel
@@ -2051,6 +2083,78 @@ viewSelectCardWidth glossaryForUi model =
                         , for ElementIds.cardWidthWide
                         ]
                         [ text I18n.cardWidthWide ]
+                    ]
+                ]
+            ]
+        ]
+
+
+viewSelectDefaultTheme : GlossaryForUi -> Model -> Html Msg
+viewSelectDefaultTheme glossaryForUi model =
+    let
+        tabbable : Bool
+        tabbable =
+            noModalDialogShown model
+
+        defaultTheme : Theme
+        defaultTheme =
+            GlossaryForUi.defaultTheme glossaryForUi
+    in
+    div
+        []
+        [ fieldset []
+            [ legend
+                [ class "mb-4 font-medium text-gray-900 dark:text-gray-100" ]
+                [ text I18n.defaultTheme ]
+            , div
+                [ class "space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6" ]
+                [ div
+                    [ class "flex items-center" ]
+                    [ Components.Button.radio
+                        "default-theme"
+                        "default-theme-light"
+                        (defaultTheme == Light)
+                        tabbable
+                        [ id ElementIds.defaultThemeLight
+                        , Html.Events.onClick <| PageMsg.Internal <| ChangeDefaultTheme Light
+                        ]
+                    , label
+                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
+                        , for ElementIds.defaultThemeLight
+                        ]
+                        [ text I18n.themeLight ]
+                    ]
+                , div
+                    [ class "flex items-center" ]
+                    [ Components.Button.radio
+                        "default-theme"
+                        "default-theme-dark"
+                        (defaultTheme == Dark)
+                        tabbable
+                        [ id ElementIds.defaultThemeDark
+                        , Html.Events.onClick <| PageMsg.Internal <| ChangeDefaultTheme Dark
+                        ]
+                    , label
+                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
+                        , for ElementIds.defaultThemeDark
+                        ]
+                        [ text I18n.themeDark ]
+                    ]
+                , div
+                    [ class "flex items-center" ]
+                    [ Components.Button.radio
+                        "default-theme"
+                        "default-theme-system"
+                        (defaultTheme == System)
+                        tabbable
+                        [ id ElementIds.defaultThemeSystem
+                        , Html.Events.onClick <| PageMsg.Internal <| ChangeDefaultTheme System
+                        ]
+                    , label
+                        [ class "ml-3 block font-medium text-gray-700 dark:text-gray-300 select-none"
+                        , for ElementIds.defaultThemeSystem
+                        ]
+                        [ text I18n.themeSystem ]
                     ]
                 ]
             ]

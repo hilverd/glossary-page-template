@@ -23,6 +23,7 @@ if (containerElement) {
     const enableExportMenu: boolean = containerDataset.enableExportMenu !== 'false';
     const enableOrderItemsButtons: boolean = containerDataset.enableOrderItemsButtons !== 'false';
     const cardWidth: string = containerDataset.cardWidth || 'compact';
+    const defaultTheme: string = containerDataset.defaultTheme || 'system';
     const enableLastUpdatedDates: boolean = containerDataset.enableLastUpdatedDates === 'true';
     const versionNumber: number | null = Number(containerDataset.versionNumber) || null;
     const separateBackendBaseUrl: string | null = bodyDataset.separateBackendBaseUrl || null;
@@ -133,13 +134,27 @@ if (containerElement) {
         });
     }
 
-    function reflectThemeInClassList() {
-        if (localStorage.glossaryPageTheme === 'dark' || (!('glossaryPageTheme' in localStorage) &&
-            window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    function themeValueForApp(defaultTheme: string): string {
+        const inStorage = localStorage.glossaryPageTheme;
+
+        if (inStorage === 'light' || inStorage === 'dark' || inStorage === 'system')
+            return inStorage;
+        else // treat themeInLocalStorage as undefined
+            return (defaultTheme === 'dark') ? 'dark' : 'system';
+    }
+
+    function useDarkMode(themeValueForApp: string): boolean {
+        if (themeValueForApp === 'system')
+            return window.matchMedia('(prefers-color-scheme: dark)').matches;
+        else
+            return (themeValueForApp === 'dark');
+    }
+
+    function reflectThemeInClassList(themeName: string) {
+        if (useDarkMode(themeName))
             document.documentElement.classList.add('dark');
-        } else {
+        else
             document.documentElement.classList.remove('dark');
-        }
     }
 
     const app = Elm.ApplicationShell.init({
@@ -161,8 +176,9 @@ if (containerElement) {
             bearerToken: bearerToken,
             userName: userName,
             userEmailAddress: userEmailAddress,
-            theme: localStorage.glossaryPageTheme || 'system',
+            theme: themeValueForApp(defaultTheme),
             cardWidth: cardWidth,
+            defaultTheme: defaultTheme,
             katexIsAvailable: katexIsAvailable
         }
     });
@@ -220,7 +236,7 @@ if (containerElement) {
             localStorage.removeItem('glossaryPageTheme');
         }
 
-        reflectThemeInClassList();
+        reflectThemeInClassList(themeName);
     });
 
     app.ports.generateUuid.subscribe(() => {
@@ -259,7 +275,7 @@ if (containerElement) {
 
     // Prevent FOUC
     domReady(() => {
-        reflectThemeInClassList();
+        reflectThemeInClassList(themeValueForApp(defaultTheme));
 
         document.body.style.visibility = 'visible';
 

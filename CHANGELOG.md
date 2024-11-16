@@ -12,6 +12,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
+- Allow setting a default theme. This is used if the user has not explicitly picked a theme, and has also not indicated a preference for dark mode in their browser settings.
+
 ### Changed
 
 - Allow viewing a glossary file directly in a browser (using a `file://` URL), instead of showing only a help message. This restores functionality that was lost from version 4.0.0 onwards (see #11 for context).

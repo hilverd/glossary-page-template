@@ -9,6 +9,9 @@ module ElementIds exposing
     , cardWidthWide
     , confirmDeleteModalTitle
     , container
+    , defaultThemeDark
+    , defaultThemeLight
+    , defaultThemeSystem
     , definition
     , disambiguationTagSelect
     , exportDropdownButton
@@ -107,6 +110,21 @@ cardWidthIntermediate =
 cardWidthWide : String
 cardWidthWide =
     prefixed "card-width-wide"
+
+
+defaultThemeLight : String
+defaultThemeLight =
+    prefixed "default-theme-light"
+
+
+defaultThemeDark : String
+defaultThemeDark =
+    prefixed "default-theme-dark"
+
+
+defaultThemeSystem : String
+defaultThemeSystem =
+    prefixed "default-theme-system"
 
 
 orderItemsAlphabetically : String

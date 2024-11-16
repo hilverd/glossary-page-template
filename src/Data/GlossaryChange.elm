@@ -16,6 +16,7 @@ import Data.GlossaryItemFromDom as GlossaryItemFromDom exposing (GlossaryItemFro
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
+import Data.Theme as Theme exposing (Theme)
 
 
 {-| Represents the different types of changes that can be made to a glossary.
@@ -27,6 +28,7 @@ type GlossaryChange
     | SetTitle GlossaryTitle
     | SetAboutSection AboutSection
     | SetCardWidth CardWidth
+    | SetDefaultTheme Theme
     | ChangeTags TagsChanges
     | Insert GlossaryItemFromDom
     | Update GlossaryItemFromDom
@@ -38,7 +40,7 @@ type GlossaryChange
 codec : Codec GlossaryChange
 codec =
     Codec.custom
-        (\toggleEnableLastUpdatedDates toggleEnableExportMenu toggleEnableOrderItemsButtons setTitle setAboutSection setCardWidth changeTags insert update remove value ->
+        (\toggleEnableLastUpdatedDates toggleEnableExportMenu toggleEnableOrderItemsButtons setTitle setAboutSection setCardWidth setDefaultTheme changeTags insert update remove value ->
             case value of
                 ToggleEnableLastUpdatedDates ->
                     toggleEnableLastUpdatedDates
@@ -58,6 +60,9 @@ codec =
                 SetCardWidth cardWidth ->
                     setCardWidth cardWidth
 
+                SetDefaultTheme theme ->
+                    setDefaultTheme theme
+
                 ChangeTags tagsChanges ->
                     changeTags tagsChanges
 
@@ -76,6 +81,7 @@ codec =
         |> Codec.variant1 "SetTitle" SetTitle GlossaryTitle.codec
         |> Codec.variant1 "SetAboutSection" SetAboutSection AboutSection.codec
         |> Codec.variant1 "SetCardWidth" SetCardWidth CardWidth.codec
+        |> Codec.variant1 "SetDefaultTheme" SetDefaultTheme Theme.codec
         |> Codec.variant1 "ChangeTags" ChangeTags TagsChanges.codec
         |> Codec.variant1 "Insert" Insert GlossaryItemFromDom.codec
         |> Codec.variant1 "Update" Update GlossaryItemFromDom.codec

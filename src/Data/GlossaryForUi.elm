@@ -3,6 +3,7 @@ module Data.GlossaryForUi exposing
     , create, fromGlossaryFromDom
     , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, title, aboutSection, items, versionNumber
     , toGlossaryFromDom
+    , defaultTheme
     )
 
 {-| A glossary ready to be used in a view function.
@@ -43,6 +44,7 @@ import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVersionNumber)
 import Data.TagDescription as TagDescription
 import Data.TagId as TagId
+import Data.Theme as Theme exposing (Theme)
 import Internationalisation as I18n
 
 
@@ -55,6 +57,7 @@ type GlossaryForUi
         , enableOrderItemsButtons : Bool
         , enableHelpForMakingChanges : Bool
         , cardWidth : CardWidth
+        , defaultTheme : Theme
         , title : GlossaryTitle
         , aboutSection : AboutSection
         , items : GlossaryItemsForUi
@@ -97,6 +100,13 @@ cardWidth (GlossaryForUi glossaryForUi) =
     glossaryForUi.cardWidth
 
 
+{-| Get the default theme configuration for a GlossaryForUi.
+-}
+defaultTheme : GlossaryForUi -> Theme
+defaultTheme (GlossaryForUi glossaryForUi) =
+    glossaryForUi.defaultTheme
+
+
 {-| Get the title for a GlossaryForUi.
 -}
 title : GlossaryForUi -> GlossaryTitle
@@ -135,6 +145,7 @@ fromGlossaryFromDom glossaryFromDom =
         glossaryFromDom.enableOrderItemsButtons
         glossaryFromDom.enableHelpForMakingChanges
         glossaryFromDom.cardWidth
+        glossaryFromDom.defaultTheme
         (GlossaryTitle.fromMarkdown glossaryFromDom.title)
         (AboutParagraph.fromMarkdown glossaryFromDom.aboutParagraph)
         (List.map (\aboutLinkFromDom -> AboutLink.create aboutLinkFromDom.href aboutLinkFromDom.body) glossaryFromDom.aboutLinks)
@@ -162,6 +173,7 @@ create :
     -> Bool
     -> Bool
     -> CardWidth
+    -> Theme
     -> GlossaryTitle
     -> AboutParagraph
     -> List AboutLink
@@ -169,13 +181,14 @@ create :
     -> List GlossaryItemForUi
     -> GlossaryVersionNumber
     -> GlossaryForUi
-create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ title_ aboutParagraph aboutLinks describedTags itemsForHtml versionNumber_ =
+create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ defaultTheme_ title_ aboutParagraph aboutLinks describedTags itemsForHtml versionNumber_ =
     createWithDefaults
         (Just enableLastUpdatedDates_)
         (Just enableExportMenu_)
         (Just enableOrderItemsButtons_)
         (Just enableHelpForMakingChanges_)
         (Just cardWidth_)
+        (Just defaultTheme_)
         (Just title_)
         (Just aboutParagraph)
         (Just aboutLinks)
@@ -190,6 +203,7 @@ createWithDefaults :
     -> Maybe Bool
     -> Maybe Bool
     -> Maybe CardWidth
+    -> Maybe Theme
     -> Maybe GlossaryTitle
     -> Maybe AboutParagraph
     -> Maybe (List AboutLink)
@@ -197,7 +211,7 @@ createWithDefaults :
     -> List GlossaryItemForUi
     -> Maybe GlossaryVersionNumber
     -> GlossaryForUi
-createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ title_ aboutParagraph aboutLinks describedTags itemsForHtml versionNumber_ =
+createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ defaultTheme_ title_ aboutParagraph aboutLinks describedTags itemsForHtml versionNumber_ =
     let
         aboutSection_ =
             { paragraph = Maybe.withDefault (AboutParagraph.fromMarkdown I18n.elementNotFound) aboutParagraph
@@ -214,6 +228,7 @@ createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsBut
         , enableOrderItemsButtons = Maybe.withDefault True enableOrderItemsButtons_
         , enableHelpForMakingChanges = Maybe.withDefault False enableHelpForMakingChanges_
         , cardWidth = Maybe.withDefault CardWidth.Compact cardWidth_
+        , defaultTheme = Maybe.withDefault Theme.System defaultTheme_
         , title = Maybe.withDefault (GlossaryTitle.fromMarkdown I18n.elementNotFound) title_
         , aboutSection = aboutSection_
         , items = Result.withDefault GlossaryItemsForUi.empty items_
@@ -230,6 +245,7 @@ toGlossaryFromDom (GlossaryForUi glossaryForUi) =
     , enableOrderItemsButtons = glossaryForUi.enableOrderItemsButtons
     , enableHelpForMakingChanges = glossaryForUi.enableHelpForMakingChanges
     , cardWidth = glossaryForUi.cardWidth
+    , defaultTheme = glossaryForUi.defaultTheme
     , title = glossaryForUi.title |> GlossaryTitle.raw
     , aboutParagraph = glossaryForUi.aboutSection.paragraph |> AboutParagraph.raw
     , aboutLinks =

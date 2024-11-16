@@ -44,6 +44,7 @@ import Data.GlossaryVersionNumber as GlossaryVersionNumber
 import Data.TagDescription as TagDescription
 import Data.TagId as TagId
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
+import Data.Theme as Theme exposing (Theme)
 import Dict exposing (Dict)
 import DuplicateRejectingDict
 import ElementIds
@@ -60,6 +61,7 @@ type alias GlossaryFromDom =
     , enableOrderItemsButtons : Bool
     , enableHelpForMakingChanges : Bool
     , cardWidth : CardWidth
+    , defaultTheme : Theme
     , title : String
     , aboutParagraph : String
     , aboutLinks : List { href : String, body : String }
@@ -77,6 +79,7 @@ create :
     -> Bool
     -> Bool
     -> CardWidth
+    -> Theme
     -> String
     -> String
     -> List { href : String, body : String }
@@ -84,12 +87,13 @@ create :
     -> List GlossaryItemFromDom
     -> Int
     -> GlossaryFromDom
-create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ title_ aboutParagraph_ aboutLinks_ tags_ items_ versionNumber_ =
+create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ defaultTheme_ title_ aboutParagraph_ aboutLinks_ tags_ items_ versionNumber_ =
     { enableLastUpdatedDates = enableLastUpdatedDates_
     , enableExportMenu = enableExportMenu_
     , enableOrderItemsButtons = enableOrderItemsButtons_
     , enableHelpForMakingChanges = enableHelpForMakingChanges_
     , cardWidth = cardWidth_
+    , defaultTheme = defaultTheme_
     , title = title_
     , aboutParagraph = aboutParagraph_
     , aboutLinks = aboutLinks_
@@ -119,6 +123,7 @@ codec =
         |> Codec.field "enableOrderItemsButtons" .enableOrderItemsButtons Codec.bool
         |> Codec.field "enableHelpForMakingChanges" .enableHelpForMakingChanges Codec.bool
         |> Codec.field "cardWidth" .cardWidth CardWidth.codec
+        |> Codec.field "defaultTheme" .defaultTheme Theme.codec
         |> Codec.field "titleString" .title Codec.string
         |> Codec.field "aboutParagraph" .aboutParagraph Codec.string
         |> Codec.field "aboutLinks" .aboutLinks (Codec.list aboutLinkCodec)
@@ -526,6 +531,9 @@ applyChange change glossaryFromDom =
         SetCardWidth cardWidth_ ->
             Ok ( Nothing, { glossaryFromDom | cardWidth = cardWidth_ } )
 
+        SetDefaultTheme theme_ ->
+            Ok ( Nothing, { glossaryFromDom | defaultTheme = theme_ } )
+
         ChangeTags tagsChanges ->
             applyTagsChanges tagsChanges glossaryFromDom
                 |> Result.map (\newGlossary -> ( Nothing, newGlossary ))
@@ -560,6 +568,7 @@ toHtmlTree glossaryFromDom =
         , HtmlTree.boolAttribute "data-enable-order-items-buttons" glossaryFromDom.enableOrderItemsButtons
         , HtmlTree.boolAttribute "data-enable-last-updated-dates" glossaryFromDom.enableLastUpdatedDates
         , CardWidth.toHtmlTreeAttribute glossaryFromDom.cardWidth
+        , Theme.toHtmlTreeAttribute glossaryFromDom.defaultTheme
         , HtmlTree.Attribute "data-version-number" <| String.fromInt glossaryFromDom.versionNumber
         ]
         [ HtmlTree.Node "header"
