@@ -1,9 +1,8 @@
 module Data.GlossaryForUi exposing
     ( GlossaryForUi
     , create, fromGlossaryFromDom
-    , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, title, aboutSection, items, versionNumber
+    , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, defaultTheme, title, aboutSection, items, versionNumber
     , toGlossaryFromDom
-    , defaultTheme
     )
 
 {-| A glossary ready to be used in a view function.
@@ -21,7 +20,7 @@ module Data.GlossaryForUi exposing
 
 # Query
 
-@docs enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, title, aboutSection, items, versionNumber
+@docs enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, defaultTheme, title, aboutSection, items, versionNumber
 
 
 # Export
