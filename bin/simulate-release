@@ -75,7 +75,7 @@ echo
 # See .github/workflows/release.yml
 cd "$tmp/glossary-page-template"
 pnpm install
-pnpm exec elm-verify-examples
+pnpm exec elm-verify-examples --run-tests
 pnpm exec elm-test
 pnpm run build
 pnpm run build:worker

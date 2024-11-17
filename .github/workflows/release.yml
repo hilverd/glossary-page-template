@@ -24,7 +24,7 @@ jobs:
           node-version: "22"
           cache: "pnpm"
       - run: pnpm install
-      - run: pnpm exec elm-verify-examples
+      - run: pnpm exec elm-verify-examples --run-tests
       - run: pnpm exec elm-test
       - run: pnpm run build
       - run: pnpm run build:worker
