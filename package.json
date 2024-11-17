@@ -24,7 +24,7 @@
     "elm": "0.19.1-6",
     "elm-doc-preview": "^5.0.5",
     "elm-format": "^0.8.7",
-    "elm-review": "^2.10.3",
+    "elm-review": "^2.12.0",
     "elm-test": "0.19.1-revision12",
     "elm-verify-examples": "^6.0.3",
     "postcss": "^8.4.49",
