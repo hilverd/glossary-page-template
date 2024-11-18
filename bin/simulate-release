@@ -84,16 +84,16 @@ pnpm run build:worker
 echo "cd $PWD/release"
 cd release
 
-# echo
-# echo '############################################################ '
-# echo '### Open glossary.html in web browser ### '
-# echo '############################################################ '
-# echo
-# ls -lha
-# echo -n 'Press Enter to continue...'
-# read
-# less glossary.html
-# firefox glossary.html
+echo
+echo '############################################################ '
+echo '### Open glossary.html in web browser ### '
+echo '############################################################ '
+echo
+ls -lha
+echo -n 'Press Enter to continue...'
+read
+less glossary.html
+firefox glossary.html
 
 echo
 echo '############################################################ '
@@ -105,10 +105,10 @@ full_release_gzip_file=$(ls glossary-page-template-*.tar.gz)
 tar -zxf "$full_release_gzip_file"
 full_release_dir="${full_release_gzip_file%.tar.gz}"
 cd "$full_release_dir"
-# ls -lha
-# echo -n 'Press Enter to continue...'
-# read
-# less glossary.html
+ls -lha
+echo -n 'Press Enter to continue...'
+read
+less glossary.html
 
 cp glossary.html before.html
 
