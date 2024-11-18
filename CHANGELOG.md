@@ -12,15 +12,19 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [5.1.0] - 2024-11-18
+
+### Added
 
 - Allow setting a default theme. This is used if the user has not explicitly picked a theme, and has also not indicated a preference for dark mode in their browser settings.
 
 ### Changed
 
 - Allow viewing a glossary file directly in a browser (using a `file://` URL), instead of showing only a help message. This restores functionality that was lost from version 4.0.0 onwards (see #11 for context).
-
-### Fixed
-### Removed
 
 ## [5.0.3] - 2024-07-17
 
@@ -770,7 +774,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.0.3...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.1.0...HEAD
+[5.1.0]: https://github.com/hilverd/glossary-page-template/compare/v5.0.3...v5.1.0
 [5.0.3]: https://github.com/hilverd/glossary-page-template/compare/v5.0.2...v5.0.3
 [5.0.2]: https://github.com/hilverd/glossary-page-template/compare/v5.0.1...v5.0.2
 [5.0.1]: https://github.com/hilverd/glossary-page-template/compare/v4.7.1...v5.0.1
