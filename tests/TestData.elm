@@ -18,6 +18,7 @@ import Data.GlossaryTitle as GlossaryTitle
 import Data.GlossaryVersionNumber as GlossaryVersionNumber
 import Data.TagDescription as TagDescription exposing (TagDescription)
 import Data.TagId as TagId exposing (TagId)
+import Data.Theme as Theme
 
 
 computerScienceTagRawId : String
@@ -443,6 +444,7 @@ glossaryFromDom =
     , enableHelpForMakingChanges = False
     , cardWidth = CardWidth.Intermediate
     , title = "Example Glossary"
+    , defaultTheme = Theme.System
     , aboutParagraph = "An example glossary."
     , aboutLinks = []
     , tags =
@@ -469,6 +471,7 @@ glossary =
         True
         False
         CardWidth.Intermediate
+        Theme.System
         (GlossaryTitle.fromMarkdown "Example Glossary")
         (AboutParagraph.fromMarkdown "An example glossary.")
         []
