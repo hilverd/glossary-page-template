@@ -1,8 +1,8 @@
 module Data.TagIdDict exposing
     ( TagIdDict
-    , empty, insert, update, remove
-    , get, nextTagId
-    , keys, values, toList, fromList
+    , empty, insert, update
+    , get
+    , values, toList, fromList
     , foldl
     )
 
@@ -16,17 +16,17 @@ module Data.TagIdDict exposing
 
 # Build
 
-@docs empty, insert, update, remove
+@docs empty, insert, update
 
 
 # Query
 
-@docs get, nextTagId
+@docs get
 
 
 # Lists
 
-@docs keys, values, toList, fromList
+@docs values, toList, fromList
 
 
 # Transform
@@ -70,16 +70,6 @@ update tagId f (TagIdDict dict) =
         |> TagIdDict
 
 
-{-| Remove a key-value pair from a dictionary. If the key is not found,
-no changes are made.
--}
-remove : TagId -> TagIdDict v -> TagIdDict v
-remove tagId (TagIdDict dict) =
-    dict
-        |> Dict.remove (TagId.toString tagId)
-        |> TagIdDict
-
-
 {-| Get the value associated with a key.
 If the key is not found, return `Nothing`.
 This is useful when you are not sure if a key will be in the dictionary.
@@ -88,29 +78,6 @@ get : TagId -> TagIdDict v -> Maybe v
 get tagId (TagIdDict dict) =
     dict
         |> Dict.get (TagId.toString tagId)
-
-
-{-| Compute the next tag ID to be used for inserting a new item.
--}
-nextTagId : TagIdDict v -> TagId
-nextTagId (TagIdDict dict) =
-    dict
-        |> Dict.keys
-        |> List.map (String.toInt >> Maybe.withDefault 0)
-        |> List.maximum
-        |> Maybe.map ((+) 1)
-        |> Maybe.withDefault 0
-        |> String.fromInt
-        |> TagId.create
-
-
-{-| Get all of the keys in a dictionary, sorted from lowest to highest.
--}
-keys : TagIdDict v -> List TagId
-keys (TagIdDict dict) =
-    dict
-        |> Dict.keys
-        |> List.map TagId.create
 
 
 {-| Get all of the values in a dictionary, in the order of their keys.

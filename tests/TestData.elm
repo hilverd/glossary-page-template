@@ -116,11 +116,6 @@ houseworkTagRawId =
     "Housework"
 
 
-houseworkTagId : TagId
-houseworkTagId =
-    TagId.create houseworkTagRawId
-
-
 houseworkRawTag : String
 houseworkRawTag =
     "Housework"

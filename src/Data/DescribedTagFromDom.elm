@@ -1,6 +1,6 @@
 module Data.DescribedTagFromDom exposing
     ( DescribedTagFromDom
-    , create, codec
+    , codec
     )
 
 {-| A tag used in a glossary together with its description, as sent to Elm by JavaScript when read from the DOM.
@@ -10,7 +10,7 @@ module Data.DescribedTagFromDom exposing
 
 # Build
 
-@docs create, codec
+@docs codec
 
 -}
 

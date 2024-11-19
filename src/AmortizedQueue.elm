@@ -1,4 +1,4 @@
-module AmortizedQueue exposing (AmortizedQueue, empty, enqueue, dequeue, toList)
+module AmortizedQueue exposing (AmortizedQueue, empty, enqueue, dequeue)
 
 {-| An amortized queue.
 Inserting an element at the back of the queue takes O(1) time.
@@ -7,7 +7,7 @@ Removing an element from the front takes O(1) time on average.
 
 # Amortized Queues
 
-@docs AmortizedQueue, empty, enqueue, dequeue, toList
+@docs AmortizedQueue, empty, enqueue, dequeue
 
 -}
 
@@ -58,8 +58,9 @@ This takes O(1) amortized time.
     |> dequeue
     |> Maybe.map Tuple.second
     |> Maybe.map (enqueue "d")
-    |> Maybe.map toList
-    --> Just ["b", "c", "d"]
+    |> Maybe.andThen dequeue
+    |> Maybe.map Tuple.first
+    --> Just "b"
 
 -}
 dequeue : AmortizedQueue a -> Maybe ( a, AmortizedQueue a )
@@ -76,28 +77,3 @@ dequeue queue =
                 ( _, [] ) ->
                     AmortizedQueue { front = [], rearReversed = List.reverse front }
                         |> dequeue
-
-
-{-| Return the queue represented as a list where the first element is the head of the queue.
-
-    empty
-    |> enqueue "a"
-    |> enqueue "b"
-    |> toList
-    --> ["a", "b"]
-
--}
-toList : AmortizedQueue a -> List a
-toList queue =
-    toList_ queue []
-        |> List.reverse
-
-
-toList_ : AmortizedQueue a -> List a -> List a
-toList_ queue acc =
-    case dequeue queue of
-        Nothing ->
-            acc
-
-        Just ( head, tail ) ->
-            toList_ tail (head :: acc)

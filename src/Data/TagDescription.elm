@@ -1,11 +1,11 @@
-module Data.TagDescription exposing (TagDescription, fromMarkdown, raw, codec, inlineText, markdown, view)
+module Data.TagDescription exposing (TagDescription, fromMarkdown, raw, codec, markdown, view)
 
 {-| The description for a tag.
 
 
 # Tag Descriptions
 
-@docs TagDescription, fromMarkdown, raw, codec, inlineText, markdown, view
+@docs TagDescription, fromMarkdown, raw, codec, markdown, view
 
 -}
 
@@ -64,18 +64,6 @@ raw (MarkdownTagDescription { body }) =
 codec : Codec TagDescription
 codec =
     Codec.map fromMarkdown raw Codec.string
-
-
-{-| Retrieve the concatenated inline text of a tag description.
-
-    fromMarkdown "*Hello* _there_"
-    |> inlineText
-    --> "Hello there"
-
--}
-inlineText : TagDescription -> String
-inlineText (MarkdownTagDescription t) =
-    t.inlineText
 
 
 {-| Convert a tag description to a string suitable for a Markdown document.

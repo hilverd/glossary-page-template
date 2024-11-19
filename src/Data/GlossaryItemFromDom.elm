@@ -1,6 +1,6 @@
 module Data.GlossaryItemFromDom exposing
     ( GlossaryItemFromDom
-    , create, codec
+    , codec
     , disambiguatedPreferredTermIdString
     , toHtmlTree
     )
@@ -12,7 +12,7 @@ module Data.GlossaryItemFromDom exposing
 
 # Build
 
-@docs create, codec
+@docs codec
 
 
 # Query
@@ -50,8 +50,6 @@ type alias GlossaryItemFromDom =
     }
 
 
-{-| Create a glossary item from its parts.
--}
 create :
     String
     -> TermFromDom

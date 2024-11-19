@@ -1,4 +1,4 @@
-module Data.GlossaryItemsForUiTests exposing (houseworkTagId, suite)
+module Data.GlossaryItemsForUiTests exposing (suite)
 
 import Data.DescribedTag as DescribedTag
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm

@@ -17,7 +17,7 @@ import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.TermFromDom exposing (TermFromDom)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.HtmlTree exposing (HtmlTree)
-import Extras.String
+import Extras.String exposing (enDash)
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
 import Internationalisation as I18n
@@ -45,7 +45,7 @@ stringToIndexGroupString =
         >> Maybe.withDefault "…"
         >> (\result ->
                 if List.member result [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ] then
-                    "0–9"
+                    "0" ++ enDash ++ "9"
 
                 else
                     result

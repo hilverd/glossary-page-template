@@ -1,11 +1,11 @@
-module GlossaryItemForm.DefinitionField exposing (DefinitionField, empty, fromString, raw, validationError, setValidationError)
+module GlossaryItemForm.DefinitionField exposing (DefinitionField, empty, fromString, raw, validationError)
 
 {-| A form field that contains a definition for a glossary item.
 
 
 # Definition Fields
 
-@docs DefinitionField, empty, fromString, raw, validationError, setValidationError
+@docs DefinitionField, empty, fromString, raw, validationError
 
 -}
 
@@ -61,18 +61,3 @@ validationError detailsField =
     case detailsField of
         DefinitionField field ->
             field.validationError
-
-
-{-| Set the validation error on a details field.
-
-    empty
-    |> setValidationError (Just "Can't be empty")
-    |> validationError
-    --> Just "Can't be empty"
-
--}
-setValidationError : Maybe String -> DefinitionField -> DefinitionField
-setValidationError error detailsField =
-    case detailsField of
-        DefinitionField field ->
-            DefinitionField { field | validationError = error }

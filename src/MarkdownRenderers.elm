@@ -1,11 +1,11 @@
-module MarkdownRenderers exposing (anchorTagHtmlTreeRenderer, htmlMsgRenderer, htmlTreeRendererForAnki, imgTagHtmlTreeRenderer, inlineHtmlMsgRenderer, inlineHtmlTreeRendererForAnki, textRenderer, inlineTextRenderer)
+module MarkdownRenderers exposing (anchorTagHtmlTreeRenderer, htmlMsgRenderer, htmlTreeRendererForAnki, imgTagHtmlTreeRenderer, inlineHtmlMsgRenderer, inlineHtmlTreeRendererForAnki, inlineTextRenderer)
 
 {-| Renderers for Markdown data.
 
 
 # Markdown Renderers
 
-@docs anchorTagHtmlTreeRenderer, htmlMsgRenderer, htmlTreeRendererForAnki, imgTagHtmlTreeRenderer, inlineHtmlMsgRenderer, inlineHtmlTreeRendererForAnki, textRenderer, inlineTextRenderer
+@docs anchorTagHtmlTreeRenderer, htmlMsgRenderer, htmlTreeRendererForAnki, imgTagHtmlTreeRenderer, inlineHtmlMsgRenderer, inlineHtmlTreeRendererForAnki, inlineTextRenderer
 
 -}
 
@@ -498,135 +498,127 @@ inlineHtmlTreeRendererForAnki enableMathSupport =
     }
 
 
-{-| A text renderer, producing Markdown. Adapted from <https://github.com/matheus23/elm-markdown-transforms>.
--}
-textRenderer : Bool -> Renderer String
-textRenderer enableMathSupport =
-    let
-        escape string =
-            String.replace string ("\\" ++ string)
-    in
-    { heading =
-        \{ level, children } ->
-            (case level of
-                Block.H1 ->
-                    "# "
 
-                Block.H2 ->
-                    "## "
-
-                Block.H3 ->
-                    "### "
-
-                Block.H4 ->
-                    "#### "
-
-                Block.H5 ->
-                    "##### "
-
-                Block.H6 ->
-                    "###### "
-            )
-                ++ String.concat children
-    , paragraph = String.concat
-    , hardLineBreak = "\n\n"
-    , blockQuote =
-        \children ->
-            children
-                |> String.concat
-                |> String.split "\n"
-                |> List.map (\line -> "> " ++ line)
-                |> String.join "\n"
-    , strong =
-        \children ->
-            "**" ++ String.replace "**" "\\**" (String.concat children) ++ "**"
-    , emphasis =
-        \children ->
-            "_" ++ escape "_" (String.concat children) ++ "_"
-    , strikethrough =
-        \children ->
-            "~" ++ escape "~" (String.concat children) ++ "~"
-    , codeSpan =
-        \content ->
-            if enableMathSupport && String.startsWith "$" content && String.endsWith "$" content then
-                "$" ++ String.slice 1 -1 content ++ "$"
-
-            else
-                "`" ++ content ++ "`"
-    , link =
-        \{ destination } children ->
-            -- TODO: handle titles, see https://github.github.com/gfm/#example-494
-            "[" ++ escape "]" (escape ")" (String.concat children)) ++ "](" ++ destination ++ ")"
-    , image =
-        \{ alt, src, title } ->
-            "!["
-                ++ escape "]" (escape ")" alt)
-                ++ "]("
-                ++ src
-                ++ (title
-                        |> Maybe.map (\t -> " \"" ++ escape "\"" t ++ "\"")
-                        |> Maybe.withDefault ""
-                   )
-                ++ ")"
-    , text = identity
-    , unorderedList =
-        \items ->
-            items
-                |> List.map
-                    (\(Block.ListItem task children) ->
-                        case task of
-                            Block.NoTask ->
-                                "- " ++ String.concat children
-
-                            Block.IncompleteTask ->
-                                "- [ ] " ++ String.concat children
-
-                            Block.CompletedTask ->
-                                "- [X] " ++ String.concat children
-                    )
-                |> String.join "\n"
-    , orderedList =
-        \startingIndex items ->
-            items
-                |> List.indexedMap
-                    (\index children ->
-                        String.fromInt (index + startingIndex)
-                            ++ ". "
-                            ++ String.concat children
-                    )
-                |> String.join "\n"
-    , html = Markdown.Html.oneOf []
-    , codeBlock =
-        \{ body, language } ->
-            case language of
-                Just langName ->
-                    "```"
-                        ++ langName
-                        ++ "\n"
-                        ++ body
-                        ++ "```"
-
-                Nothing ->
-                    let
-                        bodyLines =
-                            body
-                                |> String.split "\n"
-                    in
-                    if bodyLines |> List.any (not << String.startsWith " ") then
-                        bodyLines
-                            |> List.map ((++) "    ")
-                            |> String.join "\n"
-
-                    else
-                        "```\n" ++ body ++ "```"
-    , thematicBreak = "---\n"
-    , table = always "" -- TODO
-    , tableHeader = always "" -- TODO
-    , tableBody = always "" -- TODO
-    , tableRow = always "" -- TODO
-    , tableHeaderCell = \_ _ -> "" -- TODO
-    , tableCell = \_ _ -> "" -- TODO
-    }
+-- {-| A text renderer, producing Markdown. Adapted from <https://github.com/matheus23/elm-markdown-transforms>.
+-- This is a work in progress.
+-- -}
+-- textRenderer : Bool -> Renderer String
+-- textRenderer enableMathSupport =
+--     let
+--         escape string =
+--             String.replace string ("\\" ++ string)
+--     in
+--     { heading =
+--         \{ level, children } ->
+--             (case level of
+--                 Block.H1 ->
+--                     "# "
+--                 Block.H2 ->
+--                     "## "
+--                 Block.H3 ->
+--                     "### "
+--                 Block.H4 ->
+--                     "#### "
+--                 Block.H5 ->
+--                     "##### "
+--                 Block.H6 ->
+--                     "###### "
+--             )
+--                 ++ String.concat children
+--     , paragraph = String.concat
+--     , hardLineBreak = "\n\n"
+--     , blockQuote =
+--         \children ->
+--             children
+--                 |> String.concat
+--                 |> String.split "\n"
+--                 |> List.map (\line -> "> " ++ line)
+--                 |> String.join "\n"
+--     , strong =
+--         \children ->
+--             "**" ++ String.replace "**" "\\**" (String.concat children) ++ "**"
+--     , emphasis =
+--         \children ->
+--             "_" ++ escape "_" (String.concat children) ++ "_"
+--     , strikethrough =
+--         \children ->
+--             "~" ++ escape "~" (String.concat children) ++ "~"
+--     , codeSpan =
+--         \content ->
+--             if enableMathSupport && String.startsWith "$" content && String.endsWith "$" content then
+--                 "$" ++ String.slice 1 -1 content ++ "$"
+--             else
+--                 "`" ++ content ++ "`"
+--     , link =
+--         \{ destination } children ->
+--             -- TODO: handle titles, see https://github.github.com/gfm/#example-494
+--             "[" ++ escape "]" (escape ")" (String.concat children)) ++ "](" ++ destination ++ ")"
+--     , image =
+--         \{ alt, src, title } ->
+--             "!["
+--                 ++ escape "]" (escape ")" alt)
+--                 ++ "]("
+--                 ++ src
+--                 ++ (title
+--                         |> Maybe.map (\t -> " \"" ++ escape "\"" t ++ "\"")
+--                         |> Maybe.withDefault ""
+--                    )
+--                 ++ ")"
+--     , text = identity
+--     , unorderedList =
+--         \items ->
+--             items
+--                 |> List.map
+--                     (\(Block.ListItem task children) ->
+--                         case task of
+--                             Block.NoTask ->
+--                                 "- " ++ String.concat children
+--                             Block.IncompleteTask ->
+--                                 "- [ ] " ++ String.concat children
+--                             Block.CompletedTask ->
+--                                 "- [X] " ++ String.concat children
+--                     )
+--                 |> String.join "\n"
+--     , orderedList =
+--         \startingIndex items ->
+--             items
+--                 |> List.indexedMap
+--                     (\index children ->
+--                         String.fromInt (index + startingIndex)
+--                             ++ ". "
+--                             ++ String.concat children
+--                     )
+--                 |> String.join "\n"
+--     , html = Markdown.Html.oneOf []
+--     , codeBlock =
+--         \{ body, language } ->
+--             case language of
+--                 Just langName ->
+--                     "```"
+--                         ++ langName
+--                         ++ "\n"
+--                         ++ body
+--                         ++ "```"
+--                 Nothing ->
+--                     let
+--                         bodyLines =
+--                             body
+--                                 |> String.split "\n"
+--                     in
+--                     if bodyLines |> List.any (not << String.startsWith " ") then
+--                         bodyLines
+--                             |> List.map ((++) "    ")
+--                             |> String.join "\n"
+--                     else
+--                         "```\n" ++ body ++ "```"
+--     , thematicBreak = "---\n"
+--     , table = always "" -- TODO
+--     , tableHeader = always "" -- TODO
+--     , tableBody = always "" -- TODO
+--     , tableRow = always "" -- TODO
+--     , tableHeaderCell = \_ _ -> "" -- TODO
+--     , tableCell = \_ _ -> "" -- TODO
+--     }
 
 
 {-| A text (i.e. Markdown) renderer that only handles inline elements (e.g. strong, emphasis) properly.

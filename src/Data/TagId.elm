@@ -1,9 +1,9 @@
-module Data.TagId exposing (TagId, create, toString, codec, increment)
+module Data.TagId exposing (TagId, create, toString, codec)
 
 {-| An identifier for a tag used in a glossary.
 These are used to keep track of tags in `GlossaryItems` so that those can be changed safely.
 
-@docs TagId, create, toString, codec, increment
+@docs TagId, create, toString, codec
 
 -}
 
@@ -35,10 +35,3 @@ toString (TagId id) =
 codec : Codec TagId
 codec =
     Codec.map create toString Codec.string
-
-
-{-| Increment the tag ID by one.
--}
-increment : TagId -> TagId
-increment =
-    toString >> String.toInt >> Maybe.withDefault 0 >> (+) 1 >> String.fromInt >> create

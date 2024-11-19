@@ -1,11 +1,11 @@
-module DirectedGraph exposing (DirectedGraph, empty, insertVertex, insertEdge, vertices, outNeighbours, verticesByDistance)
+module DirectedGraph exposing (DirectedGraph, empty, insertVertex, insertEdge, verticesByDistance)
 
 {-| A directed graph.
 
 
 # Directed Graphs
 
-@docs DirectedGraph, empty, insertVertex, insertEdge, vertices, outNeighbours, verticesByDistance
+@docs DirectedGraph, empty, insertVertex, insertEdge, verticesByDistance
 
 -}
 
@@ -91,15 +91,18 @@ insertEdge vertex1 vertex2 graph =
                 }
 
 
-{-| Return the list of vertices.
 
-    empty identity identity
-    |> insertEdge "R" "A"
-    |> insertVertex "B"
-    |> vertices
-    --> ["A", "B", "R"]
+{- Return the list of vertices.
+
+   empty identity identity
+   |> insertEdge "R" "A"
+   |> insertVertex "B"
+   |> vertices
+   --> ["A", "B", "R"]
 
 -}
+
+
 vertices : DirectedGraph a -> List a
 vertices graph =
     case graph of
@@ -109,20 +112,23 @@ vertices graph =
                 |> List.map vertexFromString
 
 
-{-| Return the list of out-neighbours of a vertex.
 
-    empty identity identity
-    |> insertEdge "R" "A"
-    |> insertEdge "A" "B"
-    |> insertEdge "A" "C"
-    |> outNeighbours "A"
-    --> ["B", "C"]
+{- Return the list of out-neighbours of a vertex.
 
-    empty identity identity
-    |> outNeighbours "A"
-    --> []
+   empty identity identity
+   |> insertEdge "R" "A"
+   |> insertEdge "A" "B"
+   |> insertEdge "A" "C"
+   |> outNeighbours "A"
+   --> ["B", "C"]
+
+   empty identity identity
+   |> outNeighbours "A"
+   --> []
 
 -}
+
+
 outNeighbours : a -> DirectedGraph a -> List a
 outNeighbours vertex graph =
     case graph of

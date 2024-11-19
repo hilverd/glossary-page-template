@@ -2,7 +2,7 @@ module QueryParameters exposing
     ( QueryParameters
     , fromUrl, setOrderItemsBy, setFilterByTag
     , orderItemsBy, filterByTag
-    , toRelativeUrl, toUrlQueryParams
+    , toRelativeUrl
     )
 
 {-| Query parameters that can be present in the URL.
@@ -25,7 +25,7 @@ module QueryParameters exposing
 
 # Converting to URLs
 
-@docs toRelativeUrl, toUrlQueryParams
+@docs toRelativeUrl
 
 -}
 
@@ -130,13 +130,3 @@ toRelativeUrl queryParameters =
             ]
                 |> List.filterMap identity
                 |> Url.Builder.relative []
-
-
-{-| Convert a set of query parameters to a list of Url.Builder.QueryParameter.
--}
-toUrlQueryParams : QueryParameters -> List Url.Builder.QueryParameter
-toUrlQueryParams (QueryParameters queryParameters) =
-    [ queryParameters.orderItemsBy |> OrderItemsBy.toQueryParameter
-    , queryParameters.filterByTag |> Maybe.map Tag.toQueryParameter
-    ]
-        |> List.filterMap identity

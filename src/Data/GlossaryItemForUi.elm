@@ -1,6 +1,6 @@
 module Data.GlossaryItemForUi exposing
     ( GlossaryItemForUi
-    , create, codec, fromGlossaryItemFromDom, setLastUpdatedBy
+    , create, codec, fromGlossaryItemFromDom
     , disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, disambiguatedPreferredTermIdString, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
     , toGlossaryItemFromDom
     , disambiguatedTerm
@@ -16,7 +16,7 @@ module Data.GlossaryItemForUi exposing
 
 # Build
 
-@docs create, codec, fromGlossaryItemFromDom, setLastUpdatedBy
+@docs create, codec, fromGlossaryItemFromDom
 
 
 # Query
@@ -297,17 +297,6 @@ disambiguatedTerm tag term =
         |> Term.updateRaw
             (\raw0 -> raw0 ++ " (" ++ Tag.raw tag ++ ")")
         |> DisambiguatedTerm.fromTerm
-
-
-{-| Set the name and email address of the person who last updated this glossary item.
--}
-setLastUpdatedBy : { name : String, emailAddress : String } -> GlossaryItemForUi -> GlossaryItemForUi
-setLastUpdatedBy { name, emailAddress } (GlossaryItemForUi item) =
-    GlossaryItemForUi
-        { item
-            | lastUpdatedByName = Just name
-            , lastUpdatedByEmailAddress = Just emailAddress
-        }
 
 
 {-| Convert this glossary item to a GlossaryItemFromDom.

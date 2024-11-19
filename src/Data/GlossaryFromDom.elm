@@ -1,6 +1,6 @@
 module Data.GlossaryFromDom exposing
     ( GlossaryFromDom
-    , create, codec
+    , codec
     , ApplyChangesResult(..), applyChanges
     , toHtmlTree
     )
@@ -12,7 +12,7 @@ module Data.GlossaryFromDom exposing
 
 # Build
 
-@docs create, codec
+@docs codec
 
 
 # Apply Changes
@@ -71,8 +71,6 @@ type alias GlossaryFromDom =
     }
 
 
-{-| Create a GlossaryFromDom from its parts.
--}
 create :
     Bool
     -> Bool

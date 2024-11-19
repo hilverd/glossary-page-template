@@ -1,11 +1,11 @@
-module GlossaryItemForm.TermField exposing (TermField, empty, fromString, raw, isAbbreviation, isAbbreviationManuallyOverridden, validationError, setBody, setIsAbbreviation, setIsAbbreviationManuallyOverridden, setValidationError)
+module GlossaryItemForm.TermField exposing (TermField, empty, fromString, raw, isAbbreviation, validationError, setBody, setIsAbbreviation, setIsAbbreviationManuallyOverridden, setValidationError)
 
 {-| A form field that contains a term.
 
 
 # Term Fields
 
-@docs TermField, empty, fromString, raw, isAbbreviation, isAbbreviationManuallyOverridden, validationError, setBody, setIsAbbreviation, setIsAbbreviationManuallyOverridden, setValidationError
+@docs TermField, empty, fromString, raw, isAbbreviation, validationError, setBody, setIsAbbreviation, setIsAbbreviationManuallyOverridden, setValidationError
 
 -}
 
@@ -27,8 +27,6 @@ type TermField
 
     empty |> isAbbreviation --> False
 
-    empty |> isAbbreviationManuallyOverridden --> False
-
     empty |> validationError --> Nothing
 
 -}
@@ -47,8 +45,6 @@ empty =
     fromString "NA" True |> raw --> "NA"
 
     fromString "NA" True |> isAbbreviation --> True
-
-    fromString "Foo" True |> isAbbreviationManuallyOverridden --> True
 
     fromString "Foo" True |> validationError --> Nothing
 
@@ -154,12 +150,6 @@ setIsAbbreviation isAbbreviation0 termField =
 
 
 {-| Set the "'is an abbreviation' Boolean was manually overridden" on a term field.
-
-    empty
-    |> setIsAbbreviationManuallyOverridden True
-    |> isAbbreviationManuallyOverridden
-    --> True
-
 -}
 setIsAbbreviationManuallyOverridden : Bool -> TermField -> TermField
 setIsAbbreviationManuallyOverridden manuallyOverridden termField =
