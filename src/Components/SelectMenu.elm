@@ -126,7 +126,7 @@ render properties choices =
                 (\handler ->
                     Html.Events.on "change" <|
                         Decode.map handler <|
-                            Decode.andThen Decode.succeed Html.Events.targetValue
+                            Html.Events.targetValue
                 )
                 config.onChange
             , config.enabled |> Maybe.withDefault True |> not |> disabled

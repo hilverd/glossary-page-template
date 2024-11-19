@@ -176,7 +176,7 @@ applyTagsChanges tagsChanges glossaryFromDom =
                                 if Dict.member id tagIdToDescribedTagFromDom then
                                     Err <| I18n.thereIsAlreadyATagWithId id
 
-                                else if tagIdToDescribedTagFromDom |> Dict.toList |> List.map Tuple.second |> List.any (.tag >> (==) tag) then
+                                else if tagIdToDescribedTagFromDom |> Dict.values |> List.any (.tag >> (==) tag) then
                                     Err <| I18n.thereIsAlreadyATag tag
 
                                 else
@@ -386,8 +386,7 @@ validateAfterApplyingChanges ( maybeGlossaryItemId, glossaryFromDom ) =
         reservedTerms : List String
         reservedTerms =
             glossaryFromDom.items
-                |> List.map (\item -> item.preferredTerm :: item.alternativeTerms)
-                |> List.concat
+                |> List.concatMap (\item -> item.preferredTerm :: item.alternativeTerms)
                 |> List.filter (TermFromDom.id >> ElementIds.reserved)
                 |> List.map .body
 

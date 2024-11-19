@@ -653,7 +653,7 @@ relatedForWhichItems itemId (GlossaryItemsForUi items) =
     items.relatedItemIdsById
         |> GlossaryItemIdDict.foldl
             (\otherItemId relatedItemIds result ->
-                if List.any ((==) itemId) relatedItemIds then
+                if List.member itemId relatedItemIds then
                     otherItemId :: result
 
                 else
@@ -766,7 +766,7 @@ toList_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItemsForUi items) as
             then
                 glossaryItemsForUi
                     |> get_ disambiguatedPreferredTerm_ filterByTagId itemId
-                    |> Maybe.andThen (Just << Tuple.pair itemId)
+                    |> Maybe.map (Tuple.pair itemId)
 
             else
                 Nothing
