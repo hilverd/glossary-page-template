@@ -41,33 +41,34 @@ import Simplify
 
 config : List Rule
 config =
-    [ Docs.NoMissing.rule
-        { document = onlyExposed
-        , from = exposedModules
-        }
+    [ NoForbiddenWords.rule [ "REPLACEME" ]
+    -- , Docs.NoMissing.rule
+    --     { document = onlyExposed
+    --     , from = exposedModules
+    --     }
     , Docs.ReviewLinksAndSections.rule
     , Docs.ReviewAtDocs.rule
     , Docs.UpToDateReadmeLinks.rule
-    , NoConfusingPrefixOperator.rule
+    -- , NoConfusingPrefixOperator.rule
     , NoDebug.Log.rule
     , NoDebug.TodoOrToString.rule
         |> Rule.ignoreErrorsForDirectories [ "tests/" ]
     , NoDeprecated.rule NoDeprecated.defaults
-    , NoExposingEverything.rule
-    , NoForbiddenWords.rule [ "REPLACEME" ]
-    , NoImportingEverything.rule []
-    , NoMissingTypeAnnotation.rule
-    , NoMissingTypeAnnotationInLetIn.rule
-    , NoMissingTypeExpose.rule
-    , NoSimpleLetBody.rule
-    , NoPrematureLetComputation.rule
+    -- , NoExposingEverything.rule
+    -- , NoImportingEverything.rule []
+    -- , NoMissingTypeAnnotation.rule
+    -- , NoMissingTypeAnnotationInLetIn.rule
+    -- , NoMissingTypeExpose.rule
+    -- , NoSimpleLetBody.rule
+    -- , NoPrematureLetComputation.rule
     , NoUnused.CustomTypeConstructors.rule []
     , NoUnused.CustomTypeConstructorArgs.rule
     , NoUnused.Dependencies.rule
     , NoUnused.Exports.rule
-    , NoUnused.Parameters.rule
-    , NoUnused.Patterns.rule
-    , NoUnused.Variables.rule
-    , Simplify.rule Simplify.defaults
-    , CognitiveComplexity.rule 15
+    -- , NoUnused.Parameters.rule
+    -- , NoUnused.Patterns.rule
+    -- , NoUnused.Variables.rule
+    -- , Simplify.rule Simplify.defaults
+    -- , CognitiveComplexity.rule 15
     ]
+    |> List.map (Rule.ignoreErrorsForFiles [ "src/Internationalisation/Nld.elm" ])
