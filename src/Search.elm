@@ -12,7 +12,6 @@ import Extras.Url
 import Html
 import Html.Attributes exposing (class)
 import Icons
-import Internationalisation exposing (preferredTerm)
 import Svg.Attributes
 
 

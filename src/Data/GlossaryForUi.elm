@@ -34,7 +34,6 @@ import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
 import Data.AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.DescribedTag as DescribedTag exposing (DescribedTag)
-import Data.GlossaryChange exposing (GlossaryChange(..))
 import Data.GlossaryFromDom exposing (GlossaryFromDom)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)

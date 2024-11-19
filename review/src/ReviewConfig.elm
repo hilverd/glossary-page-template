@@ -65,10 +65,10 @@ config =
     , NoUnused.CustomTypeConstructorArgs.rule
     , NoUnused.Dependencies.rule
     , NoUnused.Exports.rule
-    -- , NoUnused.Parameters.rule
-    -- , NoUnused.Patterns.rule
-    -- , NoUnused.Variables.rule
-    -- , Simplify.rule Simplify.defaults
+    , NoUnused.Parameters.rule
+    , NoUnused.Patterns.rule
+    , NoUnused.Variables.rule
+    , Simplify.rule Simplify.defaults
     -- , CognitiveComplexity.rule 15
     ]
     |> List.map (Rule.ignoreErrorsForFiles [ "src/Internationalisation/Nld.elm" ])

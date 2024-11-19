@@ -92,27 +92,6 @@ insertEdge vertex1 vertex2 graph =
 
 
 
-{- Return the list of vertices.
-
-   empty identity identity
-   |> insertEdge "R" "A"
-   |> insertVertex "B"
-   |> vertices
-   --> ["A", "B", "R"]
-
--}
-
-
-vertices : DirectedGraph a -> List a
-vertices graph =
-    case graph of
-        DirectedGraph { vertexFromString, vertices_ } ->
-            vertices_
-                |> Set.toList
-                |> List.map vertexFromString
-
-
-
 {- Return the list of out-neighbours of a vertex.
 
    empty identity identity
