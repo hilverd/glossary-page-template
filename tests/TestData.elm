@@ -314,22 +314,6 @@ interestRateItemFromDom =
     }
 
 
-updatedInterestRateItem : GlossaryItemForUi
-updatedInterestRateItem =
-    GlossaryItemForUi.create
-        (GlossaryItemId.create "Interest rate updated")
-        (Term.fromMarkdown "Interest rate updated" False)
-        [ Term.fromMarkdown "IR" True ]
-        Nothing
-        [ financeTag ]
-        (Just interestRateDefinition)
-        [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Loan" False ]
-        False
-        (Just "2023-10-30T08:25:30.335Z")
-        Nothing
-        Nothing
-
-
 loanRawDefinition : String
 loanRawDefinition =
     "The transfer of money by one party to another with an agreement to pay it back. The recipient, or borrower, incurs a debt and is usually required to pay interest for the use of the money."
@@ -370,22 +354,6 @@ loanItemFromDom =
     , lastUpdatedByName = Nothing
     , lastUpdatedByEmailAddress = Nothing
     }
-
-
-updatedLoanItem : GlossaryItemForUi
-updatedLoanItem =
-    GlossaryItemForUi.create
-        (GlossaryItemId.create "Loan")
-        (Term.fromMarkdown "Loan" False)
-        []
-        Nothing
-        [ financeTag ]
-        (Just loanDefinition)
-        [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate updated" False ]
-        False
-        (Just "2023-10-30T08:26:18.523Z")
-        Nothing
-        Nothing
 
 
 computerScienceDescribedTagFromDom : DescribedTagFromDom

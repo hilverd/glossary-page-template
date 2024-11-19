@@ -89,6 +89,15 @@ dequeue queue =
 -}
 toList : AmortizedQueue a -> List a
 toList queue =
-    case queue of
-        AmortizedQueue { front, rearReversed } ->
-            List.append rearReversed (List.reverse front)
+    toList_ queue []
+        |> List.reverse
+
+
+toList_ : AmortizedQueue a -> List a -> List a
+toList_ queue acc =
+    case dequeue queue of
+        Nothing ->
+            acc
+
+        Just ( head, tail ) ->
+            toList_ tail (head :: acc)
