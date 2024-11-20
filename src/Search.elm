@@ -84,10 +84,6 @@ search enableMathSupport filterByTagId searchString glossaryItemsForUi =
         candidates
             |> List.filterMap
                 (\({ preferredTerm, alternativeTerm, definition } as candidate) ->
-                    let
-                        preferredTermAsTerm =
-                            DisambiguatedTerm.toTerm preferredTerm
-                    in
                     if Maybe.map termContainsSearchString alternativeTerm == Just True then
                         if Maybe.map termStartsWithSearchString alternativeTerm == Just True then
                             Just ( candidate, 3 )
@@ -95,18 +91,23 @@ search enableMathSupport filterByTagId searchString glossaryItemsForUi =
                         else
                             Just ( candidate, 2 )
 
-                    else if termContainsSearchString preferredTermAsTerm then
-                        if termStartsWithSearchString preferredTermAsTerm then
-                            Just ( candidate, 3 )
+                    else
+                        let
+                            preferredTermAsTerm =
+                                DisambiguatedTerm.toTerm preferredTerm
+                        in
+                        if termContainsSearchString preferredTermAsTerm then
+                            if termStartsWithSearchString preferredTermAsTerm then
+                                Just ( candidate, 3 )
+
+                            else
+                                Just ( candidate, 2 )
+
+                        else if alternativeTerm == Nothing && Maybe.map definitionContainsSearchString definition == Just True then
+                            Just ( candidate, 1 )
 
                         else
-                            Just ( candidate, 2 )
-
-                    else if alternativeTerm == Nothing && Maybe.map definitionContainsSearchString definition == Just True then
-                        Just ( candidate, 1 )
-
-                    else
-                        Nothing
+                            Nothing
                 )
             |> List.sortWith
                 (\( candidate1, rank1 ) ( candidate2, rank2 ) ->

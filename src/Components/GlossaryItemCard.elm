@@ -53,14 +53,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
     Extras.Html.showMaybe
         (\glossaryItem ->
             let
-                index : GlossaryItemId
-                index =
-                    GlossaryItemForUi.id glossaryItem
-
-                hasFocus : Bool
-                hasFocus =
-                    itemWithFocus == Just index
-
                 disambiguatedPreferredTerm : Term
                 disambiguatedPreferredTerm =
                     glossaryItem
@@ -74,10 +66,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                 tags : List Tag
                 tags =
                     GlossaryItemForUi.allTags glossaryItem
-
-                tagsNotBeingFilteredBy : List Tag
-                tagsNotBeingFilteredBy =
-                    tags |> List.filter (Just >> (/=) tagBeingFilteredBy)
 
                 itemHasSomeDefinitions : Bool
                 itemHasSomeDefinitions =
@@ -173,6 +161,18 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
 
                     else
                         let
+                            index : GlossaryItemId
+                            index =
+                                GlossaryItemForUi.id glossaryItem
+
+                            hasFocus : Bool
+                            hasFocus =
+                                itemWithFocus == Just index
+
+                            tagsNotBeingFilteredBy : List Tag
+                            tagsNotBeingFilteredBy =
+                                tags |> List.filter (Just >> (/=) tagBeingFilteredBy)
+
                             lastUpdatedDate =
                                 GlossaryItemForUi.lastUpdatedDateAsIso8601 glossaryItem
 

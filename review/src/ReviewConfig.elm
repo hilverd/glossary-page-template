@@ -60,7 +60,7 @@ config =
     -- , NoMissingTypeAnnotationInLetIn.rule
     -- , NoMissingTypeExpose.rule -- deliberately left out
     , NoSimpleLetBody.rule
-    -- , NoPrematureLetComputation.rule
+    , NoPrematureLetComputation.rule
     , NoUnused.CustomTypeConstructors.rule []
     , NoUnused.CustomTypeConstructorArgs.rule
     , NoUnused.Dependencies.rule

@@ -530,15 +530,16 @@ disambiguatedPreferredTerm itemId (GlossaryItemsForUi items) =
                 |> GlossaryItemIdDict.get itemId
                 |> Maybe.andThen identity
 
-        tagById : TagIdDict Tag
-        tagById =
-            GlossaryTags.tagById items.tags
-
         disambiguationTag : Maybe Tag
         disambiguationTag =
             disambiguationTagId
                 |> Maybe.andThen
                     (\disambiguationTagId_ ->
+                        let
+                            tagById : TagIdDict Tag
+                            tagById =
+                                GlossaryTags.tagById items.tags
+                        in
                         TagIdDict.get disambiguationTagId_ tagById
                     )
     in

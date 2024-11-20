@@ -161,48 +161,52 @@ applyTagsChanges tagsChanges glossaryFromDom =
                                     id : String
                                     id =
                                         describedTag |> DescribedTag.id |> TagId.toString
-
-                                    tag : String
-                                    tag =
-                                        describedTag |> DescribedTag.tag |> Tag.raw
-
-                                    describedTagFromDom : DescribedTagFromDom
-                                    describedTagFromDom =
-                                        { id = id
-                                        , tag = tag
-                                        , description = describedTag |> DescribedTag.description |> TagDescription.raw
-                                        }
                                 in
                                 if Dict.member id tagIdToDescribedTagFromDom then
                                     Err <| I18n.thereIsAlreadyATagWithId id
 
-                                else if tagIdToDescribedTagFromDom |> Dict.values |> List.any (.tag >> (==) tag) then
-                                    Err <| I18n.thereIsAlreadyATag tag
-
                                 else
-                                    Ok <| Dict.insert id describedTagFromDom tagIdToDescribedTagFromDom
+                                    let
+                                        tag : String
+                                        tag =
+                                            describedTag |> DescribedTag.tag |> Tag.raw
+                                    in
+                                    if tagIdToDescribedTagFromDom |> Dict.values |> List.any (.tag >> (==) tag) then
+                                        Err <| I18n.thereIsAlreadyATag tag
+
+                                    else
+                                        let
+                                            describedTagFromDom : DescribedTagFromDom
+                                            describedTagFromDom =
+                                                { id = id
+                                                , tag = tag
+                                                , description = describedTag |> DescribedTag.description |> TagDescription.raw
+                                                }
+                                        in
+                                        Ok <| Dict.insert id describedTagFromDom tagIdToDescribedTagFromDom
 
                             ( TagsChanges.Update tagId describedTag, Ok tagIdToDescribedTagFromDom ) ->
                                 let
                                     id : String
                                     id =
                                         tagId |> TagId.toString
-
-                                    updatedTag : String
-                                    updatedTag =
-                                        describedTag |> DescribedTag.tag |> Tag.raw
-
-                                    describedTagFromDom : DescribedTagFromDom
-                                    describedTagFromDom =
-                                        { id = id
-                                        , tag = updatedTag
-                                        , description = describedTag |> DescribedTag.description |> TagDescription.raw
-                                        }
                                 in
                                 if tagIdToDescribedTagFromDom |> Dict.keys |> List.all ((/=) id) then
                                     Err <| I18n.thereIsNoTagWithId id
 
                                 else
+                                    let
+                                        updatedTag : String
+                                        updatedTag =
+                                            describedTag |> DescribedTag.tag |> Tag.raw
+
+                                        describedTagFromDom : DescribedTagFromDom
+                                        describedTagFromDom =
+                                            { id = id
+                                            , tag = updatedTag
+                                            , description = describedTag |> DescribedTag.description |> TagDescription.raw
+                                            }
+                                    in
                                     Ok (Dict.update id (always <| Just describedTagFromDom) tagIdToDescribedTagFromDom)
 
                             ( TagsChanges.Removal tagId, Ok tagIdToDescribedTagFromDom ) ->
@@ -364,15 +368,18 @@ applyChanges changes glossaryFromDom =
             |> (\result ->
                     case result of
                         Ok result_ ->
-                            let
-                                sortedItems =
-                                    result_
-                                        |> Tuple.second
-                                        |> .items
-                                        |> List.sortBy GlossaryItemFromDom.disambiguatedPreferredTermIdString
-                            in
                             result_
-                                |> Tuple.mapSecond (\glossaryFromDom_ -> { glossaryFromDom_ | items = sortedItems })
+                                |> Tuple.mapSecond
+                                    (\glossaryFromDom_ ->
+                                        let
+                                            sortedItems =
+                                                result_
+                                                    |> Tuple.second
+                                                    |> .items
+                                                    |> List.sortBy GlossaryItemFromDom.disambiguatedPreferredTermIdString
+                                        in
+                                        { glossaryFromDom_ | items = sortedItems }
+                                    )
                                 |> ChangesApplied
 
                         Err err ->
