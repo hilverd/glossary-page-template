@@ -1,4 +1,4 @@
-module TestData exposing (..)
+module TestData exposing (computerScienceDescribedTag, computerScienceDescribedTagFromDom, computerScienceRawTag, computerScienceTag, computerScienceTagId, computerScienceTagRawDescription, defaultComputerScienceDefinition, defaultComputerScienceItem, defaultComputerScienceItemFromDom, defaultFinanceDefinition, defaultFinanceItem, defaultFinanceItemFromDom, financeDescribedTag, financeDescribedTagFromDom, financeRawTag, financeTag, financeTagDescription, financeTagId, financeTagRawDescription, gardeningDescribedTag, gardeningDescribedTagFromDom, gardeningTag, gardeningTagDescription, gardeningTagId, glossary, glossaryFromDom, glossaryItemsForUi, houseworkRawTag, houseworkTag, houseworkTagDescription, houseworkTagRawDescription, houseworkTagRawId, informationRetrievalItem, informationRetrievalItemFromDom, interestRateItem, interestRateItemFromDom, loanItem, loanItemFromDom)
 
 import Data.AboutParagraph as AboutParagraph
 import Data.CardWidth as CardWidth

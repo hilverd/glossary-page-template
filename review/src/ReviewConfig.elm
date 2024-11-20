@@ -49,13 +49,13 @@ config =
     , Docs.ReviewLinksAndSections.rule
     , Docs.ReviewAtDocs.rule
     , Docs.UpToDateReadmeLinks.rule
-    -- , NoConfusingPrefixOperator.rule
+    -- , NoConfusingPrefixOperator.rule -- deliberately left out
     , NoDebug.Log.rule
     , NoDebug.TodoOrToString.rule
         |> Rule.ignoreErrorsForDirectories [ "tests/" ]
     , NoDeprecated.rule NoDeprecated.defaults
-    -- , NoExposingEverything.rule
-    -- , NoImportingEverything.rule []
+    , NoExposingEverything.rule
+    , NoImportingEverything.rule []
     -- , NoMissingTypeAnnotation.rule
     -- , NoMissingTypeAnnotationInLetIn.rule
     -- , NoMissingTypeExpose.rule

@@ -10,7 +10,30 @@ import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForU
 import Data.TagId as TagId
 import Expect
 import Test exposing (Test, describe, test)
-import TestData exposing (..)
+import TestData
+    exposing
+        ( computerScienceDescribedTag
+        , computerScienceTag
+        , computerScienceTagId
+        , defaultComputerScienceDefinition
+        , defaultComputerScienceItem
+        , defaultFinanceDefinition
+        , defaultFinanceItem
+        , financeDescribedTag
+        , financeTag
+        , financeTagDescription
+        , financeTagId
+        , gardeningDescribedTag
+        , gardeningTag
+        , gardeningTagDescription
+        , gardeningTagId
+        , glossaryItemsForUi
+        , houseworkTag
+        , houseworkTagDescription
+        , informationRetrievalItem
+        , interestRateItem
+        , loanItem
+        )
 
 
 houseworkTagId : TagId.TagId

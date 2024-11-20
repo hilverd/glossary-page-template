@@ -12,7 +12,31 @@ import Data.TagId as TagId exposing (TagId)
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
 import Expect
 import Test exposing (Test, describe, test)
-import TestData exposing (..)
+import TestData
+    exposing
+        ( computerScienceDescribedTag
+        , computerScienceDescribedTagFromDom
+        , computerScienceRawTag
+        , computerScienceTagId
+        , computerScienceTagRawDescription
+        , defaultComputerScienceItemFromDom
+        , defaultFinanceItemFromDom
+        , financeDescribedTag
+        , financeDescribedTagFromDom
+        , financeRawTag
+        , financeTagId
+        , financeTagRawDescription
+        , gardeningDescribedTagFromDom
+        , glossaryFromDom
+        , houseworkRawTag
+        , houseworkTag
+        , houseworkTagDescription
+        , houseworkTagRawDescription
+        , houseworkTagRawId
+        , informationRetrievalItemFromDom
+        , interestRateItemFromDom
+        , loanItemFromDom
+        )
 
 
 houseworkTagId : TagId
