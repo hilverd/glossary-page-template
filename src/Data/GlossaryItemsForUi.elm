@@ -135,11 +135,8 @@ fromList describedTags_ glossaryItemsForUi =
                                                 (GlossaryItemForUi.lastUpdatedDateAsIso8601 glossaryItemForUi)
                                                 (GlossaryItemForUi.lastUpdatedByName glossaryItemForUi)
                                                 (GlossaryItemForUi.lastUpdatedByEmailAddress glossaryItemForUi)
-
-                                        itemById1 =
-                                            GlossaryItemIdDict.insert (GlossaryItem.id glossaryItem) glossaryItem itemById_
                                     in
-                                    itemById1
+                                    GlossaryItemIdDict.insert (GlossaryItem.id glossaryItem) glossaryItem itemById_
                                 )
                                 GlossaryItemIdDict.empty
 

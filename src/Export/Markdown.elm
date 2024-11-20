@@ -177,20 +177,16 @@ toString glossaryForUi =
                 |> GlossaryItems.orderedAlphabetically Nothing
                 |> List.map (Tuple.second >> itemToMarkdown)
                 |> paragraphs
-
-        content : String
-        content =
-            [ titleHeadingString
-            , aboutParagraphString
-            , aboutLinksString
-            , horizontalRule
-            , tagsSection
-            , "## Items"
-            , itemsString
-            ]
-                |> paragraphs
     in
-    content
+    [ titleHeadingString
+    , aboutParagraphString
+    , aboutLinksString
+    , horizontalRule
+    , tagsSection
+    , "## Items"
+    , itemsString
+    ]
+        |> paragraphs
 
 
 {-| Export a glossary to a Markdown file.
