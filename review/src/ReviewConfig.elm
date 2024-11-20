@@ -56,9 +56,9 @@ config =
     , NoDeprecated.rule NoDeprecated.defaults
     , NoExposingEverything.rule
     , NoImportingEverything.rule []
-    -- , NoMissingTypeAnnotation.rule
+    , NoMissingTypeAnnotation.rule
     -- , NoMissingTypeAnnotationInLetIn.rule
-    -- , NoMissingTypeExpose.rule
+    -- , NoMissingTypeExpose.rule -- deliberately left out
     -- , NoSimpleLetBody.rule
     -- , NoPrematureLetComputation.rule
     , NoUnused.CustomTypeConstructors.rule []
