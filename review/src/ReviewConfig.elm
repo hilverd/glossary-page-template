@@ -42,10 +42,10 @@ import Simplify
 config : List Rule
 config =
     [ NoForbiddenWords.rule [ "REPLACEME" ]
-    -- , Docs.NoMissing.rule
-    --     { document = onlyExposed
-    --     , from = exposedModules
-    --     }
+    , Docs.NoMissing.rule
+        { document = onlyExposed
+        , from = exposedModules
+        }
     , Docs.ReviewLinksAndSections.rule
     , Docs.ReviewAtDocs.rule
     , Docs.UpToDateReadmeLinks.rule
