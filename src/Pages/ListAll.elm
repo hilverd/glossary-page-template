@@ -1006,8 +1006,8 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
         ]
 
 
-viewSettings : GlossaryForUi -> Model -> Html Msg
-viewSettings glossaryForUi model =
+viewSettings : GlossaryForUi -> Editability -> Saving -> { tabbable : Bool, enableMathSupport : Bool } -> Html Msg
+viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupport } =
     let
         errorDiv : String -> Html msg
         errorDiv message =
@@ -1023,15 +1023,15 @@ viewSettings glossaryForUi model =
         , class "pt-4 pr-4 pl-4 pb-2"
         ]
         [ details
-            [ Accessibility.Key.tabbable <| noModalDialogShown model
+            [ Accessibility.Key.tabbable tabbable
             , class "relative"
             ]
-            [ Extras.Html.showIf (model.savingSettings == SavingInProgress) <|
+            [ Extras.Html.showIf (savingSettings == SavingInProgress) <|
                 div
                     [ class "absolute top-1/2 bottom-1/2 left-1/2 right-1/2" ]
                     [ Components.Spinner.view
                         [ Svg.Attributes.class "w-12 h-12" ]
-                        (model.savingSettings == SavingInProgress)
+                        (savingSettings == SavingInProgress)
                     ]
             , summary
                 [ class "pb-1 text-lg leading-6 items-center font-medium text-gray-900 dark:text-gray-100 select-none" ]
@@ -1041,18 +1041,18 @@ viewSettings glossaryForUi model =
                 ]
             , div
                 [ class "space-y-8 py-4"
-                , Extras.HtmlAttribute.showIf (model.savingSettings == SavingInProgress) <|
+                , Extras.HtmlAttribute.showIf (savingSettings == SavingInProgress) <|
                     class "opacity-25"
                 ]
-                [ Extras.Html.showIf (model.common.editability == EditingWithIncludedBackend) <|
+                [ Extras.Html.showIf (editability == EditingWithIncludedBackend) <|
                     p
                         [ class "mt-3 max-w-xl" ]
                         [ text I18n.theseSettingsAreUpdatedInTheHtmlFile
                         ]
-                , Extras.Html.showIf (model.common.editability == EditingWithIncludedBackend) <|
-                    viewSelectInputSyntax model.common.enableMathSupport
-                , viewSelectCardWidth glossaryForUi model
-                , viewSelectDefaultTheme glossaryForUi model
+                , Extras.Html.showIf (editability == EditingWithIncludedBackend) <|
+                    viewSelectInputSyntax enableMathSupport
+                , viewSelectCardWidth glossaryForUi tabbable
+                , viewSelectDefaultTheme glossaryForUi tabbable
                 , Components.Button.toggle
                     (GlossaryForUi.enableExportMenu glossaryForUi)
                     ElementIds.showExportMenuLabel
@@ -1077,7 +1077,7 @@ viewSettings glossaryForUi model =
                         [ class "font-medium text-gray-900 dark:text-gray-300" ]
                         [ text I18n.showLastUpdatedDates ]
                     ]
-                , case model.savingSettings of
+                , case savingSettings of
                     SavingNotAttempted errorMessage ->
                         errorDiv <| I18n.failedToSave ++ " — " ++ errorMessage ++ "."
 
@@ -1263,13 +1263,13 @@ itemWithPreviousAndNextForId id indexedGlossaryItems =
 
 
 viewSingleItemModalDialog :
-    Model
-    -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
+    Maybe GlossaryItemId
+    -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, noModalDialogShown_ : Bool, enableLastUpdatedDates : Bool }
     -> Maybe Tag
     -> List ( GlossaryItemId, GlossaryItemForUi )
     -> Maybe GlossaryItemId
     -> Html Msg
-viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } tagBeingFilteredBy indexedGlossaryItems =
+viewSingleItemModalDialog itemWithFocus { enableMathSupport, editable, tabbable, enableLastUpdatedDates, noModalDialogShown_ } tagBeingFilteredBy indexedGlossaryItems =
     Maybe.map
         (\id ->
             let
@@ -1301,9 +1301,9 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
                             , editable = editable
                             , enableLastUpdatedDates = enableLastUpdatedDates
                             , shownAsSingle = True
-                            , noModalDialogShown_ = noModalDialogShown model
+                            , noModalDialogShown_ = noModalDialogShown_
                             }
-                            model.itemWithFocus
+                            itemWithFocus
                             tagBeingFilteredBy
                             itemWithPreviousAndNext
                         ]
@@ -1629,6 +1629,33 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
             Html.Keyed.node "dl"
                 []
                 (List.map viewIndexedItemKeyed otherIndexedGlossaryItems)
+        ]
+
+
+viewMenuForMobileAndStaticSidebarForDesktop :
+    MenuForMobileVisibility
+    -> { runningOnMacOs : Bool, enableMathSupport : Bool, tabbable : Bool }
+    -> Maybe TagId
+    -> GlossaryItemsForUi
+    -> Html Msg
+viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility { runningOnMacOs, enableMathSupport, tabbable } filterByTag items =
+    let
+        indexOfTerms : IndexOfTerms
+        indexOfTerms =
+            IndexOfTerms.fromGlossaryItems filterByTag items
+    in
+    div []
+        [ Html.Lazy.lazy4 viewMenuForMobile
+            menuForMobileVisibility
+            enableMathSupport
+            tabbable
+            indexOfTerms
+        , Html.Lazy.lazy2 viewStaticSidebarForDesktop
+            { runningOnMacOs = runningOnMacOs
+            , enableMathSupport = enableMathSupport
+            , tabbable = tabbable
+            }
+            indexOfTerms
         ]
 
 
@@ -2017,13 +2044,9 @@ viewSelectInputSyntax enableMathSupport =
         ]
 
 
-viewSelectCardWidth : GlossaryForUi -> Model -> Html Msg
-viewSelectCardWidth glossaryForUi model =
+viewSelectCardWidth : GlossaryForUi -> Bool -> Html Msg
+viewSelectCardWidth glossaryForUi tabbable =
     let
-        tabbable : Bool
-        tabbable =
-            noModalDialogShown model
-
         cardWidth : CardWidth
         cardWidth =
             GlossaryForUi.cardWidth glossaryForUi
@@ -2089,13 +2112,9 @@ viewSelectCardWidth glossaryForUi model =
         ]
 
 
-viewSelectDefaultTheme : GlossaryForUi -> Model -> Html Msg
-viewSelectDefaultTheme glossaryForUi model =
+viewSelectDefaultTheme : GlossaryForUi -> Bool -> Html Msg
+viewSelectDefaultTheme glossaryForUi tabbable =
     let
-        tabbable : Bool
-        tabbable =
-            noModalDialogShown model
-
         defaultTheme : Theme
         defaultTheme =
             GlossaryForUi.defaultTheme glossaryForUi
@@ -2481,10 +2500,6 @@ view model =
                 filterByTagWithDescription_ =
                     filterByTagWithDescription model
 
-                indexOfTerms : IndexOfTerms
-                indexOfTerms =
-                    IndexOfTerms.fromGlossaryItems filterByTag_ items
-
                 controlOrCommandK_ : Extras.HtmlEvents.KeyDownEvent
                 controlOrCommandK_ =
                     controlOrCommandK model.common.runningOnMacOs
@@ -2613,17 +2628,14 @@ view model =
                             )
                         )
                     ]
-                    [ Html.Lazy.lazy4 viewMenuForMobile
+                    [ Html.Lazy.lazy4 viewMenuForMobileAndStaticSidebarForDesktop
                         model.menuForMobileVisibility
-                        model.common.enableMathSupport
-                        noModalDialogShown_
-                        indexOfTerms
-                    , Html.Lazy.lazy2 viewStaticSidebarForDesktop
                         { runningOnMacOs = model.common.runningOnMacOs
                         , enableMathSupport = model.common.enableMathSupport
                         , tabbable = noModalDialogShown_
                         }
-                        indexOfTerms
+                        filterByTag_
+                        items
                     , div
                         [ class "hidden lg:block" ]
                         [ Html.Lazy.lazy viewBackToTopLink { staticSidebar = True, visibility = model.backToTopLinkVisibility } ]
@@ -2675,7 +2687,13 @@ view model =
                                     ]
                                 , viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
                                     |> Extras.Html.showIf (model.common.editability == ReadOnlyWithHelpForMakingChanges)
-                                , Extras.Html.showIf (Editability.editing model.common.editability) <| viewSettings glossaryForUi model
+                                , Extras.Html.showIf (Editability.editing model.common.editability) <|
+                                    viewSettings glossaryForUi
+                                        model.common.editability
+                                        model.savingSettings
+                                        { tabbable = noModalDialogShown model
+                                        , enableMathSupport = model.common.enableMathSupport
+                                        }
                                 , h1
                                     [ id ElementIds.title ]
                                     [ filterByTagWithDescription_
@@ -2798,10 +2816,11 @@ view model =
                                         model.confirmDeleteId
                                         model.deleting
                                     , viewSingleItemModalDialog
-                                        model
+                                        model.itemWithFocus
                                         { enableMathSupport = model.common.enableMathSupport
                                         , editable = Editability.editing model.common.editability
                                         , tabbable = noModalDialogShown_
+                                        , noModalDialogShown_ = noModalDialogShown_
                                         , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
                                         }
                                         filterByTag
