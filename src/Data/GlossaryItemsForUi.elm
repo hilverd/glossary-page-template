@@ -64,6 +64,7 @@ type GlossaryItemsForUi
         , itemIdsByTagId : TagIdDict (List GlossaryItemId)
         , itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm : Dict String GlossaryItemId
         , relatedItemIdsById : GlossaryItemIdDict (List GlossaryItemId)
+        , disambiguatedPreferredTermByItemId : GlossaryItemIdDict (Maybe DisambiguatedTerm)
         , orderedAlphabetically : List GlossaryItemId
         , orderedByMostMentionedFirst : List GlossaryItemId
         , orderedFocusedOn : Maybe ( GlossaryItemId, ( List GlossaryItemId, List GlossaryItemId ) )
@@ -82,6 +83,7 @@ empty =
         , itemIdsByTagId = TagIdDict.empty
         , itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm = Dict.empty
         , relatedItemIdsById = GlossaryItemIdDict.empty
+        , disambiguatedPreferredTermByItemId = GlossaryItemIdDict.empty
         , orderedAlphabetically = []
         , orderedByMostMentionedFirst = []
         , orderedFocusedOn = Nothing
@@ -140,35 +142,65 @@ fromList describedTags_ glossaryItemsForUi =
                                 )
                                 GlossaryItemIdDict.empty
 
-                    ( disambiguationTagIdByItemId, normalTagIdsByItemId ) =
+                    ( disambiguationTagIdByItemId, ( normalTagIdsByItemId, disambiguatedPreferredTermByItemId ) ) =
                         glossaryItemsForUi
                             |> List.foldl
-                                (\item ( disambiguationTagByItemId_, normalTagsByItemId_ ) ->
+                                (\item ( disambiguationTagByItemId_, ( normalTagsByItemId_, disambiguatedPreferredTermByItemId_ ) ) ->
                                     let
                                         id =
                                             GlossaryItemForUi.id item
+
+                                        maybePreferredTerm : Maybe Term
+                                        maybePreferredTerm =
+                                            itemById
+                                                |> GlossaryItemIdDict.get id
+                                                |> Maybe.map GlossaryItem.preferredTerm
+
+                                        disambiguationTag : Maybe Tag
+                                        disambiguationTag =
+                                            item
+                                                |> GlossaryItemForUi.disambiguationTag
+
+                                        disambiguationTagId : Maybe TagId
+                                        disambiguationTagId =
+                                            disambiguationTag
+                                                |> Maybe.andThen
+                                                    (\disambiguationTag_ ->
+                                                        Dict.get (Tag.raw disambiguationTag_) tagIdByRawTag
+                                                    )
+
+                                        disambiguatedPreferredTerm_ : Maybe DisambiguatedTerm
+                                        disambiguatedPreferredTerm_ =
+                                            maybePreferredTerm
+                                                |> Maybe.map
+                                                    (\preferredTerm_ ->
+                                                        disambiguationTag
+                                                            |> Maybe.map
+                                                                (\disambiguationTag_ ->
+                                                                    GlossaryItemForUi.disambiguatedTerm disambiguationTag_ preferredTerm_
+                                                                )
+                                                            |> Maybe.withDefault (DisambiguatedTerm.fromTerm preferredTerm_)
+                                                    )
                                     in
                                     ( GlossaryItemIdDict.insert id
-                                        (item
-                                            |> GlossaryItemForUi.disambiguationTag
-                                            |> Maybe.andThen
-                                                (\disambiguationTag ->
-                                                    Dict.get (Tag.raw disambiguationTag) tagIdByRawTag
-                                                )
-                                        )
+                                        disambiguationTagId
                                         disambiguationTagByItemId_
-                                    , GlossaryItemIdDict.insert id
-                                        (item
-                                            |> GlossaryItemForUi.normalTags
-                                            |> List.filterMap
-                                                (\tag ->
-                                                    Dict.get (Tag.raw tag) tagIdByRawTag
-                                                )
-                                        )
-                                        normalTagsByItemId_
+                                    , ( GlossaryItemIdDict.insert id
+                                            (item
+                                                |> GlossaryItemForUi.normalTags
+                                                |> List.filterMap
+                                                    (\tag ->
+                                                        Dict.get (Tag.raw tag) tagIdByRawTag
+                                                    )
+                                            )
+                                            normalTagsByItemId_
+                                      , GlossaryItemIdDict.insert id
+                                            disambiguatedPreferredTerm_
+                                            disambiguatedPreferredTermByItemId_
+                                      )
                                     )
                                 )
-                                ( GlossaryItemIdDict.empty, GlossaryItemIdDict.empty )
+                                ( GlossaryItemIdDict.empty, ( GlossaryItemIdDict.empty, GlossaryItemIdDict.empty ) )
 
                     itemIdsByTagId_ : TagIdDict (List GlossaryItemId)
                     itemIdsByTagId_ =
@@ -308,6 +340,7 @@ fromList describedTags_ glossaryItemsForUi =
                             , itemIdsByTagId = itemIdsByTagId_
                             , itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm = itemIdByFragmentIdentifierForRawDisambiguatedPreferredTerm1
                             , relatedItemIdsById = relatedItemIdsById
+                            , disambiguatedPreferredTermByItemId = disambiguatedPreferredTermByItemId
                             , orderedAlphabetically = orderedAlphabetically__
                             , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
                             , orderedFocusedOn = Nothing
@@ -517,42 +550,8 @@ tagDescriptionFromId tagId (GlossaryItemsForUi items) =
 -}
 disambiguatedPreferredTerm : GlossaryItemId -> GlossaryItemsForUi -> Maybe DisambiguatedTerm
 disambiguatedPreferredTerm itemId (GlossaryItemsForUi items) =
-    let
-        maybePreferredTerm : Maybe Term
-        maybePreferredTerm =
-            items.itemById
-                |> GlossaryItemIdDict.get itemId
-                |> Maybe.map GlossaryItem.preferredTerm
-
-        disambiguationTagId : Maybe TagId
-        disambiguationTagId =
-            items.disambiguationTagIdByItemId
-                |> GlossaryItemIdDict.get itemId
-                |> Maybe.andThen identity
-
-        disambiguationTag : Maybe Tag
-        disambiguationTag =
-            disambiguationTagId
-                |> Maybe.andThen
-                    (\disambiguationTagId_ ->
-                        let
-                            tagById : TagIdDict Tag
-                            tagById =
-                                GlossaryTags.tagById items.tags
-                        in
-                        TagIdDict.get disambiguationTagId_ tagById
-                    )
-    in
-    maybePreferredTerm
-        |> Maybe.map
-            (\preferredTerm_ ->
-                disambiguationTag
-                    |> Maybe.map
-                        (\disambiguationTag_ ->
-                            GlossaryItemForUi.disambiguatedTerm disambiguationTag_ preferredTerm_
-                        )
-                    |> Maybe.withDefault (DisambiguatedTerm.fromTerm preferredTerm_)
-            )
+    GlossaryItemIdDict.get itemId items.disambiguatedPreferredTermByItemId
+        |> Maybe.andThen identity
 
 
 {-| All the disambiguated preferred terms in these glossary items.
