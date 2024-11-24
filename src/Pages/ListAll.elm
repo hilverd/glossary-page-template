@@ -1634,11 +1634,13 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
 
 viewMenuForMobileAndStaticSidebarForDesktop :
     MenuForMobileVisibility
-    -> { runningOnMacOs : Bool, enableMathSupport : Bool, tabbable : Bool }
+    -> Bool
+    -> Bool
+    -> Bool
     -> Maybe TagId
     -> GlossaryItemsForUi
     -> Html Msg
-viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility { runningOnMacOs, enableMathSupport, tabbable } filterByTag items =
+viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility runningOnMacOs enableMathSupport tabbable filterByTag items =
     let
         indexOfTerms : IndexOfTerms
         indexOfTerms =
@@ -1650,11 +1652,10 @@ viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility { runningOnM
             enableMathSupport
             tabbable
             indexOfTerms
-        , Html.Lazy.lazy2 viewStaticSidebarForDesktop
-            { runningOnMacOs = runningOnMacOs
-            , enableMathSupport = enableMathSupport
-            , tabbable = tabbable
-            }
+        , Html.Lazy.lazy4 viewStaticSidebarForDesktop
+            runningOnMacOs
+            enableMathSupport
+            tabbable
             indexOfTerms
         ]
 
@@ -1737,8 +1738,8 @@ backToTopLinkVisibilityCounter backToTopLinkVisibility =
             counter
 
 
-viewBackToTopLink : { staticSidebar : Bool, visibility : BackToTopLinkVisibility } -> Html Msg
-viewBackToTopLink { staticSidebar, visibility } =
+viewBackToTopLink : Bool -> BackToTopLinkVisibility -> Html Msg
+viewBackToTopLink staticSidebar visibility =
     div
         [ class "z-50 fixed bottom-0 right-0 p-4 print:hidden"
         , class "hidden"
@@ -1864,8 +1865,8 @@ viewQuickSearchButtonAndLetterGrid { runningOnMacOs, staticSidebar, tabbable } i
         ]
 
 
-viewStaticSidebarForDesktop : { runningOnMacOs : Bool, enableMathSupport : Bool, tabbable : Bool } -> IndexOfTerms -> Html Msg
-viewStaticSidebarForDesktop { runningOnMacOs, enableMathSupport, tabbable } termIndex =
+viewStaticSidebarForDesktop : Bool -> Bool -> Bool -> IndexOfTerms -> Html Msg
+viewStaticSidebarForDesktop runningOnMacOs enableMathSupport tabbable termIndex =
     div
         [ class "hidden print:hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900"
         ]
@@ -2506,19 +2507,23 @@ viewAboutSection filterByTagWithDescription_ { enableMathSupport, noModalDialogS
 
 viewOrderItemsButtonsAndItemCards :
     Maybe DescribedTag
-    -> { enableMathSupport : Bool, noModalDialogShown_ : Bool }
+    -> Bool
+    -> Bool
     -> Editability
     -> QueryParameters
-    -> Maybe TagId
     -> Maybe GlossaryItemId
     -> Maybe RawTerm
     -> GlossaryForUi
     -> Html Msg
-viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters filterByTagId_ itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryForUi =
+viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport noModalDialogShown_ editability queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryForUi =
     let
         items : GlossaryItemsForUi
         items =
             GlossaryForUi.items glossaryForUi
+
+        filterByTagId_ : Maybe TagId
+        filterByTagId_ =
+            Maybe.map DescribedTag.id filterByTagWithDescription_
     in
     items
         |> (case QueryParameters.orderItemsBy queryParameters of
@@ -2547,7 +2552,7 @@ viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ { enableMathSuppor
                                     |> (\lhs -> ( lhs, [] ))
                                 )
            )
-        |> Html.Lazy.lazy7 viewCards
+        |> viewCards
             { enableMathSupport = enableMathSupport
             , enableOrderItemsButtons = GlossaryForUi.enableOrderItemsButtons glossaryForUi
             , editable = Editability.editing editability
@@ -2600,7 +2605,6 @@ viewMain :
     -> { enableMathSupport : Bool, noModalDialogShown_ : Bool }
     -> Editability
     -> QueryParameters
-    -> Maybe TagId
     -> Maybe Tag
     -> Maybe GlossaryItemId
     -> Maybe RawTerm
@@ -2611,7 +2615,7 @@ viewMain :
     -> List ( GlossaryItemId, GlossaryItemForUi )
     -> GlossaryForUi
     -> Html Msg
-viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters filterByTagId_ filterByTag itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn searchDialog confirmDeleteId layout deleting combinedIndexedGlossaryItems glossaryForUi =
+viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters filterByTag itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn searchDialog confirmDeleteId layout deleting combinedIndexedGlossaryItems glossaryForUi =
     Html.main_
         []
         [ viewAboutSection
@@ -2628,10 +2632,10 @@ viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } 
             ]
             [ Html.Lazy.lazy8 viewOrderItemsButtonsAndItemCards
                 filterByTagWithDescription_
-                { enableMathSupport = enableMathSupport, noModalDialogShown_ = noModalDialogShown_ }
+                enableMathSupport
+                noModalDialogShown_
                 editability
                 queryParameters
-                filterByTagId_
                 itemWithFocus
                 mostRecentRawTermForOrderingItemsFocusedOn
                 glossaryForUi
@@ -2799,20 +2803,19 @@ view model =
                             )
                         )
                     ]
-                    [ Html.Lazy.lazy4 viewMenuForMobileAndStaticSidebarForDesktop
+                    [ Html.Lazy.lazy6 viewMenuForMobileAndStaticSidebarForDesktop
                         model.menuForMobileVisibility
-                        { runningOnMacOs = model.common.runningOnMacOs
-                        , enableMathSupport = model.common.enableMathSupport
-                        , tabbable = noModalDialogShown_
-                        }
+                        model.common.runningOnMacOs
+                        model.common.enableMathSupport
+                        noModalDialogShown_
                         filterByTagId_
                         items
                     , div
                         [ class "hidden lg:block" ]
-                        [ Html.Lazy.lazy viewBackToTopLink { staticSidebar = True, visibility = model.backToTopLinkVisibility } ]
+                        [ Html.Lazy.lazy2 viewBackToTopLink True model.backToTopLinkVisibility ]
                     , div
                         [ class "lg:hidden" ]
-                        [ Html.Lazy.lazy viewBackToTopLink { staticSidebar = False, visibility = model.backToTopLinkVisibility } ]
+                        [ Html.Lazy.lazy2 viewBackToTopLink False model.backToTopLinkVisibility ]
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ Html.Lazy.lazy4 viewTopBar
@@ -2893,7 +2896,6 @@ view model =
                                 }
                                 model.common.editability
                                 model.common.queryParameters
-                                filterByTagId_
                                 (Maybe.map DescribedTag.tag filterByTagWithDescription_)
                                 model.itemWithFocus
                                 model.mostRecentRawTermForOrderingItemsFocusedOn
