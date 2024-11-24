@@ -1160,8 +1160,11 @@ viewTermIndexGroup enableMathSupport tabbable staticSidebar { label, entries } =
         , class "mt-6"
         ]
         [ h5
-            [ class "mb-8 lg:mb-3 font-semibold text-slate-700 dark:text-slate-300" ]
-            [ text label ]
+            [ class "mb-8 lg:mb-3 font-semibold" ]
+            [ span
+                [ class "inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-400/10 px-2 py-1 text-gray-600 dark:text-gray-400 ring-1 ring-inset ring-gray-500/10 dark:ring-gray-400/20" ]
+                [ text label ]
+            ]
         , ul
             [ class "space-y-6 lg:space-y-2 border-l border-slate-200 dark:border-slate-600" ]
             (List.concatMap (viewTermIndexItem enableMathSupport tabbable) entries)
