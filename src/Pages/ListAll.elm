@@ -1713,7 +1713,7 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport tabbable termIndex =
                 ]
                 [ nav
                     [ class "px-4 pt-1 pb-6" ]
-                    [ viewTermIndexFirstCharacterGrid False tabbable termIndex
+                    [ Html.Lazy.lazy3 viewTermIndexFirstCharacterGrid False tabbable termIndex
                     , Html.Lazy.lazy4 viewIndexOfTerms enableMathSupport tabbable False termIndex
                     ]
                 ]
@@ -2479,6 +2479,185 @@ controlOrCommandK runningOnMacOs =
         Extras.HtmlEvents.controlK
 
 
+viewAboutSection :
+    Maybe DescribedTag
+    -> { enableMathSupport : Bool, noModalDialogShown_ : Bool }
+    -> GlossaryForUi
+    -> Html Msg
+viewAboutSection filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } glossaryForUi =
+    filterByTagWithDescription_
+        |> Maybe.map
+            (DescribedTag.description
+                >> TagDescription.view
+                    { enableMathSupport = enableMathSupport
+                    , makeLinksTabbable = noModalDialogShown_
+                    }
+                    []
+            )
+        |> Maybe.withDefault
+            (glossaryForUi
+                |> GlossaryForUi.aboutSection
+                |> Components.AboutSection.view
+                    { enableMathSupport = enableMathSupport
+                    , modalDialogShown = not noModalDialogShown_
+                    }
+            )
+
+
+viewOrderItemsButtonsAndItemCards :
+    Maybe DescribedTag
+    -> { enableMathSupport : Bool, noModalDialogShown_ : Bool }
+    -> Editability
+    -> QueryParameters
+    -> Maybe TagId
+    -> Maybe GlossaryItemId
+    -> Maybe RawTerm
+    -> GlossaryForUi
+    -> Html Msg
+viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters filterByTagId_ itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryForUi =
+    let
+        items : GlossaryItemsForUi
+        items =
+            GlossaryForUi.items glossaryForUi
+    in
+    items
+        |> (case QueryParameters.orderItemsBy queryParameters of
+                Alphabetically ->
+                    GlossaryItemsForUi.orderedAlphabetically filterByTagId_
+                        >> (\lhs -> ( lhs, [] ))
+
+                MostMentionedFirst ->
+                    GlossaryItemsForUi.orderedByMostMentionedFirst filterByTagId_
+                        >> (\lhs -> ( lhs, [] ))
+
+                FocusedOn termId ->
+                    let
+                        itemId : Maybe GlossaryItemId
+                        itemId =
+                            GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm termId items
+                    in
+                    case itemId of
+                        Just itemId_ ->
+                            GlossaryItemsForUi.orderedFocusedOn filterByTagId_ itemId_
+
+                        Nothing ->
+                            always
+                                (items
+                                    |> GlossaryItemsForUi.orderedAlphabetically filterByTagId_
+                                    |> (\lhs -> ( lhs, [] ))
+                                )
+           )
+        |> Html.Lazy.lazy7 viewCards
+            { enableMathSupport = enableMathSupport
+            , enableOrderItemsButtons = GlossaryForUi.enableOrderItemsButtons glossaryForUi
+            , editable = Editability.editing editability
+            , tabbable = noModalDialogShown_
+            , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
+            , noModalDialogShown_ = noModalDialogShown_
+            , editing = Editability.editing editability
+            }
+            { filterByTagId_ = filterByTagId_
+            , tags = GlossaryItemsForUi.tags items
+            , filterByDescribedTag_ = filterByTagWithDescription_
+            }
+            queryParameters
+            itemWithFocus
+            mostRecentRawTermForOrderingItemsFocusedOn
+            items
+
+
+viewSearchDialog : Maybe DescribedTag -> Bool -> SearchDialog -> Html Msg
+viewSearchDialog filterByTagWithDescription_ enableMathSupport searchDialog =
+    Components.SearchDialog.view
+        (PageMsg.Internal << SearchDialogMsg)
+        searchDialog.model
+        searchDialog.term
+        (filterByTagWithDescription_
+            |> Maybe.map
+                (\describedTag ->
+                    span
+                        [ class "inline-flex flex-wrap items-center" ]
+                        [ Icons.exclamation
+                            [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-800 mr-1.5"
+                            , Accessibility.Aria.hidden True
+                            ]
+                        , span
+                            [ class "mr-1" ]
+                            [ text I18n.filteringByTag ]
+                        , span []
+                            [ text " \""
+                            , Tag.view enableMathSupport [] <| DescribedTag.tag describedTag
+                            , text "\""
+                            ]
+                        ]
+                )
+        )
+        searchDialog.results
+
+
+viewMain :
+    Maybe DescribedTag
+    -> { enableMathSupport : Bool, noModalDialogShown_ : Bool }
+    -> Editability
+    -> QueryParameters
+    -> Maybe TagId
+    -> Maybe Tag
+    -> Maybe GlossaryItemId
+    -> Maybe RawTerm
+    -> SearchDialog
+    -> Maybe GlossaryItemId
+    -> Layout
+    -> Saving
+    -> List ( GlossaryItemId, GlossaryItemForUi )
+    -> GlossaryForUi
+    -> Html Msg
+viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters filterByTagId_ filterByTag itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn searchDialog confirmDeleteId layout deleting combinedIndexedGlossaryItems glossaryForUi =
+    Html.main_
+        []
+        [ viewAboutSection
+            filterByTagWithDescription_
+            { enableMathSupport = enableMathSupport, noModalDialogShown_ = noModalDialogShown_ }
+            glossaryForUi
+        , Extras.Html.showIf (Editability.editing editability && filterByTagWithDescription_ == Nothing) <|
+            div
+                [ class "flex-none mt-2" ]
+                [ viewEditTitleAndAboutButton noModalDialogShown_ ]
+        , Html.article
+            [ Html.Attributes.id ElementIds.items
+            , Extras.HtmlAttribute.showIf (GlossaryForUi.enableOrderItemsButtons glossaryForUi) <| class "mt-3 pt-2 border-t border-gray-300 dark:border-gray-700"
+            ]
+            [ Html.Lazy.lazy8 viewOrderItemsButtonsAndItemCards
+                filterByTagWithDescription_
+                { enableMathSupport = enableMathSupport, noModalDialogShown_ = noModalDialogShown_ }
+                editability
+                queryParameters
+                filterByTagId_
+                itemWithFocus
+                mostRecentRawTermForOrderingItemsFocusedOn
+                glossaryForUi
+            , Html.Lazy.lazy3 viewSearchDialog filterByTagWithDescription_ enableMathSupport searchDialog
+            , Html.Lazy.lazy3 viewConfirmDeleteModal editability confirmDeleteId deleting
+            , Html.Lazy.lazy5 viewSingleItemModalDialog
+                itemWithFocus
+                { enableMathSupport = enableMathSupport
+                , editable = Editability.editing editability
+                , tabbable = noModalDialogShown_
+                , noModalDialogShown_ = noModalDialogShown_
+                , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
+                }
+                filterByTag
+                combinedIndexedGlossaryItems
+              <|
+                case ( layout, itemWithFocus ) of
+                    ( ShowSingleItem, Just id ) ->
+                        Just id
+
+                    _ ->
+                        Nothing
+            ]
+        ]
+
+
 view : Model -> Document Msg
 view model =
     case model.common.glossaryForUi of
@@ -2492,8 +2671,8 @@ view model =
                 items =
                     GlossaryForUi.items glossaryForUi
 
-                filterByTag_ : Maybe TagId
-                filterByTag_ =
+                filterByTagId_ : Maybe TagId
+                filterByTagId_ =
                     filterByTagId model
 
                 filterByTagWithDescription_ : Maybe DescribedTag
@@ -2504,19 +2683,15 @@ view model =
                 controlOrCommandK_ =
                     controlOrCommandK model.common.runningOnMacOs
 
-                filterByTag : Maybe Tag
-                filterByTag =
-                    filterByTagWithDescription_ |> Maybe.map DescribedTag.tag
-
                 ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
                     items
                         |> (case QueryParameters.orderItemsBy model.common.queryParameters of
                                 Alphabetically ->
-                                    GlossaryItemsForUi.orderedAlphabetically filterByTag_
+                                    GlossaryItemsForUi.orderedAlphabetically filterByTagId_
                                         >> (\lhs -> ( lhs, [] ))
 
                                 MostMentionedFirst ->
-                                    GlossaryItemsForUi.orderedByMostMentionedFirst filterByTag_
+                                    GlossaryItemsForUi.orderedByMostMentionedFirst filterByTagId_
                                         >> (\lhs -> ( lhs, [] ))
 
                                 FocusedOn termId ->
@@ -2527,19 +2702,15 @@ view model =
                                     in
                                     case itemId of
                                         Just itemId_ ->
-                                            GlossaryItemsForUi.orderedFocusedOn filterByTag_ itemId_
+                                            GlossaryItemsForUi.orderedFocusedOn filterByTagId_ itemId_
 
                                         Nothing ->
                                             always
                                                 (items
-                                                    |> GlossaryItemsForUi.orderedAlphabetically filterByTag_
+                                                    |> GlossaryItemsForUi.orderedAlphabetically filterByTagId_
                                                     |> (\lhs -> ( lhs, [] ))
                                                 )
                            )
-
-                combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForUi )
-                combinedIndexedGlossaryItems =
-                    List.append indexedGlossaryItems otherIndexedGlossaryItems
             in
             { title = pageTitle model glossaryForUi
             , body =
@@ -2585,16 +2756,16 @@ view model =
                                                     items
                                                         |> (case QueryParameters.orderItemsBy model.common.queryParameters of
                                                                 Alphabetically ->
-                                                                    GlossaryItemsForUi.orderedAlphabetically filterByTag_
+                                                                    GlossaryItemsForUi.orderedAlphabetically filterByTagId_
 
                                                                 MostMentionedFirst ->
-                                                                    GlossaryItemsForUi.orderedByMostMentionedFirst filterByTag_
+                                                                    GlossaryItemsForUi.orderedByMostMentionedFirst filterByTagId_
 
                                                                 FocusedOn termId ->
                                                                     \items_ ->
                                                                         GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm termId items_
                                                                             |> Maybe.map
-                                                                                (\itemId -> GlossaryItemsForUi.orderedFocusedOn filterByTag_ itemId items_)
+                                                                                (\itemId -> GlossaryItemsForUi.orderedFocusedOn filterByTagId_ itemId items_)
                                                                             |> Maybe.withDefault ( [], [] )
                                                                             |> (\( lhs, rhs ) -> List.append lhs rhs)
                                                            )
@@ -2634,7 +2805,7 @@ view model =
                         , enableMathSupport = model.common.enableMathSupport
                         , tabbable = noModalDialogShown_
                         }
-                        filterByTag_
+                        filterByTagId_
                         items
                     , div
                         [ class "hidden lg:block" ]
@@ -2715,125 +2886,23 @@ view model =
                                         [ glossaryForUi |> GlossaryForUi.title |> GlossaryTitle.view model.common.enableMathSupport [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
                                         ]
                                 ]
-                            , Html.main_
-                                []
-                                [ filterByTagWithDescription_
-                                    |> Maybe.map
-                                        (DescribedTag.description
-                                            >> TagDescription.view
-                                                { enableMathSupport = model.common.enableMathSupport
-                                                , makeLinksTabbable = noModalDialogShown_
-                                                }
-                                                []
-                                        )
-                                    |> Maybe.withDefault
-                                        (glossaryForUi
-                                            |> GlossaryForUi.aboutSection
-                                            |> Components.AboutSection.view
-                                                { enableMathSupport = model.common.enableMathSupport
-                                                , modalDialogShown = not noModalDialogShown_
-                                                }
-                                        )
-                                , Extras.Html.showIf (Editability.editing model.common.editability && filterByTagWithDescription_ == Nothing) <|
-                                    div
-                                        [ class "flex-none mt-2" ]
-                                        [ viewEditTitleAndAboutButton noModalDialogShown_ ]
-                                , Html.article
-                                    [ Html.Attributes.id ElementIds.items
-                                    , Extras.HtmlAttribute.showIf (GlossaryForUi.enableOrderItemsButtons glossaryForUi) <| class "mt-3 pt-2 border-t border-gray-300 dark:border-gray-700"
-                                    ]
-                                    [ items
-                                        |> (case QueryParameters.orderItemsBy model.common.queryParameters of
-                                                Alphabetically ->
-                                                    GlossaryItemsForUi.orderedAlphabetically filterByTag_
-                                                        >> (\lhs -> ( lhs, [] ))
-
-                                                MostMentionedFirst ->
-                                                    GlossaryItemsForUi.orderedByMostMentionedFirst filterByTag_
-                                                        >> (\lhs -> ( lhs, [] ))
-
-                                                FocusedOn termId ->
-                                                    let
-                                                        itemId : Maybe GlossaryItemId
-                                                        itemId =
-                                                            GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm termId items
-                                                    in
-                                                    case itemId of
-                                                        Just itemId_ ->
-                                                            GlossaryItemsForUi.orderedFocusedOn filterByTag_ itemId_
-
-                                                        Nothing ->
-                                                            always
-                                                                (items
-                                                                    |> GlossaryItemsForUi.orderedAlphabetically filterByTag_
-                                                                    |> (\lhs -> ( lhs, [] ))
-                                                                )
-                                           )
-                                        |> Html.Lazy.lazy7 viewCards
-                                            { enableMathSupport = model.common.enableMathSupport
-                                            , enableOrderItemsButtons = GlossaryForUi.enableOrderItemsButtons glossaryForUi
-                                            , editable = Editability.editing model.common.editability
-                                            , tabbable = noModalDialogShown_
-                                            , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
-                                            , noModalDialogShown_ = noModalDialogShown model
-                                            , editing = Editability.editing model.common.editability
-                                            }
-                                            { filterByTagId_ = filterByTagId model
-                                            , tags = GlossaryItemsForUi.tags items
-                                            , filterByDescribedTag_ = filterByTagWithDescription_
-                                            }
-                                            model.common.queryParameters
-                                            model.itemWithFocus
-                                            model.mostRecentRawTermForOrderingItemsFocusedOn
-                                            items
-                                    , Html.Lazy.lazy5 Components.SearchDialog.view
-                                        (PageMsg.Internal << SearchDialogMsg)
-                                        model.searchDialog.model
-                                        model.searchDialog.term
-                                        (filterByTagWithDescription_
-                                            |> Maybe.map
-                                                (\describedTag ->
-                                                    span
-                                                        [ class "inline-flex flex-wrap items-center" ]
-                                                        [ Icons.exclamation
-                                                            [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-800 mr-1.5"
-                                                            , Accessibility.Aria.hidden True
-                                                            ]
-                                                        , span
-                                                            [ class "mr-1" ]
-                                                            [ text I18n.filteringByTag ]
-                                                        , span []
-                                                            [ text " \""
-                                                            , Tag.view model.common.enableMathSupport [] <| DescribedTag.tag describedTag
-                                                            , text "\""
-                                                            ]
-                                                        ]
-                                                )
-                                        )
-                                        model.searchDialog.results
-                                    , viewConfirmDeleteModal
-                                        model.common.editability
-                                        model.confirmDeleteId
-                                        model.deleting
-                                    , viewSingleItemModalDialog
-                                        model.itemWithFocus
-                                        { enableMathSupport = model.common.enableMathSupport
-                                        , editable = Editability.editing model.common.editability
-                                        , tabbable = noModalDialogShown_
-                                        , noModalDialogShown_ = noModalDialogShown_
-                                        , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
-                                        }
-                                        filterByTag
-                                        combinedIndexedGlossaryItems
-                                      <|
-                                        case ( model.layout, model.itemWithFocus ) of
-                                            ( ShowSingleItem, Just id ) ->
-                                                Just id
-
-                                            _ ->
-                                                Nothing
-                                    ]
-                                ]
+                            , viewMain
+                                filterByTagWithDescription_
+                                { enableMathSupport = model.common.enableMathSupport
+                                , noModalDialogShown_ = noModalDialogShown_
+                                }
+                                model.common.editability
+                                model.common.queryParameters
+                                filterByTagId_
+                                (Maybe.map DescribedTag.tag filterByTagWithDescription_)
+                                model.itemWithFocus
+                                model.mostRecentRawTermForOrderingItemsFocusedOn
+                                model.searchDialog
+                                model.confirmDeleteId
+                                model.layout
+                                model.deleting
+                                (List.append indexedGlossaryItems otherIndexedGlossaryItems)
+                                glossaryForUi
                             , Html.footer
                                 []
                                 [ div
