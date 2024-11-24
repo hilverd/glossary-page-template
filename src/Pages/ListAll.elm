@@ -51,7 +51,7 @@ import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
-import Data.GlossaryItemId exposing (GlossaryItemId)
+import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.GlossaryTitle as GlossaryTitle
@@ -1541,8 +1541,8 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
                 _ ->
                     Nothing
 
-        viewIndexedItem : ( GlossaryItemId, GlossaryItemForUi ) -> Html Msg
-        viewIndexedItem ( _, item ) =
+        viewIndexedItem : GlossaryItemForUi -> Html Msg
+        viewIndexedItem item =
             viewGlossaryItem
                 { enableMathSupport = enableMathSupport
                 , tabbable = tabbable
@@ -1556,9 +1556,9 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
                 { previous = Nothing, item = Just item, next = Nothing }
 
         viewIndexedItemKeyed : ( GlossaryItemId, GlossaryItemForUi ) -> ( String, Html Msg )
-        viewIndexedItemKeyed (( _, item ) as indexedItem) =
-            ( GlossaryItemForUi.disambiguatedPreferredTermIdString item
-            , Html.Lazy.lazy viewIndexedItem indexedItem
+        viewIndexedItemKeyed ( itemId, item ) =
+            ( GlossaryItemId.toString itemId
+            , Html.Lazy.lazy viewIndexedItem item
             )
 
         totalNumberOfItems : Int
