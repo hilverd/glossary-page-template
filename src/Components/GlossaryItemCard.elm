@@ -67,14 +67,13 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                 tags =
                     GlossaryItemForUi.allTags glossaryItem
 
-                itemHasSomeDefinitions : Bool
-                itemHasSomeDefinitions =
+                itemHasADefinition : Bool
+                itemHasADefinition =
                     GlossaryItemForUi.definition glossaryItem /= Nothing
 
-                definitions =
+                definition : Maybe Definition
+                definition =
                     GlossaryItemForUi.definition glossaryItem
-                        |> Maybe.map List.singleton
-                        |> Maybe.withDefault []
 
                 relatedTerms =
                     GlossaryItemForUi.relatedPreferredTerms glossaryItem
@@ -119,24 +118,25 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                                 else
                                     []
                                )
-                            ++ viewTags
-                                { enableMathSupport = enableMathSupport
-                                , onClickTag = Nothing
-                                , tabbable = False
-                                }
-                                tags
-                            :: List.map
-                                (viewGlossaryItemDefinition
+                            ++ [ viewTags
                                     { enableMathSupport = enableMathSupport
-                                    , tabbable = makeLinksTabbable
+                                    , onClickTag = Nothing
+                                    , tabbable = False
                                     }
-                                )
-                                definitions
+                                    tags
+                               , definition
+                                    |> Extras.Html.showMaybe
+                                        (viewGlossaryItemDefinition
+                                            { enableMathSupport = enableMathSupport
+                                            , tabbable = makeLinksTabbable
+                                            }
+                                        )
+                               ]
                             ++ viewGlossaryItemRelatedTerms
                                 enableMathSupport
                                 True
                                 tabbable
-                                itemHasSomeDefinitions
+                                itemHasADefinition
                                 Nothing
                                 relatedTerms
                         )
@@ -235,20 +235,21 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                                                 else
                                                     []
                                                )
-                                            ++ viewTags
-                                                { enableMathSupport = enableMathSupport
-                                                , onClickTag = Just onClickTag
-                                                , tabbable = tabbable
-                                                }
-                                                tagsNotBeingFilteredBy
-                                            :: List.map
-                                                (viewGlossaryItemDefinition
+                                            ++ [ viewTags
                                                     { enableMathSupport = enableMathSupport
-                                                    , tabbable = makeLinksTabbable
+                                                    , onClickTag = Just onClickTag
+                                                    , tabbable = tabbable
                                                     }
-                                                )
-                                                definitions
-                                            ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasSomeDefinitions Nothing relatedTerms
+                                                    tagsNotBeingFilteredBy
+                                               , definition
+                                                    |> Extras.Html.showMaybe
+                                                        (viewGlossaryItemDefinition
+                                                            { enableMathSupport = enableMathSupport
+                                                            , tabbable = makeLinksTabbable
+                                                            }
+                                                        )
+                                               ]
+                                            ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasADefinition Nothing relatedTerms
                                         )
                                     ]
                                 , div
@@ -341,24 +342,25 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                                                 else
                                                     []
                                                )
-                                            ++ viewTags
-                                                { enableMathSupport = enableMathSupport
-                                                , onClickTag = Just onClickTag
-                                                , tabbable = tabbable
-                                                }
-                                                tagsNotBeingFilteredBy
-                                            :: List.map
-                                                (viewGlossaryItemDefinition
+                                            ++ [ viewTags
                                                     { enableMathSupport = enableMathSupport
-                                                    , tabbable = makeLinksTabbable
+                                                    , onClickTag = Just onClickTag
+                                                    , tabbable = tabbable
                                                     }
-                                                )
-                                                definitions
+                                                    tagsNotBeingFilteredBy
+                                               , definition
+                                                    |> Extras.Html.showMaybe
+                                                        (viewGlossaryItemDefinition
+                                                            { enableMathSupport = enableMathSupport
+                                                            , tabbable = makeLinksTabbable
+                                                            }
+                                                        )
+                                               ]
                                             ++ viewGlossaryItemRelatedTerms
                                                 enableMathSupport
                                                 False
                                                 tabbable
-                                                itemHasSomeDefinitions
+                                                itemHasADefinition
                                                 Nothing
                                                 relatedTerms
                                         )
@@ -423,10 +425,9 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                         |> GlossaryItemForUi.allTags
                         |> List.filter (Just >> (/=) tagBeingFilteredBy)
 
-                definitions =
+                definition : Maybe Definition
+                definition =
                     GlossaryItemForUi.definition glossaryItem
-                        |> Maybe.map List.singleton
-                        |> Maybe.withDefault []
 
                 relatedTerms =
                     GlossaryItemForUi.relatedPreferredTerms glossaryItem
@@ -531,19 +532,20 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                       else
                         []
                      )
-                        ++ viewTags
-                            { enableMathSupport = enableMathSupport
-                            , onClickTag = Nothing
-                            , tabbable = False
-                            }
-                            tagsNotBeingFilteredBy
-                        :: List.map
-                            (viewGlossaryItemDefinition
+                        ++ [ viewTags
                                 { enableMathSupport = enableMathSupport
-                                , tabbable = True
+                                , onClickTag = Nothing
+                                , tabbable = False
                                 }
-                            )
-                            definitions
+                                tagsNotBeingFilteredBy
+                           , Extras.Html.showMaybe
+                                (viewGlossaryItemDefinition
+                                    { enableMathSupport = enableMathSupport
+                                    , tabbable = True
+                                    }
+                                )
+                                definition
+                           ]
                         ++ viewGlossaryItemRelatedTerms
                             enableMathSupport
                             False
@@ -646,7 +648,7 @@ viewGlossaryItemDefinition { enableMathSupport, tabbable } definition =
 
 
 viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Bool -> Maybe (Term -> msg) -> List DisambiguatedTerm -> List (Html msg)
-viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDefinitions onClick relatedTerms =
+viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasADefinition onClick relatedTerms =
     if List.isEmpty relatedTerms then
         []
 
@@ -654,7 +656,7 @@ viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasSomeDefin
         [ Html.dd
             [ class "related-terms" ]
             (text
-                (if itemHasSomeDefinitions then
+                (if itemHasADefinition then
                     I18n.seeAlso ++ ": "
 
                  else
