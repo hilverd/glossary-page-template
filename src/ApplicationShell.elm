@@ -369,7 +369,14 @@ update msg model =
                                 , itemWithFocus = itemWithFocus
                             }
                     in
-                    ( { model | page = ListAll listAllModel1 }, Cmd.none )
+                    ( if listAllModel == listAllModel1 then
+                        -- Avoid constructing a new model as that might mess up Html.Lazy calls
+                        model
+
+                      else
+                        { model | page = ListAll listAllModel1 }
+                    , Cmd.none
+                    )
 
                 _ ->
                     ( model, Cmd.none )
