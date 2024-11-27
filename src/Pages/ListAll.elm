@@ -1200,13 +1200,12 @@ viewGlossaryItem :
     , editable : Bool
     , enableLastUpdatedDates : Bool
     , shownAsSingle : Bool
-    , noModalDialogShown_ : Bool
     }
     -> Maybe GlossaryItemId
     -> Maybe Tag
     -> GlossaryItemWithPreviousAndNext
     -> Html Msg
-viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle, noModalDialogShown_ } itemWithFocus tagBeingFilteredBy itemWithPreviousAndNext =
+viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle } itemWithFocus tagBeingFilteredBy itemWithPreviousAndNext =
     Extras.Html.showMaybe
         (\item ->
             Components.GlossaryItemCard.view
@@ -1224,12 +1223,7 @@ viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates
                     }
                 )
                 tagBeingFilteredBy
-                (if noModalDialogShown_ then
-                    itemWithFocus
-
-                 else
-                    Nothing
-                )
+                itemWithFocus
                 itemWithPreviousAndNext
         )
         itemWithPreviousAndNext.item
@@ -1267,12 +1261,12 @@ itemWithPreviousAndNextForId id indexedGlossaryItems =
 
 viewSingleItemModalDialog :
     Maybe GlossaryItemId
-    -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, noModalDialogShown_ : Bool, enableLastUpdatedDates : Bool }
+    -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
     -> Maybe Tag
     -> List ( GlossaryItemId, GlossaryItemForUi )
     -> Maybe GlossaryItemId
     -> Html Msg
-viewSingleItemModalDialog itemWithFocus { enableMathSupport, editable, tabbable, enableLastUpdatedDates, noModalDialogShown_ } tagBeingFilteredBy indexedGlossaryItems =
+viewSingleItemModalDialog itemWithFocus { enableMathSupport, editable, tabbable, enableLastUpdatedDates } tagBeingFilteredBy indexedGlossaryItems =
     Maybe.map
         (\id ->
             let
@@ -1304,7 +1298,6 @@ viewSingleItemModalDialog itemWithFocus { enableMathSupport, editable, tabbable,
                             , editable = editable
                             , enableLastUpdatedDates = enableLastUpdatedDates
                             , shownAsSingle = True
-                            , noModalDialogShown_ = noModalDialogShown_
                             }
                             itemWithFocus
                             tagBeingFilteredBy
@@ -1505,7 +1498,6 @@ viewCards :
     , editable : Bool
     , tabbable : Bool
     , enableLastUpdatedDates : Bool
-    , noModalDialogShown_ : Bool
     , editing : Bool
     }
     ->
@@ -1519,7 +1511,7 @@ viewCards :
     -> GlossaryItemsForUi
     -> ( List ( GlossaryItemId, GlossaryItemForUi ), List ( GlossaryItemId, GlossaryItemForUi ) )
     -> Html Msg
-viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates, noModalDialogShown_, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
         filterByTag : Maybe Tag
         filterByTag =
@@ -1552,7 +1544,6 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
                 , editable = editable
                 , enableLastUpdatedDates = enableLastUpdatedDates
                 , shownAsSingle = False
-                , noModalDialogShown_ = noModalDialogShown_
                 }
                 itemWithFocus
                 filterByTag
@@ -1572,7 +1563,8 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
         recommendedMaximumNumberOfItems =
             500
     in
-    div []
+    div
+        []
         [ div
             [ class "mb-4" ]
             [ Extras.Html.showMaybe
@@ -1612,7 +1604,7 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
           <|
             viewOrderItemsBy
                 totalNumberOfItems
-                { enableMathSupport = enableMathSupport, tabbable = noModalDialogShown_ }
+                { enableMathSupport = enableMathSupport, tabbable = tabbable }
                 disambiguatedPreferredTermsWithDefinitions
                 orderItemsFocusedOnTerm
                 queryParameters
@@ -2561,7 +2553,6 @@ viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport 
             , editable = Editability.editing editability
             , tabbable = noModalDialogShown_
             , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
-            , noModalDialogShown_ = noModalDialogShown_
             , editing = Editability.editing editability
             }
             { filterByTagId_ = filterByTagId_
@@ -2649,7 +2640,6 @@ viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } 
                 { enableMathSupport = enableMathSupport
                 , editable = Editability.editing editability
                 , tabbable = noModalDialogShown_
-                , noModalDialogShown_ = noModalDialogShown_
                 , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
                 }
                 filterByTag
