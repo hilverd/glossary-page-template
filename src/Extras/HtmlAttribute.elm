@@ -1,4 +1,4 @@
-module Extras.HtmlAttribute exposing (fromBool, showIf, showMaybe)
+module Extras.HtmlAttribute exposing (fromBool, inert, showIf, showMaybe)
 
 import Html
 import Html.Attributes
@@ -33,3 +33,8 @@ fromBool name bool =
 
         else
             "false"
+
+
+inert : Html.Attribute msg
+inert =
+    Html.Attributes.attribute "inert" "inert"
