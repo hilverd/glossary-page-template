@@ -575,9 +575,7 @@ view model =
                                         title1
                                     ]
                                 , Components.AboutSection.view
-                                    { enableMathSupport = model.common.enableMathSupport
-                                    , modalDialogShown = False
-                                    }
+                                    { enableMathSupport = model.common.enableMathSupport }
                                     aboutSection
                                 ]
                             ]

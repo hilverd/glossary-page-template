@@ -72,8 +72,8 @@ markdown (MarkdownAboutParagraph fragment) =
     --> expected
 
 -}
-view : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> AboutParagraph -> Html msg
-view { enableMathSupport, makeLinksTabbable } (MarkdownAboutParagraph fragment) =
+view : { enableMathSupport : Bool } -> AboutParagraph -> Html msg
+view { enableMathSupport } (MarkdownAboutParagraph fragment) =
     let
         parsed : Result String (List Block)
         parsed =
@@ -84,9 +84,7 @@ view { enableMathSupport, makeLinksTabbable } (MarkdownAboutParagraph fragment) 
             case
                 Renderer.render
                     (MarkdownRenderers.htmlMsgRenderer
-                        { enableMathSupport = enableMathSupport
-                        , makeLinksTabbable = makeLinksTabbable
-                        }
+                        { enableMathSupport = enableMathSupport }
                     )
                     blocks
             of

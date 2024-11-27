@@ -60,8 +60,7 @@ viewAnchorTag tabbable href target style renderedChildren =
                 |> (==) (Just False)
     in
     Html.a
-        [ Accessibility.Key.tabbable tabbable
-        , Extras.HtmlAttribute.showMaybe Attr.href href
+        [ Extras.HtmlAttribute.showMaybe Attr.href href
         , Extras.HtmlAttribute.showMaybe Attr.target target
         , Extras.HtmlAttribute.showIf (isAbsoluteUrl && target == Nothing) <| Attr.target "_blank"
         , Extras.HtmlAttribute.showIf (isAbsoluteUrl && target == Nothing) <| Attr.rel "noopener noreferrer"
@@ -72,8 +71,8 @@ viewAnchorTag tabbable href target style renderedChildren =
 
 {-| Render Markdown to HTML.
 -}
-htmlMsgRenderer : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> Renderer (Html msg)
-htmlMsgRenderer { enableMathSupport, makeLinksTabbable } =
+htmlMsgRenderer : { enableMathSupport : Bool } -> Renderer (Html msg)
+htmlMsgRenderer { enableMathSupport } =
     let
         renderer0 : Renderer (Html msg)
         renderer0 =
@@ -84,7 +83,7 @@ htmlMsgRenderer { enableMathSupport, makeLinksTabbable } =
         , blockQuote = Html.blockquote [ class "max-w-prose print:max-w-full" ]
         , html =
             Markdown.Html.oneOf
-                [ anchorTagRenderer makeLinksTabbable
+                [ anchorTagRenderer True
                 , imgTagRenderer
                 ]
         , codeSpan =
@@ -110,7 +109,6 @@ htmlMsgRenderer { enableMathSupport, makeLinksTabbable } =
                         Html.a
                             [ Attr.href link.destination
                             , Attr.title title
-                            , Accessibility.Key.tabbable makeLinksTabbable
                             , Extras.HtmlAttribute.showIf isAbsoluteUrl <| Attr.target "_blank"
                             , Extras.HtmlAttribute.showIf isAbsoluteUrl <| Attr.rel "noopener noreferrer"
                             ]
@@ -119,7 +117,6 @@ htmlMsgRenderer { enableMathSupport, makeLinksTabbable } =
                     Nothing ->
                         Html.a
                             [ Attr.href link.destination
-                            , Accessibility.Key.tabbable makeLinksTabbable
                             , Extras.HtmlAttribute.showIf isAbsoluteUrl <| Attr.target "_blank"
                             , Extras.HtmlAttribute.showIf isAbsoluteUrl <| Attr.rel "noopener noreferrer"
                             ]

@@ -93,8 +93,8 @@ markdown (MarkdownTagDescription { body }) =
     --> expected
 
 -}
-view : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> List (Attribute msg) -> TagDescription -> Html msg
-view { enableMathSupport, makeLinksTabbable } additionalAttributes (MarkdownTagDescription { body }) =
+view : { enableMathSupport : Bool } -> List (Attribute msg) -> TagDescription -> Html msg
+view { enableMathSupport } additionalAttributes (MarkdownTagDescription { body }) =
     let
         parsed : Result String (List Block)
         parsed =
@@ -105,9 +105,7 @@ view { enableMathSupport, makeLinksTabbable } additionalAttributes (MarkdownTagD
             case
                 Renderer.render
                     (MarkdownRenderers.htmlMsgRenderer
-                        { enableMathSupport = enableMathSupport
-                        , makeLinksTabbable = makeLinksTabbable
-                        }
+                        { enableMathSupport = enableMathSupport }
                     )
                     blocks
             of

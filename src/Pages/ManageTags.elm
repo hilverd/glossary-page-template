@@ -209,14 +209,13 @@ giveFocusToTagField index =
 
 viewEditTag :
     { enableMathSupport : Bool
-    , tabbable : Bool
     , showValidationErrors : Bool
     }
     -> Int
     -> TagField
     -> TagDescriptionField
     -> Html Msg
-viewEditTag { enableMathSupport, tabbable, showValidationErrors } index tagField tagDescriptionField =
+viewEditTag { enableMathSupport, showValidationErrors } index tagField tagDescriptionField =
     div
         [ class "flex items-start" ]
         [ span
@@ -320,9 +319,7 @@ viewEditTag { enableMathSupport, tabbable, showValidationErrors } index tagField
                 , div
                     []
                     [ TagDescription.view
-                        { enableMathSupport = enableMathSupport
-                        , makeLinksTabbable = tabbable
-                        }
+                        { enableMathSupport = enableMathSupport }
                         [ class "text-gray-700 dark:text-white" ]
                         (tagDescriptionField
                             |> TagDescriptionField.raw
@@ -385,7 +382,7 @@ viewEditTags :
     }
     -> Array Form.Row
     -> Html Msg
-viewEditTags { enableMathSupport, tabbable, showValidationErrors } tagsFormRowsArray =
+viewEditTags { enableMathSupport, showValidationErrors } tagsFormRowsArray =
     let
         tagsFormRows : List Row
         tagsFormRows =
@@ -402,14 +399,14 @@ viewEditTags { enableMathSupport, tabbable, showValidationErrors } tagsFormRowsA
                         case row of
                             Form.Existing { tagField, tagDescriptionField } ->
                                 Just <|
-                                    viewEditTag { enableMathSupport = enableMathSupport, tabbable = tabbable, showValidationErrors = showValidationErrors }
+                                    viewEditTag { enableMathSupport = enableMathSupport, showValidationErrors = showValidationErrors }
                                         index
                                         tagField
                                         tagDescriptionField
 
                             Form.New { tagField, tagDescriptionField } ->
                                 Just <|
-                                    viewEditTag { enableMathSupport = enableMathSupport, tabbable = tabbable, showValidationErrors = showValidationErrors }
+                                    viewEditTag { enableMathSupport = enableMathSupport, showValidationErrors = showValidationErrors }
                                         index
                                         tagField
                                         tagDescriptionField

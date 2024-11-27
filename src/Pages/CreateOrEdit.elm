@@ -1149,7 +1149,7 @@ view model =
                                             [ dl
                                                 [ style "display" "block" ]
                                                 [ Components.GlossaryItemCard.view
-                                                    { enableMathSupport = model.common.enableMathSupport, makeLinksTabbable = True, enableLastUpdatedDates = False }
+                                                    { enableMathSupport = model.common.enableMathSupport, enableLastUpdatedDates = False }
                                                     Components.GlossaryItemCard.Preview
                                                     Nothing
                                                     Nothing

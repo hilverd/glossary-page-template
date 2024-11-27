@@ -1196,7 +1196,6 @@ viewIndexOfTerms enableMathSupport tabbable staticSidebar indexOfTerms =
 
 viewGlossaryItem :
     { enableMathSupport : Bool
-    , tabbable : Bool
     , editable : Bool
     , enableLastUpdatedDates : Bool
     , shownAsSingle : Bool
@@ -1205,14 +1204,13 @@ viewGlossaryItem :
     -> Maybe Tag
     -> GlossaryItemWithPreviousAndNext
     -> Html Msg
-viewGlossaryItem { enableMathSupport, tabbable, editable, enableLastUpdatedDates, shownAsSingle } itemWithFocus tagBeingFilteredBy itemWithPreviousAndNext =
+viewGlossaryItem { enableMathSupport, editable, enableLastUpdatedDates, shownAsSingle } itemWithFocus tagBeingFilteredBy itemWithPreviousAndNext =
     Extras.Html.showMaybe
         (\item ->
             Components.GlossaryItemCard.view
-                { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable, enableLastUpdatedDates = enableLastUpdatedDates }
+                { enableMathSupport = enableMathSupport, enableLastUpdatedDates = enableLastUpdatedDates }
                 (Components.GlossaryItemCard.Normal
-                    { tabbable = tabbable
-                    , onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForUi.id item
+                    { onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForUi.id item
                     , onClickEdit = PageMsg.NavigateToCreateOrEdit <| Just <| GlossaryItemForUi.id item
                     , onClickDelete = PageMsg.Internal <| ConfirmDelete <| GlossaryItemForUi.id item
                     , onClickTag = PageMsg.Internal << FilterByTag
@@ -1261,12 +1259,12 @@ itemWithPreviousAndNextForId id indexedGlossaryItems =
 
 viewSingleItemModalDialog :
     Maybe GlossaryItemId
-    -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
+    -> { enableMathSupport : Bool, editable : Bool, enableLastUpdatedDates : Bool }
     -> Maybe Tag
     -> List ( GlossaryItemId, GlossaryItemForUi )
     -> Maybe GlossaryItemId
     -> Html Msg
-viewSingleItemModalDialog itemWithFocus { enableMathSupport, editable, tabbable, enableLastUpdatedDates } tagBeingFilteredBy indexedGlossaryItems =
+viewSingleItemModalDialog itemWithFocus { enableMathSupport, editable, enableLastUpdatedDates } tagBeingFilteredBy indexedGlossaryItems =
     Maybe.map
         (\id ->
             let
@@ -1283,8 +1281,7 @@ viewSingleItemModalDialog itemWithFocus { enableMathSupport, editable, tabbable,
                     [ Html.div
                         [ class "absolute right-0 top-0 pr-4 pt-4" ]
                         [ Components.Button.text
-                            [ Accessibility.Key.tabbable tabbable
-                            , Html.Events.onClick <| PageMsg.Internal ChangeLayoutToShowAll
+                            [ Html.Events.onClick <| PageMsg.Internal ChangeLayoutToShowAll
                             ]
                             [ Icons.xMark
                                 [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
@@ -1294,7 +1291,6 @@ viewSingleItemModalDialog itemWithFocus { enableMathSupport, editable, tabbable,
                         [ Html.Attributes.style "display" "block" ]
                         [ viewGlossaryItem
                             { enableMathSupport = enableMathSupport
-                            , tabbable = tabbable
                             , editable = editable
                             , enableLastUpdatedDates = enableLastUpdatedDates
                             , shownAsSingle = True
@@ -1540,7 +1536,6 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
         viewIndexedItem item =
             viewGlossaryItem
                 { enableMathSupport = enableMathSupport
-                , tabbable = tabbable
                 , editable = editable
                 , enableLastUpdatedDates = enableLastUpdatedDates
                 , shownAsSingle = False
@@ -1564,7 +1559,7 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
             500
     in
     div
-        []
+        [ Extras.HtmlAttribute.showIf (not tabbable) Extras.HtmlAttribute.inert ]
         [ div
             [ class "mb-4" ]
             [ Extras.Html.showMaybe
@@ -2480,23 +2475,19 @@ viewAboutSection :
     -> { enableMathSupport : Bool, noModalDialogShown_ : Bool }
     -> GlossaryForUi
     -> Html Msg
-viewAboutSection filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } glossaryForUi =
+viewAboutSection filterByTagWithDescription_ { enableMathSupport } glossaryForUi =
     filterByTagWithDescription_
         |> Maybe.map
             (DescribedTag.description
                 >> TagDescription.view
-                    { enableMathSupport = enableMathSupport
-                    , makeLinksTabbable = noModalDialogShown_
-                    }
+                    { enableMathSupport = enableMathSupport }
                     []
             )
         |> Maybe.withDefault
             (glossaryForUi
                 |> GlossaryForUi.aboutSection
                 |> Components.AboutSection.view
-                    { enableMathSupport = enableMathSupport
-                    , modalDialogShown = not noModalDialogShown_
-                    }
+                    { enableMathSupport = enableMathSupport }
             )
 
 
@@ -2612,13 +2603,18 @@ viewMain :
 viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters filterByTag itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn searchDialog confirmDeleteId layout deleting combinedIndexedGlossaryItems glossaryForUi =
     Html.main_
         []
-        [ viewAboutSection
-            filterByTagWithDescription_
-            { enableMathSupport = enableMathSupport, noModalDialogShown_ = noModalDialogShown_ }
-            glossaryForUi
+        [ div
+            [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) <| Extras.HtmlAttribute.inert ]
+            [ viewAboutSection
+                filterByTagWithDescription_
+                { enableMathSupport = enableMathSupport, noModalDialogShown_ = noModalDialogShown_ }
+                glossaryForUi
+            ]
         , Extras.Html.showIf (Editability.editing editability && filterByTagWithDescription_ == Nothing) <|
             div
-                [ class "flex-none mt-2" ]
+                [ class "flex-none mt-2"
+                , Extras.HtmlAttribute.showIf (not noModalDialogShown_) <| Extras.HtmlAttribute.inert
+                ]
                 [ viewEditTitleAndAboutButton noModalDialogShown_ ]
         , Html.article
             [ Html.Attributes.id ElementIds.items
@@ -2639,7 +2635,6 @@ viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } 
                 itemWithFocus
                 { enableMathSupport = enableMathSupport
                 , editable = Editability.editing editability
-                , tabbable = noModalDialogShown_
                 , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
                 }
                 filterByTag

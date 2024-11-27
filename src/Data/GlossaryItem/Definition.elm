@@ -104,8 +104,8 @@ markdown (MarkdownDefinition { body }) =
     --> expected
 
 -}
-view : { enableMathSupport : Bool, makeLinksTabbable : Bool } -> Definition -> Html msg
-view { enableMathSupport, makeLinksTabbable } (MarkdownDefinition { body }) =
+view : { enableMathSupport : Bool } -> Definition -> Html msg
+view { enableMathSupport } (MarkdownDefinition { body }) =
     let
         parsed : Result String (List Block)
         parsed =
@@ -117,7 +117,6 @@ view { enableMathSupport, makeLinksTabbable } (MarkdownDefinition { body }) =
                 Renderer.render
                     (MarkdownRenderers.htmlMsgRenderer
                         { enableMathSupport = enableMathSupport
-                        , makeLinksTabbable = makeLinksTabbable
                         }
                     )
                     blocks

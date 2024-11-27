@@ -27,8 +27,7 @@ import Svg.Attributes
 type Style msg
     = Preview
     | Normal
-        { tabbable : Bool
-        , onClickViewFull : msg
+        { onClickViewFull : msg
         , onClickEdit : msg
         , onClickDelete : msg
         , onClickItem : GlossaryItemId -> msg
@@ -41,7 +40,6 @@ type Style msg
 
 view :
     { enableMathSupport : Bool
-    , makeLinksTabbable : Bool
     , enableLastUpdatedDates : Bool
     }
     -> Style msg
@@ -49,7 +47,7 @@ view :
     -> Maybe GlossaryItemId
     -> GlossaryItemWithPreviousAndNext
     -> Html msg
-view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagBeingFilteredBy itemWithFocus glossaryItemWithPreviousAndNext =
+view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy itemWithFocus glossaryItemWithPreviousAndNext =
     Extras.Html.showMaybe
         (\glossaryItem ->
             let
@@ -83,16 +81,10 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
             in
             case style of
                 Preview ->
-                    let
-                        tabbable : Bool
-                        tabbable =
-                            True
-                    in
                     div
                         [ Html.Attributes.style "max-height" "100%" ]
                         (viewGlossaryTerm
                             { enableMathSupport = enableMathSupport
-                            , tabbable = tabbable
                             , showSilcrow = False
                             , isPreferred = True
                             }
@@ -100,7 +92,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                             :: List.map
                                 (viewGlossaryTerm
                                     { enableMathSupport = enableMathSupport
-                                    , tabbable = tabbable
                                     , showSilcrow = False
                                     , isPreferred = False
                                     }
@@ -121,27 +112,24 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                             ++ [ viewTags
                                     { enableMathSupport = enableMathSupport
                                     , onClickTag = Nothing
-                                    , tabbable = False
                                     }
                                     tags
                                , definition
                                     |> Extras.Html.showMaybe
                                         (viewGlossaryItemDefinition
                                             { enableMathSupport = enableMathSupport
-                                            , tabbable = makeLinksTabbable
                                             }
                                         )
                                ]
                             ++ viewGlossaryItemRelatedTerms
                                 enableMathSupport
                                 True
-                                tabbable
                                 itemHasADefinition
                                 Nothing
                                 relatedTerms
                         )
 
-                Normal { tabbable, onClickViewFull, onClickEdit, onClickDelete, onClickTag, onClickItem, onClickRelatedTerm, editable, shownAsSingle } ->
+                Normal { onClickViewFull, onClickEdit, onClickDelete, onClickTag, onClickItem, onClickRelatedTerm, editable, shownAsSingle } ->
                     if shownAsSingle then
                         div
                             [ Html.Attributes.style "max-height" "100%"
@@ -150,7 +138,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                             ]
                             [ viewAsSingle
                                 { enableMathSupport = enableMathSupport
-                                , makeLinksTabbable = makeLinksTabbable
                                 , enableLastUpdatedDates = enableLastUpdatedDates
                                 , onClickItem = onClickItem
                                 , onClickRelatedTerm = onClickRelatedTerm
@@ -195,8 +182,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                                         [ span
                                             []
                                             [ Components.Button.text
-                                                [ Accessibility.Key.tabbable tabbable
-                                                , Accessibility.Aria.label I18n.viewAsSingleItem
+                                                [ Accessibility.Aria.label I18n.viewAsSingleItem
                                                 , Html.Attributes.title I18n.viewAsSingleItem
                                                 , Html.Events.onClick onClickViewFull
                                                 ]
@@ -209,7 +195,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                                         []
                                         (viewGlossaryTerm
                                             { enableMathSupport = enableMathSupport
-                                            , tabbable = tabbable
                                             , showSilcrow = True
                                             , isPreferred = True
                                             }
@@ -217,7 +202,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                                             :: List.map
                                                 (viewGlossaryTerm
                                                     { enableMathSupport = enableMathSupport
-                                                    , tabbable = tabbable
                                                     , showSilcrow = False
                                                     , isPreferred = False
                                                     }
@@ -238,18 +222,15 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                                             ++ [ viewTags
                                                     { enableMathSupport = enableMathSupport
                                                     , onClickTag = Just onClickTag
-                                                    , tabbable = tabbable
                                                     }
                                                     tagsNotBeingFilteredBy
                                                , definition
                                                     |> Extras.Html.showMaybe
                                                         (viewGlossaryItemDefinition
-                                                            { enableMathSupport = enableMathSupport
-                                                            , tabbable = makeLinksTabbable
-                                                            }
+                                                            { enableMathSupport = enableMathSupport }
                                                         )
                                                ]
-                                            ++ viewGlossaryItemRelatedTerms enableMathSupport False tabbable itemHasADefinition Nothing relatedTerms
+                                            ++ viewGlossaryItemRelatedTerms enableMathSupport False itemHasADefinition Nothing relatedTerms
                                         )
                                     ]
                                 , div
@@ -264,7 +245,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                                             [ class "inline-flex items-center" ]
                                             [ Components.Button.text
                                                 [ Html.Events.onClick onClickEdit
-                                                , Accessibility.Key.tabbable tabbable
                                                 ]
                                                 [ Icons.pencil
                                                     [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
@@ -277,7 +257,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                                             [ class "ml-3 inline-flex items-center" ]
                                             [ Components.Button.text
                                                 [ Html.Events.onClick onClickDelete
-                                                , Accessibility.Key.tabbable tabbable
                                                 ]
                                                 [ Icons.trash
                                                     [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
@@ -303,8 +282,7 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                                         [ span
                                             []
                                             [ Components.Button.text
-                                                [ Accessibility.Key.tabbable tabbable
-                                                , Accessibility.Aria.label I18n.viewAsSingleItem
+                                                [ Accessibility.Aria.label I18n.viewAsSingleItem
                                                 , Html.Attributes.title I18n.viewAsSingleItem
                                                 , Html.Events.onClick onClickViewFull
                                                 ]
@@ -316,7 +294,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                                     , div []
                                         (viewGlossaryTerm
                                             { enableMathSupport = enableMathSupport
-                                            , tabbable = tabbable
                                             , showSilcrow = True
                                             , isPreferred = True
                                             }
@@ -324,7 +301,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                                             :: List.map
                                                 (viewGlossaryTerm
                                                     { enableMathSupport = enableMathSupport
-                                                    , tabbable = tabbable
                                                     , showSilcrow = False
                                                     , isPreferred = False
                                                     }
@@ -345,21 +321,17 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
                                             ++ [ viewTags
                                                     { enableMathSupport = enableMathSupport
                                                     , onClickTag = Just onClickTag
-                                                    , tabbable = tabbable
                                                     }
                                                     tagsNotBeingFilteredBy
                                                , definition
                                                     |> Extras.Html.showMaybe
                                                         (viewGlossaryItemDefinition
-                                                            { enableMathSupport = enableMathSupport
-                                                            , tabbable = makeLinksTabbable
-                                                            }
+                                                            { enableMathSupport = enableMathSupport }
                                                         )
                                                ]
                                             ++ viewGlossaryItemRelatedTerms
                                                 enableMathSupport
                                                 False
-                                                tabbable
                                                 itemHasADefinition
                                                 Nothing
                                                 relatedTerms
@@ -376,7 +348,6 @@ view { enableMathSupport, makeLinksTabbable, enableLastUpdatedDates } style tagB
 
 viewAsSingle :
     { enableMathSupport : Bool
-    , makeLinksTabbable : Bool
     , enableLastUpdatedDates : Bool
     , onClickItem : GlossaryItemId -> msg
     , onClickRelatedTerm : Term -> msg
@@ -468,7 +439,6 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                         [ class "hidden md:-mt-px md:flex max-w-xs md:flex-col px-3" ]
                         (viewGlossaryTerm
                             { enableMathSupport = enableMathSupport
-                            , tabbable = True
                             , showSilcrow = False
                             , isPreferred = True
                             }
@@ -476,7 +446,6 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                             :: List.map
                                 (viewGlossaryTerm
                                     { enableMathSupport = enableMathSupport
-                                    , tabbable = True
                                     , showSilcrow = False
                                     , isPreferred = False
                                     }
@@ -503,7 +472,6 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                     [ class "md:hidden mt-4" ]
                     (viewGlossaryTerm
                         { enableMathSupport = enableMathSupport
-                        , tabbable = True
                         , showSilcrow = False
                         , isPreferred = True
                         }
@@ -511,7 +479,6 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                         :: List.map
                             (viewGlossaryTerm
                                 { enableMathSupport = enableMathSupport
-                                , tabbable = True
                                 , showSilcrow = False
                                 , isPreferred = False
                                 }
@@ -535,21 +502,17 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                         ++ [ viewTags
                                 { enableMathSupport = enableMathSupport
                                 , onClickTag = Nothing
-                                , tabbable = False
                                 }
                                 tagsNotBeingFilteredBy
                            , Extras.Html.showMaybe
                                 (viewGlossaryItemDefinition
-                                    { enableMathSupport = enableMathSupport
-                                    , tabbable = True
-                                    }
+                                    { enableMathSupport = enableMathSupport }
                                 )
                                 definition
                            ]
                         ++ viewGlossaryItemRelatedTerms
                             enableMathSupport
                             False
-                            True
                             (GlossaryItemForUi.definition glossaryItem /= Nothing)
                             (Just onClickRelatedTerm)
                             relatedTerms
@@ -567,10 +530,10 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
 
 
 viewGlossaryTerm :
-    { enableMathSupport : Bool, tabbable : Bool, showSilcrow : Bool, isPreferred : Bool }
+    { enableMathSupport : Bool, showSilcrow : Bool, isPreferred : Bool }
     -> Term
     -> Html msg
-viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term =
+viewGlossaryTerm { enableMathSupport, showSilcrow, isPreferred } term =
     let
         viewTerm =
             if isPreferred then
@@ -607,7 +570,6 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term 
                     [ Html.a
                         [ term |> Term.id |> fragmentOnly |> Html.Attributes.href
                         , target "_self"
-                        , Accessibility.Key.tabbable tabbable
                         ]
                         [ text "§" ]
                     ]
@@ -616,16 +578,16 @@ viewGlossaryTerm { enableMathSupport, tabbable, showSilcrow, isPreferred } term 
 
 
 viewTags :
-    { enableMathSupport : Bool, onClickTag : Maybe (Tag -> msg), tabbable : Bool }
+    { enableMathSupport : Bool, onClickTag : Maybe (Tag -> msg) }
     -> List Tag
     -> Html msg
-viewTags { enableMathSupport, onClickTag, tabbable } tags =
+viewTags { enableMathSupport, onClickTag } tags =
     Html.div
         [ class "mt-4" ]
         (List.map
             (\tag ->
                 Components.Button.softSmall
-                    (tabbable && onClickTag /= Nothing)
+                    (onClickTag /= Nothing)
                     [ class "mr-2 mb-2"
                     , Html.Attributes.title <| I18n.tag ++ ": " ++ Tag.inlineText tag
                     , Extras.HtmlAttribute.showMaybe (\onClickTag_ -> Html.Events.onClick <| onClickTag_ tag) onClickTag
@@ -639,16 +601,16 @@ viewTags { enableMathSupport, onClickTag, tabbable } tags =
         )
 
 
-viewGlossaryItemDefinition : { enableMathSupport : Bool, tabbable : Bool } -> Definition -> Html msg
-viewGlossaryItemDefinition { enableMathSupport, tabbable } definition =
+viewGlossaryItemDefinition : { enableMathSupport : Bool } -> Definition -> Html msg
+viewGlossaryItemDefinition { enableMathSupport } definition =
     Html.dd
         []
-        [ Definition.view { enableMathSupport = enableMathSupport, makeLinksTabbable = tabbable } definition
+        [ Definition.view { enableMathSupport = enableMathSupport } definition
         ]
 
 
-viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Bool -> Maybe (Term -> msg) -> List DisambiguatedTerm -> List (Html msg)
-viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasADefinition onClick relatedTerms =
+viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Maybe (Term -> msg) -> List DisambiguatedTerm -> List (Html msg)
+viewGlossaryItemRelatedTerms enableMathSupport preview itemHasADefinition onClick relatedTerms =
     if List.isEmpty relatedTerms then
         []
 
@@ -675,7 +637,6 @@ viewGlossaryItemRelatedTerms enableMathSupport preview tabbable itemHasADefiniti
                                       )
                                         |> Html.Attributes.href
                                     , target "_self"
-                                    , Accessibility.Key.tabbable tabbable
                                     , Extras.HtmlAttribute.showMaybe
                                         (\onClick1 ->
                                             Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <| onClick1 relatedTerm
