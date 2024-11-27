@@ -100,7 +100,7 @@ markdown (MarkdownDefinition { body }) =
 
     "The _ideal_ case"
     |> fromMarkdown
-    |> view {enableMathSupport = False, makeLinksTabbable = True}
+    |> view {enableMathSupport = False}
     --> expected
 
 -}

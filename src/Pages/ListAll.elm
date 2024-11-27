@@ -1442,14 +1442,13 @@ viewEditTitleAndAboutButton tabbable =
         ]
 
 
-viewCreateGlossaryItemButtonForEmptyState : Bool -> Html Msg
-viewCreateGlossaryItemButtonForEmptyState tabbable =
+viewCreateGlossaryItemButtonForEmptyState : Html Msg
+viewCreateGlossaryItemButtonForEmptyState =
     div
         [ class "pt-4 print:hidden" ]
         [ Components.Button.emptyState
             [ class "p-9"
             , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit Nothing
-            , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.viewGridAdd
                 [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
@@ -1464,13 +1463,12 @@ viewCreateGlossaryItemButtonForEmptyState tabbable =
         ]
 
 
-viewCreateGlossaryItemButton : Bool -> Html Msg
-viewCreateGlossaryItemButton tabbable =
+viewCreateGlossaryItemButton : Html Msg
+viewCreateGlossaryItemButton =
     div
         [ class "pb-2 print:hidden" ]
         [ Components.Button.secondary
             [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit Nothing
-            , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.viewGridAdd
                 [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5"
@@ -1492,7 +1490,6 @@ viewCards :
     { enableMathSupport : Bool
     , enableOrderItemsButtons : Bool
     , editable : Bool
-    , tabbable : Bool
     , enableLastUpdatedDates : Bool
     , editing : Bool
     }
@@ -1507,7 +1504,7 @@ viewCards :
     -> GlossaryItemsForUi
     -> ( List ( GlossaryItemId, GlossaryItemForUi ), List ( GlossaryItemId, GlossaryItemForUi ) )
     -> Html Msg
-viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enableLastUpdatedDates, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpdatedDates, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
         filterByTag : Maybe Tag
         filterByTag =
@@ -1559,18 +1556,18 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
             500
     in
     div
-        [ Extras.HtmlAttribute.showIf (not tabbable) Extras.HtmlAttribute.inert ]
+        []
         [ div
             [ class "mb-4" ]
             [ Extras.Html.showMaybe
-                (viewCurrentTagFilter { enableMathSupport = enableMathSupport, tabbable = tabbable })
+                (viewCurrentTagFilter { enableMathSupport = enableMathSupport })
                 filterByDescribedTag_
             , Extras.Html.showIf (filterByDescribedTag_ == Nothing) <|
-                viewAllTagFilters { enableMathSupport = enableMathSupport, tabbable = tabbable } tags
+                viewAllTagFilters { enableMathSupport = enableMathSupport } tags
             , Extras.Html.showIf editing <|
                 div
                     [ class "flex-none mt-4" ]
-                    [ viewManageTagsButton tabbable ]
+                    [ viewManageTagsButton ]
             ]
         , div
             []
@@ -1578,10 +1575,10 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
                 div
                     [ class "pt-2" ]
                     [ if List.isEmpty combinedIndexedGlossaryItems then
-                        viewCreateGlossaryItemButtonForEmptyState tabbable
+                        viewCreateGlossaryItemButtonForEmptyState
 
                       else
-                        viewCreateGlossaryItemButton tabbable
+                        viewCreateGlossaryItemButton
                     ]
             ]
         , Extras.Html.showIf (editable && totalNumberOfItems > recommendedMaximumNumberOfItems) <|
@@ -1599,7 +1596,7 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
           <|
             viewOrderItemsBy
                 totalNumberOfItems
-                { enableMathSupport = enableMathSupport, tabbable = tabbable }
+                { enableMathSupport = enableMathSupport }
                 disambiguatedPreferredTermsWithDefinitions
                 orderItemsFocusedOnTerm
                 queryParameters
@@ -2171,23 +2168,23 @@ viewSelectDefaultTheme glossaryForUi tabbable =
         ]
 
 
-viewCurrentTagFilter : { enableMathSupport : Bool, tabbable : Bool } -> DescribedTag -> Html Msg
-viewCurrentTagFilter { enableMathSupport, tabbable } describedTag =
+viewCurrentTagFilter : { enableMathSupport : Bool } -> DescribedTag -> Html Msg
+viewCurrentTagFilter { enableMathSupport } describedTag =
     div
         [ class "pt-3" ]
         [ span
             [ class "print:hidden mr-2 font-medium text-gray-900 dark:text-gray-100" ]
             [ text I18n.filteringByTag ]
         , Components.Badge.indigoWithBorderAndRemoveButton
-            tabbable
+            True
             [ class "print:hidden mt-2" ]
             (PageMsg.Internal DoNotFilterByTag)
             [ Tag.view enableMathSupport [] <| DescribedTag.tag describedTag ]
         ]
 
 
-viewAllTagFilters : { enableMathSupport : Bool, tabbable : Bool } -> List Tag -> Html Msg
-viewAllTagFilters { enableMathSupport, tabbable } tags =
+viewAllTagFilters : { enableMathSupport : Bool } -> List Tag -> Html Msg
+viewAllTagFilters { enableMathSupport } tags =
     Extras.Html.showIf (not <| List.isEmpty tags) <|
         div
             [ class "print:hidden pt-3" ]
@@ -2198,7 +2195,7 @@ viewAllTagFilters { enableMathSupport, tabbable } tags =
                         |> List.map
                             (\tag ->
                                 Components.Button.soft
-                                    tabbable
+                                    True
                                     [ class "mr-2 mt-2"
                                     , Html.Events.onClick <| PageMsg.Internal <| FilterByTag tag
                                     ]
@@ -2208,13 +2205,12 @@ viewAllTagFilters { enableMathSupport, tabbable } tags =
             )
 
 
-viewManageTagsButton : Bool -> Html Msg
-viewManageTagsButton tabbable =
+viewManageTagsButton : Html Msg
+viewManageTagsButton =
     div
         [ class "pb-3 print:hidden" ]
         [ Components.Button.text
             [ Html.Events.onClick <| PageMsg.NavigateToManageTags
-            , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.pencil
                 [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
@@ -2227,13 +2223,13 @@ viewManageTagsButton tabbable =
 
 viewOrderItemsBy :
     Int
-    -> { enableMathSupport : Bool, tabbable : Bool }
+    -> { enableMathSupport : Bool }
     -> List DisambiguatedTerm
     -> Maybe DisambiguatedTerm
     -> QueryParameters
     -> Maybe RawTerm
     -> Html Msg
-viewOrderItemsBy numberOfItems { enableMathSupport, tabbable } disambiguatedPreferredTermsWithDefinitions orderItemsFocusedOnTerm queryParameters mostRecentRawTermForOrderingItemsFocusedOn =
+viewOrderItemsBy numberOfItems { enableMathSupport } disambiguatedPreferredTermsWithDefinitions orderItemsFocusedOnTerm queryParameters mostRecentRawTermForOrderingItemsFocusedOn =
     div
         [ class "print:hidden pt-4 pb-2" ]
         [ fieldset []
@@ -2255,7 +2251,7 @@ viewOrderItemsBy numberOfItems { enableMathSupport, tabbable } disambiguatedPref
                         "order-items-by"
                         "order-items-alphabetically"
                         (QueryParameters.orderItemsBy queryParameters == Alphabetically)
-                        tabbable
+                        True
                         [ id ElementIds.orderItemsAlphabetically
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy Alphabetically
                         ]
@@ -2271,7 +2267,7 @@ viewOrderItemsBy numberOfItems { enableMathSupport, tabbable } disambiguatedPref
                         "order-items-by"
                         "order-items-most-mentioned-first"
                         (QueryParameters.orderItemsBy queryParameters == MostMentionedFirst)
-                        tabbable
+                        True
                         [ id ElementIds.orderItemsMostMentionedFirst
                         , Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy MostMentionedFirst
                         ]
@@ -2293,7 +2289,7 @@ viewOrderItemsBy numberOfItems { enableMathSupport, tabbable } disambiguatedPref
                             _ ->
                                 False
                         )
-                        tabbable
+                        True
                         [ id ElementIds.orderItemsFocusedOn
                         , Html.Attributes.disabled <| mostRecentRawTermForOrderingItemsFocusedOn == Nothing
                         , Extras.HtmlAttribute.showMaybe
@@ -2314,7 +2310,7 @@ viewOrderItemsBy numberOfItems { enableMathSupport, tabbable } disambiguatedPref
                             [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect
                             , Components.SelectMenu.ariaLabel I18n.focusOnTerm
                             , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << RawTerm.fromString)
-                            , Components.SelectMenu.enabled tabbable
+                            , Components.SelectMenu.enabled True
                             ]
                             (disambiguatedPreferredTermsWithDefinitions
                                 |> List.map
@@ -2494,14 +2490,13 @@ viewAboutSection filterByTagWithDescription_ { enableMathSupport } glossaryForUi
 viewOrderItemsButtonsAndItemCards :
     Maybe DescribedTag
     -> Bool
-    -> Bool
     -> Editability
     -> QueryParameters
     -> Maybe GlossaryItemId
     -> Maybe RawTerm
     -> GlossaryForUi
     -> Html Msg
-viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport noModalDialogShown_ editability queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryForUi =
+viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport editability queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryForUi =
     let
         items : GlossaryItemsForUi
         items =
@@ -2542,7 +2537,6 @@ viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport 
             { enableMathSupport = enableMathSupport
             , enableOrderItemsButtons = GlossaryForUi.enableOrderItemsButtons glossaryForUi
             , editable = Editability.editing editability
-            , tabbable = noModalDialogShown_
             , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
             , editing = Editability.editing editability
             }
@@ -2620,15 +2614,17 @@ viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } 
             [ Html.Attributes.id ElementIds.items
             , Extras.HtmlAttribute.showIf (GlossaryForUi.enableOrderItemsButtons glossaryForUi) <| class "mt-3 pt-2 border-t border-gray-300 dark:border-gray-700"
             ]
-            [ Html.Lazy.lazy8 viewOrderItemsButtonsAndItemCards
-                filterByTagWithDescription_
-                enableMathSupport
-                noModalDialogShown_
-                editability
-                queryParameters
-                itemWithFocus
-                mostRecentRawTermForOrderingItemsFocusedOn
-                glossaryForUi
+            [ div
+                [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
+                [ Html.Lazy.lazy7 viewOrderItemsButtonsAndItemCards
+                    filterByTagWithDescription_
+                    enableMathSupport
+                    editability
+                    queryParameters
+                    itemWithFocus
+                    mostRecentRawTermForOrderingItemsFocusedOn
+                    glossaryForUi
+                ]
             , Html.Lazy.lazy3 viewSearchDialog filterByTagWithDescription_ enableMathSupport searchDialog
             , Html.Lazy.lazy3 viewConfirmDeleteModal editability confirmDeleteId deleting
             , Html.Lazy.lazy5 viewSingleItemModalDialog

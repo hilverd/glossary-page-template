@@ -23,9 +23,7 @@ e = mc^2
                         |> Result.andThen
                             (Renderer.render
                                 (MarkdownRenderers.htmlMsgRenderer
-                                    { enableMathSupport = False
-                                    , makeLinksTabbable = True
-                                    }
+                                    { enableMathSupport = False }
                                 )
                             )
                         |> Expect.equal
@@ -50,9 +48,7 @@ e = mc^2
                         |> Result.andThen
                             (Renderer.render
                                 (MarkdownRenderers.htmlMsgRenderer
-                                    { enableMathSupport = True
-                                    , makeLinksTabbable = True
-                                    }
+                                    { enableMathSupport = True }
                                 )
                             )
                         |> Expect.equal
@@ -70,9 +66,7 @@ e = mc^2
                         |> Result.andThen
                             (Renderer.render
                                 (MarkdownRenderers.htmlMsgRenderer
-                                    { enableMathSupport = True
-                                    , makeLinksTabbable = True
-                                    }
+                                    { enableMathSupport = True }
                                 )
                             )
                         |> Expect.equal

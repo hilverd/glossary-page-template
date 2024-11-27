@@ -15,6 +15,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Changed
 
 - Improve performance.
+  - Opening/closing the search dialog is faster.
+  - Opening/closing the theme dropdown menu is faster.
+  - Opening/closing the export dropdown menu is faster.
 - Change styling of index of terms.
 
 ### Fixed
