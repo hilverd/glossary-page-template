@@ -1626,9 +1626,6 @@ viewMenuForMobileAndStaticSidebarForDesktop :
     -> Html Msg
 viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility runningOnMacOs enableMathSupport filterByTag items =
     let
-        _ =
-            Debug.log "viewMenuForMobileAndStaticSidebarForDesktop" ""
-
         indexOfTerms : IndexOfTerms
         indexOfTerms =
             IndexOfTerms.fromGlossaryItems filterByTag items
@@ -2493,9 +2490,6 @@ viewOrderItemsButtonsAndItemCards :
     -> Html Msg
 viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport editability queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryForUi =
     let
-        _ =
-            Debug.log "viewOrderItemsButtonsAndItemCards" ""
-
         items : GlossaryItemsForUi
         items =
             GlossaryForUi.items glossaryForUi
