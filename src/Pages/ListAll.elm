@@ -2621,7 +2621,12 @@ viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } 
                     enableMathSupport
                     editability
                     queryParameters
-                    itemWithFocus
+                    (if noModalDialogShown_ then
+                        itemWithFocus
+
+                     else
+                        Nothing
+                    )
                     mostRecentRawTermForOrderingItemsFocusedOn
                     glossaryForUi
                 ]
