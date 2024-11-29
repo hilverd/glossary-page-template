@@ -1091,8 +1091,8 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
         ]
 
 
-viewTermIndexItem : Bool -> Bool -> IndexOfTerms.Entry -> List (Html Msg)
-viewTermIndexItem enableMathSupport tabbable entry =
+viewTermIndexItem : Bool -> IndexOfTerms.Entry -> List (Html Msg)
+viewTermIndexItem enableMathSupport entry =
     case entry of
         IndexOfTerms.PreferredTerm itemId disambiguatedTerm ->
             let
@@ -1104,7 +1104,6 @@ viewTermIndexItem enableMathSupport tabbable entry =
                     [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
                     , Html.Attributes.href <| Extras.Url.fragmentOnly <| Term.id term
                     , Html.Attributes.target "_self"
-                    , Accessibility.Key.tabbable tabbable
                     , Html.Events.onClick <| PageMsg.Internal <| JumpToItem itemId
                     ]
                     [ Term.view enableMathSupport [] term ]
@@ -1137,7 +1136,6 @@ viewTermIndexItem enableMathSupport tabbable entry =
                                 [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
                                 , Html.Attributes.href <| Extras.Url.fragmentOnly <| Term.id preferredTerm
                                 , Html.Attributes.target "_self"
-                                , Accessibility.Key.tabbable tabbable
                                 , Html.Events.onClick <| PageMsg.Internal <| JumpToItem itemId
                                 ]
                                 [ span
@@ -1153,8 +1151,8 @@ viewTermIndexItem enableMathSupport tabbable entry =
                     preferredTerms
 
 
-viewTermIndexGroup : Bool -> Bool -> Bool -> TermGroup -> Html Msg
-viewTermIndexGroup enableMathSupport tabbable staticSidebar { label, entries } =
+viewTermIndexGroup : Bool -> Bool -> TermGroup -> Html Msg
+viewTermIndexGroup enableMathSupport staticSidebar { label, entries } =
     li
         [ id <| ElementIds.termIndexGroupLabel staticSidebar label
         , class "mt-6"
@@ -1167,12 +1165,12 @@ viewTermIndexGroup enableMathSupport tabbable staticSidebar { label, entries } =
             ]
         , ul
             [ class "space-y-6 lg:space-y-2 border-l border-slate-200 dark:border-slate-600" ]
-            (List.concatMap (viewTermIndexItem enableMathSupport tabbable) entries)
+            (List.concatMap (viewTermIndexItem enableMathSupport) entries)
         ]
 
 
-viewIndexOfTerms : Bool -> Bool -> Bool -> IndexOfTerms -> Html Msg
-viewIndexOfTerms enableMathSupport tabbable staticSidebar indexOfTerms =
+viewIndexOfTerms : Bool -> Bool -> IndexOfTerms -> Html Msg
+viewIndexOfTerms enableMathSupport staticSidebar indexOfTerms =
     let
         termGroups : List TermGroup
         termGroups =
@@ -1188,7 +1186,7 @@ viewIndexOfTerms enableMathSupport tabbable staticSidebar indexOfTerms =
                     Nothing
 
                 else
-                    Just <| viewTermIndexGroup enableMathSupport tabbable staticSidebar termIndexGroup
+                    Just <| viewTermIndexGroup enableMathSupport staticSidebar termIndexGroup
             )
             termGroups
         )
@@ -1623,32 +1621,32 @@ viewMenuForMobileAndStaticSidebarForDesktop :
     MenuForMobileVisibility
     -> Bool
     -> Bool
-    -> Bool
     -> Maybe TagId
     -> GlossaryItemsForUi
     -> Html Msg
-viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility runningOnMacOs enableMathSupport tabbable filterByTag items =
+viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility runningOnMacOs enableMathSupport filterByTag items =
     let
+        _ =
+            Debug.log "viewMenuForMobileAndStaticSidebarForDesktop" ""
+
         indexOfTerms : IndexOfTerms
         indexOfTerms =
             IndexOfTerms.fromGlossaryItems filterByTag items
     in
     div []
-        [ Html.Lazy.lazy4 viewMenuForMobile
+        [ Html.Lazy.lazy3 viewMenuForMobile
             menuForMobileVisibility
             enableMathSupport
-            tabbable
             indexOfTerms
-        , Html.Lazy.lazy4 viewStaticSidebarForDesktop
+        , Html.Lazy.lazy3 viewStaticSidebarForDesktop
             runningOnMacOs
             enableMathSupport
-            tabbable
             indexOfTerms
         ]
 
 
-viewMenuForMobile : MenuForMobileVisibility -> Bool -> Bool -> IndexOfTerms -> Html Msg
-viewMenuForMobile menuForMobileVisibility enableMathSupport tabbable termIndex =
+viewMenuForMobile : MenuForMobileVisibility -> Bool -> IndexOfTerms -> Html Msg
+viewMenuForMobile menuForMobileVisibility enableMathSupport termIndex =
     div
         [ class "invisible" |> Extras.HtmlAttribute.showIf (menuForMobileVisibility == GradualVisibility.Invisible)
         , class "fixed inset-0 flex z-40 lg:hidden"
@@ -1701,8 +1699,8 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport tabbable termIndex =
                 ]
                 [ nav
                     [ class "px-4 pt-1 pb-6" ]
-                    [ Html.Lazy.lazy3 viewTermIndexFirstCharacterGrid False tabbable termIndex
-                    , Html.Lazy.lazy4 viewIndexOfTerms enableMathSupport tabbable False termIndex
+                    [ Html.Lazy.lazy2 viewTermIndexFirstCharacterGrid False termIndex
+                    , Html.Lazy.lazy3 viewIndexOfTerms enableMathSupport False termIndex
                     ]
                 ]
             ]
@@ -1764,8 +1762,8 @@ viewBackToTopLink staticSidebar visibility =
         ]
 
 
-viewQuickSearchButton : { runningOnMacOs : Bool, tabbable : Bool } -> Html Msg
-viewQuickSearchButton { runningOnMacOs, tabbable } =
+viewQuickSearchButton : Bool -> Html Msg
+viewQuickSearchButton runningOnMacOs =
     div
         [ class "px-3 pb-4 bg-white dark:bg-slate-900" ]
         [ div
@@ -1775,7 +1773,6 @@ viewQuickSearchButton { runningOnMacOs, tabbable } =
                 , class "hidden w-full lg:flex items-center text-sm leading-6 text-slate-500 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-600 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800 select-none"
                 , Html.Events.onClick <| PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show
                 , Accessibility.Aria.hidden True
-                , Accessibility.Key.tabbable tabbable
                 ]
                 [ Icons.search
                     [ width "24"
@@ -1797,9 +1794,9 @@ viewQuickSearchButton { runningOnMacOs, tabbable } =
         ]
 
 
-viewTermIndexFirstCharacter : Bool -> Bool -> String -> Bool -> Html Msg
-viewTermIndexFirstCharacter staticSidebar tabbable firstCharacter enabled =
-    Components.Button.white (tabbable && enabled)
+viewTermIndexFirstCharacter : Bool -> String -> Bool -> Html Msg
+viewTermIndexFirstCharacter staticSidebar firstCharacter enabled =
+    Components.Button.white enabled
         [ class "m-0.5 px-3 py-2 leading-4"
         , Html.Events.onClick <|
             PageMsg.Internal <|
@@ -1812,8 +1809,8 @@ viewTermIndexFirstCharacter staticSidebar tabbable firstCharacter enabled =
         [ text firstCharacter ]
 
 
-viewTermIndexFirstCharacterGrid : Bool -> Bool -> IndexOfTerms -> Html Msg
-viewTermIndexFirstCharacterGrid staticSidebar tabbable indexOfTerms =
+viewTermIndexFirstCharacterGrid : Bool -> IndexOfTerms -> Html Msg
+viewTermIndexFirstCharacterGrid staticSidebar indexOfTerms =
     let
         termGroups : List TermGroup
         termGroups =
@@ -1825,7 +1822,6 @@ viewTermIndexFirstCharacterGrid staticSidebar tabbable indexOfTerms =
             (\termIndexGroup ->
                 viewTermIndexFirstCharacter
                     staticSidebar
-                    tabbable
                     termIndexGroup.label
                     (not <| List.isEmpty termIndexGroup.entries)
             )
@@ -1833,8 +1829,8 @@ viewTermIndexFirstCharacterGrid staticSidebar tabbable indexOfTerms =
         )
 
 
-viewQuickSearchButtonAndLetterGrid : { runningOnMacOs : Bool, staticSidebar : Bool, tabbable : Bool } -> IndexOfTerms -> Html Msg
-viewQuickSearchButtonAndLetterGrid { runningOnMacOs, staticSidebar, tabbable } indexOfTerms =
+viewQuickSearchButtonAndLetterGrid : { runningOnMacOs : Bool, staticSidebar : Bool } -> IndexOfTerms -> Html Msg
+viewQuickSearchButtonAndLetterGrid { runningOnMacOs, staticSidebar } indexOfTerms =
     div
         [ id ElementIds.quickSearchButtonAndLetterGrid
         , class "z-10 -mb-6 sticky top-0 -ml-0.5 pointer-events-none"
@@ -1842,18 +1838,18 @@ viewQuickSearchButtonAndLetterGrid { runningOnMacOs, staticSidebar, tabbable } i
         [ div
             [ class "h-7 bg-white dark:bg-slate-900" ]
             []
-        , viewQuickSearchButton { runningOnMacOs = runningOnMacOs, tabbable = tabbable }
+        , viewQuickSearchButton runningOnMacOs
         , div
             [ class "px-3 bg-white dark:bg-slate-900" ]
-            [ viewTermIndexFirstCharacterGrid staticSidebar tabbable indexOfTerms ]
+            [ viewTermIndexFirstCharacterGrid staticSidebar indexOfTerms ]
         , div
             [ class "h-8 bg-gradient-to-b from-white dark:from-slate-900" ]
             []
         ]
 
 
-viewStaticSidebarForDesktop : Bool -> Bool -> Bool -> IndexOfTerms -> Html Msg
-viewStaticSidebarForDesktop runningOnMacOs enableMathSupport tabbable termIndex =
+viewStaticSidebarForDesktop : Bool -> Bool -> IndexOfTerms -> Html Msg
+viewStaticSidebarForDesktop runningOnMacOs enableMathSupport termIndex =
     div
         [ class "hidden print:hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900"
         ]
@@ -1864,12 +1860,11 @@ viewStaticSidebarForDesktop runningOnMacOs enableMathSupport tabbable termIndex 
             [ viewQuickSearchButtonAndLetterGrid
                 { runningOnMacOs = runningOnMacOs
                 , staticSidebar = True
-                , tabbable = tabbable
                 }
                 termIndex
             , nav
                 [ class "px-3" ]
-                [ viewIndexOfTerms enableMathSupport tabbable True termIndex ]
+                [ viewIndexOfTerms enableMathSupport True termIndex ]
             ]
         ]
 
@@ -2498,6 +2493,9 @@ viewOrderItemsButtonsAndItemCards :
     -> Html Msg
 viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport editability queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryForUi =
     let
+        _ =
+            Debug.log "viewOrderItemsButtonsAndItemCards" ""
+
         items : GlossaryItemsForUi
         items =
             GlossaryForUi.items glossaryForUi
@@ -2792,13 +2790,16 @@ view model =
                             )
                         )
                     ]
-                    [ Html.Lazy.lazy6 viewMenuForMobileAndStaticSidebarForDesktop
-                        model.menuForMobileVisibility
-                        model.common.runningOnMacOs
-                        model.common.enableMathSupport
-                        noModalDialogShown_
-                        filterByTagId_
-                        items
+                    [ div
+                        [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) <| Extras.HtmlAttribute.inert
+                        ]
+                        [ Html.Lazy.lazy5 viewMenuForMobileAndStaticSidebarForDesktop
+                            model.menuForMobileVisibility
+                            model.common.runningOnMacOs
+                            model.common.enableMathSupport
+                            filterByTagId_
+                            items
+                        ]
                     , div
                         [ class "hidden lg:block" ]
                         [ Html.Lazy.lazy2 viewBackToTopLink True model.backToTopLinkVisibility ]
