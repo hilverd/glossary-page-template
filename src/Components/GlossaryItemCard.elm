@@ -2,7 +2,6 @@ module Components.GlossaryItemCard exposing (Style(..), view)
 
 import Accessibility exposing (Html, div, span, text)
 import Accessibility.Aria
-import Accessibility.Key
 import Components.Button
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
