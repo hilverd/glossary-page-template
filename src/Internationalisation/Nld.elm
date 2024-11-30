@@ -108,7 +108,7 @@ runTheFollowingCommand tabbable =
 youCanHideTheseInstructions : Html msg
 youCanHideTheseInstructions =
     p
-        [ class "mt-3 max-w-xl" ]
+        [ class "mt-3" ]
         [ text "Je kunt deze instructies geheel verbergen door het attribuut "
         , Extras.Html.inlineCode "data-enable-help-for-making-changes"
         , text " op "

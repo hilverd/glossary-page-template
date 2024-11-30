@@ -969,13 +969,13 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
                     [ text I18n.howToMakeChangesTitle ]
                 ]
             , div
-                [ class "mb-1 max-w-xl" ]
+                [ class "mb-1" ]
                 [ I18n.webInterfaceDescription
                 , I18n.runTheFollowingCommand tabbable
                 , div
                     [ class "mt-3 flex rounded-md shadow-sm" ]
                     [ div
-                        [ class "block w-full flex flex-grow items-stretch focus-within:z-10" ]
+                        [ class "block w-full max-w-2xl flex flex-grow items-stretch focus-within:z-10" ]
                         [ Accessibility.inputText
                             command
                             [ class "w-full min-w-0 rounded-none rounded-l-md focus:ring-indigo-500 focus:border-indigo-500 focus:ring-inset border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 font-mono text-sm"
