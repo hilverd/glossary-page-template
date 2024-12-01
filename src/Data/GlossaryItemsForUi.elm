@@ -67,7 +67,6 @@ type GlossaryItemsForUi
         , disambiguatedPreferredTermByItemId : GlossaryItemIdDict (Maybe DisambiguatedTerm)
         , orderedAlphabetically : List GlossaryItemId
         , orderedByMostMentionedFirst : List GlossaryItemId
-        , orderedFocusedOn : Maybe ( GlossaryItemId, ( List GlossaryItemId, List GlossaryItemId ) )
         }
 
 
@@ -86,7 +85,6 @@ empty =
         , disambiguatedPreferredTermByItemId = GlossaryItemIdDict.empty
         , orderedAlphabetically = []
         , orderedByMostMentionedFirst = []
-        , orderedFocusedOn = Nothing
         }
 
 
@@ -343,7 +341,6 @@ fromList describedTags_ glossaryItemsForUi =
                             , disambiguatedPreferredTermByItemId = disambiguatedPreferredTermByItemId
                             , orderedAlphabetically = orderedAlphabetically__
                             , orderedByMostMentionedFirst = orderedByMostMentionedFirst_
-                            , orderedFocusedOn = Nothing
                             }
                     )
                     itemIdByFragmentIdentifierForRawDisambiguatedPreferredTermResult
