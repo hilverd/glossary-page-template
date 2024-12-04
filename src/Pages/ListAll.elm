@@ -2411,12 +2411,9 @@ pageTitle model glossaryForUi =
                 |> Maybe.withDefault glossaryTitle
 
         _ ->
-            let
-                filterByTagWithDescription_ : Maybe DescribedTag
-                filterByTagWithDescription_ =
-                    filterByTagWithDescription model
-            in
-            filterByTagWithDescription_
+            model
+                |> filterByTagId
+                |> Maybe.andThen (filterByTagWithDescription glossaryForUi)
                 |> Maybe.map
                     (\describedTag ->
                         Tag.inlineText (DescribedTag.tag describedTag) ++ " · " ++ glossaryTitle
@@ -2424,29 +2421,19 @@ pageTitle model glossaryForUi =
                 |> Maybe.withDefault glossaryTitle
 
 
-filterByTagWithDescription : Model -> Maybe DescribedTag
-filterByTagWithDescription model =
-    case model.common.glossaryForUi of
-        Ok glossaryForUi ->
-            model
-                |> filterByTagId
-                |> Maybe.andThen
-                    (\tagId ->
-                        let
-                            items : GlossaryItemsForUi
-                            items =
-                                GlossaryForUi.items glossaryForUi
-                        in
-                        GlossaryItemsForUi.tagFromId tagId items
-                            |> Maybe.andThen
-                                (\tag ->
-                                    GlossaryItemsForUi.tagDescriptionFromId tagId items
-                                        |> Maybe.map (DescribedTag.create tagId tag)
-                                )
-                    )
-
-        _ ->
-            Nothing
+filterByTagWithDescription : GlossaryForUi -> TagId -> Maybe DescribedTag
+filterByTagWithDescription glossaryForUi tagId =
+    let
+        items : GlossaryItemsForUi
+        items =
+            GlossaryForUi.items glossaryForUi
+    in
+    GlossaryItemsForUi.tagFromId tagId items
+        |> Maybe.andThen
+            (\tag ->
+                GlossaryItemsForUi.tagDescriptionFromId tagId items
+                    |> Maybe.map (DescribedTag.create tagId tag)
+            )
 
 
 controlOrCommandK : Bool -> Extras.HtmlEvents.KeyDownEvent
@@ -2662,7 +2649,9 @@ view model =
 
                 filterByTagWithDescription_ : Maybe DescribedTag
                 filterByTagWithDescription_ =
-                    filterByTagWithDescription model
+                    Maybe.andThen
+                        (filterByTagWithDescription glossaryForUi)
+                        filterByTagId_
 
                 controlOrCommandK_ : Extras.HtmlEvents.KeyDownEvent
                 controlOrCommandK_ =
