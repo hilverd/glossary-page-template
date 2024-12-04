@@ -737,8 +737,8 @@ disambiguatedPreferredTermsByAlternativeTerm filterByTagId ((GlossaryItemsForUi 
             []
 
 
-toList_ : (GlossaryItemId -> GlossaryItemsForUi -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItemsForUi -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForUi )
-toList_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
+toList : Maybe TagId -> GlossaryItemsForUi -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForUi )
+toList filterByTagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
     let
         itemIdsMatchingTagFilter : Maybe (Set String)
         itemIdsMatchingTagFilter =
@@ -759,7 +759,7 @@ toList_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItemsForUi items) as
                     |> Maybe.withDefault True
             then
                 glossaryItemsForUi
-                    |> get_ disambiguatedPreferredTerm_ filterByTagId itemId
+                    |> get_ disambiguatedPreferredTerm filterByTagId itemId
                     |> Maybe.map (Tuple.pair itemId)
 
             else
@@ -767,21 +767,11 @@ toList_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItemsForUi items) as
         )
 
 
-toList : Maybe TagId -> GlossaryItemsForUi -> List GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForUi )
-toList =
-    toList_ disambiguatedPreferredTerm
-
-
-orderedAlphabetically_ : (GlossaryItemId -> GlossaryItemsForUi -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItemsForUi -> List ( GlossaryItemId, GlossaryItemForUi )
-orderedAlphabetically_ disambiguatedPreferredTerm_ filterByTagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
-    toList_ disambiguatedPreferredTerm_ filterByTagId glossaryItemsForUi items.orderedAlphabetically
-
-
 {-| Retrieve the glossary items ordered alphabetically.
 -}
 orderedAlphabetically : Maybe TagId -> GlossaryItemsForUi -> List ( GlossaryItemId, GlossaryItemForUi )
-orderedAlphabetically =
-    orderedAlphabetically_ disambiguatedPreferredTerm
+orderedAlphabetically filterByTagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
+    toList filterByTagId glossaryItemsForUi items.orderedAlphabetically
 
 
 {-| Retrieve the glossary items ordered by most mentioned first.
