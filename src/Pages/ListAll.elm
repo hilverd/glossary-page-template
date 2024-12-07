@@ -1257,13 +1257,15 @@ itemWithPreviousAndNextForId id indexedGlossaryItems =
 
 viewSingleItemModalDialog :
     Maybe GlossaryItemId
-    -> { enableMathSupport : Bool, editable : Bool, enableLastUpdatedDates : Bool }
+    -> Bool
+    -> Bool
+    -> Bool
     -> Maybe DescribedTag
     -> OrderItemsBy
     -> GlossaryItemsForUi
     -> Maybe GlossaryItemId
     -> Html Msg
-viewSingleItemModalDialog itemWithFocus { enableMathSupport, editable, enableLastUpdatedDates } tagBeingFilteredBy orderItemsBy items =
+viewSingleItemModalDialog itemWithFocus enableMathSupport editable enableLastUpdatedDates tagBeingFilteredBy orderItemsBy items =
     let
         filterByTagId_ =
             Maybe.map DescribedTag.id tagBeingFilteredBy
@@ -2646,12 +2648,11 @@ viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } 
                 ]
             , Html.Lazy.lazy3 viewSearchDialog filterByTagWithDescription_ enableMathSupport searchDialog
             , Html.Lazy.lazy3 viewConfirmDeleteModal editability confirmDeleteId deleting
-            , Html.Lazy.lazy6 viewSingleItemModalDialog
+            , Html.Lazy.lazy8 viewSingleItemModalDialog
                 itemWithFocus
-                { enableMathSupport = enableMathSupport
-                , editable = Editability.editing editability
-                , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
-                }
+                enableMathSupport
+                (Editability.editing editability)
+                (GlossaryForUi.enableLastUpdatedDates glossaryForUi)
                 filterByTagWithDescription_
                 (QueryParameters.orderItemsBy queryParameters)
                 (GlossaryForUi.items glossaryForUi)
