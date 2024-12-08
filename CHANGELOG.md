@@ -15,8 +15,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Changed
 
 - Improve performance.
-- Fix styling where contrast was too low.
-- Change styling of index of terms.
+- Improve styling
+  - Increase background/foreground contrast for a number of elements.
+  - Change styling of index of terms.
 
 ### Fixed
 ### Removed
