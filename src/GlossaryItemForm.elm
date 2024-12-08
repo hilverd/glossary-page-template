@@ -183,36 +183,6 @@ validate form =
                 body : String
                 body =
                     termField |> TermField.raw |> String.trim
-
-                term : Term
-                term =
-                    Term.fromMarkdown body False
-
-                disambiguatedTerm : DisambiguatedTerm
-                disambiguatedTerm =
-                    if isPreferredTerm then
-                        form
-                            |> disambiguationTagId
-                            |> Maybe.map
-                                (\disambiguationTagId_ ->
-                                    form
-                                        |> tagCheckboxes
-                                        |> List.filterMap
-                                            (\( ( tagId, tag ), _ ) ->
-                                                if tagId == disambiguationTagId_ then
-                                                    Just tag
-
-                                                else
-                                                    Nothing
-                                            )
-                                        |> List.head
-                                        |> Maybe.map (\disambiguationTag -> GlossaryItemForUi.disambiguatedTerm disambiguationTag term)
-                                        |> Maybe.withDefault (DisambiguatedTerm.fromTerm term)
-                                )
-                            |> Maybe.withDefault (DisambiguatedTerm.fromTerm term)
-
-                    else
-                        DisambiguatedTerm.fromTerm term
             in
             termField
                 |> TermField.setValidationError
@@ -221,6 +191,36 @@ validate form =
 
                      else
                         let
+                            term : Term
+                            term =
+                                Term.fromMarkdown body False
+
+                            disambiguatedTerm : DisambiguatedTerm
+                            disambiguatedTerm =
+                                if isPreferredTerm then
+                                    form
+                                        |> disambiguationTagId
+                                        |> Maybe.map
+                                            (\disambiguationTagId_ ->
+                                                form
+                                                    |> tagCheckboxes
+                                                    |> List.filterMap
+                                                        (\( ( tagId, tag ), _ ) ->
+                                                            if tagId == disambiguationTagId_ then
+                                                                Just tag
+
+                                                            else
+                                                                Nothing
+                                                        )
+                                                    |> List.head
+                                                    |> Maybe.map (\disambiguationTag -> GlossaryItemForUi.disambiguatedTerm disambiguationTag term)
+                                                    |> Maybe.withDefault (DisambiguatedTerm.fromTerm term)
+                                            )
+                                        |> Maybe.withDefault (DisambiguatedTerm.fromTerm term)
+
+                                else
+                                    DisambiguatedTerm.fromTerm term
+
                             rawTerm : String
                             rawTerm =
                                 disambiguatedTerm

@@ -76,24 +76,25 @@ fromList describedTags_ =
                 )
                 DuplicateRejectingDict.empty
                 tagById_
-
-        tagDescriptionById_ : TagIdDict TagDescription
-        tagDescriptionById_ =
-            describedTags_
-                |> List.foldl
-                    (\describedTag result ->
-                        tagIdByRawTagRejecting
-                            |> DuplicateRejectingDict.get (describedTag |> DescribedTag.tag |> Tag.raw)
-                            |> Maybe.map (\tagId -> TagIdDict.insert tagId (DescribedTag.description describedTag) result)
-                            |> Maybe.withDefault result
-                    )
-                    TagIdDict.empty
     in
     tagIdByRawTagRejecting
         |> DuplicateRejectingDict.toResult
         |> Result.mapError (\{ key } -> I18n.tagAppearsMultipleTimes key)
         |> Result.map
             (\tagIdByRawTag_ ->
+                let
+                    tagDescriptionById_ : TagIdDict TagDescription
+                    tagDescriptionById_ =
+                        describedTags_
+                            |> List.foldl
+                                (\describedTag result ->
+                                    tagIdByRawTagRejecting
+                                        |> DuplicateRejectingDict.get (describedTag |> DescribedTag.tag |> Tag.raw)
+                                        |> Maybe.map (\tagId -> TagIdDict.insert tagId (DescribedTag.description describedTag) result)
+                                        |> Maybe.withDefault result
+                                )
+                                TagIdDict.empty
+                in
                 GlossaryTags
                     { tagById = tagById_
                     , tagIdByRawTag = tagIdByRawTag_

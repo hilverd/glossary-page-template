@@ -189,93 +189,6 @@ view toParentMsg model enabled buttonShape choices =
         config : Config
         config =
             model_.config
-
-        buttonAttributes : List (Html.Attribute parentMsg)
-        buttonAttributes =
-            [ Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
-            , Accessibility.Aria.expanded <| model_.visibility == Visible
-            , Accessibility.Aria.hasMenuPopUp
-            , Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <|
-                toParentMsg <|
-                    case model_.visibility of
-                        Visible ->
-                            StartHiding
-
-                        Disappearing ->
-                            NoOp
-
-                        Invisible ->
-                            Show
-            , Html.Events.preventDefaultOn "keydown"
-                (Extras.HtmlEvents.preventDefaultOnDecoder
-                    (\event ->
-                        if event == Extras.HtmlEvents.enter then
-                            case model_.visibility of
-                                Visible ->
-                                    case model_.activeChoice of
-                                        Just active ->
-                                            choices
-                                                |> Array.fromList
-                                                |> Array.get active
-                                                |> Maybe.map
-                                                    (\choice_ ->
-                                                        case choice_ of
-                                                            Choice { onSelect } ->
-                                                                onSelect
-                                                    )
-                                                |> Maybe.map (\x -> ( x, True ))
-
-                                        Nothing ->
-                                            Just ( toParentMsg StartHiding, True )
-
-                                Disappearing ->
-                                    Nothing
-
-                                Invisible ->
-                                    Just ( toParentMsg Show, True )
-
-                        else if event == Extras.HtmlEvents.escape then
-                            Just ( toParentMsg StartHiding, True )
-
-                        else if event == Extras.HtmlEvents.downArrow then
-                            let
-                                numberOfChoices : Int
-                                numberOfChoices =
-                                    List.length choices
-                            in
-                            case model_.activeChoice of
-                                Just active ->
-                                    Just ( (active + 1) |> min (numberOfChoices - 1) |> max 0 |> MakeChoiceActive |> toParentMsg, True )
-
-                                Nothing ->
-                                    if numberOfChoices > 0 then
-                                        Just ( toParentMsg <| MakeChoiceActive 0, True )
-
-                                    else
-                                        Nothing
-
-                        else if event == Extras.HtmlEvents.upArrow then
-                            let
-                                numberOfChoices : Int
-                                numberOfChoices =
-                                    List.length choices
-                            in
-                            case model_.activeChoice of
-                                Just active ->
-                                    Just ( (active - 1) |> min (numberOfChoices - 1) |> max 0 |> MakeChoiceActive |> toParentMsg, True )
-
-                                Nothing ->
-                                    if numberOfChoices > 0 then
-                                        Just ( toParentMsg <| MakeChoiceActive <| numberOfChoices - 1, True )
-
-                                    else
-                                        Nothing
-
-                        else
-                            Nothing
-                    )
-                )
-            ]
     in
     div
         [ class "relative inline-block text-left" ]
@@ -284,6 +197,93 @@ view toParentMsg model enabled buttonShape choices =
                 Html.span
                     [ class "sr-only" ]
                     [ Html.text I18n.openOptions ]
+
+            buttonAttributes : List (Html.Attribute parentMsg)
+            buttonAttributes =
+                [ Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
+                , Accessibility.Aria.expanded <| model_.visibility == Visible
+                , Accessibility.Aria.hasMenuPopUp
+                , Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <|
+                    toParentMsg <|
+                        case model_.visibility of
+                            Visible ->
+                                StartHiding
+
+                            Disappearing ->
+                                NoOp
+
+                            Invisible ->
+                                Show
+                , Html.Events.preventDefaultOn "keydown"
+                    (Extras.HtmlEvents.preventDefaultOnDecoder
+                        (\event ->
+                            if event == Extras.HtmlEvents.enter then
+                                case model_.visibility of
+                                    Visible ->
+                                        case model_.activeChoice of
+                                            Just active ->
+                                                choices
+                                                    |> Array.fromList
+                                                    |> Array.get active
+                                                    |> Maybe.map
+                                                        (\choice_ ->
+                                                            case choice_ of
+                                                                Choice { onSelect } ->
+                                                                    onSelect
+                                                        )
+                                                    |> Maybe.map (\x -> ( x, True ))
+
+                                            Nothing ->
+                                                Just ( toParentMsg StartHiding, True )
+
+                                    Disappearing ->
+                                        Nothing
+
+                                    Invisible ->
+                                        Just ( toParentMsg Show, True )
+
+                            else if event == Extras.HtmlEvents.escape then
+                                Just ( toParentMsg StartHiding, True )
+
+                            else if event == Extras.HtmlEvents.downArrow then
+                                let
+                                    numberOfChoices : Int
+                                    numberOfChoices =
+                                        List.length choices
+                                in
+                                case model_.activeChoice of
+                                    Just active ->
+                                        Just ( (active + 1) |> min (numberOfChoices - 1) |> max 0 |> MakeChoiceActive |> toParentMsg, True )
+
+                                    Nothing ->
+                                        if numberOfChoices > 0 then
+                                            Just ( toParentMsg <| MakeChoiceActive 0, True )
+
+                                        else
+                                            Nothing
+
+                            else if event == Extras.HtmlEvents.upArrow then
+                                let
+                                    numberOfChoices : Int
+                                    numberOfChoices =
+                                        List.length choices
+                                in
+                                case model_.activeChoice of
+                                    Just active ->
+                                        Just ( (active - 1) |> min (numberOfChoices - 1) |> max 0 |> MakeChoiceActive |> toParentMsg, True )
+
+                                    Nothing ->
+                                        if numberOfChoices > 0 then
+                                            Just ( toParentMsg <| MakeChoiceActive <| numberOfChoices - 1, True )
+
+                                        else
+                                            Nothing
+
+                            else
+                                Nothing
+                        )
+                    )
+                ]
           in
           div
             []
