@@ -9,7 +9,6 @@ module MarkdownRenderers exposing (anchorTagHtmlTreeRenderer, htmlMsgRenderer, h
 
 -}
 
-import Accessibility.Key
 import Extras.HtmlAttribute
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
 import Extras.String
@@ -22,9 +21,9 @@ import Markdown.Renderer as Renderer exposing (Renderer)
 
 {-| Render an anchor tag as HTML.
 -}
-anchorTagRenderer : Bool -> Markdown.Html.Renderer (List (Html msg) -> Html msg)
+anchorTagRenderer : Markdown.Html.Renderer (List (Html msg) -> Html msg)
 anchorTagRenderer =
-    anchorTagRendererForViewFunction << viewAnchorTag
+    anchorTagRendererForViewFunction viewAnchorTag
 
 
 {-| Render an anchor tag as an HtmlTree.
@@ -45,13 +44,12 @@ anchorTagRendererForViewFunction viewFunction =
 
 
 viewAnchorTag :
-    Bool
-    -> Maybe String
+    Maybe String
     -> Maybe String
     -> Maybe String
     -> List (Html msg)
     -> Html msg
-viewAnchorTag tabbable href target style renderedChildren =
+viewAnchorTag href target style renderedChildren =
     let
         isAbsoluteUrl : Bool
         isAbsoluteUrl =
@@ -83,7 +81,7 @@ htmlMsgRenderer { enableMathSupport } =
         , blockQuote = Html.blockquote [ class "max-w-prose print:max-w-full" ]
         , html =
             Markdown.Html.oneOf
-                [ anchorTagRenderer True
+                [ anchorTagRenderer
                 , imgTagRenderer
                 ]
         , codeSpan =

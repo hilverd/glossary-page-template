@@ -1,7 +1,7 @@
 module Data.GlossaryItemForUi exposing
     ( GlossaryItemForUi
     , create, codec, fromGlossaryItemFromDom
-    , disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, disambiguatedPreferredTermIdString, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
+    , disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
     , toGlossaryItemFromDom
     , disambiguatedTerm
     )
@@ -21,7 +21,7 @@ module Data.GlossaryItemForUi exposing
 
 # Query
 
-@docs disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, disambiguatedPreferredTermIdString, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
+@docs disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
 
 
 # Exporting
@@ -164,18 +164,6 @@ disambiguatedPreferredTerm (GlossaryItemForUi item) =
                 disambiguatedTerm disambiguationTag_ item.preferredTerm
             )
         |> Maybe.withDefault (DisambiguatedTerm.fromTerm item.preferredTerm)
-
-
-{-| The HTML ID of the disambiguated preferred term.
--}
-disambiguatedPreferredTermIdString : GlossaryItemForUi -> String
-disambiguatedPreferredTermIdString ((GlossaryItemForUi item) as glossaryItemForUi) =
-    glossaryItemForUi
-        |> disambiguationTag
-        |> Maybe.map (\tag -> disambiguatedTerm tag item.preferredTerm)
-        |> Maybe.map DisambiguatedTerm.toTerm
-        |> Maybe.withDefault item.preferredTerm
-        |> Term.id
 
 
 {-| The ID for this glossary item.
