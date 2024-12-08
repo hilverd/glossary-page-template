@@ -26,7 +26,7 @@ withAdditionalAttributes attributes additionalAttributes children =
 primary : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 primary enabled =
     withAdditionalAttributes
-        [ class "inline-flex justify-center items-center py-2 px-4 border border-transparent shadow-sm font-medium rounded-md bg-indigo-600 text-white dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+        [ class "inline-flex justify-center items-center py-2 px-4 border border-transparent shadow-sm font-medium rounded-md bg-indigo-600 text-white dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
         , if enabled then
             class "hover:bg-indigo-700"
 
@@ -137,17 +137,17 @@ toggle on labelId additionalAttributes children =
             , class "relative inline-flex shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer motion-reduce:transition-none transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
             , class <|
                 if on then
-                    "bg-indigo-600 dark:bg-indigo-400"
+                    "bg-indigo-600 dark:bg-indigo-300"
 
                 else
-                    "bg-gray-200 dark:bg-gray-400"
+                    "bg-gray-200 dark:bg-gray-600"
             , Html.Attributes.attribute "role" "switch"
             , Accessibility.Aria.checked <| Just on
             , Accessibility.Aria.labelledBy labelId
             ]
             [ Accessibility.span
                 [ Accessibility.Aria.hidden True
-                , class "pointer-events-none inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-700 shadow transform motion-reduce:transition-none ring-0 transition ease-in-out duration-200"
+                , class "pointer-events-none inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-900 shadow transform motion-reduce:transition-none ring-0 transition ease-in-out duration-200"
                 , class <|
                     if on then
                         "translate-x-5"

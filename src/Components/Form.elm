@@ -97,7 +97,7 @@ markdownSupportedMessage mathSupportEnabled =
     Accessibility.div
         []
         [ span
-            [ class "inline-flex items-center text-sm text-gray-500 dark:text-gray-300" ]
+            [ class "inline-flex items-center text-sm text-gray-600 dark:text-gray-300" ]
             [ Icons.markdown
                 [ Svg.Attributes.class "w-5 h-5 mr-2"
                 , Accessibility.Aria.hidden True

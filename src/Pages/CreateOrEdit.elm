@@ -547,7 +547,7 @@ viewCreateTerms mathSupportEnabled showValidationErrors termsArray =
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
                 [ text I18n.terms ]
             , p
-                [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
+                [ class "mt-1 max-w-2xl text-sm text-gray-600 dark:text-gray-400" ]
                 I18n.listTheGroupOfTermsBeingDefined
             ]
         , div
@@ -624,7 +624,7 @@ viewDefinition mathSupportEnabled showValidationErrors definitionField =
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
                 [ text I18n.definition ]
             , p
-                [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
+                [ class "mt-1 max-w-2xl text-sm text-gray-600 dark:text-gray-400" ]
                 [ text I18n.provideADefinitionForThisGroupOfTerms ]
             ]
         , div
@@ -642,7 +642,7 @@ viewTags enableMathSupport tagCheckboxes =
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
                 [ text I18n.tags ]
             , p
-                [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
+                [ class "mt-1 max-w-2xl text-sm text-gray-600 dark:text-gray-400" ]
                 [ text I18n.selectAllTagsThatApplyToThisItem ]
             ]
         , div
@@ -889,7 +889,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItemsForUi term
                 [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
                 [ text I18n.relatedItems ]
             , p
-                [ class "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" ]
+                [ class "mt-1 max-w-2xl text-sm text-gray-600 dark:text-gray-400" ]
                 [ text I18n.pointToAnyRelatedItems ]
             ]
         , div
@@ -1021,7 +1021,7 @@ viewCreateFormFooter model =
             )
         , Extras.Html.showIf (common.editability == Editability.EditingInMemory) <|
             div
-                [ class "mt-2 mb-2 text-sm text-gray-500 dark:text-gray-400 sm:text-right" ]
+                [ class "mt-2 mb-2 text-sm text-gray-600 dark:text-gray-400 sm:text-right" ]
                 [ text I18n.savingChangesInMemoryMessage ]
         , div
             [ class "flex items-center mb-2" ]
