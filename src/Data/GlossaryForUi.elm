@@ -211,6 +211,7 @@ createWithDefaults :
     -> GlossaryForUi
 createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ defaultTheme_ title_ aboutParagraph aboutLinks describedTags itemsForHtml versionNumber_ =
     let
+        aboutSection_ : AboutSection
         aboutSection_ =
             { paragraph = Maybe.withDefault (AboutParagraph.fromMarkdown I18n.elementNotFound) aboutParagraph
             , links = Maybe.withDefault [] aboutLinks

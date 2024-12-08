@@ -8,6 +8,7 @@ module Export.Anki exposing (download)
 
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
+import Data.AboutSection exposing (AboutSection)
 import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
@@ -75,6 +76,7 @@ itemToAnki enableMathSupport glossaryItem =
         quote string =
             "\"" ++ string ++ "\""
 
+        definitions : List Definition.Definition
         definitions =
             GlossaryItemForUi.definition glossaryItem
                 |> Maybe.map List.singleton
@@ -136,12 +138,15 @@ This is achieved by producing a [command for downloading](https://package.elm-la
 download : Bool -> GlossaryForUi -> Cmd msg
 download enableMathSupport glossaryForUi =
     let
+        title : GlossaryTitle.GlossaryTitle
         title =
             GlossaryForUi.title glossaryForUi
 
+        aboutSection : AboutSection
         aboutSection =
             GlossaryForUi.aboutSection glossaryForUi
 
+        items : GlossaryItems.GlossaryItemsForUi
         items =
             GlossaryForUi.items glossaryForUi
 

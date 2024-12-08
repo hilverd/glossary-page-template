@@ -93,6 +93,7 @@ search enableMathSupport filterByTagId searchString glossaryItemsForUi =
 
                     else
                         let
+                            preferredTermAsTerm : Term
                             preferredTermAsTerm =
                                 DisambiguatedTerm.toTerm preferredTerm
                         in

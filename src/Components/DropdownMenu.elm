@@ -193,6 +193,7 @@ view toParentMsg model enabled buttonShape choices =
     div
         [ class "relative inline-block text-left" ]
         [ let
+            openOptionsMessage : Html msg
             openOptionsMessage =
                 Html.span
                     [ class "sr-only" ]

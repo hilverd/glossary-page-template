@@ -14,7 +14,7 @@ import Browser.Dom as Dom
 import Browser.Navigation exposing (Key)
 import Codec
 import CommonModel exposing (CommonModel)
-import Data.Editability as Editability
+import Data.Editability as Editability exposing (Editability)
 import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryFromDom as GlossaryFromDom
 import Data.GlossaryItemId exposing (GlossaryItemId)
@@ -182,6 +182,7 @@ init flags url key =
                 |> Decode.decodeValue (Decode.field "theme" Theme.decode)
                 |> Result.withDefault Theme.System
 
+        editability : Editability
         editability =
             Editability.create
                 { enableHelpForMakingChanges = enableHelpForMakingChanges
@@ -392,6 +393,7 @@ update msg model =
 
         ( _, NavigateToCreateOrEdit itemBeingEdited, _ ) ->
             let
+                common0 : CommonModel
                 common0 =
                     commonModelForPage model.page
 
@@ -404,6 +406,7 @@ update msg model =
 
         ( _, NavigateToEditTitleAndAbout, _ ) ->
             let
+                common0 : CommonModel
                 common0 =
                     commonModelForPage model.page
 
@@ -416,6 +419,7 @@ update msg model =
 
         ( _, NavigateToManageTags, _ ) ->
             let
+                common0 : CommonModel
                 common0 =
                     commonModelForPage model.page
 

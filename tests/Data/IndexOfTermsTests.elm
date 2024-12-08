@@ -52,6 +52,7 @@ suite =
         [ test "sorts terms alphabetically by their first alphabetic character (stripped of any diacritical marks)" <|
             \_ ->
                 let
+                    preferredTerm : String -> IndexOfTerms.Entry
                     preferredTerm body =
                         IndexOfTerms.PreferredTerm (GlossaryItemId.create body) <| DisambiguatedTerm.fromTerm <| termFromBody body
                 in

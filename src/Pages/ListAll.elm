@@ -269,9 +269,11 @@ update msg model =
 
         MakeChanges ->
             let
+                common0 : CommonModel
                 common0 =
                     model.common
 
+                editability1 : Editability
                 editability1 =
                     Editability.startEditing model.common.editability
             in
@@ -373,6 +375,7 @@ update msg model =
                         Err _ ->
                             []
 
+                model1 : Model
                 model1 =
                     { model
                         | searchDialog =
@@ -386,6 +389,7 @@ update msg model =
 
         ChangeTheme theme ->
             let
+                common0 : CommonModel
                 common0 =
                     model.common
             in
@@ -407,9 +411,11 @@ update msg model =
 
         ScrollingUpWhileFarAwayFromTheTop ->
             let
+                counter_ : Int
                 counter_ =
                     backToTopLinkVisibilityCounter model.backToTopLinkVisibility + 1
 
+                backToTopLinkVisibility : BackToTopLinkVisibility
                 backToTopLinkVisibility =
                     Visible counter_
             in
@@ -457,6 +463,7 @@ update msg model =
 
         ShowRelatedTermAsSingle relatedTerm ->
             let
+                model1 : Model
                 model1 =
                     case model.common.glossaryForUi of
                         Ok glossaryForUi ->
@@ -528,6 +535,7 @@ update msg model =
                 common =
                     model.common
 
+                cmd : Cmd Msg
                 cmd =
                     Cmd.batch
                         [ allowBackgroundScrolling ()
@@ -610,9 +618,11 @@ update msg model =
                         _ ->
                             model.mostRecentRawTermForOrderingItemsFocusedOn
 
+                updatedQueryParameters : QueryParameters
                 updatedQueryParameters =
                     QueryParameters.setOrderItemsBy orderItemsBy model.common.queryParameters
 
+                common1 : CommonModel
                 common1 =
                     { common | queryParameters = updatedQueryParameters }
             in
@@ -702,6 +712,7 @@ update msg model =
                                 (PageMsg.Internal << FailedToChangeSettings)
                                 (\( itemWithFocus, updatedGlossaryForUi ) ->
                                     let
+                                        common0 : CommonModel
                                         common0 =
                                             model.common
                                     in
@@ -738,6 +749,7 @@ update msg model =
                                 (PageMsg.Internal << FailedToChangeSettings)
                                 (\( itemWithFocus, updatedGlossaryForUi ) ->
                                     let
+                                        common0 : CommonModel
                                         common0 =
                                             model.common
                                     in
@@ -774,6 +786,7 @@ update msg model =
                                 (PageMsg.Internal << FailedToChangeSettings)
                                 (\( itemWithFocus, updatedGlossaryForUi ) ->
                                     let
+                                        common0 : CommonModel
                                         common0 =
                                             model.common
                                     in
@@ -870,6 +883,7 @@ update msg model =
                         _ ->
                             QueryParameters.orderItemsBy common0.queryParameters
 
+                common1 : CommonModel
                 common1 =
                     { common0
                         | queryParameters =
@@ -893,6 +907,7 @@ update msg model =
                 common0 =
                     model.common
 
+                common1 : CommonModel
                 common1 =
                     { common0
                         | queryParameters =
@@ -946,6 +961,7 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
         defaultFilename =
             "glossary.html"
 
+        command : String
         command =
             "sed -n '/START OF editor.js$/,$p' "
                 ++ Maybe.withDefault defaultFilename filename
@@ -1096,6 +1112,7 @@ viewTermIndexItem enableMathSupport entry =
     case entry of
         IndexOfTerms.PreferredTerm itemId disambiguatedTerm ->
             let
+                term : Term
                 term =
                     DisambiguatedTerm.toTerm disambiguatedTerm
             in
@@ -1112,6 +1129,7 @@ viewTermIndexItem enableMathSupport entry =
 
         IndexOfTerms.AlternativeTerm term disambiguatedPreferredTerms ->
             let
+                preferredTerms : List ( GlossaryItemId, Term )
                 preferredTerms =
                     List.map (Tuple.mapSecond DisambiguatedTerm.toTerm) disambiguatedPreferredTerms
             in
@@ -1228,9 +1246,11 @@ viewGlossaryItem { enableMathSupport, editable, enableLastUpdatedDates, shownAsS
 itemWithPreviousAndNextForId : GlossaryItemId -> List ( GlossaryItemId, GlossaryItemForUi ) -> GlossaryItemWithPreviousAndNext
 itemWithPreviousAndNextForId id indexedGlossaryItems =
     let
+        indexedGlossaryItemsArray : Array.Array ( GlossaryItemId, GlossaryItemForUi )
         indexedGlossaryItemsArray =
             Array.fromList indexedGlossaryItems
 
+        indexed : Array.Array ( Int, ( GlossaryItemId, GlossaryItemForUi ) )
         indexed =
             Array.indexedMap Tuple.pair indexedGlossaryItemsArray
     in
@@ -1267,6 +1287,7 @@ viewSingleItemModalDialog :
     -> Html Msg
 viewSingleItemModalDialog itemWithFocus enableMathSupport editable enableLastUpdatedDates tagBeingFilteredBy orderItemsBy items =
     let
+        filterByTagId_ : Maybe TagId
         filterByTagId_ =
             Maybe.map DescribedTag.id tagBeingFilteredBy
 
@@ -1299,12 +1320,14 @@ viewSingleItemModalDialog itemWithFocus enableMathSupport editable enableLastUpd
                                         )
                    )
 
+        combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForUi )
         combinedIndexedGlossaryItems =
             List.append indexedGlossaryItems_ otherIndexedGlossaryItems_
     in
     Maybe.map
         (\id ->
             let
+                itemWithPreviousAndNext : GlossaryItemWithPreviousAndNext
                 itemWithPreviousAndNext =
                     itemWithPreviousAndNextForId id combinedIndexedGlossaryItems
             in
@@ -2347,6 +2370,7 @@ viewOrderItemsBy numberOfItems { enableMathSupport } disambiguatedPreferredTerms
                                 |> List.map
                                     (\disambiguatedPreferredTerm ->
                                         let
+                                            preferredRawTerm : RawTerm
                                             preferredRawTerm =
                                                 disambiguatedPreferredTerm
                                                     |> DisambiguatedTerm.toTerm
@@ -2424,12 +2448,14 @@ noModalDialogShown model =
 pageTitle : Model -> GlossaryForUi -> String
 pageTitle model glossaryForUi =
     let
+        glossaryTitle : String
         glossaryTitle =
             glossaryForUi |> GlossaryForUi.title |> GlossaryTitle.inlineText
     in
     case ( model.layout, model.itemWithFocus ) of
         ( ShowSingleItem, Just id ) ->
             let
+                disambiguatedPreferredTerm : Maybe String
                 disambiguatedPreferredTerm =
                     glossaryForUi
                         |> GlossaryForUi.items
@@ -2734,6 +2760,7 @@ view model =
 
                                         else
                                             let
+                                                itemWithPreviousAndNext : GlossaryItemWithPreviousAndNext
                                                 itemWithPreviousAndNext =
                                                     items
                                                         |> (case QueryParameters.orderItemsBy model.common.queryParameters of

@@ -25,6 +25,7 @@ fromQuery =
                 [ somethingElse ] ->
                     if String.startsWith "focused-on-" somethingElse then
                         let
+                            rawTerm : RawTerm
                             rawTerm =
                                 somethingElse
                                     |> String.slice 11 (String.length somethingElse)
@@ -43,6 +44,7 @@ fromQuery =
 toQueryParameter : OrderItemsBy -> Maybe Url.Builder.QueryParameter
 toQueryParameter orderItemsBy =
     let
+        maybeValue : Maybe String
         maybeValue =
             case orderItemsBy of
                 Alphabetically ->

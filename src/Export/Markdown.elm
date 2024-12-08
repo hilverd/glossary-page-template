@@ -8,6 +8,7 @@ module Export.Markdown exposing (toString, download)
 
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph
+import Data.AboutSection exposing (AboutSection)
 import Data.DescribedTag as DescribedTag
 import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryItem.Definition as Definition
@@ -83,11 +84,13 @@ itemToMarkdown glossaryItem =
                             ""
                    )
 
+        definitions : List Definition.Definition
         definitions =
             GlossaryItemForUi.definition glossaryItem
                 |> Maybe.map List.singleton
                 |> Maybe.withDefault []
 
+        relatedTerms : List DisambiguatedTerm.DisambiguatedTerm
         relatedTerms =
             GlossaryItemForUi.relatedPreferredTerms glossaryItem
 
@@ -124,12 +127,15 @@ itemToMarkdown glossaryItem =
 toString : GlossaryForUi -> String
 toString glossaryForUi =
     let
+        title : GlossaryTitle
         title =
             GlossaryForUi.title glossaryForUi
 
+        aboutSection : AboutSection
         aboutSection =
             GlossaryForUi.aboutSection glossaryForUi
 
+        items : GlossaryItems.GlossaryItemsForUi
         items =
             GlossaryForUi.items glossaryForUi
 

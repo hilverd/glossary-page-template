@@ -99,6 +99,7 @@ htmlMsgRenderer { enableMathSupport } =
         , link =
             \link content ->
                 let
+                    isAbsoluteUrl : Bool
                     isAbsoluteUrl =
                         not <| Extras.String.isRelativeUrl link.destination
                 in
@@ -623,6 +624,7 @@ Adapted from <https://github.com/matheus23/elm-markdown-transforms>.
 inlineTextRenderer : Bool -> Renderer String
 inlineTextRenderer enableMathSupport =
     let
+        escape : String -> String -> String
         escape string =
             String.replace string ("\\" ++ string)
     in

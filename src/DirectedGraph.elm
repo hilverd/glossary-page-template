@@ -44,6 +44,7 @@ insertVertex vertex graph =
     case graph of
         DirectedGraph { vertexToString, vertexFromString, vertices_, edges_ } ->
             let
+                vertexAsString : String
                 vertexAsString =
                     vertexToString vertex
             in
@@ -61,6 +62,7 @@ If one or both of the vertices that make up the edge are not in the graph, they 
 insertEdge : a -> a -> DirectedGraph a -> DirectedGraph a
 insertEdge vertex1 vertex2 graph =
     let
+        graph1 : DirectedGraph a
         graph1 =
             graph
                 |> insertVertex vertex1
@@ -69,9 +71,11 @@ insertEdge vertex1 vertex2 graph =
     case graph1 of
         DirectedGraph { vertexToString, vertexFromString, vertices_, edges_ } ->
             let
+                vertex1AsString : String
                 vertex1AsString =
                     vertexToString vertex1
 
+                vertex2AsString : String
                 vertex2AsString =
                     vertexToString vertex2
             in
@@ -151,6 +155,7 @@ verticesByDistance startingVertex graph =
                                         |> List.foldl
                                             (\outNeighbour ( queue0, distances0 ) ->
                                                 let
+                                                    outNeighbourAsString : String
                                                     outNeighbourAsString =
                                                         vertexToString outNeighbour
                                                 in

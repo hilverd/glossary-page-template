@@ -172,6 +172,7 @@ alternativeTermToHtmlTree term =
 relatedTermToHtmlTree : TermFromDom -> HtmlTree
 relatedTermToHtmlTree disambiguatedTerm_ =
     let
+        term : TermFromDom
         term =
             disambiguatedTerm_
     in
@@ -245,6 +246,7 @@ hasADefinition glossaryItemFromDom =
 toHtmlTree : GlossaryItemFromDom -> HtmlTree
 toHtmlTree glossaryItemFromDom =
     let
+        item : GlossaryItemFromDom
         item =
             glossaryItemFromDom
 

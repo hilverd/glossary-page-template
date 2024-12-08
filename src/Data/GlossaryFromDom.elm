@@ -307,9 +307,11 @@ update itemId glossaryItemFromDom glossaryFromDom =
 remove : GlossaryItemId -> GlossaryFromDom -> Result String GlossaryFromDom
 remove itemId glossaryFromDom =
     let
+        itemIdString : String
         itemIdString =
             GlossaryItemId.toString itemId
 
+        items_ : List GlossaryItemFromDom
         items_ =
             List.filter (.id >> (/=) itemIdString) glossaryFromDom.items
     in
@@ -352,6 +354,7 @@ item that was inserted, if any.
 applyChanges : GlossaryChangelist -> GlossaryFromDom -> ApplyChangesResult
 applyChanges changes glossaryFromDom =
     let
+        currentVersionNumber : GlossaryVersionNumber.GlossaryVersionNumber
         currentVersionNumber =
             GlossaryVersionNumber.create glossaryFromDom.versionNumber
     in
@@ -372,6 +375,7 @@ applyChanges changes glossaryFromDom =
                                 |> Tuple.mapSecond
                                     (\glossaryFromDom_ ->
                                         let
+                                            sortedItems : List GlossaryItemFromDom
                                             sortedItems =
                                                 result_
                                                     |> Tuple.second
@@ -428,6 +432,7 @@ validateAfterApplyingChanges ( maybeGlossaryItemId, glossaryFromDom ) =
                     |> List.foldl
                         (\glossaryItemFromDom ->
                             let
+                                fragmentIdentifier : String
                                 fragmentIdentifier =
                                     GlossaryItemFromDom.disambiguatedPreferredTermIdString glossaryItemFromDom
                             in
@@ -462,6 +467,7 @@ validateAfterApplyingChanges ( maybeGlossaryItemId, glossaryFromDom ) =
                 |> List.filterMap
                     (\glossaryItemFromDom ->
                         let
+                            preferredTerm : String
                             preferredTerm =
                                 glossaryItemFromDom.preferredTerm.body
                         in

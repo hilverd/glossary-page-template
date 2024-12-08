@@ -177,6 +177,7 @@ update msg model =
                                     (PageMsg.Internal << FailedToSave)
                                     (\( _, updatedGlossaryForUi ) ->
                                         let
+                                            common0 : CommonModel
                                             common0 =
                                                 model.common
                                         in
@@ -426,9 +427,11 @@ viewEditTags { enableMathSupport, showValidationErrors } tagsFormRowsArray =
 viewFooter : Model -> Bool -> Html Msg
 viewFooter model showValidationErrors =
     let
+        form : TagsForm
         form =
             model.form
 
+        saving : Saving
         saving =
             model.saving
 

@@ -78,6 +78,7 @@ suite =
             [ test "unless any term starts with 'glossary-page-' (after changing to lowercase)" <|
                 \_ ->
                     let
+                        changeList : GlossaryChangelist
                         changeList =
                             GlossaryChangelist.create
                                 GlossaryVersionNumber.initial
@@ -95,6 +96,7 @@ suite =
             , test "unless an item's preferred term is the same as an alternative term in any item" <|
                 \_ ->
                     let
+                        changeList : GlossaryChangelist
                         changeList =
                             GlossaryChangelist.create
                                 GlossaryVersionNumber.initial
@@ -113,6 +115,7 @@ suite =
             , test "unless an item has two identical alternative terms" <|
                 \_ ->
                     let
+                        changeList : GlossaryChangelist
                         changeList =
                             GlossaryChangelist.create
                                 GlossaryVersionNumber.initial
@@ -139,6 +142,7 @@ suite =
                             TagsChanges.empty
                                 |> TagsChanges.insert houseworkDescribedTag
 
+                        changeList : GlossaryChangelist
                         changeList =
                             GlossaryChangelist.create
                                 GlossaryVersionNumber.initial
@@ -172,6 +176,7 @@ suite =
                                 |> TagsChanges.update computerScienceTagId financeDescribedTag
                                 |> TagsChanges.update financeTagId computerScienceDescribedTag
 
+                        changeList : GlossaryChangelist
                         changeList =
                             GlossaryChangelist.create
                                 GlossaryVersionNumber.initial
@@ -226,6 +231,7 @@ suite =
                             TagsChanges.empty
                                 |> TagsChanges.remove computerScienceTagId
 
+                        changeList : GlossaryChangelist
                         changeList =
                             GlossaryChangelist.create
                                 GlossaryVersionNumber.initial
@@ -278,6 +284,7 @@ suite =
                             TagsChanges.empty
                                 |> TagsChanges.update computerScienceTagId financeDescribedTag
 
+                        changeList : GlossaryChangelist
                         changeList =
                             GlossaryChangelist.create
                                 GlossaryVersionNumber.initial

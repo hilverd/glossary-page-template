@@ -120,6 +120,7 @@ init commonModel itemBeingEdited =
                         items
                         (QueryParameters.filterByTag commonModel.queryParameters)
 
+                form : GlossaryItemForm
                 form =
                     Maybe.andThen
                         (\id ->
@@ -286,6 +287,7 @@ update msg model =
 
         DeleteRelatedTerm relatedTermIndex ->
             let
+                form : GlossaryItemForm
                 form =
                     Form.deleteRelatedTerm relatedTermIndex model.form
             in
@@ -304,6 +306,7 @@ update msg model =
                         Components.DropdownMenu.update
                             (\x ->
                                 let
+                                    dropdownMenusWithMoreOptionsForRelatedTerms1 : Dict Int Components.DropdownMenu.Model
                                     dropdownMenusWithMoreOptionsForRelatedTerms1 =
                                         Dict.map
                                             (\relatedTermIndex_ dropdownMenu_ ->
@@ -328,6 +331,7 @@ update msg model =
 
         MoveRelatedTermUp relatedTermIndexInt ->
             let
+                form : GlossaryItemForm
                 form =
                     Form.moveRelatedTermUp relatedTermIndexInt model.form
             in
@@ -340,6 +344,7 @@ update msg model =
 
         MoveRelatedTermDown relatedTermIndexInt ->
             let
+                form : GlossaryItemForm
                 form =
                     Form.moveRelatedTermDown relatedTermIndexInt model.form
             in
@@ -383,6 +388,7 @@ update msg model =
                                     (model.itemBeingEdited |> Maybe.withDefault newGlossaryItemId)
                                     (Just dateTime)
 
+                            changelist : GlossaryChangelist.GlossaryChangelist
                             changelist =
                                 case model.itemBeingEdited of
                                     Just _ ->
@@ -402,6 +408,7 @@ update msg model =
                                     (PageMsg.Internal << FailedToSave)
                                     (\( itemToGiveFocus, updatedGlossaryForUi ) ->
                                         let
+                                            common0 : CommonModel
                                             common0 =
                                                 model.common
                                         in
@@ -796,6 +803,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedRawTerms numberOfRelatedTer
 viewMoreOptionsForRelatedTermDropdownButton : Int -> RelatedTermIndex -> Components.DropdownMenu.Model -> Html Msg
 viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownMenuWithMoreOptionsForRelatedTerm =
     let
+        indexInt : Int
         indexInt =
             RelatedTermIndex.toInt index
     in
@@ -988,6 +996,7 @@ viewMiscellaneous on =
 viewCreateFormFooter : Model -> Html Msg
 viewCreateFormFooter model =
     let
+        saving : Saving
         saving =
             model.saving
 

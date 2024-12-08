@@ -72,9 +72,11 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                 definition =
                     GlossaryItemForUi.definition glossaryItem
 
+                relatedTerms : List DisambiguatedTerm
                 relatedTerms =
                     GlossaryItemForUi.relatedPreferredTerms glossaryItem
 
+                needsUpdating : Bool
                 needsUpdating =
                     GlossaryItemForUi.needsUpdating glossaryItem
             in
@@ -159,12 +161,15 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                             tagsNotBeingFilteredBy =
                                 tags |> List.filter (Just >> (/=) tagBeingFilteredBy)
 
+                            lastUpdatedDate : Maybe String
                             lastUpdatedDate =
                                 GlossaryItemForUi.lastUpdatedDateAsIso8601 glossaryItem
 
+                            lastUpdatedByName : Maybe String
                             lastUpdatedByName =
                                 GlossaryItemForUi.lastUpdatedByName glossaryItem
 
+                            lastUpdatedByEmailAddress : Maybe String
                             lastUpdatedByEmailAddress =
                                 GlossaryItemForUi.lastUpdatedByEmailAddress glossaryItem
                         in
@@ -359,6 +364,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
         disambiguatedPreferredTermForPreviousOrNext : GlossaryItemForUi -> Html msg
         disambiguatedPreferredTermForPreviousOrNext glossaryItem =
             let
+                preferredTerm : Term
                 preferredTerm =
                     glossaryItem
                         |> GlossaryItemForUi.disambiguatedPreferredTerm
@@ -386,6 +392,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                         |> GlossaryItemForUi.disambiguatedPreferredTerm
                         |> DisambiguatedTerm.toTerm
 
+                alternativeTerms : List Term
                 alternativeTerms =
                     GlossaryItemForUi.alternativeTerms glossaryItem
 
@@ -399,18 +406,23 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                 definition =
                     GlossaryItemForUi.definition glossaryItem
 
+                relatedTerms : List DisambiguatedTerm
                 relatedTerms =
                     GlossaryItemForUi.relatedPreferredTerms glossaryItem
 
+                needsUpdating : Bool
                 needsUpdating =
                     GlossaryItemForUi.needsUpdating glossaryItem
 
+                lastUpdatedDate : Maybe String
                 lastUpdatedDate =
                     GlossaryItemForUi.lastUpdatedDateAsIso8601 glossaryItem
 
+                lastUpdatedByName : Maybe String
                 lastUpdatedByName =
                     GlossaryItemForUi.lastUpdatedByName glossaryItem
 
+                lastUpdatedByEmailAddress : Maybe String
                 lastUpdatedByEmailAddress =
                     GlossaryItemForUi.lastUpdatedByEmailAddress glossaryItem
             in
@@ -534,6 +546,7 @@ viewGlossaryTerm :
     -> Html msg
 viewGlossaryTerm { enableMathSupport, showSilcrow, isPreferred } term =
     let
+        viewTerm : Html msg
         viewTerm =
             if isPreferred then
                 Term.view enableMathSupport [] term

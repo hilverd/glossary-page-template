@@ -119,6 +119,7 @@ fromList describedTags_ glossaryItemsForUi =
                                 )
                                 DuplicateRejectingDict.empty
 
+                    itemById : GlossaryItemIdDict GlossaryItem
                     itemById =
                         glossaryItemsForUi
                             |> List.foldl
@@ -145,6 +146,7 @@ fromList describedTags_ glossaryItemsForUi =
                             |> List.foldl
                                 (\item ( disambiguationTagByItemId_, ( normalTagsByItemId_, disambiguatedPreferredTermByItemId_ ) ) ->
                                     let
+                                        id : GlossaryItemId
                                         id =
                                             GlossaryItemForUi.id item
 
@@ -252,6 +254,7 @@ fromList describedTags_ glossaryItemsForUi =
                             itemIdsByTagId_ : TagIdDict (List GlossaryItemId)
                             itemIdsByTagId_ =
                                 let
+                                    result0 : TagIdDict (List GlossaryItemId)
                                     result0 =
                                         disambiguationTagIdByItemId
                                             |> GlossaryItemIdDict.foldl
@@ -328,6 +331,7 @@ fromList describedTags_ glossaryItemsForUi =
                             orderedAlphabetically__ =
                                 orderAlphabetically glossaryItemsForUi
 
+                            orderedByMostMentionedFirst_ : List GlossaryItemId
                             orderedByMostMentionedFirst_ =
                                 orderByMostMentionedFirst glossaryItemsForUi
                         in
@@ -358,6 +362,7 @@ relatedPreferredTerms_ disambiguatedPreferredTerm_ filterByTagId itemId ((Glossa
                     |> List.filterMap
                         (\relatedItemId ->
                             let
+                                relatedItemMatchesTagBeingFilteredBy : Bool
                                 relatedItemMatchesTagBeingFilteredBy =
                                     filterByTagId
                                         |> Maybe.map
@@ -405,6 +410,7 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItemsForUi items
                     tagById =
                         GlossaryTags.tagById items.tags
 
+                    disambiguationTag : Maybe Tag
                     disambiguationTag =
                         items.disambiguationTagIdByItemId
                             |> GlossaryItemIdDict.get itemId
@@ -414,6 +420,7 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItemsForUi items
                                     TagIdDict.get disambiguationTagId tagById
                                 )
 
+                    normalTags : List Tag
                     normalTags =
                         items.normalTagIdsByItemId
                             |> GlossaryItemIdDict.get itemId
@@ -435,15 +442,19 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItemsForUi items
                             |> relatedPreferredTerms_ disambiguatedPreferredTerm_ filterByTagId itemId
                             |> Maybe.withDefault []
 
+                    needsUpdating : Bool
                     needsUpdating =
                         GlossaryItem.needsUpdating item
 
+                    lastUpdatedDateAsIso8601 : Maybe String
                     lastUpdatedDateAsIso8601 =
                         GlossaryItem.lastUpdatedDateAsIso8601 item
 
+                    lastUpdatedByName : Maybe String
                     lastUpdatedByName =
                         GlossaryItem.lastUpdatedByName item
 
+                    lastUpdatedByEmailAddress : Maybe String
                     lastUpdatedByEmailAddress =
                         GlossaryItem.lastUpdatedByEmailAddress item
                 in
@@ -520,6 +531,7 @@ tagByIdList (GlossaryItemsForUi items) =
 tagIdFromTag : Tag -> GlossaryItemsForUi -> Maybe TagId
 tagIdFromTag tag (GlossaryItemsForUi items) =
     let
+        tagIdByRawTag : Dict String TagId
         tagIdByRawTag =
             GlossaryTags.tagIdByRawTag items.tags
     in
@@ -702,6 +714,7 @@ disambiguatedPreferredTermsByAlternativeTerm filterByTagId ((GlossaryItemsForUi 
                                         |> List.foldl
                                             (\alternativeTerm ( alternativeTermByRaw1, preferredTermsByRawAlternativeTerm1 ) ->
                                                 let
+                                                    raw : String
                                                     raw =
                                                         alternativeTerm
                                                             |> Term.raw
@@ -808,6 +821,7 @@ orderedFocusedOn filterByTagId glossaryItemId ((GlossaryItemsForUi items) as glo
                 |> GlossaryItemIdDict.foldl
                     (\id relatedItemIds result ->
                         let
+                            itemHasDefinition : Bool
                             itemHasDefinition =
                                 items.itemById
                                     |> GlossaryItemIdDict.get id

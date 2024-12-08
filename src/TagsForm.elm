@@ -182,6 +182,7 @@ validate tagsForm =
                 duplicateTagMessage =
                     I18n.thisTagIsADuplicateOfAnEarlierOne
 
+                rows_ : Array Row
                 rows_ =
                     form.rows
                         |> Array.toList
@@ -191,9 +192,11 @@ validate tagsForm =
                                 case row of
                                     Existing record ->
                                         let
+                                            trimmedRawTag : String
                                             trimmedRawTag =
                                                 record.tagField |> TagField.raw |> String.trim
 
+                                            validatedRow : Row
                                             validatedRow =
                                                 if Set.member trimmedRawTag trimmedRawTagsSeenSoFar then
                                                     Existing
@@ -217,9 +220,11 @@ validate tagsForm =
 
                                     New record ->
                                         let
+                                            trimmedRawTag : String
                                             trimmedRawTag =
                                                 record.tagField |> TagField.raw |> String.trim
 
+                                            validatedRow : Row
                                             validatedRow =
                                                 if Set.member trimmedRawTag trimmedRawTagsSeenSoFar then
                                                     New
@@ -250,6 +255,7 @@ updateTag index body tagsForm =
     case tagsForm of
         TagsForm form ->
             let
+                rows_ : Array Row
                 rows_ =
                     Extras.Array.update
                         (\row ->
@@ -275,6 +281,7 @@ updateTagDescription index body tagsForm =
     case tagsForm of
         TagsForm form ->
             let
+                rows_ : Array Row
                 rows_ =
                     Extras.Array.update
                         (\row ->
@@ -319,6 +326,7 @@ deleteRow index tagsForm =
     case tagsForm of
         TagsForm form ->
             let
+                rows_ : Array Row
                 rows_ =
                     form.rows
                         |> Array.indexedMap Tuple.pair

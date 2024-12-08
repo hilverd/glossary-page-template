@@ -17,6 +17,7 @@ suite =
         [ test "can format a glossary as Markdown" <|
             \_ ->
                 let
+                    expected : String
                     expected =
                         """
 # Example Glossary

@@ -83,6 +83,7 @@ fromGlossaryItems filterByTagId glossaryItemsForUi =
                                     |> List.sortWith
                                         (\( _, t1 ) ( _, t2 ) -> DisambiguatedTerm.compareAlphabetically t1 t2)
 
+                            entry : Entry
                             entry =
                                 AlternativeTerm alternativeTerm sortedPreferredTerms
                         in

@@ -33,6 +33,7 @@ changeAndSave :
     -> ( Saving, Cmd msg )
 changeAndSave editability glossary changelist_ errorMsg successMsg =
     let
+        changelist : GlossaryChangelist
         changelist =
             case editability of
                 EditingWithSeparateBackend { userName, userEmailAddress } ->

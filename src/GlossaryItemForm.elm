@@ -396,6 +396,7 @@ fromGlossaryItemForUi_ existingPreferredTerms allTags preferredTermsOfItemsListi
         preferredTermFieldForItem : TermField
         preferredTermFieldForItem =
             let
+                preferredTerm : Term
                 preferredTerm =
                     GlossaryItemForUi.nonDisambiguatedPreferredTerm item
             in
@@ -479,6 +480,7 @@ toGlossaryItem glossaryItems form id dateTime =
                 raw =
                     termField |> TermField.raw |> String.trim
 
+                isAbbreviation : Bool
                 isAbbreviation =
                     TermField.isAbbreviation termField
             in
@@ -516,6 +518,7 @@ toGlossaryItem glossaryItems form id dateTime =
                 |> disambiguationTagId
                 |> Maybe.andThen (\tagId -> GlossaryItems.tagFromId tagId glossaryItems)
 
+        definition : Maybe Definition.Definition
         definition =
             form
                 |> definitionField
@@ -552,9 +555,11 @@ toGlossaryItem glossaryItems form id dateTime =
                                 )
                     )
 
+        needsUpdating_ : Bool
         needsUpdating_ =
             needsUpdating form
 
+        lastUpdatedDate_ : Maybe String
         lastUpdatedDate_ =
             dateTime
     in
@@ -670,6 +675,7 @@ toggleTagCheckbox tag glossaryItemForm =
                             )
                         |> List.head
 
+                tagCheckboxes_ : List ( ( TagId, Tag ), Bool )
                 tagCheckboxes_ =
                     form.tagCheckboxes
                         |> List.map
@@ -681,6 +687,7 @@ toggleTagCheckbox tag glossaryItemForm =
                                     ( ( tagId, tag_ ), checked )
                             )
 
+                disambiguationTagId_ : Maybe TagId
                 disambiguationTagId_ =
                     tagIdAndChecked
                         |> Maybe.map
@@ -793,9 +800,11 @@ moveRelatedTermUp index glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             let
+                relatedTermFields0 : Array RelatedTermField
                 relatedTermFields0 =
                     form.relatedTermFields
 
+                indexInt : Int
                 indexInt =
                     RelatedTermIndex.toInt index
 
@@ -828,9 +837,11 @@ moveRelatedTermDown index glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             let
+                relatedTermFields0 : Array RelatedTermField
                 relatedTermFields0 =
                     form.relatedTermFields
 
+                indexInt : Int
                 indexInt =
                     RelatedTermIndex.toInt index
 
