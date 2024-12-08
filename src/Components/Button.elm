@@ -6,6 +6,9 @@ import Accessibility.Key
 import Extras.HtmlAttribute
 import Html exposing (Html)
 import Html.Attributes exposing (class)
+import Internationalisation as I18n
+import Svg exposing (path, svg)
+import Svg.Attributes as SvgAttr
 
 
 withAdditionalAttributes :
@@ -134,10 +137,10 @@ toggle on labelId additionalAttributes children =
         (class "flex items-center" :: additionalAttributes)
         [ Accessibility.button
             [ Html.Attributes.type_ "button"
-            , class "relative inline-flex shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer motion-reduce:transition-none transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+            , class "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
             , class <|
                 if on then
-                    "bg-indigo-600 dark:bg-indigo-300"
+                    "bg-indigo-600 dark:bg-indigo-400"
 
                 else
                     "bg-gray-200 dark:bg-gray-600"
@@ -146,8 +149,11 @@ toggle on labelId additionalAttributes children =
             , Accessibility.Aria.labelledBy labelId
             ]
             [ Accessibility.span
-                [ Accessibility.Aria.hidden True
-                , class "pointer-events-none inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-900 shadow transform motion-reduce:transition-none ring-0 transition ease-in-out duration-200"
+                [ class "sr-only"
+                ]
+                [ Html.text I18n.useSetting ]
+            , Accessibility.span
+                [ class "pointer-events-none relative inline-block size-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
                 , class <|
                     if on then
                         "translate-x-5"
@@ -155,7 +161,53 @@ toggle on labelId additionalAttributes children =
                     else
                         "translate-x-0"
                 ]
-                []
+                [ Accessibility.span
+                    [ class "absolute inset-0 flex size-full items-center justify-center transition-opacity"
+                    , class <|
+                        if on then
+                            "opacity-0 duration-100 ease-out"
+
+                        else
+                            "opacity-100 duration-200 ease-in"
+                    , Accessibility.Aria.hidden True
+                    ]
+                    [ svg
+                        [ SvgAttr.class "size-3 text-gray-400"
+                        , SvgAttr.fill "none"
+                        , SvgAttr.viewBox "0 0 12 12"
+                        ]
+                        [ path
+                            [ SvgAttr.d "M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2"
+                            , SvgAttr.stroke "currentColor"
+                            , SvgAttr.strokeWidth "2"
+                            , SvgAttr.strokeLinecap "round"
+                            , SvgAttr.strokeLinejoin "round"
+                            ]
+                            []
+                        ]
+                    ]
+                , Accessibility.span
+                    [ class "absolute inset-0 flex size-full items-center justify-center transition-opacity"
+                    , class <|
+                        if on then
+                            "opacity-100 duration-200 ease-in"
+
+                        else
+                            "opacity-0 duration-100 ease-out"
+                    , Accessibility.Aria.hidden True
+                    ]
+                    [ svg
+                        [ SvgAttr.class "size-3 text-indigo-600 dark:text-indigo-800"
+                        , SvgAttr.fill "currentColor"
+                        , SvgAttr.viewBox "0 0 12 12"
+                        ]
+                        [ path
+                            [ SvgAttr.d "M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z"
+                            ]
+                            []
+                        ]
+                    ]
+                ]
             ]
         , Accessibility.span
             [ class "ml-3"
