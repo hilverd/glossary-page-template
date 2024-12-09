@@ -1,7 +1,7 @@
 module Data.GlossaryItemFromDom exposing
     ( GlossaryItemFromDom
     , codec
-    , disambiguatedPreferredTermIdString
+    , disambiguatedPreferredTerm, disambiguatedPreferredTermIdString
     , toHtmlTree
     )
 
@@ -17,7 +17,7 @@ module Data.GlossaryItemFromDom exposing
 
 # Query
 
-@docs disambiguatedPreferredTermIdString
+@docs disambiguatedPreferredTerm, disambiguatedPreferredTermIdString
 
 
 # Export
@@ -187,14 +187,20 @@ hrefFromRelatedTerm term =
     HtmlTree.Attribute "href" <| Extras.Url.fragmentOnly <| TermFromDom.id term
 
 
-{-| The HTML ID of the disambiguated preferred term.
+{-| The HTML ID of the disambiguated preferred term for this item.
 -}
 disambiguatedPreferredTermIdString : GlossaryItemFromDom -> String
-disambiguatedPreferredTermIdString glossaryItemFromDom =
+disambiguatedPreferredTermIdString =
+    disambiguatedPreferredTerm >> TermFromDom.id
+
+
+{-| The disambiguated preferred term for this item.
+-}
+disambiguatedPreferredTerm : GlossaryItemFromDom -> TermFromDom
+disambiguatedPreferredTerm glossaryItemFromDom =
     glossaryItemFromDom.disambiguationTag
         |> Maybe.map (\tag -> disambiguatedTerm tag glossaryItemFromDom.preferredTerm)
         |> Maybe.withDefault glossaryItemFromDom.preferredTerm
-        |> TermFromDom.id
 
 
 {-| Disambiguate a term by appending the given tag in parentheses.

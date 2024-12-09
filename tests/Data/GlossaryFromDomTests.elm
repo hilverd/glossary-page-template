@@ -8,6 +8,7 @@ import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelis
 import Data.GlossaryFromDom as GlossaryFromDom exposing (ApplyChangesResult(..))
 import Data.GlossaryItem.TermFromDom as TermFromDom
 import Data.GlossaryItemForUi as GlossaryItemForUi
+import Data.GlossaryItemFromDom exposing (GlossaryItemFromDom)
 import Data.GlossaryVersionNumber as GlossaryVersionNumber
 import Data.TagId as TagId exposing (TagId)
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
@@ -107,6 +108,60 @@ suite =
                                         , interestRateItemFromDom
                                         , loanItemFromDom
                                         , spadeItemFromDom
+                                        ]
+                                    , versionNumber =
+                                        GlossaryVersionNumber.initial
+                                            |> GlossaryVersionNumber.increment
+                                            |> GlossaryVersionNumber.toInt
+                                  }
+                                )
+                            )
+            , test "that update items" <|
+                \_ ->
+                    let
+                        loanRenamedToAdvance : GlossaryItemFromDom
+                        loanRenamedToAdvance =
+                            { loanItemFromDom
+                                | preferredTerm =
+                                    { isAbbreviation = False, body = "Advance" }
+                            }
+
+                        defaultFinanceNowPointingToAdvance : GlossaryItemFromDom
+                        defaultFinanceNowPointingToAdvance =
+                            { defaultFinanceItemFromDom
+                                | relatedPreferredTerms = [ { isAbbreviation = False, body = "Advance" } ]
+                            }
+
+                        interestRateNowPointingToAdvance : GlossaryItemFromDom
+                        interestRateNowPointingToAdvance =
+                            { interestRateItemFromDom
+                                | relatedPreferredTerms = [ { isAbbreviation = False, body = "Advance" } ]
+                            }
+
+                        changeList : GlossaryChangelist
+                        changeList =
+                            GlossaryChangelist.create
+                                GlossaryVersionNumber.initial
+                                [ GlossaryChange.Update loanRenamedToAdvance
+                                ]
+                    in
+                    glossaryFromDom
+                        |> GlossaryFromDom.applyChanges changeList
+                        |> Expect.equal
+                            (ChangesApplied
+                                ( Just <| GlossaryItemForUi.id loanItem
+                                , { glossaryFromDom
+                                    | tags =
+                                        [ computerScienceDescribedTagFromDom
+                                        , financeDescribedTagFromDom
+                                        , gardeningDescribedTagFromDom
+                                        ]
+                                    , items =
+                                        [ loanRenamedToAdvance
+                                        , defaultComputerScienceItemFromDom
+                                        , defaultFinanceNowPointingToAdvance
+                                        , informationRetrievalItemFromDom
+                                        , interestRateNowPointingToAdvance
                                         ]
                                     , versionNumber =
                                         GlossaryVersionNumber.initial

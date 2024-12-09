@@ -35,7 +35,7 @@ import Data.DescribedTagFromDom as DescribedTagFromDom exposing (DescribedTagFro
 import Data.GlossaryChange exposing (GlossaryChange(..))
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryItem.Tag as Tag
-import Data.GlossaryItem.TermFromDom as TermFromDom
+import Data.GlossaryItem.TermFromDom as TermFromDom exposing (TermFromDom)
 import Data.GlossaryItemFromDom as GlossaryItemFromDom exposing (GlossaryItemFromDom)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryTitle as GlossaryTitle
@@ -296,7 +296,62 @@ insert glossaryItemFromDom glossaryFromDom =
 -}
 update : GlossaryItemId -> GlossaryItemFromDom -> GlossaryFromDom -> Result String GlossaryFromDom
 update itemId glossaryItemFromDom glossaryFromDom =
-    glossaryFromDom
+    let
+        currentItem : Maybe GlossaryItemFromDom
+        currentItem =
+            glossaryFromDom.items
+                |> List.filter (\item -> item.id == GlossaryItemId.toString itemId)
+                |> List.head
+
+        currentDisambiguatedPreferredTerm : Maybe TermFromDom
+        currentDisambiguatedPreferredTerm =
+            Maybe.map GlossaryItemFromDom.disambiguatedPreferredTerm currentItem
+
+        updatedDisambiguatedPreferredTerm : TermFromDom
+        updatedDisambiguatedPreferredTerm =
+            GlossaryItemFromDom.disambiguatedPreferredTerm glossaryItemFromDom
+
+        glossaryFromDomAfterUpdatingOtherItemsAsNeeded : GlossaryFromDom
+        glossaryFromDomAfterUpdatingOtherItemsAsNeeded =
+            if Just updatedDisambiguatedPreferredTerm /= currentDisambiguatedPreferredTerm then
+                currentDisambiguatedPreferredTerm
+                    |> Maybe.map
+                        (\currentDisambiguatedPreferredTerm_ ->
+                            glossaryFromDom.items
+                                |> List.filter
+                                    (.relatedPreferredTerms
+                                        >> List.member currentDisambiguatedPreferredTerm_
+                                    )
+                        )
+                    |> Maybe.withDefault []
+                    |> List.foldl
+                        (\item result ->
+                            let
+                                updatedItem : GlossaryItemFromDom
+                                updatedItem =
+                                    { item
+                                        | relatedPreferredTerms =
+                                            item.relatedPreferredTerms
+                                                |> List.map
+                                                    (\relatedPreferredTerm ->
+                                                        if Just relatedPreferredTerm == currentDisambiguatedPreferredTerm then
+                                                            updatedDisambiguatedPreferredTerm
+
+                                                        else
+                                                            relatedPreferredTerm
+                                                    )
+                                    }
+                            in
+                            result
+                                |> update (GlossaryItemId.create item.id) updatedItem
+                                |> Result.withDefault result
+                        )
+                        glossaryFromDom
+
+            else
+                glossaryFromDom
+    in
+    glossaryFromDomAfterUpdatingOtherItemsAsNeeded
         |> remove itemId
         |> Result.andThen (insert glossaryItemFromDom)
         |> Result.map Tuple.second

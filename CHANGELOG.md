@@ -20,6 +20,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
   - Change styling of index of terms.
 
 ### Fixed
+
+- Keep related item links intact when renaming those items.
+
 ### Removed
 
 ## [5.1.0] - 2024-11-18
