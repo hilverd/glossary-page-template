@@ -7,6 +7,7 @@ import Data.GlossaryChange as GlossaryChange
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryFromDom as GlossaryFromDom exposing (ApplyChangesResult(..))
 import Data.GlossaryItem.TermFromDom as TermFromDom
+import Data.GlossaryItemForUi as GlossaryItemForUi
 import Data.GlossaryVersionNumber as GlossaryVersionNumber
 import Data.TagId as TagId exposing (TagId)
 import Data.TagsChanges as TagsChanges exposing (TagsChanges)
@@ -36,6 +37,8 @@ import TestData
         , informationRetrievalItemFromDom
         , interestRateItemFromDom
         , loanItemFromDom
+        , spadeItem
+        , spadeItemFromDom
         )
 
 
@@ -75,7 +78,43 @@ suite =
                         |> Expect.equal (Ok TestData.glossaryFromDom)
             ]
         , describe "can apply changes"
-            [ test "that insert tags" <|
+            [ test "that insert items" <|
+                \_ ->
+                    let
+                        changeList : GlossaryChangelist
+                        changeList =
+                            GlossaryChangelist.create
+                                GlossaryVersionNumber.initial
+                                [ GlossaryChange.Insert TestData.spadeItemFromDom
+                                ]
+                    in
+                    glossaryFromDom
+                        |> GlossaryFromDom.applyChanges changeList
+                        |> Expect.equal
+                            (ChangesApplied
+                                ( Just <| GlossaryItemForUi.id spadeItem
+                                , { glossaryFromDom
+                                    | tags =
+                                        [ computerScienceDescribedTagFromDom
+                                        , financeDescribedTagFromDom
+                                        , gardeningDescribedTagFromDom
+                                        ]
+                                    , items =
+                                        [ defaultComputerScienceItemFromDom
+                                        , defaultFinanceItemFromDom
+                                        , informationRetrievalItemFromDom
+                                        , interestRateItemFromDom
+                                        , loanItemFromDom
+                                        , spadeItemFromDom
+                                        ]
+                                    , versionNumber =
+                                        GlossaryVersionNumber.initial
+                                            |> GlossaryVersionNumber.increment
+                                            |> GlossaryVersionNumber.toInt
+                                  }
+                                )
+                            )
+            , test "that insert tags" <|
                 \_ ->
                     let
                         tagsChanges : TagsChanges

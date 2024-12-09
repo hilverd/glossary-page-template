@@ -1,4 +1,4 @@
-module TestData exposing (computerScienceDescribedTag, computerScienceDescribedTagFromDom, computerScienceRawTag, computerScienceTag, computerScienceTagId, computerScienceTagRawDescription, defaultComputerScienceDefinition, defaultComputerScienceItem, defaultComputerScienceItemFromDom, defaultFinanceDefinition, defaultFinanceItem, defaultFinanceItemFromDom, financeDescribedTag, financeDescribedTagFromDom, financeRawTag, financeTag, financeTagDescription, financeTagId, financeTagRawDescription, gardeningDescribedTag, gardeningDescribedTagFromDom, gardeningTag, gardeningTagDescription, gardeningTagId, glossary, glossaryFromDom, glossaryItemsForUi, houseworkRawTag, houseworkTag, houseworkTagDescription, houseworkTagRawDescription, houseworkTagRawId, informationRetrievalItem, informationRetrievalItemFromDom, interestRateItem, interestRateItemFromDom, loanItem, loanItemFromDom)
+module TestData exposing (computerScienceDescribedTag, computerScienceDescribedTagFromDom, computerScienceRawTag, computerScienceTag, computerScienceTagId, computerScienceTagRawDescription, defaultComputerScienceDefinition, defaultComputerScienceItem, defaultComputerScienceItemFromDom, defaultFinanceDefinition, defaultFinanceItem, defaultFinanceItemFromDom, financeDescribedTag, financeDescribedTagFromDom, financeRawTag, financeTag, financeTagDescription, financeTagId, financeTagRawDescription, gardeningDescribedTag, gardeningDescribedTagFromDom, gardeningTag, gardeningTagDescription, gardeningTagId, glossary, glossaryFromDom, glossaryItemsForUi, houseworkRawTag, houseworkTag, houseworkTagDescription, houseworkTagRawDescription, houseworkTagRawId, informationRetrievalItem, informationRetrievalItemFromDom, interestRateItem, interestRateItemFromDom, loanItem, loanItemFromDom, spadeItem, spadeItemFromDom)
 
 import Data.AboutParagraph as AboutParagraph
 import Data.CardWidth as CardWidth
@@ -346,6 +346,48 @@ loanItemFromDom =
     , relatedPreferredTerms = [ { isAbbreviation = False, body = "Interest rate" } ]
     , needsUpdating = False
     , lastUpdatedDateAsIso8601 = Just "2023-10-30T08:26:18.523Z"
+    , lastUpdatedByName = Nothing
+    , lastUpdatedByEmailAddress = Nothing
+    }
+
+
+spadeRawDefinition : String
+spadeRawDefinition =
+    "A tool primarily for digging consisting of a long handle and blade."
+
+
+spadeDefinition : Definition
+spadeDefinition =
+    Definition.fromMarkdown spadeRawDefinition
+
+
+spadeItem : GlossaryItemForUi
+spadeItem =
+    GlossaryItemForUi.create
+        (GlossaryItemId.create "Spade")
+        (Term.fromMarkdown "Spade" False)
+        []
+        Nothing
+        [ financeTag ]
+        (Just spadeDefinition)
+        [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate" False ]
+        False
+        (Just "2023-10-30T08:26:18.523Z")
+        Nothing
+        Nothing
+
+
+spadeItemFromDom : GlossaryItemFromDom
+spadeItemFromDom =
+    { id = "Spade"
+    , preferredTerm = { isAbbreviation = False, body = "Spade" }
+    , alternativeTerms = []
+    , disambiguationTag = Nothing
+    , normalTags = [ gardeningRawTag ]
+    , definition = Just spadeRawDefinition
+    , relatedPreferredTerms = []
+    , needsUpdating = False
+    , lastUpdatedDateAsIso8601 = Just "2023-11-04T09:26:18.523Z"
     , lastUpdatedByName = Nothing
     , lastUpdatedByEmailAddress = Nothing
     }
