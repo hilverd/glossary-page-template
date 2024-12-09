@@ -13,17 +13,21 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+### Fixed
+### Removed
+
+## [5.2.0] - 2024-12-09
+
+### Changed
 
 - Improve performance.
-- Improve styling
+- Improve styling.
   - Increase background/foreground contrast for a number of elements.
   - Change styling of index of terms.
 
 ### Fixed
 
 - Keep links to related items intact when renaming those items.
-
-### Removed
 
 ## [5.1.0] - 2024-11-18
 
@@ -783,7 +787,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.1.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.2.0...HEAD
+[5.2.0]: https://github.com/hilverd/glossary-page-template/compare/v5.1.0...v5.2.0
 [5.1.0]: https://github.com/hilverd/glossary-page-template/compare/v5.0.3...v5.1.0
 [5.0.3]: https://github.com/hilverd/glossary-page-template/compare/v5.0.2...v5.0.3
 [5.0.2]: https://github.com/hilverd/glossary-page-template/compare/v5.0.1...v5.0.2
