@@ -35,10 +35,10 @@ mv assets/glossary-*.css "glossary-$release_tag".min.css
 # The command below makes `file://` URLs look like `http://example.com/...` ones.
 # See also https://github.com/elm/core/blob/1.0.0/hints/1.md
 sed -i \
-  -e 's! \([a-zA-Z0-9]\+([a-zA-Z0-9]\+\.location\.href\))\.a||! \1).a||\1.replace(/^file:\\/\\//, "http://example.com")).a||!' \
+  -e 's! \([a-zA-Z0-9]\+(\$\?[a-zA-Z0-9]\+\.location\.href\))\.a||! \1).a||\1.replace(/^file:\\/\\//, "http://example.com")).a||!' \
   "glossary-$release_tag".min.js
 
-grep -q 'example\.com' "glossary-$release_tag".min.js || fail 'Failed to apply Browser.application hack'
+grep -q 'http://example\.com' "glossary-$release_tag".min.js || fail 'Failed to apply Browser.application hack'
 
 for template in glossary empty; do
   cat $template.html | \
