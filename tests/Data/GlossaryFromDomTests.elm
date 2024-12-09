@@ -36,6 +36,7 @@ import TestData
         , houseworkTagRawId
         , informationRetrievalItemFromDom
         , interestRateItemFromDom
+        , loanItem
         , loanItemFromDom
         , spadeItem
         , spadeItemFromDom
@@ -106,6 +107,40 @@ suite =
                                         , interestRateItemFromDom
                                         , loanItemFromDom
                                         , spadeItemFromDom
+                                        ]
+                                    , versionNumber =
+                                        GlossaryVersionNumber.initial
+                                            |> GlossaryVersionNumber.increment
+                                            |> GlossaryVersionNumber.toInt
+                                  }
+                                )
+                            )
+            , test "that remove items" <|
+                \_ ->
+                    let
+                        changeList : GlossaryChangelist
+                        changeList =
+                            GlossaryChangelist.create
+                                GlossaryVersionNumber.initial
+                                [ GlossaryChange.Remove <| GlossaryItemForUi.id TestData.loanItem
+                                ]
+                    in
+                    glossaryFromDom
+                        |> GlossaryFromDom.applyChanges changeList
+                        |> Expect.equal
+                            (ChangesApplied
+                                ( Nothing
+                                , { glossaryFromDom
+                                    | tags =
+                                        [ computerScienceDescribedTagFromDom
+                                        , financeDescribedTagFromDom
+                                        , gardeningDescribedTagFromDom
+                                        ]
+                                    , items =
+                                        [ defaultComputerScienceItemFromDom
+                                        , defaultFinanceItemFromDom
+                                        , informationRetrievalItemFromDom
+                                        , interestRateItemFromDom
                                         ]
                                     , versionNumber =
                                         GlossaryVersionNumber.initial
