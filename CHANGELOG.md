@@ -21,7 +21,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Fixed
 
-- Keep related item links intact when renaming those items.
+- Keep links to related items intact when renaming those items.
 
 ### Removed
 
