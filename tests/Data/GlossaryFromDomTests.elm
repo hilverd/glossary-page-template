@@ -75,66 +75,7 @@ suite =
                         |> Expect.equal (Ok TestData.glossaryFromDom)
             ]
         , describe "can apply changes"
-            [ test "unless any term starts with 'glossary-page-' (after changing to lowercase)" <|
-                \_ ->
-                    let
-                        changeList : GlossaryChangelist
-                        changeList =
-                            GlossaryChangelist.create
-                                GlossaryVersionNumber.initial
-                                [ GlossaryChange.Insert
-                                    { loanItemFromDom
-                                        | id = "some-id"
-                                        , preferredTerm = TermFromDom.create False "Glossary-Page-Foo"
-                                    }
-                                ]
-                    in
-                    glossaryFromDom
-                        |> GlossaryFromDom.applyChanges changeList
-                        |> Expect.equal
-                            (LogicalErrorWhenApplyingChanges "This term is reserved: Glossary-Page-Foo")
-            , test "unless an item's preferred term is the same as an alternative term in any item" <|
-                \_ ->
-                    let
-                        changeList : GlossaryChangelist
-                        changeList =
-                            GlossaryChangelist.create
-                                GlossaryVersionNumber.initial
-                                [ GlossaryChange.Insert
-                                    { loanItemFromDom
-                                        | id = "some-id"
-                                        , preferredTerm = TermFromDom.create False "Foo"
-                                        , alternativeTerms = [ TermFromDom.create False "Loan" ]
-                                    }
-                                ]
-                    in
-                    glossaryFromDom
-                        |> GlossaryFromDom.applyChanges changeList
-                        |> Expect.equal
-                            (LogicalErrorWhenApplyingChanges "A preferred term cannot also appear as an alternative term: \"Loan\"")
-            , test "unless an item has two identical alternative terms" <|
-                \_ ->
-                    let
-                        changeList : GlossaryChangelist
-                        changeList =
-                            GlossaryChangelist.create
-                                GlossaryVersionNumber.initial
-                                [ GlossaryChange.Insert
-                                    { loanItemFromDom
-                                        | id = "some-id"
-                                        , preferredTerm = TermFromDom.create False "Foo"
-                                        , alternativeTerms =
-                                            [ TermFromDom.create False "Bar"
-                                            , TermFromDom.create False "Bar"
-                                            ]
-                                    }
-                                ]
-                    in
-                    glossaryFromDom
-                        |> GlossaryFromDom.applyChanges changeList
-                        |> Expect.equal
-                            (LogicalErrorWhenApplyingChanges "The alternative term \"Bar\" occurs multiple times in the item with preferred term \"Foo\".")
-            , test "that insert tags" <|
+            [ test "that insert tags" <|
                 \_ ->
                     let
                         tagsChanges : TagsChanges
@@ -265,6 +206,65 @@ suite =
                                   }
                                 )
                             )
+            , test "unless any term starts with 'glossary-page-' (after changing to lowercase)" <|
+                \_ ->
+                    let
+                        changeList : GlossaryChangelist
+                        changeList =
+                            GlossaryChangelist.create
+                                GlossaryVersionNumber.initial
+                                [ GlossaryChange.Insert
+                                    { loanItemFromDom
+                                        | id = "some-id"
+                                        , preferredTerm = TermFromDom.create False "Glossary-Page-Foo"
+                                    }
+                                ]
+                    in
+                    glossaryFromDom
+                        |> GlossaryFromDom.applyChanges changeList
+                        |> Expect.equal
+                            (LogicalErrorWhenApplyingChanges "This term is reserved: Glossary-Page-Foo")
+            , test "unless an item's preferred term is the same as an alternative term in any item" <|
+                \_ ->
+                    let
+                        changeList : GlossaryChangelist
+                        changeList =
+                            GlossaryChangelist.create
+                                GlossaryVersionNumber.initial
+                                [ GlossaryChange.Insert
+                                    { loanItemFromDom
+                                        | id = "some-id"
+                                        , preferredTerm = TermFromDom.create False "Foo"
+                                        , alternativeTerms = [ TermFromDom.create False "Loan" ]
+                                    }
+                                ]
+                    in
+                    glossaryFromDom
+                        |> GlossaryFromDom.applyChanges changeList
+                        |> Expect.equal
+                            (LogicalErrorWhenApplyingChanges "A preferred term cannot also appear as an alternative term: \"Loan\"")
+            , test "unless an item has two identical alternative terms" <|
+                \_ ->
+                    let
+                        changeList : GlossaryChangelist
+                        changeList =
+                            GlossaryChangelist.create
+                                GlossaryVersionNumber.initial
+                                [ GlossaryChange.Insert
+                                    { loanItemFromDom
+                                        | id = "some-id"
+                                        , preferredTerm = TermFromDom.create False "Foo"
+                                        , alternativeTerms =
+                                            [ TermFromDom.create False "Bar"
+                                            , TermFromDom.create False "Bar"
+                                            ]
+                                    }
+                                ]
+                    in
+                    glossaryFromDom
+                        |> GlossaryFromDom.applyChanges changeList
+                        |> Expect.equal
+                            (LogicalErrorWhenApplyingChanges "The alternative term \"Bar\" occurs multiple times in the item with preferred term \"Foo\".")
             , test "unless the version in the changelist does not match the one in the glossary" <|
                 \_ ->
                     let
