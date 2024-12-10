@@ -1613,7 +1613,7 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpda
 
         recommendedMaximumNumberOfItems : Int
         recommendedMaximumNumberOfItems =
-            500
+            1000
     in
     div
         []

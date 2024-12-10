@@ -13,6 +13,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+
+- Raise recommended maximum number of items from 500 to 1,000.
+
 ### Fixed
 ### Removed
 
