@@ -150,6 +150,7 @@ type InternalMsg
     | ScrollingUpWhileFarAwayFromTheTop
     | StartHidingBackToTopLink Int
     | CompleteHidingBackToTopLink Int
+    | ImmediatelyHideBackToTopLink
     | JumpToItem GlossaryItemId
     | ChangeLayoutToShowSingle GlossaryItemId
     | ShowRelatedTermAsSingle Term
@@ -203,7 +204,11 @@ init commonModel itemWithFocus =
             , model =
                 Components.SearchDialog.init ElementIds.searchDialog
                     [ Components.SearchDialog.onChangeSearchString (PageMsg.Internal << UpdateSearchString)
-                    , Components.SearchDialog.onShow <| preventBackgroundScrolling ()
+                    , Components.SearchDialog.onShow <|
+                        Cmd.batch
+                            [ preventBackgroundScrolling ()
+                            , Extras.Task.messageToCommand <| PageMsg.Internal ImmediatelyHideBackToTopLink
+                            ]
                     , Components.SearchDialog.onHide <| Extras.Task.messageToCommand <| PageMsg.Internal SearchDialogWasHidden
                     ]
             }
@@ -441,6 +446,22 @@ update msg model =
             else
                 ( model, Cmd.none )
 
+        ImmediatelyHideBackToTopLink ->
+            ( { model
+                | backToTopLinkVisibility =
+                    case model.backToTopLinkVisibility of
+                        Invisible counter ->
+                            Invisible counter
+
+                        Visible counter ->
+                            Invisible counter
+
+                        Disappearing counter ->
+                            Invisible counter
+              }
+            , Cmd.none
+            )
+
         JumpToItem itemId ->
             ( { model
                 | menuForMobileVisibility = GradualVisibility.Disappearing
@@ -457,6 +478,16 @@ update msg model =
             ( { model
                 | layout = ShowSingleItem
                 , itemWithFocus = Just index
+                , backToTopLinkVisibility =
+                    case model.backToTopLinkVisibility of
+                        Invisible counter ->
+                            Invisible counter
+
+                        Visible counter ->
+                            Invisible counter
+
+                        Disappearing counter ->
+                            Invisible counter
               }
             , preventBackgroundScrolling ()
             )

@@ -17,6 +17,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Raise recommended maximum number of items from 500 to 1,000.
 
 ### Fixed
+
+- Hide "Back to top" link when opening search or single item dialog.
+
 ### Removed
 
 ## [5.2.1] - 2024-12-09
