@@ -1020,7 +1020,7 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
                 [ I18n.webInterfaceDescription
                 , I18n.runTheFollowingCommand tabbable
                 , div
-                    [ class "mt-3 flex rounded-md shadow-sm" ]
+                    [ class "mt-3 flex rounded-md" ]
                     [ div
                         [ class "block w-full max-w-2xl flex flex-grow items-stretch focus-within:z-10" ]
                         [ Accessibility.inputText
