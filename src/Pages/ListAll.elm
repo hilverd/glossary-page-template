@@ -611,7 +611,7 @@ update msg model =
                             |> Task.andThen
                                 (\termIndexGroupElement ->
                                     if staticSidebar then
-                                        ElementIds.quickSearchButtonAndLetterGrid
+                                        ElementIds.letterGrid
                                             |> Dom.getElement
                                             |> Task.andThen
                                                 (\quickSearchButtonAndLetterGridElement ->
@@ -1728,10 +1728,7 @@ viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility runningOnMac
             menuForMobileVisibility
             enableMathSupport
             indexOfTerms
-        , Html.Lazy.lazy3 viewStaticSidebarForDesktop
-            runningOnMacOs
-            enableMathSupport
-            indexOfTerms
+        , Html.Lazy.lazy2 viewStaticSidebarForDesktop enableMathSupport indexOfTerms
         ]
 
 
@@ -1855,12 +1852,12 @@ viewBackToTopLink staticSidebar visibility =
 viewQuickSearchButton : Bool -> Html Msg
 viewQuickSearchButton runningOnMacOs =
     div
-        [ class "px-3 pb-4 bg-white dark:bg-slate-900" ]
+        []
         [ div
             [ class "bg-gray-50 dark:bg-slate-900 relative pointer-events-auto" ]
             [ button
                 [ Html.Attributes.type_ "button"
-                , class "w-full lg:flex items-center text-sm leading-6 text-slate-500 dark:text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-600 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800 select-none"
+                , class "w-full flex items-center text-sm leading-6 text-slate-500 dark:text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-600 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800 select-none"
                 , Html.Events.onClick <| PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show
                 , Accessibility.Aria.hidden True
                 ]
@@ -1919,16 +1916,15 @@ viewTermIndexFirstCharacterGrid staticSidebar indexOfTerms =
         )
 
 
-viewQuickSearchButtonAndLetterGrid : { runningOnMacOs : Bool, staticSidebar : Bool } -> IndexOfTerms -> Html Msg
-viewQuickSearchButtonAndLetterGrid { runningOnMacOs, staticSidebar } indexOfTerms =
+viewLetterGrid : Bool -> IndexOfTerms -> Html Msg
+viewLetterGrid staticSidebar indexOfTerms =
     div
-        [ id ElementIds.quickSearchButtonAndLetterGrid
+        [ id ElementIds.letterGrid
         , class "z-10 -mb-6 sticky top-0 -ml-0.5 pointer-events-none"
         ]
         [ div
             [ class "h-7 bg-white dark:bg-slate-900" ]
             []
-        , viewQuickSearchButton runningOnMacOs
         , div
             [ class "px-3 bg-white dark:bg-slate-900" ]
             [ viewTermIndexFirstCharacterGrid staticSidebar indexOfTerms ]
@@ -1938,8 +1934,8 @@ viewQuickSearchButtonAndLetterGrid { runningOnMacOs, staticSidebar } indexOfTerm
         ]
 
 
-viewStaticSidebarForDesktop : Bool -> Bool -> IndexOfTerms -> Html Msg
-viewStaticSidebarForDesktop runningOnMacOs enableMathSupport termIndex =
+viewStaticSidebarForDesktop : Bool -> IndexOfTerms -> Html Msg
+viewStaticSidebarForDesktop enableMathSupport termIndex =
     div
         [ class "hidden print:hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900"
         ]
@@ -1947,11 +1943,7 @@ viewStaticSidebarForDesktop runningOnMacOs enableMathSupport termIndex =
             [ id ElementIds.staticSidebarForDesktop
             , class "h-0 flex-1 flex flex-col overflow-y-scroll"
             ]
-            [ viewQuickSearchButtonAndLetterGrid
-                { runningOnMacOs = runningOnMacOs
-                , staticSidebar = True
-                }
-                termIndex
+            [ viewLetterGrid True termIndex
             , nav
                 [ class "px-3" ]
                 [ viewIndexOfTerms enableMathSupport True termIndex ]
@@ -1959,8 +1951,8 @@ viewStaticSidebarForDesktop runningOnMacOs enableMathSupport termIndex =
         ]
 
 
-viewTopBar : Bool -> Theme -> Components.DropdownMenu.Model -> Maybe Components.DropdownMenu.Model -> Html Msg
-viewTopBar tabbable theme themeDropdownMenu maybeExportDropdownMenu =
+viewTopBar : Bool -> Bool -> Theme -> Components.DropdownMenu.Model -> Maybe Components.DropdownMenu.Model -> Html Msg
+viewTopBar tabbable runningOnMacOs theme themeDropdownMenu maybeExportDropdownMenu =
     div
         [ class "sticky top-0 z-20 shrink-0 flex justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
         [ div
@@ -1980,7 +1972,10 @@ viewTopBar tabbable theme themeDropdownMenu maybeExportDropdownMenu =
                 ]
             ]
         , div
-            [ class "pr-4" ]
+            [ class "hidden sm:block pr-4" ]
+            [ viewQuickSearchButton runningOnMacOs ]
+        , div
+            [ class "pr-4 sm:hidden" ]
             [ button
                 [ Html.Attributes.type_ "button"
                 , class "ml-auto text-slate-500 w-8 h-8 -my-1 flex items-center justify-center hover:text-slate-600 lg:hidden dark:text-slate-400 dark:hover:text-slate-300"
@@ -2857,8 +2852,9 @@ view model =
                         [ Html.Lazy.lazy2 viewBackToTopLink False model.backToTopLinkVisibility ]
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
-                        [ Html.Lazy.lazy4 viewTopBar
+                        [ Html.Lazy.lazy5 viewTopBar
                             noModalDialogShown_
+                            model.common.runningOnMacOs
                             model.common.theme
                             model.themeDropdownMenu
                             (if GlossaryForUi.enableExportMenu glossaryForUi then
@@ -2886,7 +2882,11 @@ view model =
                                         [ Extras.Html.showIf (Editability.canEdit model.common.editability) <|
                                             viewMakeChangesButton model.common.editability noModalDialogShown_
                                         , div
-                                            [ class "hidden lg:block ml-auto pb-3 pt-0.5" ]
+                                            [ class "hidden lg:block ml-auto pt-0.5" ]
+                                            [ viewQuickSearchButton model.common.runningOnMacOs
+                                            ]
+                                        , div
+                                            [ class "hidden lg:block pl-4 pb-3 pt-0.5" ]
                                             [ viewThemeButton noModalDialogShown_ model.common.theme model.themeDropdownMenu
                                             ]
                                         , div

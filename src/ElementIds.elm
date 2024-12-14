@@ -18,6 +18,7 @@ module ElementIds exposing
     , glossaryItemDiv
     , indexForMobile
     , items
+    , letterGrid
     , moreOptionsForRelatedTermDropdownMenu
     , needsUpdatingToggleLabel
     , orderItemsAlphabetically
@@ -25,7 +26,6 @@ module ElementIds exposing
     , orderItemsFocusedOnSelect
     , orderItemsMostMentionedFirst
     , outer
-    , quickSearchButtonAndLetterGrid
     , reserved
     , searchDialog
     , seeAlsoSelect
@@ -201,9 +201,9 @@ staticSidebarForDesktop =
     prefixed "static-sidebar-for-desktop"
 
 
-quickSearchButtonAndLetterGrid : String
-quickSearchButtonAndLetterGrid =
-    prefixed "search-button-and-letter-grid"
+letterGrid : String
+letterGrid =
+    prefixed "letter-grid"
 
 
 termsIndex : Bool -> String
