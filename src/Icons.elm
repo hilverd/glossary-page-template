@@ -14,6 +14,7 @@ module Icons exposing
     , ellipsisVertical
     , exclamation
     , exclamationCircle
+    , filter
     , markdown
     , maximize2
     , menu
@@ -29,7 +30,7 @@ module Icons exposing
     )
 
 import Html exposing (Html)
-import Svg exposing (circle, clipPath, defs, g, line, node, path, polyline, rect, svg)
+import Svg exposing (circle, clipPath, defs, g, line, node, path, polygon, polyline, rect, svg)
 import Svg.Attributes
     exposing
         ( clipPathUnits
@@ -687,5 +688,21 @@ braces =
             []
         , path
             [ d "M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1" ]
+            []
+        ]
+
+
+filter : List (Html.Attribute msg) -> Html msg
+filter =
+    withAdditionalAttributes
+        [ fill "none"
+        , viewBox "0 0 24 24"
+        , strokeWidth "2"
+        , stroke "currentColor"
+        , strokeLinecap "round"
+        , strokeLinejoin "round"
+        ]
+        [ polygon
+            [ points "22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" ]
             []
         ]

@@ -16,6 +16,7 @@ module ElementIds exposing
     , disambiguationTagSelect
     , exportDropdownButton
     , glossaryItemDiv
+    , indexFilterInputField
     , indexForMobile
     , items
     , letterGrid
@@ -293,3 +294,8 @@ tagInputField index =
 tagDescriptionInputField : Int -> String
 tagDescriptionInputField index =
     prefixed <| "tag-description-" ++ String.fromInt index
+
+
+indexFilterInputField : String
+indexFilterInputField =
+    prefixed "index-filter-input-field"

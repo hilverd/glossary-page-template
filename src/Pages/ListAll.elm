@@ -1915,18 +1915,45 @@ viewTermIndexFirstCharacterGrid staticSidebar indexOfTerms =
         )
 
 
+viewIndexFilterInputField : Html Msg
+viewIndexFilterInputField =
+    div
+        [ class "pb-4 hidden" ]
+        [ div []
+            [ div
+                [ class "mt-2 grid grid-cols-1"
+                ]
+                [ Html.input
+                    [ Html.Attributes.type_ "text"
+                    , id ElementIds.indexFilterInputField
+                    , class "col-start-1 row-start-1 block w-full pl-9 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    , Html.Attributes.placeholder "Filter"
+                    ]
+                    []
+                , Icons.filter
+                    [ Svg.Attributes.class "pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 dark:text-gray-500"
+                    , Html.Attributes.attribute "aria-hidden" "true"
+                    , Html.Attributes.attribute "data-slot" "icon"
+                    ]
+                ]
+            ]
+        ]
+
+
 viewLetterGrid : Bool -> IndexOfTerms -> Html Msg
 viewLetterGrid staticSidebar indexOfTerms =
     div
         [ id ElementIds.letterGrid
-        , class "z-10 -mb-6 sticky top-0 -ml-0.5 pointer-events-none"
+        , class "z-10 -mb-6 sticky top-0 -ml-0.5"
         ]
         [ div
             [ class "h-7 bg-white dark:bg-slate-900" ]
             []
         , div
             [ class "px-3 bg-white dark:bg-slate-900" ]
-            [ viewTermIndexFirstCharacterGrid staticSidebar indexOfTerms ]
+            [ viewIndexFilterInputField
+            , viewTermIndexFirstCharacterGrid staticSidebar indexOfTerms
+            ]
         , div
             [ class "h-8 bg-gradient-to-b from-white dark:from-slate-900" ]
             []
