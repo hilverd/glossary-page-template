@@ -292,4 +292,4 @@ tagInputField index =
 
 tagDescriptionInputField : Int -> String
 tagDescriptionInputField index =
-    prefixed <| "tag-description=" ++ String.fromInt index
+    prefixed <| "tag-description-" ++ String.fromInt index
