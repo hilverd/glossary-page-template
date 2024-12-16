@@ -1713,11 +1713,10 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpda
 viewMenuForMobileAndStaticSidebarForDesktop :
     MenuForMobileVisibility
     -> Bool
-    -> Bool
     -> Maybe TagId
     -> GlossaryItemsForUi
     -> Html Msg
-viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility runningOnMacOs enableMathSupport filterByTag items =
+viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility enableMathSupport filterByTag items =
     let
         indexOfTerms : IndexOfTerms
         indexOfTerms =
@@ -2837,9 +2836,8 @@ view model =
                     [ div
                         [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) <| Extras.HtmlAttribute.inert
                         ]
-                        [ Html.Lazy.lazy5 viewMenuForMobileAndStaticSidebarForDesktop
+                        [ Html.Lazy.lazy4 viewMenuForMobileAndStaticSidebarForDesktop
                             model.menuForMobileVisibility
-                            model.common.runningOnMacOs
                             model.common.enableMathSupport
                             filterByTagId_
                             items
