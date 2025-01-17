@@ -964,8 +964,8 @@ viewAddSuggestedSeeAlso enableMathSupport suggestedRelatedTerms =
                                         )
                                 ]
                                 [ Icons.plus
-                                    [ Svg.Attributes.class "-ml-1 mr-2 h-4 w-4" ]
-                                , Term.view enableMathSupport [] (DisambiguatedTerm.toTerm suggestedRelatedTerm)
+                                    [ Svg.Attributes.class "shrink-0 -ml-1 mr-2 h-4 w-4" ]
+                                , Term.view enableMathSupport [ class "truncate" ] (DisambiguatedTerm.toTerm suggestedRelatedTerm)
                                 ]
                         )
                 )

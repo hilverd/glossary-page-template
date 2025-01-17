@@ -25,6 +25,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Hide "Back to top" link when opening search or single item dialog.
 - Improve dark mode colours for search button.
 - Improve layout of related terms in form on edit page.
+- Improve layout of buttons and select menus with long text.
 
 ### Removed
 

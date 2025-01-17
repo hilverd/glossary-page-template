@@ -19,7 +19,7 @@ withAdditionalAttributes :
 withAdditionalAttributes attributes additionalAttributes children =
     Accessibility.button
         ([ Html.Attributes.type_ "button"
-         , class "select-none whitespace-nowrap"
+         , class "select-none truncate overflow-hidden whitespace-nowrap"
          ]
             ++ (attributes ++ additionalAttributes)
         )
