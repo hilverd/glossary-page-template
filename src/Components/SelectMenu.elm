@@ -117,10 +117,10 @@ render properties choices =
             configFromProperties properties
     in
     div
-        [ class "flex-initial" ]
+        [ class "flex-grow" ]
         [ select
             [ Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
-            , class "mt-1 block w-full max-w-max pl-3 pr-10 py-2 dark:bg-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
+            , class "mt-1 block w-full pl-3 pr-10 py-2 dark:bg-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
             , Extras.HtmlAttribute.showMaybe Accessibility.Aria.label config.ariaLabel
             , Extras.HtmlAttribute.showMaybe
                 (\handler ->

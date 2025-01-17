@@ -779,7 +779,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedRawTerms numberOfRelatedTer
                     )
                     maybeDropdownMenuWithMoreOptions
             , div
-                [ class "hidden sm:block sm:ml-2 flex items-center" ]
+                [ class "hidden sm:flex sm:ml-2 items-center" ]
                 [ Components.Button.rounded (RelatedTermIndex.toInt index > 0)
                     [ Accessibility.Aria.label I18n.moveUp
                     , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermUp index
