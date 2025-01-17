@@ -1,11 +1,11 @@
-module Data.IndexOfTerms exposing (Entry(..), TermGroup, IndexOfTerms, fromGlossaryItems, termGroups)
+module Data.IndexOfTerms exposing (Entry(..), TermGroup, IndexOfTerms, fromGlossaryItems, termGroups, filterByString)
 
 {-| An index of terms, grouped in alphabetical order by their first character.
 
 
 # Indexes of Terms
 
-@docs Entry, TermGroup, IndexOfTerms, fromGlossaryItems, termGroups
+@docs Entry, TermGroup, IndexOfTerms, fromGlossaryItems, termGroups, filterByString
 
 -}
 
@@ -160,3 +160,41 @@ fromGlossaryItems filterByTagId glossaryItemsForUi =
 termGroups : IndexOfTerms -> List TermGroup
 termGroups (IndexOfTerms index) =
     index
+
+
+{-| Filter this index by a given string.
+-}
+filterByString : String -> IndexOfTerms -> IndexOfTerms
+filterByString filterString (IndexOfTerms index) =
+    let
+        filterStringLower : String
+        filterStringLower =
+            String.toLower filterString
+
+        filterTermGroup : TermGroup -> TermGroup
+        filterTermGroup termGroup =
+            let
+                entries_ =
+                    termGroup.entries
+                        |> List.filter
+                            (\entry ->
+                                case entry of
+                                    PreferredTerm glossaryItemId disambiguatedTerm ->
+                                        disambiguatedTerm
+                                            |> DisambiguatedTerm.toTerm
+                                            |> Term.inlineText
+                                            |> String.toLower
+                                            |> String.contains filterStringLower
+
+                                    AlternativeTerm term sortedPreferredTerms ->
+                                        term
+                                            |> Term.inlineText
+                                            |> String.toLower
+                                            |> String.contains filterStringLower
+                            )
+            in
+            { termGroup | entries = entries_ }
+    in
+    index
+        |> List.map filterTermGroup
+        |> IndexOfTerms

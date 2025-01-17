@@ -123,6 +123,7 @@ type alias Model =
     , backToTopLinkVisibility : BackToTopLinkVisibility
     , themeDropdownMenu : Components.DropdownMenu.Model
     , exportDropdownMenu : Components.DropdownMenu.Model
+    , indexFilterString : String
     , searchDialog : SearchDialog
     , layout : Layout
     , itemWithFocus : Maybe GlossaryItemId
@@ -145,6 +146,7 @@ type InternalMsg
     | ExportDropdownMenuMsg Components.DropdownMenu.Msg
     | SearchDialogMsg Components.SearchDialog.Msg
     | SearchDialogWasHidden
+    | UpdateIndexFilterString String
     | UpdateSearchString String
     | ChangeTheme Theme
     | ScrollingUpWhileFarAwayFromTheTop
@@ -198,6 +200,7 @@ init commonModel itemWithFocus =
       , exportDropdownMenu =
             Components.DropdownMenu.init
                 [ Components.DropdownMenu.id ElementIds.exportDropdownButton ]
+      , indexFilterString = ""
       , searchDialog =
             { term = ""
             , results = []
@@ -362,6 +365,9 @@ update msg model =
               { model | searchDialog = { searchDialog0 | term = "", results = [] } }
             , allowBackgroundScrolling ()
             )
+
+        UpdateIndexFilterString string ->
+            ( { model | indexFilterString = string }, Cmd.none )
 
         UpdateSearchString searchString ->
             let
@@ -1713,10 +1719,11 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpda
 viewMenuForMobileAndStaticSidebarForDesktop :
     MenuForMobileVisibility
     -> Bool
+    -> String
     -> Maybe TagId
     -> GlossaryItemsForUi
     -> Html Msg
-viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility enableMathSupport filterByTag items =
+viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility enableMathSupport indexFilterString filterByTag items =
     let
         indexOfTerms : IndexOfTerms
         indexOfTerms =
@@ -1727,7 +1734,7 @@ viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility enableMathSu
             menuForMobileVisibility
             enableMathSupport
             indexOfTerms
-        , Html.Lazy.lazy2 viewStaticSidebarForDesktop enableMathSupport indexOfTerms
+        , Html.Lazy.lazy3 viewStaticSidebarForDesktop enableMathSupport indexFilterString indexOfTerms
         ]
 
 
@@ -1751,7 +1758,7 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport termIndex =
             ]
             []
         , div
-            [ class "relative flex-1 flex flex-col max-w-xs w-full pt-5 bg-white dark:bg-gray-900"
+            [ class "relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-gray-900"
             , if menuForMobileVisibility == GradualVisibility.Visible then
                 class "transition motion-reduce:transition-none ease-in-out duration-300 transform motion-reduce:transform-none translate-x-0"
 
@@ -1784,7 +1791,7 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport termIndex =
                 , class "flex-1 h-0 overflow-y-scroll"
                 ]
                 [ nav
-                    [ class "px-4 pt-1 pb-6" ]
+                    [ class "px-4 pt-5 pb-6" ]
                     [ Html.Lazy.lazy2 viewTermIndexFirstCharacterGrid False termIndex
                     , Html.Lazy.lazy3 viewIndexOfTerms enableMathSupport False termIndex
                     ]
@@ -1915,19 +1922,24 @@ viewTermIndexFirstCharacterGrid staticSidebar indexOfTerms =
         )
 
 
-viewIndexFilterInputField : Html Msg
-viewIndexFilterInputField =
+viewIndexFilterInputField : String -> Html Msg
+viewIndexFilterInputField indexFilterString =
     div
-        [ class "pb-4 hidden" ]
+        [ class "pb-4" ]
         [ div []
             [ div
                 [ class "mt-2 grid grid-cols-1"
                 ]
                 [ Html.input
-                    [ Html.Attributes.type_ "text"
+                    [ Html.Attributes.type_ "search"
                     , id ElementIds.indexFilterInputField
                     , class "col-start-1 row-start-1 block w-full pl-9 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     , Html.Attributes.placeholder "Filter"
+                    , Html.Attributes.attribute "autocorrect" "off"
+                    , Html.Attributes.attribute "autocapitalize" "off"
+                    , Html.Attributes.spellcheck False
+                    , Html.Attributes.value indexFilterString
+                    , Html.Events.onInput (PageMsg.Internal << UpdateIndexFilterString)
                     ]
                     []
                 , Icons.filter
@@ -1940,18 +1952,15 @@ viewIndexFilterInputField =
         ]
 
 
-viewLetterGrid : Bool -> IndexOfTerms -> Html Msg
-viewLetterGrid staticSidebar indexOfTerms =
+viewLetterGrid : Bool -> String -> IndexOfTerms -> Html Msg
+viewLetterGrid staticSidebar indexFilterString indexOfTerms =
     div
         [ id ElementIds.letterGrid
         , class "z-10 -mb-6 sticky top-0 -ml-0.5"
         ]
         [ div
-            [ class "h-7 bg-white dark:bg-slate-900" ]
-            []
-        , div
-            [ class "px-3 bg-white dark:bg-slate-900" ]
-            [ viewIndexFilterInputField
+            [ class "pt-5 px-3 bg-white dark:bg-slate-900" ]
+            [ viewIndexFilterInputField indexFilterString
             , viewTermIndexFirstCharacterGrid staticSidebar indexOfTerms
             ]
         , div
@@ -1960,8 +1969,13 @@ viewLetterGrid staticSidebar indexOfTerms =
         ]
 
 
-viewStaticSidebarForDesktop : Bool -> IndexOfTerms -> Html Msg
-viewStaticSidebarForDesktop enableMathSupport termIndex =
+viewStaticSidebarForDesktop : Bool -> String -> IndexOfTerms -> Html Msg
+viewStaticSidebarForDesktop enableMathSupport indexFilterString termIndex =
+    let
+        filteredTermIndex : IndexOfTerms
+        filteredTermIndex =
+            IndexOfTerms.filterByString indexFilterString termIndex
+    in
     div
         [ class "hidden print:hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900"
         ]
@@ -1969,10 +1983,10 @@ viewStaticSidebarForDesktop enableMathSupport termIndex =
             [ id ElementIds.staticSidebarForDesktop
             , class "h-0 flex-1 flex flex-col overflow-y-scroll"
             ]
-            [ viewLetterGrid True termIndex
+            [ viewLetterGrid True indexFilterString filteredTermIndex
             , nav
                 [ class "px-3" ]
-                [ viewIndexOfTerms enableMathSupport True termIndex ]
+                [ viewIndexOfTerms enableMathSupport True filteredTermIndex ]
             ]
         ]
 
@@ -2863,9 +2877,10 @@ view model =
                     [ div
                         [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) <| Extras.HtmlAttribute.inert
                         ]
-                        [ Html.Lazy.lazy4 viewMenuForMobileAndStaticSidebarForDesktop
+                        [ Html.Lazy.lazy5 viewMenuForMobileAndStaticSidebarForDesktop
                             model.menuForMobileVisibility
                             model.common.enableMathSupport
+                            model.indexFilterString
                             filterByTagId_
                             items
                         ]
