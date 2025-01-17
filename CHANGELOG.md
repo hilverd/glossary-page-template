@@ -20,6 +20,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 
 - Hide "Back to top" link when opening search or single item dialog.
+- Improve dark mode colours for search button.
 
 ### Removed
 
