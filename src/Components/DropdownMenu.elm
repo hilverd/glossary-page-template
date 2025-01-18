@@ -218,7 +218,7 @@ view toParentMsg model enabled buttonShape choices =
                 , Html.Events.preventDefaultOn "keydown"
                     (Extras.HtmlEvents.preventDefaultOnDecoder
                         (\event ->
-                            if event == Extras.HtmlEvents.enter then
+                            if Extras.HtmlEvents.isEnter event then
                                 case model_.visibility of
                                     Visible ->
                                         case model_.activeChoice of
@@ -243,10 +243,10 @@ view toParentMsg model enabled buttonShape choices =
                                     Invisible ->
                                         Just ( toParentMsg Show, True )
 
-                            else if event == Extras.HtmlEvents.escape then
+                            else if Extras.HtmlEvents.isEscape event then
                                 Just ( toParentMsg StartHiding, True )
 
-                            else if event == Extras.HtmlEvents.downArrow then
+                            else if Extras.HtmlEvents.isDownArrow event then
                                 let
                                     numberOfChoices : Int
                                     numberOfChoices =
@@ -263,7 +263,7 @@ view toParentMsg model enabled buttonShape choices =
                                         else
                                             Nothing
 
-                            else if event == Extras.HtmlEvents.upArrow then
+                            else if Extras.HtmlEvents.isUpArrow event then
                                 let
                                     numberOfChoices : Int
                                     numberOfChoices =

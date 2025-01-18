@@ -481,31 +481,31 @@ view toParentMsg model searchString messageAboveSearchResults searchResults =
                         , Html.Events.preventDefaultOn "keydown"
                             (Extras.HtmlEvents.preventDefaultOnDecoder
                                 (\event ->
-                                    if event == Extras.HtmlEvents.downArrow then
+                                    if Extras.HtmlEvents.isDownArrow event then
                                         Just
                                             ( toParentMsg <| MakePreviousOrNextSearchResultActive (List.length searchResults) True
                                             , True
                                             )
 
-                                    else if event == Extras.HtmlEvents.upArrow then
+                                    else if Extras.HtmlEvents.isUpArrow event then
                                         Just
                                             ( toParentMsg <| MakePreviousOrNextSearchResultActive (List.length searchResults) False
                                             , True
                                             )
 
-                                    else if event == Extras.HtmlEvents.home then
+                                    else if Extras.HtmlEvents.isHome event then
                                         Just
                                             ( toParentMsg <| MakeSearchResultActive False 0
                                             , True
                                             )
 
-                                    else if event == Extras.HtmlEvents.end then
+                                    else if Extras.HtmlEvents.isEnd event then
                                         Just
                                             ( toParentMsg <| MakeSearchResultActive False (List.length searchResults - 1)
                                             , True
                                             )
 
-                                    else if event == Extras.HtmlEvents.enter then
+                                    else if Extras.HtmlEvents.isEnter event then
                                         Just ( toParentMsg <| LoadUrlForActiveSearchResult searchResults, True )
 
                                     else

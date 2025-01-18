@@ -2567,13 +2567,13 @@ filterByTagWithDescription glossaryForUi tagId =
             )
 
 
-controlOrCommandK : Bool -> Extras.HtmlEvents.KeyDownEvent
-controlOrCommandK runningOnMacOs =
+isControlOrCommandK : Bool -> (Extras.HtmlEvents.KeyDownEvent -> Bool)
+isControlOrCommandK runningOnMacOs =
     if runningOnMacOs then
-        Extras.HtmlEvents.metaK
+        Extras.HtmlEvents.isMetaK
 
     else
-        Extras.HtmlEvents.controlK
+        Extras.HtmlEvents.isControlK
 
 
 viewAboutSection :
@@ -2782,9 +2782,9 @@ view model =
                         (filterByTagWithDescription glossaryForUi)
                         filterByTagId_
 
-                controlOrCommandK_ : Extras.HtmlEvents.KeyDownEvent
-                controlOrCommandK_ =
-                    controlOrCommandK model.common.runningOnMacOs
+                isControlOrCommandK_ : Extras.HtmlEvents.KeyDownEvent -> Bool
+                isControlOrCommandK_ =
+                    isControlOrCommandK model.common.runningOnMacOs
             in
             { title = pageTitle model glossaryForUi
             , body =
@@ -2797,31 +2797,31 @@ view model =
                             (\event ->
                                 case menuOrDialogShown model of
                                     ConfirmDeleteModalDialogShown index ->
-                                        if event == Extras.HtmlEvents.escape then
+                                        if Extras.HtmlEvents.isEscape event then
                                             Just <| ( PageMsg.Internal CancelDelete, True )
 
-                                        else if event == Extras.HtmlEvents.enter then
+                                        else if Extras.HtmlEvents.isEnter event then
                                             Just <| ( PageMsg.Internal <| Delete index, True )
 
                                         else
                                             Nothing
 
                                     SearchDialogShown ->
-                                        if event == Extras.HtmlEvents.escape || event == controlOrCommandK_ then
+                                        if Extras.HtmlEvents.isEscape event || isControlOrCommandK_ event then
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.hide, True )
 
                                         else
                                             Nothing
 
                                     MenuForMobileShown ->
-                                        if event == Extras.HtmlEvents.escape then
+                                        if Extras.HtmlEvents.isEscape event then
                                             Just <| ( PageMsg.Internal StartHidingMenuForMobile, True )
 
                                         else
                                             Nothing
 
                                     ViewSingleItemModalDialogShown id ->
-                                        if event == Extras.HtmlEvents.escape then
+                                        if Extras.HtmlEvents.isEscape event then
                                             Just <| ( PageMsg.Internal ChangeLayoutToShowAll, True )
 
                                         else
@@ -2846,12 +2846,12 @@ view model =
                                                            )
                                                         |> itemWithPreviousAndNextForId id
                                             in
-                                            if event == Extras.HtmlEvents.leftArrow then
+                                            if Extras.HtmlEvents.isLeftArrow event then
                                                 itemWithPreviousAndNext.previous
                                                     |> Maybe.map
                                                         (\newItem -> ( PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForUi.id newItem, True ))
 
-                                            else if event == Extras.HtmlEvents.rightArrow then
+                                            else if Extras.HtmlEvents.isRightArrow event then
                                                 itemWithPreviousAndNext.next
                                                     |> Maybe.map
                                                         (\newItem -> ( PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForUi.id newItem, True ))
@@ -2860,13 +2860,13 @@ view model =
                                                 Nothing
 
                                     NoMenuOrDialogShown ->
-                                        if event == controlOrCommandK_ then
+                                        if isControlOrCommandK_ event then
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show, True )
 
-                                        else if Editability.canEdit model.common.editability && event == Extras.HtmlEvents.e then
+                                        else if Editability.canEdit model.common.editability && Extras.HtmlEvents.isE event && not event.isFormField then
                                             Just <| ( PageMsg.Internal MakeChanges, True )
 
-                                        else if Editability.editing model.common.editability && event == Extras.HtmlEvents.n then
+                                        else if Editability.editing model.common.editability && Extras.HtmlEvents.isN event && not event.isFormField then
                                             Just <| ( PageMsg.NavigateToCreateOrEdit Nothing, True )
 
                                         else

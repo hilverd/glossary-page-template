@@ -1,24 +1,24 @@
 module Extras.HtmlEvents exposing
     ( KeyDownEvent
     , KeyValue
-    , controlK
-    , downArrow
-    , e
-    , end
-    , enter
-    , escape
-    , home
-    , leftArrow
-    , metaK
-    , n
+    , isControlK
+    , isDownArrow
+    , isE
+    , isEnd
+    , isEnter
+    , isEscape
+    , isHome
+    , isLeftArrow
+    , isMetaK
+    , isN
+    , isRightArrow
+    , isUpArrow
     , onClickPreventDefault
     , onClickPreventDefaultAndStopPropagation
     , onClickStopPropagation
     , onEnter
     , onEscape
     , preventDefaultOnDecoder
-    , rightArrow
-    , upArrow
     )
 
 import Html exposing (Attribute)
@@ -35,6 +35,7 @@ type alias KeyDownEvent =
     { keyValue : KeyValue
     , controlKey : Bool
     , metaKey : Bool -- on macOS, this is the ⌘ key
+    , isFormField : Bool
     }
 
 
@@ -48,12 +49,26 @@ toKeyValue string =
             Control string
 
 
+isFormFieldDecoder : Decode.Decoder Bool
+isFormFieldDecoder =
+    Decode.at [ "target", "tagName" ] Decode.string
+        |> Decode.map
+            (\tagName ->
+                let
+                    upperTagName =
+                        String.toUpper tagName
+                in
+                upperTagName == "INPUT" || upperTagName == "TEXTAREA"
+            )
+
+
 preventDefaultOnDecoder : (KeyDownEvent -> Maybe ( msg, Bool )) -> Decode.Decoder ( msg, Bool )
 preventDefaultOnDecoder f =
-    Decode.map3 KeyDownEvent
+    Decode.map4 KeyDownEvent
         (Decode.field "key" <| Decode.map toKeyValue <| Decode.string)
         (Decode.field "ctrlKey" <| Decode.bool)
         (Decode.field "metaKey" <| Decode.bool)
+        isFormFieldDecoder
         |> Decode.andThen
             (\code ->
                 case f code of
@@ -69,10 +84,11 @@ detailedKeyDownEventDecoder :
     (KeyDownEvent -> Maybe msg)
     -> Decode.Decoder { message : msg, stopPropagation : Bool, preventDefault : Bool }
 detailedKeyDownEventDecoder f =
-    Decode.map3 KeyDownEvent
+    Decode.map4 KeyDownEvent
         (Decode.field "key" <| Decode.map toKeyValue <| Decode.string)
         (Decode.field "ctrlKey" <| Decode.bool)
         (Decode.field "metaKey" <| Decode.bool)
+        isFormFieldDecoder
         |> Decode.andThen
             (\code ->
                 case f code of
@@ -89,76 +105,71 @@ onKeydown =
     Html.Events.custom "keydown" << detailedKeyDownEventDecoder
 
 
-withoutModifiers : KeyValue -> KeyDownEvent
-withoutModifiers keyValue =
-    { keyValue = keyValue, controlKey = False, metaKey = False }
+isUpArrow : KeyDownEvent -> Bool
+isUpArrow { keyValue, controlKey, metaKey } =
+    keyValue == Control "ArrowUp" && not controlKey && not metaKey
 
 
-upArrow : KeyDownEvent
-upArrow =
-    Control "ArrowUp" |> withoutModifiers
+isDownArrow : KeyDownEvent -> Bool
+isDownArrow { keyValue, controlKey, metaKey } =
+    keyValue == Control "ArrowDown" && not controlKey && not metaKey
 
 
-downArrow : KeyDownEvent
-downArrow =
-    Control "ArrowDown" |> withoutModifiers
+isLeftArrow : KeyDownEvent -> Bool
+isLeftArrow { keyValue, controlKey, metaKey } =
+    keyValue == Control "ArrowLeft" && not controlKey && not metaKey
 
 
-leftArrow : KeyDownEvent
-leftArrow =
-    Control "ArrowLeft" |> withoutModifiers
+isRightArrow : KeyDownEvent -> Bool
+isRightArrow { keyValue, controlKey, metaKey } =
+    keyValue == Control "ArrowRight" && not controlKey && not metaKey
 
 
-rightArrow : KeyDownEvent
-rightArrow =
-    Control "ArrowRight" |> withoutModifiers
+isEnter : KeyDownEvent -> Bool
+isEnter { keyValue, controlKey, metaKey } =
+    keyValue == Control "Enter" && not controlKey && not metaKey
 
 
-enter : KeyDownEvent
-enter =
-    Control "Enter" |> withoutModifiers
+isEscape : KeyDownEvent -> Bool
+isEscape { keyValue, controlKey, metaKey } =
+    keyValue == Control "Escape" && not controlKey && not metaKey
 
 
-escape : KeyDownEvent
-escape =
-    Control "Escape" |> withoutModifiers
+isHome : KeyDownEvent -> Bool
+isHome { keyValue, controlKey, metaKey } =
+    keyValue == Control "Home" && not controlKey && not metaKey
 
 
-home : KeyDownEvent
-home =
-    Control "Home" |> withoutModifiers
+isEnd : KeyDownEvent -> Bool
+isEnd { keyValue, controlKey, metaKey } =
+    keyValue == Control "End" && not controlKey && not metaKey
 
 
-end : KeyDownEvent
-end =
-    Control "End" |> withoutModifiers
+isControlK : KeyDownEvent -> Bool
+isControlK { keyValue, controlKey, metaKey } =
+    keyValue == Character 'k' && controlKey && not metaKey
 
 
-controlK : KeyDownEvent
-controlK =
-    { keyValue = Character 'k', controlKey = True, metaKey = False }
+isMetaK : KeyDownEvent -> Bool
+isMetaK { keyValue, controlKey, metaKey } =
+    keyValue == Character 'k' && not controlKey && metaKey
 
 
-metaK : KeyDownEvent
-metaK =
-    { keyValue = Character 'k', controlKey = False, metaKey = True }
+isE : KeyDownEvent -> Bool
+isE { keyValue, controlKey, metaKey } =
+    keyValue == Character 'e' && not controlKey && not metaKey
 
 
-e : KeyDownEvent
-e =
-    { keyValue = Character 'e', controlKey = False, metaKey = False }
-
-
-n : KeyDownEvent
-n =
-    { keyValue = Character 'n', controlKey = False, metaKey = False }
+isN : KeyDownEvent -> Bool
+isN { keyValue, controlKey, metaKey } =
+    keyValue == Character 'n' && not controlKey && not metaKey
 
 
 onEnter : msg -> Attribute msg
 onEnter msg =
     onKeydown
         (\event ->
-            if event == enter then
+            if isEnter event then
                 Just msg
 
             else
@@ -170,7 +181,7 @@ onEscape : msg -> Attribute msg
 onEscape msg =
     onKeydown
         (\event ->
-            if event == escape then
+            if isEscape event then
                 Just msg
 
             else
