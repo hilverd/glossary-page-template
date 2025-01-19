@@ -94,7 +94,7 @@ type InternalMsg
     | DeleteRelatedTerm RelatedTermIndex
     | DropdownMenuWithMoreOptionsForRelatedTermMsg Int Components.DropdownMenu.Msg
     | MoveRelatedTermUp RelatedTermIndex
-    | MoveRelatedTermDown RelatedTermIndex
+    | MoveRelatedTermDown Int RelatedTermIndex
     | ToggleNeedsUpdating
     | Save
     | ReceiveCurrentDateTimeAndNewIdForSaving ( String, String )
@@ -329,30 +329,32 @@ update msg model =
                     )
                 |> Maybe.withDefault ( model, Cmd.none )
 
-        MoveRelatedTermUp relatedTermIndexInt ->
+        MoveRelatedTermUp relatedTermIndex ->
             let
                 form : GlossaryItemForm
                 form =
-                    Form.moveRelatedTermUp relatedTermIndexInt model.form
+                    Form.moveRelatedTermUp relatedTermIndex model.form
             in
             ( { model
                 | dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
                 |> updateForm (always form)
-            , Cmd.none
+            , moveFocusAfterMovingRelatedTermUp relatedTermIndex
+                |> Cmd.map PageMsg.Internal
             )
 
-        MoveRelatedTermDown relatedTermIndexInt ->
+        MoveRelatedTermDown numberOfRelatedTerms relatedTermIndex ->
             let
                 form : GlossaryItemForm
                 form =
-                    Form.moveRelatedTermDown relatedTermIndexInt model.form
+                    Form.moveRelatedTermDown relatedTermIndex model.form
             in
             ( { model
                 | dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
                 |> updateForm (always form)
-            , Cmd.none
+            , moveFocusAfterMovingRelatedTermDown numberOfRelatedTerms relatedTermIndex
+                |> Cmd.map PageMsg.Internal
             )
 
         ToggleNeedsUpdating ->
@@ -428,6 +430,50 @@ update msg model =
             ( { model | saving = SavingFailed <| Extras.Http.httpErrorDescriptionAskingToReloadOnUnauthorisedOrConflict <| error }
             , Cmd.none
             )
+
+
+moveFocusAfterMovingRelatedTermUp : RelatedTermIndex -> Cmd InternalMsg
+moveFocusAfterMovingRelatedTermUp relatedTermIndex =
+    let
+        relatedTermIndexInt : Int
+        relatedTermIndexInt =
+            RelatedTermIndex.toInt relatedTermIndex
+
+        previousRelatedTermIndexInt : Int
+        previousRelatedTermIndexInt =
+            relatedTermIndexInt - 1
+    in
+    if previousRelatedTermIndexInt == 0 then
+        Task.attempt
+            (\_ -> NoOp)
+            (Dom.blur <| ElementIds.moveRelatedTermUpButton relatedTermIndexInt)
+
+    else
+        Task.attempt
+            (\_ -> NoOp)
+            (Dom.focus <| ElementIds.moveRelatedTermUpButton previousRelatedTermIndexInt)
+
+
+moveFocusAfterMovingRelatedTermDown : Int -> RelatedTermIndex -> Cmd InternalMsg
+moveFocusAfterMovingRelatedTermDown numberOfRelatedTerms relatedTermIndex =
+    let
+        relatedTermIndexInt : Int
+        relatedTermIndexInt =
+            RelatedTermIndex.toInt relatedTermIndex
+
+        nextRelatedTermIndexInt : Int
+        nextRelatedTermIndexInt =
+            relatedTermIndexInt + 1
+    in
+    if nextRelatedTermIndexInt == numberOfRelatedTerms - 1 then
+        Task.attempt
+            (\_ -> NoOp)
+            (Dom.blur <| ElementIds.moveRelatedTermDownButton relatedTermIndexInt)
+
+    else
+        Task.attempt
+            (\_ -> NoOp)
+            (Dom.focus <| ElementIds.moveRelatedTermDownButton nextRelatedTermIndexInt)
 
 
 
@@ -782,6 +828,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedRawTerms numberOfRelatedTer
                 [ class "hidden sm:flex sm:ml-2 items-center" ]
                 [ Components.Button.rounded (RelatedTermIndex.toInt index > 0)
                     [ Accessibility.Aria.label I18n.moveUp
+                    , id <| ElementIds.moveRelatedTermUpButton <| RelatedTermIndex.toInt index
                     , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermUp index
                     ]
                     [ Icons.arrowUp
@@ -789,8 +836,8 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedRawTerms numberOfRelatedTer
                     ]
                 , Components.Button.rounded (RelatedTermIndex.toInt index + 1 < numberOfRelatedTerms)
                     [ Accessibility.Aria.label I18n.moveDown
-                    , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermDown index
-                    , class ""
+                    , id <| ElementIds.moveRelatedTermDownButton <| RelatedTermIndex.toInt index
+                    , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermDown numberOfRelatedTerms index
                     ]
                     [ Icons.arrowDown
                         [ Svg.Attributes.class "h-5 w-5" ]
@@ -837,7 +884,7 @@ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownM
                             , text I18n.moveDown
                             ]
                         ]
-                        (PageMsg.Internal <| MoveRelatedTermDown index)
+                        (PageMsg.Internal <| MoveRelatedTermDown numberOfRelatedTerms index)
 
               else
                 Nothing

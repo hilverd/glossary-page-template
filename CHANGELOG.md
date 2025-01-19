@@ -26,6 +26,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Improve dark mode colours for search button.
 - Improve layout of related terms in form on edit page.
 - Improve layout of buttons and select menus with long text.
+- When pressing up/down buttons for reordering related items, make the focus follow the button for the item being moved.
 
 ### Removed
 

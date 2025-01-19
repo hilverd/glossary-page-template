@@ -21,6 +21,8 @@ module ElementIds exposing
     , items
     , letterGrid
     , moreOptionsForRelatedTermDropdownMenu
+    , moveRelatedTermDownButton
+    , moveRelatedTermUpButton
     , needsUpdatingToggleLabel
     , orderItemsAlphabetically
     , orderItemsFocusedOn
@@ -299,3 +301,13 @@ tagDescriptionInputField index =
 indexFilterInputField : String
 indexFilterInputField =
     prefixed "index-filter-input-field"
+
+
+moveRelatedTermUpButton : Int -> String
+moveRelatedTermUpButton index =
+    prefixed <| "move-related-term-up-" ++ String.fromInt index ++ "-button"
+
+
+moveRelatedTermDownButton : Int -> String
+moveRelatedTermDownButton index =
+    prefixed <| "move-related-term-down-" ++ String.fromInt index ++ "-button"
