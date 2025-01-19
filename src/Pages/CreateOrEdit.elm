@@ -513,19 +513,7 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
             [ class "sm:flex sm:flex-row sm:items-center" ]
             [ div
                 [ class "flex-auto max-w-2xl flex" ]
-                [ span
-                    [ class "inline-flex items-center"
-                    , Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:pt-6"
-                    ]
-                    [ Components.Button.rounded canBeDeleted
-                        [ Accessibility.Aria.label I18n.delete
-                        , Html.Events.onClick <| PageMsg.Internal <| DeleteTerm termIndex
-                        ]
-                        [ Icons.trash
-                            [ Svg.Attributes.class "h-5 w-5" ]
-                        ]
-                    ]
-                , div
+                [ div
                     [ class "flex-auto" ]
                     [ div
                         [ class "sm:flex sm:flex-row sm:items-center" ]
@@ -568,6 +556,19 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
                                     ]
                                 ]
                             ]
+                        ]
+                    ]
+                , span
+                    [ class "inline-flex items-center"
+                    , Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:pt-6"
+                    ]
+                    [ Components.Button.rounded canBeDeleted
+                        [ Accessibility.Aria.label I18n.delete
+                        , Html.Events.onClick <| PageMsg.Internal <| DeleteTerm termIndex
+                        , class "ml-4"
+                        ]
+                        [ Icons.trash
+                            [ Svg.Attributes.class "h-5 w-5" ]
                         ]
                     ]
                 ]
