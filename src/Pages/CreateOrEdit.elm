@@ -298,7 +298,10 @@ update msg model =
                 | dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
                 |> updateForm (always form)
-            , Cmd.none
+            , Task.attempt
+                (\_ -> NoOp)
+                (Dom.blur <| ElementIds.deleteRelatedTermButton <| RelatedTermIndex.toInt relatedTermIndex)
+                |> Cmd.map PageMsg.Internal
             )
 
         DropdownMenuWithMoreOptionsForRelatedTermMsg relatedTermIndexInt msg_ ->
@@ -790,17 +793,7 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedRawTerms numberOfRelatedTer
         []
         [ div
             [ class "flex-auto max-w-2xl flex items-center" ]
-            [ span
-                [ class "inline-flex items-center" ]
-                [ Components.Button.rounded True
-                    [ Accessibility.Aria.label I18n.delete
-                    , Html.Events.onClick <| PageMsg.Internal <| DeleteRelatedTerm index
-                    ]
-                    [ Icons.trash
-                        [ Svg.Attributes.class "h-5 w-5" ]
-                    ]
-                ]
-            , Components.SelectMenu.render
+            [ Components.SelectMenu.render
                 [ Components.SelectMenu.id <| ElementIds.seeAlsoSelect index
                 , Components.SelectMenu.ariaLabel I18n.relatedItem
                 , Components.SelectMenu.validationError relatedTerm.validationError
@@ -845,6 +838,18 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedRawTerms numberOfRelatedTer
                     , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermDown numberOfRelatedTerms index
                     ]
                     [ Icons.arrowDown
+                        [ Svg.Attributes.class "h-5 w-5" ]
+                    ]
+                ]
+            , span
+                [ class "inline-flex items-center" ]
+                [ Components.Button.rounded True
+                    [ Accessibility.Aria.label I18n.delete
+                    , id <| ElementIds.deleteRelatedTermButton <| RelatedTermIndex.toInt index
+                    , Html.Events.onClick <| PageMsg.Internal <| DeleteRelatedTerm index
+                    , class "ml-2"
+                    ]
+                    [ Icons.trash
                         [ Svg.Attributes.class "h-5 w-5" ]
                     ]
                 ]
