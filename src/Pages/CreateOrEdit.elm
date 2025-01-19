@@ -174,7 +174,9 @@ dropdownMenusWithMoreOptionsForRelatedTermsForForm form =
                 Dict.insert
                     index
                     (Components.DropdownMenu.init
-                        [ Components.DropdownMenu.id <| ElementIds.moreOptionsForRelatedTermDropdownMenu index ]
+                        [ Components.DropdownMenu.id <| ElementIds.moreOptionsForRelatedTermDropdownMenu index
+                        , Components.DropdownMenu.originTopLeft
+                        ]
                     )
                     result
             )
@@ -793,7 +795,34 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedRawTerms numberOfRelatedTer
         []
         [ div
             [ class "flex-auto max-w-2xl flex items-center" ]
-            [ Components.SelectMenu.render
+            [ div
+                [ class "hidden sm:flex sm:mr-2 items-center" ]
+                [ Components.Button.rounded (RelatedTermIndex.toInt index > 0)
+                    [ Accessibility.Aria.label I18n.moveUp
+                    , id <| ElementIds.moveRelatedTermUpButton <| RelatedTermIndex.toInt index
+                    , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermUp index
+                    ]
+                    [ Icons.arrowUp
+                        [ Svg.Attributes.class "h-5 w-5" ]
+                    ]
+                , Components.Button.rounded (RelatedTermIndex.toInt index + 1 < numberOfRelatedTerms)
+                    [ Accessibility.Aria.label I18n.moveDown
+                    , id <| ElementIds.moveRelatedTermDownButton <| RelatedTermIndex.toInt index
+                    , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermDown numberOfRelatedTerms index
+                    ]
+                    [ Icons.arrowDown
+                        [ Svg.Attributes.class "h-5 w-5" ]
+                    ]
+                ]
+            , Extras.Html.showIf (numberOfRelatedTerms > 1) <|
+                Extras.Html.showMaybe
+                    (\dropdownMenuWithMoreOptions ->
+                        span
+                            [ class "sm:hidden mr-2 flex items-center" ]
+                            [ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownMenuWithMoreOptions ]
+                    )
+                    maybeDropdownMenuWithMoreOptions
+            , Components.SelectMenu.render
                 [ Components.SelectMenu.id <| ElementIds.seeAlsoSelect index
                 , Components.SelectMenu.ariaLabel I18n.relatedItem
                 , Components.SelectMenu.validationError relatedTerm.validationError
@@ -814,33 +843,6 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedRawTerms numberOfRelatedTer
                                 (Just (Term.raw <| DisambiguatedTerm.toTerm term) == relatedTerm.raw)
                         )
                 )
-            , Extras.Html.showIf (numberOfRelatedTerms > 1) <|
-                Extras.Html.showMaybe
-                    (\dropdownMenuWithMoreOptions ->
-                        span
-                            [ class "sm:hidden ml-2 flex items-center" ]
-                            [ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownMenuWithMoreOptions ]
-                    )
-                    maybeDropdownMenuWithMoreOptions
-            , div
-                [ class "hidden sm:flex sm:ml-2 items-center" ]
-                [ Components.Button.rounded (RelatedTermIndex.toInt index > 0)
-                    [ Accessibility.Aria.label I18n.moveUp
-                    , id <| ElementIds.moveRelatedTermUpButton <| RelatedTermIndex.toInt index
-                    , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermUp index
-                    ]
-                    [ Icons.arrowUp
-                        [ Svg.Attributes.class "h-5 w-5" ]
-                    ]
-                , Components.Button.rounded (RelatedTermIndex.toInt index + 1 < numberOfRelatedTerms)
-                    [ Accessibility.Aria.label I18n.moveDown
-                    , id <| ElementIds.moveRelatedTermDownButton <| RelatedTermIndex.toInt index
-                    , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermDown numberOfRelatedTerms index
-                    ]
-                    [ Icons.arrowDown
-                        [ Svg.Attributes.class "h-5 w-5" ]
-                    ]
-                ]
             , span
                 [ class "inline-flex items-center" ]
                 [ Components.Button.rounded True

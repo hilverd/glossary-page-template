@@ -19,12 +19,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 - Raise recommended maximum number of items from 500 to 1,000.
 - On larger screens, move search box/button to the right side of the page.
+- Rearrange layout of buttons for rearranging/deleting terms and related items.
 
 ### Fixed
 
 - Hide "Back to top" link when opening search or single item dialog.
 - Improve dark mode colours for search button.
-- Improve layout of related terms in form on edit page.
+- Improve layout of related items in form on edit page.
 - Improve layout of buttons and select menus with long text.
 - When pressing up/down buttons for reordering related items, make the focus follow the button for the item being moved.
 

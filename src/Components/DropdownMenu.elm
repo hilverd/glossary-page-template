@@ -8,6 +8,7 @@ module Components.DropdownMenu exposing
     , hidden
     , id
     , init
+    , originTopLeft
     , subscriptions
     , update
     , view
@@ -129,10 +130,12 @@ update updateParentModel toParentMsg msg model =
 
 type Property msg
     = Id String
+    | OriginTopRight Bool
 
 
 type alias Config =
     { id : Maybe String
+    , originTopRight : Bool
     }
 
 
@@ -162,6 +165,11 @@ id =
     Id
 
 
+originTopLeft : Property msg
+originTopLeft =
+    OriginTopRight False
+
+
 configFromProperties : List (Property msg) -> Config
 configFromProperties =
     List.foldl
@@ -169,8 +177,13 @@ configFromProperties =
             case property of
                 Id string ->
                     { config | id = Just string }
+
+                OriginTopRight bool ->
+                    { config | originTopRight = bool }
         )
-        { id = Nothing }
+        { id = Nothing
+        , originTopRight = True
+        }
 
 
 view :
@@ -309,8 +322,14 @@ view toParentMsg model enabled buttonShape choices =
         , div
             [ Extras.HtmlAttribute.showMaybe Accessibility.Aria.labelledBy config.id
             , Accessibility.Aria.orientationVertical
-            , class "origin-top-right absolute right-0 z-10 w-max mt-2 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-600 ring-opacity-5 divide-y divide-gray-100 focus:outline-none"
+            , class "absolute z-10 w-max mt-2 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-600 ring-opacity-5 divide-y divide-gray-100 focus:outline-none"
             , class "hidden" |> Extras.HtmlAttribute.showIf (model_.visibility == Invisible)
+            , class <|
+                if config.originTopRight then
+                    "origin-top-right right-0"
+
+                else
+                    "origin-top-left left-0"
             , if model_.visibility == Visible then
                 class "transition motion-reduce:transition-none ease-out duration-100 transform motion-reduce:transform-none opacity-100 scale-100"
 
