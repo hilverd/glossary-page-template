@@ -13,6 +13,7 @@ module ElementIds exposing
     , defaultThemeLight
     , defaultThemeSystem
     , definition
+    , deleteTermButton
     , disambiguationTagSelect
     , exportDropdownButton
     , glossaryItemDiv
@@ -311,3 +312,8 @@ moveRelatedTermUpButton index =
 moveRelatedTermDownButton : Int -> String
 moveRelatedTermDownButton index =
     prefixed <| "move-related-term-down-" ++ String.fromInt index ++ "-button"
+
+
+deleteTermButton : Int -> String
+deleteTermButton index =
+    prefixed <| "delete-term-" ++ String.fromInt index ++ "-button"

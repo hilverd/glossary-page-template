@@ -217,7 +217,10 @@ update msg model =
 
         DeleteTerm termIndex ->
             ( updateForm (Form.deleteTerm termIndex) model
-            , Cmd.none
+            , Task.attempt
+                (\_ -> NoOp)
+                (Dom.blur <| ElementIds.deleteTermButton <| TermIndex.toInt termIndex)
+                |> Cmd.map PageMsg.Internal
             )
 
         UpdateTerm termIndex body ->
@@ -564,6 +567,7 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
                     ]
                     [ Components.Button.rounded canBeDeleted
                         [ Accessibility.Aria.label I18n.delete
+                        , id <| ElementIds.deleteTermButton <| TermIndex.toInt termIndex
                         , Html.Events.onClick <| PageMsg.Internal <| DeleteTerm termIndex
                         , class "ml-4"
                         ]
