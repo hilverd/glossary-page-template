@@ -38,7 +38,8 @@ input value_ showValidationErrors validationError additionalAttributes =
 
 inputText : String -> Bool -> Bool -> Bool -> Maybe String -> List (Attribute msg) -> Html msg
 inputText value_ markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors validationError additionalAttributes =
-    Accessibility.div []
+    Accessibility.div
+        [ class "w-full" ]
         [ Extras.Html.showIf markdownBasedSyntaxEnabled <| markdownSupportedMessage mathSupportEnabled
         , Accessibility.div
             [ class "relative" ]

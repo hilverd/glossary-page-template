@@ -62,6 +62,7 @@ type alias Model =
     , form : GlossaryItemForm
     , triedToSaveWhenFormInvalid : Bool
     , saving : Saving
+    , dropdownMenusWithMoreOptionsForTerms : Dict Int Components.DropdownMenu.Model
     , dropdownMenusWithMoreOptionsForRelatedTerms : Dict Int Components.DropdownMenu.Model
     }
 
@@ -85,6 +86,8 @@ type InternalMsg
     | AddTerm
     | DeleteTerm TermIndex
     | UpdateTerm TermIndex String
+    | MoveTermUp TermIndex
+    | MoveTermDown Int TermIndex
     | ToggleAbbreviation TermIndex
     | ToggleTagCheckbox Tag
     | UpdateDefinition String
@@ -93,6 +96,7 @@ type InternalMsg
     | SelectRelatedTerm RelatedTermIndex String
     | DeleteRelatedTerm RelatedTermIndex
     | DropdownMenuWithMoreOptionsForRelatedTermMsg Int Components.DropdownMenu.Msg
+    | DropdownMenuWithMoreOptionsForTermMsg Int Components.DropdownMenu.Msg
     | MoveRelatedTermUp RelatedTermIndex
     | MoveRelatedTermDown Int RelatedTermIndex
     | ToggleNeedsUpdating
@@ -142,6 +146,8 @@ init commonModel itemBeingEdited =
               , form = form
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
+              , dropdownMenusWithMoreOptionsForTerms =
+                    dropdownMenusWithMoreOptionsForTermsForForm form
               , dropdownMenusWithMoreOptionsForRelatedTerms =
                     dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
@@ -158,6 +164,7 @@ init commonModel itemBeingEdited =
               , form = Form.empty GlossaryItemsForUi.empty Nothing
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
+              , dropdownMenusWithMoreOptionsForTerms = Dict.empty
               , dropdownMenusWithMoreOptionsForRelatedTerms = Dict.empty
               }
             , Cmd.none
@@ -175,6 +182,25 @@ dropdownMenusWithMoreOptionsForRelatedTermsForForm form =
                     index
                     (Components.DropdownMenu.init
                         [ Components.DropdownMenu.id <| ElementIds.moreOptionsForRelatedTermDropdownMenu index
+                        , Components.DropdownMenu.originTopLeft
+                        ]
+                    )
+                    result
+            )
+            Dict.empty
+
+
+dropdownMenusWithMoreOptionsForTermsForForm : GlossaryItemForm -> Dict Int Components.DropdownMenu.Model
+dropdownMenusWithMoreOptionsForTermsForForm form =
+    form
+        |> Form.termFields
+        |> Array.indexedMap (\index _ -> index)
+        |> Array.foldl
+            (\index result ->
+                Dict.insert
+                    index
+                    (Components.DropdownMenu.init
+                        [ Components.DropdownMenu.id <| ElementIds.moreOptionsForTermDropdownMenu index
                         , Components.DropdownMenu.originTopLeft
                         ]
                     )
@@ -228,6 +254,34 @@ update msg model =
         UpdateTerm termIndex body ->
             ( updateForm (Form.updateTerm termIndex body) model
             , Cmd.none
+            )
+
+        MoveTermUp termIndex ->
+            let
+                form : GlossaryItemForm
+                form =
+                    Form.moveTermUp termIndex model.form
+            in
+            ( { model
+                | dropdownMenusWithMoreOptionsForTerms = dropdownMenusWithMoreOptionsForTermsForForm form
+              }
+                |> updateForm (always form)
+            , moveFocusAfterMovingTermUp termIndex
+                |> Cmd.map PageMsg.Internal
+            )
+
+        MoveTermDown numberOfTerms termIndex ->
+            let
+                form : GlossaryItemForm
+                form =
+                    Form.moveTermDown termIndex model.form
+            in
+            ( { model
+                | dropdownMenusWithMoreOptionsForTerms = dropdownMenusWithMoreOptionsForTermsForForm form
+              }
+                |> updateForm (always form)
+            , moveFocusAfterMovingTermDown numberOfTerms termIndex
+                |> Cmd.map PageMsg.Internal
             )
 
         ToggleAbbreviation termIndex ->
@@ -305,6 +359,37 @@ update msg model =
                 (Dom.blur <| ElementIds.deleteRelatedTermButton <| RelatedTermIndex.toInt relatedTermIndex)
                 |> Cmd.map PageMsg.Internal
             )
+
+        DropdownMenuWithMoreOptionsForTermMsg termIndexInt msg_ ->
+            model.dropdownMenusWithMoreOptionsForTerms
+                |> Dict.get termIndexInt
+                |> Maybe.map
+                    (\dropdownMenu ->
+                        Components.DropdownMenu.update
+                            (\x ->
+                                let
+                                    dropdownMenusWithMoreOptionsForTerms1 : Dict Int Components.DropdownMenu.Model
+                                    dropdownMenusWithMoreOptionsForTerms1 =
+                                        Dict.map
+                                            (\termIndex_ dropdownMenu_ ->
+                                                if termIndex_ == termIndexInt then
+                                                    x
+
+                                                else
+                                                    Components.DropdownMenu.hidden dropdownMenu_
+                                            )
+                                            model.dropdownMenusWithMoreOptionsForTerms
+                                in
+                                { model
+                                    | dropdownMenusWithMoreOptionsForTerms =
+                                        dropdownMenusWithMoreOptionsForTerms1
+                                }
+                            )
+                            (PageMsg.Internal << DropdownMenuWithMoreOptionsForTermMsg termIndexInt)
+                            msg_
+                            dropdownMenu
+                    )
+                |> Maybe.withDefault ( model, Cmd.none )
 
         DropdownMenuWithMoreOptionsForRelatedTermMsg relatedTermIndexInt msg_ ->
             model.dropdownMenusWithMoreOptionsForRelatedTerms
@@ -440,6 +525,50 @@ update msg model =
             )
 
 
+moveFocusAfterMovingTermUp : TermIndex -> Cmd InternalMsg
+moveFocusAfterMovingTermUp termIndex =
+    let
+        termIndexInt : Int
+        termIndexInt =
+            TermIndex.toInt termIndex
+
+        previousTermIndexInt : Int
+        previousTermIndexInt =
+            termIndexInt - 1
+    in
+    if previousTermIndexInt == 0 then
+        Task.attempt
+            (\_ -> NoOp)
+            (Dom.blur <| ElementIds.moveTermUpButton termIndexInt)
+
+    else
+        Task.attempt
+            (\_ -> NoOp)
+            (Dom.focus <| ElementIds.moveTermUpButton previousTermIndexInt)
+
+
+moveFocusAfterMovingTermDown : Int -> TermIndex -> Cmd InternalMsg
+moveFocusAfterMovingTermDown numberOfTerms termIndex =
+    let
+        termIndexInt : Int
+        termIndexInt =
+            TermIndex.toInt termIndex
+
+        nextTermIndexInt : Int
+        nextTermIndexInt =
+            termIndexInt + 1
+    in
+    if nextTermIndexInt == numberOfTerms - 1 then
+        Task.attempt
+            (\_ -> NoOp)
+            (Dom.blur <| ElementIds.moveTermDownButton termIndexInt)
+
+    else
+        Task.attempt
+            (\_ -> NoOp)
+            (Dom.focus <| ElementIds.moveTermDownButton nextTermIndexInt)
+
+
 moveFocusAfterMovingRelatedTermUp : RelatedTermIndex -> Cmd InternalMsg
 moveFocusAfterMovingRelatedTermUp relatedTermIndex =
     let
@@ -498,19 +627,20 @@ giveFocusToSeeAlsoSelect index =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.seeAlsoSelect index)
 
 
-viewCreateTerm : Bool -> Bool -> Bool -> Int -> TermField -> Html Msg
-viewCreateTerm mathSupportEnabled showValidationErrors canBeDeleted index term =
+viewCreateTerm : Bool -> Bool -> Int -> Int -> TermField -> Dict Int Components.DropdownMenu.Model -> Html Msg
+viewCreateTerm mathSupportEnabled showValidationErrors numberOfTerms index term dropdownMenusWithMoreOptionsForTerms =
     viewCreateTermInternal
         (index == 0)
         mathSupportEnabled
         showValidationErrors
-        canBeDeleted
+        numberOfTerms
+        (Dict.get index dropdownMenusWithMoreOptionsForTerms)
         (TermIndex.fromInt index)
         term
 
 
-viewCreateTermInternal : Bool -> Bool -> Bool -> Bool -> TermIndex -> TermField -> Html Msg
-viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors canBeDeleted termIndex termField =
+viewCreateTermInternal : Bool -> Bool -> Bool -> Int -> Maybe Components.DropdownMenu.Model -> TermIndex -> TermField -> Html Msg
+viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors numberOfTerms maybeDropdownMenuWithMoreOptions termIndex termField =
     let
         abbreviationLabelId : String
         abbreviationLabelId =
@@ -518,67 +648,88 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
     in
     div []
         [ div
-            [ class "sm:flex sm:flex-row sm:items-center" ]
+            [ class "flex flex-row items-center flex-auto max-w-2xl" ]
             [ div
-                [ class "flex-auto max-w-2xl flex" ]
+                [ class "flex items-center w-full" ]
                 [ div
-                    [ class "flex-auto" ]
-                    [ div
-                        [ class "sm:flex sm:flex-row sm:items-center" ]
-                        [ Html.div
-                            [ class "block w-full min-w-0" ]
-                            [ Components.Form.inputText
-                                (TermField.raw termField)
-                                showMarkdownBasedSyntaxEnabled
-                                mathSupportEnabled
-                                showValidationErrors
-                                (TermField.validationError termField)
-                                [ id <| ElementIds.termInputField termIndex
-                                , required True
-                                , Html.Attributes.autocomplete False
-                                , Html.Attributes.placeholder <|
-                                    if TermIndex.toInt termIndex == 0 then
-                                        I18n.preferredTerm
-
-                                    else
-                                        I18n.alternativeTerm
-                                , Accessibility.Aria.label I18n.term
-                                , Accessibility.Aria.required True
-                                , Html.Events.onInput (PageMsg.Internal << UpdateTerm termIndex)
-                                , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
-                                ]
-                            ]
-                        , div
-                            [ class "flex-auto mt-2 sm:mt-0 relative flex items-baseline"
-                            , Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:pt-6"
-                            ]
-                            [ div
-                                [ class "sm:ml-5" ]
-                                [ Components.Button.toggle
-                                    (TermField.isAbbreviation termField)
-                                    abbreviationLabelId
-                                    [ Html.Events.onClick <| PageMsg.Internal <| ToggleAbbreviation termIndex ]
-                                    [ span
-                                        [ class "font-medium text-gray-900 dark:text-gray-300" ]
-                                        [ text I18n.abbreviation ]
-                                    ]
-                                ]
-                            ]
+                    [ class "hidden sm:flex sm:mr-2 items-center" ]
+                    [ Components.Button.rounded (TermIndex.toInt termIndex > 0)
+                        [ Accessibility.Aria.label I18n.moveUp
+                        , id <| ElementIds.moveTermUpButton <| TermIndex.toInt termIndex
+                        , Html.Events.onClick <| PageMsg.Internal <| MoveTermUp termIndex
                         ]
-                    ]
-                , span
-                    [ class "inline-flex items-center"
-                    , Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:pt-6"
-                    ]
-                    [ Components.Button.rounded canBeDeleted
-                        [ Accessibility.Aria.label I18n.delete
-                        , id <| ElementIds.deleteTermButton <| TermIndex.toInt termIndex
-                        , Html.Events.onClick <| PageMsg.Internal <| DeleteTerm termIndex
-                        , class "ml-4"
-                        ]
-                        [ Icons.trash
+                        [ Icons.arrowUp
                             [ Svg.Attributes.class "h-5 w-5" ]
                         ]
+                    , Components.Button.rounded (TermIndex.toInt termIndex + 1 < numberOfTerms)
+                        [ Accessibility.Aria.label I18n.moveDown
+                        , id <| ElementIds.moveTermDownButton <| TermIndex.toInt termIndex
+                        , Html.Events.onClick <| PageMsg.Internal <| MoveTermDown numberOfTerms termIndex
+                        ]
+                        [ Icons.arrowDown
+                            [ Svg.Attributes.class "h-5 w-5" ]
+                        ]
+                    ]
+                , Extras.Html.showIf (numberOfTerms > 1) <|
+                    Extras.Html.showMaybe
+                        (\dropdownMenuWithMoreOptions ->
+                            span
+                                [ class "sm:hidden mr-2 flex items-center" ]
+                                [ viewMoreOptionsForTermDropdownButton numberOfTerms termIndex dropdownMenuWithMoreOptions ]
+                        )
+                        maybeDropdownMenuWithMoreOptions
+                , Html.div
+                    [ class "flex flex-wrap sm:flex-nowrap w-full min-w-0" ]
+                    [ Components.Form.inputText
+                        (TermField.raw termField)
+                        showMarkdownBasedSyntaxEnabled
+                        mathSupportEnabled
+                        showValidationErrors
+                        (TermField.validationError termField)
+                        [ id <| ElementIds.termInputField termIndex
+                        , required True
+                        , Html.Attributes.autocomplete False
+                        , Html.Attributes.placeholder <|
+                            if TermIndex.toInt termIndex == 0 then
+                                I18n.preferredTerm
+
+                            else
+                                I18n.alternativeTerm
+                        , Accessibility.Aria.label I18n.term
+                        , Accessibility.Aria.required True
+                        , Html.Events.onInput (PageMsg.Internal << UpdateTerm termIndex)
+                        , Extras.HtmlEvents.onEnter <| PageMsg.Internal NoOp
+                        ]
+                    , div
+                        [ class "sm:flex flex-auto mt-2 relative items-baseline"
+                        , Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:pt-6"
+                        ]
+                        [ div
+                            [ class "mt-1 sm:mt-0 sm:ml-5" ]
+                            [ Components.Button.toggle
+                                (TermField.isAbbreviation termField)
+                                abbreviationLabelId
+                                [ Html.Events.onClick <| PageMsg.Internal <| ToggleAbbreviation termIndex ]
+                                [ span
+                                    [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                                    [ text I18n.abbreviation ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            , span
+                [ class "inline-flex items-center"
+                , Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "pt-6"
+                ]
+                [ Components.Button.rounded (numberOfTerms > 1)
+                    [ Accessibility.Aria.label I18n.delete
+                    , id <| ElementIds.deleteTermButton <| TermIndex.toInt termIndex
+                    , Html.Events.onClick <| PageMsg.Internal <| DeleteTerm termIndex
+                    , class "ml-4"
+                    ]
+                    [ Icons.trash
+                        [ Svg.Attributes.class "h-5 w-5" ]
                     ]
                 ]
             ]
@@ -597,8 +748,53 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
         ]
 
 
-viewCreateTerms : Bool -> Bool -> Array TermField -> Html Msg
-viewCreateTerms mathSupportEnabled showValidationErrors termsArray =
+viewMoreOptionsForTermDropdownButton : Int -> TermIndex -> Components.DropdownMenu.Model -> Html Msg
+viewMoreOptionsForTermDropdownButton numberOfTerms index dropdownMenuWithMoreOptionsForTerm =
+    let
+        indexInt : Int
+        indexInt =
+            TermIndex.toInt index
+    in
+    Components.DropdownMenu.view
+        (PageMsg.Internal << DropdownMenuWithMoreOptionsForTermMsg indexInt)
+        dropdownMenuWithMoreOptionsForTerm
+        True
+        Components.DropdownMenu.Ellipsis
+        (List.filterMap identity
+            [ if indexInt > 0 then
+                Just <|
+                    Components.DropdownMenu.choice
+                        [ span
+                            [ class "inline-flex items-center" ]
+                            [ Icons.arrowUp
+                                [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" ]
+                            , text I18n.moveUp
+                            ]
+                        ]
+                        (PageMsg.Internal <| MoveTermUp index)
+
+              else
+                Nothing
+            , if indexInt + 1 < numberOfTerms then
+                Just <|
+                    Components.DropdownMenu.choice
+                        [ span
+                            [ class "inline-flex items-center" ]
+                            [ Icons.arrowDown
+                                [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" ]
+                            , text I18n.moveDown
+                            ]
+                        ]
+                        (PageMsg.Internal <| MoveTermDown numberOfTerms index)
+
+              else
+                Nothing
+            ]
+        )
+
+
+viewCreateTerms : Bool -> Bool -> Array TermField -> Dict Int Components.DropdownMenu.Model -> Html Msg
+viewCreateTerms mathSupportEnabled showValidationErrors termsArray dropdownMenusWithMoreOptionsForTerms =
     let
         terms : List TermField
         terms =
@@ -615,7 +811,17 @@ viewCreateTerms mathSupportEnabled showValidationErrors termsArray =
             ]
         , div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
-            (List.indexedMap (viewCreateTerm mathSupportEnabled showValidationErrors (List.length terms > 1)) terms
+            (List.indexedMap
+                (\index termField ->
+                    viewCreateTerm
+                        mathSupportEnabled
+                        showValidationErrors
+                        (List.length terms)
+                        index
+                        termField
+                        dropdownMenusWithMoreOptionsForTerms
+                )
+                terms
                 ++ [ div []
                         [ Components.Button.secondary
                             [ Html.Events.onClick <| PageMsg.Internal AddTerm ]
@@ -1172,7 +1378,11 @@ view model =
                                 [ class "lg:flex lg:space-x-8" ]
                                 [ div
                                     [ class "lg:w-1/2" ]
-                                    [ viewCreateTerms model.common.enableMathSupport model.triedToSaveWhenFormInvalid terms
+                                    [ viewCreateTerms
+                                        model.common.enableMathSupport
+                                        model.triedToSaveWhenFormInvalid
+                                        terms
+                                        model.dropdownMenusWithMoreOptionsForTerms
                                     , viewDefinition
                                         model.common.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
@@ -1255,6 +1465,15 @@ subscriptions model =
         [ ReceiveCurrentDateTimeAndNewIdForSaving
             |> receiveCurrentDateTimeAndNewIdForSaving
             |> Sub.map PageMsg.Internal
+        , model.dropdownMenusWithMoreOptionsForTerms
+            |> Dict.toList
+            |> List.map
+                (\( termIndex, dropdownModel ) ->
+                    dropdownModel
+                        |> Components.DropdownMenu.subscriptions
+                        |> Sub.map (DropdownMenuWithMoreOptionsForTermMsg termIndex >> PageMsg.Internal)
+                )
+            |> Sub.batch
         , model.dropdownMenusWithMoreOptionsForRelatedTerms
             |> Dict.toList
             |> List.map

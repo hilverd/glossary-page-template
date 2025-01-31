@@ -23,8 +23,11 @@ module ElementIds exposing
     , items
     , letterGrid
     , moreOptionsForRelatedTermDropdownMenu
+    , moreOptionsForTermDropdownMenu
     , moveRelatedTermDownButton
     , moveRelatedTermUpButton
+    , moveTermDownButton
+    , moveTermUpButton
     , needsUpdatingToggleLabel
     , orderItemsAlphabetically
     , orderItemsFocusedOn
@@ -240,6 +243,11 @@ exportDropdownButton =
     prefixed "export-dropdown-button"
 
 
+moreOptionsForTermDropdownMenu : Int -> String
+moreOptionsForTermDropdownMenu relatedTermIndexInt =
+    prefixed "more-options-for-term-" ++ String.fromInt relatedTermIndexInt ++ "-dropdown-menu"
+
+
 moreOptionsForRelatedTermDropdownMenu : Int -> String
 moreOptionsForRelatedTermDropdownMenu relatedTermIndexInt =
     prefixed "more-options-for-related-term-" ++ String.fromInt relatedTermIndexInt ++ "-dropdown-menu"
@@ -305,6 +313,21 @@ indexFilterInputField =
     prefixed "index-filter-input-field"
 
 
+moveTermUpButton : Int -> String
+moveTermUpButton index =
+    prefixed <| "move-term-up-" ++ String.fromInt index ++ "-button"
+
+
+moveTermDownButton : Int -> String
+moveTermDownButton index =
+    prefixed <| "move-term-down-" ++ String.fromInt index ++ "-button"
+
+
+deleteTermButton : Int -> String
+deleteTermButton index =
+    prefixed <| "delete-term-" ++ String.fromInt index ++ "-button"
+
+
 moveRelatedTermUpButton : Int -> String
 moveRelatedTermUpButton index =
     prefixed <| "move-related-term-up-" ++ String.fromInt index ++ "-button"
@@ -313,11 +336,6 @@ moveRelatedTermUpButton index =
 moveRelatedTermDownButton : Int -> String
 moveRelatedTermDownButton index =
     prefixed <| "move-related-term-down-" ++ String.fromInt index ++ "-button"
-
-
-deleteTermButton : Int -> String
-deleteTermButton index =
-    prefixed <| "delete-term-" ++ String.fromInt index ++ "-button"
 
 
 deleteRelatedTermButton : Int -> String

@@ -12,6 +12,8 @@ module GlossaryItemForm exposing
     , hasValidationErrors
     , moveRelatedTermDown
     , moveRelatedTermUp
+    , moveTermDown
+    , moveTermUp
     , needsUpdating
     , relatedTermFields
     , selectRelatedTerm
@@ -605,6 +607,18 @@ updateTerm termIndex body glossaryItemForm =
                     }
             )
                 |> validate
+
+
+moveTermUp : TermIndex -> GlossaryItemForm -> GlossaryItemForm
+moveTermUp index glossaryItemForm =
+    -- TODO
+    glossaryItemForm
+
+
+moveTermDown : TermIndex -> GlossaryItemForm -> GlossaryItemForm
+moveTermDown index glossaryItemForm =
+    --- TODO
+    glossaryItemForm
 
 
 deleteTerm : TermIndex -> GlossaryItemForm -> GlossaryItemForm
