@@ -111,7 +111,7 @@ init flags url key =
 
         maybeFragment : Maybe String
         maybeFragment =
-            url.fragment
+            Maybe.andThen Url.percentDecode url.fragment
 
         glossaryForUi : Result String GlossaryForUi
         glossaryForUi =
@@ -346,7 +346,7 @@ update msg model =
 
                         maybeFragment : Maybe String
                         maybeFragment =
-                            url.fragment
+                            Maybe.andThen Url.percentDecode url.fragment
 
                         itemWithFocus : Maybe GlossaryItemId
                         itemWithFocus =
