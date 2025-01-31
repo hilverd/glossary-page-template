@@ -14,6 +14,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 
 - Add a filter field for the index on larger screens.
+- Add buttons for rearranging terms.
 
 ### Changed
 
@@ -27,7 +28,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Improve dark mode colours for search button.
 - Improve layout of related items in form on edit page.
 - Improve layout of buttons and select menus with long text.
-- When pressing up/down buttons for reordering related items, make the focus follow the button for the item being moved.
+- When pressing up/down buttons for rearranging related items, make the focus follow the button for the item being moved.
 - Fix bug where not doing percent-decoding on fragment identifiers in URLs broke item highlighting.
 
 ### Removed

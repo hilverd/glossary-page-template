@@ -610,15 +610,85 @@ updateTerm termIndex body glossaryItemForm =
 
 
 moveTermUp : TermIndex -> GlossaryItemForm -> GlossaryItemForm
-moveTermUp index glossaryItemForm =
-    -- TODO
-    glossaryItemForm
+moveTermUp index ((GlossaryItemForm form) as glossaryItemForm) =
+    let
+        termFields0 : Array TermField
+        termFields0 =
+            termFields glossaryItemForm
+
+        indexInt : Int
+        indexInt =
+            TermIndex.toInt index
+
+        maybeCurrentAtIndex : Maybe TermField
+        maybeCurrentAtIndex =
+            Array.get indexInt termFields0
+
+        maybeCurrentAtPreviousIndex : Maybe TermField
+        maybeCurrentAtPreviousIndex =
+            Array.get (indexInt - 1) termFields0
+
+        termFields1 : Array TermField
+        termFields1 =
+            Maybe.map2
+                (\currentAtIndex currentAtPreviousIndex ->
+                    termFields0
+                        |> Array.set (indexInt - 1) currentAtIndex
+                        |> Array.set indexInt currentAtPreviousIndex
+                )
+                maybeCurrentAtIndex
+                maybeCurrentAtPreviousIndex
+                |> Maybe.withDefault termFields0
+    in
+    GlossaryItemForm
+        { form
+            | preferredTermField =
+                termFields1
+                    |> Array.get 0
+                    |> Maybe.withDefault TermField.empty
+            , alternativeTermFields = Extras.Array.delete 0 termFields1
+        }
 
 
 moveTermDown : TermIndex -> GlossaryItemForm -> GlossaryItemForm
-moveTermDown index glossaryItemForm =
-    --- TODO
-    glossaryItemForm
+moveTermDown index ((GlossaryItemForm form) as glossaryItemForm) =
+    let
+        termFields0 : Array TermField
+        termFields0 =
+            termFields glossaryItemForm
+
+        indexInt : Int
+        indexInt =
+            TermIndex.toInt index
+
+        maybeCurrentAtIndex : Maybe TermField
+        maybeCurrentAtIndex =
+            Array.get indexInt termFields0
+
+        maybeCurrentAtNextIndex : Maybe TermField
+        maybeCurrentAtNextIndex =
+            Array.get (indexInt + 1) termFields0
+
+        termFields1 : Array TermField
+        termFields1 =
+            Maybe.map2
+                (\currentAtIndex currentAtNextIndex ->
+                    termFields0
+                        |> Array.set (indexInt + 1) currentAtIndex
+                        |> Array.set indexInt currentAtNextIndex
+                )
+                maybeCurrentAtIndex
+                maybeCurrentAtNextIndex
+                |> Maybe.withDefault termFields0
+    in
+    GlossaryItemForm
+        { form
+            | preferredTermField =
+                termFields1
+                    |> Array.get 0
+                    |> Maybe.withDefault TermField.empty
+            , alternativeTermFields = Extras.Array.delete 0 termFields1
+        }
 
 
 deleteTerm : TermIndex -> GlossaryItemForm -> GlossaryItemForm
