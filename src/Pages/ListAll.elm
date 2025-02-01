@@ -1028,7 +1028,7 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
                 , div
                     [ class "mt-3 flex rounded-md" ]
                     [ div
-                        [ class "block w-full max-w-2xl flex flex-grow items-stretch focus-within:z-10" ]
+                        [ class "block w-full max-w-2xl flex grow items-stretch focus-within:z-10" ]
                         [ Accessibility.inputText
                             command
                             [ class "w-full min-w-0 rounded-none rounded-l-md focus:ring-indigo-500 focus:border-indigo-500 focus:ring-inset border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 font-mono text-sm"
@@ -1511,7 +1511,7 @@ viewMakeChangesButton editability tabbable =
                 [ class "ml-2 inline-flex items-center" ]
                 [ text I18n.makeChanges
                 , Html.kbd
-                    [ class "ml-2 inline-flex items-center rounded border border-gray-700 dark:border-gray-300 px-1 font-sans text-xs" ]
+                    [ class "ml-2 inline-flex items-center rounded-xs border border-gray-700 dark:border-gray-300 px-1 font-sans text-xs" ]
                     [ text "e" ]
                 ]
             ]
@@ -1553,7 +1553,7 @@ viewCreateGlossaryItemButtonForEmptyState =
                 [ class "mt-2 inline-flex items-center font-medium text-gray-900 dark:text-gray-200" ]
                 [ text I18n.createANewGlossaryItem
                 , Html.kbd
-                    [ class "ml-2 rounded border border-indigo-700 dark:border-indigo-300 px-1 font-sans text-xs" ]
+                    [ class "ml-2 rounded-xs border border-indigo-700 dark:border-indigo-300 px-1 font-sans text-xs" ]
                     [ text "n" ]
                 ]
             ]
@@ -1576,7 +1576,7 @@ viewCreateGlossaryItemButton =
                 [ class "inline-flex items-center" ]
                 [ text I18n.createANewGlossaryItem
                 , Html.kbd
-                    [ class "ml-2 inline-flex items-center rounded border border-indigo-700 dark:border-indigo-300 px-1 font-sans text-xs" ]
+                    [ class "ml-2 inline-flex items-center rounded-xs border border-indigo-700 dark:border-indigo-300 px-1 font-sans text-xs" ]
                     [ text "n" ]
                 ]
             ]
@@ -1747,7 +1747,7 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport termIndex =
         , Accessibility.Aria.modal True
         ]
         [ Html.div
-            [ class "fixed inset-0 bg-gray-600 bg-opacity-75"
+            [ class "fixed inset-0 bg-gray-600 bg-black/75"
             , if menuForMobileVisibility == GradualVisibility.Visible then
                 class "transition-opacity motion-reduce:transition-none ease-linear duration-300 opacity-100"
 
@@ -1775,7 +1775,7 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport termIndex =
                 ]
                 [ button
                     [ Html.Attributes.type_ "button"
-                    , class "ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white dark:focus:ring-gray-500"
+                    , class "ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-hidden focus:ring-2 focus:ring-inset focus:ring-white dark:focus:ring-gray-500"
                     , Html.Events.onClick <| PageMsg.Internal StartHidingMenuForMobile
                     ]
                     [ span
@@ -1844,7 +1844,7 @@ viewBackToTopLink staticSidebar visibility =
             , Accessibility.Key.tabbable staticSidebar
             ]
             [ span
-                [ class "inline-flex bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-95 border border-gray-600 dark:border-gray-400 rounded-md p-3 text-lg" ]
+                [ class "inline-flex bg-white/95 dark:bg-gray-800/95 border border-gray-600 dark:border-gray-400 rounded-md p-3 text-lg" ]
                 [ text I18n.backToTop
                 , Icons.arrowUp
                     [ Svg.Attributes.class "w-6 h-6 ml-2"
@@ -1863,7 +1863,7 @@ viewQuickSearchButton runningOnMacOs =
             [ class "bg-gray-50 dark:bg-slate-900 relative pointer-events-auto" ]
             [ button
                 [ Html.Attributes.type_ "button"
-                , class "w-full flex items-center text-sm leading-6 text-slate-500 dark:text-slate-400 rounded-md ring-1 ring-slate-900/10 dark:ring-slate-600 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-400 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800 select-none"
+                , class "w-full flex items-center text-sm leading-6 text-slate-500 dark:text-slate-400 rounded-md ring-1 ring-slate-900/10 dark:ring-slate-600 shadow-xs py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-400 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800 select-none"
                 , Html.Events.onClick <| PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show
                 , Accessibility.Aria.hidden True
                 ]
@@ -1965,7 +1965,7 @@ viewLetterGrid staticSidebar indexFilterString indexOfTerms =
             , viewTermIndexFirstCharacterGrid staticSidebar indexOfTerms
             ]
         , div
-            [ class "h-8 bg-gradient-to-b from-white dark:from-slate-900" ]
+            [ class "h-8 bg-linear-to-b from-white dark:from-slate-900" ]
             []
         ]
 
@@ -2000,7 +2000,7 @@ viewTopBar tabbable runningOnMacOs theme themeDropdownMenu maybeExportDropdownMe
             [ class "flex-1" ]
             [ button
                 [ Html.Attributes.type_ "button"
-                , class "px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 focus:outline-none lg:hidden"
+                , class "px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 focus:outline-hidden lg:hidden"
                 , Html.Events.onClick <| PageMsg.Internal ShowMenuForMobile
                 ]
                 [ span
@@ -2790,7 +2790,7 @@ view model =
             { title = pageTitle model glossaryForUi
             , body =
                 [ Html.div
-                    [ class "min-h-full focus:outline-none"
+                    [ class "min-h-full focus:outline-hidden"
                     , Html.Attributes.id ElementIds.outer
                     , Accessibility.Key.tabbable True
                     , Html.Events.preventDefaultOn "keydown"

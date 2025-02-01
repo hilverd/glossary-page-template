@@ -1,9 +1,13 @@
+import tailwindcss from "@tailwindcss/vite"
 import path from 'path'
 import { defineConfig } from 'vite'
 import elmPlugin from 'vite-plugin-elm'
 
 export default defineConfig({
-    plugins: [elmPlugin()],
+    plugins: [
+        tailwindcss(),
+        elmPlugin()
+    ],
     build: {
         rollupOptions: {
             input: {

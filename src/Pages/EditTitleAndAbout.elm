@@ -386,7 +386,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                     ]
                 ]
             , div
-                [ class "flex-1 isolate -space-y-px rounded-md shadow-sm bg-white dark:bg-gray-700" ]
+                [ class "flex-1 isolate -space-y-px rounded-md shadow-xs bg-white dark:bg-gray-700" ]
                 [ div
                     [ if not showValidationErrors || aboutLinkHref.validationError == Nothing then
                         class "relative border border-gray-300 dark:border-gray-500 rounded-md rounded-b-none px-3 py-2 focus-within:z-10 focus-within:ring-1 focus-within:ring-indigo-600 focus-within:border-indigo-600"
@@ -548,7 +548,7 @@ view model =
     { title = GlossaryTitle.inlineText title1
     , body =
         [ div
-            [ class "container mx-auto px-6 pb-12 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
+            [ class "container mx-auto px-6 pb-12 lg:px-8 max-w-4xl lg:max-w-(--breakpoint-2xl)" ]
             [ main_
                 []
                 [ h1

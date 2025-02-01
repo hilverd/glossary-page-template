@@ -322,7 +322,7 @@ view toParentMsg model enabled buttonShape choices =
         , div
             [ Extras.HtmlAttribute.showMaybe Accessibility.Aria.labelledBy config.id
             , Accessibility.Aria.orientationVertical
-            , class "absolute z-10 w-max mt-2 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-600 ring-opacity-5 divide-y divide-gray-100 focus:outline-none"
+            , class "absolute z-10 w-max mt-2 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black/5 dark:ring-gray-600 divide-y divide-gray-100 focus:outline-hidden"
             , class "hidden" |> Extras.HtmlAttribute.showIf (model_.visibility == Invisible)
             , class <|
                 if config.originTopRight then

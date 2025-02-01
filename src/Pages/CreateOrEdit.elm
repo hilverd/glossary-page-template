@@ -1360,7 +1360,7 @@ view model =
             { title = glossaryForUi |> Glossary.title |> GlossaryTitle.inlineText
             , body =
                 [ div
-                    [ class "container mx-auto px-6 pb-16 lg:px-8 max-w-4xl lg:max-w-screen-2xl" ]
+                    [ class "container mx-auto px-6 pb-16 lg:px-8 max-w-4xl lg:max-w-(--breakpoint-2xl)" ]
                     [ Html.main_
                         []
                         [ h1

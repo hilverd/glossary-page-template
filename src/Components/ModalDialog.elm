@@ -23,7 +23,7 @@ view onEscape labelledBy alignTop additionalAttributes body visible =
         [ div
             [ class "flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0" ]
             [ Html.div
-                [ class "fixed inset-0 bg-gray-500 dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 transition-opacity motion-reduce:transition-none"
+                [ class "fixed inset-0 bg-gray-500/75 dark:bg-gray-800/75 transition-opacity motion-reduce:transition-none"
                 , if visible then
                     class "ease-out duration-300 opacity-100"
 

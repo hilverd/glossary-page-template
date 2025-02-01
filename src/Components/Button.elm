@@ -29,7 +29,7 @@ withAdditionalAttributes attributes additionalAttributes children =
 primary : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 primary enabled =
     withAdditionalAttributes
-        [ class "inline-flex justify-center items-center py-2 px-4 border border-transparent shadow-sm font-medium rounded-md bg-indigo-600 text-white dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+        [ class "inline-flex justify-center items-center py-2 px-4 border border-transparent shadow-xs font-medium rounded-md bg-indigo-600 text-white dark:text-gray-200 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
         , if enabled then
             class "hover:bg-indigo-700"
 
@@ -43,15 +43,15 @@ primary enabled =
 secondary : List (Attribute msg) -> List (Html msg) -> Html msg
 secondary =
     withAdditionalAttributes
-        [ class "inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-indigo-700 dark:text-indigo-100 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300" ]
+        [ class "inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-xs font-medium rounded-md text-indigo-700 dark:text-indigo-100 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300" ]
 
 
 white : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 white enabled =
     withAdditionalAttributes
-        [ class "inline-flex justify-center items-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 font-medium"
+        [ class "inline-flex justify-center items-center rounded-md border border-gray-300 dark:border-gray-700 shadow-xs px-4 py-2 font-medium"
         , if enabled then
-            class "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+            class "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
 
           else
             class "text-gray-300 dark:text-slate-600 bg-white dark:bg-slate-900"
@@ -82,7 +82,7 @@ roundedWithoutBorder enabled =
     withAdditionalAttributes
         [ class "flex items-center rounded-full text-gray-500 dark:text-gray-400"
         , if enabled then
-            class "hover:text-black dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+            class "hover:text-black dark:hover:text-white focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
 
           else
             class "opacity-50"
@@ -94,15 +94,15 @@ roundedWithoutBorder enabled =
 emptyState : List (Attribute msg) -> List (Html msg) -> Html msg
 emptyState =
     withAdditionalAttributes
-        [ class "relative block max-w-lg border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-lg p-5 text-center hover:border-gray-400 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300" ]
+        [ class "relative block max-w-lg border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-lg p-5 text-center hover:border-gray-400 dark:hover:border-gray-600 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300" ]
 
 
 rounded : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 rounded enabled =
     withAdditionalAttributes
-        [ class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-sm rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
+        [ class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-xs rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
         , if enabled then
-            class "hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+            class "hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
 
           else
             class "opacity-50"
@@ -114,7 +114,7 @@ rounded enabled =
 softSmall : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 softSmall enabled =
     withAdditionalAttributes
-        [ class "rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-700 dark:text-gray-100 shadow-sm"
+        [ class "rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-700 dark:text-gray-100 shadow-xs"
         , Extras.HtmlAttribute.showIf enabled <| class "hover:bg-gray-100 dark:hover:bg-gray-700"
         , Html.Attributes.disabled <| not enabled
         , Accessibility.Key.tabbable enabled
@@ -124,7 +124,7 @@ softSmall enabled =
 soft : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 soft enabled =
     withAdditionalAttributes
-        [ class "rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-2 py-1 text-gray-700 dark:text-gray-200 shadow-sm"
+        [ class "rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-2 py-1 text-gray-700 dark:text-gray-200 shadow-xs"
         , Extras.HtmlAttribute.showIf enabled <| class "hover:bg-gray-100 dark:hover:bg-gray-800"
         , Html.Attributes.disabled <| not enabled
         , Accessibility.Key.tabbable enabled
@@ -137,7 +137,7 @@ toggle on labelId additionalAttributes children =
         (class "flex items-center" :: additionalAttributes)
         [ Accessibility.button
             [ Html.Attributes.type_ "button"
-            , class "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
+            , class "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
             , class <|
                 if on then
                     "bg-indigo-600 dark:bg-indigo-400"
@@ -153,7 +153,7 @@ toggle on labelId additionalAttributes children =
                 ]
                 [ Html.text I18n.useSetting ]
             , Accessibility.span
-                [ class "pointer-events-none relative inline-block size-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                [ class "pointer-events-none relative inline-block size-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out"
                 , class <|
                     if on then
                         "translate-x-5"
@@ -226,7 +226,7 @@ radio name_ value_ checked_ tabbable additionalAttributes =
         name_
         value_
         checked_
-        ([ class "h-4 w-4 disabled:bg-gray-200 dark:bg-gray-700 disabled:dark:bg-gray-800 text-indigo-600 dark:text-amber-700 border-gray-300 dark:border-gray-500 disabled:dark:border-gray-700 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+        ([ class "h-4 w-4 disabled:bg-gray-200 dark:bg-gray-700 dark:disabled:bg-gray-800 text-indigo-600 dark:text-amber-700 border-gray-300 dark:border-gray-500 dark:disabled:border-gray-700 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
          , Accessibility.Key.tabbable tabbable
          ]
             ++ additionalAttributes

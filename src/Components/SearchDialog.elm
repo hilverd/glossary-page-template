@@ -417,7 +417,7 @@ view toParentMsg model searchString messageAboveSearchResults searchResults =
         , class "relative z-20"
         ]
         [ Html.div
-            [ class "fixed inset-0 bg-gray-500 dark:bg-gray-800 bg-opacity-50 dark:bg-opacity-75 transition-opacity motion-reduce:transition-none"
+            [ class "fixed inset-0 bg-gray-500/50 dark:bg-gray-800/75 transition-opacity motion-reduce:transition-none"
             , class "invisible" |> Extras.HtmlAttribute.showIf (model_.visibility == Invisible)
             , if model_.visibility == Visible then
                 class "ease-out duration-300 opacity-100"
@@ -439,7 +439,7 @@ view toParentMsg model searchString messageAboveSearchResults searchResults =
                             NoOp
             ]
             [ Html.div
-                [ class "mx-auto max-w-xl transform motion-reduce:transform-none divide-y divide-gray-100 dark:divide-gray-800 overflow-hidden rounded-xl bg-white dark:bg-gray-700 shadow-2xl ring-1 ring-black ring-opacity-5 transition-all motion-reduce:transition-none"
+                [ class "mx-auto max-w-xl transform motion-reduce:transform-none divide-y divide-gray-100 dark:divide-gray-800 overflow-hidden rounded-xl bg-white dark:bg-gray-700 shadow-2xl ring-1 ring-black/5 transition-all motion-reduce:transition-none"
                 , class "invisible" |> Extras.HtmlAttribute.showIf (model_.visibility == Invisible)
                 , if model_.visibility == Visible then
                     class "ease-out duration-300 opacity-100 scale-100"

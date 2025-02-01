@@ -176,13 +176,13 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                         if editable then
                             div
                                 [ class "flex flex-col justify-items-end"
-                                , Extras.HtmlAttribute.showIf hasFocus <| class "print:outline-none outline-offset-2 outline-4 outline-dashed outline-yellow-500 dark:outline-pink-900"
+                                , Extras.HtmlAttribute.showIf hasFocus <| class "print:outline-hidden outline-offset-2 outline-4 outline-dashed outline-yellow-500 dark:outline-pink-900"
                                 , id <| ElementIds.glossaryItemDiv index
                                 ]
                                 [ div
                                     []
                                     [ div
-                                        [ class "print:hidden hidden lg:block float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
+                                        [ class "print:hidden hidden lg:block float-right sticky top-0 bg-white/75 dark:bg-gray-800/75 p-0.5 rounded-full" ]
                                         [ span
                                             []
                                             [ Components.Button.text
@@ -238,7 +238,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                                         )
                                     ]
                                 , div
-                                    [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
+                                    [ class "print:hidden mt-3 flex flex-col grow justify-end" ]
                                     [ Extras.Html.showIf enableLastUpdatedDates <|
                                         Extras.Html.showMaybe
                                             (I18n.updatedOn lastUpdatedByName lastUpdatedByEmailAddress)
@@ -276,13 +276,13 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                         else
                             div
                                 [ class "flex flex-col justify-between"
-                                , Extras.HtmlAttribute.showIf hasFocus <| class "print:outline-none outline-offset-2 outline-4 outline-dashed outline-yellow-500 dark:outline-pink-900"
+                                , Extras.HtmlAttribute.showIf hasFocus <| class "print:outline-hidden outline-offset-2 outline-4 outline-dashed outline-yellow-500 dark:outline-pink-900"
                                 , id <| ElementIds.glossaryItemDiv index
                                 ]
                                 [ div
                                     [ class "flex-1" ]
                                     [ div
-                                        [ class "print:hidden hidden lg:block float-right sticky top-0 bg-white dark:bg-gray-800 bg-opacity-75 dark:bg-opacity-75 p-0.5 rounded-full" ]
+                                        [ class "print:hidden hidden lg:block float-right sticky top-0 bg-white/75 dark:bg-gray-800/75 p-0.5 rounded-full" ]
                                         [ span
                                             []
                                             [ Components.Button.text
@@ -529,7 +529,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                             relatedTerms
                     )
                 , div
-                    [ class "print:hidden mt-3 flex flex-col flex-grow justify-end" ]
+                    [ class "print:hidden mt-3 flex flex-col grow justify-end" ]
                     [ Extras.Html.showIf enableLastUpdatedDates <|
                         Extras.Html.showMaybe
                             (I18n.updatedOn lastUpdatedByName lastUpdatedByEmailAddress)
