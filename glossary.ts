@@ -268,6 +268,10 @@ if (containerElement) {
         }
     });
 
+    app.ports.dragStart.subscribe(function (event) {
+        event.dataTransfer.setData('text', '');
+    });
+
     function domReady(callback: () => void) {
         document.readyState === 'interactive' || document.readyState === 'complete' ?
             callback() : document.addEventListener('DOMContentLoaded', callback);

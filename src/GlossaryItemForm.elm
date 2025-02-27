@@ -16,6 +16,7 @@ module GlossaryItemForm exposing
     , moveTermUp
     , needsUpdating
     , relatedTermFields
+    , relocateTerm
     , selectRelatedTerm
     , suggestRelatedTerms
     , tagCheckboxes
@@ -680,6 +681,58 @@ moveTermDown index ((GlossaryItemForm form) as glossaryItemForm) =
                 maybeCurrentAtIndex
                 maybeCurrentAtNextIndex
                 |> Maybe.withDefault termFields0
+    in
+    GlossaryItemForm
+        { form
+            | preferredTermField =
+                termFields1
+                    |> Array.get 0
+                    |> Maybe.withDefault TermField.empty
+            , alternativeTermFields = Extras.Array.delete 0 termFields1
+        }
+
+
+relocateTerm : TermIndex -> TermIndex -> GlossaryItemForm -> GlossaryItemForm
+relocateTerm oldIndex newIndex ((GlossaryItemForm form) as glossaryItemForm) =
+    let
+        termFields0 : Array TermField
+        termFields0 =
+            termFields glossaryItemForm
+
+        oldIndexInt : Int
+        oldIndexInt =
+            TermIndex.toInt oldIndex
+
+        newIndexInt : Int
+        newIndexInt =
+            TermIndex.toInt newIndex
+
+        maybeTermToMove : Maybe TermField
+        maybeTermToMove =
+            Array.get oldIndexInt termFields0
+
+        termFields1 : Array TermField
+        termFields1 =
+            case maybeTermToMove of
+                Just termToMove ->
+                    termFields0
+                        |> Array.toList
+                        |> List.indexedMap Tuple.pair
+                        |> List.filter (\( i, _ ) -> i /= oldIndexInt)
+                        |> List.indexedMap Tuple.pair
+                        |> List.foldr
+                            (\( i, ( _, term ) ) acc ->
+                                if i == newIndexInt then
+                                    termToMove :: term :: acc
+
+                                else
+                                    term :: acc
+                            )
+                            []
+                        |> Array.fromList
+
+                Nothing ->
+                    termFields0
     in
     GlossaryItemForm
         { form

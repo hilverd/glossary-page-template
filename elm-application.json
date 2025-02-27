@@ -5,6 +5,7 @@
     "exposed-modules": [
         "AmortizedQueue",
         "ApplicationShell",
+        "Components.DragAndDrop",
         "Data.AboutLink",
         "Data.AboutParagraph",
         "Data.DescribedTag",

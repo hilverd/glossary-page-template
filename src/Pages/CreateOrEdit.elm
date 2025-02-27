@@ -8,6 +8,7 @@ import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
 import Components.Badge
 import Components.Button
+import Components.DragAndDrop
 import Components.DropdownMenu
 import Components.Form
 import Components.GlossaryItemCard
@@ -44,6 +45,7 @@ import Html.Events
 import Http
 import Icons
 import Internationalisation as I18n
+import Json.Decode
 import PageMsg exposing (PageMsg)
 import QueryParameters
 import Save
@@ -63,6 +65,7 @@ type alias Model =
     , triedToSaveWhenFormInvalid : Bool
     , saving : Saving
     , dropdownMenusWithMoreOptionsForTerms : Dict Int Components.DropdownMenu.Model
+    , dragAndDropTerms : Components.DragAndDrop.Model TermIndex TermIndex
     , dropdownMenusWithMoreOptionsForRelatedTerms : Dict Int Components.DropdownMenu.Model
     }
 
@@ -86,8 +89,10 @@ type InternalMsg
     | AddTerm
     | DeleteTerm TermIndex
     | UpdateTerm TermIndex String
+    | DragAndDropMsg (Components.DragAndDrop.Msg TermIndex TermIndex)
     | MoveTermUp TermIndex
     | MoveTermDown Int TermIndex
+    | RelocateTerm TermIndex TermIndex
     | ToggleAbbreviation TermIndex
     | ToggleTagCheckbox Tag
     | UpdateDefinition String
@@ -146,6 +151,7 @@ init commonModel itemBeingEdited =
               , form = form
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
+              , dragAndDropTerms = Components.DragAndDrop.init
               , dropdownMenusWithMoreOptionsForTerms =
                     dropdownMenusWithMoreOptionsForTermsForForm form
               , dropdownMenusWithMoreOptionsForRelatedTerms =
@@ -164,6 +170,7 @@ init commonModel itemBeingEdited =
               , form = Form.empty GlossaryItemsForUi.empty Nothing
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
+              , dragAndDropTerms = Components.DragAndDrop.init
               , dropdownMenusWithMoreOptionsForTerms = Dict.empty
               , dropdownMenusWithMoreOptionsForRelatedTerms = Dict.empty
               }
@@ -219,6 +226,9 @@ port getCurrentDateTimeAndNewIdForSaving : () -> Cmd msg
 port receiveCurrentDateTimeAndNewIdForSaving : (( String, String ) -> msg) -> Sub msg
 
 
+port dragStart : Json.Decode.Value -> Cmd msg
+
+
 
 -- UPDATE
 
@@ -256,6 +266,24 @@ update msg model =
             , Cmd.none
             )
 
+        DragAndDropMsg msg_ ->
+            let
+                ( model_, result ) =
+                    Components.DragAndDrop.update msg_ model.dragAndDropTerms
+            in
+            ( { model | dragAndDropTerms = model_ }
+                |> (case result of
+                        Nothing ->
+                            identity
+
+                        Just ( oldTermIndex, newTermIndex, _ ) ->
+                            updateForm (Form.relocateTerm oldTermIndex newTermIndex)
+                   )
+            , Components.DragAndDrop.getDragstartEvent msg_
+                |> Maybe.map (.event >> dragStart)
+                |> Maybe.withDefault Cmd.none
+            )
+
         MoveTermUp termIndex ->
             let
                 form : GlossaryItemForm
@@ -282,6 +310,19 @@ update msg model =
                 |> updateForm (always form)
             , moveFocusAfterMovingTermDown numberOfTerms termIndex
                 |> Cmd.map PageMsg.Internal
+            )
+
+        RelocateTerm oldTermIndex newTermIndex ->
+            let
+                form : GlossaryItemForm
+                form =
+                    Form.relocateTerm oldTermIndex newTermIndex model.form
+            in
+            ( { model
+                | dropdownMenusWithMoreOptionsForTerms = dropdownMenusWithMoreOptionsForTermsForForm form
+              }
+                |> updateForm (always form)
+            , Cmd.none
             )
 
         ToggleAbbreviation termIndex ->
@@ -639,6 +680,29 @@ viewCreateTerm mathSupportEnabled showValidationErrors numberOfTerms index term 
         term
 
 
+viewMoveTermUpOrDownButtons : Int -> TermIndex -> Html Msg
+viewMoveTermUpOrDownButtons numberOfTerms termIndex =
+    div
+        [ class "hidden sm:flex sm:mr-2 items-center" ]
+        [ Components.Button.rounded (TermIndex.toInt termIndex > 0)
+            [ Accessibility.Aria.label I18n.moveUp
+            , id <| ElementIds.moveTermUpButton <| TermIndex.toInt termIndex
+            , Html.Events.onClick <| PageMsg.Internal <| MoveTermUp termIndex
+            ]
+            [ Icons.arrowUp
+                [ Svg.Attributes.class "h-5 w-5" ]
+            ]
+        , Components.Button.rounded (TermIndex.toInt termIndex + 1 < numberOfTerms)
+            [ Accessibility.Aria.label I18n.moveDown
+            , id <| ElementIds.moveTermDownButton <| TermIndex.toInt termIndex
+            , Html.Events.onClick <| PageMsg.Internal <| MoveTermDown numberOfTerms termIndex
+            ]
+            [ Icons.arrowDown
+                [ Svg.Attributes.class "h-5 w-5" ]
+            ]
+        ]
+
+
 viewCreateTermInternal : Bool -> Bool -> Bool -> Int -> Maybe Components.DropdownMenu.Model -> TermIndex -> TermField -> Html Msg
 viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors numberOfTerms maybeDropdownMenuWithMoreOptions termIndex termField =
     let
@@ -646,30 +710,23 @@ viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showVal
         abbreviationLabelId =
             ElementIds.abbreviationLabel termIndex
     in
-    div []
+    Html.div
+        -- (Components.DragAndDrop.draggable (PageMsg.Internal << DragAndDropMsg) termIndex
+        --     ++ Components.DragAndDrop.droppable (PageMsg.Internal << DragAndDropMsg) termIndex
+        -- )
+        []
         [ div
             [ class "flex flex-row items-center flex-auto max-w-2xl" ]
             [ div
                 [ class "flex items-center w-full" ]
-                [ div
-                    [ class "hidden sm:flex sm:mr-2 items-center" ]
-                    [ Components.Button.rounded (TermIndex.toInt termIndex > 0)
-                        [ Accessibility.Aria.label I18n.moveUp
-                        , id <| ElementIds.moveTermUpButton <| TermIndex.toInt termIndex
-                        , Html.Events.onClick <| PageMsg.Internal <| MoveTermUp termIndex
-                        ]
-                        [ Icons.arrowUp
-                            [ Svg.Attributes.class "h-5 w-5" ]
-                        ]
-                    , Components.Button.rounded (TermIndex.toInt termIndex + 1 < numberOfTerms)
-                        [ Accessibility.Aria.label I18n.moveDown
-                        , id <| ElementIds.moveTermDownButton <| TermIndex.toInt termIndex
-                        , Html.Events.onClick <| PageMsg.Internal <| MoveTermDown numberOfTerms termIndex
-                        ]
-                        [ Icons.arrowDown
-                            [ Svg.Attributes.class "h-5 w-5" ]
-                        ]
-                    ]
+                [ -- Components.Button.roundedWithoutBorder True
+                  -- [ Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:mt-6"
+                  -- , class "cursor-grab mr-2"
+                  -- ]
+                  -- [ Icons.gripVertical
+                  --     [ Svg.Attributes.class "h-6 w-6 text-gray-500 dark:text-gray-400" ]
+                  -- ]
+                  viewMoveTermUpOrDownButtons numberOfTerms termIndex
                 , Extras.Html.showIf (numberOfTerms > 1) <|
                     Extras.Html.showMaybe
                         (\dropdownMenuWithMoreOptions ->

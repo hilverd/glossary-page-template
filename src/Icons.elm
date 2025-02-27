@@ -15,6 +15,7 @@ module Icons exposing
     , exclamation
     , exclamationCircle
     , filter
+    , gripVertical
     , markdown
     , maximize2
     , menu
@@ -704,5 +705,54 @@ filter =
         ]
         [ polygon
             [ points "22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" ]
+            []
+        ]
+
+
+gripVertical : List (Html.Attribute msg) -> Html msg
+gripVertical =
+    withAdditionalAttributes
+        [ strokeWidth "2"
+        , stroke "currentColor"
+        , strokeLinecap "round"
+        , strokeLinejoin "round"
+        , fill "none"
+        , viewBox "0 0 24 24"
+        ]
+        [ circle
+            [ cx "9"
+            , cy "12"
+            , r "1"
+            ]
+            []
+        , circle
+            [ cx "9"
+            , cy "5"
+            , r "1"
+            ]
+            []
+        , circle
+            [ cx "9"
+            , cy "19"
+            , r "1"
+            ]
+            []
+        , circle
+            [ cx "15"
+            , cy "12"
+            , r "1"
+            ]
+            []
+        , circle
+            [ cx "15"
+            , cy "5"
+            , r "1"
+            ]
+            []
+        , circle
+            [ cx "15"
+            , cy "19"
+            , r "1"
+            ]
             []
         ]
