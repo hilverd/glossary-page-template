@@ -16,6 +16,7 @@ module ElementIds exposing
     , deleteRelatedTermButton
     , deleteTermButton
     , disambiguationTagSelect
+    , draggableTermInputField
     , exportDropdownButton
     , glossaryItemDiv
     , indexFilterInputField
@@ -163,6 +164,11 @@ viewSingleItemModalTitle =
 termInputField : TermIndex -> String
 termInputField termIndex =
     prefixed <| "term-" ++ (termIndex |> TermIndex.toInt |> String.fromInt)
+
+
+draggableTermInputField : TermIndex -> String
+draggableTermInputField termIndex =
+    prefixed <| "draggable-term-" ++ (termIndex |> TermIndex.toInt |> String.fromInt)
 
 
 definition : String

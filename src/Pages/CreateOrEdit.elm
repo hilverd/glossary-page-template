@@ -58,10 +58,16 @@ import Task
 -- MODEL
 
 
+type TentativeDragAndDropChangesToShow
+    = NoDragAndDropInProgress
+    | TermBeingRelocated TermIndex (Maybe TermIndex)
+
+
 type alias Model =
     { common : CommonModel
     , itemBeingEdited : Maybe GlossaryItemId
     , form : GlossaryItemForm
+    , tentativeDragAndDropChangesToShow : TentativeDragAndDropChangesToShow
     , triedToSaveWhenFormInvalid : Bool
     , saving : Saving
     , dropdownMenusWithMoreOptionsForTerms : Dict Int Components.DropdownMenu.Model
@@ -89,7 +95,7 @@ type InternalMsg
     | AddTerm
     | DeleteTerm TermIndex
     | UpdateTerm TermIndex String
-    | DragAndDropMsg (Components.DragAndDrop.Msg TermIndex TermIndex)
+    | DragAndDropTermsMsg (Components.DragAndDrop.Msg TermIndex TermIndex)
     | MoveTermUp TermIndex
     | MoveTermDown Int TermIndex
     | ToggleAbbreviation TermIndex
@@ -148,6 +154,7 @@ init commonModel itemBeingEdited =
             ( { itemBeingEdited = itemBeingEdited
               , common = commonModel
               , form = form
+              , tentativeDragAndDropChangesToShow = NoDragAndDropInProgress
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
               , dragAndDropTerms = Components.DragAndDrop.init
@@ -167,6 +174,7 @@ init commonModel itemBeingEdited =
             ( { itemBeingEdited = itemBeingEdited
               , common = commonModel
               , form = Form.empty GlossaryItemsForUi.empty Nothing
+              , tentativeDragAndDropChangesToShow = NoDragAndDropInProgress
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
               , dragAndDropTerms = Components.DragAndDrop.init
@@ -265,34 +273,45 @@ update msg model =
             , Cmd.none
             )
 
-        DragAndDropMsg msg_ ->
+        DragAndDropTermsMsg msg_ ->
             let
-                ( model_, result ) =
+                ( dragAndDropTerms_, result ) =
                     Components.DragAndDrop.update msg_ model.dragAndDropTerms
+
+                dragId : Maybe TermIndex
+                dragId =
+                    Components.DragAndDrop.getDragId dragAndDropTerms_
+
+                dropId : Maybe TermIndex
+                dropId =
+                    Components.DragAndDrop.getDropId dragAndDropTerms_
+
+                tentativeDragAndDropChangesToShow : TentativeDragAndDropChangesToShow
+                tentativeDragAndDropChangesToShow =
+                    case ( dragId, dropId ) of
+                        ( Just dragId_, Nothing ) ->
+                            if model.tentativeDragAndDropChangesToShow == NoDragAndDropInProgress then
+                                TermBeingRelocated dragId_ dropId
+
+                            else
+                                model.tentativeDragAndDropChangesToShow
+
+                        ( Just dragId_, Just _ ) ->
+                            TermBeingRelocated dragId_ dropId
+
+                        _ ->
+                            NoDragAndDropInProgress
             in
-            ( { model | dragAndDropTerms = model_ }
+            ( { model
+                | tentativeDragAndDropChangesToShow = tentativeDragAndDropChangesToShow
+                , dragAndDropTerms = dragAndDropTerms_
+              }
                 |> (case result of
                         Nothing ->
                             identity
 
                         Just ( oldTermIndex_, newTermIndex_, _ ) ->
-                            let
-                                oldTermIndexInt : Int
-                                oldTermIndexInt =
-                                    TermIndex.toInt oldTermIndex_
-
-                                newTermIndexInt : Int
-                                newTermIndexInt =
-                                    TermIndex.toInt newTermIndex_
-
-                                ( oldTermIndex, newTermIndex ) =
-                                    if oldTermIndexInt < newTermIndexInt then
-                                        ( oldTermIndex_, newTermIndexInt + 1 |> TermIndex.fromInt )
-
-                                    else
-                                        ( oldTermIndex_, newTermIndex_ )
-                            in
-                            updateForm (Form.relocateTerm oldTermIndex newTermIndex)
+                            updateForm (updatedFormWithTermBeingRelocated oldTermIndex_ newTermIndex_)
                    )
             , Components.DragAndDrop.getDragstartEvent msg_
                 |> Maybe.map (.event >> dragStart)
@@ -670,10 +689,10 @@ giveFocusToSeeAlsoSelect index =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.seeAlsoSelect index)
 
 
-viewCreateTerm : Bool -> Bool -> Bool -> Int -> Int -> TermField -> Dict Int Components.DropdownMenu.Model -> Html Msg
-viewCreateTerm supportingDragAndDrop mathSupportEnabled showValidationErrors numberOfTerms index term dropdownMenusWithMoreOptionsForTerms =
+viewCreateTerm : DivDragAndDropStatus -> Bool -> Bool -> Int -> Int -> TermField -> Dict Int Components.DropdownMenu.Model -> Html Msg
+viewCreateTerm dragAndDropStatus mathSupportEnabled showValidationErrors numberOfTerms index term dropdownMenusWithMoreOptionsForTerms =
     viewCreateTermInternal
-        supportingDragAndDrop
+        dragAndDropStatus
         False
         mathSupportEnabled
         showValidationErrors
@@ -706,18 +725,27 @@ viewMoveTermUpOrDownButtons numberOfTerms termIndex =
         ]
 
 
-viewCreateTermInternal : Bool -> Bool -> Bool -> Bool -> Int -> Maybe Components.DropdownMenu.Model -> TermIndex -> TermField -> Html Msg
-viewCreateTermInternal supportingDragAndDrop showMarkdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors numberOfTerms maybeDropdownMenuWithMoreOptions termIndex termField =
+type DivDragAndDropStatus
+    = CannotBeDraggedAndDropped
+    | CanBeDraggedAndDropped
+    | BeingDragged
+
+
+viewCreateTermInternal : DivDragAndDropStatus -> Bool -> Bool -> Bool -> Int -> Maybe Components.DropdownMenu.Model -> TermIndex -> TermField -> Html Msg
+viewCreateTermInternal dragAndDropStatus showMarkdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors numberOfTerms maybeDropdownMenuWithMoreOptions termIndex termField =
     let
         abbreviationLabelId : String
         abbreviationLabelId =
             ElementIds.abbreviationLabel termIndex
     in
     Html.div
-        (if supportingDragAndDrop then
-            Components.DragAndDrop.draggable (PageMsg.Internal << DragAndDropMsg) termIndex
-                ++ Components.DragAndDrop.droppable (PageMsg.Internal << DragAndDropMsg) termIndex
-                ++ [ class "hidden lg:block" ]
+        (if dragAndDropStatus /= CannotBeDraggedAndDropped then
+            Components.DragAndDrop.draggable (PageMsg.Internal << DragAndDropTermsMsg) termIndex
+                ++ Components.DragAndDrop.droppable (PageMsg.Internal << DragAndDropTermsMsg) termIndex
+                ++ [ class "hidden lg:block"
+                   , Extras.HtmlAttribute.showIf (dragAndDropStatus == BeingDragged) <|
+                        class "opacity-25"
+                   ]
 
          else
             [ class "lg:hidden" ]
@@ -726,7 +754,7 @@ viewCreateTermInternal supportingDragAndDrop showMarkdownBasedSyntaxEnabled math
             [ class "flex flex-row items-center flex-auto max-w-2xl" ]
             [ div
                 [ class "flex items-center w-full" ]
-                [ Extras.Html.showIf supportingDragAndDrop <|
+                [ Extras.Html.showIf (dragAndDropStatus /= CannotBeDraggedAndDropped) <|
                     Components.Button.roundedWithoutBorder True
                         [ Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:mt-6"
                         , class "cursor-grab mr-2"
@@ -734,7 +762,7 @@ viewCreateTermInternal supportingDragAndDrop showMarkdownBasedSyntaxEnabled math
                         [ Icons.gripVertical
                             [ Svg.Attributes.class "h-6 w-6 text-gray-500 dark:text-gray-400" ]
                         ]
-                , Extras.Html.showIf (not supportingDragAndDrop) <| viewMoveTermUpOrDownButtons numberOfTerms termIndex
+                , Extras.Html.showIf (dragAndDropStatus == CannotBeDraggedAndDropped) <| viewMoveTermUpOrDownButtons numberOfTerms termIndex
                 , Extras.Html.showIf (numberOfTerms > 1) <|
                     Extras.Html.showMaybe
                         (\dropdownMenuWithMoreOptions ->
@@ -751,7 +779,14 @@ viewCreateTermInternal supportingDragAndDrop showMarkdownBasedSyntaxEnabled math
                         mathSupportEnabled
                         showValidationErrors
                         (TermField.validationError termField)
-                        [ id <| ElementIds.termInputField termIndex
+                        [ id <|
+                            (if dragAndDropStatus == CannotBeDraggedAndDropped then
+                                ElementIds.termInputField
+
+                             else
+                                ElementIds.draggableTermInputField
+                            )
+                                termIndex
                         , required True
                         , Html.Attributes.autocomplete False
                         , Html.Attributes.placeholder <|
@@ -858,8 +893,8 @@ viewMoreOptionsForTermDropdownButton numberOfTerms index dropdownMenuWithMoreOpt
         )
 
 
-viewCreateTerms : Bool -> Bool -> Array TermField -> Dict Int Components.DropdownMenu.Model -> Html Msg
-viewCreateTerms mathSupportEnabled showValidationErrors termsArray dropdownMenusWithMoreOptionsForTerms =
+viewCreateTerms : Bool -> Bool -> Maybe Int -> Array TermField -> Dict Int Components.DropdownMenu.Model -> Html Msg
+viewCreateTerms mathSupportEnabled showValidationErrors idOfTermBeingDragged termsArray dropdownMenusWithMoreOptionsForTerms =
     let
         terms : List TermField
         terms =
@@ -884,7 +919,12 @@ viewCreateTerms mathSupportEnabled showValidationErrors termsArray dropdownMenus
                 ((List.indexedMap
                     (\index termField ->
                         [ viewCreateTerm
-                            True
+                            (if Just index == idOfTermBeingDragged then
+                                BeingDragged
+
+                             else
+                                CanBeDraggedAndDropped
+                            )
                             mathSupportEnabled
                             showValidationErrors
                             (List.length terms)
@@ -892,7 +932,7 @@ viewCreateTerms mathSupportEnabled showValidationErrors termsArray dropdownMenus
                             termField
                             dropdownMenusWithMoreOptionsForTerms
                         , viewCreateTerm
-                            False
+                            CannotBeDraggedAndDropped
                             mathSupportEnabled
                             showValidationErrors
                             (List.length terms)
@@ -1407,6 +1447,27 @@ viewCreateFormFooter model =
         ]
 
 
+updatedFormWithTermBeingRelocated : TermIndex -> TermIndex -> GlossaryItemForm -> GlossaryItemForm
+updatedFormWithTermBeingRelocated sourceTermIndex destinationTermIndex =
+    let
+        sourceTermIndexInt : Int
+        sourceTermIndexInt =
+            TermIndex.toInt sourceTermIndex
+
+        destinationTermIndexInt : Int
+        destinationTermIndexInt =
+            TermIndex.toInt destinationTermIndex
+
+        ( sourceTermIndex_, destinationTermIndex_ ) =
+            if sourceTermIndexInt < destinationTermIndexInt then
+                ( sourceTermIndex, destinationTermIndexInt + 1 |> TermIndex.fromInt )
+
+            else
+                ( sourceTermIndex, destinationTermIndex )
+    in
+    Form.relocateTerm sourceTermIndex_ destinationTermIndex_
+
+
 view : Model -> Document Msg
 view model =
     case model.common.glossaryForUi of
@@ -1414,7 +1475,14 @@ view model =
             let
                 terms : Array TermField
                 terms =
-                    Form.termFields model.form
+                    Form.termFields
+                        (case model.tentativeDragAndDropChangesToShow of
+                            TermBeingRelocated sourceIndex (Just destinationIndex) ->
+                                updatedFormWithTermBeingRelocated sourceIndex destinationIndex model.form
+
+                            _ ->
+                                model.form
+                        )
 
                 definitionArray : DefinitionField
                 definitionArray =
@@ -1439,6 +1507,20 @@ view model =
                 newOrUpdatedGlossaryItem : GlossaryItemForUi
                 newOrUpdatedGlossaryItem =
                     Form.toGlossaryItem items model.form (GlossaryItemId.create "") Nothing
+
+                idOfTermBeingDragged : Maybe Int
+                idOfTermBeingDragged =
+                    case
+                        model.tentativeDragAndDropChangesToShow
+                    of
+                        TermBeingRelocated sourceIndex Nothing ->
+                            Just <| TermIndex.toInt sourceIndex
+
+                        TermBeingRelocated _ (Just destinationIndex) ->
+                            Just <| TermIndex.toInt destinationIndex
+
+                        _ ->
+                            Nothing
             in
             { title = glossaryForUi |> Glossary.title |> GlossaryTitle.inlineText
             , body =
@@ -1464,6 +1546,7 @@ view model =
                                     [ viewCreateTerms
                                         model.common.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
+                                        idOfTermBeingDragged
                                         terms
                                         model.dropdownMenusWithMoreOptionsForTerms
                                     , viewDefinition
