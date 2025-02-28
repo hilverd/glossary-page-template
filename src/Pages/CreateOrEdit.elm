@@ -674,7 +674,7 @@ viewCreateTerm : Bool -> Bool -> Bool -> Int -> Int -> TermField -> Dict Int Com
 viewCreateTerm supportingDragAndDrop mathSupportEnabled showValidationErrors numberOfTerms index term dropdownMenusWithMoreOptionsForTerms =
     viewCreateTermInternal
         supportingDragAndDrop
-        (index == 0)
+        False
         mathSupportEnabled
         showValidationErrors
         numberOfTerms
@@ -875,39 +875,45 @@ viewCreateTerms mathSupportEnabled showValidationErrors termsArray dropdownMenus
                 I18n.listTheGroupOfTermsBeingDefined
             ]
         , div
-            [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
-            ((List.indexedMap
-                (\index termField ->
-                    [ viewCreateTerm
-                        True
-                        mathSupportEnabled
-                        showValidationErrors
-                        (List.length terms)
-                        index
-                        termField
-                        dropdownMenusWithMoreOptionsForTerms
-                    , viewCreateTerm
-                        False
-                        mathSupportEnabled
-                        showValidationErrors
-                        (List.length terms)
-                        index
-                        termField
-                        dropdownMenusWithMoreOptionsForTerms
-                    ]
-                )
-                terms
-                |> List.concat
-             )
-                ++ [ div []
-                        [ Components.Button.secondary
-                            [ Html.Events.onClick <| PageMsg.Internal AddTerm ]
-                            [ Icons.plus [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
-                            , text I18n.addTermButton
-                            ]
+            [ class "mt-6 sm:mt-5" ]
+            [ div
+                [ class "mb-1" ]
+                [ Components.Form.markdownSupportedMessage mathSupportEnabled ]
+            , div
+                [ class "space-y-6 sm:space-y-5" ]
+                ((List.indexedMap
+                    (\index termField ->
+                        [ viewCreateTerm
+                            True
+                            mathSupportEnabled
+                            showValidationErrors
+                            (List.length terms)
+                            index
+                            termField
+                            dropdownMenusWithMoreOptionsForTerms
+                        , viewCreateTerm
+                            False
+                            mathSupportEnabled
+                            showValidationErrors
+                            (List.length terms)
+                            index
+                            termField
+                            dropdownMenusWithMoreOptionsForTerms
                         ]
-                   ]
-            )
+                    )
+                    terms
+                    |> List.concat
+                 )
+                    ++ [ div []
+                            [ Components.Button.secondary
+                                [ Html.Events.onClick <| PageMsg.Internal AddTerm ]
+                                [ Icons.plus [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
+                                , text I18n.addTermButton
+                                ]
+                            ]
+                       ]
+                )
+            ]
         ]
 
 

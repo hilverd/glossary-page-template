@@ -1,4 +1,4 @@
-module Components.Form exposing (input, inputText, textarea)
+module Components.Form exposing (input, inputText, markdownSupportedMessage, textarea)
 
 import Accessibility exposing (Attribute)
 import Accessibility.Aria
