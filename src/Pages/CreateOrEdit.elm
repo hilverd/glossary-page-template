@@ -92,7 +92,6 @@ type InternalMsg
     | DragAndDropMsg (Components.DragAndDrop.Msg TermIndex TermIndex)
     | MoveTermUp TermIndex
     | MoveTermDown Int TermIndex
-    | RelocateTerm TermIndex TermIndex
     | ToggleAbbreviation TermIndex
     | ToggleTagCheckbox Tag
     | UpdateDefinition String
@@ -276,7 +275,23 @@ update msg model =
                         Nothing ->
                             identity
 
-                        Just ( oldTermIndex, newTermIndex, _ ) ->
+                        Just ( oldTermIndex_, newTermIndex_, _ ) ->
+                            let
+                                oldTermIndexInt : Int
+                                oldTermIndexInt =
+                                    TermIndex.toInt oldTermIndex_
+
+                                newTermIndexInt : Int
+                                newTermIndexInt =
+                                    TermIndex.toInt newTermIndex_
+
+                                ( oldTermIndex, newTermIndex ) =
+                                    if oldTermIndexInt < newTermIndexInt then
+                                        ( oldTermIndex_, newTermIndexInt + 1 |> TermIndex.fromInt )
+
+                                    else
+                                        ( oldTermIndex_, newTermIndex_ )
+                            in
                             updateForm (Form.relocateTerm oldTermIndex newTermIndex)
                    )
             , Components.DragAndDrop.getDragstartEvent msg_
@@ -310,19 +325,6 @@ update msg model =
                 |> updateForm (always form)
             , moveFocusAfterMovingTermDown numberOfTerms termIndex
                 |> Cmd.map PageMsg.Internal
-            )
-
-        RelocateTerm oldTermIndex newTermIndex ->
-            let
-                form : GlossaryItemForm
-                form =
-                    Form.relocateTerm oldTermIndex newTermIndex model.form
-            in
-            ( { model
-                | dropdownMenusWithMoreOptionsForTerms = dropdownMenusWithMoreOptionsForTermsForForm form
-              }
-                |> updateForm (always form)
-            , Cmd.none
             )
 
         ToggleAbbreviation termIndex ->
@@ -668,9 +670,10 @@ giveFocusToSeeAlsoSelect index =
     Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.seeAlsoSelect index)
 
 
-viewCreateTerm : Bool -> Bool -> Int -> Int -> TermField -> Dict Int Components.DropdownMenu.Model -> Html Msg
-viewCreateTerm mathSupportEnabled showValidationErrors numberOfTerms index term dropdownMenusWithMoreOptionsForTerms =
+viewCreateTerm : Bool -> Bool -> Bool -> Int -> Int -> TermField -> Dict Int Components.DropdownMenu.Model -> Html Msg
+viewCreateTerm supportingDragAndDrop mathSupportEnabled showValidationErrors numberOfTerms index term dropdownMenusWithMoreOptionsForTerms =
     viewCreateTermInternal
+        supportingDragAndDrop
         (index == 0)
         mathSupportEnabled
         showValidationErrors
@@ -703,30 +706,35 @@ viewMoveTermUpOrDownButtons numberOfTerms termIndex =
         ]
 
 
-viewCreateTermInternal : Bool -> Bool -> Bool -> Int -> Maybe Components.DropdownMenu.Model -> TermIndex -> TermField -> Html Msg
-viewCreateTermInternal showMarkdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors numberOfTerms maybeDropdownMenuWithMoreOptions termIndex termField =
+viewCreateTermInternal : Bool -> Bool -> Bool -> Bool -> Int -> Maybe Components.DropdownMenu.Model -> TermIndex -> TermField -> Html Msg
+viewCreateTermInternal supportingDragAndDrop showMarkdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors numberOfTerms maybeDropdownMenuWithMoreOptions termIndex termField =
     let
         abbreviationLabelId : String
         abbreviationLabelId =
             ElementIds.abbreviationLabel termIndex
     in
     Html.div
-        -- (Components.DragAndDrop.draggable (PageMsg.Internal << DragAndDropMsg) termIndex
-        --     ++ Components.DragAndDrop.droppable (PageMsg.Internal << DragAndDropMsg) termIndex
-        -- )
-        []
+        (if supportingDragAndDrop then
+            Components.DragAndDrop.draggable (PageMsg.Internal << DragAndDropMsg) termIndex
+                ++ Components.DragAndDrop.droppable (PageMsg.Internal << DragAndDropMsg) termIndex
+                ++ [ class "hidden lg:block" ]
+
+         else
+            [ class "lg:hidden" ]
+        )
         [ div
             [ class "flex flex-row items-center flex-auto max-w-2xl" ]
             [ div
                 [ class "flex items-center w-full" ]
-                [ -- Components.Button.roundedWithoutBorder True
-                  -- [ Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:mt-6"
-                  -- , class "cursor-grab mr-2"
-                  -- ]
-                  -- [ Icons.gripVertical
-                  --     [ Svg.Attributes.class "h-6 w-6 text-gray-500 dark:text-gray-400" ]
-                  -- ]
-                  viewMoveTermUpOrDownButtons numberOfTerms termIndex
+                [ Extras.Html.showIf supportingDragAndDrop <|
+                    Components.Button.roundedWithoutBorder True
+                        [ Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:mt-6"
+                        , class "cursor-grab mr-2"
+                        ]
+                        [ Icons.gripVertical
+                            [ Svg.Attributes.class "h-6 w-6 text-gray-500 dark:text-gray-400" ]
+                        ]
+                , Extras.Html.showIf (not supportingDragAndDrop) <| viewMoveTermUpOrDownButtons numberOfTerms termIndex
                 , Extras.Html.showIf (numberOfTerms > 1) <|
                     Extras.Html.showMaybe
                         (\dropdownMenuWithMoreOptions ->
@@ -868,17 +876,29 @@ viewCreateTerms mathSupportEnabled showValidationErrors termsArray dropdownMenus
             ]
         , div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
-            (List.indexedMap
+            ((List.indexedMap
                 (\index termField ->
-                    viewCreateTerm
+                    [ viewCreateTerm
+                        True
                         mathSupportEnabled
                         showValidationErrors
                         (List.length terms)
                         index
                         termField
                         dropdownMenusWithMoreOptionsForTerms
+                    , viewCreateTerm
+                        False
+                        mathSupportEnabled
+                        showValidationErrors
+                        (List.length terms)
+                        index
+                        termField
+                        dropdownMenusWithMoreOptionsForTerms
+                    ]
                 )
                 terms
+                |> List.concat
+             )
                 ++ [ div []
                         [ Components.Button.secondary
                             [ Html.Events.onClick <| PageMsg.Internal AddTerm ]

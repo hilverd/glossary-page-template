@@ -45,6 +45,7 @@ import Data.TermIndex as TermIndex exposing (TermIndex)
 import Dict exposing (Dict)
 import ElementIds
 import Extras.Array
+import Extras.List
 import Extras.Regex
 import GlossaryItemForm.DefinitionField as DefinitionField exposing (DefinitionField)
 import GlossaryItemForm.TermField as TermField exposing (TermField)
@@ -693,46 +694,15 @@ moveTermDown index ((GlossaryItemForm form) as glossaryItemForm) =
 
 
 relocateTerm : TermIndex -> TermIndex -> GlossaryItemForm -> GlossaryItemForm
-relocateTerm oldIndex newIndex ((GlossaryItemForm form) as glossaryItemForm) =
+relocateTerm sourceIndex destinationIndex ((GlossaryItemForm form) as glossaryItemForm) =
     let
-        termFields0 : Array TermField
-        termFields0 =
-            termFields glossaryItemForm
-
-        oldIndexInt : Int
-        oldIndexInt =
-            TermIndex.toInt oldIndex
-
-        newIndexInt : Int
-        newIndexInt =
-            TermIndex.toInt newIndex
-
-        maybeTermToMove : Maybe TermField
-        maybeTermToMove =
-            Array.get oldIndexInt termFields0
-
         termFields1 : Array TermField
         termFields1 =
-            case maybeTermToMove of
-                Just termToMove ->
-                    termFields0
-                        |> Array.toList
-                        |> List.indexedMap Tuple.pair
-                        |> List.filter (\( i, _ ) -> i /= oldIndexInt)
-                        |> List.indexedMap Tuple.pair
-                        |> List.foldr
-                            (\( i, ( _, term ) ) acc ->
-                                if i == newIndexInt then
-                                    termToMove :: term :: acc
-
-                                else
-                                    term :: acc
-                            )
-                            []
-                        |> Array.fromList
-
-                Nothing ->
-                    termFields0
+            glossaryItemForm
+                |> termFields
+                |> Array.toList
+                |> Extras.List.relocate (TermIndex.toInt sourceIndex) (TermIndex.toInt destinationIndex)
+                |> Array.fromList
     in
     GlossaryItemForm
         { form
