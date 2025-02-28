@@ -96,8 +96,8 @@ type InternalMsg
     | DeleteTerm TermIndex
     | UpdateTerm TermIndex String
     | DragAndDropTermsMsg (Components.DragAndDrop.Msg TermIndex TermIndex)
-    | MoveTermUp TermIndex
-    | MoveTermDown Int TermIndex
+    | MoveTermUp Bool TermIndex
+    | MoveTermDown Bool Int TermIndex
     | ToggleAbbreviation TermIndex
     | ToggleTagCheckbox Tag
     | UpdateDefinition String
@@ -318,7 +318,7 @@ update msg model =
                 |> Maybe.withDefault Cmd.none
             )
 
-        MoveTermUp termIndex ->
+        MoveTermUp dragged termIndex ->
             let
                 form : GlossaryItemForm
                 form =
@@ -328,11 +328,11 @@ update msg model =
                 | dropdownMenusWithMoreOptionsForTerms = dropdownMenusWithMoreOptionsForTermsForForm form
               }
                 |> updateForm (always form)
-            , moveFocusAfterMovingTermUp termIndex
+            , moveFocusAfterMovingTermUp dragged termIndex
                 |> Cmd.map PageMsg.Internal
             )
 
-        MoveTermDown numberOfTerms termIndex ->
+        MoveTermDown dragged numberOfTerms termIndex ->
             let
                 form : GlossaryItemForm
                 form =
@@ -342,7 +342,7 @@ update msg model =
                 | dropdownMenusWithMoreOptionsForTerms = dropdownMenusWithMoreOptionsForTermsForForm form
               }
                 |> updateForm (always form)
-            , moveFocusAfterMovingTermDown numberOfTerms termIndex
+            , moveFocusAfterMovingTermDown dragged numberOfTerms termIndex
                 |> Cmd.map PageMsg.Internal
             )
 
@@ -587,8 +587,8 @@ update msg model =
             )
 
 
-moveFocusAfterMovingTermUp : TermIndex -> Cmd InternalMsg
-moveFocusAfterMovingTermUp termIndex =
+moveFocusAfterMovingTermUp : Bool -> TermIndex -> Cmd InternalMsg
+moveFocusAfterMovingTermUp dragged termIndex =
     let
         termIndexInt : Int
         termIndexInt =
@@ -598,7 +598,12 @@ moveFocusAfterMovingTermUp termIndex =
         previousTermIndexInt =
             termIndexInt - 1
     in
-    if previousTermIndexInt == 0 then
+    if dragged then
+        Task.attempt
+            (\_ -> NoOp)
+            (Dom.focus <| ElementIds.dragTermButton previousTermIndexInt)
+
+    else if previousTermIndexInt == 0 then
         Task.attempt
             (\_ -> NoOp)
             (Dom.blur <| ElementIds.moveTermUpButton termIndexInt)
@@ -609,8 +614,8 @@ moveFocusAfterMovingTermUp termIndex =
             (Dom.focus <| ElementIds.moveTermUpButton previousTermIndexInt)
 
 
-moveFocusAfterMovingTermDown : Int -> TermIndex -> Cmd InternalMsg
-moveFocusAfterMovingTermDown numberOfTerms termIndex =
+moveFocusAfterMovingTermDown : Bool -> Int -> TermIndex -> Cmd InternalMsg
+moveFocusAfterMovingTermDown dragged numberOfTerms termIndex =
     let
         termIndexInt : Int
         termIndexInt =
@@ -620,7 +625,12 @@ moveFocusAfterMovingTermDown numberOfTerms termIndex =
         nextTermIndexInt =
             termIndexInt + 1
     in
-    if nextTermIndexInt == numberOfTerms - 1 then
+    if dragged then
+        Task.attempt
+            (\_ -> NoOp)
+            (Dom.focus <| ElementIds.dragTermButton nextTermIndexInt)
+
+    else if nextTermIndexInt == numberOfTerms - 1 then
         Task.attempt
             (\_ -> NoOp)
             (Dom.blur <| ElementIds.moveTermDownButton termIndexInt)
@@ -709,7 +719,7 @@ viewMoveTermUpOrDownButtons numberOfTerms termIndex =
         [ Components.Button.rounded (TermIndex.toInt termIndex > 0)
             [ Accessibility.Aria.label I18n.moveUp
             , id <| ElementIds.moveTermUpButton <| TermIndex.toInt termIndex
-            , Html.Events.onClick <| PageMsg.Internal <| MoveTermUp termIndex
+            , Html.Events.onClick <| PageMsg.Internal <| MoveTermUp False termIndex
             ]
             [ Icons.arrowUp
                 [ Svg.Attributes.class "h-5 w-5" ]
@@ -717,7 +727,7 @@ viewMoveTermUpOrDownButtons numberOfTerms termIndex =
         , Components.Button.rounded (TermIndex.toInt termIndex + 1 < numberOfTerms)
             [ Accessibility.Aria.label I18n.moveDown
             , id <| ElementIds.moveTermDownButton <| TermIndex.toInt termIndex
-            , Html.Events.onClick <| PageMsg.Internal <| MoveTermDown numberOfTerms termIndex
+            , Html.Events.onClick <| PageMsg.Internal <| MoveTermDown False numberOfTerms termIndex
             ]
             [ Icons.arrowDown
                 [ Svg.Attributes.class "h-5 w-5" ]
@@ -758,8 +768,26 @@ viewCreateTermInternal dragAndDropStatus showMarkdownBasedSyntaxEnabled mathSupp
                     Components.Button.roundedWithoutBorder True
                         [ Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:mt-6"
                         , class "cursor-grab mr-2"
+                        , id <| ElementIds.dragTermButton (TermIndex.toInt termIndex)
+                        , Html.Events.preventDefaultOn "keydown"
+                            (Extras.HtmlEvents.preventDefaultOnDecoder
+                                (\event ->
+                                    if Extras.HtmlEvents.isUpArrow event then
+                                        Just <| ( PageMsg.Internal <| MoveTermUp True termIndex, True )
+
+                                    else if Extras.HtmlEvents.isDownArrow event then
+                                        Just <| ( PageMsg.Internal <| MoveTermDown True numberOfTerms termIndex, True )
+
+                                    else
+                                        Nothing
+                                )
+                            )
                         ]
-                        [ Icons.gripVertical
+                        [ span
+                            [ class "sr-only" ]
+                            [ text I18n.dragOrUseUpAndDownArrowsToMoveTerm
+                            ]
+                        , Icons.gripVertical
                             [ Svg.Attributes.class "h-6 w-6 text-gray-500 dark:text-gray-400" ]
                         ]
                 , Extras.Html.showIf (dragAndDropStatus == CannotBeDraggedAndDropped) <| viewMoveTermUpOrDownButtons numberOfTerms termIndex
@@ -871,7 +899,7 @@ viewMoreOptionsForTermDropdownButton numberOfTerms index dropdownMenuWithMoreOpt
                             , text I18n.moveUp
                             ]
                         ]
-                        (PageMsg.Internal <| MoveTermUp index)
+                        (PageMsg.Internal <| MoveTermUp False index)
 
               else
                 Nothing
@@ -885,7 +913,7 @@ viewMoreOptionsForTermDropdownButton numberOfTerms index dropdownMenuWithMoreOpt
                             , text I18n.moveDown
                             ]
                         ]
-                        (PageMsg.Internal <| MoveTermDown numberOfTerms index)
+                        (PageMsg.Internal <| MoveTermDown False numberOfTerms index)
 
               else
                 Nothing

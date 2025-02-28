@@ -16,6 +16,7 @@ module ElementIds exposing
     , deleteRelatedTermButton
     , deleteTermButton
     , disambiguationTagSelect
+    , dragTermButton
     , draggableTermInputField
     , exportDropdownButton
     , glossaryItemDiv
@@ -332,6 +333,11 @@ moveTermDownButton index =
 deleteTermButton : Int -> String
 deleteTermButton index =
     prefixed <| "delete-term-" ++ String.fromInt index ++ "-button"
+
+
+dragTermButton : Int -> String
+dragTermButton index =
+    prefixed <| "drag-term-" ++ String.fromInt index ++ "-button"
 
 
 moveRelatedTermUpButton : Int -> String
