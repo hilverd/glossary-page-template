@@ -15,6 +15,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 - Add a filter field for the index on larger screens.
 - Add buttons and drag & drop handles for rearranging terms.
+- Add drag & drop handles for rearranging related items.
 
 ### Changed
 

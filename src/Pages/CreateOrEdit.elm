@@ -109,8 +109,8 @@ type InternalMsg
     | DeleteRelatedTerm RelatedTermIndex
     | DropdownMenuWithMoreOptionsForTermMsg Int Components.DropdownMenu.Msg
     | DropdownMenuWithMoreOptionsForRelatedTermMsg Int Components.DropdownMenu.Msg
-    | MoveRelatedTermUp RelatedTermIndex
-    | MoveRelatedTermDown Int RelatedTermIndex
+    | MoveRelatedTermUp Bool RelatedTermIndex
+    | MoveRelatedTermDown Bool Int RelatedTermIndex
     | DragAndDropRelatedTermsMsg (Components.DragAndDrop.Msg RelatedTermIndex RelatedTermIndex)
     | ToggleNeedsUpdating
     | Save
@@ -323,7 +323,7 @@ update msg model =
                 |> Maybe.withDefault Cmd.none
             )
 
-        MoveTermUp dragged termIndex ->
+        MoveTermUp fromDragButton termIndex ->
             let
                 form : GlossaryItemForm
                 form =
@@ -333,11 +333,11 @@ update msg model =
                 | dropdownMenusWithMoreOptionsForTerms = dropdownMenusWithMoreOptionsForTermsForForm form
               }
                 |> updateForm (always form)
-            , moveFocusAfterMovingTermUp dragged termIndex
+            , moveFocusAfterMovingTermUp fromDragButton termIndex
                 |> Cmd.map PageMsg.Internal
             )
 
-        MoveTermDown dragged numberOfTerms termIndex ->
+        MoveTermDown fromDragButton numberOfTerms termIndex ->
             let
                 form : GlossaryItemForm
                 form =
@@ -347,7 +347,7 @@ update msg model =
                 | dropdownMenusWithMoreOptionsForTerms = dropdownMenusWithMoreOptionsForTermsForForm form
               }
                 |> updateForm (always form)
-            , moveFocusAfterMovingTermDown dragged numberOfTerms termIndex
+            , moveFocusAfterMovingTermDown fromDragButton numberOfTerms termIndex
                 |> Cmd.map PageMsg.Internal
             )
 
@@ -489,7 +489,7 @@ update msg model =
                     )
                 |> Maybe.withDefault ( model, Cmd.none )
 
-        MoveRelatedTermUp relatedTermIndex ->
+        MoveRelatedTermUp fromDragButton relatedTermIndex ->
             let
                 form : GlossaryItemForm
                 form =
@@ -499,11 +499,11 @@ update msg model =
                 | dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
                 |> updateForm (always form)
-            , moveFocusAfterMovingRelatedTermUp relatedTermIndex
+            , moveFocusAfterMovingRelatedTermUp fromDragButton relatedTermIndex
                 |> Cmd.map PageMsg.Internal
             )
 
-        MoveRelatedTermDown numberOfRelatedTerms relatedTermIndex ->
+        MoveRelatedTermDown fromDragButton numberOfRelatedTerms relatedTermIndex ->
             let
                 form : GlossaryItemForm
                 form =
@@ -513,7 +513,7 @@ update msg model =
                 | dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
                 |> updateForm (always form)
-            , moveFocusAfterMovingRelatedTermDown numberOfRelatedTerms relatedTermIndex
+            , moveFocusAfterMovingRelatedTermDown fromDragButton numberOfRelatedTerms relatedTermIndex
                 |> Cmd.map PageMsg.Internal
             )
 
@@ -638,7 +638,7 @@ update msg model =
 
 
 moveFocusAfterMovingTermUp : Bool -> TermIndex -> Cmd InternalMsg
-moveFocusAfterMovingTermUp dragged termIndex =
+moveFocusAfterMovingTermUp fromDragButton termIndex =
     let
         termIndexInt : Int
         termIndexInt =
@@ -648,7 +648,7 @@ moveFocusAfterMovingTermUp dragged termIndex =
         previousTermIndexInt =
             termIndexInt - 1
     in
-    if dragged then
+    if fromDragButton then
         Task.attempt
             (\_ -> NoOp)
             (Dom.focus <| ElementIds.dragTermButton previousTermIndexInt)
@@ -665,7 +665,7 @@ moveFocusAfterMovingTermUp dragged termIndex =
 
 
 moveFocusAfterMovingTermDown : Bool -> Int -> TermIndex -> Cmd InternalMsg
-moveFocusAfterMovingTermDown dragged numberOfTerms termIndex =
+moveFocusAfterMovingTermDown fromDragButton numberOfTerms termIndex =
     let
         termIndexInt : Int
         termIndexInt =
@@ -675,7 +675,7 @@ moveFocusAfterMovingTermDown dragged numberOfTerms termIndex =
         nextTermIndexInt =
             termIndexInt + 1
     in
-    if dragged then
+    if fromDragButton then
         Task.attempt
             (\_ -> NoOp)
             (Dom.focus <| ElementIds.dragTermButton nextTermIndexInt)
@@ -691,8 +691,8 @@ moveFocusAfterMovingTermDown dragged numberOfTerms termIndex =
             (Dom.focus <| ElementIds.moveTermDownButton nextTermIndexInt)
 
 
-moveFocusAfterMovingRelatedTermUp : RelatedTermIndex -> Cmd InternalMsg
-moveFocusAfterMovingRelatedTermUp relatedTermIndex =
+moveFocusAfterMovingRelatedTermUp : Bool -> RelatedTermIndex -> Cmd InternalMsg
+moveFocusAfterMovingRelatedTermUp fromDragButton relatedTermIndex =
     let
         relatedTermIndexInt : Int
         relatedTermIndexInt =
@@ -702,7 +702,12 @@ moveFocusAfterMovingRelatedTermUp relatedTermIndex =
         previousRelatedTermIndexInt =
             relatedTermIndexInt - 1
     in
-    if previousRelatedTermIndexInt == 0 then
+    if fromDragButton then
+        Task.attempt
+            (\_ -> NoOp)
+            (Dom.focus <| ElementIds.dragRelatedTermButton previousRelatedTermIndexInt)
+
+    else if previousRelatedTermIndexInt == 0 then
         Task.attempt
             (\_ -> NoOp)
             (Dom.blur <| ElementIds.moveRelatedTermUpButton relatedTermIndexInt)
@@ -713,8 +718,8 @@ moveFocusAfterMovingRelatedTermUp relatedTermIndex =
             (Dom.focus <| ElementIds.moveRelatedTermUpButton previousRelatedTermIndexInt)
 
 
-moveFocusAfterMovingRelatedTermDown : Int -> RelatedTermIndex -> Cmd InternalMsg
-moveFocusAfterMovingRelatedTermDown numberOfRelatedTerms relatedTermIndex =
+moveFocusAfterMovingRelatedTermDown : Bool -> Int -> RelatedTermIndex -> Cmd InternalMsg
+moveFocusAfterMovingRelatedTermDown fromDragButton numberOfRelatedTerms relatedTermIndex =
     let
         relatedTermIndexInt : Int
         relatedTermIndexInt =
@@ -724,7 +729,12 @@ moveFocusAfterMovingRelatedTermDown numberOfRelatedTerms relatedTermIndex =
         nextRelatedTermIndexInt =
             relatedTermIndexInt + 1
     in
-    if nextRelatedTermIndexInt == numberOfRelatedTerms - 1 then
+    if fromDragButton then
+        Task.attempt
+            (\_ -> NoOp)
+            (Dom.focus <| ElementIds.dragRelatedTermButton nextRelatedTermIndexInt)
+
+    else if nextRelatedTermIndexInt == numberOfRelatedTerms - 1 then
         Task.attempt
             (\_ -> NoOp)
             (Dom.blur <| ElementIds.moveRelatedTermDownButton relatedTermIndexInt)
@@ -762,7 +772,7 @@ viewCreateTerm dragAndDropStatus mathSupportEnabled showValidationErrors numberO
         term
 
 
-viewMoveTermUpOrDownButtons : Int -> TermIndex -> Html Msg
+viewMoveTermUpOrDownButtons : Int -> TermIndex -> Html (PageMsg InternalMsg)
 viewMoveTermUpOrDownButtons numberOfTerms termIndex =
     div
         [ class "hidden sm:flex sm:mr-2 items-center" ]
@@ -1169,7 +1179,8 @@ viewDisambiguationTag disambiguationTagId tags =
 
 
 viewCreateSeeAlsoSingle :
-    Bool
+    DivDragAndDropStatus
+    -> Bool
     -> Set String
     -> Int
     -> List DisambiguatedTerm
@@ -1177,8 +1188,9 @@ viewCreateSeeAlsoSingle :
     -> Int
     -> Form.RelatedTermField
     -> Html Msg
-viewCreateSeeAlsoSingle showValidationErrors relatedRawTerms numberOfRelatedTerms allTerms dropdownMenusWithMoreOptionsForRelatedTerms index relatedTerm =
+viewCreateSeeAlsoSingle dragAndDropStatus showValidationErrors relatedRawTerms numberOfRelatedTerms allTerms dropdownMenusWithMoreOptionsForRelatedTerms index relatedTerm =
     viewCreateSeeAlsoSingle1
+        dragAndDropStatus
         showValidationErrors
         relatedRawTerms
         numberOfRelatedTerms
@@ -1188,8 +1200,32 @@ viewCreateSeeAlsoSingle showValidationErrors relatedRawTerms numberOfRelatedTerm
         relatedTerm
 
 
+viewMoveRelatedTermUpOrDownButtons : Int -> RelatedTermIndex -> Html (PageMsg InternalMsg)
+viewMoveRelatedTermUpOrDownButtons numberOfRelatedTerms relatedTermIndex =
+    div
+        [ class "hidden sm:flex sm:mr-2 items-center" ]
+        [ Components.Button.rounded (RelatedTermIndex.toInt relatedTermIndex > 0)
+            [ Accessibility.Aria.label I18n.moveUp
+            , id <| ElementIds.moveRelatedTermUpButton <| RelatedTermIndex.toInt relatedTermIndex
+            , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermUp False relatedTermIndex
+            ]
+            [ Icons.arrowUp
+                [ Svg.Attributes.class "h-5 w-5" ]
+            ]
+        , Components.Button.rounded (RelatedTermIndex.toInt relatedTermIndex + 1 < numberOfRelatedTerms)
+            [ Accessibility.Aria.label I18n.moveDown
+            , id <| ElementIds.moveRelatedTermDownButton <| RelatedTermIndex.toInt relatedTermIndex
+            , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermDown False numberOfRelatedTerms relatedTermIndex
+            ]
+            [ Icons.arrowDown
+                [ Svg.Attributes.class "h-5 w-5" ]
+            ]
+        ]
+
+
 viewCreateSeeAlsoSingle1 :
-    Bool
+    DivDragAndDropStatus
+    -> Bool
     -> Set String
     -> Int
     -> List DisambiguatedTerm
@@ -1197,44 +1233,68 @@ viewCreateSeeAlsoSingle1 :
     -> RelatedTermIndex
     -> Form.RelatedTermField
     -> Html Msg
-viewCreateSeeAlsoSingle1 showValidationErrors relatedRawTerms numberOfRelatedTerms allTerms maybeDropdownMenuWithMoreOptions index relatedTerm =
-    div
-        []
+viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms numberOfRelatedTerms allTerms maybeDropdownMenuWithMoreOptions relatedTermIndex relatedTerm =
+    Html.div
+        (if dragAndDropStatus /= CannotBeDraggedAndDropped then
+            Components.DragAndDrop.draggable (PageMsg.Internal << DragAndDropRelatedTermsMsg) relatedTermIndex
+                ++ Components.DragAndDrop.droppable (PageMsg.Internal << DragAndDropRelatedTermsMsg) relatedTermIndex
+                ++ [ class "hidden lg:block"
+                   , Extras.HtmlAttribute.showIf (dragAndDropStatus == BeingDragged) <|
+                        class "opacity-25"
+                   ]
+
+         else
+            [ class "lg:hidden" ]
+        )
         [ div
             [ class "flex-auto max-w-2xl flex items-center" ]
-            [ div
-                [ class "hidden sm:flex sm:mr-2 items-center" ]
-                [ Components.Button.rounded (RelatedTermIndex.toInt index > 0)
-                    [ Accessibility.Aria.label I18n.moveUp
-                    , id <| ElementIds.moveRelatedTermUpButton <| RelatedTermIndex.toInt index
-                    , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermUp index
+            [ Extras.Html.showIf (dragAndDropStatus /= CannotBeDraggedAndDropped) <|
+                Components.Button.roundedWithoutBorder True
+                    [ class "cursor-grab mr-2"
+                    , id <| ElementIds.dragRelatedTermButton (RelatedTermIndex.toInt relatedTermIndex)
+                    , Html.Events.preventDefaultOn "keydown"
+                        (Extras.HtmlEvents.preventDefaultOnDecoder
+                            (\event ->
+                                if Extras.HtmlEvents.isUpArrow event then
+                                    Just <| ( PageMsg.Internal <| MoveRelatedTermUp True relatedTermIndex, True )
+
+                                else if Extras.HtmlEvents.isDownArrow event then
+                                    Just <| ( PageMsg.Internal <| MoveRelatedTermDown True numberOfRelatedTerms relatedTermIndex, True )
+
+                                else
+                                    Nothing
+                            )
+                        )
                     ]
-                    [ Icons.arrowUp
-                        [ Svg.Attributes.class "h-5 w-5" ]
+                    [ span
+                        [ class "sr-only" ]
+                        [ text I18n.dragOrUseUpAndDownArrowsToMoveTerm
+                        ]
+                    , Icons.gripVertical
+                        [ Svg.Attributes.class "h-6 w-6 text-gray-500 dark:text-gray-400" ]
                     ]
-                , Components.Button.rounded (RelatedTermIndex.toInt index + 1 < numberOfRelatedTerms)
-                    [ Accessibility.Aria.label I18n.moveDown
-                    , id <| ElementIds.moveRelatedTermDownButton <| RelatedTermIndex.toInt index
-                    , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermDown numberOfRelatedTerms index
-                    ]
-                    [ Icons.arrowDown
-                        [ Svg.Attributes.class "h-5 w-5" ]
-                    ]
-                ]
+            , Extras.Html.showIf (dragAndDropStatus == CannotBeDraggedAndDropped) <| viewMoveRelatedTermUpOrDownButtons numberOfRelatedTerms relatedTermIndex
             , Extras.Html.showIf (numberOfRelatedTerms > 1) <|
                 Extras.Html.showMaybe
                     (\dropdownMenuWithMoreOptions ->
                         span
                             [ class "sm:hidden mr-2 flex items-center" ]
-                            [ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownMenuWithMoreOptions ]
+                            [ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms relatedTermIndex dropdownMenuWithMoreOptions ]
                     )
                     maybeDropdownMenuWithMoreOptions
             , Components.SelectMenu.render
-                [ Components.SelectMenu.id <| ElementIds.seeAlsoSelect index
+                [ Components.SelectMenu.id <|
+                    (if dragAndDropStatus == CannotBeDraggedAndDropped then
+                        ElementIds.seeAlsoSelect
+
+                     else
+                        ElementIds.draggableSeeAlsoSelect
+                    )
+                        relatedTermIndex
                 , Components.SelectMenu.ariaLabel I18n.relatedItem
                 , Components.SelectMenu.validationError relatedTerm.validationError
                 , Components.SelectMenu.showValidationErrors showValidationErrors
-                , Components.SelectMenu.onChange (PageMsg.Internal << SelectRelatedTerm index)
+                , Components.SelectMenu.onChange (PageMsg.Internal << SelectRelatedTerm relatedTermIndex)
                 ]
                 (allTerms
                     |> List.filter
@@ -1254,8 +1314,8 @@ viewCreateSeeAlsoSingle1 showValidationErrors relatedRawTerms numberOfRelatedTer
                 [ class "inline-flex items-center" ]
                 [ Components.Button.rounded True
                     [ Accessibility.Aria.label I18n.delete
-                    , id <| ElementIds.deleteRelatedTermButton <| RelatedTermIndex.toInt index
-                    , Html.Events.onClick <| PageMsg.Internal <| DeleteRelatedTerm index
+                    , id <| ElementIds.deleteRelatedTermButton <| RelatedTermIndex.toInt relatedTermIndex
+                    , Html.Events.onClick <| PageMsg.Internal <| DeleteRelatedTerm relatedTermIndex
                     , class "ml-2"
                     ]
                     [ Icons.trash
@@ -1289,7 +1349,7 @@ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownM
                             , text I18n.moveUp
                             ]
                         ]
-                        (PageMsg.Internal <| MoveRelatedTermUp index)
+                        (PageMsg.Internal <| MoveRelatedTermUp False index)
 
               else
                 Nothing
@@ -1303,7 +1363,7 @@ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownM
                             , text I18n.moveDown
                             ]
                         ]
-                        (PageMsg.Internal <| MoveRelatedTermDown numberOfRelatedTerms index)
+                        (PageMsg.Internal <| MoveRelatedTermDown False numberOfRelatedTerms index)
 
               else
                 Nothing
@@ -1334,13 +1394,14 @@ viewAddRelatedTermButtonForEmptyState =
 viewCreateSeeAlso :
     Bool
     -> Bool
+    -> Maybe Int
     -> GlossaryItemsForUi
     -> Array TermField
     -> Array Form.RelatedTermField
     -> Dict Int Components.DropdownMenu.Model
     -> List DisambiguatedTerm
     -> Html Msg
-viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItemsForUi terms relatedTermsArray dropdownMenusWithMoreOptionsForRelatedTerms suggestedRelatedTerms =
+viewCreateSeeAlso enableMathSupport showValidationErrors idOfRelatedTermBeingDragged glossaryItemsForUi terms relatedTermsArray dropdownMenusWithMoreOptionsForRelatedTerms suggestedRelatedTerms =
     let
         rawTermsSet : Set String
         rawTermsSet =
@@ -1369,29 +1430,64 @@ viewCreateSeeAlso enableMathSupport showValidationErrors glossaryItemsForUi term
         , div
             [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
             (List.indexedMap
-                (viewCreateSeeAlsoSingle
-                    showValidationErrors
-                    (relatedTermsList
-                        |> List.filterMap (.raw >> Maybe.map RawTerm.toString)
-                        |> Set.fromList
-                    )
-                    (List.length relatedTermsList)
-                    (List.filter
-                        (\term ->
-                            not <|
-                                Set.member
-                                    (term
-                                        |> DisambiguatedTerm.toTerm
-                                        |> Term.raw
-                                        |> RawTerm.toString
-                                    )
-                                    rawTermsSet
+                (\index relatedTerm ->
+                    [ viewCreateSeeAlsoSingle
+                        (if Just index == idOfRelatedTermBeingDragged then
+                            BeingDragged
+
+                         else
+                            CanBeDraggedAndDropped
                         )
-                        allPreferredTerms
-                    )
-                    dropdownMenusWithMoreOptionsForRelatedTerms
+                        showValidationErrors
+                        (relatedTermsList
+                            |> List.filterMap (.raw >> Maybe.map RawTerm.toString)
+                            |> Set.fromList
+                        )
+                        (List.length relatedTermsList)
+                        (List.filter
+                            (\term ->
+                                not <|
+                                    Set.member
+                                        (term
+                                            |> DisambiguatedTerm.toTerm
+                                            |> Term.raw
+                                            |> RawTerm.toString
+                                        )
+                                        rawTermsSet
+                            )
+                            allPreferredTerms
+                        )
+                        dropdownMenusWithMoreOptionsForRelatedTerms
+                        index
+                        relatedTerm
+                    , viewCreateSeeAlsoSingle
+                        CannotBeDraggedAndDropped
+                        showValidationErrors
+                        (relatedTermsList
+                            |> List.filterMap (.raw >> Maybe.map RawTerm.toString)
+                            |> Set.fromList
+                        )
+                        (List.length relatedTermsList)
+                        (List.filter
+                            (\term ->
+                                not <|
+                                    Set.member
+                                        (term
+                                            |> DisambiguatedTerm.toTerm
+                                            |> Term.raw
+                                            |> RawTerm.toString
+                                        )
+                                        rawTermsSet
+                            )
+                            allPreferredTerms
+                        )
+                        dropdownMenusWithMoreOptionsForRelatedTerms
+                        index
+                        relatedTerm
+                    ]
                 )
                 relatedTermsList
+                |> List.concat
             )
         , div
             []
@@ -1593,7 +1689,14 @@ view model =
 
                 relatedTerms : Array Form.RelatedTermField
                 relatedTerms =
-                    Form.relatedTermFields model.form
+                    Form.relatedTermFields
+                        (case model.tentativeDragAndDropChangesToShow of
+                            RelatedTermBeingRelocated sourceIndex (Just destinationIndex) ->
+                                updatedFormWithRelatedTermBeingRelocated sourceIndex destinationIndex model.form
+
+                            _ ->
+                                model.form
+                        )
 
                 suggestedRelatedTerms : List DisambiguatedTerm
                 suggestedRelatedTerms =
@@ -1617,6 +1720,20 @@ view model =
 
                         TermBeingRelocated _ (Just destinationIndex) ->
                             Just <| TermIndex.toInt destinationIndex
+
+                        _ ->
+                            Nothing
+
+                idOfRelatedTermBeingDragged : Maybe Int
+                idOfRelatedTermBeingDragged =
+                    case
+                        model.tentativeDragAndDropChangesToShow
+                    of
+                        RelatedTermBeingRelocated sourceIndex Nothing ->
+                            Just <| RelatedTermIndex.toInt sourceIndex
+
+                        RelatedTermBeingRelocated _ (Just destinationIndex) ->
+                            Just <| RelatedTermIndex.toInt destinationIndex
 
                         _ ->
                             Nothing
@@ -1673,6 +1790,7 @@ view model =
                                     , viewCreateSeeAlso
                                         model.common.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
+                                        idOfRelatedTermBeingDragged
                                         items
                                         terms
                                         relatedTerms

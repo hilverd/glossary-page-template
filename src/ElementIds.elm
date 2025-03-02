@@ -16,7 +16,9 @@ module ElementIds exposing
     , deleteRelatedTermButton
     , deleteTermButton
     , disambiguationTagSelect
+    , dragRelatedTermButton
     , dragTermButton
+    , draggableSeeAlsoSelect
     , draggableTermInputField
     , exportDropdownButton
     , glossaryItemDiv
@@ -180,6 +182,11 @@ definition =
 seeAlsoSelect : RelatedTermIndex -> String
 seeAlsoSelect index =
     prefixed <| "see-also-" ++ (index |> RelatedTermIndex.toInt |> String.fromInt)
+
+
+draggableSeeAlsoSelect : RelatedTermIndex -> String
+draggableSeeAlsoSelect index =
+    prefixed <| "draggable-see-also-" ++ (index |> RelatedTermIndex.toInt |> String.fromInt)
 
 
 disambiguationTagSelect : String
@@ -353,3 +360,8 @@ moveRelatedTermDownButton index =
 deleteRelatedTermButton : Int -> String
 deleteRelatedTermButton index =
     prefixed <| "delete-related-term-" ++ String.fromInt index ++ "-button"
+
+
+dragRelatedTermButton : Int -> String
+dragRelatedTermButton index =
+    prefixed <| "drag-related-term-" ++ String.fromInt index ++ "-button"
