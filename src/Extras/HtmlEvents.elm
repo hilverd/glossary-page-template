@@ -55,6 +55,7 @@ isFormFieldDecoder =
         |> Decode.map
             (\tagName ->
                 let
+                    upperTagName : String
                     upperTagName =
                         String.toUpper tagName
                 in

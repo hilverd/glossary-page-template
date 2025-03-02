@@ -53,9 +53,11 @@ relocate sourceIndex destinationIndex list =
     in
     case maybeElement of
         Just ( _, element ) ->
-            List.take destinationIndex indexed
-                ++ [ ( -1, element ) ]
-                ++ List.drop destinationIndex indexed
+            (List.take destinationIndex indexed
+                ++ (( -1, element )
+                        :: List.drop destinationIndex indexed
+                   )
+            )
                 |> List.filterMap
                     (\( index, element_ ) ->
                         if index == sourceIndex then

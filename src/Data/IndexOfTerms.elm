@@ -174,19 +174,20 @@ filterByString filterString (IndexOfTerms index) =
         filterTermGroup : TermGroup -> TermGroup
         filterTermGroup termGroup =
             let
+                entries_ : List Entry
                 entries_ =
                     termGroup.entries
                         |> List.filter
                             (\entry ->
                                 case entry of
-                                    PreferredTerm glossaryItemId disambiguatedTerm ->
+                                    PreferredTerm _ disambiguatedTerm ->
                                         disambiguatedTerm
                                             |> DisambiguatedTerm.toTerm
                                             |> Term.inlineText
                                             |> String.toLower
                                             |> String.contains filterStringLower
 
-                                    AlternativeTerm term sortedPreferredTerms ->
+                                    AlternativeTerm term _ ->
                                         term
                                             |> Term.inlineText
                                             |> String.toLower

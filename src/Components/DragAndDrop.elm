@@ -208,7 +208,7 @@ updateCommon sticky msg model =
         ( DragOver dropId timeStamp pos, Dragging dragId, _ ) ->
             ( DraggedOver dragId dropId timeStamp (Just pos), Nothing )
 
-        ( DragOver dropId timeStamp pos, DraggedOver dragId currentDropId currentTimeStamp currentPos, _ ) ->
+        ( DragOver dropId timeStamp pos, DraggedOver dragId _ currentTimeStamp _, _ ) ->
             if timeStamp == currentTimeStamp then
                 -- Handle dragover bubbling, if we already have handled this event
                 -- (by looking at the timeStamp), do nothing. Also, this does some rate limiting
@@ -297,7 +297,7 @@ getDragId model =
         Dragging dragId ->
             Just dragId
 
-        DraggedOver dragId dropId _ _ ->
+        DraggedOver dragId _ _ _ ->
             Just dragId
 
 
@@ -316,10 +316,10 @@ getDropId model =
         NotDragging ->
             Nothing
 
-        Dragging dragId ->
+        Dragging _ ->
             Nothing
 
-        DraggedOver dragId dropId _ _ ->
+        DraggedOver _ dropId _ _ ->
             Just dropId
 
 
