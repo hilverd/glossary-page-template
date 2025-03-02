@@ -16,6 +16,7 @@ module GlossaryItemForm exposing
     , moveTermUp
     , needsUpdating
     , relatedTermFields
+    , relocateRelatedTerm
     , relocateTerm
     , selectRelatedTerm
     , suggestRelatedTerms
@@ -974,6 +975,20 @@ moveRelatedTermDown index glossaryItemForm =
                             |> Maybe.withDefault relatedTermFields0
                 }
                 |> validate
+
+
+relocateRelatedTerm : RelatedTermIndex -> RelatedTermIndex -> GlossaryItemForm -> GlossaryItemForm
+relocateRelatedTerm sourceIndex destinationIndex ((GlossaryItemForm form) as glossaryItemForm) =
+    let
+        relatedTermFields1 : Array RelatedTermField
+        relatedTermFields1 =
+            glossaryItemForm
+                |> relatedTermFields
+                |> Array.toList
+                |> Extras.List.relocate (RelatedTermIndex.toInt sourceIndex) (RelatedTermIndex.toInt destinationIndex)
+                |> Array.fromList
+    in
+    GlossaryItemForm { form | relatedTermFields = relatedTermFields1 }
 
 
 suggestRelatedTerms : GlossaryItemForm -> List DisambiguatedTerm

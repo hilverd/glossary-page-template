@@ -61,6 +61,7 @@ import Task
 type TentativeDragAndDropChangesToShow
     = NoDragAndDropInProgress
     | TermBeingRelocated TermIndex (Maybe TermIndex)
+    | RelatedTermBeingRelocated RelatedTermIndex (Maybe RelatedTermIndex)
 
 
 type alias Model =
@@ -73,6 +74,7 @@ type alias Model =
     , dropdownMenusWithMoreOptionsForTerms : Dict Int Components.DropdownMenu.Model
     , dragAndDropTerms : Components.DragAndDrop.Model TermIndex TermIndex
     , dropdownMenusWithMoreOptionsForRelatedTerms : Dict Int Components.DropdownMenu.Model
+    , dragAndDropRelatedTerms : Components.DragAndDrop.Model RelatedTermIndex RelatedTermIndex
     }
 
 
@@ -105,10 +107,11 @@ type InternalMsg
     | AddRelatedTerm (Maybe RawTerm)
     | SelectRelatedTerm RelatedTermIndex String
     | DeleteRelatedTerm RelatedTermIndex
-    | DropdownMenuWithMoreOptionsForRelatedTermMsg Int Components.DropdownMenu.Msg
     | DropdownMenuWithMoreOptionsForTermMsg Int Components.DropdownMenu.Msg
+    | DropdownMenuWithMoreOptionsForRelatedTermMsg Int Components.DropdownMenu.Msg
     | MoveRelatedTermUp RelatedTermIndex
     | MoveRelatedTermDown Int RelatedTermIndex
+    | DragAndDropRelatedTermsMsg (Components.DragAndDrop.Msg RelatedTermIndex RelatedTermIndex)
     | ToggleNeedsUpdating
     | Save
     | ReceiveCurrentDateTimeAndNewIdForSaving ( String, String )
@@ -162,6 +165,7 @@ init commonModel itemBeingEdited =
                     dropdownMenusWithMoreOptionsForTermsForForm form
               , dropdownMenusWithMoreOptionsForRelatedTerms =
                     dropdownMenusWithMoreOptionsForRelatedTermsForForm form
+              , dragAndDropRelatedTerms = Components.DragAndDrop.init
               }
             , if itemBeingEdited == Nothing then
                 0 |> TermIndex.fromInt |> giveFocusToTermInputField
@@ -180,6 +184,7 @@ init commonModel itemBeingEdited =
               , dragAndDropTerms = Components.DragAndDrop.init
               , dropdownMenusWithMoreOptionsForTerms = Dict.empty
               , dropdownMenusWithMoreOptionsForRelatedTerms = Dict.empty
+              , dragAndDropRelatedTerms = Components.DragAndDrop.init
               }
             , Cmd.none
             )
@@ -510,6 +515,51 @@ update msg model =
                 |> updateForm (always form)
             , moveFocusAfterMovingRelatedTermDown numberOfRelatedTerms relatedTermIndex
                 |> Cmd.map PageMsg.Internal
+            )
+
+        DragAndDropRelatedTermsMsg msg_ ->
+            let
+                ( dragAndDropRelatedTerms_, result ) =
+                    Components.DragAndDrop.update msg_ model.dragAndDropRelatedTerms
+
+                dragId : Maybe RelatedTermIndex
+                dragId =
+                    Components.DragAndDrop.getDragId dragAndDropRelatedTerms_
+
+                dropId : Maybe RelatedTermIndex
+                dropId =
+                    Components.DragAndDrop.getDropId dragAndDropRelatedTerms_
+
+                tentativeDragAndDropChangesToShow : TentativeDragAndDropChangesToShow
+                tentativeDragAndDropChangesToShow =
+                    case ( dragId, dropId ) of
+                        ( Just dragId_, Nothing ) ->
+                            if model.tentativeDragAndDropChangesToShow == NoDragAndDropInProgress then
+                                RelatedTermBeingRelocated dragId_ dropId
+
+                            else
+                                model.tentativeDragAndDropChangesToShow
+
+                        ( Just dragId_, Just _ ) ->
+                            RelatedTermBeingRelocated dragId_ dropId
+
+                        _ ->
+                            NoDragAndDropInProgress
+            in
+            ( { model
+                | tentativeDragAndDropChangesToShow = tentativeDragAndDropChangesToShow
+                , dragAndDropRelatedTerms = dragAndDropRelatedTerms_
+              }
+                |> (case result of
+                        Nothing ->
+                            identity
+
+                        Just ( oldRelatedTermIndex_, newRelatedTermIndex_, _ ) ->
+                            updateForm (updatedFormWithRelatedTermBeingRelocated oldRelatedTermIndex_ newRelatedTermIndex_)
+                   )
+            , Components.DragAndDrop.getDragstartEvent msg_
+                |> Maybe.map (.event >> dragStart)
+                |> Maybe.withDefault Cmd.none
             )
 
         ToggleNeedsUpdating ->
@@ -1494,6 +1544,27 @@ updatedFormWithTermBeingRelocated sourceTermIndex destinationTermIndex =
                 ( sourceTermIndex, destinationTermIndex )
     in
     Form.relocateTerm sourceTermIndex_ destinationTermIndex_
+
+
+updatedFormWithRelatedTermBeingRelocated : RelatedTermIndex -> RelatedTermIndex -> GlossaryItemForm -> GlossaryItemForm
+updatedFormWithRelatedTermBeingRelocated sourceRelatedTermIndex destinationRelatedTermIndex =
+    let
+        sourceRelatedTermIndexInt : Int
+        sourceRelatedTermIndexInt =
+            RelatedTermIndex.toInt sourceRelatedTermIndex
+
+        destinationRelatedTermIndexInt : Int
+        destinationRelatedTermIndexInt =
+            RelatedTermIndex.toInt destinationRelatedTermIndex
+
+        ( sourceRelatedTermIndex_, destinationRelatedTermIndex_ ) =
+            if sourceRelatedTermIndexInt < destinationRelatedTermIndexInt then
+                ( sourceRelatedTermIndex, destinationRelatedTermIndexInt + 1 |> RelatedTermIndex.fromInt )
+
+            else
+                ( sourceRelatedTermIndex, destinationRelatedTermIndex )
+    in
+    Form.relocateRelatedTerm sourceRelatedTermIndex_ destinationRelatedTermIndex_
 
 
 view : Model -> Document Msg
