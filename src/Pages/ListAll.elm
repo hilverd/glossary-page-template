@@ -2427,7 +2427,7 @@ viewOrderItemsBy numberOfItems { enableMathSupport } disambiguatedPreferredTerms
                             [ class "mr-2" ]
                             [ text I18n.focusedOn
                             ]
-                        , Components.SelectMenu.render
+                        , Components.SelectMenu.view
                             [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect
                             , Components.SelectMenu.ariaLabel I18n.focusOnTerm
                             , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << RawTerm.fromString)

@@ -5,9 +5,9 @@ module Components.SelectMenu exposing
     , enabled
     , id
     , onChange
-    , render
     , showValidationErrors
     , validationError
+    , view
     )
 
 import Accessibility exposing (Html, div, option, p, select, text)
@@ -109,8 +109,8 @@ configFromProperties =
         }
 
 
-render : List (Property msg) -> List Choice -> Html msg
-render properties choices =
+view : List (Property msg) -> List Choice -> Html msg
+view properties choices =
     let
         config : Config msg
         config =

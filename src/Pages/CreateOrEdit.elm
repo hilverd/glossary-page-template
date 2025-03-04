@@ -1155,7 +1155,7 @@ viewDisambiguationTag disambiguationTagId tags =
             ]
         , div
             [ class "max-w-md" ]
-            [ Components.SelectMenu.render
+            [ Components.SelectMenu.view
                 [ Components.SelectMenu.id <| ElementIds.disambiguationTagSelect
                 , Components.SelectMenu.ariaLabel I18n.disambiguationTag
                 , Components.SelectMenu.onChange (PageMsg.Internal << SelectDisambiguationTag)
@@ -1282,7 +1282,7 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                             [ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms relatedTermIndex dropdownMenuWithMoreOptions ]
                     )
                     maybeDropdownMenuWithMoreOptions
-            , Components.SelectMenu.render
+            , Components.SelectMenu.view
                 [ Components.SelectMenu.id <|
                     (if dragAndDropStatus == CannotBeDraggedAndDropped then
                         ElementIds.seeAlsoSelect
