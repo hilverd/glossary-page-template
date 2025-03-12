@@ -5,7 +5,9 @@ module Icons exposing
     , arrowLongRight
     , arrowUp
     , braces
+    , check
     , chevronDown
+    , chevronUpDown
     , computerDesktop
     , copy
     , cornerDownRight
@@ -127,6 +129,40 @@ chevronDown =
             [ d "M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
             , fillRule "evenodd"
             , clipRule "evenodd"
+            ]
+            []
+        ]
+
+
+chevronUpDown : List (Html.Attribute msg) -> Html msg
+chevronUpDown =
+    withAdditionalAttributes
+        [ viewBox "0 0 24 24"
+        , fill "none"
+        , strokeWidth "1.5"
+        , stroke "currentColor"
+        ]
+        [ path
+            [ d "M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
+            , strokeLinecap "round"
+            , strokeLinejoin "round"
+            ]
+            []
+        ]
+
+
+check : List (Html.Attribute msg) -> Html msg
+check =
+    withAdditionalAttributes
+        [ fill "none"
+        , viewBox "0 0 24 24"
+        , strokeWidth "1.5"
+        , stroke "currentColor"
+        ]
+        [ path
+            [ strokeLinecap "round"
+            , strokeLinejoin "round"
+            , d "m4.5 12.75 6 6 9-13.5"
             ]
             []
         ]

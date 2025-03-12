@@ -32,6 +32,7 @@ module GlossaryItemForm exposing
     )
 
 import Array exposing (Array)
+import Components.Combobox
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
@@ -58,6 +59,7 @@ import Set exposing (Set)
 type alias RelatedTermField =
     { raw : Maybe RawTerm
     , validationError : Maybe String
+    , combobox : Components.Combobox.Model
     }
 
 
@@ -350,6 +352,7 @@ emptyRelatedTermField : RelatedTermField
 emptyRelatedTermField =
     { raw = Nothing
     , validationError = Nothing
+    , combobox = Components.Combobox.init
     }
 
 
@@ -465,7 +468,13 @@ fromGlossaryItemForUi_ existingPreferredTerms allTags preferredTermsOfItemsListi
         , definitionField = definitionField_
         , relatedTermFields =
             relatedTerms
-                |> List.map (\term -> RelatedTermField (Just <| Term.raw <| DisambiguatedTerm.toTerm term) Nothing)
+                |> List.map
+                    (\term ->
+                        RelatedTermField
+                            (Just <| Term.raw <| DisambiguatedTerm.toTerm term)
+                            Nothing
+                            Components.Combobox.init
+                    )
                 |> Array.fromList
         , preferredTermsOutside = preferredTermsOutside1
         , preferredTermsOfItemsListingThisItemAsRelated = preferredTermsOfItemsListingThisItemAsRelated_
@@ -860,7 +869,13 @@ addRelatedTerm maybeRawTerm glossaryItemForm =
                 relatedTermField : RelatedTermField
                 relatedTermField =
                     maybeRawTerm
-                        |> Maybe.map (\rawTerm -> { raw = Just rawTerm, validationError = Nothing })
+                        |> Maybe.map
+                            (\rawTerm ->
+                                { raw = Just rawTerm
+                                , validationError = Nothing
+                                , combobox = Components.Combobox.init
+                                }
+                            )
                         |> Maybe.withDefault emptyRelatedTermField
 
                 needsUpdating1 : Bool
@@ -887,7 +902,9 @@ selectRelatedTerm index relatedRawTerm glossaryItemForm =
                 { form
                     | relatedTermFields =
                         Extras.Array.update
-                            (always <| RelatedTermField relatedRawTerm Nothing)
+                            (always <|
+                                RelatedTermField relatedRawTerm Nothing Components.Combobox.init
+                            )
                             (RelatedTermIndex.toInt index)
                             form.relatedTermFields
                 }
