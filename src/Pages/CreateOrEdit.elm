@@ -318,9 +318,20 @@ update msg model =
                         Just ( oldTermIndex_, newTermIndex_, _ ) ->
                             updateForm (updatedFormWithTermBeingRelocated oldTermIndex_ newTermIndex_)
                    )
-            , Components.DragAndDrop.getDragstartEvent msg_
-                |> Maybe.map (.event >> dragStart)
-                |> Maybe.withDefault Cmd.none
+            , Cmd.batch
+                [ Components.DragAndDrop.getDragstartEvent msg_
+                    |> Maybe.map (.event >> dragStart)
+                    |> Maybe.withDefault Cmd.none
+                , case result of
+                    Nothing ->
+                        Cmd.none
+
+                    Just ( _, newTermIndex_, _ ) ->
+                        Task.attempt
+                            (\_ -> NoOp)
+                            (Dom.focus <| ElementIds.dragTermButton <| TermIndex.toInt newTermIndex_)
+                            |> Cmd.map PageMsg.Internal
+                ]
             )
 
         MoveTermUp fromDragButton termIndex ->
@@ -557,9 +568,20 @@ update msg model =
                         Just ( oldRelatedTermIndex_, newRelatedTermIndex_, _ ) ->
                             updateForm (updatedFormWithRelatedTermBeingRelocated oldRelatedTermIndex_ newRelatedTermIndex_)
                    )
-            , Components.DragAndDrop.getDragstartEvent msg_
-                |> Maybe.map (.event >> dragStart)
-                |> Maybe.withDefault Cmd.none
+            , Cmd.batch
+                [ Components.DragAndDrop.getDragstartEvent msg_
+                    |> Maybe.map (.event >> dragStart)
+                    |> Maybe.withDefault Cmd.none
+                , case result of
+                    Nothing ->
+                        Cmd.none
+
+                    Just ( _, newRelatedTermIndex_, _ ) ->
+                        Task.attempt
+                            (\_ -> NoOp)
+                            (Dom.focus <| ElementIds.dragRelatedTermButton <| RelatedTermIndex.toInt newRelatedTermIndex_)
+                            |> Cmd.map PageMsg.Internal
+                ]
             )
 
         ToggleNeedsUpdating ->
