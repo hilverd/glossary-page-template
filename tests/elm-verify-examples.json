@@ -3,6 +3,7 @@
         "AmortizedQueue",
         "Data.AboutLink",
         "Data.AboutParagraph",
+        "Data.Checksum",
         "Data.DescribedTag",
         "Data.DescribedTagFromDom",
         "Data.Editability",

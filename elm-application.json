@@ -8,6 +8,7 @@
         "Components.DragAndDrop",
         "Data.AboutLink",
         "Data.AboutParagraph",
+        "Data.Checksum",
         "Data.DescribedTag",
         "Data.DescribedTagFromDom",
         "Data.Editability",
