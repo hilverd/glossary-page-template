@@ -1509,7 +1509,7 @@ viewMakeChangesButton editability tabbable =
                 [ Svg.Attributes.class "h-5 w-5" ]
             , span
                 [ class "ml-2 inline-flex items-center" ]
-                [ text I18n.makeChanges
+                [ text I18n.startEditing
                 , Html.kbd
                     [ class "ml-2 inline-flex items-center rounded-xs border border-gray-700 dark:border-gray-300 px-1 font-sans text-xs" ]
                     [ text "e" ]
