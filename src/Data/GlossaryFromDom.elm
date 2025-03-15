@@ -413,7 +413,7 @@ applyChanges changes glossaryFromDom =
         currentVersionNumber =
             GlossaryVersionNumber.create glossaryFromDom.versionNumber
     in
-    if GlossaryChangelist.applyToVersionNumber changes /= currentVersionNumber then
+    if GlossaryChangelist.startedFromVersionNumber changes /= currentVersionNumber then
         VersionsDoNotMatch
 
     else

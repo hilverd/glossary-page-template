@@ -1,7 +1,7 @@
 module Data.GlossaryChangelist exposing
     ( GlossaryChangelist
     , create, codec, setLastUpdatedBy
-    , applyToVersionNumber, body
+    , startedFromVersionNumber, body
     )
 
 {-| A representation of a sequence of changes to be made to a glossary.
@@ -19,7 +19,7 @@ module Data.GlossaryChangelist exposing
 
 # Query
 
-@docs applyToVersionNumber, body
+@docs startedFromVersionNumber, body
 
 -}
 
@@ -32,7 +32,7 @@ import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVer
 -}
 type GlossaryChangelist
     = GlossaryChangelist
-        { applyToVersionNumber : GlossaryVersionNumber
+        { startedFromVersionNumber : GlossaryVersionNumber
         , body : List GlossaryChange
         }
 
@@ -40,18 +40,18 @@ type GlossaryChangelist
 {-| Construct a changelist from a list and a version number for the glossary that the changes are to be applied to.
 -}
 create : GlossaryVersionNumber -> List GlossaryChange -> GlossaryChangelist
-create applyToVersionNumber_ changeList_ =
+create startedFromVersionNumber_ changeList_ =
     GlossaryChangelist
-        { applyToVersionNumber = applyToVersionNumber_
+        { startedFromVersionNumber = startedFromVersionNumber_
         , body = changeList_
         }
 
 
 {-| Return the version number for the glossary that the changes are to be applied to.
 -}
-applyToVersionNumber : GlossaryChangelist -> GlossaryVersionNumber
-applyToVersionNumber (GlossaryChangelist changelist) =
-    changelist.applyToVersionNumber
+startedFromVersionNumber : GlossaryChangelist -> GlossaryVersionNumber
+startedFromVersionNumber (GlossaryChangelist changelist) =
+    changelist.startedFromVersionNumber
 
 
 {-| Return the changelist as a list.
@@ -66,7 +66,7 @@ body (GlossaryChangelist changelist) =
 codec : Codec GlossaryChangelist
 codec =
     Codec.object create
-        |> Codec.field "applyToVersionNumber" applyToVersionNumber GlossaryVersionNumber.codec
+        |> Codec.field "startedFromVersionNumber" startedFromVersionNumber GlossaryVersionNumber.codec
         |> Codec.field "changeList" body (Codec.list GlossaryChange.codec)
         |> Codec.buildObject
 
