@@ -12,6 +12,7 @@ module Data.Checksum exposing (Checksum, againstGlossaryForUi, againstGlossaryFr
 import Codec exposing (Codec)
 import Data.AboutSection as AboutSection
 import Data.CardWidth as CardWidth
+import Data.DescribedTagFromDom as DescribedTagFromDom
 import Data.GlossaryChange exposing (GlossaryChange(..))
 import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryFromDom exposing (GlossaryFromDom)
@@ -54,7 +55,8 @@ againstGlossaryForUi glossaryForUi glossaryChange =
         SetTitle _ ->
             glossaryForUi
                 |> GlossaryForUi.title
-                |> checkSumUsingCodec GlossaryTitle.codec
+                |> GlossaryTitle.raw
+                |> checkSumUsingCodec Codec.string
 
         SetAboutSection _ ->
             glossaryForUi
@@ -105,7 +107,69 @@ againstGlossaryFromDom glossaryFromDom glossaryChange =
         ToggleEnableLastUpdatedDates ->
             glossaryFromDom
                 |> .enableLastUpdatedDates
-                |> Codec.encodeToString 0 Codec.bool
+                |> checkSumUsingCodec Codec.bool
+
+        ToggleEnableExportMenu ->
+            glossaryFromDom
+                |> .enableExportMenu
+                |> checkSumUsingCodec Codec.bool
+
+        ToggleEnableOrderItemsButtons ->
+            glossaryFromDom
+                |> .enableOrderItemsButtons
+                |> checkSumUsingCodec Codec.bool
+
+        SetTitle _ ->
+            glossaryFromDom
+                |> .title
+                |> checkSumUsingCodec Codec.string
+
+        SetAboutSection _ ->
+            let
+                aboutParagraph : String
+                aboutParagraph =
+                    glossaryFromDom.aboutParagraph
+
+                aboutLinks : String
+                aboutLinks =
+                    glossaryFromDom.aboutLinks
+                        |> List.map (\{ href, body } -> "[" ++ body ++ "](" ++ href ++ ")")
+                        |> String.join "\n"
+            in
+            aboutParagraph
+                ++ "\n\n"
+                ++ aboutLinks
+                |> Extras.Md5.hexWithCrlfToLf
+                |> Checksum
+
+        SetCardWidth _ ->
+            glossaryFromDom
+                |> .cardWidth
+                |> checkSumUsingCodec CardWidth.codec
+
+        SetDefaultTheme _ ->
+            glossaryFromDom
+                |> .defaultTheme
+                |> checkSumUsingCodec Theme.codec
+
+        ChangeTags _ ->
+            glossaryFromDom.tags
+                |> List.map (Codec.encodeToString 0 DescribedTagFromDom.codec)
+                |> String.join "\n"
+                |> Extras.Md5.hexWithCrlfToLf
+                |> Checksum
+
+        Update { id } ->
+            glossaryFromDom.items
+                |> List.filterMap
+                    (\glossaryItemFromDom ->
+                        if id == glossaryItemFromDom.id then
+                            Just (Codec.encodeToString 0 GlossaryItemFromDom.codec glossaryItemFromDom)
+
+                        else
+                            Nothing
+                    )
+                |> String.join "\n"
                 |> Extras.Md5.hexWithCrlfToLf
                 |> Checksum
 

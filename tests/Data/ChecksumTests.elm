@@ -6,99 +6,135 @@ import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryFromDom exposing (ApplyChangesResult(..), GlossaryFromDom)
 import Data.GlossaryTitle as GlossaryTitle
 import Expect
-import Test exposing (Test, describe, test)
-import TestData exposing (glossaryFromDom)
+import Test exposing (Test, concat, describe, test)
+import TestData exposing (glossaryFromDom, loanItemFromDom)
 
 
 suite : Test
 suite =
     describe "The Data.Checksum module"
         [ describe "can compute checksums"
-            [ describe "against a GlossaryForUi"
-                [ test "where the change is ToggleEnableLastUpdatedDates" <|
+            [ test "where the change is ToggleEnableLastUpdatedDates" <|
+                \_ ->
+                    let
+                        glossaryInFrontEnd : GlossaryForUi
+                        glossaryInFrontEnd =
+                            { glossaryFromDom | enableLastUpdatedDates = True }
+                                |> GlossaryForUi.fromGlossaryFromDom
+
+                        glossaryInBackEnd : GlossaryFromDom
+                        glossaryInBackEnd =
+                            { glossaryFromDom | enableLastUpdatedDates = False }
+
+                        change : GlossaryChange
+                        change =
+                            GlossaryChange.ToggleEnableLastUpdatedDates
+
+                        checksumSentAlongWithChange : Checksum
+                        checksumSentAlongWithChange =
+                            Checksum.againstGlossaryForUi glossaryInFrontEnd change
+
+                        checksumForGlossaryInBackEnd : Checksum
+                        checksumForGlossaryInBackEnd =
+                            Checksum.againstGlossaryFromDom glossaryInBackEnd change
+                    in
+                    Expect.notEqual checksumSentAlongWithChange checksumForGlossaryInBackEnd
+            , let
+                glossaryInFrontEnd : GlossaryForUi
+                glossaryInFrontEnd =
+                    GlossaryForUi.fromGlossaryFromDom { glossaryFromDom | title = "One" }
+
+                change : GlossaryChange
+                change =
+                    GlossaryChange.SetTitle <| GlossaryTitle.fromMarkdown "does-not-matter"
+
+                checksumSentAlongWithChange : Checksum
+                checksumSentAlongWithChange =
+                    Checksum.againstGlossaryForUi glossaryInFrontEnd change
+              in
+              concat
+                [ test "where the change is SetTitle and the checksums do not match" <|
                     \_ ->
-                        let
-                            glossary1 : GlossaryForUi
-                            glossary1 =
-                                { glossaryFromDom | enableLastUpdatedDates = True }
-                                    |> GlossaryForUi.fromGlossaryFromDom
-
-                            glossary2 : GlossaryForUi
-                            glossary2 =
-                                { glossaryFromDom | enableLastUpdatedDates = False }
-                                    |> GlossaryForUi.fromGlossaryFromDom
-
-                            change : GlossaryChange
-                            change =
-                                GlossaryChange.ToggleEnableLastUpdatedDates
-
-                            checksum1 : Checksum
-                            checksum1 =
-                                change
-                                    |> Checksum.againstGlossaryForUi glossary1
-
-                            checksum2 : Checksum
-                            checksum2 =
-                                change
-                                    |> Checksum.againstGlossaryForUi glossary2
-                        in
-                        Expect.notEqual checksum1 checksum2
-                , test "where the change is SetTitle" <|
+                        Expect.notEqual checksumSentAlongWithChange
+                            (Checksum.againstGlossaryFromDom { glossaryFromDom | title = "Two" } change)
+                , test "where the change is SetTitle and the checksums match" <|
                     \_ ->
-                        let
-                            glossary1 : GlossaryForUi
-                            glossary1 =
-                                { glossaryFromDom | title = "One" }
-                                    |> GlossaryForUi.fromGlossaryFromDom
-
-                            glossary2 : GlossaryForUi
-                            glossary2 =
-                                { glossaryFromDom | title = "Two" }
-                                    |> GlossaryForUi.fromGlossaryFromDom
-
-                            change : GlossaryChange
-                            change =
-                                GlossaryChange.SetTitle (GlossaryTitle.fromMarkdown "does-not-matter")
-
-                            checksum1 : Checksum
-                            checksum1 =
-                                change
-                                    |> Checksum.againstGlossaryForUi glossary1
-
-                            checksum2 : Checksum
-                            checksum2 =
-                                change
-                                    |> Checksum.againstGlossaryForUi glossary2
-                        in
-                        Expect.notEqual checksum1 checksum2
+                        Expect.equal checksumSentAlongWithChange
+                            (Checksum.againstGlossaryFromDom { glossaryFromDom | title = "One" } change)
                 ]
-            , describe "against a GlossaryFromDom"
-                [ test "where the change is ToggleEnableLastUpdatedDates" <|
-                    \_ ->
-                        let
-                            glossary1 : GlossaryFromDom
-                            glossary1 =
-                                { glossaryFromDom | enableLastUpdatedDates = True }
+            , test "where the change is Update but no other changes have been made to the item" <|
+                \_ ->
+                    let
+                        glossaryInFrontEnd : GlossaryForUi
+                        glossaryInFrontEnd =
+                            { glossaryFromDom
+                                | items =
+                                    [ TestData.interestRateItemFromDom
+                                    , loanItemFromDom
+                                    ]
+                            }
+                                |> GlossaryForUi.fromGlossaryFromDom
 
-                            glossary2 : GlossaryFromDom
-                            glossary2 =
-                                { glossaryFromDom | enableLastUpdatedDates = False }
+                        glossaryInBackEnd : GlossaryFromDom
+                        glossaryInBackEnd =
+                            { glossaryFromDom
+                                | items =
+                                    [ TestData.defaultComputerScienceItemFromDom
+                                    , TestData.interestRateItemFromDom
+                                    , loanItemFromDom
+                                    ]
+                            }
 
-                            change : GlossaryChange
-                            change =
-                                GlossaryChange.ToggleEnableLastUpdatedDates
+                        change : GlossaryChange
+                        change =
+                            GlossaryChange.Update loanItemFromDom
 
-                            checksum1 : Checksum
-                            checksum1 =
-                                change
-                                    |> Checksum.againstGlossaryFromDom glossary1
+                        checksumSentAlongWithChange : Checksum
+                        checksumSentAlongWithChange =
+                            Checksum.againstGlossaryForUi glossaryInFrontEnd change
 
-                            checksum2 : Checksum
-                            checksum2 =
-                                change
-                                    |> Checksum.againstGlossaryFromDom glossary2
-                        in
-                        Expect.notEqual checksum1 checksum2
-                ]
+                        checksumForGlossaryInBackEnd : Checksum
+                        checksumForGlossaryInBackEnd =
+                            Checksum.againstGlossaryFromDom glossaryInBackEnd change
+                    in
+                    Expect.equal checksumSentAlongWithChange checksumForGlossaryInBackEnd
+            , test "where the change is Update" <|
+                \_ ->
+                    let
+                        glossaryInFrontEnd : GlossaryForUi
+                        glossaryInFrontEnd =
+                            { glossaryFromDom
+                                | items =
+                                    [ TestData.defaultComputerScienceItemFromDom
+                                    , loanItemFromDom
+                                    ]
+                            }
+                                |> GlossaryForUi.fromGlossaryFromDom
+
+                        glossaryInBackEnd : GlossaryFromDom
+                        glossaryInBackEnd =
+                            { glossaryFromDom
+                                | items =
+                                    [ TestData.defaultComputerScienceItemFromDom
+                                    , { loanItemFromDom
+                                        | preferredTerm =
+                                            { isAbbreviation = False, body = "Advance" }
+                                      }
+                                    ]
+                            }
+
+                        change : GlossaryChange
+                        change =
+                            GlossaryChange.Update loanItemFromDom
+
+                        checksumSentAlongWithChange : Checksum
+                        checksumSentAlongWithChange =
+                            Checksum.againstGlossaryForUi glossaryInFrontEnd change
+
+                        checksumForGlossaryInBackEnd : Checksum
+                        checksumForGlossaryInBackEnd =
+                            Checksum.againstGlossaryFromDom glossaryInBackEnd change
+                    in
+                    Expect.notEqual checksumSentAlongWithChange checksumForGlossaryInBackEnd
             ]
         ]
