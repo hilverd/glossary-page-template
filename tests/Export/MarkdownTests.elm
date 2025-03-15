@@ -76,7 +76,7 @@ See also: Interest rate"""
                             |> String.trim
                             |> String.replace "\n" crlf
                 in
-                TestData.glossary
+                TestData.glossaryForUi
                     |> Export.Markdown.toString
                     |> Expect.equal expected
         ]

@@ -1,4 +1,4 @@
-module TestData exposing (computerScienceDescribedTag, computerScienceDescribedTagFromDom, computerScienceRawTag, computerScienceTag, computerScienceTagId, computerScienceTagRawDescription, defaultComputerScienceDefinition, defaultComputerScienceItem, defaultComputerScienceItemFromDom, defaultFinanceDefinition, defaultFinanceItem, defaultFinanceItemFromDom, financeDescribedTag, financeDescribedTagFromDom, financeRawTag, financeTag, financeTagDescription, financeTagId, financeTagRawDescription, gardeningDescribedTag, gardeningDescribedTagFromDom, gardeningTag, gardeningTagDescription, gardeningTagId, glossary, glossaryFromDom, glossaryItemsForUi, houseworkRawTag, houseworkTag, houseworkTagDescription, houseworkTagRawDescription, houseworkTagRawId, informationRetrievalItem, informationRetrievalItemFromDom, interestRateItem, interestRateItemFromDom, loanItem, loanItemFromDom, spadeItem, spadeItemFromDom)
+module TestData exposing (computerScienceDescribedTag, computerScienceDescribedTagFromDom, computerScienceRawTag, computerScienceTag, computerScienceTagId, computerScienceTagRawDescription, defaultComputerScienceDefinition, defaultComputerScienceItem, defaultComputerScienceItemFromDom, defaultFinanceDefinition, defaultFinanceItem, defaultFinanceItemFromDom, financeDescribedTag, financeDescribedTagFromDom, financeRawTag, financeTag, financeTagDescription, financeTagId, financeTagRawDescription, gardeningDescribedTag, gardeningDescribedTagFromDom, gardeningTag, gardeningTagDescription, gardeningTagId, glossaryForUi, glossaryFromDom, glossaryItemsForUi, houseworkRawTag, houseworkTag, houseworkTagDescription, houseworkTagRawDescription, houseworkTagRawId, informationRetrievalItem, informationRetrievalItemFromDom, interestRateItem, interestRateItemFromDom, loanItem, loanItemFromDom, spadeItem, spadeItemFromDom)
 
 import Data.AboutParagraph as AboutParagraph
 import Data.CardWidth as CardWidth
@@ -468,8 +468,8 @@ glossaryFromDom =
     }
 
 
-glossary : GlossaryForUi
-glossary =
+glossaryForUi : GlossaryForUi
+glossaryForUi =
     GlossaryForUi.create
         True
         True
@@ -495,4 +495,4 @@ glossary =
 
 glossaryItemsForUi : GlossaryItemsForUi
 glossaryItemsForUi =
-    GlossaryForUi.items glossary
+    GlossaryForUi.items glossaryForUi
