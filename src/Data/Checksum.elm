@@ -9,7 +9,7 @@ module Data.Checksum exposing (Checksum, againstGlossaryForUi, againstGlossaryFr
 
 -}
 
-import Codec
+import Codec exposing (Codec)
 import Data.AboutSection as AboutSection
 import Data.CardWidth as CardWidth
 import Data.GlossaryChange exposing (GlossaryChange(..))
@@ -39,51 +39,37 @@ againstGlossaryForUi glossaryForUi glossaryChange =
         ToggleEnableLastUpdatedDates ->
             glossaryForUi
                 |> GlossaryForUi.enableLastUpdatedDates
-                |> stringFromBool
-                |> Extras.Md5.hexWithCrlfToLf
-                |> Checksum
+                |> checkSumUsingCodec Codec.bool
 
         ToggleEnableExportMenu ->
             glossaryForUi
                 |> GlossaryForUi.enableExportMenu
-                |> stringFromBool
-                |> Extras.Md5.hexWithCrlfToLf
-                |> Checksum
+                |> checkSumUsingCodec Codec.bool
 
         ToggleEnableOrderItemsButtons ->
             glossaryForUi
                 |> GlossaryForUi.enableOrderItemsButtons
-                |> stringFromBool
-                |> Extras.Md5.hexWithCrlfToLf
-                |> Checksum
+                |> checkSumUsingCodec Codec.bool
 
         SetTitle _ ->
             glossaryForUi
                 |> GlossaryForUi.title
-                |> GlossaryTitle.raw
-                |> Extras.Md5.hexWithCrlfToLf
-                |> Checksum
+                |> checkSumUsingCodec GlossaryTitle.codec
 
         SetAboutSection _ ->
             glossaryForUi
                 |> GlossaryForUi.aboutSection
-                |> Codec.encodeToString 0 AboutSection.codec
-                |> Extras.Md5.hexWithCrlfToLf
-                |> Checksum
+                |> checkSumUsingCodec AboutSection.codec
 
         SetCardWidth _ ->
             glossaryForUi
                 |> GlossaryForUi.cardWidth
-                |> Codec.encodeToString 0 CardWidth.codec
-                |> Extras.Md5.hexWithCrlfToLf
-                |> Checksum
+                |> checkSumUsingCodec CardWidth.codec
 
         SetDefaultTheme _ ->
             glossaryForUi
                 |> GlossaryForUi.defaultTheme
-                |> Codec.encodeToString 0 Theme.codec
-                |> Extras.Md5.hexWithCrlfToLf
-                |> Checksum
+                |> checkSumUsingCodec Theme.codec
 
         ChangeTags _ ->
             glossaryForUi
@@ -119,7 +105,7 @@ againstGlossaryFromDom glossaryFromDom glossaryChange =
         ToggleEnableLastUpdatedDates ->
             glossaryFromDom
                 |> .enableLastUpdatedDates
-                |> stringFromBool
+                |> Codec.encodeToString 0 Codec.bool
                 |> Extras.Md5.hexWithCrlfToLf
                 |> Checksum
 
@@ -127,10 +113,8 @@ againstGlossaryFromDom glossaryFromDom glossaryChange =
             Checksum ""
 
 
-stringFromBool : Bool -> String
-stringFromBool bool =
-    if bool then
-        "true"
-
-    else
-        "false"
+checkSumUsingCodec : Codec a -> a -> Checksum
+checkSumUsingCodec codec =
+    Codec.encodeToString 0 codec
+        >> Extras.Md5.hexWithCrlfToLf
+        >> Checksum
