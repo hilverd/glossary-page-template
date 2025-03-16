@@ -1,11 +1,11 @@
-module Data.Checksum exposing (Checksum, againstGlossaryForUi, againstGlossaryFromDom)
+module Data.Checksum exposing (Checksum, againstGlossaryForUi, againstGlossaryFromDom, codec)
 
 {-| Checksums for preventing edit conflicts.
 
 
 # Checksums
 
-@docs Checksum, againstGlossaryForUi, againstGlossaryFromDom
+@docs Checksum, againstGlossaryForUi, againstGlossaryFromDom, codec
 
 -}
 
@@ -178,7 +178,16 @@ againstGlossaryFromDom glossaryFromDom glossaryChange =
 
 
 checkSumUsingCodec : Codec a -> a -> Checksum
-checkSumUsingCodec codec =
-    Codec.encodeToString 0 codec
+checkSumUsingCodec codec_ =
+    Codec.encodeToString 0 codec_
         >> Extras.Md5.hexWithCrlfToLf
         >> Checksum
+
+
+{-| An encoder/decoder for checksums.
+-}
+codec : Codec Checksum
+codec =
+    Codec.map Checksum
+        (\(Checksum checksum_) -> checksum_)
+        Codec.string

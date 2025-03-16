@@ -14,6 +14,7 @@
         "Data.Editability",
         "Data.GlossaryChange",
         "Data.GlossaryChangelist",
+        "Data.GlossaryChangeWithChecksum",
         "Data.GlossaryForUi",
         "Data.GlossaryFromDom",
         "Data.GlossaryItem.Definition",
