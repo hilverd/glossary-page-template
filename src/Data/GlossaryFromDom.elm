@@ -1,6 +1,7 @@
 module Data.GlossaryFromDom exposing
     ( GlossaryFromDom
     , codec
+    , checksumForChange
     , ApplyChangesResult(..), applyChanges
     , toHtmlTree
     )
@@ -13,6 +14,11 @@ module Data.GlossaryFromDom exposing
 # Build
 
 @docs codec
+
+
+# Checksums
+
+@docs checksumForChange
 
 
 # Apply Changes
@@ -30,6 +36,7 @@ import Codec exposing (Codec)
 import Data.AboutLink as AboutLink
 import Data.AboutParagraph as AboutParagraph
 import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.Checksum as Checksum exposing (Checksum)
 import Data.DescribedTag as DescribedTag
 import Data.DescribedTagFromDom as DescribedTagFromDom exposing (DescribedTagFromDom)
 import Data.GlossaryChange exposing (GlossaryChange(..))
@@ -48,6 +55,7 @@ import Dict exposing (Dict)
 import DuplicateRejectingDict
 import ElementIds
 import Extras.HtmlTree as HtmlTree exposing (HtmlTree)
+import Extras.Md5
 import Internationalisation as I18n
 import Set exposing (Set)
 
@@ -128,6 +136,91 @@ codec =
         |> Codec.field "glossaryItems" .items (Codec.list GlossaryItemFromDom.codec)
         |> Codec.field "versionNumber" .versionNumber Codec.int
         |> Codec.buildObject
+
+
+{-| Calculate the checksum of the existing data being changed in a `GlossaryFromDom`.
+-}
+checksumForChange : GlossaryFromDom -> GlossaryChange -> Checksum
+checksumForChange glossaryFromDom glossaryChange =
+    case glossaryChange of
+        ToggleEnableLastUpdatedDates ->
+            glossaryFromDom
+                |> .enableLastUpdatedDates
+                |> checkSumUsingCodec Codec.bool
+
+        ToggleEnableExportMenu ->
+            glossaryFromDom
+                |> .enableExportMenu
+                |> checkSumUsingCodec Codec.bool
+
+        ToggleEnableOrderItemsButtons ->
+            glossaryFromDom
+                |> .enableOrderItemsButtons
+                |> checkSumUsingCodec Codec.bool
+
+        SetTitle _ ->
+            glossaryFromDom
+                |> .title
+                |> checkSumUsingCodec Codec.string
+
+        SetAboutSection _ ->
+            let
+                aboutParagraph : String
+                aboutParagraph =
+                    glossaryFromDom.aboutParagraph
+
+                aboutLinks : String
+                aboutLinks =
+                    glossaryFromDom.aboutLinks
+                        |> List.map (\{ href, body } -> "[" ++ body ++ "](" ++ href ++ ")")
+                        |> String.join "\n"
+            in
+            aboutParagraph
+                ++ "\n\n"
+                ++ aboutLinks
+                |> Extras.Md5.hexWithCrlfToLf
+                |> Checksum.create
+
+        SetCardWidth _ ->
+            glossaryFromDom
+                |> .cardWidth
+                |> checkSumUsingCodec CardWidth.codec
+
+        SetDefaultTheme _ ->
+            glossaryFromDom
+                |> .defaultTheme
+                |> checkSumUsingCodec Theme.codec
+
+        ChangeTags _ ->
+            glossaryFromDom.tags
+                |> List.map (Codec.encodeToString 0 DescribedTagFromDom.codec)
+                |> String.join "\n"
+                |> Extras.Md5.hexWithCrlfToLf
+                |> Checksum.create
+
+        Update { id } ->
+            glossaryFromDom.items
+                |> List.filterMap
+                    (\glossaryItemFromDom ->
+                        if id == glossaryItemFromDom.id then
+                            Just (Codec.encodeToString 0 GlossaryItemFromDom.codec glossaryItemFromDom)
+
+                        else
+                            Nothing
+                    )
+                |> String.join "\n"
+                |> Extras.Md5.hexWithCrlfToLf
+                |> Checksum.create
+
+        _ ->
+            Checksum.create ""
+
+
+checkSumUsingCodec : Codec a -> a -> Checksum
+checkSumUsingCodec codec_ =
+    Codec.encodeToString 0 codec_
+        >> Extras.Md5.hexWithCrlfToLf
+        >> Checksum.create
 
 
 applyTagsChanges : TagsChanges -> GlossaryFromDom -> Result String GlossaryFromDom

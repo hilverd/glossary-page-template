@@ -2,6 +2,7 @@ module Data.GlossaryForUi exposing
     ( GlossaryForUi
     , create, fromGlossaryFromDom
     , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, defaultTheme, title, aboutSection, items, versionNumber
+    , checksumForChange
     , toGlossaryFromDom
     )
 
@@ -23,26 +24,37 @@ module Data.GlossaryForUi exposing
 @docs enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, cardWidth, defaultTheme, title, aboutSection, items, versionNumber
 
 
+# Checksums
+
+@docs checksumForChange
+
+
 # Export
 
 @docs toGlossaryFromDom
 
 -}
 
+import Codec exposing (Codec)
 import Data.AboutLink as AboutLink exposing (AboutLink)
 import Data.AboutParagraph as AboutParagraph exposing (AboutParagraph)
-import Data.AboutSection exposing (AboutSection)
+import Data.AboutSection as AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.Checksum as Checksum exposing (Checksum)
 import Data.DescribedTag as DescribedTag exposing (DescribedTag)
+import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
 import Data.GlossaryFromDom exposing (GlossaryFromDom)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
+import Data.GlossaryItemFromDom as GlossaryItemFromDom
+import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVersionNumber)
 import Data.TagDescription as TagDescription
 import Data.TagId as TagId
 import Data.Theme as Theme exposing (Theme)
+import Extras.Md5
 import Internationalisation as I18n
 
 
@@ -233,6 +245,80 @@ createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsBut
         , items = Result.withDefault GlossaryItemsForUi.empty items_
         , versionNumber = Maybe.withDefault GlossaryVersionNumber.initial versionNumber_
         }
+
+
+{-| Calculate the checksum of the existing data being changed in a `GlossaryForUi`.
+-}
+checksumForChange : GlossaryForUi -> GlossaryChange -> Checksum
+checksumForChange glossaryForUi glossaryChange =
+    case glossaryChange of
+        GlossaryChange.ToggleEnableLastUpdatedDates ->
+            glossaryForUi
+                |> enableLastUpdatedDates
+                |> checkSumUsingCodec Codec.bool
+
+        GlossaryChange.ToggleEnableExportMenu ->
+            glossaryForUi
+                |> enableExportMenu
+                |> checkSumUsingCodec Codec.bool
+
+        GlossaryChange.ToggleEnableOrderItemsButtons ->
+            glossaryForUi
+                |> enableOrderItemsButtons
+                |> checkSumUsingCodec Codec.bool
+
+        GlossaryChange.SetTitle _ ->
+            glossaryForUi
+                |> title
+                |> GlossaryTitle.raw
+                |> checkSumUsingCodec Codec.string
+
+        GlossaryChange.SetAboutSection _ ->
+            glossaryForUi
+                |> aboutSection
+                |> checkSumUsingCodec AboutSection.codec
+
+        GlossaryChange.SetCardWidth _ ->
+            glossaryForUi
+                |> cardWidth
+                |> checkSumUsingCodec CardWidth.codec
+
+        GlossaryChange.SetDefaultTheme _ ->
+            glossaryForUi
+                |> defaultTheme
+                |> checkSumUsingCodec Theme.codec
+
+        GlossaryChange.ChangeTags _ ->
+            glossaryForUi
+                |> items
+                |> GlossaryItemsForUi.tags
+                |> List.map (Codec.encodeToString 0 Tag.codec)
+                |> String.join "\n"
+                |> Extras.Md5.hexWithCrlfToLf
+                |> Checksum.create
+
+        GlossaryChange.Update { id } ->
+            glossaryForUi
+                |> items
+                |> GlossaryItemsForUi.get (GlossaryItemId.create id)
+                |> Maybe.map
+                    (\glossaryItemForUi ->
+                        GlossaryItemForUi.toGlossaryItemFromDom glossaryItemForUi
+                            |> Codec.encodeToString 0 GlossaryItemFromDom.codec
+                    )
+                |> Maybe.withDefault ""
+                |> Extras.Md5.hexWithCrlfToLf
+                |> Checksum.create
+
+        _ ->
+            Checksum.create ""
+
+
+checkSumUsingCodec : Codec a -> a -> Checksum
+checkSumUsingCodec codec_ =
+    Codec.encodeToString 0 codec_
+        >> Extras.Md5.hexWithCrlfToLf
+        >> Checksum.create
 
 
 {-| Convert this glossary to a GlossaryFromDom.

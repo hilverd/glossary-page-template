@@ -12,7 +12,7 @@ module Data.GlossaryChangeWithChecksum exposing (GlossaryChangeWithChecksum, cre
 import Codec exposing (Codec)
 import Data.Checksum as Checksum exposing (Checksum)
 import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
-import Data.GlossaryForUi exposing (GlossaryForUi)
+import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 
 
 {-| A glossary change with a checksum against the existing data being changed.
@@ -30,7 +30,7 @@ create : GlossaryChange -> GlossaryForUi -> GlossaryChangeWithChecksum
 create glossaryChange_ glossaryForUi =
     GlossaryChangeWithChecksum
         { glossaryChange_ = glossaryChange_
-        , checksum_ = Checksum.againstGlossaryForUi glossaryForUi glossaryChange_
+        , checksum_ = GlossaryForUi.checksumForChange glossaryForUi glossaryChange_
         }
 
 
