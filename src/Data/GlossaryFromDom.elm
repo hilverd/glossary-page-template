@@ -377,7 +377,7 @@ remove itemId glossaryFromDom =
         Err <| I18n.thereIsNoItemWithId itemIdString
 
 
-{-| Increment the version number for a GlossaryForUi.
+{-| Increment the version number for a GlossaryFromDom.
 -}
 incrementVersionNumber : GlossaryFromDom -> GlossaryFromDom
 incrementVersionNumber glossaryFromDom =
