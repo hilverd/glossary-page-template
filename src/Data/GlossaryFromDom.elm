@@ -513,7 +513,7 @@ applyChanges changes glossaryFromDom =
         changes
             |> GlossaryChangelist.body
             |> List.foldl
-                (\change -> Result.andThen (Tuple.second >> applyChange change))
+                (\{ glossaryChange, checksum } -> Result.andThen (Tuple.second >> applyChange glossaryChange))
                 (Ok ( Nothing, incrementVersionNumber glossaryFromDom ))
             |> Result.andThen validateAfterApplyingChanges
             |> (\result ->

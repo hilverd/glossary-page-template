@@ -24,7 +24,8 @@ module Data.GlossaryChangelist exposing
 -}
 
 import Codec exposing (Codec)
-import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
+import Data.GlossaryChange as GlossaryChange
+import Data.GlossaryChangeWithChecksum as GlossaryChangeWithChecksum exposing (GlossaryChangeWithChecksum)
 import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVersionNumber)
 
 
@@ -33,13 +34,13 @@ import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVer
 type GlossaryChangelist
     = GlossaryChangelist
         { startedFromVersionNumber : GlossaryVersionNumber
-        , body : List GlossaryChange
+        , body : List GlossaryChangeWithChecksum
         }
 
 
 {-| Construct a changelist from a list and a version number for the glossary that the changes are to be applied to.
 -}
-create : GlossaryVersionNumber -> List GlossaryChange -> GlossaryChangelist
+create : GlossaryVersionNumber -> List GlossaryChangeWithChecksum -> GlossaryChangelist
 create startedFromVersionNumber_ changeList_ =
     GlossaryChangelist
         { startedFromVersionNumber = startedFromVersionNumber_
@@ -56,7 +57,7 @@ startedFromVersionNumber (GlossaryChangelist changelist) =
 
 {-| Return the changelist as a list.
 -}
-body : GlossaryChangelist -> List GlossaryChange
+body : GlossaryChangelist -> List GlossaryChangeWithChecksum
 body (GlossaryChangelist changelist) =
     changelist.body
 
@@ -67,7 +68,7 @@ codec : Codec GlossaryChangelist
 codec =
     Codec.object create
         |> Codec.field "startedFromVersionNumber" startedFromVersionNumber GlossaryVersionNumber.codec
-        |> Codec.field "changeList" body (Codec.list GlossaryChange.codec)
+        |> Codec.field "changeList" body (Codec.list GlossaryChangeWithChecksum.codec)
         |> Codec.buildObject
 
 
@@ -79,5 +80,10 @@ setLastUpdatedBy nameAndEmailAddress (GlossaryChangelist changelist) =
         { changelist
             | body =
                 changelist.body
-                    |> List.map (GlossaryChange.setLastUpdatedBy nameAndEmailAddress)
+                    |> List.map
+                        (\{ glossaryChange, checksum } ->
+                            { glossaryChange = GlossaryChange.setLastUpdatedBy nameAndEmailAddress glossaryChange
+                            , checksum = checksum
+                            }
+                        )
         }

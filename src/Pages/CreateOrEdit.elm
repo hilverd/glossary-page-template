@@ -15,7 +15,8 @@ import Components.GlossaryItemCard
 import Components.SelectMenu
 import Components.Spinner
 import Data.Editability as Editability
-import Data.GlossaryChange as GlossaryChange
+import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
+import Data.GlossaryChangeWithChecksum exposing (GlossaryChangeWithChecksum)
 import Data.GlossaryChangelist as GlossaryChangelist
 import Data.GlossaryForUi as Glossary
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
@@ -617,18 +618,26 @@ update msg model =
                                     (model.itemBeingEdited |> Maybe.withDefault newGlossaryItemId)
                                     (Just dateTime)
 
-                            changelist : GlossaryChangelist.GlossaryChangelist
-                            changelist =
+                            glossaryChange : GlossaryChange
+                            glossaryChange =
                                 case model.itemBeingEdited of
                                     Just _ ->
-                                        GlossaryChangelist.create
-                                            (Glossary.versionNumber glossaryForUi)
-                                            [ GlossaryChange.Update (GlossaryItemForUi.toGlossaryItemFromDom newOrUpdatedGlossaryItem) ]
+                                        GlossaryChange.Update (GlossaryItemForUi.toGlossaryItemFromDom newOrUpdatedGlossaryItem)
 
                                     Nothing ->
-                                        GlossaryChangelist.create
-                                            (Glossary.versionNumber glossaryForUi)
-                                            [ GlossaryChange.Insert (GlossaryItemForUi.toGlossaryItemFromDom newOrUpdatedGlossaryItem) ]
+                                        GlossaryChange.Insert (GlossaryItemForUi.toGlossaryItemFromDom newOrUpdatedGlossaryItem)
+
+                            glossaryChangeWithChecksum : GlossaryChangeWithChecksum
+                            glossaryChangeWithChecksum =
+                                { glossaryChange = glossaryChange
+                                , checksum = Glossary.checksumForChange glossaryForUi glossaryChange
+                                }
+
+                            changelist : GlossaryChangelist.GlossaryChangelist
+                            changelist =
+                                GlossaryChangelist.create
+                                    (Glossary.versionNumber glossaryForUi)
+                                    [ glossaryChangeWithChecksum ]
 
                             ( saving, cmd ) =
                                 Save.changeAndSave model.common.editability

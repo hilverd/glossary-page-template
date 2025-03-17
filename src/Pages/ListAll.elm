@@ -43,7 +43,8 @@ import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.Editability as Editability exposing (Editability(..))
-import Data.GlossaryChange as GlossaryChange
+import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
+import Data.GlossaryChangeWithChecksum exposing (GlossaryChangeWithChecksum)
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
@@ -544,11 +545,21 @@ update msg model =
             case model.common.glossaryForUi of
                 Ok glossaryForUi ->
                     let
+                        glossaryChange : GlossaryChange
+                        glossaryChange =
+                            GlossaryChange.Remove id
+
+                        glossaryChangeWithChecksum : GlossaryChangeWithChecksum
+                        glossaryChangeWithChecksum =
+                            { glossaryChange = glossaryChange
+                            , checksum = GlossaryForUi.checksumForChange glossaryForUi glossaryChange
+                            }
+
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
                                 (GlossaryForUi.versionNumber glossaryForUi)
-                                [ GlossaryChange.Remove id ]
+                                [ glossaryChangeWithChecksum ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
@@ -676,11 +687,21 @@ update msg model =
             case model.common.glossaryForUi of
                 Ok glossaryForUi ->
                     let
+                        glossaryChange : GlossaryChange
+                        glossaryChange =
+                            GlossaryChange.SetCardWidth cardWidth
+
+                        glossaryChangeWithChecksum : GlossaryChangeWithChecksum
+                        glossaryChangeWithChecksum =
+                            { glossaryChange = glossaryChange
+                            , checksum = GlossaryForUi.checksumForChange glossaryForUi glossaryChange
+                            }
+
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
                                 (GlossaryForUi.versionNumber glossaryForUi)
-                                [ GlossaryChange.SetCardWidth cardWidth ]
+                                [ glossaryChangeWithChecksum ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
@@ -706,11 +727,21 @@ update msg model =
             case model.common.glossaryForUi of
                 Ok glossaryForUi ->
                     let
+                        glossaryChange : GlossaryChange
+                        glossaryChange =
+                            GlossaryChange.SetDefaultTheme defaultTheme
+
+                        glossaryChangeWithChecksum : GlossaryChangeWithChecksum
+                        glossaryChangeWithChecksum =
+                            { glossaryChange = glossaryChange
+                            , checksum = GlossaryForUi.checksumForChange glossaryForUi glossaryChange
+                            }
+
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
                                 (GlossaryForUi.versionNumber glossaryForUi)
-                                [ GlossaryChange.SetDefaultTheme defaultTheme ]
+                                [ glossaryChangeWithChecksum ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
@@ -736,11 +767,21 @@ update msg model =
             case model.common.glossaryForUi of
                 Ok glossaryForUi ->
                     let
+                        glossaryChange : GlossaryChange
+                        glossaryChange =
+                            GlossaryChange.ToggleEnableExportMenu
+
+                        glossaryChangeWithChecksum : GlossaryChangeWithChecksum
+                        glossaryChangeWithChecksum =
+                            { glossaryChange = glossaryChange
+                            , checksum = GlossaryForUi.checksumForChange glossaryForUi glossaryChange
+                            }
+
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
                                 (GlossaryForUi.versionNumber glossaryForUi)
-                                [ GlossaryChange.ToggleEnableExportMenu ]
+                                [ glossaryChangeWithChecksum ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
@@ -773,11 +814,21 @@ update msg model =
             case model.common.glossaryForUi of
                 Ok glossaryForUi ->
                     let
+                        glossaryChange : GlossaryChange
+                        glossaryChange =
+                            GlossaryChange.ToggleEnableOrderItemsButtons
+
+                        glossaryChangeWithChecksum : GlossaryChangeWithChecksum
+                        glossaryChangeWithChecksum =
+                            { glossaryChange = glossaryChange
+                            , checksum = GlossaryForUi.checksumForChange glossaryForUi glossaryChange
+                            }
+
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
                                 (GlossaryForUi.versionNumber glossaryForUi)
-                                [ GlossaryChange.ToggleEnableOrderItemsButtons ]
+                                [ glossaryChangeWithChecksum ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability
@@ -810,11 +861,21 @@ update msg model =
             case model.common.glossaryForUi of
                 Ok glossaryForUi ->
                     let
+                        glossaryChange : GlossaryChange
+                        glossaryChange =
+                            GlossaryChange.ToggleEnableLastUpdatedDates
+
+                        glossaryChangeWithChecksum : GlossaryChangeWithChecksum
+                        glossaryChangeWithChecksum =
+                            { glossaryChange = glossaryChange
+                            , checksum = GlossaryForUi.checksumForChange glossaryForUi glossaryChange
+                            }
+
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create
                                 (GlossaryForUi.versionNumber glossaryForUi)
-                                [ GlossaryChange.ToggleEnableLastUpdatedDates ]
+                                [ glossaryChangeWithChecksum ]
 
                         ( saving, cmd ) =
                             Save.changeAndSave model.common.editability

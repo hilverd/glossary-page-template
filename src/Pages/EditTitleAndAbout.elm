@@ -14,9 +14,11 @@ import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
+import Data.Checksum exposing (Checksum)
 import Data.Editability as Editability
-import Data.GlossaryChange as GlossaryChange
-import Data.GlossaryChangelist as GlossaryChangelist
+import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
+import Data.GlossaryChangeWithChecksum exposing (GlossaryChangeWithChecksum)
+import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryForUi as Glossary
 import Data.GlossaryTitle as GlossaryTitle
 import Data.Saving exposing (Saving(..))
@@ -147,13 +149,30 @@ update msg model =
 
                     else
                         let
-                            changelist : GlossaryChangelist.GlossaryChangelist
+                            setTitleChange : GlossaryChange
+                            setTitleChange =
+                                GlossaryChange.SetTitle <| titleFromForm model.form
+
+                            setAboutSectionChange : GlossaryChange
+                            setAboutSectionChange =
+                                GlossaryChange.SetAboutSection <| aboutSectionFromForm model.form
+
+                            glossaryChangesWithChecksums : List GlossaryChangeWithChecksum
+                            glossaryChangesWithChecksums =
+                                [ setTitleChange, setAboutSectionChange ]
+                                    |> List.map
+                                        (\glossaryChange ->
+                                            { glossaryChange = glossaryChange
+                                            , checksum =
+                                                Glossary.checksumForChange glossaryForUi glossaryChange
+                                            }
+                                        )
+
+                            changelist : GlossaryChangelist
                             changelist =
                                 GlossaryChangelist.create
                                     (Glossary.versionNumber glossaryForUi)
-                                    [ GlossaryChange.SetTitle <| titleFromForm model.form
-                                    , GlossaryChange.SetAboutSection <| aboutSectionFromForm model.form
-                                    ]
+                                    glossaryChangesWithChecksums
 
                             ( saving, cmd ) =
                                 Save.changeAndSave model.common.editability

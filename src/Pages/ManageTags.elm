@@ -11,6 +11,7 @@ import Components.Form
 import Components.Spinner
 import Data.Editability as Editability
 import Data.GlossaryChange as GlossaryChange
+import Data.GlossaryChangeWithChecksum exposing (GlossaryChangeWithChecksum)
 import Data.GlossaryChangelist as GlossaryChangelist
 import Data.GlossaryForUi as Glossary
 import Data.GlossaryItem.Tag as Tag
@@ -164,11 +165,20 @@ update msg model =
 
                     else
                         let
+                            glossaryChange =
+                                GlossaryChange.ChangeTags <| Form.changes model.form
+
+                            glossaryChangeWithChecksum : GlossaryChangeWithChecksum
+                            glossaryChangeWithChecksum =
+                                { glossaryChange = glossaryChange
+                                , checksum = Glossary.checksumForChange glossaryForUi glossaryChange
+                                }
+
                             changelist : GlossaryChangelist.GlossaryChangelist
                             changelist =
                                 GlossaryChangelist.create
                                     (Glossary.versionNumber glossaryForUi)
-                                    [ GlossaryChange.ChangeTags <| Form.changes model.form ]
+                                    [ glossaryChangeWithChecksum ]
 
                             ( saving, cmd ) =
                                 Save.changeAndSave model.common.editability
