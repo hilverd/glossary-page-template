@@ -1,9 +1,11 @@
 module Data.GlossaryFromDomTests exposing (suite)
 
 import Codec
+import Data.Checksum as Checksum
 import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.DescribedTagFromDom exposing (DescribedTagFromDom)
-import Data.GlossaryChange as GlossaryChange
+import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
+import Data.GlossaryChangeWithChecksum exposing (GlossaryChangeWithChecksum)
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryFromDom as GlossaryFromDom exposing (ApplyChangesResult(..))
 import Data.GlossaryItem.TermFromDom as TermFromDom
@@ -62,6 +64,13 @@ houseworkDescribedTagFromDom =
     }
 
 
+glossaryChangeWithMeaninglessChecksum : GlossaryChange -> GlossaryChangeWithChecksum
+glossaryChangeWithMeaninglessChecksum glossaryChange =
+    { glossaryChange = glossaryChange
+    , checksum = Checksum.create "whatever"
+    }
+
+
 suite : Test
 suite =
     describe "The Data.GlossaryFromDom module"
@@ -88,6 +97,7 @@ suite =
                             GlossaryChangelist.create
                                 GlossaryVersionNumber.initial
                                 [ GlossaryChange.Insert TestData.spadeItemFromDom
+                                    |> glossaryChangeWithMeaninglessChecksum
                                 ]
                     in
                     glossaryFromDom
@@ -143,6 +153,7 @@ suite =
                             GlossaryChangelist.create
                                 GlossaryVersionNumber.initial
                                 [ GlossaryChange.Update loanRenamedToAdvance
+                                    |> glossaryChangeWithMeaninglessChecksum
                                 ]
                     in
                     glossaryFromDom
@@ -177,7 +188,8 @@ suite =
                         changeList =
                             GlossaryChangelist.create
                                 GlossaryVersionNumber.initial
-                                [ GlossaryChange.Remove <| GlossaryItemForUi.id TestData.loanItem
+                                [ GlossaryChange.Remove (GlossaryItemForUi.id TestData.loanItem)
+                                    |> glossaryChangeWithMeaninglessChecksum
                                 ]
                     in
                     glossaryFromDom
@@ -216,7 +228,9 @@ suite =
                         changeList =
                             GlossaryChangelist.create
                                 GlossaryVersionNumber.initial
-                                [ GlossaryChange.ChangeTags tagsChanges ]
+                                [ GlossaryChange.ChangeTags tagsChanges
+                                    |> glossaryChangeWithMeaninglessChecksum
+                                ]
                     in
                     glossaryFromDom
                         |> GlossaryFromDom.applyChanges changeList
@@ -250,7 +264,9 @@ suite =
                         changeList =
                             GlossaryChangelist.create
                                 GlossaryVersionNumber.initial
-                                [ GlossaryChange.ChangeTags tagsChanges ]
+                                [ GlossaryChange.ChangeTags tagsChanges
+                                    |> glossaryChangeWithMeaninglessChecksum
+                                ]
                     in
                     glossaryFromDom
                         |> GlossaryFromDom.applyChanges changeList
@@ -305,7 +321,9 @@ suite =
                         changeList =
                             GlossaryChangelist.create
                                 GlossaryVersionNumber.initial
-                                [ GlossaryChange.ChangeTags tagsChanges ]
+                                [ GlossaryChange.ChangeTags tagsChanges
+                                    |> glossaryChangeWithMeaninglessChecksum
+                                ]
                     in
                     glossaryFromDom
                         |> GlossaryFromDom.applyChanges changeList
@@ -347,6 +365,7 @@ suite =
                                         | id = "some-id"
                                         , preferredTerm = TermFromDom.create False "Glossary-Page-Foo"
                                     }
+                                    |> glossaryChangeWithMeaninglessChecksum
                                 ]
                     in
                     glossaryFromDom
@@ -366,6 +385,7 @@ suite =
                                         , preferredTerm = TermFromDom.create False "Foo"
                                         , alternativeTerms = [ TermFromDom.create False "Loan" ]
                                     }
+                                    |> glossaryChangeWithMeaninglessChecksum
                                 ]
                     in
                     glossaryFromDom
@@ -388,6 +408,7 @@ suite =
                                             , TermFromDom.create False "Bar"
                                             ]
                                     }
+                                    |> glossaryChangeWithMeaninglessChecksum
                                 ]
                     in
                     glossaryFromDom
@@ -417,7 +438,9 @@ suite =
                         changeList =
                             GlossaryChangelist.create
                                 GlossaryVersionNumber.initial
-                                [ GlossaryChange.ChangeTags tagsChanges ]
+                                [ GlossaryChange.ChangeTags tagsChanges
+                                    |> glossaryChangeWithMeaninglessChecksum
+                                ]
                     in
                     glossaryFromDom
                         |> GlossaryFromDom.applyChanges changeList
