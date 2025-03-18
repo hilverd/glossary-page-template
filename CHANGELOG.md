@@ -12,6 +12,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [5.3.0] - 2025-03-18
+
+### Added
 
 - Add a filter field for the index on larger screens.
 - Add buttons and drag & drop handles for rearranging terms.
@@ -32,8 +39,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Improve layout of buttons and select menus with long text.
 - When pressing up/down buttons for rearranging related items, make the focus follow the button for the item being moved.
 - Fix bug where not doing percent-decoding on fragment identifiers in URLs broke item highlighting.
-
-### Removed
 
 ## [5.2.1] - 2024-12-09
 
@@ -812,7 +817,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.2.1...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.3.0...HEAD
+[5.3.0]: https://github.com/hilverd/glossary-page-template/compare/v5.2.1...v5.3.0
 [5.2.1]: https://github.com/hilverd/glossary-page-template/compare/v5.2.0...v5.2.1
 [5.2.0]: https://github.com/hilverd/glossary-page-template/compare/v5.1.0...v5.2.0
 [5.1.0]: https://github.com/hilverd/glossary-page-template/compare/v5.0.3...v5.1.0
