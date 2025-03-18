@@ -22,6 +22,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Raise recommended maximum number of items from 500 to 1,000.
 - On larger screens, move search box/button to the right side of the page.
 - Rearrange layout of buttons for rearranging/deleting terms and related items.
+- Refine edit conflict detection mechanism. This should only take effect for Node.js back ends that use the `worker.min.js` script.
 
 ### Fixed
 

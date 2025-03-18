@@ -223,7 +223,7 @@ checkSumUsingCodec codec_ =
         >> Checksum.create
 
 
-applyTagsChanges : TagsChanges -> GlossaryFromDom -> Result String GlossaryFromDom
+applyTagsChanges : TagsChanges -> GlossaryFromDom -> ApplyChangesResult
 applyTagsChanges tagsChanges glossaryFromDom =
     let
         originalTagToTagId : Dict String String
@@ -351,14 +351,22 @@ applyTagsChanges tagsChanges glossaryFromDom =
                 in
                 { glossaryFromDom | tags = tags1, items = items1 }
             )
+        |> (\result ->
+                case result of
+                    Ok glossaryFromDom1 ->
+                        ChangesApplied ( Nothing, glossaryFromDom1 )
+
+                    Err error ->
+                        LogicalErrorWhenApplyingChanges error
+           )
 
 
 {-| Insert an item.
 -}
-insert : GlossaryItemFromDom -> GlossaryFromDom -> Result String ( GlossaryItemId, GlossaryFromDom )
+insert : GlossaryItemFromDom -> GlossaryFromDom -> ApplyChangesResult
 insert glossaryItemFromDom glossaryFromDom =
     if List.any (.id >> (==) glossaryItemFromDom.id) glossaryFromDom.items then
-        Err <| I18n.thereIsAlreadyAnItemWithId glossaryItemFromDom.id
+        LogicalErrorWhenApplyingChanges <| I18n.thereIsAlreadyAnItemWithId glossaryItemFromDom.id
 
     else
         let
@@ -374,11 +382,11 @@ insert glossaryItemFromDom glossaryFromDom =
                 )
                 glossaryFromDom.items
         then
-            Err <| I18n.thereIsAlreadyAnItemWithDisambiguatedPreferredTermId fragmentIdentifierForDisambiguatedPreferredTerm
+            LogicalErrorWhenApplyingChanges <| I18n.thereIsAlreadyAnItemWithDisambiguatedPreferredTermId fragmentIdentifierForDisambiguatedPreferredTerm
 
         else
-            Ok
-                ( glossaryItemFromDom.id |> GlossaryItemId.create
+            ChangesApplied
+                ( glossaryItemFromDom.id |> GlossaryItemId.create |> Just
                 , { glossaryFromDom
                     | items = glossaryItemFromDom :: glossaryFromDom.items
                   }
@@ -387,7 +395,7 @@ insert glossaryItemFromDom glossaryFromDom =
 
 {-| Update an item.
 -}
-update : GlossaryItemId -> GlossaryItemFromDom -> GlossaryFromDom -> Result String GlossaryFromDom
+update : GlossaryItemId -> GlossaryItemFromDom -> GlossaryFromDom -> ApplyChangesResult
 update itemId glossaryItemFromDom glossaryFromDom =
     let
         currentItem : Maybe GlossaryItemFromDom
@@ -437,7 +445,14 @@ update itemId glossaryItemFromDom glossaryFromDom =
                             in
                             result
                                 |> update (GlossaryItemId.create item.id) updatedItem
-                                |> Result.withDefault result
+                                |> (\updateResult ->
+                                        case updateResult of
+                                            ChangesApplied ( _, updatedGlossaryFromDom ) ->
+                                                updatedGlossaryFromDom
+
+                                            _ ->
+                                                result
+                                   )
                         )
                         glossaryFromDom
 
@@ -446,13 +461,19 @@ update itemId glossaryItemFromDom glossaryFromDom =
     in
     glossaryFromDomAfterUpdatingOtherItemsAsNeeded
         |> remove itemId
-        |> Result.andThen (insert glossaryItemFromDom)
-        |> Result.map Tuple.second
+        |> (\removeResult ->
+                case removeResult of
+                    ChangesApplied ( _, updatedGlossaryFromDom ) ->
+                        insert glossaryItemFromDom updatedGlossaryFromDom
+
+                    _ ->
+                        removeResult
+           )
 
 
 {-| Remove the item associated with an ID.
 -}
-remove : GlossaryItemId -> GlossaryFromDom -> Result String GlossaryFromDom
+remove : GlossaryItemId -> GlossaryFromDom -> ApplyChangesResult
 remove itemId glossaryFromDom =
     let
         itemIdString : String
@@ -464,10 +485,10 @@ remove itemId glossaryFromDom =
             List.filter (.id >> (/=) itemIdString) glossaryFromDom.items
     in
     if List.length items_ < List.length glossaryFromDom.items then
-        Ok { glossaryFromDom | items = items_ }
+        ChangesApplied ( Nothing, { glossaryFromDom | items = items_ } )
 
     else
-        Err <| I18n.thereIsNoItemWithId itemIdString
+        LogicalErrorWhenApplyingChanges <| I18n.thereIsNoItemWithId itemIdString
 
 
 {-| Increment the version number for a GlossaryFromDom.
@@ -505,41 +526,62 @@ applyChanges changes glossaryFromDom =
         currentVersionNumber : GlossaryVersionNumber.GlossaryVersionNumber
         currentVersionNumber =
             GlossaryVersionNumber.create glossaryFromDom.versionNumber
+
+        shouldCompareChecksums : Bool
+        shouldCompareChecksums =
+            GlossaryChangelist.startedFromVersionNumber changes /= currentVersionNumber
     in
-    if GlossaryChangelist.startedFromVersionNumber changes /= currentVersionNumber then
-        VersionsDoNotMatch
+    changes
+        |> GlossaryChangelist.body
+        |> List.foldl
+            (\{ glossaryChange, checksum } resultSoFar ->
+                case resultSoFar of
+                    ChangesApplied ( _, glossaryFromDom_ ) ->
+                        if shouldCompareChecksums then
+                            let
+                                checksumForGlossaryInBackEnd : Checksum
+                                checksumForGlossaryInBackEnd =
+                                    checksumForChange glossaryFromDom glossaryChange
+                            in
+                            if checksum /= checksumForGlossaryInBackEnd then
+                                VersionsDoNotMatch
 
-    else
-        changes
-            |> GlossaryChangelist.body
-            |> List.foldl
-                (\{ glossaryChange, checksum } -> Result.andThen (Tuple.second >> applyChange glossaryChange))
-                (Ok ( Nothing, incrementVersionNumber glossaryFromDom ))
-            |> Result.andThen validateAfterApplyingChanges
-            |> (\result ->
-                    case result of
-                        Ok result_ ->
-                            result_
-                                |> Tuple.mapSecond
-                                    (\glossaryFromDom_ ->
-                                        let
-                                            sortedItems : List GlossaryItemFromDom
-                                            sortedItems =
-                                                result_
-                                                    |> Tuple.second
-                                                    |> .items
-                                                    |> List.sortBy GlossaryItemFromDom.disambiguatedPreferredTermIdString
-                                        in
-                                        { glossaryFromDom_ | items = sortedItems }
-                                    )
-                                |> ChangesApplied
+                            else
+                                applyChange glossaryChange glossaryFromDom_
 
-                        Err err ->
-                            LogicalErrorWhenApplyingChanges err
-               )
+                        else
+                            applyChange glossaryChange glossaryFromDom_
+
+                    _ ->
+                        resultSoFar
+            )
+            (ChangesApplied ( Nothing, incrementVersionNumber glossaryFromDom ))
+        |> (\result ->
+                case result of
+                    ChangesApplied ( itemId, glossaryFromDom_ ) ->
+                        validateAfterApplyingChanges ( itemId, glossaryFromDom_ )
+
+                    _ ->
+                        result
+           )
+        |> (\result ->
+                case result of
+                    ChangesApplied ( itemId, glossaryFromDom_ ) ->
+                        let
+                            sortedItems : List GlossaryItemFromDom
+                            sortedItems =
+                                glossaryFromDom_
+                                    |> .items
+                                    |> List.sortBy GlossaryItemFromDom.disambiguatedPreferredTermIdString
+                        in
+                        ChangesApplied ( itemId, { glossaryFromDom_ | items = sortedItems } )
+
+                    _ ->
+                        result
+           )
 
 
-validateAfterApplyingChanges : ( Maybe GlossaryItemId, GlossaryFromDom ) -> Result String ( Maybe GlossaryItemId, GlossaryFromDom )
+validateAfterApplyingChanges : ( Maybe GlossaryItemId, GlossaryFromDom ) -> ApplyChangesResult
 validateAfterApplyingChanges ( maybeGlossaryItemId, glossaryFromDom ) =
     let
         reservedTerms : List String
@@ -636,41 +678,41 @@ validateAfterApplyingChanges ( maybeGlossaryItemId, glossaryFromDom ) =
         )
     of
         ( ( Just reservedTerm, _ ), _ ) ->
-            Err <| I18n.thisTermIsReserved ++ ": " ++ reservedTerm
+            LogicalErrorWhenApplyingChanges <| I18n.thisTermIsReserved ++ ": " ++ reservedTerm
 
         ( ( _, Just { preferredTerm, alternativeTerm } ), _ ) ->
-            Err <| I18n.thisAlternativeTermOccursMultipleTimes alternativeTerm preferredTerm
+            LogicalErrorWhenApplyingChanges <| I18n.thisAlternativeTermOccursMultipleTimes alternativeTerm preferredTerm
 
         ( _, ( Just duplicateDisambiguatedPreferredTermFragmentIdentifier_, _ ) ) ->
-            Err <| I18n.thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm ++ " \"" ++ duplicateDisambiguatedPreferredTermFragmentIdentifier_ ++ "\""
+            LogicalErrorWhenApplyingChanges <| I18n.thereAreMultipleItemsWithTheSameDisambiguatedPreferredTerm ++ " \"" ++ duplicateDisambiguatedPreferredTermFragmentIdentifier_ ++ "\""
 
         ( _, ( _, Just preferredTermThatAlsoAppearsAsAnAlternativeTerm ) ) ->
-            Err <| I18n.preferredTermCannotAlsoAppearAsAnAlternativeTerm preferredTermThatAlsoAppearsAsAnAlternativeTerm
+            LogicalErrorWhenApplyingChanges <| I18n.preferredTermCannotAlsoAppearAsAnAlternativeTerm preferredTermThatAlsoAppearsAsAnAlternativeTerm
 
         _ ->
-            Ok ( maybeGlossaryItemId, glossaryFromDom )
+            ChangesApplied ( maybeGlossaryItemId, glossaryFromDom )
 
 
-applyChange : GlossaryChange -> GlossaryFromDom -> Result String ( Maybe GlossaryItemId, GlossaryFromDom )
+applyChange : GlossaryChange -> GlossaryFromDom -> ApplyChangesResult
 applyChange change glossaryFromDom =
     case change of
         ToggleEnableLastUpdatedDates ->
-            Ok <|
+            ChangesApplied
                 ( Nothing
                 , { glossaryFromDom | enableLastUpdatedDates = not glossaryFromDom.enableLastUpdatedDates }
                 )
 
         ToggleEnableExportMenu ->
-            Ok <| ( Nothing, { glossaryFromDom | enableExportMenu = not glossaryFromDom.enableExportMenu } )
+            ChangesApplied ( Nothing, { glossaryFromDom | enableExportMenu = not glossaryFromDom.enableExportMenu } )
 
         ToggleEnableOrderItemsButtons ->
-            Ok ( Nothing, { glossaryFromDom | enableOrderItemsButtons = not glossaryFromDom.enableOrderItemsButtons } )
+            ChangesApplied ( Nothing, { glossaryFromDom | enableOrderItemsButtons = not glossaryFromDom.enableOrderItemsButtons } )
 
         SetTitle title_ ->
-            Ok ( Nothing, { glossaryFromDom | title = GlossaryTitle.raw title_ } )
+            ChangesApplied ( Nothing, { glossaryFromDom | title = GlossaryTitle.raw title_ } )
 
         SetAboutSection aboutSection_ ->
-            Ok
+            ChangesApplied
                 ( Nothing
                 , { glossaryFromDom
                     | aboutParagraph = aboutSection_.paragraph |> AboutParagraph.raw
@@ -686,18 +728,16 @@ applyChange change glossaryFromDom =
                 )
 
         SetCardWidth cardWidth_ ->
-            Ok ( Nothing, { glossaryFromDom | cardWidth = cardWidth_ } )
+            ChangesApplied ( Nothing, { glossaryFromDom | cardWidth = cardWidth_ } )
 
         SetDefaultTheme theme_ ->
-            Ok ( Nothing, { glossaryFromDom | defaultTheme = theme_ } )
+            ChangesApplied ( Nothing, { glossaryFromDom | defaultTheme = theme_ } )
 
         ChangeTags tagsChanges ->
             applyTagsChanges tagsChanges glossaryFromDom
-                |> Result.map (\newGlossary -> ( Nothing, newGlossary ))
 
         Insert item ->
             insert item glossaryFromDom
-                |> Result.map (\( newItemId, newGlossary ) -> ( Just newItemId, newGlossary ))
 
         Update item ->
             let
@@ -706,11 +746,9 @@ applyChange change glossaryFromDom =
                     GlossaryItemId.create item.id
             in
             update itemId item glossaryFromDom
-                |> Result.map (\newGlossary -> ( Just itemId, newGlossary ))
 
         Remove itemId ->
             remove itemId glossaryFromDom
-                |> Result.map (\newGlossary -> ( Nothing, newGlossary ))
 
 
 {-| Represent this GlossaryFromDom as an HTML tree, ready for writing back to the glossary's HTML file.

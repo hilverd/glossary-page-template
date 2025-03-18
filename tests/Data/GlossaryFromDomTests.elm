@@ -1,7 +1,7 @@
 module Data.GlossaryFromDomTests exposing (suite)
 
 import Codec
-import Data.Checksum as Checksum
+import Data.Checksum as Checksum exposing (Checksum)
 import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.DescribedTagFromDom exposing (DescribedTagFromDom)
 import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
@@ -68,6 +68,13 @@ glossaryChangeWithMeaninglessChecksum : GlossaryChange -> GlossaryChangeWithChec
 glossaryChangeWithMeaninglessChecksum glossaryChange =
     { glossaryChange = glossaryChange
     , checksum = Checksum.create "whatever"
+    }
+
+
+glossaryChangeWithChecksum : Checksum -> GlossaryChange -> GlossaryChangeWithChecksum
+glossaryChangeWithChecksum checksum glossaryChange =
+    { glossaryChange = glossaryChange
+    , checksum = checksum
     }
 
 
@@ -148,12 +155,15 @@ suite =
                                 | relatedPreferredTerms = [ { isAbbreviation = False, body = "Advance" } ]
                             }
 
+                        change : GlossaryChange
+                        change =
+                            GlossaryChange.Update loanRenamedToAdvance
+
                         changeList : GlossaryChangelist
                         changeList =
-                            GlossaryChangelist.create
-                                GlossaryVersionNumber.initial
-                                [ GlossaryChange.Update loanRenamedToAdvance
-                                    |> glossaryChangeWithMeaninglessChecksum
+                            GlossaryChangelist.create (GlossaryVersionNumber.create 99)
+                                [ change
+                                    |> glossaryChangeWithChecksum (GlossaryFromDom.checksumForChange glossaryFromDom change)
                                 ]
                     in
                     glossaryFromDom
@@ -415,13 +425,17 @@ suite =
                         |> GlossaryFromDom.applyChanges changeList
                         |> Expect.equal
                             (LogicalErrorWhenApplyingChanges "The alternative term \"Bar\" occurs multiple times in the item with preferred term \"Foo\".")
-            , test "unless the version in the changelist does not match the one in the glossary" <|
+            , test "unless the version in the changelist does not match the one in the glossary and the checksums also do not match" <|
                 \_ ->
                     let
                         changelist : GlossaryChangelist
                         changelist =
                             GlossaryChangelist.create (GlossaryVersionNumber.create 99)
-                                []
+                                [ TagsChanges.empty
+                                    |> TagsChanges.update computerScienceTagId financeDescribedTag
+                                    |> GlossaryChange.ChangeTags
+                                    |> glossaryChangeWithChecksum (Checksum.create "different")
+                                ]
                     in
                     Expect.equal
                         VersionsDoNotMatch
