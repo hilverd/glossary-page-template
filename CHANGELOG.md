@@ -13,7 +13,11 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+
 ### Fixed
+
+- Work around a [bug](https://github.com/drag-drop-touch-js/dragdroptouch/issues/90) in a 3rd party library that was making all links draggable on mobile devices.
+
 ### Removed
 
 ## [5.3.0] - 2025-03-18

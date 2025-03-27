@@ -1034,7 +1034,9 @@ viewCreateTerms mathSupportEnabled showValidationErrors idOfTermBeingDragged ter
                 [ class "mb-1" ]
                 [ Components.Form.markdownSupportedMessage mathSupportEnabled ]
             , div
-                [ class "space-y-6 sm:space-y-5" ]
+                [ class "space-y-6 sm:space-y-5"
+                , Html.Attributes.attribute "data-contains-draggable-elements" "true"
+                ]
                 ((List.indexedMap
                     (\index termField ->
                         [ viewCreateTerm
@@ -1459,7 +1461,9 @@ viewCreateSeeAlso enableMathSupport showValidationErrors idOfRelatedTermBeingDra
                 [ text I18n.pointToAnyRelatedItems ]
             ]
         , div
-            [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5" ]
+            [ class "mt-6 sm:mt-5 space-y-6 sm:space-y-5"
+            , Html.Attributes.attribute "data-contains-draggable-elements" "true"
+            ]
             (List.indexedMap
                 (\index relatedTerm ->
                     [ viewCreateSeeAlsoSingle

@@ -1,13 +1,13 @@
 import "@webcomponents/custom-elements";
 import "./glossary.css";
 import { Elm } from "./src/ApplicationShell.elm";
+import { enableDragDropTouch } from "./ts/drag-drop-touch.esm.js";
 import {
     normaliseWhitespace,
     scrollFragmentIdentifierIntoView,
     untilAsync,
     waitForElement,
 } from "./ts/utilities.ts";
-import { enableDragDropTouch } from "./ts/drag-drop-touch.esm.js";
 
 const runningOnMacOs: boolean = navigator.userAgent.indexOf("Mac OS X") != -1;
 
@@ -383,7 +383,7 @@ if (containerElement) {
 
     function domReady(callback: () => void) {
         document.readyState === "interactive" ||
-        document.readyState === "complete"
+            document.readyState === "complete"
             ? callback()
             : document.addEventListener("DOMContentLoaded", callback);
     }
@@ -392,7 +392,22 @@ if (containerElement) {
     domReady(() => {
         reflectThemeInClassList(themeValueForApp(defaultTheme));
 
-        enableDragDropTouch();
+        // Call enableDragDropTouch on divs that contain draggable elements.
+        // Because of https://github.com/drag-drop-touch-js/dragdroptouch/issues/90 this is not done for the entire document.
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node: any) => {
+                    if (node instanceof HTMLElement) {
+
+                        node.querySelectorAll('[data-contains-draggable-elements="true"]').forEach((element: any) => {
+                            enableDragDropTouch(element, element);
+                        });
+                    }
+                });
+            });
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
 
         document.body.style.visibility = "visible";
 
