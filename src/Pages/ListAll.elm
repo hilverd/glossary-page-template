@@ -138,7 +138,7 @@ type alias Model =
 
 type InternalMsg
     = NoOp
-    | MakeChanges
+    | StartEditing
     | ShowMenuForMobile
     | StartHidingMenuForMobile
     | CompleteHidingMenuForMobile
@@ -276,7 +276,7 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
-        MakeChanges ->
+        StartEditing ->
             let
                 common0 : CommonModel
                 common0 =
@@ -1558,12 +1558,12 @@ viewConfirmDeleteModal editability itemToDelete deleting =
         (itemToDelete /= Nothing)
 
 
-viewMakeChangesButton : Editability -> Bool -> Html Msg
-viewMakeChangesButton editability tabbable =
+viewStartEditingButton : Editability -> Bool -> Html Msg
+viewStartEditingButton editability tabbable =
     div
         [ class "mb-4 flex-none print:hidden" ]
         [ Components.Button.white True
-            [ Html.Events.onClick <| PageMsg.Internal MakeChanges
+            [ Html.Events.onClick <| PageMsg.Internal StartEditing
             , Accessibility.Key.tabbable tabbable
             ]
             [ Icons.pencil
@@ -2926,7 +2926,7 @@ view model =
                                             Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show, True )
 
                                         else if Editability.canEdit model.common.editability && Extras.HtmlEvents.isE event && not event.isFormField then
-                                            Just <| ( PageMsg.Internal MakeChanges, True )
+                                            Just <| ( PageMsg.Internal StartEditing, True )
 
                                         else if Editability.editing model.common.editability && Extras.HtmlEvents.isN event && not event.isFormField then
                                             Just <| ( PageMsg.NavigateToCreateOrEdit Nothing, True )
@@ -2984,7 +2984,7 @@ view model =
                                     [ div
                                         [ class "flex flex-row justify-start lg:justify-end" ]
                                         [ Extras.Html.showIf (Editability.canEdit model.common.editability) <|
-                                            viewMakeChangesButton model.common.editability noModalDialogShown_
+                                            viewStartEditingButton model.common.editability noModalDialogShown_
                                         , div
                                             [ class "hidden lg:block ml-auto pt-0.5" ]
                                             [ viewQuickSearchButton model.common.runningOnMacOs
