@@ -99,8 +99,8 @@ type InternalMsg
     | DeleteTerm TermIndex
     | UpdateTerm TermIndex String
     | DragAndDropTermsMsg (Components.DragAndDrop.Msg TermIndex TermIndex)
-    | MoveTermUp Bool TermIndex
-    | MoveTermDown Bool Int TermIndex
+    | MoveTermUp HowTermWasMoved TermIndex
+    | MoveTermDown HowTermWasMoved Int TermIndex
     | ToggleAbbreviation TermIndex
     | ToggleTagCheckbox Tag
     | UpdateDefinition String
@@ -110,8 +110,8 @@ type InternalMsg
     | DeleteRelatedTerm RelatedTermIndex
     | DropdownMenuWithMoreOptionsForTermMsg Int Components.DropdownMenu.Msg
     | DropdownMenuWithMoreOptionsForRelatedTermMsg Int Components.DropdownMenu.Msg
-    | MoveRelatedTermUp Bool RelatedTermIndex
-    | MoveRelatedTermDown Bool Int RelatedTermIndex
+    | MoveRelatedTermUp HowTermWasMoved RelatedTermIndex
+    | MoveRelatedTermDown HowTermWasMoved Int RelatedTermIndex
     | DragAndDropRelatedTermsMsg (Components.DragAndDrop.Msg RelatedTermIndex RelatedTermIndex)
     | ToggleNeedsUpdating
     | Save
@@ -121,6 +121,12 @@ type InternalMsg
 
 type alias Msg =
     PageMsg InternalMsg
+
+
+type HowTermWasMoved
+    = TermDropDownMenu
+    | TermMoveUpOrDownButton
+    | TermDragButton
 
 
 init : CommonModel -> Maybe GlossaryItemId -> ( Model, Cmd Msg )
@@ -269,7 +275,7 @@ update msg model =
         DeleteTerm termIndex ->
             ( updateForm (Form.deleteTerm termIndex) model
             , Task.attempt
-                (\_ -> NoOp)
+                (always NoOp)
                 (Dom.blur <| ElementIds.deleteTermButton <| TermIndex.toInt termIndex)
                 |> Cmd.map PageMsg.Internal
             )
@@ -329,13 +335,13 @@ update msg model =
 
                     Just ( _, newTermIndex_, _ ) ->
                         Task.attempt
-                            (\_ -> NoOp)
+                            (always NoOp)
                             (Dom.focus <| ElementIds.dragTermButton <| TermIndex.toInt newTermIndex_)
                             |> Cmd.map PageMsg.Internal
                 ]
             )
 
-        MoveTermUp fromDragButton termIndex ->
+        MoveTermUp howTermWasMoved termIndex ->
             let
                 form : GlossaryItemForm
                 form =
@@ -345,7 +351,7 @@ update msg model =
                 | dropdownMenusWithMoreOptionsForTerms = dropdownMenusWithMoreOptionsForTermsForForm form
               }
                 |> updateForm (always form)
-            , moveFocusAfterMovingTermUp fromDragButton termIndex
+            , moveFocusAfterMovingTermUp howTermWasMoved termIndex
                 |> Cmd.map PageMsg.Internal
             )
 
@@ -434,7 +440,7 @@ update msg model =
               }
                 |> updateForm (always form)
             , Task.attempt
-                (\_ -> NoOp)
+                (always NoOp)
                 (Dom.blur <| ElementIds.deleteRelatedTermButton <| RelatedTermIndex.toInt relatedTermIndex)
                 |> Cmd.map PageMsg.Internal
             )
@@ -501,7 +507,7 @@ update msg model =
                     )
                 |> Maybe.withDefault ( model, Cmd.none )
 
-        MoveRelatedTermUp fromDragButton relatedTermIndex ->
+        MoveRelatedTermUp howTermWasMoved relatedTermIndex ->
             let
                 form : GlossaryItemForm
                 form =
@@ -511,7 +517,7 @@ update msg model =
                 | dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
                 |> updateForm (always form)
-            , moveFocusAfterMovingRelatedTermUp fromDragButton relatedTermIndex
+            , moveFocusAfterMovingRelatedTermUp howTermWasMoved relatedTermIndex
                 |> Cmd.map PageMsg.Internal
             )
 
@@ -579,7 +585,7 @@ update msg model =
 
                     Just ( _, newRelatedTermIndex_, _ ) ->
                         Task.attempt
-                            (\_ -> NoOp)
+                            (always NoOp)
                             (Dom.focus <| ElementIds.dragRelatedTermButton <| RelatedTermIndex.toInt newRelatedTermIndex_)
                             |> Cmd.map PageMsg.Internal
                 ]
@@ -668,8 +674,8 @@ update msg model =
             )
 
 
-moveFocusAfterMovingTermUp : Bool -> TermIndex -> Cmd InternalMsg
-moveFocusAfterMovingTermUp fromDragButton termIndex =
+moveFocusAfterMovingTermUp : HowTermWasMoved -> TermIndex -> Cmd InternalMsg
+moveFocusAfterMovingTermUp howTermWasMoved termIndex =
     let
         termIndexInt : Int
         termIndexInt =
@@ -679,24 +685,37 @@ moveFocusAfterMovingTermUp fromDragButton termIndex =
         previousTermIndexInt =
             termIndexInt - 1
     in
-    if fromDragButton then
-        Task.attempt
-            (\_ -> NoOp)
-            (Dom.focus <| ElementIds.dragTermButton previousTermIndexInt)
+    case howTermWasMoved of
+        TermDropDownMenu ->
+            if previousTermIndexInt == 0 then
+                Task.attempt
+                    (always NoOp)
+                    (Dom.blur <| ElementIds.moreOptionsForTermDropdownMenu termIndexInt)
 
-    else if previousTermIndexInt == 0 then
-        Task.attempt
-            (\_ -> NoOp)
-            (Dom.blur <| ElementIds.moveTermUpButton termIndexInt)
+            else
+                Task.attempt
+                    (always NoOp)
+                    (Dom.blur <| ElementIds.moreOptionsForTermDropdownMenu termIndexInt)
 
-    else
-        Task.attempt
-            (\_ -> NoOp)
-            (Dom.focus <| ElementIds.moveTermUpButton previousTermIndexInt)
+        TermDragButton ->
+            Task.attempt
+                (always NoOp)
+                (ElementIds.dragTermButton previousTermIndexInt |> Dom.focus)
+
+        TermMoveUpOrDownButton ->
+            if previousTermIndexInt == 0 then
+                Task.attempt
+                    (always NoOp)
+                    (Dom.blur <| ElementIds.moveTermUpButton termIndexInt)
+
+            else
+                Task.attempt
+                    (always NoOp)
+                    (Dom.focus <| ElementIds.moveTermUpButton previousTermIndexInt)
 
 
-moveFocusAfterMovingTermDown : Bool -> Int -> TermIndex -> Cmd InternalMsg
-moveFocusAfterMovingTermDown fromDragButton numberOfTerms termIndex =
+moveFocusAfterMovingTermDown : HowTermWasMoved -> Int -> TermIndex -> Cmd InternalMsg
+moveFocusAfterMovingTermDown howTermWasMoved numberOfTerms termIndex =
     let
         termIndexInt : Int
         termIndexInt =
@@ -706,24 +725,37 @@ moveFocusAfterMovingTermDown fromDragButton numberOfTerms termIndex =
         nextTermIndexInt =
             termIndexInt + 1
     in
-    if fromDragButton then
-        Task.attempt
-            (\_ -> NoOp)
-            (Dom.focus <| ElementIds.dragTermButton nextTermIndexInt)
+    case howTermWasMoved of
+        TermDropDownMenu ->
+            if nextTermIndexInt == numberOfTerms - 1 then
+                Task.attempt
+                    (always NoOp)
+                    (Dom.blur <| ElementIds.moreOptionsForTermDropdownMenu termIndexInt)
 
-    else if nextTermIndexInt == numberOfTerms - 1 then
-        Task.attempt
-            (\_ -> NoOp)
-            (Dom.blur <| ElementIds.moveTermDownButton termIndexInt)
+            else
+                Task.attempt
+                    (always NoOp)
+                    (Dom.focus <| ElementIds.moreOptionsForTermDropdownMenu nextTermIndexInt)
 
-    else
-        Task.attempt
-            (\_ -> NoOp)
-            (Dom.focus <| ElementIds.moveTermDownButton nextTermIndexInt)
+        TermDragButton ->
+            Task.attempt
+                (always NoOp)
+                (Dom.focus <| ElementIds.dragTermButton nextTermIndexInt)
+
+        TermMoveUpOrDownButton ->
+            if nextTermIndexInt == numberOfTerms - 1 then
+                Task.attempt
+                    (always NoOp)
+                    (Dom.blur <| ElementIds.moveTermDownButton termIndexInt)
+
+            else
+                Task.attempt
+                    (always NoOp)
+                    (Dom.focus <| ElementIds.moveTermDownButton nextTermIndexInt)
 
 
-moveFocusAfterMovingRelatedTermUp : Bool -> RelatedTermIndex -> Cmd InternalMsg
-moveFocusAfterMovingRelatedTermUp fromDragButton relatedTermIndex =
+moveFocusAfterMovingRelatedTermUp : HowTermWasMoved -> RelatedTermIndex -> Cmd InternalMsg
+moveFocusAfterMovingRelatedTermUp howTermWasMoved relatedTermIndex =
     let
         relatedTermIndexInt : Int
         relatedTermIndexInt =
@@ -733,24 +765,37 @@ moveFocusAfterMovingRelatedTermUp fromDragButton relatedTermIndex =
         previousRelatedTermIndexInt =
             relatedTermIndexInt - 1
     in
-    if fromDragButton then
-        Task.attempt
-            (\_ -> NoOp)
-            (Dom.focus <| ElementIds.dragRelatedTermButton previousRelatedTermIndexInt)
+    case howTermWasMoved of
+        TermDropDownMenu ->
+            if previousRelatedTermIndexInt == 0 then
+                Task.attempt
+                    (always NoOp)
+                    (Dom.blur <| ElementIds.moreOptionsForRelatedTermDropdownMenu relatedTermIndexInt)
 
-    else if previousRelatedTermIndexInt == 0 then
-        Task.attempt
-            (\_ -> NoOp)
-            (Dom.blur <| ElementIds.moveRelatedTermUpButton relatedTermIndexInt)
+            else
+                Task.attempt
+                    (always NoOp)
+                    (Dom.focus <| ElementIds.moreOptionsForRelatedTermDropdownMenu previousRelatedTermIndexInt)
 
-    else
-        Task.attempt
-            (\_ -> NoOp)
-            (Dom.focus <| ElementIds.moveRelatedTermUpButton previousRelatedTermIndexInt)
+        TermDragButton ->
+            Task.attempt
+                (always NoOp)
+                (Dom.focus <| ElementIds.dragRelatedTermButton previousRelatedTermIndexInt)
+
+        TermMoveUpOrDownButton ->
+            if previousRelatedTermIndexInt == 0 then
+                Task.attempt
+                    (always NoOp)
+                    (Dom.blur <| ElementIds.moveRelatedTermUpButton relatedTermIndexInt)
+
+            else
+                Task.attempt
+                    (always NoOp)
+                    (Dom.focus <| ElementIds.moveRelatedTermUpButton previousRelatedTermIndexInt)
 
 
-moveFocusAfterMovingRelatedTermDown : Bool -> Int -> RelatedTermIndex -> Cmd InternalMsg
-moveFocusAfterMovingRelatedTermDown fromDragButton numberOfRelatedTerms relatedTermIndex =
+moveFocusAfterMovingRelatedTermDown : HowTermWasMoved -> Int -> RelatedTermIndex -> Cmd InternalMsg
+moveFocusAfterMovingRelatedTermDown howTermWasMoved numberOfRelatedTerms relatedTermIndex =
     let
         relatedTermIndexInt : Int
         relatedTermIndexInt =
@@ -760,20 +805,33 @@ moveFocusAfterMovingRelatedTermDown fromDragButton numberOfRelatedTerms relatedT
         nextRelatedTermIndexInt =
             relatedTermIndexInt + 1
     in
-    if fromDragButton then
-        Task.attempt
-            (\_ -> NoOp)
-            (Dom.focus <| ElementIds.dragRelatedTermButton nextRelatedTermIndexInt)
+    case howTermWasMoved of
+        TermDropDownMenu ->
+            if nextRelatedTermIndexInt == numberOfRelatedTerms - 1 then
+                Task.attempt
+                    (always NoOp)
+                    (Dom.blur <| ElementIds.moreOptionsForRelatedTermDropdownMenu relatedTermIndexInt)
 
-    else if nextRelatedTermIndexInt == numberOfRelatedTerms - 1 then
-        Task.attempt
-            (\_ -> NoOp)
-            (Dom.blur <| ElementIds.moveRelatedTermDownButton relatedTermIndexInt)
+            else
+                Task.attempt
+                    (always NoOp)
+                    (Dom.focus <| ElementIds.moreOptionsForRelatedTermDropdownMenu nextRelatedTermIndexInt)
 
-    else
-        Task.attempt
-            (\_ -> NoOp)
-            (Dom.focus <| ElementIds.moveRelatedTermDownButton nextRelatedTermIndexInt)
+        TermDragButton ->
+            Task.attempt
+                (always NoOp)
+                (Dom.focus <| ElementIds.dragRelatedTermButton nextRelatedTermIndexInt)
+
+        TermMoveUpOrDownButton ->
+            if nextRelatedTermIndexInt == numberOfRelatedTerms - 1 then
+                Task.attempt
+                    (always NoOp)
+                    (Dom.blur <| ElementIds.moveRelatedTermDownButton relatedTermIndexInt)
+
+            else
+                Task.attempt
+                    (always NoOp)
+                    (Dom.focus <| ElementIds.moveRelatedTermDownButton nextRelatedTermIndexInt)
 
 
 
@@ -810,7 +868,7 @@ viewMoveTermUpOrDownButtons numberOfTerms termIndex =
         [ Components.Button.rounded (TermIndex.toInt termIndex > 0)
             [ Accessibility.Aria.label I18n.moveUp
             , id <| ElementIds.moveTermUpButton <| TermIndex.toInt termIndex
-            , Html.Events.onClick <| PageMsg.Internal <| MoveTermUp False termIndex
+            , Html.Events.onClick <| PageMsg.Internal <| MoveTermUp TermMoveUpOrDownButton termIndex
             ]
             [ Icons.arrowUp
                 [ Svg.Attributes.class "h-5 w-5" ]
@@ -818,7 +876,7 @@ viewMoveTermUpOrDownButtons numberOfTerms termIndex =
         , Components.Button.rounded (TermIndex.toInt termIndex + 1 < numberOfTerms)
             [ Accessibility.Aria.label I18n.moveDown
             , id <| ElementIds.moveTermDownButton <| TermIndex.toInt termIndex
-            , Html.Events.onClick <| PageMsg.Internal <| MoveTermDown False numberOfTerms termIndex
+            , Html.Events.onClick <| PageMsg.Internal <| MoveTermDown TermMoveUpOrDownButton numberOfTerms termIndex
             ]
             [ Icons.arrowDown
                 [ Svg.Attributes.class "h-5 w-5" ]
@@ -864,10 +922,10 @@ viewCreateTermInternal dragAndDropStatus showMarkdownBasedSyntaxEnabled mathSupp
                             (Extras.HtmlEvents.preventDefaultOnDecoder
                                 (\event ->
                                     if Extras.HtmlEvents.isUpArrow event then
-                                        Just <| ( PageMsg.Internal <| MoveTermUp True termIndex, True )
+                                        Just <| ( PageMsg.Internal <| MoveTermUp TermDragButton termIndex, True )
 
                                     else if Extras.HtmlEvents.isDownArrow event then
-                                        Just <| ( PageMsg.Internal <| MoveTermDown True numberOfTerms termIndex, True )
+                                        Just <| ( PageMsg.Internal <| MoveTermDown TermDragButton numberOfTerms termIndex, True )
 
                                     else
                                         Nothing
@@ -990,7 +1048,7 @@ viewMoreOptionsForTermDropdownButton numberOfTerms index dropdownMenuWithMoreOpt
                             , text I18n.moveUp
                             ]
                         ]
-                        (PageMsg.Internal <| MoveTermUp False index)
+                        (PageMsg.Internal <| MoveTermUp TermDropDownMenu index)
 
               else
                 Nothing
@@ -1004,7 +1062,7 @@ viewMoreOptionsForTermDropdownButton numberOfTerms index dropdownMenuWithMoreOpt
                             , text I18n.moveDown
                             ]
                         ]
-                        (PageMsg.Internal <| MoveTermDown False numberOfTerms index)
+                        (PageMsg.Internal <| MoveTermDown TermDropDownMenu numberOfTerms index)
 
               else
                 Nothing
@@ -1240,7 +1298,7 @@ viewMoveRelatedTermUpOrDownButtons numberOfRelatedTerms relatedTermIndex =
         [ Components.Button.rounded (RelatedTermIndex.toInt relatedTermIndex > 0)
             [ Accessibility.Aria.label I18n.moveUp
             , id <| ElementIds.moveRelatedTermUpButton <| RelatedTermIndex.toInt relatedTermIndex
-            , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermUp False relatedTermIndex
+            , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermUp TermMoveUpOrDownButton relatedTermIndex
             ]
             [ Icons.arrowUp
                 [ Svg.Attributes.class "h-5 w-5" ]
@@ -1248,7 +1306,7 @@ viewMoveRelatedTermUpOrDownButtons numberOfRelatedTerms relatedTermIndex =
         , Components.Button.rounded (RelatedTermIndex.toInt relatedTermIndex + 1 < numberOfRelatedTerms)
             [ Accessibility.Aria.label I18n.moveDown
             , id <| ElementIds.moveRelatedTermDownButton <| RelatedTermIndex.toInt relatedTermIndex
-            , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermDown False numberOfRelatedTerms relatedTermIndex
+            , Html.Events.onClick <| PageMsg.Internal <| MoveRelatedTermDown TermMoveUpOrDownButton numberOfRelatedTerms relatedTermIndex
             ]
             [ Icons.arrowDown
                 [ Svg.Attributes.class "h-5 w-5" ]
@@ -1289,10 +1347,10 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                         (Extras.HtmlEvents.preventDefaultOnDecoder
                             (\event ->
                                 if Extras.HtmlEvents.isUpArrow event then
-                                    Just <| ( PageMsg.Internal <| MoveRelatedTermUp True relatedTermIndex, True )
+                                    Just <| ( PageMsg.Internal <| MoveRelatedTermUp TermDragButton relatedTermIndex, True )
 
                                 else if Extras.HtmlEvents.isDownArrow event then
-                                    Just <| ( PageMsg.Internal <| MoveRelatedTermDown True numberOfRelatedTerms relatedTermIndex, True )
+                                    Just <| ( PageMsg.Internal <| MoveRelatedTermDown TermDragButton numberOfRelatedTerms relatedTermIndex, True )
 
                                 else
                                     Nothing
@@ -1382,7 +1440,7 @@ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownM
                             , text I18n.moveUp
                             ]
                         ]
-                        (PageMsg.Internal <| MoveRelatedTermUp False index)
+                        (PageMsg.Internal <| MoveRelatedTermUp TermDropDownMenu index)
 
               else
                 Nothing
@@ -1396,7 +1454,7 @@ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownM
                             , text I18n.moveDown
                             ]
                         ]
-                        (PageMsg.Internal <| MoveRelatedTermDown False numberOfRelatedTerms index)
+                        (PageMsg.Internal <| MoveRelatedTermDown TermDropDownMenu numberOfRelatedTerms index)
 
               else
                 Nothing

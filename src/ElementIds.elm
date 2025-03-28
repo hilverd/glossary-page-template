@@ -258,13 +258,13 @@ exportDropdownButton =
 
 
 moreOptionsForTermDropdownMenu : Int -> String
-moreOptionsForTermDropdownMenu relatedTermIndexInt =
-    prefixed "more-options-for-term-" ++ String.fromInt relatedTermIndexInt ++ "-dropdown-menu"
+moreOptionsForTermDropdownMenu termIndexInt =
+    prefixed <| "more-options-for-term-" ++ String.fromInt termIndexInt ++ "-dropdown-menu"
 
 
 moreOptionsForRelatedTermDropdownMenu : Int -> String
-moreOptionsForRelatedTermDropdownMenu relatedTermIndexInt =
-    prefixed "more-options-for-related-term-" ++ String.fromInt relatedTermIndexInt ++ "-dropdown-menu"
+moreOptionsForRelatedTermDropdownMenu termIndexInt =
+    prefixed <| "more-options-for-related-term-" ++ String.fromInt termIndexInt ++ "-dropdown-menu"
 
 
 abbreviationLabel : TermIndex -> String
