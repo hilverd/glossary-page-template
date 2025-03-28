@@ -13,6 +13,8 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 
+- Add "Stop editing" button.
+
 ### Changed
 
 - Keep buttons and dropdown menus visible at the top.

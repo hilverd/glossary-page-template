@@ -1,6 +1,6 @@
 module Data.Editability exposing
     ( Editability(..)
-    , create, startEditing
+    , create, startEditing, stopEditing
     , canEdit, editing
     )
 
@@ -14,7 +14,7 @@ module Data.Editability exposing
 
 # Build
 
-@docs create, startEditing
+@docs create, startEditing, stopEditing
 
 
 # Query
@@ -175,6 +175,24 @@ startEditing editability =
 
         CanEditWithSeparateBackend baseUrl ->
             EditingWithSeparateBackend baseUrl
+
+        _ ->
+            editability
+
+
+{-| Stop editing a glossary.
+-}
+stopEditing : Editability -> Editability
+stopEditing editability =
+    case editability of
+        EditingInMemory ->
+            CanEditInMemory
+
+        EditingWithIncludedBackend ->
+            CanEditWithIncludedBackend
+
+        EditingWithSeparateBackend details ->
+            CanEditWithSeparateBackend details
 
         _ ->
             editability

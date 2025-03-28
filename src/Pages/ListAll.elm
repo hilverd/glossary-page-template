@@ -139,6 +139,7 @@ type alias Model =
 type InternalMsg
     = NoOp
     | StartEditing
+    | StopEditing
     | ShowMenuForMobile
     | StartHidingMenuForMobile
     | CompleteHidingMenuForMobile
@@ -281,12 +282,30 @@ update msg model =
                 common0 : CommonModel
                 common0 =
                     model.common
-
-                editability1 : Editability
-                editability1 =
-                    Editability.startEditing model.common.editability
             in
-            ( { model | common = { common0 | editability = editability1 } }, Cmd.none )
+            ( { model
+                | common =
+                    { common0
+                        | editability = Editability.startEditing model.common.editability
+                    }
+              }
+            , Cmd.none
+            )
+
+        StopEditing ->
+            let
+                common0 : CommonModel
+                common0 =
+                    model.common
+            in
+            ( { model
+                | common =
+                    { common0
+                        | editability = Editability.stopEditing model.common.editability
+                    }
+              }
+            , Cmd.none
+            )
 
         ShowMenuForMobile ->
             ( { model | menuForMobileVisibility = GradualVisibility.Visible }
@@ -1580,6 +1599,18 @@ viewStartEditingButton editability tabbable =
             div
                 [ class "my-4 text-sm text-gray-500 dark:text-gray-400" ]
                 [ text I18n.savingChangesInMemoryMessage ]
+        ]
+
+
+viewStopEditingButton : Bool -> Html Msg
+viewStopEditingButton tabbable =
+    div
+        [ class "mb-4 flex-none print:hidden" ]
+        [ Components.Button.white True
+            [ Html.Events.onClick <| PageMsg.Internal StopEditing
+            , Accessibility.Key.tabbable tabbable
+            ]
+            [ text I18n.stopEditing ]
         ]
 
 
@@ -2985,6 +3016,8 @@ view model =
                                         [ class "flex flex-row justify-start lg:justify-end" ]
                                         [ Extras.Html.showIf (Editability.canEdit model.common.editability) <|
                                             viewStartEditingButton model.common.editability noModalDialogShown_
+                                        , Extras.Html.showIf (Editability.editing model.common.editability) <|
+                                            viewStopEditingButton noModalDialogShown_
                                         , div
                                             [ class "hidden lg:block ml-auto pt-0.5" ]
                                             [ viewQuickSearchButton model.common.runningOnMacOs
