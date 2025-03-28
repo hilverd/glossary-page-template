@@ -27,11 +27,13 @@ type Style msg
     = Preview
     | Normal
         { onClickViewFull : msg
+        , onClickCopyToClipboard : msg
         , onClickEdit : msg
         , onClickDelete : msg
         , onClickItem : GlossaryItemId -> msg
         , onClickTag : Tag -> msg
         , onClickRelatedTerm : Term -> msg
+        , resultOfAttemptingToCopyItemTextToClipboard : Maybe Bool
         , editable : Bool
         , shownAsSingle : Bool
         }
@@ -130,7 +132,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                                 relatedTerms
                         )
 
-                Normal { onClickViewFull, onClickEdit, onClickDelete, onClickTag, onClickItem, onClickRelatedTerm, editable, shownAsSingle } ->
+                Normal { onClickViewFull, onClickCopyToClipboard, onClickEdit, onClickDelete, onClickTag, onClickItem, onClickRelatedTerm, resultOfAttemptingToCopyItemTextToClipboard, editable, shownAsSingle } ->
                     if shownAsSingle then
                         div
                             [ Html.Attributes.style "max-height" "100%"
@@ -141,7 +143,9 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                                 { enableMathSupport = enableMathSupport
                                 , enableLastUpdatedDates = enableLastUpdatedDates
                                 , onClickItem = onClickItem
+                                , onClickCopyToClipboard = onClickCopyToClipboard
                                 , onClickRelatedTerm = onClickRelatedTerm
+                                , resultOfAttemptingToCopyItemTextToClipboard = resultOfAttemptingToCopyItemTextToClipboard
                                 }
                                 tagBeingFilteredBy
                                 glossaryItemWithPreviousAndNext
@@ -341,10 +345,27 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                                                 relatedTerms
                                         )
                                     ]
-                                , Extras.Html.showIf enableLastUpdatedDates <|
-                                    Extras.Html.showMaybe
-                                        (I18n.updatedOn lastUpdatedByName lastUpdatedByEmailAddress)
-                                        lastUpdatedDate
+                                , div
+                                    [ class "flex justify-between items-center w-full" ]
+                                    [ Components.Button.text
+                                        [ Extras.HtmlAttribute.showIf (resultOfAttemptingToCopyItemTextToClipboard == Nothing) <|
+                                            Html.Events.onClick onClickCopyToClipboard
+                                        , Html.Attributes.title I18n.copyToClipboard
+                                        , Accessibility.Aria.label I18n.copyToClipboard
+                                        ]
+                                        [ if resultOfAttemptingToCopyItemTextToClipboard == Just True then
+                                            Icons.tick
+                                                [ Svg.Attributes.class "h-5 w-5 text-green-700 dark:text-green-300" ]
+
+                                          else
+                                            Icons.copy
+                                                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
+                                        ]
+                                    , Extras.Html.showIf enableLastUpdatedDates <|
+                                        Extras.Html.showMaybe
+                                            (I18n.updatedOn lastUpdatedByName lastUpdatedByEmailAddress)
+                                            lastUpdatedDate
+                                    ]
                                 ]
         )
         glossaryItemWithPreviousAndNext.item
@@ -354,12 +375,14 @@ viewAsSingle :
     { enableMathSupport : Bool
     , enableLastUpdatedDates : Bool
     , onClickItem : GlossaryItemId -> msg
+    , onClickCopyToClipboard : msg
     , onClickRelatedTerm : Term -> msg
+    , resultOfAttemptingToCopyItemTextToClipboard : Maybe Bool
     }
     -> Maybe Tag
     -> GlossaryItemWithPreviousAndNext
     -> Html msg
-viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRelatedTerm } tagBeingFilteredBy glossaryItemWithPreviousAndNext =
+viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCopyToClipboard, onClickRelatedTerm, resultOfAttemptingToCopyItemTextToClipboard } tagBeingFilteredBy glossaryItemWithPreviousAndNext =
     let
         disambiguatedPreferredTermForPreviousOrNext : GlossaryItemForUi -> Html msg
         disambiguatedPreferredTermForPreviousOrNext glossaryItem =
@@ -529,11 +552,28 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickRe
                             relatedTerms
                     )
                 , div
-                    [ class "print:hidden mt-3 flex flex-col grow justify-end" ]
-                    [ Extras.Html.showIf enableLastUpdatedDates <|
-                        Extras.Html.showMaybe
-                            (I18n.updatedOn lastUpdatedByName lastUpdatedByEmailAddress)
-                            lastUpdatedDate
+                    [ class "flex justify-between items-center w-full" ]
+                    [ Components.Button.text
+                        [ Extras.HtmlAttribute.showIf (resultOfAttemptingToCopyItemTextToClipboard == Nothing) <|
+                            Html.Events.onClick onClickCopyToClipboard
+                        , Html.Attributes.title I18n.copyToClipboard
+                        , Accessibility.Aria.label I18n.copyToClipboard
+                        ]
+                        [ if resultOfAttemptingToCopyItemTextToClipboard == Just True then
+                            Icons.tick
+                                [ Svg.Attributes.class "h-5 w-5 text-green-700 dark:text-green-300" ]
+
+                          else
+                            Icons.copy
+                                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
+                        ]
+                    , div
+                        [ class "print:hidden mt-3 flex flex-col grow justify-end" ]
+                        [ Extras.Html.showIf enableLastUpdatedDates <|
+                            Extras.Html.showMaybe
+                                (I18n.updatedOn lastUpdatedByName lastUpdatedByEmailAddress)
+                                lastUpdatedDate
+                        ]
                     ]
                 ]
         )

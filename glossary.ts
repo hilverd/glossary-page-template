@@ -365,6 +365,17 @@ if (containerElement) {
         );
     });
 
+    app.ports.copyItemTextToClipboard.subscribe(([itemId, textToCopy]: [string, string]) => {
+        navigator.clipboard.writeText(textToCopy).then(
+            () => {
+                app.ports.attemptedToCopyItemTextToClipboard.send([itemId, true]);
+            },
+            () => {
+                app.ports.attemptedToCopyItemTextToClipboard.send([itemId, false]);
+            },
+        );
+    });
+
     app.ports.selectAllInTextFieldWithCommandToRunEditor.subscribe(() => {
         const element: HTMLElement | null = document.getElementById(
             "glossary-page-text-field-with-command-to-run-editor",

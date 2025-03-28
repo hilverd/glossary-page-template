@@ -133,6 +133,7 @@ type alias Model =
     , savingSettings : Saving
     , mostRecentRawTermForOrderingItemsFocusedOn : Maybe RawTerm
     , resultOfAttemptingToCopyEditorCommandToClipboard : Maybe Bool
+    , resultOfAttemptingToCopyItemTextToClipboard : Maybe ( GlossaryItemId, Bool )
     }
 
 
@@ -157,6 +158,7 @@ type InternalMsg
     | ImmediatelyHideBackToTopLink
     | JumpToItem GlossaryItemId
     | ChangeLayoutToShowSingle GlossaryItemId
+    | CopyItemTextToClipboard GlossaryItemId
     | ShowRelatedTermAsSingle Term
     | ChangeLayoutToShowAll
     | ConfirmDelete GlossaryItemId
@@ -180,6 +182,8 @@ type InternalMsg
     | CopyEditorCommandToClipboard String
     | AttemptedToCopyEditorCommandToClipboard Bool
     | ClearResultOfAttemptingToCopyEditorCommandToClipboard
+    | AttemptedToCopyItemTextToClipboard ( String, Bool )
+    | ClearResultOfAttemptingToCopyItemTextToClipboard
     | FilterByTag Tag
     | DoNotFilterByTag
 
@@ -227,6 +231,7 @@ init commonModel itemWithFocus =
                 _ ->
                     Nothing
       , resultOfAttemptingToCopyEditorCommandToClipboard = Nothing
+      , resultOfAttemptingToCopyItemTextToClipboard = Nothing
       }
     , case itemWithFocus of
         Just id ->
@@ -259,6 +264,12 @@ port copyEditorCommandToClipboard : String -> Cmd msg
 
 
 port attemptedToCopyEditorCommandToClipboard : (Bool -> msg) -> Sub msg
+
+
+port copyItemTextToClipboard : ( String, String ) -> Cmd msg
+
+
+port attemptedToCopyItemTextToClipboard : (( String, Bool ) -> msg) -> Sub msg
 
 
 port selectAllInTextFieldWithCommandToRunEditor : () -> Cmd msg
@@ -517,6 +528,31 @@ update msg model =
               }
             , preventBackgroundScrolling ()
             )
+
+        CopyItemTextToClipboard glossaryItemId ->
+            (case model.common.glossaryForUi of
+                Ok glossaryForUi ->
+                    glossaryForUi
+                        |> GlossaryForUi.items
+                        |> GlossaryItemsForUi.get glossaryItemId
+
+                _ ->
+                    Nothing
+            )
+                |> Maybe.map
+                    (\glossaryItemForUi ->
+                        let
+                            textToCopy =
+                                Export.Markdown.itemToMarkdown glossaryItemForUi
+                        in
+                        ( model
+                        , copyItemTextToClipboard
+                            ( GlossaryItemId.toString glossaryItemId
+                            , textToCopy
+                            )
+                        )
+                    )
+                |> Maybe.withDefault ( model, Cmd.none )
 
         ShowRelatedTermAsSingle relatedTerm ->
             let
@@ -985,6 +1021,16 @@ update msg model =
         ClearResultOfAttemptingToCopyEditorCommandToClipboard ->
             ( { model | resultOfAttemptingToCopyEditorCommandToClipboard = Nothing }, Cmd.none )
 
+        AttemptedToCopyItemTextToClipboard ( glossaryItemId, success ) ->
+            ( { model
+                | resultOfAttemptingToCopyItemTextToClipboard = Just ( GlossaryItemId.create glossaryItemId, success )
+              }
+            , Process.sleep 1000 |> Task.perform (always <| PageMsg.Internal ClearResultOfAttemptingToCopyItemTextToClipboard)
+            )
+
+        ClearResultOfAttemptingToCopyItemTextToClipboard ->
+            ( { model | resultOfAttemptingToCopyItemTextToClipboard = Nothing }, Cmd.none )
+
         FilterByTag tag ->
             let
                 common0 : CommonModel
@@ -1335,20 +1381,23 @@ viewGlossaryItem :
     }
     -> Maybe GlossaryItemId
     -> Maybe Tag
+    -> Maybe Bool
     -> GlossaryItemWithPreviousAndNext
     -> Html Msg
-viewGlossaryItem { enableMathSupport, editable, enableLastUpdatedDates, shownAsSingle } itemWithFocus tagBeingFilteredBy itemWithPreviousAndNext =
+viewGlossaryItem { enableMathSupport, editable, enableLastUpdatedDates, shownAsSingle } itemWithFocus tagBeingFilteredBy resultOfAttemptingToCopyItemTextToClipboard itemWithPreviousAndNext =
     Extras.Html.showMaybe
         (\item ->
             Components.GlossaryItemCard.view
                 { enableMathSupport = enableMathSupport, enableLastUpdatedDates = enableLastUpdatedDates }
                 (Components.GlossaryItemCard.Normal
                     { onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForUi.id item
+                    , onClickCopyToClipboard = PageMsg.Internal <| CopyItemTextToClipboard <| GlossaryItemForUi.id item
                     , onClickEdit = PageMsg.NavigateToCreateOrEdit <| Just <| GlossaryItemForUi.id item
                     , onClickDelete = PageMsg.Internal <| ConfirmDelete <| GlossaryItemForUi.id item
                     , onClickTag = PageMsg.Internal << FilterByTag
                     , onClickItem = PageMsg.Internal << ChangeLayoutToShowSingle
                     , onClickRelatedTerm = PageMsg.Internal << ShowRelatedTermAsSingle
+                    , resultOfAttemptingToCopyItemTextToClipboard = resultOfAttemptingToCopyItemTextToClipboard
                     , editable = editable
                     , shownAsSingle = shownAsSingle
                     }
@@ -1396,14 +1445,22 @@ viewSingleItemModalDialog :
     Maybe GlossaryItemId
     -> Bool
     -> Bool
-    -> Bool
     -> Maybe DescribedTag
     -> OrderItemsBy
-    -> GlossaryItemsForUi
+    -> Maybe Bool
+    -> GlossaryForUi
     -> Maybe GlossaryItemId
     -> Html Msg
-viewSingleItemModalDialog itemWithFocus enableMathSupport editable enableLastUpdatedDates tagBeingFilteredBy orderItemsBy items =
+viewSingleItemModalDialog itemWithFocus enableMathSupport editable tagBeingFilteredBy orderItemsBy resultOfAttemptingToCopyItemTextToClipboard glossaryForUi =
     let
+        items : GlossaryItemsForUi
+        items =
+            GlossaryForUi.items glossaryForUi
+
+        enableLastUpdatedDates : Bool
+        enableLastUpdatedDates =
+            GlossaryForUi.enableLastUpdatedDates glossaryForUi
+
         filterByTagId_ : Maybe TagId
         filterByTagId_ =
             Maybe.map DescribedTag.id tagBeingFilteredBy
@@ -1474,6 +1531,7 @@ viewSingleItemModalDialog itemWithFocus enableMathSupport editable enableLastUpd
                             }
                             itemWithFocus
                             (Maybe.map DescribedTag.tag tagBeingFilteredBy)
+                            resultOfAttemptingToCopyItemTextToClipboard
                             itemWithPreviousAndNext
                         ]
                     ]
@@ -1690,10 +1748,11 @@ viewCards :
     -> QueryParameters
     -> Maybe GlossaryItemId
     -> Maybe RawTerm
+    -> Maybe ( GlossaryItemId, Bool )
     -> GlossaryItemsForUi
     -> ( List ( GlossaryItemId, GlossaryItemForUi ), List ( GlossaryItemId, GlossaryItemForUi ) )
     -> Html Msg
-viewCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpdatedDates, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpdatedDates, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn resultOfAttemptingToCopyItemTextToClipboard glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
         filterByTag : Maybe Tag
         filterByTag =
@@ -1728,6 +1787,9 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpda
                 }
                 itemWithFocus
                 filterByTag
+                (resultOfAttemptingToCopyItemTextToClipboard
+                    |> Maybe.map (\( itemId, _ ) -> itemId == GlossaryItemForUi.id item)
+                )
                 { previous = Nothing, item = Just item, next = Nothing }
 
         viewIndexedItemKeyed : ( GlossaryItemId, GlossaryItemForUi ) -> ( String, Html Msg )
@@ -2697,9 +2759,10 @@ viewOrderItemsButtonsAndItemCards :
     -> QueryParameters
     -> Maybe GlossaryItemId
     -> Maybe RawTerm
+    -> Maybe ( GlossaryItemId, Bool )
     -> GlossaryForUi
     -> Html Msg
-viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport editability queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn glossaryForUi =
+viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport editability queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn resultOfAttemptingToCopyItemTextToClipboard glossaryForUi =
     let
         items : GlossaryItemsForUi
         items =
@@ -2750,6 +2813,7 @@ viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport 
             queryParameters
             itemWithFocus
             mostRecentRawTermForOrderingItemsFocusedOn
+            resultOfAttemptingToCopyItemTextToClipboard
             items
 
 
@@ -2793,9 +2857,10 @@ viewMain :
     -> Maybe GlossaryItemId
     -> Layout
     -> Saving
+    -> Maybe ( GlossaryItemId, Bool )
     -> GlossaryForUi
     -> Html Msg
-viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn searchDialog confirmDeleteId layout deleting glossaryForUi =
+viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn searchDialog confirmDeleteId layout deleting resultOfAttemptingToCopyItemTextToClipboard glossaryForUi =
     Html.main_
         []
         [ div
@@ -2817,7 +2882,7 @@ viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } 
             ]
             [ div
                 [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
-                [ Html.Lazy.lazy7 viewOrderItemsButtonsAndItemCards
+                [ Html.Lazy.lazy8 viewOrderItemsButtonsAndItemCards
                     filterByTagWithDescription_
                     enableMathSupport
                     editability
@@ -2829,6 +2894,12 @@ viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } 
                         Nothing
                     )
                     mostRecentRawTermForOrderingItemsFocusedOn
+                    (if layout == ShowSingleItem then
+                        Nothing
+
+                     else
+                        resultOfAttemptingToCopyItemTextToClipboard
+                    )
                     glossaryForUi
                 ]
             , Html.Lazy.lazy3 viewSearchDialog filterByTagWithDescription_ enableMathSupport searchDialog
@@ -2837,10 +2908,15 @@ viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } 
                 itemWithFocus
                 enableMathSupport
                 (Editability.editing editability)
-                (GlossaryForUi.enableLastUpdatedDates glossaryForUi)
                 filterByTagWithDescription_
                 (QueryParameters.orderItemsBy queryParameters)
-                (GlossaryForUi.items glossaryForUi)
+                (resultOfAttemptingToCopyItemTextToClipboard
+                    |> Maybe.map
+                        (\( glossaryItemId, _ ) ->
+                            Just glossaryItemId == itemWithFocus
+                        )
+                )
+                glossaryForUi
               <|
                 case ( layout, itemWithFocus ) of
                     ( ShowSingleItem, Just id ) ->
@@ -3011,28 +3087,25 @@ view model =
                                         GlossaryForUi.enableExportMenu glossaryForUi
                                 in
                                 [ div
-                                    [ class "" ]
-                                    [ div
-                                        [ class "flex flex-row justify-start lg:justify-end" ]
-                                        [ Extras.Html.showIf (Editability.canEdit model.common.editability) <|
-                                            viewStartEditingButton model.common.editability noModalDialogShown_
-                                        , Extras.Html.showIf (Editability.editing model.common.editability) <|
-                                            viewStopEditingButton noModalDialogShown_
-                                        , div
-                                            [ class "hidden lg:block ml-auto pt-0.5" ]
-                                            [ viewQuickSearchButton model.common.runningOnMacOs
-                                            ]
-                                        , div
-                                            [ class "hidden lg:block pl-4 pb-3 pt-0.5" ]
-                                            [ viewThemeButton noModalDialogShown_ model.common.theme model.themeDropdownMenu
-                                            ]
-                                        , div
-                                            [ class "hidden lg:block" ]
-                                            [ Extras.Html.showIf showExportButton <|
-                                                span
-                                                    [ class "pl-4 pb-3" ]
-                                                    [ viewExportButton noModalDialogShown_ model.exportDropdownMenu ]
-                                            ]
+                                    [ class "flex flex-row justify-start lg:justify-end" ]
+                                    [ Extras.Html.showIf (Editability.canEdit model.common.editability) <|
+                                        viewStartEditingButton model.common.editability noModalDialogShown_
+                                    , Extras.Html.showIf (Editability.editing model.common.editability) <|
+                                        viewStopEditingButton noModalDialogShown_
+                                    , div
+                                        [ class "hidden lg:block ml-auto pt-0.5" ]
+                                        [ viewQuickSearchButton model.common.runningOnMacOs
+                                        ]
+                                    , div
+                                        [ class "hidden lg:block pl-4 pb-3 pt-0.5" ]
+                                        [ viewThemeButton noModalDialogShown_ model.common.theme model.themeDropdownMenu
+                                        ]
+                                    , div
+                                        [ class "hidden lg:block" ]
+                                        [ Extras.Html.showIf showExportButton <|
+                                            span
+                                                [ class "pl-4 pb-3" ]
+                                                [ viewExportButton noModalDialogShown_ model.exportDropdownMenu ]
                                         ]
                                     ]
                                 ]
@@ -3084,6 +3157,7 @@ view model =
                                 model.confirmDeleteId
                                 model.layout
                                 model.deleting
+                                model.resultOfAttemptingToCopyItemTextToClipboard
                                 glossaryForUi
                             , Html.footer
                                 []
@@ -3115,5 +3189,6 @@ subscriptions model =
         , Components.DropdownMenu.subscriptions model.exportDropdownMenu
             |> Sub.map (ExportDropdownMenuMsg >> PageMsg.Internal)
         , attemptedToCopyEditorCommandToClipboard (AttemptedToCopyEditorCommandToClipboard >> PageMsg.Internal)
+        , attemptedToCopyItemTextToClipboard (AttemptedToCopyItemTextToClipboard >> PageMsg.Internal)
         , scrollingUpWhileFarAwayFromTheTop (always <| PageMsg.Internal ScrollingUpWhileFarAwayFromTheTop)
         ]

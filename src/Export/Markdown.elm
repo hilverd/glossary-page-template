@@ -1,8 +1,8 @@
-module Export.Markdown exposing (toString, download)
+module Export.Markdown exposing (toString, itemToMarkdown, download)
 
 {-| Functionality for exporting as Markdown.
 
-@docs toString, download
+@docs toString, itemToMarkdown, download
 
 -}
 
