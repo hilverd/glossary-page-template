@@ -2971,14 +2971,16 @@ view model =
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
                             , glossaryForUi |> GlossaryForUi.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
                             ]
-                            [ header [] <|
+                            [ div
+                                [ class "pt-4 px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-full lg:sticky lg:top-0 lg:z-20 bg-gray-100 dark:bg-gray-900 lg:bg-white lg:dark:bg-gray-900 lg:border-b lg:border-gray-200 lg:dark:border-gray-800 print:bg-white" ]
+                              <|
                                 let
                                     showExportButton : Bool
                                     showExportButton =
                                         GlossaryForUi.enableExportMenu glossaryForUi
                                 in
                                 [ div
-                                    [ class "lg:border-b border-gray-300 dark:border-gray-700 lg:mb-4" ]
+                                    [ class "" ]
                                     [ div
                                         [ class "flex flex-row justify-start lg:justify-end" ]
                                         [ Extras.Html.showIf (Editability.canEdit model.common.editability) <|
@@ -3000,7 +3002,10 @@ view model =
                                             ]
                                         ]
                                     ]
-                                , viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
+                                ]
+                            , div
+                                [ class "mt-6 px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-full" ]
+                                [ viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
                                     |> Extras.Html.showIf (model.common.editability == ReadOnlyWithHelpForMakingChanges)
                                 , Extras.Html.showIf (Editability.editing model.common.editability) <|
                                     viewSettings glossaryForUi
@@ -3009,7 +3014,10 @@ view model =
                                         { tabbable = noModalDialogShown model
                                         , enableMathSupport = model.common.enableMathSupport
                                         }
-                                , h1
+                                ]
+                            , header
+                                [ class "mt-0" ]
+                                [ h1
                                     [ id ElementIds.title ]
                                     [ filterByTagWithDescription_
                                         |> Maybe.map
