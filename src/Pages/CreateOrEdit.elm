@@ -33,6 +33,7 @@ import Data.TagId as TagId exposing (TagId)
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import Dict exposing (Dict)
 import ElementIds
+import Extras.BrowserDom
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
@@ -670,7 +671,7 @@ update msg model =
 
         FailedToSave error ->
             ( { model | saving = SavingFailed <| Extras.Http.httpErrorDescriptionAskingToReloadOnUnauthorisedOrConflict <| error }
-            , Cmd.none
+            , Extras.BrowserDom.scrollToBottom <| PageMsg.Internal NoOp
             )
 
 
@@ -1658,7 +1659,7 @@ viewCreateFormFooter model =
         errorDiv : String -> Html msg
         errorDiv message =
             div
-                [ class "flex justify-end mb-4" ]
+                [ class "flex justify-end mt-2 mb-4" ]
                 [ p
                     [ class "text-red-600 dark:text-red-400" ]
                     [ text message ]

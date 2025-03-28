@@ -1,4 +1,4 @@
-module Extras.BrowserDom exposing (scrollElementIntoView, scrollToTop, scrollToTopInElement)
+module Extras.BrowserDom exposing (scrollElementIntoView, scrollToBottom, scrollToTop, scrollToTopInElement)
 
 import Browser.Dom as Dom
 import Task
@@ -25,4 +25,12 @@ scrollToTopInElement noOpMsg id =
     id
         |> Dom.getViewportOf
         |> Task.andThen (always <| Dom.setViewportOf id 0 0)
+        |> Task.attempt (always noOpMsg)
+
+
+scrollToBottom : msg -> Cmd msg
+scrollToBottom noOpMsg =
+    Dom.getViewport
+        |> Task.andThen (\info -> Dom.setViewport 0 info.scene.height)
+        |> Task.onError (always <| Task.succeed ())
         |> Task.attempt (always noOpMsg)
