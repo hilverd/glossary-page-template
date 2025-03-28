@@ -13,14 +13,16 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+### Fixed
+### Removed
+
+## [5.3.1] - 2025-03-28
 
 ### Fixed
 
 - Work around a [bug](https://github.com/drag-drop-touch-js/dragdroptouch/issues/90) in a 3rd party library that was making all links draggable on mobile devices.
 - Allow scrolling horizontally within item cards instead of allowing text to overflow (and mess up the page layout).
 - When save request to back end fails, scroll to bottom to ensure error message is visible.
-
-### Removed
 
 ## [5.3.0] - 2025-03-18
 
@@ -823,7 +825,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.3.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.3.1...HEAD
+[5.3.1]: https://github.com/hilverd/glossary-page-template/compare/v5.3.0...v5.3.1
 [5.3.0]: https://github.com/hilverd/glossary-page-template/compare/v5.2.1...v5.3.0
 [5.2.1]: https://github.com/hilverd/glossary-page-template/compare/v5.2.0...v5.2.1
 [5.2.0]: https://github.com/hilverd/glossary-page-template/compare/v5.1.0...v5.2.0
