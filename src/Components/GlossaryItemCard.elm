@@ -275,7 +275,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
 
                         else
                             div
-                                [ class "flex flex-col justify-between"
+                                [ class "flex flex-col justify-between overflow-x-auto"
                                 , Extras.HtmlAttribute.showIf hasFocus <| class "print:outline-hidden outline-offset-2 outline-4 outline-dashed outline-yellow-500 dark:outline-pink-900"
                                 , id <| ElementIds.glossaryItemDiv index
                                 ]

@@ -17,6 +17,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 
 - Work around a [bug](https://github.com/drag-drop-touch-js/dragdroptouch/issues/90) in a 3rd party library that was making all links draggable on mobile devices.
+- Allow scrolling horizontally within item cards instead of allowing text to overflow (and mess up the page layout).
 
 ### Removed
 
