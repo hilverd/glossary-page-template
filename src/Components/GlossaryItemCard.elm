@@ -348,7 +348,8 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                                 , div
                                     [ class "flex justify-between items-center w-full" ]
                                     [ Components.Button.text
-                                        [ Extras.HtmlAttribute.showIf (resultOfAttemptingToCopyItemTextToClipboard == Nothing) <|
+                                        [ class "print:hidden"
+                                        , Extras.HtmlAttribute.showIf (resultOfAttemptingToCopyItemTextToClipboard == Nothing) <|
                                             Html.Events.onClick onClickCopyToClipboard
                                         , Html.Attributes.title I18n.copyToClipboard
                                         , Accessibility.Aria.label I18n.copyToClipboard
@@ -554,7 +555,8 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                 , div
                     [ class "flex justify-between items-center w-full" ]
                     [ Components.Button.text
-                        [ Extras.HtmlAttribute.showIf (resultOfAttemptingToCopyItemTextToClipboard == Nothing) <|
+                        [ class "print:hidden"
+                        , Extras.HtmlAttribute.showIf (resultOfAttemptingToCopyItemTextToClipboard == Nothing) <|
                             Html.Events.onClick onClickCopyToClipboard
                         , Html.Attributes.title I18n.copyToClipboard
                         , Accessibility.Aria.label I18n.copyToClipboard
