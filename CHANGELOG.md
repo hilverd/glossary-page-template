@@ -12,6 +12,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [5.4.0] - 2025-03-28
+
+### Added
 
 - Add "Stop editing" button.
 - Add a "Copy to clipboard" button for each item.
@@ -19,9 +26,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Changed
 
 - Keep buttons and dropdown menus visible at the top.
-
-### Fixed
-### Removed
 
 ## [5.3.1] - 2025-03-28
 
@@ -832,7 +836,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.3.1...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.4.0...HEAD
+[5.4.0]: https://github.com/hilverd/glossary-page-template/compare/v5.3.1...v5.4.0
 [5.3.1]: https://github.com/hilverd/glossary-page-template/compare/v5.3.0...v5.3.1
 [5.3.0]: https://github.com/hilverd/glossary-page-template/compare/v5.2.1...v5.3.0
 [5.2.1]: https://github.com/hilverd/glossary-page-template/compare/v5.2.0...v5.2.1
