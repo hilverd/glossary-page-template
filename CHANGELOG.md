@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- Fix opacity issue on mobile when opening sidebar.
+
 ### Removed
 
 ## [5.4.0] - 2025-03-28

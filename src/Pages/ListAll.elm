@@ -1901,7 +1901,7 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport termIndex =
         , Accessibility.Aria.modal True
         ]
         [ Html.div
-            [ class "fixed inset-0 bg-gray-600 bg-black/75"
+            [ class "fixed inset-0 bg-black/75"
             , if menuForMobileVisibility == GradualVisibility.Visible then
                 class "transition-opacity motion-reduce:transition-none ease-linear duration-300 opacity-100"
 
