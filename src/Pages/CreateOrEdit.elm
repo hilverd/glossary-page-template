@@ -8,6 +8,7 @@ import Browser.Dom as Dom
 import CommonModel exposing (CommonModel)
 import Components.Badge
 import Components.Button
+import Components.Combobox
 import Components.DragAndDrop
 import Components.DropdownMenu
 import Components.Form
@@ -1402,6 +1403,12 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                                 (Just (Term.raw <| DisambiguatedTerm.toTerm term) == relatedTerm.raw)
                         )
                 )
+
+            -- , Components.Combobox.view relatedTerm.combobox
+            --     []
+            --     [ Components.Combobox.choice (text "First") False
+            --     , Components.Combobox.choice (text "Second") False
+            --     ]
             , span
                 [ class "inline-flex items-center" ]
                 [ Components.Button.rounded True
