@@ -177,7 +177,7 @@ init commonModel itemBeingEdited =
               , dragAndDropRelatedTerms = Components.DragAndDrop.init
               }
             , if itemBeingEdited == Nothing then
-                0 |> TermIndex.fromInt |> giveFocusToTermInputField
+                giveFocusToTermInputField 0
 
               else
                 Cmd.none
@@ -250,6 +250,12 @@ port receiveCurrentDateTimeAndNewIdForSaving : (( String, String ) -> msg) -> Su
 port dragStart : Json.Decode.Value -> Cmd msg
 
 
+port giveFocusToTermInputField : Int -> Cmd msg
+
+
+port giveFocusToSeeAlsoSelect : Int -> Cmd msg
+
+
 
 -- UPDATE
 
@@ -266,9 +272,9 @@ update msg model =
                 form =
                     Form.addTerm model.form
 
-                latestTermIndex : TermIndex
+                latestTermIndex : Int
                 latestTermIndex =
-                    Array.length (Form.termFields form) - 1 |> TermIndex.fromInt
+                    Array.length (Form.termFields form) - 1
             in
             ( updateForm (always form) model
             , giveFocusToTermInputField latestTermIndex
@@ -406,9 +412,9 @@ update msg model =
                 form =
                     Form.addRelatedTerm maybeRawTerm model.form
 
-                latestRelatedTermIndex : RelatedTermIndex
+                latestRelatedTermIndex : Int
                 latestRelatedTermIndex =
-                    Array.length (Form.relatedTermFields form) - 1 |> RelatedTermIndex.fromInt
+                    Array.length (Form.relatedTermFields form) - 1
             in
             ( { model
                 | dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
@@ -838,16 +844,6 @@ moveFocusAfterMovingRelatedTermDown howTermWasMoved numberOfRelatedTerms related
 
 
 -- VIEW
-
-
-giveFocusToTermInputField : TermIndex -> Cmd Msg
-giveFocusToTermInputField termIndex =
-    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.termInputField termIndex)
-
-
-giveFocusToSeeAlsoSelect : RelatedTermIndex -> Cmd Msg
-giveFocusToSeeAlsoSelect index =
-    Task.attempt (always <| PageMsg.Internal NoOp) (Dom.focus <| ElementIds.seeAlsoSelect index)
 
 
 viewCreateTerm : DivDragAndDropStatus -> Bool -> Bool -> Int -> Int -> TermField -> Dict Int Components.DropdownMenu.Model -> Html Msg

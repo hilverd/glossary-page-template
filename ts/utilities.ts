@@ -52,3 +52,15 @@ export function scrollFragmentIdentifierIntoView() {
             elem.scrollIntoView({ "block": "nearest" });
     }
 }
+
+export function elementIsVisible(element: HTMLElement): boolean {
+    while (element) {
+        if (window.getComputedStyle(element).display === 'none') {
+            return false;
+        }
+        const parent = element.parentElement;
+        if (!parent) break;
+        element = parent;
+    }
+    return true;
+}

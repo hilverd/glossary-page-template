@@ -3,6 +3,7 @@ import "./glossary.css";
 import { Elm } from "./src/ApplicationShell.elm";
 import { enableDragDropTouch } from "./ts/drag-drop-touch.esm.js";
 import {
+    elementIsVisible,
     normaliseWhitespace,
     scrollFragmentIdentifierIntoView,
     untilAsync,
@@ -390,6 +391,32 @@ if (containerElement) {
 
     app.ports.dragStart.subscribe(function (event) {
         event.dataTransfer.setData("text", "");
+    });
+
+    app.ports.giveFocusToTermInputField.subscribe((index) => {
+        window.requestAnimationFrame(() => {
+            const termElem = document.getElementById(`glossary-page-term-${index}`);
+            const draggableTermElem = document.getElementById(`glossary-page-draggable-term-${index}`);
+
+            if (termElem instanceof HTMLInputElement && elementIsVisible(termElem)) {
+                termElem.focus();
+            } else if (draggableTermElem instanceof HTMLInputElement && elementIsVisible(draggableTermElem)) {
+                draggableTermElem.focus();
+            }
+        });
+    });
+
+    app.ports.giveFocusToSeeAlsoSelect.subscribe((index) => {
+        window.requestAnimationFrame(() => {
+            const seeAlsoSelectElem = document.getElementById(`glossary-page-see-also-${index}`);
+            const draggableSeeAlsoSelectElem = document.getElementById(`glossary-page-draggable-see-also-${index}`);
+
+            if (seeAlsoSelectElem instanceof HTMLSelectElement && elementIsVisible(seeAlsoSelectElem)) {
+                seeAlsoSelectElem.focus();
+            } else if (draggableSeeAlsoSelectElem instanceof HTMLSelectElement && elementIsVisible(draggableSeeAlsoSelectElem)) {
+                draggableSeeAlsoSelectElem.focus();
+            }
+        });
     });
 
     function domReady(callback: () => void) {
