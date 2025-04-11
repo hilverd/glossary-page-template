@@ -48,10 +48,8 @@ type Model
 
 
 hidden : Model -> Model
-hidden model =
-    case model of
-        Model model_ ->
-            Model { model_ | visibility = Invisible }
+hidden (Model model) =
+    Model { model | visibility = Invisible }
 
 
 init : List (Property parentMsg) -> Model
@@ -61,13 +59,6 @@ init properties =
         , config = configFromProperties properties
         , activeChoice = Nothing
         }
-
-
-innerModel : Model -> { visibility : GradualVisibility, config : Config, activeChoice : Maybe ChoiceIndex }
-innerModel model =
-    case model of
-        Model model_ ->
-            model_
 
 
 
@@ -84,39 +75,35 @@ type Msg
 
 
 update : (Model -> parentModel) -> (Msg -> parentMsg) -> Msg -> Model -> ( parentModel, Cmd parentMsg )
-update updateParentModel toParentMsg msg model =
+update updateParentModel toParentMsg msg (Model model) =
     let
-        model_ : { visibility : GradualVisibility, config : Config, activeChoice : Maybe ChoiceIndex }
-        model_ =
-            innerModel model
-
         ( model1, cmd ) =
             case msg of
                 NoOp ->
-                    ( model_, Cmd.none )
+                    ( model, Cmd.none )
 
                 Show ->
-                    ( { model_ | visibility = Visible, activeChoice = Nothing }, Cmd.none )
+                    ( { model | visibility = Visible, activeChoice = Nothing }, Cmd.none )
 
                 StartHiding ->
-                    ( { model_ | visibility = Disappearing, activeChoice = Nothing }
+                    ( { model | visibility = Disappearing, activeChoice = Nothing }
                     , Process.sleep 100 |> Task.perform (always CompleteHiding)
                     )
 
                 CompleteHiding ->
-                    ( { model_ | visibility = Invisible, activeChoice = Nothing }, Cmd.none )
+                    ( { model | visibility = Invisible, activeChoice = Nothing }, Cmd.none )
 
                 ActivateChoice choiceIndex ->
-                    ( { model_ | activeChoice = Just choiceIndex }, Cmd.none )
+                    ( { model | activeChoice = Just choiceIndex }, Cmd.none )
 
                 DeactivateChoice choiceIndex ->
-                    ( { model_
+                    ( { model
                         | activeChoice =
-                            if model_.activeChoice == Just choiceIndex then
+                            if model.activeChoice == Just choiceIndex then
                                 Nothing
 
                             else
-                                model_.activeChoice
+                                model.activeChoice
                       }
                     , Cmd.none
                     )
@@ -193,15 +180,11 @@ view :
     -> ButtonShape parentMsg
     -> List (Choice parentMsg)
     -> Html parentMsg
-view toParentMsg model enabled buttonShape choices =
+view toParentMsg (Model model) enabled buttonShape choices =
     let
-        model_ : { visibility : GradualVisibility, config : Config, activeChoice : Maybe ChoiceIndex }
-        model_ =
-            innerModel model
-
         config : Config
         config =
-            model_.config
+            model.config
     in
     div
         [ class "relative inline-block text-left" ]
@@ -215,11 +198,11 @@ view toParentMsg model enabled buttonShape choices =
             buttonAttributes : List (Html.Attribute parentMsg)
             buttonAttributes =
                 [ Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
-                , Accessibility.Aria.expanded <| model_.visibility == Visible
+                , Accessibility.Aria.expanded <| model.visibility == Visible
                 , Accessibility.Aria.hasMenuPopUp
                 , Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <|
                     toParentMsg <|
-                        case model_.visibility of
+                        case model.visibility of
                             Visible ->
                                 StartHiding
 
@@ -232,9 +215,9 @@ view toParentMsg model enabled buttonShape choices =
                     (Extras.HtmlEvents.preventDefaultOnDecoder
                         (\event ->
                             if Extras.HtmlEvents.isEnter event then
-                                case model_.visibility of
+                                case model.visibility of
                                     Visible ->
-                                        case model_.activeChoice of
+                                        case model.activeChoice of
                                             Just active ->
                                                 choices
                                                     |> Array.fromList
@@ -265,7 +248,7 @@ view toParentMsg model enabled buttonShape choices =
                                     numberOfChoices =
                                         List.length choices
                                 in
-                                case model_.activeChoice of
+                                case model.activeChoice of
                                     Just active ->
                                         Just ( (active + 1) |> min (numberOfChoices - 1) |> max 0 |> ActivateChoice |> toParentMsg, True )
 
@@ -282,7 +265,7 @@ view toParentMsg model enabled buttonShape choices =
                                     numberOfChoices =
                                         List.length choices
                                 in
-                                case model_.activeChoice of
+                                case model.activeChoice of
                                     Just active ->
                                         Just ( (active - 1) |> min (numberOfChoices - 1) |> max 0 |> ActivateChoice |> toParentMsg, True )
 
@@ -323,14 +306,14 @@ view toParentMsg model enabled buttonShape choices =
             [ Extras.HtmlAttribute.showMaybe Accessibility.Aria.labelledBy config.id
             , Accessibility.Aria.orientationVertical
             , class "absolute z-10 w-max mt-2 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black/5 dark:ring-gray-600 divide-y divide-gray-100 focus:outline-hidden"
-            , class "hidden" |> Extras.HtmlAttribute.showIf (model_.visibility == Invisible)
+            , class "hidden" |> Extras.HtmlAttribute.showIf (model.visibility == Invisible)
             , class <|
                 if config.originTopRight then
                     "origin-top-right right-0"
 
                 else
                     "origin-top-left left-0"
-            , if model_.visibility == Visible then
+            , if model.visibility == Visible then
                 class "transition motion-reduce:transition-none ease-out duration-100 transform motion-reduce:transform-none opacity-100 scale-100"
 
               else
@@ -349,7 +332,7 @@ view toParentMsg model enabled buttonShape choices =
                                 Choice { body, onSelect } ->
                                     Html.a
                                         [ class "group flex items-center px-4 py-2 hover:no-underline"
-                                        , if model_.activeChoice == Just choiceIndex then
+                                        , if model.activeChoice == Just choiceIndex then
                                             class "text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-900"
 
                                           else
@@ -373,8 +356,8 @@ view toParentMsg model enabled buttonShape choices =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
-    if model |> innerModel |> .visibility |> (==) Visible then
+subscriptions (Model model) =
+    if model.visibility == Visible then
         Events.onClick <| Decode.succeed StartHiding
 
     else
