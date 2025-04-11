@@ -60,6 +60,8 @@ paragraphs =
         >> String.join (crlf ++ crlf)
 
 
+{-| Convert a glossary item to a Markdown string.
+-}
 itemToMarkdown : GlossaryItemForUi -> String
 itemToMarkdown glossaryItem =
     let
