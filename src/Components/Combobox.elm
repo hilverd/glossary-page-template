@@ -1,9 +1,11 @@
-module Components.Combobox exposing (Model, choice, id, init, view)
+module Components.Combobox exposing (Model, Msg, choice, id, init, update, view)
 
 import Browser.Events as Events
+import Extras.Html
 import Extras.HtmlAttribute
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class)
+import Html.Events
 import Icons
 import Json.Decode as Decode
 import Svg.Attributes
@@ -21,13 +23,16 @@ type alias Config =
 type Model
     = Model
         { choicesVisible : Bool
+        , activeChoice : Maybe ChoiceIndex
         }
 
 
 init : Model
 init =
     Model
-        { choicesVisible = False }
+        { choicesVisible = False
+        , activeChoice = Nothing
+        }
 
 
 
@@ -37,6 +42,38 @@ init =
 type Msg
     = NoOp
     | HideChoices
+    | ActivateChoice ChoiceIndex
+    | DeactivateChoice ChoiceIndex
+
+
+update : (Model -> parentModel) -> (Msg -> parentMsg) -> Msg -> Model -> ( parentModel, Cmd parentMsg )
+update updateParentModel toParentMsg msg (Model model) =
+    let
+        ( model1, cmd ) =
+            case msg of
+                NoOp ->
+                    ( Model model, Cmd.none )
+
+                HideChoices ->
+                    ( Model { model | choicesVisible = False }, Cmd.none )
+
+                ActivateChoice choiceIndex ->
+                    ( Model { model | activeChoice = Just choiceIndex }, Cmd.none )
+
+                DeactivateChoice choiceIndex ->
+                    ( Model
+                        { model
+                            | activeChoice =
+                                if model.activeChoice == Just choiceIndex then
+                                    Nothing
+
+                                else
+                                    model.activeChoice
+                        }
+                    , Cmd.none
+                    )
+    in
+    ( updateParentModel model1, Cmd.map toParentMsg cmd )
 
 
 
@@ -47,14 +84,18 @@ type Property
     = Id String
 
 
-type Choice msg
+type alias ChoiceIndex =
+    Int
+
+
+type Choice parentMsg
     = Choice
-        { body : Html msg
+        { body : Html parentMsg
         , selected : Bool
         }
 
 
-choice : Html msg -> Bool -> Choice msg
+choice : Html parentMsg -> Bool -> Choice parentMsg
 choice body selected =
     Choice { body = body, selected = selected }
 
@@ -76,8 +117,8 @@ configFromProperties =
         }
 
 
-view : Model -> List Property -> List (Choice msg) -> Html msg
-view model properties choices =
+view : (Msg -> parentMsg) -> Model -> List Property -> List (Choice parentMsg) -> Html parentMsg
+view toParentMsg (Model model) properties choices =
     let
         config : Config
         config =
@@ -116,45 +157,48 @@ view model properties choices =
                 , attribute "role" "listbox"
                 ]
                 (choices
-                    |> List.map
-                        (\choice_ ->
+                    |> List.indexedMap
+                        (\choiceIndex choice_ ->
                             case choice_ of
                                 Choice { body, selected } ->
-                                    {-
-                                       Combobox option, manage highlight styles based on mouseenter/mouseleave and keyboard navigation.
-
-                                       Active: "text-white bg-indigo-600 outline-hidden", Not Active: "text-gray-900"
-                                    -}
+                                    let
+                                        active : Bool
+                                        active =
+                                            model.activeChoice == Just choiceIndex
+                                    in
                                     li
-                                        [ class "relative cursor-default py-2 pr-9 pl-3 text-gray-900 dark:text-white select-none"
+                                        [ class "relative cursor-default py-2 pr-9 pl-3 dark:text-white select-none"
+                                        , if active then
+                                            class "text-white bg-indigo-600 outline-hidden"
+
+                                          else
+                                            class "text-gray-900"
                                         , Html.Attributes.id "option-0"
                                         , attribute "role" "option"
                                         , Html.Attributes.tabindex -1
+                                        , Html.Events.onMouseEnter <| toParentMsg <| ActivateChoice choiceIndex
+                                        , Html.Events.onMouseLeave <| toParentMsg <| DeactivateChoice choiceIndex
                                         ]
-                                        [ {- Selected: "font-semibold" -}
-                                          span
+                                        [ span
                                             [ class "block truncate"
+                                            , Extras.HtmlAttribute.showIf selected <| class "font-semibold"
                                             ]
                                             [ body ]
-                                        , {-
-                                             Checkmark, only display for selected option.
+                                        , Extras.Html.showIf selected <|
+                                            span
+                                                [ class "absolute inset-y-0 right-0 flex items-center pr-4"
+                                                , if active then
+                                                    class "text-white dark:text-gray-900"
 
-                                             Active: "text-white", Not Active: "text-indigo-600"
-                                          -}
-                                          span
-                                            [ class "absolute inset-y-0 right-0 flex items-center pr-4"
-                                            , if selected then
-                                                class "text-indigo-600 dark:text-indigo-300"
-
-                                              else
-                                                class "text-white dark:text-gray-900"
-                                            ]
-                                            [ Icons.check
-                                                [ Svg.Attributes.class "size-5"
-                                                , attribute "aria-hidden" "true"
-                                                , attribute "data-slot" "icon"
+                                                  else
+                                                    class "text-indigo-600 dark:text-indigo-300"
                                                 ]
-                                            ]
+                                                [ Icons.check
+                                                    [ Svg.Attributes.class "size-5"
+                                                    , attribute "aria-hidden" "true"
+                                                    , attribute "data-slot" "icon"
+                                                    ]
+                                                ]
                                         ]
                         )
                 )

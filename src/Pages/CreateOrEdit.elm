@@ -109,6 +109,7 @@ type InternalMsg
     | SelectDisambiguationTag String
     | AddRelatedTerm (Maybe RawTerm)
     | SelectRelatedTerm RelatedTermIndex String
+    | RelatedTermComboboxMsg RelatedTermIndex Components.Combobox.Msg
     | DeleteRelatedTerm RelatedTermIndex
     | DropdownMenuWithMoreOptionsForTermMsg Int Components.DropdownMenu.Msg
     | DropdownMenuWithMoreOptionsForRelatedTermMsg Int Components.DropdownMenu.Msg
@@ -439,6 +440,28 @@ update msg model =
             ( updateForm (Form.selectRelatedTerm relatedTermIndex relatedRawTerm) model
             , Cmd.none
             )
+
+        RelatedTermComboboxMsg relatedTermIndex msg_ ->
+            model.form
+                |> Form.relatedTermFields
+                |> Array.get (RelatedTermIndex.toInt relatedTermIndex)
+                |> Maybe.map .combobox
+                |> Maybe.map
+                    (\combobox ->
+                        Components.Combobox.update
+                            (\x ->
+                                model
+                                    |> updateForm
+                                        (\form ->
+                                            form
+                                                |> Form.updateRelatedTermFieldCombobox relatedTermIndex x
+                                        )
+                            )
+                            (PageMsg.Internal << RelatedTermComboboxMsg relatedTermIndex)
+                            msg_
+                            combobox
+                    )
+                |> Maybe.withDefault ( model, Cmd.none )
 
         DeleteRelatedTerm relatedTermIndex ->
             let
@@ -1403,9 +1426,11 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                         )
                 )
 
-            -- , Components.Combobox.view relatedTerm.combobox
+            -- , Components.Combobox.view
+            --     (PageMsg.Internal << RelatedTermComboboxMsg relatedTermIndex)
+            --     relatedTerm.combobox
             --     []
-            --     [ Components.Combobox.choice (text "First") False
+            --     [ Components.Combobox.choice (text "First") True
             --     , Components.Combobox.choice (text "Second") False
             --     ]
             , span

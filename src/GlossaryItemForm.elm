@@ -28,6 +28,7 @@ module GlossaryItemForm exposing
     , toggleTagCheckbox
     , updateDefinition
     , updateDisambiguationTagId
+    , updateRelatedTermFieldCombobox
     , updateTerm
     )
 
@@ -892,6 +893,19 @@ addRelatedTerm maybeRawTerm glossaryItemForm =
                     , needsUpdating = needsUpdating1
                 }
                 |> validate
+
+
+updateRelatedTermFieldCombobox : RelatedTermIndex -> Components.Combobox.Model -> GlossaryItemForm -> GlossaryItemForm
+updateRelatedTermFieldCombobox index combobox (GlossaryItemForm form) =
+    GlossaryItemForm
+        { form
+            | relatedTermFields =
+                Extras.Array.update
+                    (\relatedTermField -> { relatedTermField | combobox = combobox })
+                    (RelatedTermIndex.toInt index)
+                    form.relatedTermFields
+        }
+        |> validate
 
 
 selectRelatedTerm : RelatedTermIndex -> Maybe RawTerm -> GlossaryItemForm -> GlossaryItemForm
