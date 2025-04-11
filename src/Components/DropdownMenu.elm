@@ -79,8 +79,8 @@ type Msg
     | Show
     | StartHiding
     | CompleteHiding
-    | MakeChoiceActive ChoiceIndex
-    | MakeChoiceInactive ChoiceIndex
+    | ActivateChoice ChoiceIndex
+    | DeactivateChoice ChoiceIndex
 
 
 update : (Model -> parentModel) -> (Msg -> parentMsg) -> Msg -> Model -> ( parentModel, Cmd parentMsg )
@@ -106,10 +106,10 @@ update updateParentModel toParentMsg msg model =
                 CompleteHiding ->
                     ( { model_ | visibility = Invisible, activeChoice = Nothing }, Cmd.none )
 
-                MakeChoiceActive choiceIndex ->
+                ActivateChoice choiceIndex ->
                     ( { model_ | activeChoice = Just choiceIndex }, Cmd.none )
 
-                MakeChoiceInactive choiceIndex ->
+                DeactivateChoice choiceIndex ->
                     ( { model_
                         | activeChoice =
                             if model_.activeChoice == Just choiceIndex then
@@ -267,11 +267,11 @@ view toParentMsg model enabled buttonShape choices =
                                 in
                                 case model_.activeChoice of
                                     Just active ->
-                                        Just ( (active + 1) |> min (numberOfChoices - 1) |> max 0 |> MakeChoiceActive |> toParentMsg, True )
+                                        Just ( (active + 1) |> min (numberOfChoices - 1) |> max 0 |> ActivateChoice |> toParentMsg, True )
 
                                     Nothing ->
                                         if numberOfChoices > 0 then
-                                            Just ( toParentMsg <| MakeChoiceActive 0, True )
+                                            Just ( toParentMsg <| ActivateChoice 0, True )
 
                                         else
                                             Nothing
@@ -284,11 +284,11 @@ view toParentMsg model enabled buttonShape choices =
                                 in
                                 case model_.activeChoice of
                                     Just active ->
-                                        Just ( (active - 1) |> min (numberOfChoices - 1) |> max 0 |> MakeChoiceActive |> toParentMsg, True )
+                                        Just ( (active - 1) |> min (numberOfChoices - 1) |> max 0 |> ActivateChoice |> toParentMsg, True )
 
                                     Nothing ->
                                         if numberOfChoices > 0 then
-                                            Just ( toParentMsg <| MakeChoiceActive <| numberOfChoices - 1, True )
+                                            Just ( toParentMsg <| ActivateChoice <| numberOfChoices - 1, True )
 
                                         else
                                             Nothing
@@ -358,8 +358,8 @@ view toParentMsg model enabled buttonShape choices =
                                         , Accessibility.Role.menuItem
                                         , Accessibility.Key.tabbable False
                                         , Extras.HtmlEvents.onClickPreventDefault onSelect
-                                        , Html.Events.onMouseEnter <| toParentMsg <| MakeChoiceActive choiceIndex
-                                        , Html.Events.onMouseLeave <| toParentMsg <| MakeChoiceInactive choiceIndex
+                                        , Html.Events.onMouseEnter <| toParentMsg <| ActivateChoice choiceIndex
+                                        , Html.Events.onMouseLeave <| toParentMsg <| DeactivateChoice choiceIndex
                                         ]
                                         body
                         )
