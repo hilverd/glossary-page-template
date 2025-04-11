@@ -276,7 +276,10 @@ update msg model =
                 latestTermIndex =
                     Array.length (Form.termFields form) - 1
             in
-            ( updateForm (always form) model
+            ( { model
+                | dropdownMenusWithMoreOptionsForTerms = dropdownMenusWithMoreOptionsForTermsForForm form
+              }
+                |> updateForm (always form)
             , giveFocusToTermInputField latestTermIndex
             )
 
