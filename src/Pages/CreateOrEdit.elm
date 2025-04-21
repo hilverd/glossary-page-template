@@ -1430,9 +1430,26 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
             --     (PageMsg.Internal << RelatedTermComboboxMsg relatedTermIndex)
             --     relatedTerm.combobox
             --     []
-            --     [ Components.Combobox.choice (text "First") True
-            --     , Components.Combobox.choice (text "Second") False
-            --     ]
+            --     (allTerms
+            --         |> List.filter
+            --             (\term ->
+            --                 (not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) relatedRawTerms)
+            --                     || (Just (term |> DisambiguatedTerm.toTerm |> Term.raw) == relatedTerm.raw)
+            --             )
+            --         |> List.map
+            --             (\term ->
+            --                 let
+            --                     enableMathSupport =
+            --                         False
+            --                 in
+            --                 Components.Combobox.choice
+            --                     (\additionalAttributes ->
+            --                         Term.view enableMathSupport additionalAttributes <|
+            --                             DisambiguatedTerm.toTerm term
+            --                     )
+            --                     (Just (Term.raw <| DisambiguatedTerm.toTerm term) == relatedTerm.raw)
+            --             )
+            --     )
             , span
                 [ class "inline-flex items-center" ]
                 [ Components.Button.rounded True
