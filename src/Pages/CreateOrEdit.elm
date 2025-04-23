@@ -47,6 +47,7 @@ import Html.Attributes exposing (class, id, required, style)
 import Html.Events
 import Http
 import Icons
+import IncubatingFeatures exposing (showIncubatingFeatures)
 import Internationalisation as I18n
 import Json.Decode
 import PageMsg exposing (PageMsg)
@@ -1397,59 +1398,61 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                             [ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms relatedTermIndex dropdownMenuWithMoreOptions ]
                     )
                     maybeDropdownMenuWithMoreOptions
-            , Components.SelectMenu.view
-                [ Components.SelectMenu.id <|
-                    (if dragAndDropStatus == CannotBeDraggedAndDropped then
-                        ElementIds.seeAlsoSelect
-
-                     else
-                        ElementIds.draggableSeeAlsoSelect
+            , if showIncubatingFeatures then
+                Components.Combobox.view
+                    (PageMsg.Internal << RelatedTermComboboxMsg relatedTermIndex)
+                    relatedTerm.combobox
+                    []
+                    (allTerms
+                        |> List.filter
+                            (\term ->
+                                (not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) relatedRawTerms)
+                                    || (Just (term |> DisambiguatedTerm.toTerm |> Term.raw) == relatedTerm.raw)
+                            )
+                        |> List.map
+                            (\term ->
+                                let
+                                    enableMathSupport =
+                                        False
+                                in
+                                Components.Combobox.choice
+                                    (\additionalAttributes ->
+                                        Term.view enableMathSupport additionalAttributes <|
+                                            DisambiguatedTerm.toTerm term
+                                    )
+                                    (Just (Term.raw <| DisambiguatedTerm.toTerm term) == relatedTerm.raw)
+                            )
                     )
-                        relatedTermIndex
-                , Components.SelectMenu.ariaLabel I18n.relatedItem
-                , Components.SelectMenu.validationError relatedTerm.validationError
-                , Components.SelectMenu.showValidationErrors showValidationErrors
-                , Components.SelectMenu.onChange (PageMsg.Internal << SelectRelatedTerm relatedTermIndex)
-                ]
-                (allTerms
-                    |> List.filter
-                        (\term ->
-                            (not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) relatedRawTerms)
-                                || (Just (term |> DisambiguatedTerm.toTerm |> Term.raw) == relatedTerm.raw)
-                        )
-                    |> List.map
-                        (\term ->
-                            Components.SelectMenu.Choice
-                                (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
-                                [ text <| Term.inlineText <| DisambiguatedTerm.toTerm term ]
-                                (Just (Term.raw <| DisambiguatedTerm.toTerm term) == relatedTerm.raw)
-                        )
-                )
 
-            -- , Components.Combobox.view
-            --     (PageMsg.Internal << RelatedTermComboboxMsg relatedTermIndex)
-            --     relatedTerm.combobox
-            --     []
-            --     (allTerms
-            --         |> List.filter
-            --             (\term ->
-            --                 (not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) relatedRawTerms)
-            --                     || (Just (term |> DisambiguatedTerm.toTerm |> Term.raw) == relatedTerm.raw)
-            --             )
-            --         |> List.map
-            --             (\term ->
-            --                 let
-            --                     enableMathSupport =
-            --                         False
-            --                 in
-            --                 Components.Combobox.choice
-            --                     (\additionalAttributes ->
-            --                         Term.view enableMathSupport additionalAttributes <|
-            --                             DisambiguatedTerm.toTerm term
-            --                     )
-            --                     (Just (Term.raw <| DisambiguatedTerm.toTerm term) == relatedTerm.raw)
-            --             )
-            --     )
+              else
+                Components.SelectMenu.view
+                    [ Components.SelectMenu.id <|
+                        (if dragAndDropStatus == CannotBeDraggedAndDropped then
+                            ElementIds.seeAlsoSelect
+
+                         else
+                            ElementIds.draggableSeeAlsoSelect
+                        )
+                            relatedTermIndex
+                    , Components.SelectMenu.ariaLabel I18n.relatedItem
+                    , Components.SelectMenu.validationError relatedTerm.validationError
+                    , Components.SelectMenu.showValidationErrors showValidationErrors
+                    , Components.SelectMenu.onChange (PageMsg.Internal << SelectRelatedTerm relatedTermIndex)
+                    ]
+                    (allTerms
+                        |> List.filter
+                            (\term ->
+                                (not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) relatedRawTerms)
+                                    || (Just (term |> DisambiguatedTerm.toTerm |> Term.raw) == relatedTerm.raw)
+                            )
+                        |> List.map
+                            (\term ->
+                                Components.SelectMenu.Choice
+                                    (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
+                                    [ text <| Term.inlineText <| DisambiguatedTerm.toTerm term ]
+                                    (Just (Term.raw <| DisambiguatedTerm.toTerm term) == relatedTerm.raw)
+                            )
+                    )
             , span
                 [ class "inline-flex items-center" ]
                 [ Components.Button.rounded True
@@ -1986,6 +1989,14 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
+    let
+        relatedTermComboboxes : List Components.Combobox.Model
+        relatedTermComboboxes =
+            model.form
+                |> Form.relatedTermFields
+                |> Array.toList
+                |> List.map .combobox
+    in
     Sub.batch
         [ ReceiveCurrentDateTimeAndNewIdForSaving
             |> receiveCurrentDateTimeAndNewIdForSaving
@@ -2006,6 +2017,19 @@ subscriptions model =
                     dropdownModel
                         |> Components.DropdownMenu.subscriptions
                         |> Sub.map (DropdownMenuWithMoreOptionsForRelatedTermMsg relatedTermIndex >> PageMsg.Internal)
+                )
+            |> Sub.batch
+        , relatedTermComboboxes
+            |> List.indexedMap
+                (\indexInt comboboxModel ->
+                    let
+                        index : RelatedTermIndex
+                        index =
+                            RelatedTermIndex.fromInt indexInt
+                    in
+                    comboboxModel
+                        |> Components.Combobox.subscriptions
+                        |> Sub.map (RelatedTermComboboxMsg index >> PageMsg.Internal)
                 )
             |> Sub.batch
         ]

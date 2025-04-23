@@ -1,4 +1,4 @@
-module Components.Combobox exposing (Model, Msg, choice, id, init, update, view)
+module Components.Combobox exposing (Model, Msg, choice, id, init, subscriptions, update, view)
 
 import Browser.Events as Events
 import Extras.Html
@@ -218,9 +218,5 @@ view toParentMsg (Model model) properties choices =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions (Model { choicesVisible }) =
-    if choicesVisible then
-        Events.onClick <| Decode.succeed HideChoices
-
-    else
-        Sub.none
+subscriptions (Model _) =
+    Sub.none
