@@ -41,7 +41,7 @@ init =
 
 type Msg
     = NoOp
-    | HideChoices
+    | ToggleChoicesVisibility
     | ActivateChoice ChoiceIndex
     | DeactivateChoice ChoiceIndex
 
@@ -54,8 +54,8 @@ update updateParentModel toParentMsg msg (Model model) =
                 NoOp ->
                     ( Model model, Cmd.none )
 
-                HideChoices ->
-                    ( Model { model | choicesVisible = False }, Cmd.none )
+                ToggleChoicesVisibility ->
+                    ( Model { model | choicesVisible = not model.choicesVisible }, Cmd.none )
 
                 ActivateChoice choiceIndex ->
                     ( Model { model | activeChoice = Just choiceIndex }, Cmd.none )
@@ -144,6 +144,7 @@ view toParentMsg (Model model) properties choices =
             , button
                 [ Html.Attributes.type_ "button"
                 , class "absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-hidden"
+                , Html.Events.onClick <| toParentMsg ToggleChoicesVisibility
                 ]
                 [ Icons.chevronUpDown
                     [ Svg.Attributes.class "size-6 text-gray-400 dark:text-gray-500"
@@ -153,8 +154,9 @@ view toParentMsg (Model model) properties choices =
                 ]
             , ul
                 [ class "absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-gray-900 py-1 ring-1 shadow-lg ring-black/5 dark:ring-gray-100/5 focus:outline-hidden"
-                , Html.Attributes.id "options"
+                , Html.Attributes.id "options" -- TODO
                 , attribute "role" "listbox"
+                , Extras.HtmlAttribute.showUnless model.choicesVisible <| class "hidden"
                 ]
                 (choices
                     |> List.indexedMap

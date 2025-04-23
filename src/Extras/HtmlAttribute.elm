@@ -1,4 +1,4 @@
-module Extras.HtmlAttribute exposing (fromBool, inert, showIf, showMaybe)
+module Extras.HtmlAttribute exposing (fromBool, inert, showIf, showMaybe, showUnless)
 
 import Html
 import Html.Attributes
@@ -23,6 +23,11 @@ showMaybe f maybe =
     maybe
         |> Maybe.map f
         |> Maybe.withDefault empty
+
+
+showUnless : Bool -> Html.Attribute msg -> Html.Attribute msg
+showUnless =
+    not >> showIf
 
 
 fromBool : String -> Bool -> Html.Attribute msg

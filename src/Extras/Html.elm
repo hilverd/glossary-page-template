@@ -1,4 +1,4 @@
-module Extras.Html exposing (inlineCode, nothing, showIf, showMaybe)
+module Extras.Html exposing (inlineCode, nothing, showIf, showMaybe, showUnless)
 
 import Html exposing (Html, code, span, text)
 import Html.Attributes exposing (class)
@@ -16,6 +16,11 @@ showIf condition html =
 
     else
         nothing
+
+
+showUnless : Bool -> Html msg -> Html msg
+showUnless =
+    not >> showIf
 
 
 showMaybe : (a -> Html msg) -> Maybe a -> Html msg
