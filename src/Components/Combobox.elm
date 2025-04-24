@@ -3,6 +3,7 @@ module Components.Combobox exposing (Model, Msg, choice, id, init, subscriptions
 import Accessibility.Aria
 import Accessibility.Key
 import Accessibility.Role
+import Browser.Dom as Dom
 import Extras.Html
 import Extras.HtmlAttribute
 import Html exposing (..)
@@ -10,6 +11,7 @@ import Html.Attributes exposing (attribute, class)
 import Html.Events
 import Icons
 import Svg.Attributes
+import Task
 
 
 
@@ -42,7 +44,7 @@ init =
 
 type Msg
     = NoOp
-    | ToggleChoicesVisibility
+    | ToggleChoicesVisibility String
     | ActivateChoice ChoiceIndex
     | DeactivateChoice ChoiceIndex
 
@@ -55,8 +57,14 @@ update updateParentModel toParentMsg msg (Model model) =
                 NoOp ->
                     ( Model model, Cmd.none )
 
-                ToggleChoicesVisibility ->
-                    ( Model { model | choicesVisible = not model.choicesVisible }, Cmd.none )
+                ToggleChoicesVisibility id_ ->
+                    ( Model { model | choicesVisible = not model.choicesVisible }
+                    , if not model.choicesVisible then
+                        Dom.focus id_ |> Task.attempt (\_ -> NoOp)
+
+                      else
+                        Cmd.none
+                    )
 
                 ActivateChoice choiceIndex ->
                     ( Model { model | activeChoice = Just choiceIndex }, Cmd.none )
@@ -125,9 +133,13 @@ view toParentMsg (Model model) properties choices =
         config =
             configFromProperties properties
 
+        id_ : String
+        id_ =
+            config.id |> Maybe.withDefault "combobox"
+
         optionsId : String
         optionsId =
-            config.id |> Maybe.withDefault "combobox" |> (++) "-options"
+            id_ ++ "-options"
     in
     div []
         [ div
@@ -149,7 +161,7 @@ view toParentMsg (Model model) properties choices =
             , button
                 [ Html.Attributes.type_ "button"
                 , class "absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-hidden"
-                , Html.Events.onClick <| toParentMsg ToggleChoicesVisibility
+                , Html.Events.onClick <| toParentMsg <| ToggleChoicesVisibility id_
                 ]
                 [ Icons.chevronUpDown
                     [ Svg.Attributes.class "size-6 text-gray-400 dark:text-gray-500"
