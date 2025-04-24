@@ -18,6 +18,7 @@ module ElementIds exposing
     , disambiguationTagSelect
     , dragRelatedTermButton
     , dragTermButton
+    , draggableRelatedTermCombobox
     , draggableSeeAlsoSelect
     , draggableTermInputField
     , exportDropdownButton
@@ -38,6 +39,7 @@ module ElementIds exposing
     , orderItemsFocusedOnSelect
     , orderItemsMostMentionedFirst
     , outer
+    , relatedTermCombobox
     , reserved
     , searchDialog
     , seeAlsoSelect
@@ -265,6 +267,16 @@ moreOptionsForTermDropdownMenu termIndexInt =
 moreOptionsForRelatedTermDropdownMenu : Int -> String
 moreOptionsForRelatedTermDropdownMenu termIndexInt =
     prefixed <| "more-options-for-related-term-" ++ String.fromInt termIndexInt ++ "-dropdown-menu"
+
+
+relatedTermCombobox : RelatedTermIndex -> String
+relatedTermCombobox index =
+    prefixed <| "related-term-combobox-" ++ (index |> RelatedTermIndex.toInt |> String.fromInt)
+
+
+draggableRelatedTermCombobox : RelatedTermIndex -> String
+draggableRelatedTermCombobox index =
+    prefixed <| "draggable-related-term-combobox-" ++ (index |> RelatedTermIndex.toInt |> String.fromInt)
 
 
 abbreviationLabel : TermIndex -> String

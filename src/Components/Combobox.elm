@@ -123,6 +123,10 @@ view toParentMsg (Model model) properties choices =
         config : Config
         config =
             configFromProperties properties
+
+        optionsId : String
+        optionsId =
+            config.id |> Maybe.withDefault "combobox" |> (++) "-options"
     in
     div []
         [ div
@@ -133,7 +137,7 @@ view toParentMsg (Model model) properties choices =
                 , Html.Attributes.type_ "text"
                 , class "block w-full rounded-md bg-white dark:bg-gray-900 py-1.5 pr-12 pl-3 text-gray-900 dark:text-gray-200 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 darkL:placeholder:text-gray-500 focus:outline-1 focus:-outline-offset-1 focus:outline-indigo-600 dark:focus:outline-indigo-300"
                 , attribute "role" "combobox"
-                , attribute "aria-controls" "options"
+                , attribute "aria-controls" optionsId
                 , attribute "aria-expanded" "false"
                 , Html.Attributes.autocomplete False
                 , attribute "autocorrect" "off"
@@ -154,7 +158,7 @@ view toParentMsg (Model model) properties choices =
                 ]
             , ul
                 [ class "absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-gray-900 py-1 ring-1 shadow-lg ring-black/5 dark:ring-gray-100/5 focus:outline-hidden"
-                , Html.Attributes.id "options" -- TODO
+                , Html.Attributes.id optionsId
                 , attribute "role" "listbox"
                 , Extras.HtmlAttribute.showUnless model.choicesVisible <| class "hidden"
                 ]
@@ -175,7 +179,6 @@ view toParentMsg (Model model) properties choices =
 
                                           else
                                             class "text-gray-900"
-                                        , Html.Attributes.id "option-0"
                                         , attribute "role" "option"
                                         , Html.Attributes.tabindex -1
                                         , Html.Events.onMouseEnter <| toParentMsg <| ActivateChoice choiceIndex

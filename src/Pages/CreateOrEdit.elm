@@ -1402,7 +1402,13 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                 Components.Combobox.view
                     (PageMsg.Internal << RelatedTermComboboxMsg relatedTermIndex)
                     relatedTerm.combobox
-                    []
+                    [ Components.Combobox.id <|
+                        if dragAndDropStatus == CannotBeDraggedAndDropped then
+                            ElementIds.relatedTermCombobox relatedTermIndex
+
+                        else
+                            ElementIds.draggableRelatedTermCombobox relatedTermIndex
+                    ]
                     (allTerms
                         |> List.filter
                             (\term ->
