@@ -1,13 +1,14 @@
 module Components.Combobox exposing (Model, Msg, choice, id, init, subscriptions, update, view)
 
-import Browser.Events as Events
+import Accessibility.Aria
+import Accessibility.Key
+import Accessibility.Role
 import Extras.Html
 import Extras.HtmlAttribute
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class)
 import Html.Events
 import Icons
-import Json.Decode as Decode
 import Svg.Attributes
 
 
@@ -136,9 +137,9 @@ view toParentMsg (Model model) properties choices =
                 [ Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
                 , Html.Attributes.type_ "text"
                 , class "block w-full rounded-md bg-white dark:bg-gray-900 py-1.5 pr-12 pl-3 text-gray-900 dark:text-gray-200 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 darkL:placeholder:text-gray-500 focus:outline-1 focus:-outline-offset-1 focus:outline-indigo-600 dark:focus:outline-indigo-300"
-                , attribute "role" "combobox"
-                , attribute "aria-controls" optionsId
-                , attribute "aria-expanded" "false"
+                , Accessibility.Role.comboBox
+                , Accessibility.Aria.controls [ optionsId ]
+                , Accessibility.Aria.expanded model.choicesVisible
                 , Html.Attributes.autocomplete False
                 , attribute "autocorrect" "off"
                 , attribute "autocapitalize" "off"
@@ -152,14 +153,14 @@ view toParentMsg (Model model) properties choices =
                 ]
                 [ Icons.chevronUpDown
                     [ Svg.Attributes.class "size-6 text-gray-400 dark:text-gray-500"
-                    , attribute "aria-hidden" "true"
+                    , Accessibility.Aria.hidden True
                     , attribute "data-slot" "icon"
                     ]
                 ]
             , ul
                 [ class "absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-gray-900 py-1 ring-1 shadow-lg ring-black/5 dark:ring-gray-100/5 focus:outline-hidden"
                 , Html.Attributes.id optionsId
-                , attribute "role" "listbox"
+                , Accessibility.Role.listBox
                 , Extras.HtmlAttribute.showUnless model.choicesVisible <| class "hidden"
                 ]
                 (choices
@@ -180,7 +181,7 @@ view toParentMsg (Model model) properties choices =
                                           else
                                             class "text-gray-900"
                                         , attribute "role" "option"
-                                        , Html.Attributes.tabindex -1
+                                        , Accessibility.Key.tabbable False
                                         , Html.Events.onMouseEnter <| toParentMsg <| ActivateChoice choiceIndex
                                         , Html.Events.onMouseLeave <| toParentMsg <| DeactivateChoice choiceIndex
                                         ]
@@ -207,7 +208,7 @@ view toParentMsg (Model model) properties choices =
                                                 ]
                                                 [ Icons.check
                                                     [ Svg.Attributes.class "size-5"
-                                                    , attribute "aria-hidden" "true"
+                                                    , Accessibility.Aria.hidden True
                                                     , attribute "data-slot" "icon"
                                                     ]
                                                 ]
