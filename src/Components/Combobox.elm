@@ -1,4 +1,4 @@
-module Components.Combobox exposing (Model, Msg, choice, id, init, subscriptions, update, view)
+module Components.Combobox exposing (Model, Msg, choice, id, init, onSelect, subscriptions, update, view)
 
 import Accessibility
 import Accessibility.Aria
@@ -8,6 +8,7 @@ import Browser.Dom as Dom
 import Browser.Events as Events
 import Extras.Html
 import Extras.HtmlAttribute
+import Extras.HtmlEvents
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class)
 import Html.Events
@@ -22,8 +23,9 @@ import Task
 -- MODEL
 
 
-type alias Config =
+type alias Config parentMsg =
     { id : Maybe String
+    , onSelect : Maybe (String -> parentMsg)
     }
 
 
@@ -71,7 +73,7 @@ update updateParentModel toParentMsg msg (Model model) =
 
                 StartShowing id_ ->
                     ( Model model
-                    , Process.sleep 50 |> Task.perform (always (ShowChoices id_))
+                    , Process.sleep 50 |> Task.perform (always <| ShowChoices id_)
                     )
 
                 ShowChoices id_ ->
@@ -105,8 +107,9 @@ update updateParentModel toParentMsg msg (Model model) =
 -- VIEW
 
 
-type Property
+type Property parentMsg
     = Id String
+    | OnSelect (String -> parentMsg)
 
 
 type alias ChoiceIndex =
@@ -125,27 +128,36 @@ choice value body =
     Choice { value = value, body = body }
 
 
-id : String -> Property
+id : String -> Property msg
 id =
     Id
 
 
-configFromProperties : List Property -> Config
+onSelect : (String -> parentMsg) -> Property parentMsg
+onSelect =
+    OnSelect
+
+
+configFromProperties : List (Property parentMsg) -> Config parentMsg
 configFromProperties =
     List.foldl
         (\property config ->
             case property of
                 Id string ->
                     { config | id = Just string }
+
+                OnSelect onSelect_ ->
+                    { config | onSelect = Just onSelect_ }
         )
         { id = Nothing
+        , onSelect = Nothing
         }
 
 
-view : (Msg -> parentMsg) -> Model -> List Property -> Maybe String -> List (Choice parentMsg) -> Html parentMsg
+view : (Msg -> parentMsg) -> Model -> List (Property parentMsg) -> Maybe String -> List (Choice parentMsg) -> Html parentMsg
 view toParentMsg (Model model) properties inputForSelectedChoice choices =
     let
-        config : Config
+        config : Config parentMsg
         config =
             configFromProperties properties
 
@@ -222,6 +234,11 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices =
                                         , Accessibility.Key.tabbable False
                                         , Html.Events.onMouseEnter <| toParentMsg <| ActivateChoice choiceIndex
                                         , Html.Events.onMouseLeave <| toParentMsg <| DeactivateChoice choiceIndex
+                                        , Extras.HtmlAttribute.showMaybe
+                                            (\onSelect_ ->
+                                                Html.Events.onMouseDown <| onSelect_ value
+                                            )
+                                            config.onSelect
                                         ]
                                         [ span
                                             [ class "block truncate"

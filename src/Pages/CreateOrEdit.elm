@@ -437,6 +437,9 @@ update msg model =
 
                     else
                         Just <| RawTerm.fromString selection
+
+                _ =
+                    Debug.log "relatedRawTerm" relatedRawTerm
             in
             ( updateForm (Form.selectRelatedTerm relatedTermIndex relatedRawTerm) model
             , Cmd.none
@@ -1408,6 +1411,7 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
 
                         else
                             ElementIds.draggableRelatedTermCombobox relatedTermIndex
+                    , Components.Combobox.onSelect (PageMsg.Internal << SelectRelatedTerm relatedTermIndex)
                     ]
                     (relatedTerm.raw |> Maybe.map RawTerm.toString)
                     (allTerms
