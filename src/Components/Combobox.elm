@@ -165,7 +165,7 @@ view toParentMsg (Model model) properties valueOfSelectedChoice choices =
                 model.input
                 [ Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
                 , Html.Attributes.type_ "text"
-                , class "block w-full rounded-md bg-white dark:bg-gray-900 py-1.5 pr-12 pl-3 text-gray-900 dark:text-gray-200 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 darkL:placeholder:text-gray-500 focus:outline-1 focus:-outline-offset-1 focus:outline-indigo-600 dark:focus:outline-indigo-300"
+                , class "block w-full rounded-md bg-white dark:bg-gray-900 py-1.5 pr-12 pl-3 text-gray-900 dark:text-gray-200 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-1 focus:-outline-offset-1 focus:outline-indigo-600 dark:focus:outline-indigo-300"
                 , Accessibility.Role.comboBox
                 , Accessibility.Aria.controls [ optionsId ]
                 , Accessibility.Aria.expanded model.choicesVisible
@@ -214,10 +214,10 @@ view toParentMsg (Model model) properties valueOfSelectedChoice choices =
                                     li
                                         [ class "relative cursor-default py-2 pr-9 pl-3 dark:text-white select-none"
                                         , if active then
-                                            class "text-white bg-indigo-600 outline-hidden"
+                                            class "text-white bg-indigo-600 dark:bg-indigo-300 outline-hidden"
 
                                           else
-                                            class "text-gray-900"
+                                            class "text-gray-900 dark:text-gray-200"
                                         , attribute "role" "option"
                                         , Accessibility.Key.tabbable False
                                         , Html.Events.onMouseEnter <| toParentMsg <| ActivateChoice choiceIndex
@@ -229,10 +229,10 @@ view toParentMsg (Model model) properties valueOfSelectedChoice choices =
                                             ]
                                             [ body
                                                 [ if active then
-                                                    class "text-white bg-indigo-600 outline-hidden"
+                                                    class "text-white dark:text-gray-900 bg-indigo-600 dark:bg-indigo-300 outline-hidden"
 
                                                   else
-                                                    class "text-gray-900"
+                                                    class "text-gray-900 dark:text-gray-200"
                                                 ]
                                             ]
                                         , Extras.Html.showIf selected <|
