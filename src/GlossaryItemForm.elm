@@ -353,7 +353,7 @@ emptyRelatedTermField : RelatedTermField
 emptyRelatedTermField =
     { raw = Nothing
     , validationError = Nothing
-    , combobox = Components.Combobox.init
+    , combobox = Components.Combobox.init Nothing
     }
 
 
@@ -474,7 +474,7 @@ fromGlossaryItemForUi_ existingPreferredTerms allTags preferredTermsOfItemsListi
                         RelatedTermField
                             (Just <| Term.raw <| DisambiguatedTerm.toTerm term)
                             Nothing
-                            Components.Combobox.init
+                            (Components.Combobox.init <| Just <| RawTerm.toString <| Term.raw <| DisambiguatedTerm.toTerm term)
                     )
                 |> Array.fromList
         , preferredTermsOutside = preferredTermsOutside1
@@ -874,7 +874,7 @@ addRelatedTerm maybeRawTerm glossaryItemForm =
                             (\rawTerm ->
                                 { raw = Just rawTerm
                                 , validationError = Nothing
-                                , combobox = Components.Combobox.init
+                                , combobox = Components.Combobox.init <| Just <| RawTerm.toString rawTerm
                                 }
                             )
                         |> Maybe.withDefault emptyRelatedTermField
@@ -917,7 +917,7 @@ selectRelatedTerm index relatedRawTerm glossaryItemForm =
                     | relatedTermFields =
                         Extras.Array.update
                             (always <|
-                                RelatedTermField relatedRawTerm Nothing Components.Combobox.init
+                                RelatedTermField relatedRawTerm Nothing (Components.Combobox.init <| Maybe.map RawTerm.toString relatedRawTerm)
                             )
                             (RelatedTermIndex.toInt index)
                             form.relatedTermFields

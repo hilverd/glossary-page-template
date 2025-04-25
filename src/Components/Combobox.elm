@@ -35,12 +35,12 @@ type Model
         }
 
 
-init : Model
-init =
+init : Maybe String -> Model
+init inputForSelectedChoice =
     Model
         { choicesVisible = False
         , activeChoice = Nothing
-        , input = ""
+        , input = inputForSelectedChoice |> Maybe.withDefault ""
         }
 
 
@@ -143,7 +143,7 @@ configFromProperties =
 
 
 view : (Msg -> parentMsg) -> Model -> List Property -> Maybe String -> List (Choice parentMsg) -> Html parentMsg
-view toParentMsg (Model model) properties valueOfSelectedChoice choices =
+view toParentMsg (Model model) properties inputForSelectedChoice choices =
     let
         config : Config
         config =
@@ -205,7 +205,7 @@ view toParentMsg (Model model) properties valueOfSelectedChoice choices =
                                 Choice { body, value } ->
                                     let
                                         selected =
-                                            Just value == valueOfSelectedChoice
+                                            Just value == inputForSelectedChoice
 
                                         active : Bool
                                         active =
