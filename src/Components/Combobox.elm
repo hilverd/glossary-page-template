@@ -7,12 +7,12 @@ import Browser.Dom as Dom
 import Browser.Events as Events
 import Extras.Html
 import Extras.HtmlAttribute
-import Extras.HtmlEvents
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class)
 import Html.Events
 import Icons
 import Json.Decode as Decode
+import Process
 import Svg.Attributes
 import Task
 
@@ -47,7 +47,8 @@ init =
 
 type Msg
     = NoOp
-    | ToggleChoicesVisibility String
+    | StartShowing String
+    | ShowChoices String
     | HideChoices
     | ActivateChoice ChoiceIndex
     | DeactivateChoice ChoiceIndex
@@ -61,13 +62,14 @@ update updateParentModel toParentMsg msg (Model model) =
                 NoOp ->
                     ( Model model, Cmd.none )
 
-                ToggleChoicesVisibility id_ ->
-                    ( Model { model | choicesVisible = not model.choicesVisible }
-                    , if not model.choicesVisible then
-                        Dom.focus id_ |> Task.attempt (\_ -> NoOp)
+                StartShowing id_ ->
+                    ( Model model
+                    , Process.sleep 50 |> Task.perform (always (ShowChoices id_))
+                    )
 
-                      else
-                        Cmd.none
+                ShowChoices id_ ->
+                    ( Model { model | choicesVisible = True }
+                    , Dom.focus id_ |> Task.attempt (\_ -> NoOp)
                     )
 
                 HideChoices ->
@@ -168,7 +170,13 @@ view toParentMsg (Model model) properties choices =
             , button
                 [ Html.Attributes.type_ "button"
                 , class "absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-hidden"
-                , Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <| toParentMsg <| ToggleChoicesVisibility id_
+                , Html.Events.onMouseDown <|
+                    toParentMsg <|
+                        if model.choicesVisible == False then
+                            StartShowing id_
+
+                        else
+                            HideChoices
                 ]
                 [ Icons.chevronUpDown
                     [ Svg.Attributes.class "size-6 text-gray-400 dark:text-gray-500"
@@ -245,7 +253,7 @@ view toParentMsg (Model model) properties choices =
 subscriptions : Model -> Sub Msg
 subscriptions (Model model) =
     if model.choicesVisible then
-        Events.onClick <| Decode.succeed HideChoices
+        Events.onMouseDown <| Decode.succeed HideChoices
 
     else
         Sub.none
