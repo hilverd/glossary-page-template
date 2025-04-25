@@ -159,7 +159,7 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices =
     in
     div []
         [ div
-            [ class "relative mt-2"
+            [ class "relative"
             ]
             [ Accessibility.inputText
                 model.input
