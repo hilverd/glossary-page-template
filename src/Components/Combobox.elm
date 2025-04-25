@@ -1,5 +1,6 @@
 module Components.Combobox exposing (Model, Msg, choice, id, init, subscriptions, update, view)
 
+import Accessibility
 import Accessibility.Aria
 import Accessibility.Key
 import Accessibility.Role
@@ -30,6 +31,7 @@ type Model
     = Model
         { choicesVisible : Bool
         , activeChoice : Maybe ChoiceIndex
+        , input : String
         }
 
 
@@ -38,6 +40,7 @@ init =
     Model
         { choicesVisible = False
         , activeChoice = Nothing
+        , input = ""
         }
 
 
@@ -47,6 +50,7 @@ init =
 
 type Msg
     = NoOp
+    | UpdateInput String
     | StartShowing String
     | ShowChoices String
     | HideChoices
@@ -61,6 +65,9 @@ update updateParentModel toParentMsg msg (Model model) =
             case msg of
                 NoOp ->
                     ( Model model, Cmd.none )
+
+                UpdateInput input ->
+                    ( Model { model | input = input }, Cmd.none )
 
                 StartShowing id_ ->
                     ( Model model
@@ -154,7 +161,8 @@ view toParentMsg (Model model) properties choices =
         [ div
             [ class "relative mt-2"
             ]
-            [ input
+            [ Accessibility.inputText
+                model.input
                 [ Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
                 , Html.Attributes.type_ "text"
                 , class "block w-full rounded-md bg-white dark:bg-gray-900 py-1.5 pr-12 pl-3 text-gray-900 dark:text-gray-200 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 darkL:placeholder:text-gray-500 focus:outline-1 focus:-outline-offset-1 focus:outline-indigo-600 dark:focus:outline-indigo-300"
@@ -165,8 +173,8 @@ view toParentMsg (Model model) properties choices =
                 , attribute "autocorrect" "off"
                 , attribute "autocapitalize" "off"
                 , Html.Attributes.spellcheck False
+                , Html.Events.onInput <| toParentMsg << UpdateInput
                 ]
-                []
             , button
                 [ Html.Attributes.type_ "button"
                 , class "absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-hidden"
