@@ -437,9 +437,6 @@ update msg model =
 
                     else
                         Just <| RawTerm.fromString selection
-
-                _ =
-                    Debug.log "relatedRawTerm" relatedRawTerm
             in
             ( updateForm (Form.selectRelatedTerm relatedTermIndex relatedRawTerm) model
             , Cmd.none

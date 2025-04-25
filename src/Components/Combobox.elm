@@ -8,7 +8,6 @@ import Browser.Dom as Dom
 import Browser.Events as Events
 import Extras.Html
 import Extras.HtmlAttribute
-import Extras.HtmlEvents
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class)
 import Html.Events
@@ -27,6 +26,10 @@ type alias Config parentMsg =
     { id : Maybe String
     , onSelect : Maybe (String -> parentMsg)
     }
+
+
+
+-- TODO: don't keep track of the input in the model, let that be passed in by the parent
 
 
 type Model
