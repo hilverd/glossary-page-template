@@ -1409,6 +1409,7 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                         else
                             ElementIds.draggableRelatedTermCombobox relatedTermIndex
                     ]
+                    (relatedTerm.raw |> Maybe.map RawTerm.toString)
                     (allTerms
                         |> List.filter
                             (\term ->
@@ -1422,11 +1423,11 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                                         False
                                 in
                                 Components.Combobox.choice
+                                    (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
                                     (\additionalAttributes ->
                                         Term.view enableMathSupport additionalAttributes <|
                                             DisambiguatedTerm.toTerm term
                                     )
-                                    (Just (Term.raw <| DisambiguatedTerm.toTerm term) == relatedTerm.raw)
                             )
                     )
 

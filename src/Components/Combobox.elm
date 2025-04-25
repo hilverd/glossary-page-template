@@ -115,14 +115,14 @@ type alias ChoiceIndex =
 
 type Choice parentMsg
     = Choice
-        { body : List (Attribute parentMsg) -> Html parentMsg
-        , selected : Bool
+        { value : String
+        , body : List (Attribute parentMsg) -> Html parentMsg
         }
 
 
-choice : (List (Attribute parentMsg) -> Html parentMsg) -> Bool -> Choice parentMsg
-choice body selected =
-    Choice { body = body, selected = selected }
+choice : String -> (List (Attribute parentMsg) -> Html parentMsg) -> Choice parentMsg
+choice value body =
+    Choice { value = value, body = body }
 
 
 id : String -> Property
@@ -142,8 +142,8 @@ configFromProperties =
         }
 
 
-view : (Msg -> parentMsg) -> Model -> List Property -> List (Choice parentMsg) -> Html parentMsg
-view toParentMsg (Model model) properties choices =
+view : (Msg -> parentMsg) -> Model -> List Property -> Maybe String -> List (Choice parentMsg) -> Html parentMsg
+view toParentMsg (Model model) properties valueOfSelectedChoice choices =
     let
         config : Config
         config =
@@ -202,8 +202,11 @@ view toParentMsg (Model model) properties choices =
                     |> List.indexedMap
                         (\choiceIndex choice_ ->
                             case choice_ of
-                                Choice { body, selected } ->
+                                Choice { body, value } ->
                                     let
+                                        selected =
+                                            Just value == valueOfSelectedChoice
+
                                         active : Bool
                                         active =
                                             model.activeChoice == Just choiceIndex
