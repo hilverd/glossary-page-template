@@ -410,15 +410,15 @@ if (containerElement) {
         });
     });
 
-    app.ports.giveFocusToSeeAlsoSelect.subscribe((index) => {
+    app.ports.giveFocusToSeeAlsoCombobox.subscribe((index) => {
         window.requestAnimationFrame(() => {
-            const seeAlsoSelectElem = document.getElementById(`glossary-page-see-also-${index}`);
-            const draggableSeeAlsoSelectElem = document.getElementById(`glossary-page-draggable-see-also-${index}`);
+            const relatedTermComboboxElem = document.getElementById(`glossary-page-related-term-combobox-${index}`);
+            const draggableRelatedTermComboboxElem = document.getElementById(`glossary-page-draggable-related-term-combobox-${index}`);
 
-            if (seeAlsoSelectElem instanceof HTMLSelectElement && elementIsVisible(seeAlsoSelectElem)) {
-                seeAlsoSelectElem.focus();
-            } else if (draggableSeeAlsoSelectElem instanceof HTMLSelectElement && elementIsVisible(draggableSeeAlsoSelectElem)) {
-                draggableSeeAlsoSelectElem.focus();
+            if (relatedTermComboboxElem instanceof HTMLInputElement && elementIsVisible(relatedTermComboboxElem)) {
+                relatedTermComboboxElem.focus();
+            } else if (draggableRelatedTermComboboxElem instanceof HTMLInputElement && elementIsVisible(draggableRelatedTermComboboxElem)) {
+                draggableRelatedTermComboboxElem.focus();
             }
         });
     });

@@ -256,7 +256,7 @@ port dragStart : Json.Decode.Value -> Cmd msg
 port giveFocusToTermInputField : Int -> Cmd msg
 
 
-port giveFocusToSeeAlsoSelect : Int -> Cmd msg
+port giveFocusToSeeAlsoCombobox : Int -> Cmd msg
 
 
 
@@ -426,7 +426,7 @@ update msg model =
                 | dropdownMenusWithMoreOptionsForRelatedTerms = dropdownMenusWithMoreOptionsForRelatedTermsForForm form
               }
                 |> updateForm (always form)
-            , giveFocusToSeeAlsoSelect latestRelatedTermIndex
+            , giveFocusToSeeAlsoCombobox latestRelatedTermIndex
             )
 
         UpdateRelatedTermComboboxInput hideChoices relatedTermIndex input ->
