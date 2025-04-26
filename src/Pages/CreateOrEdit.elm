@@ -1421,8 +1421,27 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                     (allTerms
                         |> List.filter
                             (\term ->
-                                (not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) relatedRawTerms)
-                                    || (Just (term |> DisambiguatedTerm.toTerm |> Term.raw) == relatedTerm.raw)
+                                let
+                                    rawTerm : RawTerm
+                                    rawTerm =
+                                        term |> DisambiguatedTerm.toTerm |> Term.raw
+
+                                    rawTermMatchesInput : Bool
+                                    rawTermMatchesInput =
+                                        rawTerm
+                                            |> RawTerm.toString
+                                            |> String.toLower
+                                            |> String.contains (relatedTerm.comboboxInput |> String.toLower)
+
+                                    rawTermIsCurrentlySelected : Bool
+                                    rawTermIsCurrentlySelected =
+                                        Just rawTerm == relatedTerm.raw
+
+                                    rawTermIsAlreadyListed : Bool
+                                    rawTermIsAlreadyListed =
+                                        Set.member (RawTerm.toString rawTerm) relatedRawTerms
+                                in
+                                rawTermIsCurrentlySelected || (not rawTermIsAlreadyListed && rawTermMatchesInput)
                             )
                         |> List.map
                             (\term ->
