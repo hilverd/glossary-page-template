@@ -334,6 +334,14 @@ if (containerElement) {
         }
     });
 
+    app.ports.scrollChoiceIntoView.subscribe((elementId: string) => {
+        const elem: HTMLElement | null = document.getElementById(elementId);
+
+        if (elem) {
+            elem.scrollIntoView({ block: "nearest" });
+        }
+    });
+
     app.ports.changeTheme.subscribe((themeName: string) => {
         if (themeName) {
             localStorage.glossaryPageTheme = themeName;

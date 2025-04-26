@@ -1,11 +1,13 @@
-module Components.Combobox exposing (Model, Msg, choice, choicesVisible, hideChoices, id, init, onBlur, onInput, onSelect, subscriptions, update, view)
+port module Components.Combobox exposing (Model, Msg, choice, choicesVisible, hideChoices, id, init, onBlur, onInput, onSelect, showChoices, subscriptions, update, view)
 
 import Accessibility
 import Accessibility.Aria
 import Accessibility.Key
 import Accessibility.Role
+import Array
 import Browser.Dom as Dom
 import Browser.Events as Events
+import ElementIds
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
@@ -34,7 +36,7 @@ type alias Config parentMsg =
 type Model
     = Model
         { choicesVisible : Bool
-        , activeChoice : Maybe ChoiceIndex
+        , activeChoiceIndex : Maybe ChoiceIndex
         }
 
 
@@ -42,7 +44,7 @@ init : Model
 init =
     Model
         { choicesVisible = False
-        , activeChoice = Nothing
+        , activeChoiceIndex = Nothing
         }
 
 
@@ -56,6 +58,18 @@ hideChoices (Model model) =
     Model { model | choicesVisible = False }
 
 
+showChoices : Model -> Model
+showChoices (Model model) =
+    Model { model | choicesVisible = True }
+
+
+
+-- PORTS
+
+
+port scrollChoiceIntoView : String -> Cmd msg
+
+
 
 -- UPDATE
 
@@ -67,6 +81,7 @@ type Msg
     | HideChoices
     | ActivateChoice ChoiceIndex
     | DeactivateChoice ChoiceIndex
+    | ActivatePreviousOrNextChoice Int Bool
 
 
 update : (Model -> parentModel) -> (Msg -> parentMsg) -> Msg -> Model -> ( parentModel, Cmd parentMsg )
@@ -95,19 +110,56 @@ update updateParentModel toParentMsg msg (Model model) =
                     ( Model { model | choicesVisible = False }, Cmd.none )
 
                 ActivateChoice choiceIndex ->
-                    ( Model { model | activeChoice = Just choiceIndex }, Cmd.none )
+                    ( Model { model | activeChoiceIndex = Just choiceIndex }, Cmd.none )
 
                 DeactivateChoice choiceIndex ->
                     ( Model
                         { model
-                            | activeChoice =
-                                if model.activeChoice == Just choiceIndex then
+                            | activeChoiceIndex =
+                                if model.activeChoiceIndex == Just choiceIndex then
                                     Nothing
 
                                 else
-                                    model.activeChoice
+                                    model.activeChoiceIndex
                         }
                     , Cmd.none
+                    )
+
+                ActivatePreviousOrNextChoice numberOfChoices next ->
+                    let
+                        delta : Int
+                        delta =
+                            if next then
+                                1
+
+                            else
+                                -1
+
+                        initial : Int
+                        initial =
+                            if next then
+                                0
+
+                            else
+                                numberOfChoices - 1
+
+                        activeChoiceIndex_ : Maybe Int
+                        activeChoiceIndex_ =
+                            model.activeChoiceIndex
+                                |> Maybe.map ((+) delta >> min (numberOfChoices - 1) >> max 0)
+                                |> Maybe.withDefault initial
+                                |> (\new ->
+                                        if numberOfChoices == 0 then
+                                            Nothing
+
+                                        else
+                                            Just new
+                                   )
+                    in
+                    ( Model { model | activeChoiceIndex = activeChoiceIndex_ }
+                    , activeChoiceIndex_
+                        |> Maybe.map (\index -> scrollChoiceIntoView "TODO")
+                        |> Maybe.withDefault Cmd.none
                     )
     in
     ( updateParentModel model1, Cmd.map toParentMsg cmd )
@@ -219,6 +271,51 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices input =
                 , Html.Events.onFocus <| toParentMsg <| StartShowingChoices id_
                 , Html.Events.onClick <| toParentMsg <| StartShowingChoices id_
                 , Extras.HtmlAttribute.showMaybe Html.Events.onBlur config.onBlur
+                , Html.Events.preventDefaultOn "keydown"
+                    (Extras.HtmlEvents.preventDefaultOnDecoder
+                        (\event ->
+                            if Extras.HtmlEvents.isDownArrow event then
+                                Just
+                                    ( toParentMsg <| ActivatePreviousOrNextChoice (List.length choices) True
+                                    , True
+                                    )
+
+                            else if Extras.HtmlEvents.isUpArrow event then
+                                Just
+                                    ( toParentMsg <| ActivatePreviousOrNextChoice (List.length choices) False
+                                    , True
+                                    )
+
+                            else if Extras.HtmlEvents.isHome event then
+                                Just
+                                    ( toParentMsg <| ActivatePreviousOrNextChoice (List.length choices) False
+                                    , True
+                                    )
+
+                            else if Extras.HtmlEvents.isEnd event then
+                                Just
+                                    ( toParentMsg <| ActivatePreviousOrNextChoice (List.length choices) False
+                                    , True
+                                    )
+
+                            else if Extras.HtmlEvents.isEnter event then
+                                let
+                                    maybeActiveChoice : Maybe (Choice parentMsg)
+                                    maybeActiveChoice =
+                                        model.activeChoiceIndex
+                                            |> Maybe.andThen (\activeChoiceIndex -> choices |> Array.fromList |> Array.get activeChoiceIndex)
+                                in
+                                case ( maybeActiveChoice, config.onSelect ) of
+                                    ( Just (Choice { value }), Just onSelect_ ) ->
+                                        Just ( onSelect_ value, True )
+
+                                    _ ->
+                                        Nothing
+
+                            else
+                                Nothing
+                        )
+                    )
                 ]
             , button
                 [ Html.Attributes.type_ "button"
@@ -254,7 +351,7 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices input =
 
                                         active : Bool
                                         active =
-                                            model.activeChoice == Just choiceIndex
+                                            model.activeChoiceIndex == Just choiceIndex
                                     in
                                     li
                                         [ class "relative cursor-default py-2 pr-9 pl-3 dark:text-white select-none"

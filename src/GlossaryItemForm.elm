@@ -926,7 +926,7 @@ updateRelatedTermComboboxInput hideChoices index input (GlossaryItemForm form) =
                                     Components.Combobox.hideChoices
 
                                  else
-                                    identity
+                                    Components.Combobox.showChoices
                                 )
                                     relatedTermField.combobox
                             , comboboxInput = input

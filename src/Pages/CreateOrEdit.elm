@@ -1473,7 +1473,7 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                                     rawTermIsAlreadyListed =
                                         Set.member (RawTerm.toString rawTerm) relatedRawTerms
                                 in
-                                rawTermIsCurrentlySelected || (not rawTermIsAlreadyListed && rawTermMatchesInput)
+                                (rawTermIsCurrentlySelected || not rawTermIsAlreadyListed) && rawTermMatchesInput
                             )
                         |> List.take 10
                         |> List.map
