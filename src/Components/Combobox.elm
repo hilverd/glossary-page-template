@@ -241,7 +241,7 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices input =
                 [ class "absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-gray-900 py-1 ring-1 shadow-lg ring-black/5 dark:ring-gray-100/5 focus:outline-hidden"
                 , Html.Attributes.id optionsId
                 , Accessibility.Role.listBox
-                , Extras.HtmlAttribute.showUnless model.choicesVisible <| class "hidden"
+                , Extras.HtmlAttribute.showUnless (model.choicesVisible && List.length choices > 0) <| class "hidden"
                 ]
                 (choices
                     |> List.indexedMap
