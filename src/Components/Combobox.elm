@@ -1,4 +1,4 @@
-module Components.Combobox exposing (Model, Msg, choice, id, init, onInput, onSelect, subscriptions, update, view)
+module Components.Combobox exposing (Model, Msg, choice, choicesVisible, id, init, onInput, onSelect, subscriptions, update, view)
 
 import Accessibility
 import Accessibility.Aria
@@ -8,6 +8,7 @@ import Browser.Dom as Dom
 import Browser.Events as Events
 import Extras.Html
 import Extras.HtmlAttribute
+import Extras.HtmlEvents
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class)
 import Html.Events
@@ -44,13 +45,18 @@ init =
         }
 
 
+choicesVisible : Model -> Bool
+choicesVisible (Model model) =
+    model.choicesVisible
+
+
 
 -- UPDATE
 
 
 type Msg
     = NoOp
-    | StartShowing String
+    | StartShowingChoices String
     | ShowChoices String
     | HideChoices
     | ActivateChoice ChoiceIndex
@@ -65,10 +71,14 @@ update updateParentModel toParentMsg msg (Model model) =
                 NoOp ->
                     ( Model model, Cmd.none )
 
-                StartShowing id_ ->
-                    ( Model model
-                    , Process.sleep 50 |> Task.perform (always <| ShowChoices id_)
-                    )
+                StartShowingChoices id_ ->
+                    if model.choicesVisible == False then
+                        ( Model model
+                        , Process.sleep 50 |> Task.perform (always <| ShowChoices id_)
+                        )
+
+                    else
+                        ( Model model, Cmd.none )
 
                 ShowChoices id_ ->
                     ( Model { model | choicesVisible = True }
@@ -190,6 +200,8 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices input =
                 , attribute "autocapitalize" "off"
                 , Html.Attributes.spellcheck False
                 , Extras.HtmlAttribute.showMaybe Html.Events.onInput config.onInput
+                , Html.Events.onFocus <| toParentMsg <| StartShowingChoices id_
+                , Html.Events.onClick <| toParentMsg <| StartShowingChoices id_
                 ]
             , button
                 [ Html.Attributes.type_ "button"
@@ -197,7 +209,7 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices input =
                 , Html.Events.onMouseDown <|
                     toParentMsg <|
                         if model.choicesVisible == False then
-                            StartShowing id_
+                            StartShowingChoices id_
 
                         else
                             HideChoices

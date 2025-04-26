@@ -390,6 +390,10 @@ if (containerElement) {
     });
 
     app.ports.dragStart.subscribe(function (event) {
+        const dragImage = event.target.closest('.drag-image');
+        if (dragImage) {
+            event.dataTransfer.setDragImage(dragImage, 0, 0);
+        }
         event.dataTransfer.setData("text", "");
     });
 

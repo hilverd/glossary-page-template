@@ -930,9 +930,8 @@ viewCreateTermInternal dragAndDropStatus showMarkdownBasedSyntaxEnabled mathSupp
     in
     Html.div
         (if dragAndDropStatus /= CannotBeDraggedAndDropped then
-            Components.DragAndDrop.draggable (PageMsg.Internal << DragAndDropTermsMsg) termIndex
-                ++ Components.DragAndDrop.droppable (PageMsg.Internal << DragAndDropTermsMsg) termIndex
-                ++ [ class "hidden lg:block"
+            Components.DragAndDrop.droppable (PageMsg.Internal << DragAndDropTermsMsg) termIndex
+                ++ [ class "hidden lg:block drag-image"
                    , Extras.HtmlAttribute.showIf (dragAndDropStatus == BeingDragged) <|
                         class "opacity-25"
                    ]
@@ -945,24 +944,31 @@ viewCreateTermInternal dragAndDropStatus showMarkdownBasedSyntaxEnabled mathSupp
             [ div
                 [ class "flex items-center w-full" ]
                 [ Extras.Html.showIf (dragAndDropStatus /= CannotBeDraggedAndDropped) <|
+                    let
+                        dragAndDropAttributes : List (Html.Attribute (PageMsg InternalMsg))
+                        dragAndDropAttributes =
+                            Components.DragAndDrop.draggable (PageMsg.Internal << DragAndDropTermsMsg) termIndex
+                    in
                     Components.Button.roundedWithoutBorder True
-                        [ Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:mt-6"
-                        , class "cursor-grab mr-2"
-                        , id <| ElementIds.dragTermButton (TermIndex.toInt termIndex)
-                        , Html.Events.preventDefaultOn "keydown"
-                            (Extras.HtmlEvents.preventDefaultOnDecoder
-                                (\event ->
-                                    if Extras.HtmlEvents.isUpArrow event then
-                                        Just <| ( PageMsg.Internal <| MoveTermUp TermDragButton termIndex, True )
+                        (dragAndDropAttributes
+                            ++ [ Extras.HtmlAttribute.showIf showMarkdownBasedSyntaxEnabled <| class "sm:mt-6"
+                               , class "cursor-grab mr-2"
+                               , id <| ElementIds.dragTermButton (TermIndex.toInt termIndex)
+                               , Html.Events.preventDefaultOn "keydown"
+                                    (Extras.HtmlEvents.preventDefaultOnDecoder
+                                        (\event ->
+                                            if Extras.HtmlEvents.isUpArrow event then
+                                                Just <| ( PageMsg.Internal <| MoveTermUp TermDragButton termIndex, True )
 
-                                    else if Extras.HtmlEvents.isDownArrow event then
-                                        Just <| ( PageMsg.Internal <| MoveTermDown TermDragButton numberOfTerms termIndex, True )
+                                            else if Extras.HtmlEvents.isDownArrow event then
+                                                Just <| ( PageMsg.Internal <| MoveTermDown TermDragButton numberOfTerms termIndex, True )
 
-                                    else
-                                        Nothing
-                                )
-                            )
-                        ]
+                                            else
+                                                Nothing
+                                        )
+                                    )
+                               ]
+                        )
                         [ span
                             [ class "sr-only" ]
                             [ text I18n.dragOrUseUpAndDownArrowsToMoveTerm
@@ -1358,9 +1364,17 @@ viewCreateSeeAlsoSingle1 :
 viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms numberOfRelatedTerms allTerms maybeDropdownMenuWithMoreOptions relatedTermIndex relatedTerm =
     Html.div
         (if dragAndDropStatus /= CannotBeDraggedAndDropped then
-            Components.DragAndDrop.draggable (PageMsg.Internal << DragAndDropRelatedTermsMsg) relatedTermIndex
-                ++ Components.DragAndDrop.droppable (PageMsg.Internal << DragAndDropRelatedTermsMsg) relatedTermIndex
-                ++ [ class "hidden lg:block"
+            let
+                dragAndDropAttributes : List (Html.Attribute (PageMsg InternalMsg))
+                dragAndDropAttributes =
+                    if Components.Combobox.choicesVisible relatedTerm.combobox then
+                        []
+
+                    else
+                        Components.DragAndDrop.droppable (PageMsg.Internal << DragAndDropRelatedTermsMsg) relatedTermIndex
+            in
+            dragAndDropAttributes
+                ++ [ class "hidden lg:block drag-image"
                    , Extras.HtmlAttribute.showIf (dragAndDropStatus == BeingDragged) <|
                         class "opacity-25"
                    ]
@@ -1371,23 +1385,34 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
         [ div
             [ class "flex-auto max-w-2xl flex items-center" ]
             [ Extras.Html.showIf (dragAndDropStatus /= CannotBeDraggedAndDropped) <|
+                let
+                    dragAndDropAttributes : List (Html.Attribute (PageMsg InternalMsg))
+                    dragAndDropAttributes =
+                        if Components.Combobox.choicesVisible relatedTerm.combobox then
+                            []
+
+                        else
+                            Components.DragAndDrop.draggable (PageMsg.Internal << DragAndDropRelatedTermsMsg) relatedTermIndex
+                in
                 Components.Button.roundedWithoutBorder True
-                    [ class "cursor-grab mr-2"
-                    , id <| ElementIds.dragRelatedTermButton (RelatedTermIndex.toInt relatedTermIndex)
-                    , Html.Events.preventDefaultOn "keydown"
-                        (Extras.HtmlEvents.preventDefaultOnDecoder
-                            (\event ->
-                                if Extras.HtmlEvents.isUpArrow event then
-                                    Just <| ( PageMsg.Internal <| MoveRelatedTermUp TermDragButton relatedTermIndex, True )
+                    (dragAndDropAttributes
+                        ++ [ class "cursor-grab mr-2"
+                           , id <| ElementIds.dragRelatedTermButton (RelatedTermIndex.toInt relatedTermIndex)
+                           , Html.Events.preventDefaultOn "keydown"
+                                (Extras.HtmlEvents.preventDefaultOnDecoder
+                                    (\event ->
+                                        if Extras.HtmlEvents.isUpArrow event then
+                                            Just <| ( PageMsg.Internal <| MoveRelatedTermUp TermDragButton relatedTermIndex, True )
 
-                                else if Extras.HtmlEvents.isDownArrow event then
-                                    Just <| ( PageMsg.Internal <| MoveRelatedTermDown TermDragButton numberOfRelatedTerms relatedTermIndex, True )
+                                        else if Extras.HtmlEvents.isDownArrow event then
+                                            Just <| ( PageMsg.Internal <| MoveRelatedTermDown TermDragButton numberOfRelatedTerms relatedTermIndex, True )
 
-                                else
-                                    Nothing
-                            )
-                        )
-                    ]
+                                        else
+                                            Nothing
+                                    )
+                                )
+                           ]
+                    )
                     [ span
                         [ class "sr-only" ]
                         [ text I18n.dragOrUseUpAndDownArrowsToMoveTerm
@@ -1443,6 +1468,7 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                                 in
                                 rawTermIsCurrentlySelected || (not rawTermIsAlreadyListed && rawTermMatchesInput)
                             )
+                        |> List.take 10
                         |> List.map
                             (\term ->
                                 let

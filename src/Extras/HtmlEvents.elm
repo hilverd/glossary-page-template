@@ -18,6 +18,9 @@ module Extras.HtmlEvents exposing
     , onClickStopPropagation
     , onEnter
     , onEscape
+    , onMouseDownPreventDefault
+    , onMouseDownPreventDefaultAndStopPropagation
+    , onMouseDownStopPropagation
     , preventDefaultOnDecoder
     )
 
@@ -205,4 +208,22 @@ onClickPreventDefault msg =
 onClickPreventDefaultAndStopPropagation : msg -> Attribute msg
 onClickPreventDefaultAndStopPropagation msg =
     Html.Events.custom "click" <|
+        Decode.succeed { message = msg, stopPropagation = True, preventDefault = True }
+
+
+onMouseDownStopPropagation : msg -> Attribute msg
+onMouseDownStopPropagation msg =
+    Html.Events.custom "mousedown" <|
+        Decode.succeed { message = msg, stopPropagation = True, preventDefault = False }
+
+
+onMouseDownPreventDefault : msg -> Attribute msg
+onMouseDownPreventDefault msg =
+    Html.Events.custom "mousedown" <|
+        Decode.succeed { message = msg, stopPropagation = False, preventDefault = True }
+
+
+onMouseDownPreventDefaultAndStopPropagation : msg -> Attribute msg
+onMouseDownPreventDefaultAndStopPropagation msg =
+    Html.Events.custom "mousedown" <|
         Decode.succeed { message = msg, stopPropagation = True, preventDefault = True }
