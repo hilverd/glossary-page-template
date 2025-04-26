@@ -1,4 +1,4 @@
-module Components.Combobox exposing (Model, Msg, choice, id, init, onSelect, subscriptions, update, view)
+module Components.Combobox exposing (Model, Msg, choice, id, init, onInput, onSelect, subscriptions, update, view)
 
 import Accessibility
 import Accessibility.Aria
@@ -25,27 +25,22 @@ import Task
 type alias Config parentMsg =
     { id : Maybe String
     , onSelect : Maybe (String -> parentMsg)
+    , onInput : Maybe (String -> parentMsg)
     }
-
-
-
--- TODO: don't keep track of the input in the model, let that be passed in by the parent
 
 
 type Model
     = Model
         { choicesVisible : Bool
         , activeChoice : Maybe ChoiceIndex
-        , input : String
         }
 
 
-init : Maybe String -> Model
-init inputForSelectedChoice =
+init : Model
+init =
     Model
         { choicesVisible = False
         , activeChoice = Nothing
-        , input = inputForSelectedChoice |> Maybe.withDefault ""
         }
 
 
@@ -55,7 +50,6 @@ init inputForSelectedChoice =
 
 type Msg
     = NoOp
-    | UpdateInput String
     | StartShowing String
     | ShowChoices String
     | HideChoices
@@ -70,9 +64,6 @@ update updateParentModel toParentMsg msg (Model model) =
             case msg of
                 NoOp ->
                     ( Model model, Cmd.none )
-
-                UpdateInput input ->
-                    ( Model { model | input = input }, Cmd.none )
 
                 StartShowing id_ ->
                     ( Model model
@@ -113,6 +104,7 @@ update updateParentModel toParentMsg msg (Model model) =
 type Property parentMsg
     = Id String
     | OnSelect (String -> parentMsg)
+    | OnInput (String -> parentMsg)
 
 
 type alias ChoiceIndex =
@@ -141,6 +133,11 @@ onSelect =
     OnSelect
 
 
+onInput : (String -> parentMsg) -> Property parentMsg
+onInput =
+    OnInput
+
+
 configFromProperties : List (Property parentMsg) -> Config parentMsg
 configFromProperties =
     List.foldl
@@ -151,14 +148,18 @@ configFromProperties =
 
                 OnSelect onSelect_ ->
                     { config | onSelect = Just onSelect_ }
+
+                OnInput onInput_ ->
+                    { config | onInput = Just onInput_ }
         )
         { id = Nothing
         , onSelect = Nothing
+        , onInput = Nothing
         }
 
 
-view : (Msg -> parentMsg) -> Model -> List (Property parentMsg) -> Maybe String -> List (Choice parentMsg) -> Html parentMsg
-view toParentMsg (Model model) properties inputForSelectedChoice choices =
+view : (Msg -> parentMsg) -> Model -> List (Property parentMsg) -> Maybe String -> List (Choice parentMsg) -> String -> Html parentMsg
+view toParentMsg (Model model) properties inputForSelectedChoice choices input =
     let
         config : Config parentMsg
         config =
@@ -177,7 +178,7 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices =
             [ class "relative"
             ]
             [ Accessibility.inputText
-                model.input
+                input
                 [ Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
                 , Html.Attributes.type_ "text"
                 , class "block w-full rounded-md bg-white dark:bg-gray-900 py-1.5 pr-12 pl-3 text-gray-900 dark:text-gray-200 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-1 focus:-outline-offset-1 focus:outline-indigo-600 dark:focus:outline-indigo-300"
@@ -188,7 +189,7 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices =
                 , attribute "autocorrect" "off"
                 , attribute "autocapitalize" "off"
                 , Html.Attributes.spellcheck False
-                , Html.Events.onInput <| toParentMsg << UpdateInput
+                , Extras.HtmlAttribute.showMaybe Html.Events.onInput config.onInput
                 ]
             , button
                 [ Html.Attributes.type_ "button"

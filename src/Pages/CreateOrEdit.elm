@@ -110,6 +110,7 @@ type InternalMsg
     | SelectDisambiguationTag String
     | AddRelatedTerm (Maybe RawTerm)
     | SelectRelatedTerm RelatedTermIndex String
+    | UpdateRelatedTermComboboxInput RelatedTermIndex String
     | RelatedTermComboboxMsg RelatedTermIndex Components.Combobox.Msg
     | DeleteRelatedTerm RelatedTermIndex
     | DropdownMenuWithMoreOptionsForTermMsg Int Components.DropdownMenu.Msg
@@ -426,6 +427,11 @@ update msg model =
               }
                 |> updateForm (always form)
             , giveFocusToSeeAlsoSelect latestRelatedTermIndex
+            )
+
+        UpdateRelatedTermComboboxInput relatedTermIndex input ->
+            ( updateForm (Form.updateRelatedTermComboboxInput relatedTermIndex input) model
+            , Cmd.none
             )
 
         SelectRelatedTerm relatedTermIndex selection ->
@@ -1409,6 +1415,7 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                         else
                             ElementIds.draggableRelatedTermCombobox relatedTermIndex
                     , Components.Combobox.onSelect (PageMsg.Internal << SelectRelatedTerm relatedTermIndex)
+                    , Components.Combobox.onInput (PageMsg.Internal << UpdateRelatedTermComboboxInput relatedTermIndex)
                     ]
                     (relatedTerm.raw |> Maybe.map RawTerm.toString)
                     (allTerms
@@ -1431,6 +1438,7 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                                     )
                             )
                     )
+                    relatedTerm.comboboxInput
 
               else
                 Components.SelectMenu.view

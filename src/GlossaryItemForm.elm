@@ -28,6 +28,7 @@ module GlossaryItemForm exposing
     , toggleTagCheckbox
     , updateDefinition
     , updateDisambiguationTagId
+    , updateRelatedTermComboboxInput
     , updateRelatedTermFieldCombobox
     , updateTerm
     )
@@ -61,6 +62,7 @@ type alias RelatedTermField =
     { raw : Maybe RawTerm
     , validationError : Maybe String
     , combobox : Components.Combobox.Model
+    , comboboxInput : String
     }
 
 
@@ -353,7 +355,8 @@ emptyRelatedTermField : RelatedTermField
 emptyRelatedTermField =
     { raw = Nothing
     , validationError = Nothing
-    , combobox = Components.Combobox.init Nothing
+    , combobox = Components.Combobox.init
+    , comboboxInput = ""
     }
 
 
@@ -474,7 +477,8 @@ fromGlossaryItemForUi_ existingPreferredTerms allTags preferredTermsOfItemsListi
                         RelatedTermField
                             (Just <| Term.raw <| DisambiguatedTerm.toTerm term)
                             Nothing
-                            (Components.Combobox.init <| Just <| RawTerm.toString <| Term.raw <| DisambiguatedTerm.toTerm term)
+                            Components.Combobox.init
+                            (DisambiguatedTerm.toTerm term |> Term.raw |> RawTerm.toString)
                     )
                 |> Array.fromList
         , preferredTermsOutside = preferredTermsOutside1
@@ -874,7 +878,8 @@ addRelatedTerm maybeRawTerm glossaryItemForm =
                             (\rawTerm ->
                                 { raw = Just rawTerm
                                 , validationError = Nothing
-                                , combobox = Components.Combobox.init <| Just <| RawTerm.toString rawTerm
+                                , combobox = Components.Combobox.init
+                                , comboboxInput = RawTerm.toString rawTerm
                                 }
                             )
                         |> Maybe.withDefault emptyRelatedTermField
@@ -908,6 +913,19 @@ updateRelatedTermFieldCombobox index combobox (GlossaryItemForm form) =
         |> validate
 
 
+updateRelatedTermComboboxInput : RelatedTermIndex -> String -> GlossaryItemForm -> GlossaryItemForm
+updateRelatedTermComboboxInput index input (GlossaryItemForm form) =
+    GlossaryItemForm
+        { form
+            | relatedTermFields =
+                Extras.Array.update
+                    (\relatedTermField -> { relatedTermField | comboboxInput = input })
+                    (RelatedTermIndex.toInt index)
+                    form.relatedTermFields
+        }
+        |> validate
+
+
 selectRelatedTerm : RelatedTermIndex -> Maybe RawTerm -> GlossaryItemForm -> GlossaryItemForm
 selectRelatedTerm index relatedRawTerm glossaryItemForm =
     case glossaryItemForm of
@@ -917,7 +935,10 @@ selectRelatedTerm index relatedRawTerm glossaryItemForm =
                     | relatedTermFields =
                         Extras.Array.update
                             (always <|
-                                RelatedTermField relatedRawTerm Nothing (Components.Combobox.init <| Maybe.map RawTerm.toString relatedRawTerm)
+                                RelatedTermField relatedRawTerm
+                                    Nothing
+                                    Components.Combobox.init
+                                    (relatedRawTerm |> Maybe.map RawTerm.toString |> Maybe.withDefault "")
                             )
                             (RelatedTermIndex.toInt index)
                             form.relatedTermFields
