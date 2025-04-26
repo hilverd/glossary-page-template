@@ -1,4 +1,4 @@
-module Components.Combobox exposing (Model, Msg, choice, choicesVisible, id, init, onInput, onSelect, subscriptions, update, view)
+module Components.Combobox exposing (Model, Msg, choice, choicesVisible, hideChoices, id, init, onBlur, onInput, onSelect, subscriptions, update, view)
 
 import Accessibility
 import Accessibility.Aria
@@ -27,6 +27,7 @@ type alias Config parentMsg =
     { id : Maybe String
     , onSelect : Maybe (String -> parentMsg)
     , onInput : Maybe (String -> parentMsg)
+    , onBlur : Maybe parentMsg
     }
 
 
@@ -48,6 +49,11 @@ init =
 choicesVisible : Model -> Bool
 choicesVisible (Model model) =
     model.choicesVisible
+
+
+hideChoices : Model -> Model
+hideChoices (Model model) =
+    Model { model | choicesVisible = False }
 
 
 
@@ -115,6 +121,7 @@ type Property parentMsg
     = Id String
     | OnSelect (String -> parentMsg)
     | OnInput (String -> parentMsg)
+    | OnBlur parentMsg
 
 
 type alias ChoiceIndex =
@@ -148,6 +155,11 @@ onInput =
     OnInput
 
 
+onBlur : parentMsg -> Property parentMsg
+onBlur =
+    OnBlur
+
+
 configFromProperties : List (Property parentMsg) -> Config parentMsg
 configFromProperties =
     List.foldl
@@ -161,10 +173,14 @@ configFromProperties =
 
                 OnInput onInput_ ->
                     { config | onInput = Just onInput_ }
+
+                OnBlur onBlur_ ->
+                    { config | onBlur = Just onBlur_ }
         )
         { id = Nothing
         , onSelect = Nothing
         , onInput = Nothing
+        , onBlur = Nothing
         }
 
 
@@ -202,6 +218,7 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices input =
                 , Extras.HtmlAttribute.showMaybe Html.Events.onInput config.onInput
                 , Html.Events.onFocus <| toParentMsg <| StartShowingChoices id_
                 , Html.Events.onClick <| toParentMsg <| StartShowingChoices id_
+                , Extras.HtmlAttribute.showMaybe Html.Events.onBlur config.onBlur
                 ]
             , button
                 [ Html.Attributes.type_ "button"
@@ -252,7 +269,7 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices input =
                                         , Html.Events.onMouseLeave <| toParentMsg <| DeactivateChoice choiceIndex
                                         , Extras.HtmlAttribute.showMaybe
                                             (\onSelect_ ->
-                                                Html.Events.onMouseDown <| onSelect_ value
+                                                Extras.HtmlEvents.onMouseDownStopPropagation <| onSelect_ value
                                             )
                                             config.onSelect
                                         ]

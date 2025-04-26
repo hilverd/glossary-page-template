@@ -913,13 +913,25 @@ updateRelatedTermFieldCombobox index combobox (GlossaryItemForm form) =
         |> validate
 
 
-updateRelatedTermComboboxInput : RelatedTermIndex -> String -> GlossaryItemForm -> GlossaryItemForm
-updateRelatedTermComboboxInput index input (GlossaryItemForm form) =
+updateRelatedTermComboboxInput : Bool -> RelatedTermIndex -> String -> GlossaryItemForm -> GlossaryItemForm
+updateRelatedTermComboboxInput hideChoices index input (GlossaryItemForm form) =
     GlossaryItemForm
         { form
             | relatedTermFields =
                 Extras.Array.update
-                    (\relatedTermField -> { relatedTermField | comboboxInput = input })
+                    (\relatedTermField ->
+                        { relatedTermField
+                            | combobox =
+                                (if hideChoices then
+                                    Components.Combobox.hideChoices
+
+                                 else
+                                    identity
+                                )
+                                    relatedTermField.combobox
+                            , comboboxInput = input
+                        }
+                    )
                     (RelatedTermIndex.toInt index)
                     form.relatedTermFields
         }

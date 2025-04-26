@@ -110,7 +110,7 @@ type InternalMsg
     | SelectDisambiguationTag String
     | AddRelatedTerm (Maybe RawTerm)
     | SelectRelatedTerm RelatedTermIndex String
-    | UpdateRelatedTermComboboxInput RelatedTermIndex String
+    | UpdateRelatedTermComboboxInput Bool RelatedTermIndex String
     | RelatedTermComboboxMsg RelatedTermIndex Components.Combobox.Msg
     | DeleteRelatedTerm RelatedTermIndex
     | DropdownMenuWithMoreOptionsForTermMsg Int Components.DropdownMenu.Msg
@@ -429,8 +429,8 @@ update msg model =
             , giveFocusToSeeAlsoSelect latestRelatedTermIndex
             )
 
-        UpdateRelatedTermComboboxInput relatedTermIndex input ->
-            ( updateForm (Form.updateRelatedTermComboboxInput relatedTermIndex input) model
+        UpdateRelatedTermComboboxInput hideChoices relatedTermIndex input ->
+            ( updateForm (Form.updateRelatedTermComboboxInput hideChoices relatedTermIndex input) model
             , Cmd.none
             )
 
@@ -1440,7 +1440,14 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                         else
                             ElementIds.draggableRelatedTermCombobox relatedTermIndex
                     , Components.Combobox.onSelect (PageMsg.Internal << SelectRelatedTerm relatedTermIndex)
-                    , Components.Combobox.onInput (PageMsg.Internal << UpdateRelatedTermComboboxInput relatedTermIndex)
+                    , Components.Combobox.onInput (PageMsg.Internal << UpdateRelatedTermComboboxInput False relatedTermIndex)
+                    , Components.Combobox.onBlur
+                        (PageMsg.Internal <|
+                            UpdateRelatedTermComboboxInput True relatedTermIndex <|
+                                Maybe.withDefault "" <|
+                                    Maybe.map RawTerm.toString <|
+                                        relatedTerm.raw
+                        )
                     ]
                     (relatedTerm.raw |> Maybe.map RawTerm.toString)
                     (allTerms
