@@ -81,7 +81,7 @@ type Msg
     | HideChoices
     | ActivateChoice ChoiceIndex
     | DeactivateChoice ChoiceIndex
-    | ActivatePreviousOrNextChoice Int Bool
+    | ActivatePreviousOrNextChoice String Int Bool
 
 
 update : (Model -> parentModel) -> (Msg -> parentMsg) -> Msg -> Model -> ( parentModel, Cmd parentMsg )
@@ -125,7 +125,7 @@ update updateParentModel toParentMsg msg (Model model) =
                     , Cmd.none
                     )
 
-                ActivatePreviousOrNextChoice numberOfChoices next ->
+                ActivatePreviousOrNextChoice comboboxId numberOfChoices next ->
                     let
                         delta : Int
                         delta =
@@ -158,7 +158,7 @@ update updateParentModel toParentMsg msg (Model model) =
                     in
                     ( Model { model | activeChoiceIndex = activeChoiceIndex_ }
                     , activeChoiceIndex_
-                        |> Maybe.map (\index -> scrollChoiceIntoView "TODO")
+                        |> Maybe.map (\index -> scrollChoiceIntoView <| ElementIds.comboboxChoice comboboxId index)
                         |> Maybe.withDefault Cmd.none
                     )
     in
@@ -276,25 +276,25 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices input =
                         (\event ->
                             if Extras.HtmlEvents.isDownArrow event then
                                 Just
-                                    ( toParentMsg <| ActivatePreviousOrNextChoice (List.length choices) True
+                                    ( toParentMsg <| ActivatePreviousOrNextChoice id_ (List.length choices) True
                                     , True
                                     )
 
                             else if Extras.HtmlEvents.isUpArrow event then
                                 Just
-                                    ( toParentMsg <| ActivatePreviousOrNextChoice (List.length choices) False
+                                    ( toParentMsg <| ActivatePreviousOrNextChoice id_ (List.length choices) False
                                     , True
                                     )
 
                             else if Extras.HtmlEvents.isHome event then
                                 Just
-                                    ( toParentMsg <| ActivatePreviousOrNextChoice (List.length choices) False
+                                    ( toParentMsg <| ActivatePreviousOrNextChoice id_ (List.length choices) False
                                     , True
                                     )
 
                             else if Extras.HtmlEvents.isEnd event then
                                 Just
-                                    ( toParentMsg <| ActivatePreviousOrNextChoice (List.length choices) False
+                                    ( toParentMsg <| ActivatePreviousOrNextChoice id_ (List.length choices) False
                                     , True
                                     )
 
@@ -362,6 +362,7 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices input =
                                             class "text-gray-900 dark:text-gray-200"
                                         , attribute "role" "option"
                                         , Accessibility.Key.tabbable False
+                                        , Html.Attributes.id <| ElementIds.comboboxChoice id_ choiceIndex
                                         , Html.Events.onMouseEnter <| toParentMsg <| ActivateChoice choiceIndex
                                         , Html.Events.onMouseLeave <| toParentMsg <| DeactivateChoice choiceIndex
                                         , Extras.HtmlAttribute.showMaybe

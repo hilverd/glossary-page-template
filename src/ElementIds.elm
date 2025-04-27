@@ -7,6 +7,7 @@ module ElementIds exposing
     , cardWidthCompact
     , cardWidthIntermediate
     , cardWidthWide
+    , comboboxChoice
     , confirmDeleteModalTitle
     , container
     , defaultThemeDark
@@ -377,3 +378,8 @@ deleteRelatedTermButton index =
 dragRelatedTermButton : Int -> String
 dragRelatedTermButton index =
     prefixed <| "drag-related-term-" ++ String.fromInt index ++ "-button"
+
+
+comboboxChoice : String -> Int -> String
+comboboxChoice comboboxId index =
+    prefixed <| comboboxId ++ "-choice-" ++ String.fromInt index
