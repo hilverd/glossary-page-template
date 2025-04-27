@@ -1439,6 +1439,8 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
 
                         else
                             ElementIds.draggableRelatedTermCombobox relatedTermIndex
+                    , Components.Combobox.validationError relatedTerm.validationError
+                    , Components.Combobox.showValidationErrors showValidationErrors
                     , Components.Combobox.onSelect (PageMsg.Internal << SelectRelatedTerm relatedTermIndex)
                     , Components.Combobox.onInput (PageMsg.Internal << UpdateRelatedTermComboboxInput False relatedTermIndex)
                     , Components.Combobox.onBlur

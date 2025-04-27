@@ -1,4 +1,4 @@
-port module Components.Combobox exposing (Model, Msg, choice, choicesVisible, hideChoices, id, init, onBlur, onInput, onSelect, showChoices, subscriptions, update, view)
+port module Components.Combobox exposing (Model, Msg, choice, choicesVisible, hideChoices, id, init, onBlur, onInput, onSelect, showChoices, showValidationErrors, subscriptions, update, validationError, view)
 
 import Accessibility
 import Accessibility.Aria
@@ -27,6 +27,8 @@ import Task
 
 type alias Config parentMsg =
     { id : Maybe String
+    , showValidationErrors : Bool
+    , validationError : Maybe String
     , onSelect : Maybe (String -> parentMsg)
     , onInput : Maybe (String -> parentMsg)
     , onBlur : Maybe parentMsg
@@ -174,6 +176,8 @@ type Property parentMsg
     | OnSelect (String -> parentMsg)
     | OnInput (String -> parentMsg)
     | OnBlur parentMsg
+    | ShowValidationErrors Bool
+    | ValidationError (Maybe String)
 
 
 type alias ChoiceIndex =
@@ -212,6 +216,16 @@ onBlur =
     OnBlur
 
 
+validationError : Maybe String -> Property msg
+validationError =
+    ValidationError
+
+
+showValidationErrors : Bool -> Property msg
+showValidationErrors =
+    ShowValidationErrors
+
+
 configFromProperties : List (Property parentMsg) -> Config parentMsg
 configFromProperties =
     List.foldl
@@ -228,11 +242,19 @@ configFromProperties =
 
                 OnBlur onBlur_ ->
                     { config | onBlur = Just onBlur_ }
+
+                ShowValidationErrors showValidationErrors_ ->
+                    { config | showValidationErrors = showValidationErrors_ }
+
+                ValidationError validationError_ ->
+                    { config | validationError = validationError_ }
         )
         { id = Nothing
         , onSelect = Nothing
         , onInput = Nothing
         , onBlur = Nothing
+        , showValidationErrors = False
+        , validationError = Nothing
         }
 
 
@@ -402,6 +424,18 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices input =
                         )
                 )
             ]
+        , Extras.Html.showMaybe
+            (\validationError1 ->
+                p
+                    [ class "mt-2 text-red-600 dark:text-red-400" ]
+                    [ text validationError1 ]
+            )
+            (if config.showValidationErrors then
+                config.validationError
+
+             else
+                Nothing
+            )
         ]
 
 
