@@ -47,7 +47,6 @@ import Html.Attributes exposing (class, id, required, style)
 import Html.Events
 import Http
 import Icons
-import IncubatingFeatures exposing (showIncubatingFeatures)
 import Internationalisation as I18n
 import Json.Decode
 import PageMsg exposing (PageMsg)
@@ -1429,100 +1428,69 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                             [ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms relatedTermIndex dropdownMenuWithMoreOptions ]
                     )
                     maybeDropdownMenuWithMoreOptions
-            , if showIncubatingFeatures then
-                Components.Combobox.view
-                    (PageMsg.Internal << RelatedTermComboboxMsg relatedTermIndex)
-                    relatedTerm.combobox
-                    [ Components.Combobox.id <|
-                        if dragAndDropStatus == CannotBeDraggedAndDropped then
-                            ElementIds.relatedTermCombobox relatedTermIndex
+            , Components.Combobox.view
+                (PageMsg.Internal << RelatedTermComboboxMsg relatedTermIndex)
+                relatedTerm.combobox
+                [ Components.Combobox.id <|
+                    if dragAndDropStatus == CannotBeDraggedAndDropped then
+                        ElementIds.relatedTermCombobox relatedTermIndex
 
-                        else
-                            ElementIds.draggableRelatedTermCombobox relatedTermIndex
-                    , Components.Combobox.validationError relatedTerm.validationError
-                    , Components.Combobox.showValidationErrors showValidationErrors
-                    , Components.Combobox.onSelect (PageMsg.Internal << SelectRelatedTerm relatedTermIndex)
-                    , Components.Combobox.onInput (PageMsg.Internal << UpdateRelatedTermComboboxInput False relatedTermIndex)
-                    , Components.Combobox.onBlur
-                        (PageMsg.Internal <|
-                            UpdateRelatedTermComboboxInput True relatedTermIndex <|
-                                Maybe.withDefault "" <|
-                                    Maybe.map RawTerm.toString <|
-                                        relatedTerm.raw
-                        )
-                    ]
-                    (relatedTerm.raw |> Maybe.map RawTerm.toString)
-                    (allTerms
-                        |> List.filter
-                            (\term ->
-                                let
-                                    rawTerm : RawTerm
-                                    rawTerm =
-                                        term |> DisambiguatedTerm.toTerm |> Term.raw
-
-                                    rawTermMatchesInput : Bool
-                                    rawTermMatchesInput =
-                                        rawTerm
-                                            |> RawTerm.toString
-                                            |> String.toLower
-                                            |> String.contains (relatedTerm.comboboxInput |> String.toLower)
-
-                                    rawTermIsCurrentlySelected : Bool
-                                    rawTermIsCurrentlySelected =
-                                        Just rawTerm == relatedTerm.raw
-
-                                    rawTermIsAlreadyListed : Bool
-                                    rawTermIsAlreadyListed =
-                                        Set.member (RawTerm.toString rawTerm) relatedRawTerms
-                                in
-                                (rawTermIsCurrentlySelected || not rawTermIsAlreadyListed) && rawTermMatchesInput
-                            )
-                        |> List.take 10
-                        |> List.map
-                            (\term ->
-                                let
-                                    enableMathSupport =
-                                        False
-                                in
-                                Components.Combobox.choice
-                                    (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
-                                    (\additionalAttributes ->
-                                        Term.view enableMathSupport additionalAttributes <|
-                                            DisambiguatedTerm.toTerm term
-                                    )
-                            )
+                    else
+                        ElementIds.draggableRelatedTermCombobox relatedTermIndex
+                , Components.Combobox.validationError relatedTerm.validationError
+                , Components.Combobox.showValidationErrors showValidationErrors
+                , Components.Combobox.onSelect (PageMsg.Internal << SelectRelatedTerm relatedTermIndex)
+                , Components.Combobox.onInput (PageMsg.Internal << UpdateRelatedTermComboboxInput False relatedTermIndex)
+                , Components.Combobox.onBlur
+                    (PageMsg.Internal <|
+                        UpdateRelatedTermComboboxInput True relatedTermIndex <|
+                            Maybe.withDefault "" <|
+                                Maybe.map RawTerm.toString <|
+                                    relatedTerm.raw
                     )
-                    relatedTerm.comboboxInput
+                ]
+                (relatedTerm.raw |> Maybe.map RawTerm.toString)
+                (allTerms
+                    |> List.filter
+                        (\term ->
+                            let
+                                rawTerm : RawTerm
+                                rawTerm =
+                                    term |> DisambiguatedTerm.toTerm |> Term.raw
 
-              else
-                Components.SelectMenu.view
-                    [ Components.SelectMenu.id <|
-                        (if dragAndDropStatus == CannotBeDraggedAndDropped then
-                            ElementIds.seeAlsoSelect
+                                rawTermMatchesInput : Bool
+                                rawTermMatchesInput =
+                                    rawTerm
+                                        |> RawTerm.toString
+                                        |> String.toLower
+                                        |> String.contains (relatedTerm.comboboxInput |> String.toLower)
 
-                         else
-                            ElementIds.draggableSeeAlsoSelect
+                                rawTermIsCurrentlySelected : Bool
+                                rawTermIsCurrentlySelected =
+                                    Just rawTerm == relatedTerm.raw
+
+                                rawTermIsAlreadyListed : Bool
+                                rawTermIsAlreadyListed =
+                                    Set.member (RawTerm.toString rawTerm) relatedRawTerms
+                            in
+                            (rawTermIsCurrentlySelected || not rawTermIsAlreadyListed) && rawTermMatchesInput
                         )
-                            relatedTermIndex
-                    , Components.SelectMenu.ariaLabel I18n.relatedItem
-                    , Components.SelectMenu.validationError relatedTerm.validationError
-                    , Components.SelectMenu.showValidationErrors showValidationErrors
-                    , Components.SelectMenu.onChange (PageMsg.Internal << SelectRelatedTerm relatedTermIndex)
-                    ]
-                    (allTerms
-                        |> List.filter
-                            (\term ->
-                                (not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) relatedRawTerms)
-                                    || (Just (term |> DisambiguatedTerm.toTerm |> Term.raw) == relatedTerm.raw)
-                            )
-                        |> List.map
-                            (\term ->
-                                Components.SelectMenu.Choice
-                                    (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
-                                    [ text <| Term.inlineText <| DisambiguatedTerm.toTerm term ]
-                                    (Just (Term.raw <| DisambiguatedTerm.toTerm term) == relatedTerm.raw)
-                            )
-                    )
+                    |> List.take 10
+                    |> List.map
+                        (\term ->
+                            let
+                                enableMathSupport =
+                                    False
+                            in
+                            Components.Combobox.choice
+                                (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
+                                (\additionalAttributes ->
+                                    Term.view enableMathSupport additionalAttributes <|
+                                        DisambiguatedTerm.toTerm term
+                                )
+                        )
+                )
+                relatedTerm.comboboxInput
             , span
                 [ class "inline-flex items-center" ]
                 [ Components.Button.rounded True
