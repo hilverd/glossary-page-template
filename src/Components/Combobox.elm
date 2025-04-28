@@ -273,7 +273,7 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices input =
         optionsId =
             id_ ++ "-options"
     in
-    div []
+    div [ class "w-full max-w-md" ]
         [ div
             [ class "relative"
             ]
