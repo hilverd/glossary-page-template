@@ -1428,7 +1428,35 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                             [ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms relatedTermIndex dropdownMenuWithMoreOptions ]
                     )
                     maybeDropdownMenuWithMoreOptions
-            , Components.Combobox.view
+            , let
+                comboboxMatches =
+                    allTerms
+                        |> List.filter
+                            (\term ->
+                                let
+                                    rawTerm : RawTerm
+                                    rawTerm =
+                                        term |> DisambiguatedTerm.toTerm |> Term.raw
+
+                                    rawTermMatchesInput : Bool
+                                    rawTermMatchesInput =
+                                        rawTerm
+                                            |> RawTerm.toString
+                                            |> String.toLower
+                                            |> String.contains (relatedTerm.comboboxInput |> String.toLower)
+
+                                    rawTermIsCurrentlySelected : Bool
+                                    rawTermIsCurrentlySelected =
+                                        Just rawTerm == relatedTerm.raw
+
+                                    rawTermIsAlreadyListed : Bool
+                                    rawTermIsAlreadyListed =
+                                        Set.member (RawTerm.toString rawTerm) relatedRawTerms
+                                in
+                                (rawTermIsCurrentlySelected || not rawTermIsAlreadyListed) && rawTermMatchesInput
+                            )
+              in
+              Components.Combobox.view
                 (PageMsg.Internal << RelatedTermComboboxMsg relatedTermIndex)
                 relatedTerm.combobox
                 [ Components.Combobox.id <|
@@ -1450,31 +1478,7 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                     )
                 ]
                 (relatedTerm.raw |> Maybe.map RawTerm.toString)
-                (allTerms
-                    |> List.filter
-                        (\term ->
-                            let
-                                rawTerm : RawTerm
-                                rawTerm =
-                                    term |> DisambiguatedTerm.toTerm |> Term.raw
-
-                                rawTermMatchesInput : Bool
-                                rawTermMatchesInput =
-                                    rawTerm
-                                        |> RawTerm.toString
-                                        |> String.toLower
-                                        |> String.contains (relatedTerm.comboboxInput |> String.toLower)
-
-                                rawTermIsCurrentlySelected : Bool
-                                rawTermIsCurrentlySelected =
-                                    Just rawTerm == relatedTerm.raw
-
-                                rawTermIsAlreadyListed : Bool
-                                rawTermIsAlreadyListed =
-                                    Set.member (RawTerm.toString rawTerm) relatedRawTerms
-                            in
-                            (rawTermIsCurrentlySelected || not rawTermIsAlreadyListed) && rawTermMatchesInput
-                        )
+                (comboboxMatches
                     |> List.take 10
                     |> List.map
                         (\term ->
@@ -1489,6 +1493,12 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                                         DisambiguatedTerm.toTerm term
                                 )
                         )
+                )
+                (if List.length comboboxMatches > 10 then
+                    Just <| "Showing 10 of " ++ String.fromInt (List.length comboboxMatches) ++ " matches"
+
+                 else
+                    Nothing
                 )
                 relatedTerm.comboboxInput
             , span

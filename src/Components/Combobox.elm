@@ -258,8 +258,8 @@ configFromProperties =
         }
 
 
-view : (Msg -> parentMsg) -> Model -> List (Property parentMsg) -> Maybe String -> List (Choice parentMsg) -> String -> Html parentMsg
-view toParentMsg (Model model) properties inputForSelectedChoice choices input =
+view : (Msg -> parentMsg) -> Model -> List (Property parentMsg) -> Maybe String -> List (Choice parentMsg) -> Maybe String -> String -> Html parentMsg
+view toParentMsg (Model model) properties inputForSelectedChoice choices messageToShowAtBottom input =
     let
         config : Config parentMsg
         config =
@@ -356,73 +356,90 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices input =
                     , attribute "data-slot" "icon"
                     ]
                 ]
-            , ul
-                [ class "absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-gray-900 py-1 ring-1 shadow-lg ring-black/5 dark:ring-gray-100/5 focus:outline-hidden"
-                , Html.Attributes.id optionsId
-                , Accessibility.Role.listBox
-                , Extras.HtmlAttribute.showUnless (model.choicesVisible && List.length choices > 0) <| class "hidden"
-                ]
-                (choices
-                    |> List.indexedMap
-                        (\choiceIndex choice_ ->
-                            case choice_ of
-                                Choice { body, value } ->
-                                    let
-                                        selected =
-                                            Just value == inputForSelectedChoice
+            , div
+                [ class "absolute z-10 mt-1 w-full" ]
+                [ ul
+                    [ class "max-h-60 overflow-auto bg-white dark:bg-gray-800 py-1 ring-1 shadow-lg ring-black/5 dark:ring-gray-100/5 focus:outline-hidden"
+                    , if messageToShowAtBottom == Nothing then
+                        class "rounded-md"
 
-                                        active : Bool
-                                        active =
-                                            model.activeChoiceIndex == Just choiceIndex
-                                    in
-                                    li
-                                        [ class "relative cursor-default py-2 pr-9 pl-3 dark:text-white select-none"
-                                        , if active then
-                                            class "text-white bg-indigo-600 dark:bg-indigo-300 outline-hidden"
+                      else
+                        class "rounded-t-md"
+                    , Html.Attributes.id optionsId
+                    , Accessibility.Role.listBox
+                    , Extras.HtmlAttribute.showUnless (model.choicesVisible && List.length choices > 0) <| class "hidden"
+                    ]
+                    (choices
+                        |> List.indexedMap
+                            (\choiceIndex choice_ ->
+                                case choice_ of
+                                    Choice { body, value } ->
+                                        let
+                                            selected =
+                                                Just value == inputForSelectedChoice
 
-                                          else
-                                            class "text-gray-900 dark:text-gray-200"
-                                        , attribute "role" "option"
-                                        , Accessibility.Key.tabbable False
-                                        , Html.Attributes.id <| ElementIds.comboboxChoice id_ choiceIndex
-                                        , Html.Events.onMouseEnter <| toParentMsg <| ActivateChoice choiceIndex
-                                        , Html.Events.onMouseLeave <| toParentMsg <| DeactivateChoice choiceIndex
-                                        , Extras.HtmlAttribute.showMaybe
-                                            (\onSelect_ ->
-                                                Extras.HtmlEvents.onMouseDownStopPropagation <| onSelect_ value
-                                            )
-                                            config.onSelect
-                                        ]
-                                        [ span
-                                            [ class "block truncate"
-                                            , Extras.HtmlAttribute.showIf selected <| class "font-semibold"
+                                            active : Bool
+                                            active =
+                                                model.activeChoiceIndex == Just choiceIndex
+                                        in
+                                        li
+                                            [ class "relative cursor-default py-2 pr-9 pl-3 dark:text-white select-none"
+                                            , if active then
+                                                class "text-white bg-indigo-600 dark:bg-indigo-300 outline-hidden"
+
+                                              else
+                                                class "text-gray-900 dark:text-gray-200"
+                                            , attribute "role" "option"
+                                            , Accessibility.Key.tabbable False
+                                            , Html.Attributes.id <| ElementIds.comboboxChoice id_ choiceIndex
+                                            , Html.Events.onMouseEnter <| toParentMsg <| ActivateChoice choiceIndex
+                                            , Html.Events.onMouseLeave <| toParentMsg <| DeactivateChoice choiceIndex
+                                            , Extras.HtmlAttribute.showMaybe
+                                                (\onSelect_ ->
+                                                    Extras.HtmlEvents.onMouseDownStopPropagation <| onSelect_ value
+                                                )
+                                                config.onSelect
                                             ]
-                                            [ body
-                                                [ if active then
-                                                    class "text-white dark:text-gray-900 bg-indigo-600 dark:bg-indigo-300 outline-hidden"
-
-                                                  else
-                                                    class "text-gray-900 dark:text-gray-200"
+                                            [ span
+                                                [ class "block truncate"
+                                                , Extras.HtmlAttribute.showIf selected <| class "font-semibold"
                                                 ]
-                                            ]
-                                        , Extras.Html.showIf selected <|
-                                            span
-                                                [ class "absolute inset-y-0 right-0 flex items-center pr-4"
-                                                , if active then
-                                                    class "text-white dark:text-gray-900"
+                                                [ body
+                                                    [ if active then
+                                                        class "text-white dark:text-gray-900 bg-indigo-600 dark:bg-indigo-300 outline-hidden"
 
-                                                  else
-                                                    class "text-indigo-600 dark:text-indigo-300"
-                                                ]
-                                                [ Icons.check
-                                                    [ Svg.Attributes.class "size-5"
-                                                    , Accessibility.Aria.hidden True
-                                                    , attribute "data-slot" "icon"
+                                                      else
+                                                        class "text-gray-900 dark:text-gray-200"
                                                     ]
                                                 ]
-                                        ]
-                        )
-                )
+                                            , Extras.Html.showIf selected <|
+                                                span
+                                                    [ class "absolute inset-y-0 right-0 flex items-center pr-4"
+                                                    , if active then
+                                                        class "text-white dark:text-gray-900"
+
+                                                      else
+                                                        class "text-indigo-600 dark:text-indigo-300"
+                                                    ]
+                                                    [ Icons.check
+                                                        [ Svg.Attributes.class "size-5"
+                                                        , Accessibility.Aria.hidden True
+                                                        , attribute "data-slot" "icon"
+                                                        ]
+                                                    ]
+                                            ]
+                            )
+                    )
+                , Extras.Html.showMaybe
+                    (\message ->
+                        div
+                            [ class "cursor-default border border-gray-300 shadow-lg dark:border-gray-700 rounded-b-md bg-gray-100 dark:bg-gray-900 text-sm py-2 pr-9 pl-3 dark:text-white select-none text-gray-900 dark:text-gray-200"
+                            , Extras.HtmlAttribute.showUnless model.choicesVisible <| class "hidden"
+                            ]
+                            [ text message ]
+                    )
+                    messageToShowAtBottom
+                ]
             ]
         , Extras.Html.showMaybe
             (\validationError1 ->
