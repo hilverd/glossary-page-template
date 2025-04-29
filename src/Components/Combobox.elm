@@ -322,6 +322,12 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices message
                                     , True
                                     )
 
+                            else if Extras.HtmlEvents.isEscape event then
+                                Just
+                                    ( toParentMsg <| HideChoices (Just id_)
+                                    , True
+                                    )
+
                             else if Extras.HtmlEvents.isEnter event then
                                 let
                                     maybeActiveChoice : Maybe (Choice parentMsg)
