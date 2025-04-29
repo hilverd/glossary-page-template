@@ -1459,6 +1459,25 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                                     in
                                     (rawTermIsCurrentlySelected || not rawTermIsAlreadyListed) && rawTermMatchesInput
                                 )
+                            |> List.sortBy
+                                (\term ->
+                                    let
+                                        rawTermString =
+                                            term
+                                                |> DisambiguatedTerm.toTerm
+                                                |> Term.raw
+                                                |> RawTerm.toString
+                                                |> String.toLower
+
+                                        input =
+                                            String.toLower relatedTerm.comboboxInput
+                                    in
+                                    if String.startsWith input rawTermString then
+                                        0
+
+                                    else
+                                        1
+                                )
               in
               Components.Combobox.view
                 (PageMsg.Internal << RelatedTermComboboxMsg relatedTermIndex)
