@@ -80,7 +80,7 @@ type Msg
     = NoOp
     | StartShowingChoices String
     | ShowChoices String
-    | HideChoices
+    | HideChoices (Maybe String)
     | ActivateChoice ChoiceIndex
     | DeactivateChoice ChoiceIndex
     | ActivatePreviousOrNextChoice String Int Bool
@@ -108,8 +108,12 @@ update updateParentModel toParentMsg msg (Model model) =
                     , Dom.focus id_ |> Task.attempt (\_ -> NoOp)
                     )
 
-                HideChoices ->
-                    ( Model { model | choicesVisible = False }, Cmd.none )
+                HideChoices id_ ->
+                    ( Model { model | choicesVisible = False }
+                    , id_
+                        |> Maybe.map (Dom.focus >> Task.attempt (\_ -> NoOp))
+                        |> Maybe.withDefault Cmd.none
+                    )
 
                 ActivateChoice choiceIndex ->
                     ( Model { model | activeChoiceIndex = Just choiceIndex }, Cmd.none )
@@ -290,8 +294,6 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices message
                 , attribute "autocapitalize" "off"
                 , Html.Attributes.spellcheck False
                 , Extras.HtmlAttribute.showMaybe Html.Events.onInput config.onInput
-                , Html.Events.onFocus <| toParentMsg <| StartShowingChoices id_
-                , Html.Events.onClick <| toParentMsg <| StartShowingChoices id_
                 , Extras.HtmlAttribute.showMaybe Html.Events.onBlur config.onBlur
                 , Html.Events.preventDefaultOn "keydown"
                     (Extras.HtmlEvents.preventDefaultOnDecoder
@@ -348,7 +350,7 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices message
                             StartShowingChoices id_
 
                         else
-                            HideChoices
+                            HideChoices (Just id_)
                 ]
                 [ Icons.chevronUpDown
                     [ Svg.Attributes.class "size-6 text-gray-400 dark:text-gray-500"
@@ -463,7 +465,7 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices message
 subscriptions : Model -> Sub Msg
 subscriptions (Model model) =
     if model.choicesVisible then
-        Events.onMouseDown <| Decode.succeed HideChoices
+        Events.onMouseDown <| Decode.succeed <| HideChoices Nothing
 
     else
         Sub.none
