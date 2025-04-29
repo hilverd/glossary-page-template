@@ -46,7 +46,7 @@ init : Model
 init =
     Model
         { choicesVisible = False
-        , activeChoiceIndex = Nothing
+        , activeChoiceIndex = Just 0
         }
 
 
