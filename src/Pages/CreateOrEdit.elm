@@ -1430,31 +1430,35 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                     maybeDropdownMenuWithMoreOptions
             , let
                 comboboxMatches =
-                    allTerms
-                        |> List.filter
-                            (\term ->
-                                let
-                                    rawTerm : RawTerm
-                                    rawTerm =
-                                        term |> DisambiguatedTerm.toTerm |> Term.raw
+                    if relatedTerm.comboboxInput == "" then
+                        []
 
-                                    rawTermMatchesInput : Bool
-                                    rawTermMatchesInput =
-                                        rawTerm
-                                            |> RawTerm.toString
-                                            |> String.toLower
-                                            |> String.contains (relatedTerm.comboboxInput |> String.toLower)
+                    else
+                        allTerms
+                            |> List.filter
+                                (\term ->
+                                    let
+                                        rawTerm : RawTerm
+                                        rawTerm =
+                                            term |> DisambiguatedTerm.toTerm |> Term.raw
 
-                                    rawTermIsCurrentlySelected : Bool
-                                    rawTermIsCurrentlySelected =
-                                        Just rawTerm == relatedTerm.raw
+                                        rawTermMatchesInput : Bool
+                                        rawTermMatchesInput =
+                                            rawTerm
+                                                |> RawTerm.toString
+                                                |> String.toLower
+                                                |> String.contains (relatedTerm.comboboxInput |> String.toLower)
 
-                                    rawTermIsAlreadyListed : Bool
-                                    rawTermIsAlreadyListed =
-                                        Set.member (RawTerm.toString rawTerm) relatedRawTerms
-                                in
-                                (rawTermIsCurrentlySelected || not rawTermIsAlreadyListed) && rawTermMatchesInput
-                            )
+                                        rawTermIsCurrentlySelected : Bool
+                                        rawTermIsCurrentlySelected =
+                                            Just rawTerm == relatedTerm.raw
+
+                                        rawTermIsAlreadyListed : Bool
+                                        rawTermIsAlreadyListed =
+                                            Set.member (RawTerm.toString rawTerm) relatedRawTerms
+                                    in
+                                    (rawTermIsCurrentlySelected || not rawTermIsAlreadyListed) && rawTermMatchesInput
+                                )
               in
               Components.Combobox.view
                 (PageMsg.Internal << RelatedTermComboboxMsg relatedTermIndex)
@@ -1496,6 +1500,9 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                 )
                 (if List.length comboboxMatches > 10 then
                     Just <| "Showing 10 of " ++ String.fromInt (List.length comboboxMatches) ++ " matches"
+
+                 else if relatedTerm.comboboxInput /= "" && List.length comboboxMatches == 0 then
+                    Just "No matches found"
 
                  else
                     Nothing
