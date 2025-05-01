@@ -13,6 +13,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+
+- Use comboboxes instead of `<select>` elements for selecting related items.
+
 ### Fixed
 
 - Fix opacity issue on mobile when opening sidebar.
