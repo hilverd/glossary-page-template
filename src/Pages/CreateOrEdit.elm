@@ -1350,6 +1350,11 @@ viewMoveRelatedTermUpOrDownButtons numberOfRelatedTerms relatedTermIndex =
         ]
 
 
+maximumNumberOfResultsForTermCombobox : Int
+maximumNumberOfResultsForTermCombobox =
+    10
+
+
 viewCreateSeeAlsoSingle1 :
     DivDragAndDropStatus
     -> Bool
@@ -1502,7 +1507,7 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                 ]
                 (relatedTerm.raw |> Maybe.map RawTerm.toString)
                 (comboboxMatches
-                    |> List.take 10
+                    |> List.take maximumNumberOfResultsForTermCombobox
                     |> List.map
                         (\term ->
                             let
@@ -1517,11 +1522,11 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                                 )
                         )
                 )
-                (if List.length comboboxMatches > 10 then
-                    Just <| "Showing 10 of " ++ String.fromInt (List.length comboboxMatches) ++ " matches"
+                (if List.length comboboxMatches > maximumNumberOfResultsForTermCombobox then
+                    Just <| I18n.showingXOfYMatches (String.fromInt maximumNumberOfResultsForTermCombobox) (String.fromInt (List.length comboboxMatches))
 
                  else if relatedTerm.comboboxInput /= "" && List.length comboboxMatches == 0 then
-                    Just "No matches found"
+                    Just I18n.noMatchesFound
 
                  else
                     Nothing

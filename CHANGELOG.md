@@ -15,6 +15,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Changed
 
 - Use comboboxes instead of `<select>` elements for selecting related items.
+- Limit search results to at most 10 and add a "Showing x of y matches" message.
 
 ### Fixed
 

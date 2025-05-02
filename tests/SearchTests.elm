@@ -77,31 +77,67 @@ suite =
             [ test "returns search results sorted by relevance for a given search string" <|
                 \_ ->
                     loadedGlossaryItemsForUi
-                        |> Search.search False Nothing "term"
-                        |> List.map SearchDialog.searchResultHref
+                        |> Search.search False Nothing 10 "term"
+                        |> (\{ totalNumberOfResults, results } ->
+                                { totalNumberOfResults = totalNumberOfResults
+                                , results = List.map SearchDialog.searchResultHref results
+                                }
+                           )
                         |> Expect.equal
-                            [ "#Second_the_term"
-                            , "#The_term_one"
-                            , "#The_term_three"
-                            ]
+                            { totalNumberOfResults = 3
+                            , results =
+                                [ "#Second_the_term"
+                                , "#The_term_one"
+                                , "#The_term_three"
+                                ]
+                            }
             , test "terms for which the search string is a prefix are ranked higher than other terms" <|
                 \_ ->
                     loadedGlossaryItemsForUi
-                        |> Search.search False Nothing "the"
-                        |> List.map SearchDialog.searchResultHref
+                        |> Search.search False Nothing 10 "the"
+                        |> (\{ totalNumberOfResults, results } ->
+                                { totalNumberOfResults = totalNumberOfResults
+                                , results = List.map SearchDialog.searchResultHref results
+                                }
+                           )
                         |> Expect.equal
-                            [ "#The_term_one"
-                            , "#The_term_three"
-                            , "#Second_the_term"
-                            ]
+                            { totalNumberOfResults = 3
+                            , results =
+                                [ "#The_term_one"
+                                , "#The_term_three"
+                                , "#Second_the_term"
+                                ]
+                            }
             , test "also searches definitions, but terms take priority" <|
                 \_ ->
                     loadedGlossaryItemsForUi
-                        |> Search.search False Nothing "three"
-                        |> List.map SearchDialog.searchResultHref
+                        |> Search.search False Nothing 10 "three"
+                        |> (\{ totalNumberOfResults, results } ->
+                                { totalNumberOfResults = totalNumberOfResults
+                                , results = List.map SearchDialog.searchResultHref results
+                                }
+                           )
                         |> Expect.equal
-                            [ "#The_term_three"
-                            , "#Second_the_term"
-                            ]
+                            { totalNumberOfResults = 2
+                            , results =
+                                [ "#The_term_three"
+                                , "#Second_the_term"
+                                ]
+                            }
+            , test "can restrict the number of results" <|
+                \_ ->
+                    loadedGlossaryItemsForUi
+                        |> Search.search False Nothing 1 "three"
+                        |> (\{ totalNumberOfResults, results } ->
+                                { totalNumberOfResults = totalNumberOfResults
+                                , results = List.map SearchDialog.searchResultHref results
+                                }
+                           )
+                        |> Expect.equal
+                            { totalNumberOfResults = 2
+                            , results =
+                                [ "#The_term_three"
+                                ]
+                            }
             ]
         ]

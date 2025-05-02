@@ -393,9 +393,10 @@ view :
     -> Model parentMsg
     -> String
     -> Maybe (Html parentMsg)
+    -> Maybe String
     -> List SearchResult
     -> Html parentMsg
-view toParentMsg model searchString messageAboveSearchResults searchResults =
+view toParentMsg model searchString messageAboveSearchResults messageToShowAtBottom searchResults =
     let
         model_ :
             { idPrefix : String
@@ -439,7 +440,12 @@ view toParentMsg model searchString messageAboveSearchResults searchResults =
                             NoOp
             ]
             [ Html.div
-                [ class "mx-auto max-w-xl transform motion-reduce:transform-none divide-y divide-gray-100 dark:divide-gray-800 overflow-hidden rounded-xl bg-white dark:bg-gray-700 shadow-2xl ring-1 ring-black/5 transition-all motion-reduce:transition-none"
+                [ class "mx-auto max-w-xl transform motion-reduce:transform-none overflow-hidden bg-white dark:bg-gray-700 shadow-2xl ring-1 ring-black/5 transition-all motion-reduce:transition-none"
+                , if messageToShowAtBottom == Nothing then
+                    class "rounded-xl"
+
+                  else
+                    class "rounded-xl"
                 , class "invisible" |> Extras.HtmlAttribute.showIf (model_.visibility == Invisible)
                 , if model_.visibility == Visible then
                     class "ease-out duration-300 opacity-100 scale-100"
@@ -518,14 +524,15 @@ view toParentMsg model searchString messageAboveSearchResults searchResults =
                     Extras.Html.showMaybe
                         (\messageAboveSearchResults_ ->
                             div
-                                [ class "px-4 py-2 border-none text-gray-800 dark:text-gray-200" ]
+                                [ class "px-4 bg-transparent border-b dark:border-none dark:bg-gray-600 text-gray-800 dark:text-gray-200" ]
                                 [ messageAboveSearchResults_ ]
                         )
                         messageAboveSearchResults
                 , Extras.Html.showIf (not <| List.isEmpty searchResults) <|
                     ul
                         [ Accessibility.Role.listBox
-                        , class "z-30 max-h-72 scroll-py-2 overflow-y-auto py-2 text-gray-800 dark:text-gray-200"
+                        , Accessibility.Key.tabbable False
+                        , class "z-30 max-h-72 scroll-py-2 overflow-y-auto py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
                         , Html.Attributes.id <| searchResultsListId model_.idPrefix
                         ]
                         (searchResults
@@ -555,10 +562,14 @@ view toParentMsg model searchString messageAboveSearchResults searchResults =
                                                 ]
                                 )
                         )
-                , Extras.Html.showIf (String.trim searchString /= "" && List.isEmpty searchResults) <|
-                    p
-                        [ class "p-4 text-gray-500 dark:text-gray-300" ]
-                        [ text I18n.noResultsFound ]
+                , Extras.Html.showMaybe
+                    (\message ->
+                        div
+                            [ class "cursor-default shadow-lg rounded-b-xl dark:border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-sm py-2 pr-9 pl-3 select-none text-gray-900 dark:text-gray-200"
+                            ]
+                            [ text message ]
+                    )
+                    messageToShowAtBottom
                 ]
             ]
         ]

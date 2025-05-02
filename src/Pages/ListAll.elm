@@ -108,7 +108,7 @@ type BackToTopLinkVisibility
 
 type alias SearchDialog =
     { term : String
-    , results : List Components.SearchDialog.SearchResult
+    , results : { totalNumberOfResults : Int, results : List Components.SearchDialog.SearchResult }
     , model : Components.SearchDialog.Model (PageMsg InternalMsg)
     }
 
@@ -209,7 +209,7 @@ init commonModel itemWithFocus =
       , indexFilterString = ""
       , searchDialog =
             { term = ""
-            , results = []
+            , results = { totalNumberOfResults = 0, results = [] }
             , model =
                 Components.SearchDialog.init ElementIds.searchDialog
                     [ Components.SearchDialog.onChangeSearchString (PageMsg.Internal << UpdateSearchString)
@@ -280,6 +280,11 @@ port scrollingUpWhileFarAwayFromTheTop : (() -> msg) -> Sub msg
 
 
 -- UPDATE
+
+
+maximumNumberOfResultsForSearchDialog : Int
+maximumNumberOfResultsForSearchDialog =
+    10
 
 
 update : InternalMsg -> Model -> ( Model, Cmd Msg )
@@ -393,7 +398,13 @@ update msg model =
                 searchDialog0 =
                     model.searchDialog
               in
-              { model | searchDialog = { searchDialog0 | term = "", results = [] } }
+              { model
+                | searchDialog =
+                    { searchDialog0
+                        | term = ""
+                        , results = { totalNumberOfResults = 0, results = [] }
+                    }
+              }
             , allowBackgroundScrolling ()
             )
 
@@ -406,16 +417,16 @@ update msg model =
                 searchDialog0 =
                     model.searchDialog
 
-                results : List Components.SearchDialog.SearchResult
+                results : { totalNumberOfResults : Int, results : List Components.SearchDialog.SearchResult }
                 results =
                     case model.common.glossaryForUi of
                         Ok glossaryForUi ->
                             glossaryForUi
                                 |> GlossaryForUi.items
-                                |> Search.search model.common.enableMathSupport (filterByTagId model) searchString
+                                |> Search.search model.common.enableMathSupport (filterByTagId model) maximumNumberOfResultsForSearchDialog searchString
 
                         Err _ ->
-                            []
+                            { totalNumberOfResults = 0, results = [] }
 
                 model1 : Model
                 model1 =
@@ -2819,6 +2830,11 @@ viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport 
 
 viewSearchDialog : Maybe DescribedTag -> Bool -> SearchDialog -> Html Msg
 viewSearchDialog filterByTagWithDescription_ enableMathSupport searchDialog =
+    let
+        totalNumberOfResults : Int
+        totalNumberOfResults =
+            searchDialog.results.totalNumberOfResults
+    in
     Components.SearchDialog.view
         (PageMsg.Internal << SearchDialogMsg)
         searchDialog.model
@@ -2829,7 +2845,7 @@ viewSearchDialog filterByTagWithDescription_ enableMathSupport searchDialog =
                     span
                         [ class "inline-flex flex-wrap items-center" ]
                         [ Icons.exclamation
-                            [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-800 mr-1.5"
+                            [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-500 mr-1.5"
                             , Accessibility.Aria.hidden True
                             ]
                         , span
@@ -2843,7 +2859,16 @@ viewSearchDialog filterByTagWithDescription_ enableMathSupport searchDialog =
                         ]
                 )
         )
-        searchDialog.results
+        (if totalNumberOfResults > maximumNumberOfResultsForSearchDialog then
+            Just <| I18n.showingXOfYMatches (String.fromInt maximumNumberOfResultsForSearchDialog) (String.fromInt totalNumberOfResults)
+
+         else if searchDialog.term /= "" && totalNumberOfResults == 0 then
+            Just I18n.noMatchesFound
+
+         else
+            Nothing
+        )
+        searchDialog.results.results
 
 
 viewMain :

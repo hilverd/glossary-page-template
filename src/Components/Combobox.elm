@@ -441,7 +441,7 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices message
                 , Extras.Html.showMaybe
                     (\message ->
                         div
-                            [ class "cursor-default border border-gray-300 shadow-lg dark:border-gray-700 rounded-b-md bg-gray-100 dark:bg-gray-900 text-sm py-2 pr-9 pl-3 dark:text-white select-none text-gray-900 dark:text-gray-200"
+                            [ class "cursor-default border border-gray-300 shadow-lg dark:border-gray-700 rounded-b-md bg-gray-100 dark:bg-gray-800 text-sm py-2 pr-9 pl-3 select-none text-gray-900 dark:text-gray-200"
                             , Extras.HtmlAttribute.showUnless model.choicesVisible <| class "hidden"
                             ]
                             [ text message ]

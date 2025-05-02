@@ -15,15 +15,15 @@ import Icons
 import Svg.Attributes
 
 
-search : Bool -> Maybe TagId -> String -> GlossaryItemsForUi -> List SearchDialog.SearchResult
-search enableMathSupport filterByTagId searchString glossaryItemsForUi =
+search : Bool -> Maybe TagId -> Int -> String -> GlossaryItemsForUi -> { totalNumberOfResults : Int, results : List SearchDialog.SearchResult }
+search enableMathSupport filterByTagId maximumNumberOfResults searchString glossaryItemsForUi =
     let
         searchStringNormalised : String
         searchStringNormalised =
             searchString |> String.trim |> String.toLower
     in
     if String.isEmpty searchStringNormalised then
-        []
+        { totalNumberOfResults = 0, results = [] }
 
     else
         let
@@ -136,62 +136,75 @@ search enableMathSupport filterByTagId searchString glossaryItemsForUi =
                             ( Nothing, Nothing ) ->
                                 DisambiguatedTerm.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
                 )
-            |> List.take 40
-            |> List.map
-                (\( { preferredTerm, alternativeTerm, definition }, _ ) ->
-                    case alternativeTerm of
-                        Just alternativeTerm_ ->
-                            SearchDialog.searchResult
-                                (Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
-                                [ Html.div
-                                    [ class "flex flex-col" ]
-                                    [ Html.div
-                                        [ class "font-medium" ]
-                                        [ Term.view enableMathSupport [] alternativeTerm_ ]
-                                    , Html.div
-                                        [ class "inline-flex items-center group-hover:underline font-medium" ]
-                                        [ Icons.cornerDownRight
-                                            [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400"
-                                            ]
-                                        , Term.view enableMathSupport [] (DisambiguatedTerm.toTerm preferredTerm)
-                                        ]
-                                    , Extras.Html.showMaybe
-                                        (\definition_ ->
-                                            Html.div
-                                                [ if enableMathSupport then
-                                                    class "overflow-hidden whitespace-nowrap"
+            |> (\rawResults ->
+                    { totalNumberOfResults = List.length rawResults
+                    , results = List.take maximumNumberOfResults rawResults
+                    }
+               )
+            |> (\{ totalNumberOfResults, results } ->
+                    let
+                        finalResults =
+                            results
+                                |> List.map
+                                    (\( { preferredTerm, alternativeTerm, definition }, _ ) ->
+                                        case alternativeTerm of
+                                            Just alternativeTerm_ ->
+                                                SearchDialog.searchResult
+                                                    (Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
+                                                    [ Html.div
+                                                        [ class "flex flex-col" ]
+                                                        [ Html.div
+                                                            [ class "font-medium" ]
+                                                            [ Term.view enableMathSupport [] alternativeTerm_ ]
+                                                        , Html.div
+                                                            [ class "inline-flex items-center group-hover:underline font-medium" ]
+                                                            [ Icons.cornerDownRight
+                                                                [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400"
+                                                                ]
+                                                            , Term.view enableMathSupport [] (DisambiguatedTerm.toTerm preferredTerm)
+                                                            ]
+                                                        , Extras.Html.showMaybe
+                                                            (\definition_ ->
+                                                                Html.div
+                                                                    [ if enableMathSupport then
+                                                                        class "overflow-hidden whitespace-nowrap"
 
-                                                  else
-                                                    class "truncate"
-                                                ]
-                                                [ Definition.viewInline enableMathSupport [] definition_
-                                                ]
-                                        )
-                                        definition
-                                    ]
-                                ]
+                                                                      else
+                                                                        class "truncate"
+                                                                    ]
+                                                                    [ Definition.viewInline enableMathSupport [] definition_
+                                                                    ]
+                                                            )
+                                                            definition
+                                                        ]
+                                                    ]
 
-                        Nothing ->
-                            SearchDialog.searchResult
-                                (Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
-                                [ Html.div
-                                    []
-                                    [ Html.p
-                                        [ class "font-medium" ]
-                                        [ Term.view enableMathSupport [] (DisambiguatedTerm.toTerm preferredTerm) ]
-                                    , Extras.Html.showMaybe
-                                        (\definition_ ->
-                                            Html.div
-                                                [ if enableMathSupport then
-                                                    class "overflow-hidden whitespace-nowrap"
+                                            Nothing ->
+                                                SearchDialog.searchResult
+                                                    (Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
+                                                    [ Html.div
+                                                        []
+                                                        [ Html.p
+                                                            [ class "font-medium" ]
+                                                            [ Term.view enableMathSupport [] (DisambiguatedTerm.toTerm preferredTerm) ]
+                                                        , Extras.Html.showMaybe
+                                                            (\definition_ ->
+                                                                Html.div
+                                                                    [ if enableMathSupport then
+                                                                        class "overflow-hidden whitespace-nowrap"
 
-                                                  else
-                                                    class "truncate"
-                                                ]
-                                                [ Definition.viewInline enableMathSupport [] definition_
-                                                ]
-                                        )
-                                        definition
-                                    ]
-                                ]
-                )
+                                                                      else
+                                                                        class "truncate"
+                                                                    ]
+                                                                    [ Definition.viewInline enableMathSupport [] definition_
+                                                                    ]
+                                                            )
+                                                            definition
+                                                        ]
+                                                    ]
+                                    )
+                    in
+                    { totalNumberOfResults = totalNumberOfResults
+                    , results = finalResults
+                    }
+               )
