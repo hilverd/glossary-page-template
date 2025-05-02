@@ -460,7 +460,9 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                         [ Extras.Html.showMaybe
                             (\previousItem ->
                                 Components.Button.textWrapNormal
-                                    [ Html.Events.onClick <| onClickItem <| GlossaryItemForUi.id previousItem ]
+                                    [ Html.Events.onClick <| onClickItem <| GlossaryItemForUi.id previousItem
+                                    , class "cursor-pointer"
+                                    ]
                                     [ Icons.arrowLongLeft
                                         [ Svg.Attributes.class "h-5 w-5 shrink-0" ]
                                     , span
@@ -492,7 +494,9 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                         [ Extras.Html.showMaybe
                             (\nextItem ->
                                 Components.Button.textWrapNormal
-                                    [ Html.Events.onClick <| onClickItem <| GlossaryItemForUi.id nextItem ]
+                                    [ Html.Events.onClick <| onClickItem <| GlossaryItemForUi.id nextItem
+                                    , class "cursor-pointer"
+                                    ]
                                     [ span
                                         [ class "font-medium" ]
                                         [ disambiguatedPreferredTermForPreviousOrNext nextItem ]
