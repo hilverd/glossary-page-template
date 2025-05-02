@@ -1,4 +1,4 @@
-module Components.Badge exposing (indigoWithBorderAndRemoveButton, indigoWithCheckbox)
+module Components.Badge exposing (indigoWithBorderAndRemoveButton, indigoWithCheckbox, withRemoveButton)
 
 import Accessibility exposing (Attribute, Html, button, checkbox, span, text)
 import Accessibility.Key
@@ -60,4 +60,28 @@ indigoWithCheckbox { tabbable, checked } id_ onClick additionalAttributes childr
             , for id_
             ]
             children
+        ]
+
+
+withRemoveButton : msg -> List (Attribute Never) -> List (Html msg) -> Html msg
+withRemoveButton onClick additionalAttributes children =
+    span
+        (class "inline-flex items-center gap-x-0.5 rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-2 py-1 text-gray-700 dark:text-gray-200 shadow-xs" :: additionalAttributes)
+        [ span
+            [ class "whitespace-nowrap" ]
+            children
+        , button
+            [ Html.Attributes.type_ "button"
+            , class "group relative -mr-1 size-3.5 rounded-xs hover:bg-gray-500/20 dark:hover:bg-gray-400/20"
+            , Html.Events.onClick onClick
+            ]
+            [ span
+                [ class "sr-only" ]
+                [ text I18n.remove ]
+            , Icons.xMark
+                [ Svg.Attributes.class "size-3.5 stroke-gray-600/50 dark:stroke-gray-300/50 group-hover:stroke-gray-600/75 dark:group-hover:stroke-gray-300/75" ]
+            , span
+                [ class "absolute -inset-1" ]
+                []
+            ]
         ]
