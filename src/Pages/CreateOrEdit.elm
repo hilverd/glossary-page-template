@@ -110,6 +110,7 @@ type InternalMsg
     | DeleteTag Tag
     | ToggleTagCheckbox Tag
     | UpdateDefinition String
+    | UpdateAddTagComboboxInput Bool String
     | AddTagComboboxMsg Components.Combobox.Msg
     | SelectDisambiguationTag String
     | AddRelatedTerm (Maybe RawTerm)
@@ -402,6 +403,19 @@ update msg model =
 
         UpdateDefinition body ->
             ( updateForm (Form.updateDefinition body) model, Cmd.none )
+
+        UpdateAddTagComboboxInput hideChoices input ->
+            ( { model
+                | addTagComboboxInput = input
+                , addTagCombobox =
+                    if hideChoices then
+                        Components.Combobox.hideChoices model.addTagCombobox
+
+                    else
+                        Components.Combobox.showChoices model.addTagCombobox
+              }
+            , Cmd.none
+            )
 
         AddTagComboboxMsg msg_ ->
             Components.Combobox.update
@@ -1320,9 +1334,25 @@ viewTags enableMathSupport addTagCombobox addTagComboboxInput tagCheckboxes =
                 addTagCombobox
                 [ Components.Combobox.placeholder I18n.addTag
                 , Components.Combobox.id ElementIds.addTagCombobox
+                , Components.Combobox.onSelect (PageMsg.Internal << ToggleTagCheckbox)
+                , Components.Combobox.onInput (PageMsg.Internal << UpdateAddTagComboboxInput False)
+                , Components.Combobox.onBlur
+                    (PageMsg.Internal <|
+                        UpdateAddTagComboboxInput True ""
+                    )
                 ]
-                (Just "")
-                []
+                Nothing
+                (tagCheckboxes
+                    |> List.filter (\( _, checked ) -> not checked)
+                    |> List.map
+                        (\( ( _, tag ), _ ) ->
+                            Components.Combobox.choice
+                                tag
+                                (\additionalAttributes ->
+                                    Tag.view enableMathSupport additionalAttributes tag
+                                )
+                        )
+                )
                 Nothing
                 addTagComboboxInput
             ]
