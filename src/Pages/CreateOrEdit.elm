@@ -47,6 +47,7 @@ import Html.Attributes exposing (class, id, required, style)
 import Html.Events
 import Http
 import Icons
+import IncubatingFeatures exposing (showIncubatingFeatures)
 import Internationalisation as I18n
 import Json.Decode
 import PageMsg exposing (PageMsg)
@@ -76,6 +77,8 @@ type alias Model =
     , saving : Saving
     , dropdownMenusWithMoreOptionsForTerms : Dict Int Components.DropdownMenu.Model
     , dragAndDropTerms : Components.DragAndDrop.Model TermIndex TermIndex
+    , addTagCombobox : Components.Combobox.Model
+    , addTagComboboxInput : String
     , dropdownMenusWithMoreOptionsForRelatedTerms : Dict Int Components.DropdownMenu.Model
     , dragAndDropRelatedTerms : Components.DragAndDrop.Model RelatedTermIndex RelatedTermIndex
     }
@@ -104,8 +107,10 @@ type InternalMsg
     | MoveTermUp HowTermWasMoved TermIndex
     | MoveTermDown HowTermWasMoved Int TermIndex
     | ToggleAbbreviation TermIndex
+    | DeleteTag Tag
     | ToggleTagCheckbox Tag
     | UpdateDefinition String
+    | AddTagComboboxMsg Components.Combobox.Msg
     | SelectDisambiguationTag String
     | AddRelatedTerm (Maybe RawTerm)
     | SelectRelatedTerm RelatedTermIndex String
@@ -172,6 +177,8 @@ init commonModel itemBeingEdited =
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
               , dragAndDropTerms = Components.DragAndDrop.init
+              , addTagCombobox = Components.Combobox.init
+              , addTagComboboxInput = ""
               , dropdownMenusWithMoreOptionsForTerms =
                     dropdownMenusWithMoreOptionsForTermsForForm form
               , dropdownMenusWithMoreOptionsForRelatedTerms =
@@ -193,6 +200,8 @@ init commonModel itemBeingEdited =
               , triedToSaveWhenFormInvalid = False
               , saving = NotCurrentlySaving
               , dragAndDropTerms = Components.DragAndDrop.init
+              , addTagCombobox = Components.Combobox.init
+              , addTagComboboxInput = ""
               , dropdownMenusWithMoreOptionsForTerms = Dict.empty
               , dropdownMenusWithMoreOptionsForRelatedTerms = Dict.empty
               , dragAndDropRelatedTerms = Components.DragAndDrop.init
@@ -385,11 +394,23 @@ update msg model =
         ToggleAbbreviation termIndex ->
             ( updateForm (Form.toggleAbbreviation termIndex) model, Cmd.none )
 
+        DeleteTag tag ->
+            ( updateForm (Form.toggleTagCheckbox tag) model, Cmd.none )
+
         ToggleTagCheckbox tag ->
             ( updateForm (Form.toggleTagCheckbox tag) model, Cmd.none )
 
         UpdateDefinition body ->
             ( updateForm (Form.updateDefinition body) model, Cmd.none )
+
+        AddTagComboboxMsg msg_ ->
+            Components.Combobox.update
+                (\x ->
+                    { model | addTagCombobox = x }
+                )
+                (PageMsg.Internal << AddTagComboboxMsg)
+                msg_
+                model.addTagCombobox
 
         SelectDisambiguationTag rawTag ->
             let
@@ -1240,8 +1261,8 @@ viewDefinition mathSupportEnabled showValidationErrors definitionField =
         ]
 
 
-viewTags : Bool -> List ( ( TagId, Tag ), Bool ) -> Html Msg
-viewTags enableMathSupport tagCheckboxes =
+viewTagsOld : Bool -> Components.Combobox.Model -> String -> List ( ( TagId, Tag ), Bool ) -> Html Msg
+viewTagsOld enableMathSupport addTagCombobox addTagComboboxInput tagCheckboxes =
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
         [ div []
@@ -1265,6 +1286,46 @@ viewTags enableMathSupport tagCheckboxes =
                             [ Tag.view enableMathSupport [] tag ]
                     )
             )
+        ]
+
+
+viewTags : Bool -> Components.Combobox.Model -> String -> List ( ( TagId, Tag ), Bool ) -> Html Msg
+viewTags enableMathSupport addTagCombobox addTagComboboxInput tagCheckboxes =
+    div
+        [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
+        [ div []
+            [ h2
+                [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
+                [ text I18n.tags ]
+            , p
+                [ class "mt-1 max-w-2xl text-sm text-gray-600 dark:text-gray-400" ]
+                [ text I18n.selectAllTagsThatApplyToThisItem ]
+            ]
+        , div
+            []
+            (tagCheckboxes
+                |> List.filter (\( _, checked ) -> checked)
+                |> List.map
+                    (\( ( _, tag ), _ ) ->
+                        Components.Badge.withRemoveButton
+                            (PageMsg.Internal <| DeleteTag tag)
+                            [ class "mr-2 mt-2" ]
+                            [ Tag.view enableMathSupport [] tag ]
+                    )
+            )
+        , div
+            []
+            [ Components.Combobox.view
+                (PageMsg.Internal << AddTagComboboxMsg)
+                addTagCombobox
+                [ Components.Combobox.placeholder I18n.addTag
+                , Components.Combobox.id ElementIds.addTagCombobox
+                ]
+                (Just "")
+                []
+                Nothing
+                addTagComboboxInput
+            ]
         ]
 
 
@@ -1995,7 +2056,15 @@ view model =
                                         definitionArray
                                     , model.form
                                         |> Form.tagCheckboxes
-                                        |> viewTags model.common.enableMathSupport
+                                        |> (if showIncubatingFeatures then
+                                                viewTags
+
+                                            else
+                                                viewTagsOld
+                                           )
+                                            model.common.enableMathSupport
+                                            model.addTagCombobox
+                                            model.addTagComboboxInput
                                         |> Extras.Html.showIf (not <| List.isEmpty <| Form.tagCheckboxes model.form)
                                     , model.form
                                         |> Form.tagCheckboxes
@@ -2089,6 +2158,9 @@ subscriptions model =
                         |> Sub.map (DropdownMenuWithMoreOptionsForTermMsg termIndex >> PageMsg.Internal)
                 )
             |> Sub.batch
+        , model.addTagCombobox
+            |> Components.Combobox.subscriptions
+            |> Sub.map (AddTagComboboxMsg >> PageMsg.Internal)
         , model.dropdownMenusWithMoreOptionsForRelatedTerms
             |> Dict.toList
             |> List.map

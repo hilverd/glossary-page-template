@@ -351,7 +351,7 @@ viewAddTagButtonForEmptyState =
             [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
         , span
             [ class "mt-2 block font-medium text-gray-900 dark:text-gray-200" ]
-            [ text I18n.addTagButton ]
+            [ text I18n.addTag ]
         ]
 
 
@@ -363,7 +363,7 @@ viewAddTagButton =
             ]
             [ Icons.plus
                 [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5" ]
-            , text I18n.addTagButton
+            , text I18n.addTag
             ]
         ]
 

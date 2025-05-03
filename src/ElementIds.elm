@@ -4,6 +4,7 @@ module ElementIds exposing
     , aboutLinkBody
     , aboutLinkHref
     , aboutParagraphInputField
+    , addTagCombobox
     , cardWidthCompact
     , cardWidthIntermediate
     , cardWidthWide
@@ -383,3 +384,8 @@ dragRelatedTermButton index =
 comboboxChoice : String -> Int -> String
 comboboxChoice comboboxId index =
     prefixed <| comboboxId ++ "-choice-" ++ String.fromInt index
+
+
+addTagCombobox : String
+addTagCombobox =
+    prefixed "add-tag-combobox"

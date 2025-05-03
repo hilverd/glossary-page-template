@@ -1,4 +1,4 @@
-port module Components.Combobox exposing (Model, Msg, choice, choicesVisible, hideChoices, id, init, onBlur, onInput, onSelect, showChoices, showValidationErrors, subscriptions, update, validationError, view)
+port module Components.Combobox exposing (Model, Msg, choice, choicesVisible, hideChoices, id, init, onBlur, onInput, onSelect, placeholder, showChoices, showValidationErrors, subscriptions, update, validationError, view)
 
 import Accessibility
 import Accessibility.Aria
@@ -27,6 +27,7 @@ import Task
 
 type alias Config parentMsg =
     { id : Maybe String
+    , placeholder : Maybe String
     , showValidationErrors : Bool
     , validationError : Maybe String
     , onSelect : Maybe (String -> parentMsg)
@@ -177,6 +178,7 @@ update updateParentModel toParentMsg msg (Model model) =
 
 type Property parentMsg
     = Id String
+    | Placeholder String
     | OnSelect (String -> parentMsg)
     | OnInput (String -> parentMsg)
     | OnBlur parentMsg
@@ -203,6 +205,11 @@ choice value body =
 id : String -> Property msg
 id =
     Id
+
+
+placeholder : String -> Property msg
+placeholder =
+    Placeholder
 
 
 onSelect : (String -> parentMsg) -> Property parentMsg
@@ -238,6 +245,9 @@ configFromProperties =
                 Id string ->
                     { config | id = Just string }
 
+                Placeholder placeholder_ ->
+                    { config | placeholder = Just placeholder_ }
+
                 OnSelect onSelect_ ->
                     { config | onSelect = Just onSelect_ }
 
@@ -254,6 +264,7 @@ configFromProperties =
                     { config | validationError = validationError_ }
         )
         { id = Nothing
+        , placeholder = Nothing
         , onSelect = Nothing
         , onInput = Nothing
         , onBlur = Nothing
@@ -277,7 +288,8 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices message
         optionsId =
             id_ ++ "-options"
     in
-    div [ class "w-full max-w-md" ]
+    div
+        [ class "w-full max-w-md" ]
         [ div
             [ class "relative"
             ]
@@ -292,6 +304,7 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices message
                 , Html.Attributes.autocomplete False
                 , attribute "autocorrect" "off"
                 , attribute "autocapitalize" "off"
+                , Extras.HtmlAttribute.showMaybe Html.Attributes.placeholder config.placeholder
                 , Html.Attributes.spellcheck False
                 , Extras.HtmlAttribute.showMaybe Html.Events.onInput config.onInput
                 , Extras.HtmlAttribute.showMaybe Html.Events.onBlur config.onBlur
