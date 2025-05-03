@@ -25,12 +25,12 @@ import Task
 -- MODEL
 
 
-type alias Config parentMsg =
+type alias Config value parentMsg =
     { id : Maybe String
     , placeholder : Maybe String
     , showValidationErrors : Bool
     , validationError : Maybe String
-    , onSelect : Maybe (String -> parentMsg)
+    , onSelect : Maybe (value -> parentMsg)
     , onInput : Maybe (String -> parentMsg)
     , onBlur : Maybe parentMsg
     }
@@ -176,10 +176,10 @@ update updateParentModel toParentMsg msg (Model model) =
 -- VIEW
 
 
-type Property parentMsg
+type Property value parentMsg
     = Id String
     | Placeholder String
-    | OnSelect (String -> parentMsg)
+    | OnSelect (value -> parentMsg)
     | OnInput (String -> parentMsg)
     | OnBlur parentMsg
     | ShowValidationErrors Bool
@@ -190,54 +190,54 @@ type alias ChoiceIndex =
     Int
 
 
-type Choice parentMsg
+type Choice value parentMsg
     = Choice
-        { value : String
+        { value : value
         , body : List (Attribute parentMsg) -> Html parentMsg
         }
 
 
-choice : String -> (List (Attribute parentMsg) -> Html parentMsg) -> Choice parentMsg
+choice : value -> (List (Attribute parentMsg) -> Html parentMsg) -> Choice value parentMsg
 choice value body =
     Choice { value = value, body = body }
 
 
-id : String -> Property msg
+id : String -> Property value parentMsg
 id =
     Id
 
 
-placeholder : String -> Property msg
+placeholder : String -> Property value parentMsg
 placeholder =
     Placeholder
 
 
-onSelect : (String -> parentMsg) -> Property parentMsg
+onSelect : (value -> parentMsg) -> Property value parentMsg
 onSelect =
     OnSelect
 
 
-onInput : (String -> parentMsg) -> Property parentMsg
+onInput : (String -> parentMsg) -> Property value parentMsg
 onInput =
     OnInput
 
 
-onBlur : parentMsg -> Property parentMsg
+onBlur : parentMsg -> Property value parentMsg
 onBlur =
     OnBlur
 
 
-validationError : Maybe String -> Property msg
+validationError : Maybe String -> Property value parentMsg
 validationError =
     ValidationError
 
 
-showValidationErrors : Bool -> Property msg
+showValidationErrors : Bool -> Property value parentMsg
 showValidationErrors =
     ShowValidationErrors
 
 
-configFromProperties : List (Property parentMsg) -> Config parentMsg
+configFromProperties : List (Property value parentMsg) -> Config value parentMsg
 configFromProperties =
     List.foldl
         (\property config ->
@@ -273,10 +273,10 @@ configFromProperties =
         }
 
 
-view : (Msg -> parentMsg) -> Model -> List (Property parentMsg) -> Maybe String -> List (Choice parentMsg) -> Maybe String -> String -> Html parentMsg
-view toParentMsg (Model model) properties inputForSelectedChoice choices messageToShowAtBottom input =
+view : (Msg -> parentMsg) -> Model -> List (Property value parentMsg) -> Maybe value -> List (Choice value parentMsg) -> Maybe String -> String -> Html parentMsg
+view toParentMsg (Model model) properties valueForSelectedChoice choices messageToShowAtBottom input =
     let
-        config : Config parentMsg
+        config : Config value parentMsg
         config =
             configFromProperties properties
 
@@ -343,7 +343,7 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices message
 
                             else if Extras.HtmlEvents.isEnter event then
                                 let
-                                    maybeActiveChoice : Maybe (Choice parentMsg)
+                                    maybeActiveChoice : Maybe (Choice value parentMsg)
                                     maybeActiveChoice =
                                         model.activeChoiceIndex
                                             |> Maybe.andThen (\activeChoiceIndex -> choices |> Array.fromList |> Array.get activeChoiceIndex)
@@ -396,8 +396,9 @@ view toParentMsg (Model model) properties inputForSelectedChoice choices message
                                 case choice_ of
                                     Choice { body, value } ->
                                         let
+                                            selected : Bool
                                             selected =
-                                                Just value == inputForSelectedChoice
+                                                Just value == valueForSelectedChoice
 
                                             active : Bool
                                             active =
