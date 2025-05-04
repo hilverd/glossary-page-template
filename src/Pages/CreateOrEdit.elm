@@ -399,7 +399,14 @@ update msg model =
             ( updateForm (Form.toggleTagCheckbox tag) model, Cmd.none )
 
         ToggleTagCheckbox tag ->
-            ( updateForm (Form.toggleTagCheckbox tag) model, Cmd.none )
+            ( { model
+                | addTagCombobox =
+                    Components.Combobox.hideChoices model.addTagCombobox
+                , addTagComboboxInput = ""
+              }
+                |> updateForm (Form.toggleTagCheckbox tag)
+            , Cmd.none
+            )
 
         UpdateDefinition body ->
             ( updateForm (Form.updateDefinition body) model, Cmd.none )
@@ -1329,7 +1336,21 @@ viewTags enableMathSupport addTagCombobox addTagComboboxInput tagCheckboxes =
             )
         , div
             []
-            [ Components.Combobox.view
+            [ let
+                comboboxMatches : List Tag
+                comboboxMatches =
+                    tagCheckboxes
+                        |> List.filter (\( _, checked ) -> not checked)
+                        |> List.filter
+                            (\( ( _, tag ), _ ) ->
+                                tag
+                                    |> Tag.inlineText
+                                    |> String.toLower
+                                    |> String.contains (String.toLower addTagComboboxInput)
+                            )
+                        |> List.map (\( ( _, tag ), _ ) -> tag)
+              in
+              Components.Combobox.view
                 (PageMsg.Internal << AddTagComboboxMsg)
                 addTagCombobox
                 [ Components.Combobox.placeholder I18n.addTag
@@ -1342,10 +1363,9 @@ viewTags enableMathSupport addTagCombobox addTagComboboxInput tagCheckboxes =
                     )
                 ]
                 Nothing
-                (tagCheckboxes
-                    |> List.filter (\( _, checked ) -> not checked)
+                (comboboxMatches
                     |> List.map
-                        (\( ( _, tag ), _ ) ->
+                        (\tag ->
                             Components.Combobox.choice
                                 tag
                                 (\additionalAttributes ->
@@ -1353,7 +1373,15 @@ viewTags enableMathSupport addTagCombobox addTagComboboxInput tagCheckboxes =
                                 )
                         )
                 )
-                Nothing
+                (if List.length comboboxMatches > maximumNumberOfResultsForTagCombobox then
+                    Just <| I18n.showingXOfYMatches (String.fromInt maximumNumberOfResultsForTagCombobox) (String.fromInt (List.length comboboxMatches))
+
+                 else if addTagComboboxInput /= "" && List.length comboboxMatches == 0 then
+                    Just I18n.noMatchesFound
+
+                 else
+                    Nothing
+                )
                 addTagComboboxInput
             ]
         ]
@@ -1443,6 +1471,11 @@ viewMoveRelatedTermUpOrDownButtons numberOfRelatedTerms relatedTermIndex =
 
 maximumNumberOfResultsForTermCombobox : Int
 maximumNumberOfResultsForTermCombobox =
+    10
+
+
+maximumNumberOfResultsForTagCombobox : Int
+maximumNumberOfResultsForTagCombobox =
     10
 
 
