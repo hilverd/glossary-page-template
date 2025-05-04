@@ -30,7 +30,7 @@ import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForU
 import Data.GlossaryTitle as GlossaryTitle
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.Saving exposing (Saving(..))
-import Data.TagId as TagId exposing (TagId)
+import Data.TagId exposing (TagId)
 import Data.TermIndex as TermIndex exposing (TermIndex)
 import Dict exposing (Dict)
 import ElementIds
@@ -47,7 +47,6 @@ import Html.Attributes exposing (class, id, required, style)
 import Html.Events
 import Http
 import Icons
-import IncubatingFeatures exposing (showIncubatingFeatures)
 import Internationalisation as I18n
 import Json.Decode
 import PageMsg exposing (PageMsg)
@@ -1282,34 +1281,6 @@ viewDefinition mathSupportEnabled showValidationErrors definitionField =
         ]
 
 
-viewTagsOld : Bool -> Components.Combobox.Model -> String -> List ( ( TagId, Tag ), Bool ) -> Html Msg
-viewTagsOld enableMathSupport addTagCombobox addTagComboboxInput tagCheckboxes =
-    div
-        [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
-        [ div []
-            [ h2
-                [ class "text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text I18n.tags ]
-            , p
-                [ class "mt-1 max-w-2xl text-sm text-gray-600 dark:text-gray-400" ]
-                [ text I18n.selectAllTagsThatApplyToThisItem ]
-            ]
-        , div
-            []
-            (tagCheckboxes
-                |> List.map
-                    (\( ( tagId, tag ), checked ) ->
-                        Components.Badge.indigoWithCheckbox
-                            { tabbable = True, checked = checked }
-                            (tagId |> TagId.toString |> (++) "tag-")
-                            (PageMsg.Internal <| ToggleTagCheckbox tag)
-                            [ class "mr-2 mb-2" ]
-                            [ Tag.view enableMathSupport [] tag ]
-                    )
-            )
-        ]
-
-
 viewTags : Bool -> Components.Combobox.Model -> String -> List ( ( TagId, Tag ), Bool ) -> Html Msg
 viewTags enableMathSupport addTagCombobox addTagComboboxInput tagCheckboxes =
     div
@@ -2119,12 +2090,7 @@ view model =
                                         definitionArray
                                     , model.form
                                         |> Form.tagCheckboxes
-                                        |> (if showIncubatingFeatures then
-                                                viewTags
-
-                                            else
-                                                viewTagsOld
-                                           )
+                                        |> viewTags
                                             model.common.enableMathSupport
                                             model.addTagCombobox
                                             model.addTagComboboxInput
