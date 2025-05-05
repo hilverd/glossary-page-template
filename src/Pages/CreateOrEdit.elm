@@ -1396,7 +1396,8 @@ viewDisambiguationTag disambiguationTagId tags =
 
 
 viewCreateSeeAlsoSingle :
-    DivDragAndDropStatus
+    Bool
+    -> DivDragAndDropStatus
     -> Bool
     -> Set String
     -> Int
@@ -1405,8 +1406,9 @@ viewCreateSeeAlsoSingle :
     -> Int
     -> Form.RelatedTermField
     -> Html Msg
-viewCreateSeeAlsoSingle dragAndDropStatus showValidationErrors relatedRawTerms numberOfRelatedTerms allTerms dropdownMenusWithMoreOptionsForRelatedTerms index relatedTerm =
+viewCreateSeeAlsoSingle enableMathSupport dragAndDropStatus showValidationErrors relatedRawTerms numberOfRelatedTerms allTerms dropdownMenusWithMoreOptionsForRelatedTerms index relatedTerm =
     viewCreateSeeAlsoSingle1
+        enableMathSupport
         dragAndDropStatus
         showValidationErrors
         relatedRawTerms
@@ -1451,7 +1453,8 @@ maximumNumberOfResultsForTagCombobox =
 
 
 viewCreateSeeAlsoSingle1 :
-    DivDragAndDropStatus
+    Bool
+    -> DivDragAndDropStatus
     -> Bool
     -> Set String
     -> Int
@@ -1460,7 +1463,7 @@ viewCreateSeeAlsoSingle1 :
     -> RelatedTermIndex
     -> Form.RelatedTermField
     -> Html Msg
-viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms numberOfRelatedTerms allTerms maybeDropdownMenuWithMoreOptions relatedTermIndex relatedTerm =
+viewCreateSeeAlsoSingle1 enableMathSupport dragAndDropStatus showValidationErrors relatedRawTerms numberOfRelatedTerms allTerms maybeDropdownMenuWithMoreOptions relatedTermIndex relatedTerm =
     Html.div
         (if dragAndDropStatus /= CannotBeDraggedAndDropped then
             let
@@ -1542,6 +1545,14 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                                         rawTerm =
                                             term |> DisambiguatedTerm.toTerm |> Term.raw
 
+                                        termInlineTextMatchesInput : Bool
+                                        termInlineTextMatchesInput =
+                                            term
+                                                |> DisambiguatedTerm.toTerm
+                                                |> Term.inlineText
+                                                |> String.toLower
+                                                |> String.contains (relatedTerm.comboboxInput |> String.toLower)
+
                                         rawTermMatchesInput : Bool
                                         rawTermMatchesInput =
                                             rawTerm
@@ -1557,7 +1568,7 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                                         rawTermIsAlreadyListed =
                                             Set.member (RawTerm.toString rawTerm) relatedRawTerms
                                     in
-                                    (rawTermIsCurrentlySelected || not rawTermIsAlreadyListed) && rawTermMatchesInput
+                                    (rawTermIsCurrentlySelected || not rawTermIsAlreadyListed) && (rawTermMatchesInput || termInlineTextMatchesInput)
                                 )
                             |> List.sortBy
                                 (\term ->
@@ -1605,10 +1616,6 @@ viewCreateSeeAlsoSingle1 dragAndDropStatus showValidationErrors relatedRawTerms 
                     |> List.take maximumNumberOfResultsForTermCombobox
                     |> List.map
                         (\term ->
-                            let
-                                enableMathSupport =
-                                    False
-                            in
                             Components.Combobox.choice
                                 (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
                                 (\additionalAttributes ->
@@ -1751,6 +1758,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors idOfRelatedTermBeingDra
             (List.indexedMap
                 (\index relatedTerm ->
                     [ viewCreateSeeAlsoSingle
+                        enableMathSupport
                         (if Just index == idOfRelatedTermBeingDragged then
                             BeingDragged
 
@@ -1780,6 +1788,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors idOfRelatedTermBeingDra
                         index
                         relatedTerm
                     , viewCreateSeeAlsoSingle
+                        enableMathSupport
                         CannotBeDraggedAndDropped
                         showValidationErrors
                         (relatedTermsList
