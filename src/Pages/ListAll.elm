@@ -2461,10 +2461,9 @@ viewCurrentTagFilter { enableMathSupport } describedTag =
         [ span
             [ class "print:hidden mr-2 font-medium text-gray-900 dark:text-gray-100" ]
             [ text I18n.filteringByTag ]
-        , Components.Badge.indigoWithBorderAndRemoveButton
-            True
-            [ class "print:hidden mt-2" ]
+        , Components.Badge.withRemoveButton
             (PageMsg.Internal DoNotFilterByTag)
+            [ class "print:hidden mt-2" ]
             [ Tag.view enableMathSupport [] <| DescribedTag.tag describedTag ]
         ]
 

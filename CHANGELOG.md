@@ -23,6 +23,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Fix opacity issue on mobile when opening sidebar.
 - Fix regression bug where auto-focusing on terms and related items no longer worked.
 - Fix minor UI bug where dropdown menus for reordering terms were not appearing for new terms on small screens.
+- Improve layout of long tags.
 
 ### Removed
 
