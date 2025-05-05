@@ -1314,10 +1314,58 @@ viewTags enableMathSupport addTagCombobox addTagComboboxInput tagCheckboxes =
                         |> List.filter (\( _, checked ) -> not checked)
                         |> List.filter
                             (\( ( _, tag ), _ ) ->
-                                tag
-                                    |> Tag.inlineText
-                                    |> String.toLower
-                                    |> String.contains (String.toLower addTagComboboxInput)
+                                let
+                                    lowercasedAddTagComboboxInput : String
+                                    lowercasedAddTagComboboxInput =
+                                        String.toLower addTagComboboxInput
+
+                                    tagInlineTextMatchesInput : Bool
+                                    tagInlineTextMatchesInput =
+                                        tag
+                                            |> Tag.inlineText
+                                            |> String.toLower
+                                            |> String.contains lowercasedAddTagComboboxInput
+
+                                    tagRawMatchesInput : Bool
+                                    tagRawMatchesInput =
+                                        tag
+                                            |> Tag.raw
+                                            |> String.toLower
+                                            |> String.contains lowercasedAddTagComboboxInput
+                                in
+                                tagInlineTextMatchesInput || tagRawMatchesInput
+                            )
+                        |> List.sortBy
+                            (\( ( _, tag ), _ ) ->
+                                let
+                                    tagInlineText =
+                                        tag
+                                            |> Tag.inlineText
+                                            |> String.toLower
+                                in
+                                tagInlineText
+                            )
+                        |> List.sortBy
+                            (\( ( _, tag ), _ ) ->
+                                let
+                                    tagInlineText =
+                                        tag
+                                            |> Tag.inlineText
+                                            |> String.toLower
+
+                                    tagRaw =
+                                        tag
+                                            |> Tag.raw
+                                            |> String.toLower
+
+                                    input =
+                                        String.toLower addTagComboboxInput
+                                in
+                                if String.startsWith input tagInlineText || String.startsWith input tagRaw then
+                                    0
+
+                                else
+                                    1
                             )
                         |> List.map (\( ( _, tag ), _ ) -> tag)
               in
@@ -1573,17 +1621,16 @@ viewCreateSeeAlsoSingle1 enableMathSupport dragAndDropStatus showValidationError
                             |> List.sortBy
                                 (\term ->
                                     let
-                                        rawTermString =
+                                        termInlineText =
                                             term
                                                 |> DisambiguatedTerm.toTerm
-                                                |> Term.raw
-                                                |> RawTerm.toString
+                                                |> Term.inlineText
                                                 |> String.toLower
 
                                         input =
                                             String.toLower relatedTerm.comboboxInput
                                     in
-                                    if String.startsWith input rawTermString then
+                                    if String.startsWith input termInlineText then
                                         0
 
                                     else
