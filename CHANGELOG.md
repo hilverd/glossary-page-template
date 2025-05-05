@@ -16,7 +16,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 - Use comboboxes instead of `<select>` elements for selecting related items.
 - Use comboboxes instead of checkboxes for adding tags to items.
-- Limit search results to at most 10 and add a "Showing x of y matches" message.
+- Limit search and combobox results to at most 10 and add "Showing x of y matches" messages.
 
 ### Fixed
 
