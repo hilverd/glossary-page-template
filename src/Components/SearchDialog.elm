@@ -17,7 +17,7 @@ port module Components.SearchDialog exposing
     , visible
     )
 
-import Accessibility exposing (Html, div, p, text, ul)
+import Accessibility exposing (Html, div, text, ul)
 import Accessibility.Aria
 import Accessibility.Key
 import Accessibility.Role

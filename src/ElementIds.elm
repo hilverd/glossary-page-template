@@ -27,6 +27,7 @@ module ElementIds exposing
     , glossaryItemDiv
     , indexFilterInputField
     , indexForMobile
+    , itemSearchDialog
     , items
     , letterGrid
     , moreOptionsForRelatedTermDropdownMenu
@@ -43,7 +44,6 @@ module ElementIds exposing
     , outer
     , relatedTermCombobox
     , reserved
-    , searchDialog
     , seeAlsoSelect
     , showExportMenuLabel
     , showLastUpdatedDatesLabel
@@ -291,9 +291,9 @@ needsUpdatingToggleLabel =
     prefixed "needs-updating-toggle"
 
 
-searchDialog : String
-searchDialog =
-    prefixed "search-dialog"
+itemSearchDialog : String
+itemSearchDialog =
+    prefixed "item-search-dialog"
 
 
 showExportMenuLabel : String

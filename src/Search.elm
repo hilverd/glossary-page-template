@@ -146,65 +146,77 @@ search enableMathSupport filterByTagId maximumNumberOfResults searchString gloss
                         finalResults =
                             results
                                 |> List.map
-                                    (\( { preferredTerm, alternativeTerm, definition }, _ ) ->
-                                        case alternativeTerm of
-                                            Just alternativeTerm_ ->
-                                                SearchDialog.searchResult
-                                                    (Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
-                                                    [ Html.div
-                                                        [ class "flex flex-col" ]
-                                                        [ Html.div
-                                                            [ class "font-medium" ]
-                                                            [ Term.view enableMathSupport [] alternativeTerm_ ]
-                                                        , Html.div
-                                                            [ class "inline-flex items-center group-hover:underline font-medium" ]
-                                                            [ Icons.cornerDownRight
-                                                                [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400"
-                                                                ]
-                                                            , Term.view enableMathSupport [] (DisambiguatedTerm.toTerm preferredTerm)
-                                                            ]
-                                                        , Extras.Html.showMaybe
-                                                            (\definition_ ->
-                                                                Html.div
-                                                                    [ if enableMathSupport then
-                                                                        class "overflow-hidden whitespace-nowrap"
-
-                                                                      else
-                                                                        class "truncate"
-                                                                    ]
-                                                                    [ Definition.viewInline enableMathSupport [] definition_
-                                                                    ]
-                                                            )
-                                                            definition
-                                                        ]
-                                                    ]
-
-                                            Nothing ->
-                                                SearchDialog.searchResult
-                                                    (Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
-                                                    [ Html.div
-                                                        []
-                                                        [ Html.p
-                                                            [ class "font-medium" ]
-                                                            [ Term.view enableMathSupport [] (DisambiguatedTerm.toTerm preferredTerm) ]
-                                                        , Extras.Html.showMaybe
-                                                            (\definition_ ->
-                                                                Html.div
-                                                                    [ if enableMathSupport then
-                                                                        class "overflow-hidden whitespace-nowrap"
-
-                                                                      else
-                                                                        class "truncate"
-                                                                    ]
-                                                                    [ Definition.viewInline enableMathSupport [] definition_
-                                                                    ]
-                                                            )
-                                                            definition
-                                                        ]
-                                                    ]
+                                    (\( itemSearchResult, _ ) ->
+                                        viewItemSearchResult enableMathSupport itemSearchResult
                                     )
                     in
                     { totalNumberOfResults = totalNumberOfResults
                     , results = finalResults
                     }
                )
+
+
+type alias ItemSearchResult =
+    { preferredTerm : DisambiguatedTerm
+    , alternativeTerm : Maybe Term
+    , definition : Maybe Definition
+    }
+
+
+viewItemSearchResult : Bool -> ItemSearchResult -> SearchDialog.SearchResult
+viewItemSearchResult enableMathSupport { preferredTerm, alternativeTerm, definition } =
+    case alternativeTerm of
+        Just alternativeTerm_ ->
+            SearchDialog.searchResult
+                (Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
+                [ Html.div
+                    [ class "flex flex-col" ]
+                    [ Html.div
+                        [ class "font-medium" ]
+                        [ Term.view enableMathSupport [] alternativeTerm_ ]
+                    , Html.div
+                        [ class "inline-flex items-center group-hover:underline font-medium" ]
+                        [ Icons.cornerDownRight
+                            [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400"
+                            ]
+                        , Term.view enableMathSupport [] (DisambiguatedTerm.toTerm preferredTerm)
+                        ]
+                    , Extras.Html.showMaybe
+                        (\definition_ ->
+                            Html.div
+                                [ if enableMathSupport then
+                                    class "overflow-hidden whitespace-nowrap"
+
+                                  else
+                                    class "truncate"
+                                ]
+                                [ Definition.viewInline enableMathSupport [] definition_
+                                ]
+                        )
+                        definition
+                    ]
+                ]
+
+        Nothing ->
+            SearchDialog.searchResult
+                (Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
+                [ Html.div
+                    []
+                    [ Html.p
+                        [ class "font-medium" ]
+                        [ Term.view enableMathSupport [] (DisambiguatedTerm.toTerm preferredTerm) ]
+                    , Extras.Html.showMaybe
+                        (\definition_ ->
+                            Html.div
+                                [ if enableMathSupport then
+                                    class "overflow-hidden whitespace-nowrap"
+
+                                  else
+                                    class "truncate"
+                                ]
+                                [ Definition.viewInline enableMathSupport [] definition_
+                                ]
+                        )
+                        definition
+                    ]
+                ]

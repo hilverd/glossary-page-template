@@ -1,4 +1,4 @@
-port module Pages.ListAll exposing (InternalMsg, Layout, MenuForMobileVisibility, Model, Msg, SearchDialog, init, subscriptions, update, view)
+port module Pages.ListAll exposing (InternalMsg, ItemSearchDialog, Layout, MenuForMobileVisibility, Model, Msg, init, subscriptions, update, view)
 
 import Accessibility
     exposing
@@ -106,7 +106,7 @@ type BackToTopLinkVisibility
     | Invisible Int
 
 
-type alias SearchDialog =
+type alias ItemSearchDialog =
     { term : String
     , results : { totalNumberOfResults : Int, results : List Components.SearchDialog.SearchResult }
     , model : Components.SearchDialog.Model (PageMsg InternalMsg)
@@ -125,7 +125,7 @@ type alias Model =
     , themeDropdownMenu : Components.DropdownMenu.Model
     , exportDropdownMenu : Components.DropdownMenu.Model
     , indexFilterString : String
-    , searchDialog : SearchDialog
+    , itemSearchDialog : ItemSearchDialog
     , layout : Layout
     , itemWithFocus : Maybe GlossaryItemId
     , confirmDeleteId : Maybe GlossaryItemId
@@ -147,10 +147,10 @@ type InternalMsg
     | BackToTop Bool Int
     | ThemeDropdownMenuMsg Components.DropdownMenu.Msg
     | ExportDropdownMenuMsg Components.DropdownMenu.Msg
-    | SearchDialogMsg Components.SearchDialog.Msg
-    | SearchDialogWasHidden
+    | ItemSearchDialogMsg Components.SearchDialog.Msg
+    | ItemSearchDialogWasHidden
     | UpdateIndexFilterString String
-    | UpdateSearchString String
+    | UpdateItemSearchString String
     | ChangeTheme Theme
     | ScrollingUpWhileFarAwayFromTheTop
     | StartHidingBackToTopLink Int
@@ -207,18 +207,18 @@ init commonModel itemWithFocus =
             Components.DropdownMenu.init
                 [ Components.DropdownMenu.id ElementIds.exportDropdownButton ]
       , indexFilterString = ""
-      , searchDialog =
+      , itemSearchDialog =
             { term = ""
             , results = { totalNumberOfResults = 0, results = [] }
             , model =
-                Components.SearchDialog.init ElementIds.searchDialog
-                    [ Components.SearchDialog.onChangeSearchString (PageMsg.Internal << UpdateSearchString)
+                Components.SearchDialog.init ElementIds.itemSearchDialog
+                    [ Components.SearchDialog.onChangeSearchString (PageMsg.Internal << UpdateItemSearchString)
                     , Components.SearchDialog.onShow <|
                         Cmd.batch
                             [ preventBackgroundScrolling ()
                             , Extras.Task.messageToCommand <| PageMsg.Internal ImmediatelyHideBackToTopLink
                             ]
-                    , Components.SearchDialog.onHide <| Extras.Task.messageToCommand <| PageMsg.Internal SearchDialogWasHidden
+                    , Components.SearchDialog.onHide <| Extras.Task.messageToCommand <| PageMsg.Internal ItemSearchDialogWasHidden
                     ]
             }
       , deleting = NotCurrentlySaving
@@ -282,8 +282,8 @@ port scrollingUpWhileFarAwayFromTheTop : (() -> msg) -> Sub msg
 -- UPDATE
 
 
-maximumNumberOfResultsForSearchDialog : Int
-maximumNumberOfResultsForSearchDialog =
+maximumNumberOfResultsForItemSearchDialog : Int
+maximumNumberOfResultsForItemSearchDialog =
     10
 
 
@@ -378,29 +378,29 @@ update msg model =
                 msg_
                 model.exportDropdownMenu
 
-        SearchDialogMsg msg_ ->
+        ItemSearchDialogMsg msg_ ->
             Components.SearchDialog.update
                 (\x ->
                     let
-                        searchDialog0 : SearchDialog
-                        searchDialog0 =
-                            model.searchDialog
+                        itemSearchDialog0 : ItemSearchDialog
+                        itemSearchDialog0 =
+                            model.itemSearchDialog
                     in
-                    { model | searchDialog = { searchDialog0 | model = x } }
+                    { model | itemSearchDialog = { itemSearchDialog0 | model = x } }
                 )
-                (PageMsg.Internal << SearchDialogMsg)
+                (PageMsg.Internal << ItemSearchDialogMsg)
                 msg_
-                model.searchDialog.model
+                model.itemSearchDialog.model
 
-        SearchDialogWasHidden ->
+        ItemSearchDialogWasHidden ->
             ( let
-                searchDialog0 : SearchDialog
-                searchDialog0 =
-                    model.searchDialog
+                itemSearchDialog0 : ItemSearchDialog
+                itemSearchDialog0 =
+                    model.itemSearchDialog
               in
               { model
-                | searchDialog =
-                    { searchDialog0
+                | itemSearchDialog =
+                    { itemSearchDialog0
                         | term = ""
                         , results = { totalNumberOfResults = 0, results = [] }
                     }
@@ -411,11 +411,11 @@ update msg model =
         UpdateIndexFilterString string ->
             ( { model | indexFilterString = string }, Cmd.none )
 
-        UpdateSearchString searchString ->
+        UpdateItemSearchString itemSearchString ->
             let
-                searchDialog0 : SearchDialog
-                searchDialog0 =
-                    model.searchDialog
+                itemSearchDialog0 : ItemSearchDialog
+                itemSearchDialog0 =
+                    model.itemSearchDialog
 
                 results : { totalNumberOfResults : Int, results : List Components.SearchDialog.SearchResult }
                 results =
@@ -423,7 +423,7 @@ update msg model =
                         Ok glossaryForUi ->
                             glossaryForUi
                                 |> GlossaryForUi.items
-                                |> Search.search model.common.enableMathSupport (filterByTagId model) maximumNumberOfResultsForSearchDialog searchString
+                                |> Search.search model.common.enableMathSupport (filterByTagId model) maximumNumberOfResultsForItemSearchDialog itemSearchString
 
                         Err _ ->
                             { totalNumberOfResults = 0, results = [] }
@@ -431,14 +431,14 @@ update msg model =
                 model1 : Model
                 model1 =
                     { model
-                        | searchDialog =
-                            { searchDialog0
-                                | term = searchString
+                        | itemSearchDialog =
+                            { itemSearchDialog0
+                                | term = itemSearchString
                                 , results = results
                             }
                     }
             in
-            update (SearchDialogMsg Components.SearchDialog.searchStringWasJustUpdated) model1
+            update (ItemSearchDialogMsg Components.SearchDialog.searchStringWasJustUpdated) model1
 
         ChangeTheme theme ->
             let
@@ -697,11 +697,11 @@ update msg model =
                                         ElementIds.letterGrid
                                             |> Dom.getElement
                                             |> Task.andThen
-                                                (\quickSearchButtonAndLetterGridElement ->
+                                                (\letterGridElement ->
                                                     let
                                                         height : Float
                                                         height =
-                                                            quickSearchButtonAndLetterGridElement.element.height
+                                                            letterGridElement.element.height
                                                     in
                                                     Dom.setViewportOf idOfSidebarOrMenu 0 (viewport.viewport.y + termIndexGroupElement.element.y - termIndexGroupElement.viewport.y - height)
                                                         |> Task.onError
@@ -2020,8 +2020,8 @@ viewBackToTopLink staticSidebar visibility =
         ]
 
 
-viewQuickSearchButton : Bool -> Html Msg
-viewQuickSearchButton runningOnMacOs =
+viewQuickItemSearchButton : Bool -> Html Msg
+viewQuickItemSearchButton runningOnMacOs =
     div
         []
         [ div
@@ -2029,7 +2029,7 @@ viewQuickSearchButton runningOnMacOs =
             [ button
                 [ Html.Attributes.type_ "button"
                 , class "w-full flex items-center text-sm leading-6 text-slate-500 dark:text-slate-400 rounded-md ring-1 ring-slate-900/10 dark:ring-slate-600 shadow-xs py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-400 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800 select-none"
-                , Html.Events.onClick <| PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show
+                , Html.Events.onClick <| PageMsg.Internal <| ItemSearchDialogMsg Components.SearchDialog.show
                 , Accessibility.Aria.hidden True
                 ]
                 [ Icons.search
@@ -2179,13 +2179,13 @@ viewTopBar tabbable runningOnMacOs theme themeDropdownMenu maybeExportDropdownMe
             ]
         , div
             [ class "hidden sm:block pr-4" ]
-            [ viewQuickSearchButton runningOnMacOs ]
+            [ viewQuickItemSearchButton runningOnMacOs ]
         , div
             [ class "pr-4 sm:hidden" ]
             [ button
                 [ Html.Attributes.type_ "button"
                 , class "ml-auto text-slate-500 w-8 h-8 -my-1 flex items-center justify-center hover:text-slate-600 lg:hidden dark:text-slate-400 dark:hover:text-slate-300"
-                , Html.Events.onClick <| PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show
+                , Html.Events.onClick <| PageMsg.Internal <| ItemSearchDialogMsg Components.SearchDialog.show
                 ]
                 [ span
                     [ class "sr-only" ]
@@ -2632,7 +2632,7 @@ viewOrderItemsBy numberOfItems { enableMathSupport } disambiguatedPreferredTerms
 
 type MenuOrDialogShown
     = MenuForMobileShown
-    | SearchDialogShown
+    | ItemSearchDialogShown
     | ConfirmDeleteModalDialogShown GlossaryItemId
     | ViewSingleItemModalDialogShown GlossaryItemId
     | NoMenuOrDialogShown
@@ -2640,8 +2640,8 @@ type MenuOrDialogShown
 
 menuOrDialogShown : Model -> MenuOrDialogShown
 menuOrDialogShown model =
-    if Components.SearchDialog.visible model.searchDialog.model then
-        SearchDialogShown
+    if Components.SearchDialog.visible model.itemSearchDialog.model then
+        ItemSearchDialogShown
 
     else if model.menuForMobileVisibility == GradualVisibility.Visible then
         MenuForMobileShown
@@ -2663,7 +2663,7 @@ noModalDialogShown model =
         MenuForMobileShown ->
             True
 
-        SearchDialogShown ->
+        ItemSearchDialogShown ->
             False
 
         ConfirmDeleteModalDialogShown _ ->
@@ -2827,17 +2827,17 @@ viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport 
             items
 
 
-viewSearchDialog : Maybe DescribedTag -> Bool -> SearchDialog -> Html Msg
-viewSearchDialog filterByTagWithDescription_ enableMathSupport searchDialog =
+viewItemSearchDialog : Maybe DescribedTag -> Bool -> ItemSearchDialog -> Html Msg
+viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog =
     let
         totalNumberOfResults : Int
         totalNumberOfResults =
-            searchDialog.results.totalNumberOfResults
+            itemSearchDialog.results.totalNumberOfResults
     in
     Components.SearchDialog.view
-        (PageMsg.Internal << SearchDialogMsg)
-        searchDialog.model
-        searchDialog.term
+        (PageMsg.Internal << ItemSearchDialogMsg)
+        itemSearchDialog.model
+        itemSearchDialog.term
         (filterByTagWithDescription_
             |> Maybe.map
                 (\describedTag ->
@@ -2858,16 +2858,16 @@ viewSearchDialog filterByTagWithDescription_ enableMathSupport searchDialog =
                         ]
                 )
         )
-        (if totalNumberOfResults > maximumNumberOfResultsForSearchDialog then
-            Just <| I18n.showingXOfYMatches (String.fromInt maximumNumberOfResultsForSearchDialog) (String.fromInt totalNumberOfResults)
+        (if totalNumberOfResults > maximumNumberOfResultsForItemSearchDialog then
+            Just <| I18n.showingXOfYMatches (String.fromInt maximumNumberOfResultsForItemSearchDialog) (String.fromInt totalNumberOfResults)
 
-         else if searchDialog.term /= "" && totalNumberOfResults == 0 then
+         else if itemSearchDialog.term /= "" && totalNumberOfResults == 0 then
             Just I18n.noMatchesFound
 
          else
             Nothing
         )
-        searchDialog.results.results
+        itemSearchDialog.results.results
 
 
 viewMain :
@@ -2877,14 +2877,14 @@ viewMain :
     -> QueryParameters
     -> Maybe GlossaryItemId
     -> Maybe RawTerm
-    -> SearchDialog
+    -> ItemSearchDialog
     -> Maybe GlossaryItemId
     -> Layout
     -> Saving
     -> Maybe ( GlossaryItemId, Bool )
     -> GlossaryForUi
     -> Html Msg
-viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn searchDialog confirmDeleteId layout deleting resultOfAttemptingToCopyItemTextToClipboard glossaryForUi =
+viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn itemSearchDialog confirmDeleteId layout deleting resultOfAttemptingToCopyItemTextToClipboard glossaryForUi =
     Html.main_
         []
         [ div
@@ -2926,7 +2926,7 @@ viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } 
                     )
                     glossaryForUi
                 ]
-            , Html.Lazy.lazy3 viewSearchDialog filterByTagWithDescription_ enableMathSupport searchDialog
+            , Html.Lazy.lazy3 viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog
             , Html.Lazy.lazy3 viewConfirmDeleteModal editability confirmDeleteId deleting
             , Html.Lazy.lazy8 viewSingleItemModalDialog
                 itemWithFocus
@@ -2999,9 +2999,9 @@ view model =
                                         else
                                             Nothing
 
-                                    SearchDialogShown ->
+                                    ItemSearchDialogShown ->
                                         if Extras.HtmlEvents.isEscape event || isControlOrCommandK_ event then
-                                            Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.hide, True )
+                                            Just <| ( PageMsg.Internal <| ItemSearchDialogMsg Components.SearchDialog.hide, True )
 
                                         else
                                             Nothing
@@ -3054,7 +3054,7 @@ view model =
 
                                     NoMenuOrDialogShown ->
                                         if isControlOrCommandK_ event then
-                                            Just <| ( PageMsg.Internal <| SearchDialogMsg Components.SearchDialog.show, True )
+                                            Just <| ( PageMsg.Internal <| ItemSearchDialogMsg Components.SearchDialog.show, True )
 
                                         else if Editability.canEdit model.common.editability && Extras.HtmlEvents.isE event && not event.isFormField then
                                             Just <| ( PageMsg.Internal StartEditing, True )
@@ -3118,7 +3118,7 @@ view model =
                                         viewStopEditingButton noModalDialogShown_
                                     , div
                                         [ class "hidden lg:block ml-auto pt-0.5" ]
-                                        [ viewQuickSearchButton model.common.runningOnMacOs
+                                        [ viewQuickItemSearchButton model.common.runningOnMacOs
                                         ]
                                     , div
                                         [ class "hidden lg:block pl-4 pb-3 pt-0.5" ]
@@ -3177,7 +3177,7 @@ view model =
                                 model.common.queryParameters
                                 model.itemWithFocus
                                 model.mostRecentRawTermForOrderingItemsFocusedOn
-                                model.searchDialog
+                                model.itemSearchDialog
                                 model.confirmDeleteId
                                 model.layout
                                 model.deleting
