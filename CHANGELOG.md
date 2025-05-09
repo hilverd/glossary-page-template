@@ -18,6 +18,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Allow searching by alternative terms in combo box for related items.
 - Use combo boxes instead of checkboxes for adding tags to items.
 - Limit search and combo box results to at most 10 and add "Showing x of y matches" messages.
+- Upgrade KaTeX to version 0.16.22.
 
 ### Fixed
 
