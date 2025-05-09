@@ -1448,6 +1448,7 @@ viewCreateSeeAlsoSingle :
     Bool
     -> DivDragAndDropStatus
     -> Bool
+    -> Maybe String
     -> Set String
     -> Int
     -> GlossaryItemsForUi
@@ -1455,11 +1456,12 @@ viewCreateSeeAlsoSingle :
     -> Int
     -> Form.RelatedTermField
     -> Html Msg
-viewCreateSeeAlsoSingle enableMathSupport dragAndDropStatus showValidationErrors relatedRawTerms numberOfRelatedTerms glossaryItemsForUi dropdownMenusWithMoreOptionsForRelatedTerms index relatedTerm =
+viewCreateSeeAlsoSingle enableMathSupport dragAndDropStatus showValidationErrors disambiguatedPreferredTermOfItemBeingEdited relatedRawTerms numberOfRelatedTerms glossaryItemsForUi dropdownMenusWithMoreOptionsForRelatedTerms index relatedTerm =
     viewCreateSeeAlsoSingle1
         enableMathSupport
         dragAndDropStatus
         showValidationErrors
+        disambiguatedPreferredTermOfItemBeingEdited
         relatedRawTerms
         numberOfRelatedTerms
         glossaryItemsForUi
@@ -1505,6 +1507,7 @@ viewCreateSeeAlsoSingle1 :
     Bool
     -> DivDragAndDropStatus
     -> Bool
+    -> Maybe String
     -> Set String
     -> Int
     -> GlossaryItemsForUi
@@ -1512,7 +1515,7 @@ viewCreateSeeAlsoSingle1 :
     -> RelatedTermIndex
     -> Form.RelatedTermField
     -> Html Msg
-viewCreateSeeAlsoSingle1 enableMathSupport dragAndDropStatus showValidationErrors relatedRawTerms numberOfRelatedTerms glossaryItemsForUi maybeDropdownMenuWithMoreOptions relatedTermIndex relatedTerm =
+viewCreateSeeAlsoSingle1 enableMathSupport dragAndDropStatus showValidationErrors disambiguatedPreferredTermOfItemBeingEdited relatedRawTerms numberOfRelatedTerms glossaryItemsForUi maybeDropdownMenuWithMoreOptions relatedTermIndex relatedTerm =
     Html.div
         (if dragAndDropStatus /= CannotBeDraggedAndDropped then
             let
@@ -1587,14 +1590,20 @@ viewCreateSeeAlsoSingle1 enableMathSupport dragAndDropStatus showValidationError
                         Nothing
                         (\{ preferredTerm, alternativeTerm } ->
                             let
+                                rawPreferredTerm : RawTerm
                                 rawPreferredTerm =
                                     preferredTerm |> DisambiguatedTerm.toTerm |> Term.raw
+
+                                rawPreferredTermString =
+                                    rawPreferredTerm |> RawTerm.toString
                             in
                             (relatedTerm.raw == Just rawPreferredTerm && alternativeTerm == Nothing)
-                                || (not <|
+                                || ((not <|
                                         Set.member
-                                            (RawTerm.toString rawPreferredTerm)
+                                            rawPreferredTermString
                                             relatedRawTerms
+                                    )
+                                        && not (disambiguatedPreferredTermOfItemBeingEdited == Just rawPreferredTermString)
                                    )
                         )
                         maximumNumberOfResultsForTermCombobox
@@ -1736,12 +1745,13 @@ viewCreateSeeAlso :
     Bool
     -> Bool
     -> Maybe Int
+    -> Maybe String
     -> GlossaryItemsForUi
     -> Array Form.RelatedTermField
     -> Dict Int Components.DropdownMenu.Model
     -> List DisambiguatedTerm
     -> Html Msg
-viewCreateSeeAlso enableMathSupport showValidationErrors idOfRelatedTermBeingDragged glossaryItemsForUi relatedTermsArray dropdownMenusWithMoreOptionsForRelatedTerms suggestedRelatedTerms =
+viewCreateSeeAlso enableMathSupport showValidationErrors idOfRelatedTermBeingDragged disambiguatedPreferredTermOfItemBeingEdited glossaryItemsForUi relatedTermsArray dropdownMenusWithMoreOptionsForRelatedTerms suggestedRelatedTerms =
     let
         relatedTermsList : List Form.RelatedTermField
         relatedTermsList =
@@ -1772,6 +1782,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors idOfRelatedTermBeingDra
                             CanBeDraggedAndDropped
                         )
                         showValidationErrors
+                        disambiguatedPreferredTermOfItemBeingEdited
                         (relatedTermsList
                             |> List.filterMap (.raw >> Maybe.map RawTerm.toString)
                             |> Set.fromList
@@ -1785,6 +1796,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors idOfRelatedTermBeingDra
                         enableMathSupport
                         CannotBeDraggedAndDropped
                         showValidationErrors
+                        disambiguatedPreferredTermOfItemBeingEdited
                         (relatedTermsList
                             |> List.filterMap (.raw >> Maybe.map RawTerm.toString)
                             |> Set.fromList
@@ -2016,6 +2028,12 @@ view model =
                 items =
                     Glossary.items glossaryForUi
 
+                disambiguatedPreferredTermOfItemBeingEdited : Maybe String
+                disambiguatedPreferredTermOfItemBeingEdited =
+                    model.itemBeingEdited
+                        |> Maybe.andThen (\itemBeingEdited -> GlossaryItemsForUi.get itemBeingEdited items)
+                        |> Maybe.map (GlossaryItemForUi.disambiguatedPreferredTerm >> DisambiguatedTerm.toTerm >> Term.raw >> RawTerm.toString)
+
                 newOrUpdatedGlossaryItem : GlossaryItemForUi
                 newOrUpdatedGlossaryItem =
                     Form.toGlossaryItem items model.form (GlossaryItemId.create "") Nothing
@@ -2104,6 +2122,7 @@ view model =
                                         model.common.enableMathSupport
                                         model.triedToSaveWhenFormInvalid
                                         idOfRelatedTermBeingDragged
+                                        disambiguatedPreferredTermOfItemBeingEdited
                                         items
                                         relatedTerms
                                         model.dropdownMenusWithMoreOptionsForRelatedTerms
