@@ -2,6 +2,7 @@ module Search exposing (resultsForItems, viewItemSearchResult)
 
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
+import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi
 import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
@@ -68,20 +69,34 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
                                    )
                         )
 
-            termContainsSearchString : Term -> Bool
-            termContainsSearchString =
+            termRawContainsSearchString : Term -> Bool
+            termRawContainsSearchString =
+                Term.raw
+                    >> RawTerm.toString
+                    >> String.toLower
+                    >> String.contains searchStringNormalised
+
+            termInlineTextContainsSearchString : Term -> Bool
+            termInlineTextContainsSearchString =
                 Term.inlineText
                     >> String.toLower
                     >> String.contains searchStringNormalised
 
-            termStartsWithSearchString : Term -> Bool
-            termStartsWithSearchString =
+            termRawStartsWithSearchString : Term -> Bool
+            termRawStartsWithSearchString =
+                Term.raw
+                    >> RawTerm.toString
+                    >> String.toLower
+                    >> String.startsWith searchStringNormalised
+
+            termInlineTextStartsWithSearchString : Term -> Bool
+            termInlineTextStartsWithSearchString =
                 Term.inlineText
                     >> String.toLower
                     >> String.startsWith searchStringNormalised
 
-            definitionContainsSearchString : Definition -> Bool
-            definitionContainsSearchString =
+            definitionInlineTextContainsSearchString : Definition -> Bool
+            definitionInlineTextContainsSearchString =
                 Definition.inlineText
                     >> String.toLower
                     >> String.contains searchStringNormalised
@@ -90,8 +105,13 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
             |> List.filter filter
             |> List.filterMap
                 (\({ preferredTerm, alternativeTerm, definition } as candidate) ->
-                    if Maybe.map termContainsSearchString alternativeTerm == Just True then
-                        if Maybe.map termStartsWithSearchString alternativeTerm == Just True then
+                    if
+                        Maybe.map termRawContainsSearchString alternativeTerm
+                            == Just True
+                            || Maybe.map termInlineTextContainsSearchString alternativeTerm
+                            == Just True
+                    then
+                        if Maybe.map termRawStartsWithSearchString alternativeTerm == Just True || Maybe.map termInlineTextStartsWithSearchString alternativeTerm == Just True then
                             Just ( candidate, 3 )
 
                         else
@@ -103,14 +123,14 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
                             preferredTermAsTerm =
                                 DisambiguatedTerm.toTerm preferredTerm
                         in
-                        if termContainsSearchString preferredTermAsTerm then
-                            if termStartsWithSearchString preferredTermAsTerm then
+                        if termRawContainsSearchString preferredTermAsTerm || termInlineTextContainsSearchString preferredTermAsTerm then
+                            if termRawStartsWithSearchString preferredTermAsTerm || termInlineTextStartsWithSearchString preferredTermAsTerm then
                                 Just ( candidate, 3 )
 
                             else
                                 Just ( candidate, 2 )
 
-                        else if alternativeTerm == Nothing && Maybe.map definitionContainsSearchString definition == Just True then
+                        else if alternativeTerm == Nothing && Maybe.map definitionInlineTextContainsSearchString definition == Just True then
                             Just ( candidate, 1 )
 
                         else
