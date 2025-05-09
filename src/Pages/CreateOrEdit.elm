@@ -52,6 +52,7 @@ import Json.Decode
 import PageMsg exposing (PageMsg)
 import QueryParameters
 import Save
+import Search
 import Set exposing (Set)
 import Svg.Attributes
 import Task
@@ -1449,19 +1450,19 @@ viewCreateSeeAlsoSingle :
     -> Bool
     -> Set String
     -> Int
-    -> List DisambiguatedTerm
+    -> GlossaryItemsForUi
     -> Dict Int Components.DropdownMenu.Model
     -> Int
     -> Form.RelatedTermField
     -> Html Msg
-viewCreateSeeAlsoSingle enableMathSupport dragAndDropStatus showValidationErrors relatedRawTerms numberOfRelatedTerms allTerms dropdownMenusWithMoreOptionsForRelatedTerms index relatedTerm =
+viewCreateSeeAlsoSingle enableMathSupport dragAndDropStatus showValidationErrors relatedRawTerms numberOfRelatedTerms glossaryItemsForUi dropdownMenusWithMoreOptionsForRelatedTerms index relatedTerm =
     viewCreateSeeAlsoSingle1
         enableMathSupport
         dragAndDropStatus
         showValidationErrors
         relatedRawTerms
         numberOfRelatedTerms
-        allTerms
+        glossaryItemsForUi
         (Dict.get index dropdownMenusWithMoreOptionsForRelatedTerms)
         (RelatedTermIndex.fromInt index)
         relatedTerm
@@ -1506,12 +1507,12 @@ viewCreateSeeAlsoSingle1 :
     -> Bool
     -> Set String
     -> Int
-    -> List DisambiguatedTerm
+    -> GlossaryItemsForUi
     -> Maybe Components.DropdownMenu.Model
     -> RelatedTermIndex
     -> Form.RelatedTermField
     -> Html Msg
-viewCreateSeeAlsoSingle1 enableMathSupport dragAndDropStatus showValidationErrors relatedRawTerms numberOfRelatedTerms allTerms maybeDropdownMenuWithMoreOptions relatedTermIndex relatedTerm =
+viewCreateSeeAlsoSingle1 enableMathSupport dragAndDropStatus showValidationErrors relatedRawTerms numberOfRelatedTerms glossaryItemsForUi maybeDropdownMenuWithMoreOptions relatedTermIndex relatedTerm =
     Html.div
         (if dragAndDropStatus /= CannotBeDraggedAndDropped then
             let
@@ -1580,62 +1581,42 @@ viewCreateSeeAlsoSingle1 enableMathSupport dragAndDropStatus showValidationError
                     )
                     maybeDropdownMenuWithMoreOptions
             , let
-                comboboxMatches =
-                    if relatedTerm.comboboxInput == "" then
-                        []
-
-                    else
-                        allTerms
-                            |> List.filter
-                                (\term ->
-                                    let
-                                        rawTerm : RawTerm
-                                        rawTerm =
-                                            term |> DisambiguatedTerm.toTerm |> Term.raw
-
-                                        termInlineTextMatchesInput : Bool
-                                        termInlineTextMatchesInput =
-                                            term
-                                                |> DisambiguatedTerm.toTerm
-                                                |> Term.inlineText
-                                                |> String.toLower
-                                                |> String.contains (relatedTerm.comboboxInput |> String.toLower)
-
-                                        rawTermMatchesInput : Bool
-                                        rawTermMatchesInput =
-                                            rawTerm
-                                                |> RawTerm.toString
-                                                |> String.toLower
-                                                |> String.contains (relatedTerm.comboboxInput |> String.toLower)
-
-                                        rawTermIsCurrentlySelected : Bool
-                                        rawTermIsCurrentlySelected =
-                                            Just rawTerm == relatedTerm.raw
-
-                                        rawTermIsAlreadyListed : Bool
-                                        rawTermIsAlreadyListed =
-                                            Set.member (RawTerm.toString rawTerm) relatedRawTerms
-                                    in
-                                    (rawTermIsCurrentlySelected || not rawTermIsAlreadyListed) && (rawTermMatchesInput || termInlineTextMatchesInput)
-                                )
-                            |> List.sortBy
-                                (\term ->
-                                    let
-                                        termInlineText =
-                                            term
-                                                |> DisambiguatedTerm.toTerm
-                                                |> Term.inlineText
-                                                |> String.toLower
-
-                                        input =
-                                            String.toLower relatedTerm.comboboxInput
-                                    in
-                                    if String.startsWith input termInlineText then
-                                        0
-
-                                    else
-                                        1
-                                )
+                comboboxChoices : { totalNumberOfResults : Int, results : List (Components.Combobox.Choice String (PageMsg InternalMsg)) }
+                comboboxChoices =
+                    Search.resultsForItems
+                        Nothing
+                        (\{ preferredTerm, alternativeTerm } ->
+                            let
+                                rawPreferredTerm =
+                                    preferredTerm |> DisambiguatedTerm.toTerm |> Term.raw
+                            in
+                            (relatedTerm.raw == Just rawPreferredTerm && alternativeTerm == Nothing)
+                                || (not <|
+                                        Set.member
+                                            (RawTerm.toString rawPreferredTerm)
+                                            relatedRawTerms
+                                   )
+                        )
+                        maximumNumberOfResultsForTermCombobox
+                        relatedTerm.comboboxInput
+                        glossaryItemsForUi
+                        |> (\{ totalNumberOfResults, results } ->
+                                { totalNumberOfResults = totalNumberOfResults
+                                , results =
+                                    results
+                                        |> List.map
+                                            (\({ preferredTerm } as result) ->
+                                                Components.Combobox.choice
+                                                    (preferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
+                                                    (\additionalAttributes ->
+                                                        Search.viewItemSearchResult
+                                                            enableMathSupport
+                                                            additionalAttributes
+                                                            result
+                                                    )
+                                            )
+                                }
+                           )
               in
               Components.Combobox.view
                 (PageMsg.Internal << RelatedTermComboboxMsg relatedTermIndex)
@@ -1659,22 +1640,11 @@ viewCreateSeeAlsoSingle1 enableMathSupport dragAndDropStatus showValidationError
                     )
                 ]
                 (relatedTerm.raw |> Maybe.map RawTerm.toString)
-                (comboboxMatches
-                    |> List.take maximumNumberOfResultsForTermCombobox
-                    |> List.map
-                        (\term ->
-                            Components.Combobox.choice
-                                (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
-                                (\additionalAttributes ->
-                                    Term.view enableMathSupport additionalAttributes <|
-                                        DisambiguatedTerm.toTerm term
-                                )
-                        )
-                )
-                (if List.length comboboxMatches > maximumNumberOfResultsForTermCombobox then
-                    Just <| I18n.showingXOfYMatches (String.fromInt maximumNumberOfResultsForTermCombobox) (String.fromInt (List.length comboboxMatches))
+                comboboxChoices.results
+                (if comboboxChoices.totalNumberOfResults > maximumNumberOfResultsForTermCombobox then
+                    Just <| I18n.showingXOfYMatches (String.fromInt maximumNumberOfResultsForTermCombobox) (String.fromInt comboboxChoices.totalNumberOfResults)
 
-                 else if relatedTerm.comboboxInput /= "" && List.length comboboxMatches == 0 then
+                 else if relatedTerm.comboboxInput /= "" && List.length comboboxChoices.results == 0 then
                     Just I18n.noMatchesFound
 
                  else
@@ -1767,26 +1737,15 @@ viewCreateSeeAlso :
     -> Bool
     -> Maybe Int
     -> GlossaryItemsForUi
-    -> Array TermField
     -> Array Form.RelatedTermField
     -> Dict Int Components.DropdownMenu.Model
     -> List DisambiguatedTerm
     -> Html Msg
-viewCreateSeeAlso enableMathSupport showValidationErrors idOfRelatedTermBeingDragged glossaryItemsForUi terms relatedTermsArray dropdownMenusWithMoreOptionsForRelatedTerms suggestedRelatedTerms =
+viewCreateSeeAlso enableMathSupport showValidationErrors idOfRelatedTermBeingDragged glossaryItemsForUi relatedTermsArray dropdownMenusWithMoreOptionsForRelatedTerms suggestedRelatedTerms =
     let
-        rawTermsSet : Set String
-        rawTermsSet =
-            terms |> Array.toList |> List.map TermField.raw |> Set.fromList
-
         relatedTermsList : List Form.RelatedTermField
         relatedTermsList =
             Array.toList relatedTermsArray
-
-        allPreferredTerms : List DisambiguatedTerm
-        allPreferredTerms =
-            glossaryItemsForUi
-                |> GlossaryItemsForUi.orderedAlphabetically Nothing
-                |> List.map (Tuple.second >> GlossaryItemForUi.disambiguatedPreferredTerm)
     in
     div
         [ class "pt-8 space-y-6 sm:pt-10 sm:space-y-5" ]
@@ -1818,19 +1777,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors idOfRelatedTermBeingDra
                             |> Set.fromList
                         )
                         (List.length relatedTermsList)
-                        (List.filter
-                            (\term ->
-                                not <|
-                                    Set.member
-                                        (term
-                                            |> DisambiguatedTerm.toTerm
-                                            |> Term.raw
-                                            |> RawTerm.toString
-                                        )
-                                        rawTermsSet
-                            )
-                            allPreferredTerms
-                        )
+                        glossaryItemsForUi
                         dropdownMenusWithMoreOptionsForRelatedTerms
                         index
                         relatedTerm
@@ -1843,19 +1790,7 @@ viewCreateSeeAlso enableMathSupport showValidationErrors idOfRelatedTermBeingDra
                             |> Set.fromList
                         )
                         (List.length relatedTermsList)
-                        (List.filter
-                            (\term ->
-                                not <|
-                                    Set.member
-                                        (term
-                                            |> DisambiguatedTerm.toTerm
-                                            |> Term.raw
-                                            |> RawTerm.toString
-                                        )
-                                        rawTermsSet
-                            )
-                            allPreferredTerms
-                        )
+                        glossaryItemsForUi
                         dropdownMenusWithMoreOptionsForRelatedTerms
                         index
                         relatedTerm
@@ -2170,7 +2105,6 @@ view model =
                                         model.triedToSaveWhenFormInvalid
                                         idOfRelatedTermBeingDragged
                                         items
-                                        terms
                                         relatedTerms
                                         model.dropdownMenusWithMoreOptionsForRelatedTerms
                                         suggestedRelatedTerms

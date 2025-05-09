@@ -423,7 +423,7 @@ update msg model =
                         Ok glossaryForUi ->
                             glossaryForUi
                                 |> GlossaryForUi.items
-                                |> Search.resultsForItems (filterByTagId model) maximumNumberOfResultsForItemSearchDialog itemSearchString
+                                |> Search.resultsForItems (filterByTagId model) (always True) maximumNumberOfResultsForItemSearchDialog itemSearchString
                                 |> (\{ totalNumberOfResults, results } ->
                                         { totalNumberOfResults = totalNumberOfResults
                                         , results =
@@ -432,7 +432,7 @@ update msg model =
                                                     (\({ preferredTerm } as searchResult) ->
                                                         Components.SearchDialog.searchResult
                                                             (Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
-                                                            (Search.viewItemSearchResult model.common.enableMathSupport searchResult)
+                                                            [ Search.viewItemSearchResult model.common.enableMathSupport [] searchResult ]
                                                     )
                                         }
                                    )

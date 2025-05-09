@@ -14,9 +14,10 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 
-- Use comboboxes instead of `<select>` elements for selecting related items.
-- Use comboboxes instead of checkboxes for adding tags to items.
-- Limit search and combobox results to at most 10 and add "Showing x of y matches" messages.
+- Use combo boxes instead of `<select>` elements for selecting related items.
+- Allow searching by alternative terms in combo box for related items.
+- Use combo boxes instead of checkboxes for adding tags to items.
+- Limit search and combo box results to at most 10 and add "Showing x of y matches" messages.
 
 ### Fixed
 

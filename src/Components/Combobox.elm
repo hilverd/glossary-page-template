@@ -1,4 +1,4 @@
-port module Components.Combobox exposing (Model, Msg, choice, choicesVisible, hideChoices, id, init, onBlur, onInput, onSelect, placeholder, showChoices, showValidationErrors, subscriptions, update, validationError, view)
+port module Components.Combobox exposing (Choice, Model, Msg, choice, choicesVisible, hideChoices, id, init, onBlur, onInput, onSelect, placeholder, showChoices, showValidationErrors, subscriptions, update, validationError, view)
 
 import Accessibility
 import Accessibility.Aria

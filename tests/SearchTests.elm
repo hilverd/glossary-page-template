@@ -77,7 +77,7 @@ suite =
             [ test "returns search results sorted by relevance for a given search string" <|
                 \_ ->
                     loadedGlossaryItemsForUi
-                        |> Search.resultsForItems Nothing 10 "term"
+                        |> Search.resultsForItems Nothing (always True) 10 "term"
                         |> (\{ totalNumberOfResults, results } ->
                                 { totalNumberOfResults = totalNumberOfResults
                                 , results = List.map (\{ preferredTerm } -> Term.id <| DisambiguatedTerm.toTerm preferredTerm) results
@@ -94,7 +94,7 @@ suite =
             , test "terms for which the search string is a prefix are ranked higher than other terms" <|
                 \_ ->
                     loadedGlossaryItemsForUi
-                        |> Search.resultsForItems Nothing 10 "the"
+                        |> Search.resultsForItems Nothing (always True) 10 "the"
                         |> (\{ totalNumberOfResults, results } ->
                                 { totalNumberOfResults = totalNumberOfResults
                                 , results = List.map (\{ preferredTerm } -> Term.id <| DisambiguatedTerm.toTerm preferredTerm) results
@@ -111,7 +111,7 @@ suite =
             , test "also searches definitions, but terms take priority" <|
                 \_ ->
                     loadedGlossaryItemsForUi
-                        |> Search.resultsForItems Nothing 10 "three"
+                        |> Search.resultsForItems Nothing (always True) 10 "three"
                         |> (\{ totalNumberOfResults, results } ->
                                 { totalNumberOfResults = totalNumberOfResults
                                 , results = List.map (\{ preferredTerm } -> Term.id <| DisambiguatedTerm.toTerm preferredTerm) results
@@ -127,7 +127,7 @@ suite =
             , test "can restrict the number of results" <|
                 \_ ->
                     loadedGlossaryItemsForUi
-                        |> Search.resultsForItems Nothing 1 "three"
+                        |> Search.resultsForItems Nothing (always True) 1 "three"
                         |> (\{ totalNumberOfResults, results } ->
                                 { totalNumberOfResults = totalNumberOfResults
                                 , results = List.map (\{ preferredTerm } -> Term.id <| DisambiguatedTerm.toTerm preferredTerm) results

@@ -7,7 +7,7 @@ import Data.GlossaryItemForUi as GlossaryItemForUi
 import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.TagId exposing (TagId)
 import Extras.Html
-import Html exposing (Html)
+import Html exposing (Attribute, Html)
 import Html.Attributes exposing (class)
 import Icons
 import Svg.Attributes
@@ -20,8 +20,8 @@ type alias ItemSearchResult =
     }
 
 
-resultsForItems : Maybe TagId -> Int -> String -> GlossaryItemsForUi -> { totalNumberOfResults : Int, results : List ItemSearchResult }
-resultsForItems filterByTagId maximumNumberOfResults searchString glossaryItemsForUi =
+resultsForItems : Maybe TagId -> (ItemSearchResult -> Bool) -> Int -> String -> GlossaryItemsForUi -> { totalNumberOfResults : Int, results : List ItemSearchResult }
+resultsForItems filterByTagId filter maximumNumberOfResults searchString glossaryItemsForUi =
     let
         searchStringNormalised : String
         searchStringNormalised =
@@ -87,6 +87,7 @@ resultsForItems filterByTagId maximumNumberOfResults searchString glossaryItemsF
                     >> String.contains searchStringNormalised
         in
         candidates
+            |> List.filter filter
             |> List.filterMap
                 (\({ preferredTerm, alternativeTerm, definition } as candidate) ->
                     if Maybe.map termContainsSearchString alternativeTerm == Just True then
@@ -151,21 +152,21 @@ resultsForItems filterByTagId maximumNumberOfResults searchString glossaryItemsF
                )
 
 
-viewItemSearchResult : Bool -> ItemSearchResult -> List (Html Never)
-viewItemSearchResult enableMathSupport { preferredTerm, alternativeTerm, definition } =
+viewItemSearchResult : Bool -> List (Attribute msg) -> ItemSearchResult -> Html msg
+viewItemSearchResult enableMathSupport additionalAttributes { preferredTerm, alternativeTerm, definition } =
     case alternativeTerm of
         Just alternativeTerm_ ->
-            [ Html.div
+            Html.div
                 [ class "flex flex-col" ]
                 [ Html.div
                     [ class "font-medium" ]
-                    [ Term.view enableMathSupport [] alternativeTerm_ ]
+                    [ Term.view enableMathSupport additionalAttributes alternativeTerm_ ]
                 , Html.div
                     [ class "inline-flex items-center group-hover:underline font-medium" ]
                     [ Icons.cornerDownRight
                         [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400"
                         ]
-                    , Term.view enableMathSupport [] (DisambiguatedTerm.toTerm preferredTerm)
+                    , Term.view enableMathSupport additionalAttributes (DisambiguatedTerm.toTerm preferredTerm)
                     ]
                 , Extras.Html.showMaybe
                     (\definition_ ->
@@ -176,19 +177,18 @@ viewItemSearchResult enableMathSupport { preferredTerm, alternativeTerm, definit
                               else
                                 class "truncate"
                             ]
-                            [ Definition.viewInline enableMathSupport [] definition_
+                            [ Definition.viewInline enableMathSupport additionalAttributes definition_
                             ]
                     )
                     definition
                 ]
-            ]
 
         Nothing ->
-            [ Html.div
+            Html.div
                 []
                 [ Html.p
                     [ class "font-medium" ]
-                    [ Term.view enableMathSupport [] (DisambiguatedTerm.toTerm preferredTerm) ]
+                    [ Term.view enableMathSupport additionalAttributes (DisambiguatedTerm.toTerm preferredTerm) ]
                 , Extras.Html.showMaybe
                     (\definition_ ->
                         Html.div
@@ -198,9 +198,8 @@ viewItemSearchResult enableMathSupport { preferredTerm, alternativeTerm, definit
                               else
                                 class "truncate"
                             ]
-                            [ Definition.viewInline enableMathSupport [] definition_
+                            [ Definition.viewInline enableMathSupport additionalAttributes definition_
                             ]
                     )
                     definition
                 ]
-            ]
