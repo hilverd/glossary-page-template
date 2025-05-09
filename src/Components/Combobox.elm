@@ -380,7 +380,7 @@ view toParentMsg (Model model) properties valueForSelectedChoice choices message
             , div
                 [ class "absolute z-10 mt-1 w-full" ]
                 [ ul
-                    [ class "max-h-60 overflow-auto bg-white dark:bg-gray-800 py-1 ring-1 shadow-lg ring-black/5 dark:ring-gray-100/5 focus:outline-hidden"
+                    [ class "max-h-60 overflow-x-hidden overflow-y-auto bg-white dark:bg-gray-800 py-1 ring-1 shadow-lg ring-black/5 dark:ring-gray-100/5 focus:outline-hidden"
                     , if messageToShowAtBottom == Nothing then
                         class "rounded-md"
 
@@ -423,9 +423,7 @@ view toParentMsg (Model model) properties valueForSelectedChoice choices message
                                                 config.onSelect
                                             ]
                                             [ span
-                                                [ class "block truncate"
-                                                , Extras.HtmlAttribute.showIf selected <| class "font-semibold"
-                                                ]
+                                                [ class "block truncate" ]
                                                 [ body
                                                     [ if active then
                                                         class "text-white dark:text-gray-900 bg-indigo-600 dark:bg-indigo-300 outline-hidden"
