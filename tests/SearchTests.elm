@@ -73,70 +73,70 @@ loadedGlossaryItemsForUi =
 suite : Test
 suite =
     describe "The Search module"
-        [ describe "Search.search"
+        [ describe "Search.resultsForItems"
             [ test "returns search results sorted by relevance for a given search string" <|
                 \_ ->
                     loadedGlossaryItemsForUi
-                        |> Search.search False Nothing 10 "term"
+                        |> Search.resultsForItems Nothing 10 "term"
                         |> (\{ totalNumberOfResults, results } ->
                                 { totalNumberOfResults = totalNumberOfResults
-                                , results = List.map SearchDialog.searchResultHref results
+                                , results = List.map (\{ preferredTerm } -> Term.id <| DisambiguatedTerm.toTerm preferredTerm) results
                                 }
                            )
                         |> Expect.equal
                             { totalNumberOfResults = 3
                             , results =
-                                [ "#Second_the_term"
-                                , "#The_term_one"
-                                , "#The_term_three"
+                                [ "Second_the_term"
+                                , "The_term_one"
+                                , "The_term_three"
                                 ]
                             }
             , test "terms for which the search string is a prefix are ranked higher than other terms" <|
                 \_ ->
                     loadedGlossaryItemsForUi
-                        |> Search.search False Nothing 10 "the"
+                        |> Search.resultsForItems Nothing 10 "the"
                         |> (\{ totalNumberOfResults, results } ->
                                 { totalNumberOfResults = totalNumberOfResults
-                                , results = List.map SearchDialog.searchResultHref results
+                                , results = List.map (\{ preferredTerm } -> Term.id <| DisambiguatedTerm.toTerm preferredTerm) results
                                 }
                            )
                         |> Expect.equal
                             { totalNumberOfResults = 3
                             , results =
-                                [ "#The_term_one"
-                                , "#The_term_three"
-                                , "#Second_the_term"
+                                [ "The_term_one"
+                                , "The_term_three"
+                                , "Second_the_term"
                                 ]
                             }
             , test "also searches definitions, but terms take priority" <|
                 \_ ->
                     loadedGlossaryItemsForUi
-                        |> Search.search False Nothing 10 "three"
+                        |> Search.resultsForItems Nothing 10 "three"
                         |> (\{ totalNumberOfResults, results } ->
                                 { totalNumberOfResults = totalNumberOfResults
-                                , results = List.map SearchDialog.searchResultHref results
+                                , results = List.map (\{ preferredTerm } -> Term.id <| DisambiguatedTerm.toTerm preferredTerm) results
                                 }
                            )
                         |> Expect.equal
                             { totalNumberOfResults = 2
                             , results =
-                                [ "#The_term_three"
-                                , "#Second_the_term"
+                                [ "The_term_three"
+                                , "Second_the_term"
                                 ]
                             }
             , test "can restrict the number of results" <|
                 \_ ->
                     loadedGlossaryItemsForUi
-                        |> Search.search False Nothing 1 "three"
+                        |> Search.resultsForItems Nothing 1 "three"
                         |> (\{ totalNumberOfResults, results } ->
                                 { totalNumberOfResults = totalNumberOfResults
-                                , results = List.map SearchDialog.searchResultHref results
+                                , results = List.map (\{ preferredTerm } -> Term.id <| DisambiguatedTerm.toTerm preferredTerm) results
                                 }
                            )
                         |> Expect.equal
                             { totalNumberOfResults = 2
                             , results =
-                                [ "#The_term_three"
+                                [ "The_term_three"
                                 ]
                             }
             ]

@@ -417,13 +417,25 @@ update msg model =
                 itemSearchDialog0 =
                     model.itemSearchDialog
 
-                results : { totalNumberOfResults : Int, results : List Components.SearchDialog.SearchResult }
-                results =
+                resultsToShowInDialog : { totalNumberOfResults : Int, results : List Components.SearchDialog.SearchResult }
+                resultsToShowInDialog =
                     case model.common.glossaryForUi of
                         Ok glossaryForUi ->
                             glossaryForUi
                                 |> GlossaryForUi.items
-                                |> Search.search model.common.enableMathSupport (filterByTagId model) maximumNumberOfResultsForItemSearchDialog itemSearchString
+                                |> Search.resultsForItems (filterByTagId model) maximumNumberOfResultsForItemSearchDialog itemSearchString
+                                |> (\{ totalNumberOfResults, results } ->
+                                        { totalNumberOfResults = totalNumberOfResults
+                                        , results =
+                                            results
+                                                |> List.map
+                                                    (\({ preferredTerm } as searchResult) ->
+                                                        Components.SearchDialog.searchResult
+                                                            (Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
+                                                            (Search.viewItemSearchResult model.common.enableMathSupport searchResult)
+                                                    )
+                                        }
+                                   )
 
                         Err _ ->
                             { totalNumberOfResults = 0, results = [] }
@@ -434,7 +446,7 @@ update msg model =
                         | itemSearchDialog =
                             { itemSearchDialog0
                                 | term = itemSearchString
-                                , results = results
+                                , results = resultsToShowInDialog
                             }
                     }
             in
