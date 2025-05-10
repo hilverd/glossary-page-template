@@ -13,6 +13,12 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+### Fixed
+### Removed
+
+## [5.5.0] - 2025-05-10
+
+### Changed
 
 - Use combo boxes instead of `<select>` elements for selecting related items.
 - Allow searching by alternative terms in combo box for related items.
@@ -26,8 +32,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Fix regression bug where auto-focusing on terms and related items no longer worked.
 - Fix minor UI bug where dropdown menus for reordering terms were not appearing for new terms on small screens.
 - Improve layout of long tags.
-
-### Removed
 
 ## [5.4.0] - 2025-03-28
 
@@ -849,7 +853,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.4.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.5.0...HEAD
+[5.5.0]: https://github.com/hilverd/glossary-page-template/compare/v5.4.0...v5.5.0
 [5.4.0]: https://github.com/hilverd/glossary-page-template/compare/v5.3.1...v5.4.0
 [5.3.1]: https://github.com/hilverd/glossary-page-template/compare/v5.3.0...v5.3.1
 [5.3.0]: https://github.com/hilverd/glossary-page-template/compare/v5.2.1...v5.3.0
