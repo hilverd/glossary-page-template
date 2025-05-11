@@ -33,6 +33,7 @@ import CommonModel exposing (CommonModel)
 import Components.AboutSection
 import Components.Badge
 import Components.Button
+import Components.Combobox
 import Components.Dividers
 import Components.DropdownMenu
 import Components.GlossaryItemCard
@@ -82,7 +83,9 @@ import Html.Keyed
 import Html.Lazy
 import Http
 import Icons
+import IncubatingFeatures exposing (showIncubatingFeatures)
 import Internationalisation as I18n
+import List exposing (maximum)
 import PageMsg exposing (PageMsg)
 import Process
 import QueryParameters exposing (QueryParameters)
@@ -128,6 +131,8 @@ type alias Model =
     , itemSearchDialog : ItemSearchDialog
     , layout : Layout
     , itemWithFocus : Maybe GlossaryItemId
+    , itemWithFocusCombobox : Components.Combobox.Model
+    , itemWithFocusComboboxInput : String
     , confirmDeleteId : Maybe GlossaryItemId
     , deleting : Saving
     , savingSettings : Saving
@@ -161,6 +166,8 @@ type InternalMsg
     | CopyItemTextToClipboard GlossaryItemId
     | ShowRelatedTermAsSingle Term
     | ChangeLayoutToShowAll
+    | ItemWithFocusComboboxMsg Components.Combobox.Msg
+    | UpdateItemWithFocusComboboxInput Bool String
     | ConfirmDelete GlossaryItemId
     | CancelDelete
     | Delete GlossaryItemId
@@ -199,6 +206,8 @@ init commonModel itemWithFocus =
       , backToTopLinkVisibility = Invisible 0
       , layout = ShowAllItems
       , itemWithFocus = itemWithFocus
+      , itemWithFocusCombobox = Components.Combobox.init
+      , itemWithFocusComboboxInput = ""
       , confirmDeleteId = Nothing
       , themeDropdownMenu =
             Components.DropdownMenu.init
@@ -284,6 +293,11 @@ port scrollingUpWhileFarAwayFromTheTop : (() -> msg) -> Sub msg
 
 maximumNumberOfResultsForItemSearchDialog : Int
 maximumNumberOfResultsForItemSearchDialog =
+    10
+
+
+maximumNumberOfResultsForItemWithFocusCombobox : Int
+maximumNumberOfResultsForItemWithFocusCombobox =
     10
 
 
@@ -602,6 +616,26 @@ update msg model =
                     |> Maybe.map (ElementIds.glossaryItemDiv >> scrollElementIntoView)
                     |> Maybe.withDefault Cmd.none
                 ]
+            )
+
+        ItemWithFocusComboboxMsg msg_ ->
+            Components.Combobox.update
+                (\x -> { model | itemWithFocusCombobox = x })
+                (PageMsg.Internal << ItemWithFocusComboboxMsg)
+                msg_
+                model.itemWithFocusCombobox
+
+        UpdateItemWithFocusComboboxInput hideChoices input ->
+            ( { model
+                | itemWithFocusComboboxInput = input
+                , itemWithFocusCombobox =
+                    if hideChoices then
+                        Components.Combobox.hideChoices model.itemWithFocusCombobox
+
+                    else
+                        Components.Combobox.showChoices model.itemWithFocusCombobox
+              }
+            , Cmd.none
             )
 
         ConfirmDelete index ->
@@ -1872,6 +1906,7 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpda
                 totalNumberOfItems
                 { enableMathSupport = enableMathSupport }
                 disambiguatedPreferredTermsWithDefinitions
+                glossaryItemsForUi
                 orderItemsFocusedOnTerm
                 queryParameters
                 mostRecentRawTermForOrderingItemsFocusedOn
@@ -2522,11 +2557,12 @@ viewOrderItemsBy :
     Int
     -> { enableMathSupport : Bool }
     -> List DisambiguatedTerm
+    -> GlossaryItemsForUi
     -> Maybe DisambiguatedTerm
     -> QueryParameters
     -> Maybe RawTerm
     -> Html Msg
-viewOrderItemsBy numberOfItems { enableMathSupport } disambiguatedPreferredTermsWithDefinitions orderItemsFocusedOnTerm queryParameters mostRecentRawTermForOrderingItemsFocusedOn =
+viewOrderItemsBy numberOfItems { enableMathSupport } disambiguatedPreferredTermsWithDefinitions glossaryItemsForUi orderItemsFocusedOnTerm queryParameters mostRecentRawTermForOrderingItemsFocusedOn =
     div
         [ class "print:hidden pt-4 pb-2" ]
         [ fieldset []
@@ -2600,31 +2636,90 @@ viewOrderItemsBy numberOfItems { enableMathSupport } disambiguatedPreferredTerms
                         , for ElementIds.orderItemsFocusedOn
                         ]
                         [ span
-                            [ class "mr-2" ]
+                            [ class "mr-2 text-nowrap" ]
                             [ text I18n.focusedOn
                             ]
-                        , Components.SelectMenu.view
-                            [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect
-                            , Components.SelectMenu.ariaLabel I18n.focusOnTerm
-                            , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << RawTerm.fromString)
-                            , Components.SelectMenu.enabled True
-                            ]
-                            (disambiguatedPreferredTermsWithDefinitions
-                                |> List.map
-                                    (\disambiguatedPreferredTerm ->
-                                        let
-                                            preferredRawTerm : RawTerm
-                                            preferredRawTerm =
-                                                disambiguatedPreferredTerm
-                                                    |> DisambiguatedTerm.toTerm
-                                                    |> Term.raw
-                                        in
-                                        Components.SelectMenu.Choice
-                                            (RawTerm.toString preferredRawTerm)
-                                            [ text <| Term.inlineText <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm ]
-                                            (mostRecentRawTermForOrderingItemsFocusedOn == Just preferredRawTerm)
+                        , if showIncubatingFeatures then
+                            let
+                                itemWithFocusComboboxInput : String
+                                itemWithFocusComboboxInput =
+                                    "TODO"
+
+                                comboboxChoices : { totalNumberOfResults : Int, results : List (Components.Combobox.Choice Term (PageMsg InternalMsg)) }
+                                comboboxChoices =
+                                    Search.resultsForItems
+                                        Nothing
+                                        -- TODO
+                                        (always True)
+                                        maximumNumberOfResultsForItemWithFocusCombobox
+                                        itemWithFocusComboboxInput
+                                        glossaryItemsForUi
+                                        |> (\{ totalNumberOfResults, results } ->
+                                                { totalNumberOfResults = totalNumberOfResults
+                                                , results =
+                                                    results
+                                                        |> List.map
+                                                            (\({ preferredTerm } as result) ->
+                                                                Components.Combobox.choice
+                                                                    (preferredTerm |> DisambiguatedTerm.toTerm)
+                                                                    (\additionalAttributes ->
+                                                                        Search.viewItemSearchResult
+                                                                            enableMathSupport
+                                                                            additionalAttributes
+                                                                            result
+                                                                    )
+                                                            )
+                                                }
+                                           )
+                            in
+                            Components.Combobox.view
+                                (PageMsg.Internal << ItemWithFocusComboboxMsg)
+                                Components.Combobox.init
+                                -- TODO: itemWithFocusCombobox
+                                [ Components.Combobox.id ElementIds.orderItemsFocusedOn
+                                , Components.Combobox.onSelect (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << Term.raw)
+                                , Components.Combobox.onInput (PageMsg.Internal << UpdateItemWithFocusComboboxInput False)
+                                , Components.Combobox.onBlur
+                                    (PageMsg.Internal <|
+                                        UpdateItemWithFocusComboboxInput True ""
                                     )
-                            )
+                                ]
+                                Nothing
+                                comboboxChoices.results
+                                (if comboboxChoices.totalNumberOfResults > maximumNumberOfResultsForItemWithFocusCombobox then
+                                    Just <| I18n.showingXOfYMatches (String.fromInt maximumNumberOfResultsForItemWithFocusCombobox) (String.fromInt comboboxChoices.totalNumberOfResults)
+
+                                 else if itemWithFocusComboboxInput /= "" && comboboxChoices.totalNumberOfResults == 0 then
+                                    Just I18n.noMatchesFound
+
+                                 else
+                                    Nothing
+                                )
+                                itemWithFocusComboboxInput
+
+                          else
+                            Components.SelectMenu.view
+                                [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect
+                                , Components.SelectMenu.ariaLabel I18n.focusOnTerm
+                                , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << RawTerm.fromString)
+                                , Components.SelectMenu.enabled True
+                                ]
+                                (disambiguatedPreferredTermsWithDefinitions
+                                    |> List.map
+                                        (\disambiguatedPreferredTerm ->
+                                            let
+                                                preferredRawTerm : RawTerm
+                                                preferredRawTerm =
+                                                    disambiguatedPreferredTerm
+                                                        |> DisambiguatedTerm.toTerm
+                                                        |> Term.raw
+                                            in
+                                            Components.SelectMenu.Choice
+                                                (RawTerm.toString preferredRawTerm)
+                                                [ text <| Term.inlineText <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm ]
+                                                (mostRecentRawTermForOrderingItemsFocusedOn == Just preferredRawTerm)
+                                        )
+                                )
                         ]
                     ]
                 ]
@@ -3227,4 +3322,7 @@ subscriptions model =
         , attemptedToCopyEditorCommandToClipboard (AttemptedToCopyEditorCommandToClipboard >> PageMsg.Internal)
         , attemptedToCopyItemTextToClipboard (AttemptedToCopyItemTextToClipboard >> PageMsg.Internal)
         , scrollingUpWhileFarAwayFromTheTop (always <| PageMsg.Internal ScrollingUpWhileFarAwayFromTheTop)
+        , model.itemWithFocusCombobox
+            |> Components.Combobox.subscriptions
+            |> Sub.map (ItemWithFocusComboboxMsg >> PageMsg.Internal)
         ]
