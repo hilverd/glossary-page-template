@@ -1790,7 +1790,7 @@ viewCreateGlossaryItemButton =
         ]
 
 
-viewCards :
+viewTagFilterAndOrderItemsByAndItemCards :
     { enableMathSupport : Bool
     , enableOrderItemsButtons : Bool
     , editable : Bool
@@ -1809,12 +1809,55 @@ viewCards :
     -> GlossaryItemsForUi
     -> ( List ( GlossaryItemId, GlossaryItemForUi ), List ( GlossaryItemId, GlossaryItemForUi ) )
     -> Html Msg
-viewCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpdatedDates, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn resultOfAttemptingToCopyItemTextToClipboard glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
-    let
-        filterByTag : Maybe Tag
-        filterByTag =
-            Maybe.map DescribedTag.tag filterByDescribedTag_
+viewTagFilterAndOrderItemsByAndItemCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpdatedDates, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn resultOfAttemptingToCopyItemTextToClipboard glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+    div
+        []
+        [ div
+            []
+            (viewTagFilterAndOrderItemsBy
+                { enableMathSupport = enableMathSupport
+                , enableOrderItemsButtons = enableOrderItemsButtons
+                , editable = editable
+                , editing = editing
+                }
+                { filterByTagId_ = filterByTagId_, tags = tags, filterByDescribedTag_ = filterByDescribedTag_ }
+                queryParameters
+                mostRecentRawTermForOrderingItemsFocusedOn
+                glossaryItemsForUi
+                ( indexedGlossaryItems, otherIndexedGlossaryItems )
+            )
+        , div []
+            (viewItemCards
+                enableMathSupport
+                editable
+                enableLastUpdatedDates
+                filterByDescribedTag_
+                itemWithFocus
+                resultOfAttemptingToCopyItemTextToClipboard
+                indexedGlossaryItems
+                otherIndexedGlossaryItems
+            )
+        ]
 
+
+viewTagFilterAndOrderItemsBy :
+    { enableMathSupport : Bool
+    , enableOrderItemsButtons : Bool
+    , editable : Bool
+    , editing : Bool
+    }
+    ->
+        { filterByTagId_ : Maybe TagId
+        , tags : List Tag
+        , filterByDescribedTag_ : Maybe DescribedTag
+        }
+    -> QueryParameters
+    -> Maybe RawTerm
+    -> GlossaryItemsForUi
+    -> ( List ( GlossaryItemId, GlossaryItemForUi ), List ( GlossaryItemId, GlossaryItemForUi ) )
+    -> List (Html Msg)
+viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, editable, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters mostRecentRawTermForOrderingItemsFocusedOn glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+    let
         combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForUi )
         combinedIndexedGlossaryItems =
             List.append indexedGlossaryItems otherIndexedGlossaryItems
@@ -1833,6 +1876,78 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpda
 
                 _ ->
                     Nothing
+
+        totalNumberOfItems : Int
+        totalNumberOfItems =
+            List.length combinedIndexedGlossaryItems
+
+        recommendedMaximumNumberOfItems : Int
+        recommendedMaximumNumberOfItems =
+            1000
+    in
+    [ div
+        [ class "mb-4" ]
+        [ Extras.Html.showMaybe
+            (viewCurrentTagFilter { enableMathSupport = enableMathSupport })
+            filterByDescribedTag_
+        , Extras.Html.showIf (filterByDescribedTag_ == Nothing) <|
+            viewAllTagFilters { enableMathSupport = enableMathSupport } tags
+        , Extras.Html.showIf editing <|
+            div
+                [ class "flex-none mt-4" ]
+                [ viewManageTagsButton ]
+        ]
+    , div
+        []
+        [ Extras.Html.showIf editable <|
+            div
+                [ class "pt-2" ]
+                [ if List.isEmpty combinedIndexedGlossaryItems then
+                    viewCreateGlossaryItemButtonForEmptyState
+
+                  else
+                    viewCreateGlossaryItemButton
+                ]
+        ]
+    , Extras.Html.showIf (editable && totalNumberOfItems > recommendedMaximumNumberOfItems) <|
+        I18n.glossaryContainsTooManyItems recommendedMaximumNumberOfItems
+    , Extras.Html.showIf
+        (List.isEmpty combinedIndexedGlossaryItems && filterByTagId_ /= Nothing)
+      <|
+        div
+            [ class "mt-4" ]
+            [ text I18n.noMatchingItemsFound ]
+    , Extras.Html.showIf
+        (enableOrderItemsButtons
+            && (not <| List.isEmpty combinedIndexedGlossaryItems)
+        )
+      <|
+        viewOrderItemsBy
+            totalNumberOfItems
+            { enableMathSupport = enableMathSupport }
+            disambiguatedPreferredTermsWithDefinitions
+            glossaryItemsForUi
+            orderItemsFocusedOnTerm
+            queryParameters
+            mostRecentRawTermForOrderingItemsFocusedOn
+    ]
+
+
+viewItemCards :
+    Bool
+    -> Bool
+    -> Bool
+    -> Maybe DescribedTag
+    -> Maybe GlossaryItemId
+    -> Maybe ( GlossaryItemId, Bool )
+    -> List ( GlossaryItemId, GlossaryItemForUi )
+    -> List ( GlossaryItemId, GlossaryItemForUi )
+    -> List (Html Msg)
+viewItemCards enableMathSupport editable enableLastUpdatedDates filterByDescribedTag_ itemWithFocus resultOfAttemptingToCopyItemTextToClipboard indexedGlossaryItems otherIndexedGlossaryItems =
+    let
+        filterByTag : Maybe Tag
+        filterByTag =
+            Maybe.map DescribedTag.tag filterByDescribedTag_
 
         viewIndexedItem : GlossaryItemForUi -> Html Msg
         viewIndexedItem item =
@@ -1854,78 +1969,23 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpda
             ( GlossaryItemId.toString itemId
             , Html.Lazy.lazy viewIndexedItem item
             )
-
-        totalNumberOfItems : Int
-        totalNumberOfItems =
-            List.length combinedIndexedGlossaryItems
-
-        recommendedMaximumNumberOfItems : Int
-        recommendedMaximumNumberOfItems =
-            1000
     in
-    div
-        []
-        [ div
-            [ class "mb-4" ]
-            [ Extras.Html.showMaybe
-                (viewCurrentTagFilter { enableMathSupport = enableMathSupport })
-                filterByDescribedTag_
-            , Extras.Html.showIf (filterByDescribedTag_ == Nothing) <|
-                viewAllTagFilters { enableMathSupport = enableMathSupport } tags
-            , Extras.Html.showIf editing <|
-                div
-                    [ class "flex-none mt-4" ]
-                    [ viewManageTagsButton ]
-            ]
-        , div
+    [ Html.Keyed.node "dl"
+        [ class "mt-4" ]
+        (List.map viewIndexedItemKeyed indexedGlossaryItems)
+    , Extras.Html.showIf
+        ((not <| List.isEmpty indexedGlossaryItems)
+            && (not <| List.isEmpty otherIndexedGlossaryItems)
+        )
+      <|
+        Components.Dividers.withLabel
+            [ class "my-10" ]
+            I18n.otherItems
+    , Extras.Html.showIf (not <| List.isEmpty otherIndexedGlossaryItems) <|
+        Html.Keyed.node "dl"
             []
-            [ Extras.Html.showIf editable <|
-                div
-                    [ class "pt-2" ]
-                    [ if List.isEmpty combinedIndexedGlossaryItems then
-                        viewCreateGlossaryItemButtonForEmptyState
-
-                      else
-                        viewCreateGlossaryItemButton
-                    ]
-            ]
-        , Extras.Html.showIf (editable && totalNumberOfItems > recommendedMaximumNumberOfItems) <|
-            I18n.glossaryContainsTooManyItems recommendedMaximumNumberOfItems
-        , Extras.Html.showIf
-            (List.isEmpty combinedIndexedGlossaryItems && filterByTagId_ /= Nothing)
-          <|
-            div
-                [ class "mt-4" ]
-                [ text I18n.noMatchingItemsFound ]
-        , Extras.Html.showIf
-            (enableOrderItemsButtons
-                && (not <| List.isEmpty combinedIndexedGlossaryItems)
-            )
-          <|
-            viewOrderItemsBy
-                totalNumberOfItems
-                { enableMathSupport = enableMathSupport }
-                disambiguatedPreferredTermsWithDefinitions
-                glossaryItemsForUi
-                orderItemsFocusedOnTerm
-                queryParameters
-                mostRecentRawTermForOrderingItemsFocusedOn
-        , Html.Keyed.node "dl"
-            [ class "mt-4" ]
-            (List.map viewIndexedItemKeyed indexedGlossaryItems)
-        , Extras.Html.showIf
-            ((not <| List.isEmpty indexedGlossaryItems)
-                && (not <| List.isEmpty otherIndexedGlossaryItems)
-            )
-          <|
-            Components.Dividers.withLabel
-                [ class "my-10" ]
-                I18n.otherItems
-        , Extras.Html.showIf (not <| List.isEmpty otherIndexedGlossaryItems) <|
-            Html.Keyed.node "dl"
-                []
-                (List.map viewIndexedItemKeyed otherIndexedGlossaryItems)
-        ]
+            (List.map viewIndexedItemKeyed otherIndexedGlossaryItems)
+    ]
 
 
 viewMenuForMobileAndStaticSidebarForDesktop :
@@ -2916,7 +2976,7 @@ viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport 
                                     |> (\lhs -> ( lhs, [] ))
                                 )
            )
-        |> viewCards
+        |> viewTagFilterAndOrderItemsByAndItemCards
             { enableMathSupport = enableMathSupport
             , enableOrderItemsButtons = GlossaryForUi.enableOrderItemsButtons glossaryForUi
             , editable = Editability.editing editability
