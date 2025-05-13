@@ -85,7 +85,6 @@ import Http
 import Icons
 import IncubatingFeatures exposing (showIncubatingFeatures)
 import Internationalisation as I18n
-import List exposing (maximum)
 import PageMsg exposing (PageMsg)
 import Process
 import QueryParameters exposing (QueryParameters)
@@ -2846,14 +2845,17 @@ pageTitle model glossaryForUi =
         glossaryTitle : String
         glossaryTitle =
             glossaryForUi |> GlossaryForUi.title |> GlossaryTitle.inlineText
+
+        glossaryItemsForUi : GlossaryItemsForUi
+        glossaryItemsForUi =
+            GlossaryForUi.items glossaryForUi
     in
     case ( model.layout, model.itemWithFocus ) of
         ( ShowSingleItem, Just id ) ->
             let
                 disambiguatedPreferredTerm : Maybe String
                 disambiguatedPreferredTerm =
-                    glossaryForUi
-                        |> GlossaryForUi.items
+                    glossaryItemsForUi
                         |> GlossaryItemsForUi.get id
                         |> Maybe.map
                             (\item ->
@@ -2873,7 +2875,7 @@ pageTitle model glossaryForUi =
         _ ->
             model
                 |> filterByTagId
-                |> Maybe.andThen (filterByTagWithDescription glossaryForUi)
+                |> Maybe.andThen (filterByTagWithDescription glossaryItemsForUi)
                 |> Maybe.map
                     (\describedTag ->
                         Tag.inlineText (DescribedTag.tag describedTag) ++ " · " ++ glossaryTitle
@@ -2881,17 +2883,12 @@ pageTitle model glossaryForUi =
                 |> Maybe.withDefault glossaryTitle
 
 
-filterByTagWithDescription : GlossaryForUi -> TagId -> Maybe DescribedTag
-filterByTagWithDescription glossaryForUi tagId =
-    let
-        items : GlossaryItemsForUi
-        items =
-            GlossaryForUi.items glossaryForUi
-    in
-    GlossaryItemsForUi.tagFromId tagId items
+filterByTagWithDescription : GlossaryItemsForUi -> TagId -> Maybe DescribedTag
+filterByTagWithDescription glossaryItemsForUi tagId =
+    GlossaryItemsForUi.tagFromId tagId glossaryItemsForUi
         |> Maybe.andThen
             (\tag ->
-                GlossaryItemsForUi.tagDescriptionFromId tagId items
+                GlossaryItemsForUi.tagDescriptionFromId tagId glossaryItemsForUi
                     |> Maybe.map (DescribedTag.create tagId tag)
             )
 
@@ -3125,8 +3122,8 @@ view model =
                 noModalDialogShown_ =
                     noModalDialogShown model
 
-                items : GlossaryItemsForUi
-                items =
+                glossaryItemsForUi : GlossaryItemsForUi
+                glossaryItemsForUi =
                     GlossaryForUi.items glossaryForUi
 
                 filterByTagId_ : Maybe TagId
@@ -3136,7 +3133,7 @@ view model =
                 filterByTagWithDescription_ : Maybe DescribedTag
                 filterByTagWithDescription_ =
                     Maybe.andThen
-                        (filterByTagWithDescription glossaryForUi)
+                        (filterByTagWithDescription glossaryItemsForUi)
                         filterByTagId_
 
                 isControlOrCommandK_ : Extras.HtmlEvents.KeyDownEvent -> Bool
@@ -3185,7 +3182,7 @@ view model =
                                             let
                                                 itemWithPreviousAndNext : GlossaryItemWithPreviousAndNext
                                                 itemWithPreviousAndNext =
-                                                    items
+                                                    glossaryItemsForUi
                                                         |> (case QueryParameters.orderItemsBy model.common.queryParameters of
                                                                 Alphabetically ->
                                                                     GlossaryItemsForUi.orderedAlphabetically filterByTagId_
@@ -3239,7 +3236,7 @@ view model =
                             model.common.enableMathSupport
                             model.indexFilterString
                             filterByTagId_
-                            items
+                            glossaryItemsForUi
                         ]
                     , div
                         [ class "hidden lg:block" ]
