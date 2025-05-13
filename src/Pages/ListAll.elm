@@ -135,7 +135,6 @@ type alias Model =
     , confirmDeleteId : Maybe GlossaryItemId
     , deleting : Saving
     , savingSettings : Saving
-    , mostRecentRawTermForOrderingItemsFocusedOn : Maybe RawTerm
     , resultOfAttemptingToCopyEditorCommandToClipboard : Maybe Bool
     , resultOfAttemptingToCopyItemTextToClipboard : Maybe ( GlossaryItemId, Bool )
     }
@@ -206,7 +205,13 @@ init commonModel itemWithFocus =
       , layout = ShowAllItems
       , itemWithFocus = itemWithFocus
       , itemWithFocusCombobox = Components.Combobox.init
-      , itemWithFocusComboboxInput = ""
+      , itemWithFocusComboboxInput =
+            case QueryParameters.orderItemsBy commonModel.queryParameters of
+                FocusedOn rawTerm ->
+                    RawTerm.toString rawTerm
+
+                _ ->
+                    ""
       , confirmDeleteId = Nothing
       , themeDropdownMenu =
             Components.DropdownMenu.init
@@ -231,13 +236,6 @@ init commonModel itemWithFocus =
             }
       , deleting = NotCurrentlySaving
       , savingSettings = NotCurrentlySaving
-      , mostRecentRawTermForOrderingItemsFocusedOn =
-            case QueryParameters.orderItemsBy commonModel.queryParameters of
-                FocusedOn rawTerm ->
-                    Just rawTerm
-
-                _ ->
-                    Nothing
       , resultOfAttemptingToCopyEditorCommandToClipboard = Nothing
       , resultOfAttemptingToCopyItemTextToClipboard = Nothing
       }
@@ -768,15 +766,6 @@ update msg model =
                 common =
                     model.common
 
-                mostRecentTermIdForOrderingItemsFocusedOn1 : Maybe RawTerm
-                mostRecentTermIdForOrderingItemsFocusedOn1 =
-                    case orderItemsBy of
-                        FocusedOn rawTerm ->
-                            Just rawTerm
-
-                        _ ->
-                            model.mostRecentRawTermForOrderingItemsFocusedOn
-
                 updatedQueryParameters : QueryParameters
                 updatedQueryParameters =
                     QueryParameters.setOrderItemsBy orderItemsBy model.common.queryParameters
@@ -787,7 +776,14 @@ update msg model =
             in
             ( { model
                 | common = common1
-                , mostRecentRawTermForOrderingItemsFocusedOn = mostRecentTermIdForOrderingItemsFocusedOn1
+                , itemWithFocusComboboxInput =
+                    case orderItemsBy of
+                        FocusedOn rawTerm ->
+                            RawTerm.toString rawTerm
+
+                        _ ->
+                            ""
+                , itemWithFocusCombobox = model.itemWithFocusCombobox |> Components.Combobox.hideChoices
               }
             , common1
                 |> CommonModel.relativeUrl
@@ -1803,12 +1799,13 @@ viewTagFilterAndOrderItemsByAndItemCards :
         }
     -> QueryParameters
     -> Maybe GlossaryItemId
-    -> Maybe RawTerm
     -> Maybe ( GlossaryItemId, Bool )
+    -> Components.Combobox.Model
+    -> String
     -> GlossaryItemsForUi
     -> ( List ( GlossaryItemId, GlossaryItemForUi ), List ( GlossaryItemId, GlossaryItemForUi ) )
     -> Html Msg
-viewTagFilterAndOrderItemsByAndItemCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpdatedDates, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn resultOfAttemptingToCopyItemTextToClipboard glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewTagFilterAndOrderItemsByAndItemCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpdatedDates, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus resultOfAttemptingToCopyItemTextToClipboard itemWithFocusCombobox itemWithFocusComboboxInput glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
         totalNumberOfItems : Int
         totalNumberOfItems =
@@ -1826,7 +1823,8 @@ viewTagFilterAndOrderItemsByAndItemCards { enableMathSupport, enableOrderItemsBu
                 }
                 { filterByTagId_ = filterByTagId_, tags = tags, filterByDescribedTag_ = filterByDescribedTag_ }
                 queryParameters
-                mostRecentRawTermForOrderingItemsFocusedOn
+                itemWithFocusCombobox
+                itemWithFocusComboboxInput
                 glossaryItemsForUi
                 totalNumberOfItems
             )
@@ -1856,11 +1854,12 @@ viewTagFilterAndOrderItemsBy :
         , filterByDescribedTag_ : Maybe DescribedTag
         }
     -> QueryParameters
-    -> Maybe RawTerm
+    -> Components.Combobox.Model
+    -> String
     -> GlossaryItemsForUi
     -> Int
     -> List (Html Msg)
-viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, editable, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters mostRecentRawTermForOrderingItemsFocusedOn glossaryItemsForUi totalNumberOfItems =
+viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, editable, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocusCombobox itemWithFocusComboboxInput glossaryItemsForUi totalNumberOfItems =
     let
         disambiguatedPreferredTermsWithDefinitions : List DisambiguatedTerm
         disambiguatedPreferredTermsWithDefinitions =
@@ -1920,12 +1919,14 @@ viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, edita
       <|
         viewOrderItemsBy
             totalNumberOfItems
-            { enableMathSupport = enableMathSupport }
+            enableMathSupport
+            filterByTagId_
             disambiguatedPreferredTermsWithDefinitions
+            itemWithFocusCombobox
+            itemWithFocusComboboxInput
             glossaryItemsForUi
             orderItemsFocusedOnTerm
             queryParameters
-            mostRecentRawTermForOrderingItemsFocusedOn
     ]
 
 
@@ -2611,14 +2612,16 @@ viewManageTagsButton =
 
 viewOrderItemsBy :
     Int
-    -> { enableMathSupport : Bool }
+    -> Bool
+    -> Maybe TagId
     -> List DisambiguatedTerm
+    -> Components.Combobox.Model
+    -> String
     -> GlossaryItemsForUi
     -> Maybe DisambiguatedTerm
     -> QueryParameters
-    -> Maybe RawTerm
     -> Html Msg
-viewOrderItemsBy numberOfItems { enableMathSupport } disambiguatedPreferredTermsWithDefinitions glossaryItemsForUi orderItemsFocusedOnTerm queryParameters mostRecentRawTermForOrderingItemsFocusedOn =
+viewOrderItemsBy numberOfItems enableMathSupport filterByTagId_ disambiguatedPreferredTermsWithDefinitions itemWithFocusCombobox itemWithFocusComboboxInput glossaryItemsForUi orderItemsFocusedOnTerm queryParameters =
     div
         [ class "print:hidden pt-4 pb-2" ]
         [ fieldset []
@@ -2680,12 +2683,14 @@ viewOrderItemsBy numberOfItems { enableMathSupport } disambiguatedPreferredTerms
                         )
                         True
                         [ id ElementIds.orderItemsFocusedOn
-                        , Html.Attributes.disabled <| mostRecentRawTermForOrderingItemsFocusedOn == Nothing
-                        , Extras.HtmlAttribute.showMaybe
-                            (\termId ->
-                                Html.Events.onClick <| PageMsg.Internal <| ChangeOrderItemsBy <| FocusedOn termId
+                        , Html.Attributes.disabled
+                            (case QueryParameters.orderItemsBy queryParameters of
+                                FocusedOn _ ->
+                                    False
+
+                                _ ->
+                                    True
                             )
-                            mostRecentRawTermForOrderingItemsFocusedOn
                         ]
                     , label
                         [ class "ml-3 inline-flex items-center font-medium text-gray-700 dark:text-gray-300 select-none"
@@ -2697,15 +2702,10 @@ viewOrderItemsBy numberOfItems { enableMathSupport } disambiguatedPreferredTerms
                             ]
                         , if showIncubatingFeatures then
                             let
-                                itemWithFocusComboboxInput : String
-                                itemWithFocusComboboxInput =
-                                    "TODO"
-
                                 comboboxChoices : { totalNumberOfResults : Int, results : List (Components.Combobox.Choice Term (PageMsg InternalMsg)) }
                                 comboboxChoices =
                                     Search.resultsForItems
-                                        Nothing
-                                        -- TODO
+                                        filterByTagId_
                                         (always True)
                                         maximumNumberOfResultsForItemWithFocusCombobox
                                         itemWithFocusComboboxInput
@@ -2730,14 +2730,13 @@ viewOrderItemsBy numberOfItems { enableMathSupport } disambiguatedPreferredTerms
                             in
                             Components.Combobox.view
                                 (PageMsg.Internal << ItemWithFocusComboboxMsg)
-                                Components.Combobox.init
-                                -- TODO: itemWithFocusCombobox
+                                itemWithFocusCombobox
                                 [ Components.Combobox.id ElementIds.orderItemsFocusedOn
                                 , Components.Combobox.onSelect (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << Term.raw)
                                 , Components.Combobox.onInput (PageMsg.Internal << UpdateItemWithFocusComboboxInput False)
                                 , Components.Combobox.onBlur
                                     (PageMsg.Internal <|
-                                        UpdateItemWithFocusComboboxInput True ""
+                                        UpdateItemWithFocusComboboxInput True itemWithFocusComboboxInput
                                     )
                                 ]
                                 Nothing
@@ -2773,7 +2772,7 @@ viewOrderItemsBy numberOfItems { enableMathSupport } disambiguatedPreferredTerms
                                             Components.SelectMenu.Choice
                                                 (RawTerm.toString preferredRawTerm)
                                                 [ text <| Term.inlineText <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm ]
-                                                (mostRecentRawTermForOrderingItemsFocusedOn == Just preferredRawTerm)
+                                                False
                                         )
                                 )
                         ]
@@ -2928,11 +2927,12 @@ viewOrderItemsButtonsAndItemCards :
     -> Editability
     -> QueryParameters
     -> Maybe GlossaryItemId
-    -> Maybe RawTerm
     -> Maybe ( GlossaryItemId, Bool )
+    -> Components.Combobox.Model
+    -> String
     -> GlossaryForUi
     -> Html Msg
-viewOrderItemsButtonsAndItemCards enableMathSupport editability queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn resultOfAttemptingToCopyItemTextToClipboard glossaryForUi =
+viewOrderItemsButtonsAndItemCards enableMathSupport editability queryParameters itemWithFocus resultOfAttemptingToCopyItemTextToClipboard itemWithFocusCombobox itemWithFocusComboboxInput glossaryForUi =
     let
         glossaryItemsForUi : GlossaryItemsForUi
         glossaryItemsForUi =
@@ -2991,8 +2991,9 @@ viewOrderItemsButtonsAndItemCards enableMathSupport editability queryParameters 
             }
             queryParameters
             itemWithFocus
-            mostRecentRawTermForOrderingItemsFocusedOn
             resultOfAttemptingToCopyItemTextToClipboard
+            itemWithFocusCombobox
+            itemWithFocusComboboxInput
             glossaryItemsForUi
 
 
@@ -3045,15 +3046,16 @@ viewMain :
     -> Editability
     -> QueryParameters
     -> Maybe GlossaryItemId
-    -> Maybe RawTerm
     -> ItemSearchDialog
     -> Maybe GlossaryItemId
     -> Layout
     -> Saving
     -> Maybe ( GlossaryItemId, Bool )
+    -> Components.Combobox.Model
+    -> String
     -> GlossaryForUi
     -> Html Msg
-viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn itemSearchDialog confirmDeleteId layout deleting resultOfAttemptingToCopyItemTextToClipboard glossaryForUi =
+viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters itemWithFocus itemSearchDialog confirmDeleteId layout deleting resultOfAttemptingToCopyItemTextToClipboard itemWithFocusCombobox itemWithFocusComboboxInput glossaryForUi =
     Html.main_
         []
         [ div
@@ -3075,7 +3077,7 @@ viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } 
             ]
             [ div
                 [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
-                [ Html.Lazy.lazy7 viewOrderItemsButtonsAndItemCards
+                [ Html.Lazy.lazy8 viewOrderItemsButtonsAndItemCards
                     enableMathSupport
                     editability
                     queryParameters
@@ -3085,13 +3087,14 @@ viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } 
                      else
                         Nothing
                     )
-                    mostRecentRawTermForOrderingItemsFocusedOn
                     (if layout == ShowSingleItem then
                         Nothing
 
                      else
                         resultOfAttemptingToCopyItemTextToClipboard
                     )
+                    itemWithFocusCombobox
+                    itemWithFocusComboboxInput
                     glossaryForUi
                 ]
             , Html.Lazy.lazy3 viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog
@@ -3344,12 +3347,13 @@ view model =
                                 model.common.editability
                                 model.common.queryParameters
                                 model.itemWithFocus
-                                model.mostRecentRawTermForOrderingItemsFocusedOn
                                 model.itemSearchDialog
                                 model.confirmDeleteId
                                 model.layout
                                 model.deleting
                                 model.resultOfAttemptingToCopyItemTextToClipboard
+                                model.itemWithFocusCombobox
+                                model.itemWithFocusComboboxInput
                                 glossaryForUi
                             , Html.footer
                                 []
