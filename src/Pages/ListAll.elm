@@ -1810,6 +1810,11 @@ viewTagFilterAndOrderItemsByAndItemCards :
     -> ( List ( GlossaryItemId, GlossaryItemForUi ), List ( GlossaryItemId, GlossaryItemForUi ) )
     -> Html Msg
 viewTagFilterAndOrderItemsByAndItemCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpdatedDates, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn resultOfAttemptingToCopyItemTextToClipboard glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+    let
+        totalNumberOfItems : Int
+        totalNumberOfItems =
+            List.length indexedGlossaryItems + List.length otherIndexedGlossaryItems
+    in
     div
         []
         [ div
@@ -1824,7 +1829,7 @@ viewTagFilterAndOrderItemsByAndItemCards { enableMathSupport, enableOrderItemsBu
                 queryParameters
                 mostRecentRawTermForOrderingItemsFocusedOn
                 glossaryItemsForUi
-                ( indexedGlossaryItems, otherIndexedGlossaryItems )
+                totalNumberOfItems
             )
         , div []
             (viewItemCards
@@ -1854,14 +1859,10 @@ viewTagFilterAndOrderItemsBy :
     -> QueryParameters
     -> Maybe RawTerm
     -> GlossaryItemsForUi
-    -> ( List ( GlossaryItemId, GlossaryItemForUi ), List ( GlossaryItemId, GlossaryItemForUi ) )
+    -> Int
     -> List (Html Msg)
-viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, editable, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters mostRecentRawTermForOrderingItemsFocusedOn glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, editable, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters mostRecentRawTermForOrderingItemsFocusedOn glossaryItemsForUi totalNumberOfItems =
     let
-        combinedIndexedGlossaryItems : List ( GlossaryItemId, GlossaryItemForUi )
-        combinedIndexedGlossaryItems =
-            List.append indexedGlossaryItems otherIndexedGlossaryItems
-
         disambiguatedPreferredTermsWithDefinitions : List DisambiguatedTerm
         disambiguatedPreferredTermsWithDefinitions =
             GlossaryItemsForUi.disambiguatedPreferredTermsWhichHaveDefinitions
@@ -1876,10 +1877,6 @@ viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, edita
 
                 _ ->
                     Nothing
-
-        totalNumberOfItems : Int
-        totalNumberOfItems =
-            List.length combinedIndexedGlossaryItems
 
         recommendedMaximumNumberOfItems : Int
         recommendedMaximumNumberOfItems =
@@ -1902,7 +1899,7 @@ viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, edita
         [ Extras.Html.showIf editable <|
             div
                 [ class "pt-2" ]
-                [ if List.isEmpty combinedIndexedGlossaryItems then
+                [ if totalNumberOfItems == 0 then
                     viewCreateGlossaryItemButtonForEmptyState
 
                   else
@@ -1912,14 +1909,14 @@ viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, edita
     , Extras.Html.showIf (editable && totalNumberOfItems > recommendedMaximumNumberOfItems) <|
         I18n.glossaryContainsTooManyItems recommendedMaximumNumberOfItems
     , Extras.Html.showIf
-        (List.isEmpty combinedIndexedGlossaryItems && filterByTagId_ /= Nothing)
+        (totalNumberOfItems == 0 && filterByTagId_ /= Nothing)
       <|
         div
             [ class "mt-4" ]
             [ text I18n.noMatchingItemsFound ]
     , Extras.Html.showIf
         (enableOrderItemsButtons
-            && (not <| List.isEmpty combinedIndexedGlossaryItems)
+            && (totalNumberOfItems > 0)
         )
       <|
         viewOrderItemsBy
