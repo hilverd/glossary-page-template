@@ -2924,8 +2924,7 @@ viewAboutSection filterByTagWithDescription_ { enableMathSupport } glossaryForUi
 
 
 viewOrderItemsButtonsAndItemCards :
-    Maybe DescribedTag
-    -> Bool
+    Bool
     -> Editability
     -> QueryParameters
     -> Maybe GlossaryItemId
@@ -2933,17 +2932,26 @@ viewOrderItemsButtonsAndItemCards :
     -> Maybe ( GlossaryItemId, Bool )
     -> GlossaryForUi
     -> Html Msg
-viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport editability queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn resultOfAttemptingToCopyItemTextToClipboard glossaryForUi =
+viewOrderItemsButtonsAndItemCards enableMathSupport editability queryParameters itemWithFocus mostRecentRawTermForOrderingItemsFocusedOn resultOfAttemptingToCopyItemTextToClipboard glossaryForUi =
     let
-        items : GlossaryItemsForUi
-        items =
+        glossaryItemsForUi : GlossaryItemsForUi
+        glossaryItemsForUi =
             GlossaryForUi.items glossaryForUi
+
+        filterByTagWithDescription_ : Maybe DescribedTag
+        filterByTagWithDescription_ =
+            Maybe.andThen
+                (filterByTagWithDescription glossaryItemsForUi)
+                filterByTagId_
 
         filterByTagId_ : Maybe TagId
         filterByTagId_ =
-            Maybe.map DescribedTag.id filterByTagWithDescription_
+            queryParameters
+                |> QueryParameters.filterByTag
+                |> Maybe.andThen
+                    (\tag -> GlossaryItemsForUi.tagIdFromTag tag glossaryItemsForUi)
     in
-    items
+    glossaryItemsForUi
         |> (case QueryParameters.orderItemsBy queryParameters of
                 Alphabetically ->
                     GlossaryItemsForUi.orderedAlphabetically filterByTagId_
@@ -2957,7 +2965,7 @@ viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport 
                     let
                         itemId : Maybe GlossaryItemId
                         itemId =
-                            GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm termId items
+                            GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm termId glossaryItemsForUi
                     in
                     case itemId of
                         Just itemId_ ->
@@ -2965,7 +2973,7 @@ viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport 
 
                         Nothing ->
                             always
-                                (items
+                                (glossaryItemsForUi
                                     |> GlossaryItemsForUi.orderedAlphabetically filterByTagId_
                                     |> (\lhs -> ( lhs, [] ))
                                 )
@@ -2978,14 +2986,14 @@ viewOrderItemsButtonsAndItemCards filterByTagWithDescription_ enableMathSupport 
             , editing = Editability.editing editability
             }
             { filterByTagId_ = filterByTagId_
-            , tags = GlossaryItemsForUi.tags items
+            , tags = GlossaryItemsForUi.tags glossaryItemsForUi
             , filterByDescribedTag_ = filterByTagWithDescription_
             }
             queryParameters
             itemWithFocus
             mostRecentRawTermForOrderingItemsFocusedOn
             resultOfAttemptingToCopyItemTextToClipboard
-            items
+            glossaryItemsForUi
 
 
 viewItemSearchDialog : Maybe DescribedTag -> Bool -> ItemSearchDialog -> Html Msg
@@ -3067,8 +3075,7 @@ viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } 
             ]
             [ div
                 [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
-                [ Html.Lazy.lazy8 viewOrderItemsButtonsAndItemCards
-                    filterByTagWithDescription_
+                [ Html.Lazy.lazy7 viewOrderItemsButtonsAndItemCards
                     enableMathSupport
                     editability
                     queryParameters
