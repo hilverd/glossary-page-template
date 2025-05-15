@@ -2731,7 +2731,7 @@ viewOrderItemsBy numberOfItems enableMathSupport filterByTagId_ disambiguatedPre
                             Components.Combobox.view
                                 (PageMsg.Internal << ItemWithFocusComboboxMsg)
                                 itemWithFocusCombobox
-                                [ Components.Combobox.id ElementIds.orderItemsFocusedOn
+                                [ Components.Combobox.id ElementIds.orderItemsFocusedOnCombobox
                                 , Components.Combobox.onSelect (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << Term.raw)
                                 , Components.Combobox.onInput (PageMsg.Internal << UpdateItemWithFocusComboboxInput False)
                                 , Components.Combobox.onBlur

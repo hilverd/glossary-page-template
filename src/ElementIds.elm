@@ -39,6 +39,7 @@ module ElementIds exposing
     , needsUpdatingToggleLabel
     , orderItemsAlphabetically
     , orderItemsFocusedOn
+    , orderItemsFocusedOnCombobox
     , orderItemsFocusedOnSelect
     , orderItemsMostMentionedFirst
     , outer
@@ -156,6 +157,11 @@ orderItemsMostMentionedFirst =
 orderItemsFocusedOn : String
 orderItemsFocusedOn =
     prefixed "order-items-focused-on"
+
+
+orderItemsFocusedOnCombobox : String
+orderItemsFocusedOnCombobox =
+    prefixed "order-items-focused-on-combobox"
 
 
 confirmDeleteModalTitle : String
