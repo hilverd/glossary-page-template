@@ -1861,12 +1861,6 @@ viewTagFilterAndOrderItemsBy :
     -> List (Html Msg)
 viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, editable, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocusCombobox itemWithFocusComboboxInput glossaryItemsForUi totalNumberOfItems =
     let
-        disambiguatedPreferredTermsWithDefinitions : List DisambiguatedTerm
-        disambiguatedPreferredTermsWithDefinitions =
-            GlossaryItemsForUi.disambiguatedPreferredTermsWhichHaveDefinitions
-                filterByTagId_
-                glossaryItemsForUi
-
         orderItemsFocusedOnTerm : Maybe DisambiguatedTerm
         orderItemsFocusedOnTerm =
             case QueryParameters.orderItemsBy queryParameters of
@@ -1912,16 +1906,11 @@ viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, edita
         div
             [ class "mt-4" ]
             [ text I18n.noMatchingItemsFound ]
-    , Extras.Html.showIf
-        (enableOrderItemsButtons
-            && (totalNumberOfItems > 0)
-        )
-      <|
+    , Extras.Html.showIf (enableOrderItemsButtons && (totalNumberOfItems > 0)) <|
         viewOrderItemsBy
             totalNumberOfItems
             enableMathSupport
             filterByTagId_
-            disambiguatedPreferredTermsWithDefinitions
             itemWithFocusCombobox
             itemWithFocusComboboxInput
             glossaryItemsForUi
@@ -2614,14 +2603,13 @@ viewOrderItemsBy :
     Int
     -> Bool
     -> Maybe TagId
-    -> List DisambiguatedTerm
     -> Components.Combobox.Model
     -> String
     -> GlossaryItemsForUi
     -> Maybe DisambiguatedTerm
     -> QueryParameters
     -> Html Msg
-viewOrderItemsBy numberOfItems enableMathSupport filterByTagId_ disambiguatedPreferredTermsWithDefinitions itemWithFocusCombobox itemWithFocusComboboxInput glossaryItemsForUi orderItemsFocusedOnTerm queryParameters =
+viewOrderItemsBy numberOfItems enableMathSupport filterByTagId_ itemWithFocusCombobox itemWithFocusComboboxInput glossaryItemsForUi orderItemsFocusedOnTerm queryParameters =
     div
         [ class "print:hidden pt-4 pb-2" ]
         [ fieldset []
@@ -2701,81 +2689,56 @@ viewOrderItemsBy numberOfItems enableMathSupport filterByTagId_ disambiguatedPre
                             [ text I18n.focusedOn
                             ]
                         ]
-                    , if showIncubatingFeatures then
-                        let
-                            comboboxChoices : { totalNumberOfResults : Int, results : List (Components.Combobox.Choice Term (PageMsg InternalMsg)) }
-                            comboboxChoices =
-                                Search.resultsForItems
-                                    filterByTagId_
-                                    (always True)
-                                    maximumNumberOfResultsForItemWithFocusCombobox
-                                    itemWithFocusComboboxInput
-                                    glossaryItemsForUi
-                                    |> (\{ totalNumberOfResults, results } ->
-                                            { totalNumberOfResults = totalNumberOfResults
-                                            , results =
-                                                results
-                                                    |> List.map
-                                                        (\({ preferredTerm } as result) ->
-                                                            Components.Combobox.choice
-                                                                (preferredTerm |> DisambiguatedTerm.toTerm)
-                                                                (\additionalAttributes ->
-                                                                    Search.viewItemSearchResult
-                                                                        enableMathSupport
-                                                                        additionalAttributes
-                                                                        result
-                                                                )
-                                                        )
-                                            }
-                                       )
-                        in
-                        Components.Combobox.view
-                            (PageMsg.Internal << ItemWithFocusComboboxMsg)
-                            itemWithFocusCombobox
-                            [ Components.Combobox.id ElementIds.orderItemsFocusedOnCombobox
-                            , Components.Combobox.onSelect (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << Term.raw)
-                            , Components.Combobox.onInput (PageMsg.Internal << UpdateItemWithFocusComboboxInput False)
-                            , Components.Combobox.onBlur
-                                (PageMsg.Internal <|
-                                    UpdateItemWithFocusComboboxInput True itemWithFocusComboboxInput
-                                )
-                            ]
+                    , let
+                        comboboxChoices : { totalNumberOfResults : Int, results : List (Components.Combobox.Choice Term (PageMsg InternalMsg)) }
+                        comboboxChoices =
+                            Search.resultsForItems
+                                filterByTagId_
+                                (always True)
+                                maximumNumberOfResultsForItemWithFocusCombobox
+                                itemWithFocusComboboxInput
+                                glossaryItemsForUi
+                                |> (\{ totalNumberOfResults, results } ->
+                                        { totalNumberOfResults = totalNumberOfResults
+                                        , results =
+                                            results
+                                                |> List.map
+                                                    (\({ preferredTerm } as result) ->
+                                                        Components.Combobox.choice
+                                                            (preferredTerm |> DisambiguatedTerm.toTerm)
+                                                            (\additionalAttributes ->
+                                                                Search.viewItemSearchResult
+                                                                    enableMathSupport
+                                                                    additionalAttributes
+                                                                    result
+                                                            )
+                                                    )
+                                        }
+                                   )
+                      in
+                      Components.Combobox.view
+                        (PageMsg.Internal << ItemWithFocusComboboxMsg)
+                        itemWithFocusCombobox
+                        [ Components.Combobox.id ElementIds.orderItemsFocusedOnCombobox
+                        , Components.Combobox.onSelect (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << Term.raw)
+                        , Components.Combobox.onInput (PageMsg.Internal << UpdateItemWithFocusComboboxInput False)
+                        , Components.Combobox.onBlur
+                            (PageMsg.Internal <|
+                                UpdateItemWithFocusComboboxInput True itemWithFocusComboboxInput
+                            )
+                        ]
+                        Nothing
+                        comboboxChoices.results
+                        (if comboboxChoices.totalNumberOfResults > maximumNumberOfResultsForItemWithFocusCombobox then
+                            Just <| I18n.showingXOfYMatches (String.fromInt maximumNumberOfResultsForItemWithFocusCombobox) (String.fromInt comboboxChoices.totalNumberOfResults)
+
+                         else if itemWithFocusComboboxInput /= "" && comboboxChoices.totalNumberOfResults == 0 then
+                            Just I18n.noMatchesFound
+
+                         else
                             Nothing
-                            comboboxChoices.results
-                            (if comboboxChoices.totalNumberOfResults > maximumNumberOfResultsForItemWithFocusCombobox then
-                                Just <| I18n.showingXOfYMatches (String.fromInt maximumNumberOfResultsForItemWithFocusCombobox) (String.fromInt comboboxChoices.totalNumberOfResults)
-
-                             else if itemWithFocusComboboxInput /= "" && comboboxChoices.totalNumberOfResults == 0 then
-                                Just I18n.noMatchesFound
-
-                             else
-                                Nothing
-                            )
-                            itemWithFocusComboboxInput
-
-                      else
-                        Components.SelectMenu.view
-                            [ Components.SelectMenu.id <| ElementIds.orderItemsFocusedOnSelect
-                            , Components.SelectMenu.ariaLabel I18n.focusOnTerm
-                            , Components.SelectMenu.onChange (PageMsg.Internal << ChangeOrderItemsBy << FocusedOn << RawTerm.fromString)
-                            , Components.SelectMenu.enabled True
-                            ]
-                            (disambiguatedPreferredTermsWithDefinitions
-                                |> List.map
-                                    (\disambiguatedPreferredTerm ->
-                                        let
-                                            preferredRawTerm : RawTerm
-                                            preferredRawTerm =
-                                                disambiguatedPreferredTerm
-                                                    |> DisambiguatedTerm.toTerm
-                                                    |> Term.raw
-                                        in
-                                        Components.SelectMenu.Choice
-                                            (RawTerm.toString preferredRawTerm)
-                                            [ text <| Term.inlineText <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm ]
-                                            False
-                                    )
-                            )
+                        )
+                        itemWithFocusComboboxInput
                     ]
                 ]
             ]

@@ -12,7 +12,11 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
 ### Changed
+
+- Use combo box for selecting "focused on" item.
+
 ### Fixed
 ### Removed
 
