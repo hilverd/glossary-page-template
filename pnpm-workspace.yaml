@@ -1,0 +1,6 @@
+onlyBuiltDependencies:
+  - '@tailwindcss/oxide'
+  - elm
+  - elm-format
+  - elm-json
+  - esbuild
