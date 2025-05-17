@@ -39,7 +39,6 @@ import Components.DropdownMenu
 import Components.GlossaryItemCard
 import Components.ModalDialog
 import Components.SearchDialog
-import Components.SelectMenu
 import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
 import Data.DescribedTag as DescribedTag exposing (DescribedTag)
@@ -49,7 +48,7 @@ import Data.GlossaryChangeWithChecksum exposing (GlossaryChangeWithChecksum)
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
-import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
+import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
@@ -83,7 +82,6 @@ import Html.Keyed
 import Html.Lazy
 import Http
 import Icons
-import IncubatingFeatures exposing (showIncubatingFeatures)
 import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
 import Process

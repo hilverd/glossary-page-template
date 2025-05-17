@@ -14,7 +14,6 @@ import Data.AboutLink as AboutLink
 import Data.AboutLinkIndex as AboutLinkIndex exposing (AboutLinkIndex)
 import Data.AboutParagraph as AboutParagraph
 import Data.AboutSection exposing (AboutSection)
-import Data.Checksum exposing (Checksum)
 import Data.Editability as Editability
 import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
 import Data.GlossaryChangeWithChecksum exposing (GlossaryChangeWithChecksum)
