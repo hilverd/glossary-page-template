@@ -375,7 +375,12 @@ update msg model =
                         model
 
                       else
-                        { model | page = ListAll listAllModel1 }
+                        { model
+                            | page =
+                                Pages.ListAll.init common1 itemWithFocus
+                                    |> Tuple.first
+                                    |> ListAll
+                        }
                     , Cmd.none
                     )
 
