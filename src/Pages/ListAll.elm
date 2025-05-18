@@ -38,6 +38,7 @@ import Components.Dividers
 import Components.DropdownMenu
 import Components.GlossaryItemCard
 import Components.ModalDialog
+import Components.Notifications
 import Components.SearchDialog
 import Components.Spinner
 import Data.CardWidth as CardWidth exposing (CardWidth)
@@ -82,6 +83,7 @@ import Html.Keyed
 import Html.Lazy
 import Http
 import Icons
+import IncubatingFeatures exposing (showIncubatingFeatures)
 import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
 import Process
@@ -3325,6 +3327,10 @@ view model =
                             ]
                         ]
                     ]
+                , Extras.Html.showIf showIncubatingFeatures <|
+                    Components.Notifications.view
+                        (text "Successfully saved!")
+                        (text "Anyone with a link can now view this file.")
                 ]
             }
 
