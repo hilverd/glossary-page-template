@@ -137,6 +137,7 @@ type alias Model =
     , savingSettings : Saving
     , resultOfAttemptingToCopyEditorCommandToClipboard : Maybe Bool
     , resultOfAttemptingToCopyItemTextToClipboard : Maybe ( GlossaryItemId, Bool )
+    , notificationVisibility : GradualVisibility
     }
 
 
@@ -191,6 +192,9 @@ type InternalMsg
     | ClearResultOfAttemptingToCopyItemTextToClipboard
     | FilterByTag Tag
     | DoNotFilterByTag
+    | ShowNotification
+    | StartHidingNotification
+    | CompleteHidingNotification
 
 
 type alias Msg =
@@ -238,6 +242,7 @@ init commonModel itemWithFocus =
       , savingSettings = NotCurrentlySaving
       , resultOfAttemptingToCopyEditorCommandToClipboard = Nothing
       , resultOfAttemptingToCopyItemTextToClipboard = Nothing
+      , notificationVisibility = GradualVisibility.Visible
       }
     , case itemWithFocus of
         Just id ->
@@ -1134,6 +1139,21 @@ update msg model =
             , common1
                 |> CommonModel.relativeUrl
                 |> Navigation.pushUrl model.common.key
+            )
+
+        ShowNotification ->
+            ( { model | notificationVisibility = GradualVisibility.Visible }
+            , Cmd.none
+            )
+
+        StartHidingNotification ->
+            ( { model | notificationVisibility = GradualVisibility.Disappearing }
+            , Process.sleep 1000 |> Task.perform (always <| PageMsg.Internal CompleteHidingNotification)
+            )
+
+        CompleteHidingNotification ->
+            ( { model | notificationVisibility = GradualVisibility.Invisible }
+            , Process.sleep 1000 |> Task.perform (always <| PageMsg.Internal ShowNotification)
             )
 
 
@@ -3329,6 +3349,8 @@ view model =
                     ]
                 , Extras.Html.showIf showIncubatingFeatures <|
                     Components.Notifications.view
+                        (PageMsg.Internal <| StartHidingNotification)
+                        model.notificationVisibility
                         (text "Successfully saved!")
                         (text "Anyone with a link can now view this file.")
                 ]
