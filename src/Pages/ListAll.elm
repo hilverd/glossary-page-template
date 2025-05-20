@@ -137,7 +137,7 @@ type alias Model =
     , savingSettings : Saving
     , resultOfAttemptingToCopyEditorCommandToClipboard : Maybe Bool
     , resultOfAttemptingToCopyItemTextToClipboard : Maybe ( GlossaryItemId, Bool )
-    , notificationVisibility : GradualVisibility
+    , notifications : Components.Notifications.Model
     }
 
 
@@ -192,9 +192,7 @@ type InternalMsg
     | ClearResultOfAttemptingToCopyItemTextToClipboard
     | FilterByTag Tag
     | DoNotFilterByTag
-    | ShowNotification
-    | StartHidingNotification
-    | CompleteHidingNotification
+    | NotificationsMsg Components.Notifications.Msg
 
 
 type alias Msg =
@@ -242,7 +240,7 @@ init commonModel itemWithFocus =
       , savingSettings = NotCurrentlySaving
       , resultOfAttemptingToCopyEditorCommandToClipboard = Nothing
       , resultOfAttemptingToCopyItemTextToClipboard = Nothing
-      , notificationVisibility = GradualVisibility.Visible
+      , notifications = Components.Notifications.init
       }
     , case itemWithFocus of
         Just id ->
@@ -693,6 +691,12 @@ update msg model =
 
         Deleted updatedGlossaryForUi ->
             let
+                ( notifications_, notificationsCmd ) =
+                    Components.Notifications.addNotification
+                        (text "Deleted")
+                        (text "The item has been deleted.")
+                        model.notifications
+
                 common : CommonModel
                 common =
                     model.common
@@ -702,10 +706,12 @@ update msg model =
                     Cmd.batch
                         [ allowBackgroundScrolling ()
                         , giveFocusToOuter
+                        , Cmd.map (PageMsg.Internal << NotificationsMsg) notificationsCmd
                         ]
             in
             ( { model
                 | common = { common | glossaryForUi = Ok <| updatedGlossaryForUi }
+                , notifications = notifications_
                 , itemWithFocus = Nothing
                 , confirmDeleteId = Nothing
                 , deleting = NotCurrentlySaving
@@ -1141,19 +1147,13 @@ update msg model =
                 |> Navigation.pushUrl model.common.key
             )
 
-        ShowNotification ->
-            ( { model | notificationVisibility = GradualVisibility.Visible }
-            , Cmd.none
-            )
-
-        StartHidingNotification ->
-            ( { model | notificationVisibility = GradualVisibility.Disappearing }
-            , Process.sleep 1000 |> Task.perform (always <| PageMsg.Internal CompleteHidingNotification)
-            )
-
-        CompleteHidingNotification ->
-            ( { model | notificationVisibility = GradualVisibility.Invisible }
-            , Process.sleep 1000 |> Task.perform (always <| PageMsg.Internal ShowNotification)
+        NotificationsMsg notificationsMsg ->
+            let
+                ( notifications_, cmd ) =
+                    Components.Notifications.update notificationsMsg model.notifications
+            in
+            ( { model | notifications = notifications_ }
+            , Cmd.map (PageMsg.Internal << NotificationsMsg) cmd
             )
 
 
@@ -3347,12 +3347,9 @@ view model =
                             ]
                         ]
                     ]
-                , Extras.Html.showIf showIncubatingFeatures <|
-                    Components.Notifications.view
-                        (PageMsg.Internal <| StartHidingNotification)
-                        model.notificationVisibility
-                        (text "Successfully saved!")
-                        (text "Anyone with a link can now view this file.")
+                , model.notifications
+                    |> Components.Notifications.view
+                    |> Html.map (PageMsg.Internal << NotificationsMsg)
                 ]
             }
 
@@ -3379,4 +3376,6 @@ subscriptions model =
         , model.itemWithFocusCombobox
             |> Components.Combobox.subscriptions
             |> Sub.map (ItemWithFocusComboboxMsg >> PageMsg.Internal)
+        , Components.Notifications.subscriptions model.notifications
+            |> Sub.map (NotificationsMsg >> PageMsg.Internal)
         ]

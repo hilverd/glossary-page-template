@@ -13,6 +13,8 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 
+- Show "toast" notification after deleting item.
+
 ### Changed
 
 - Use combo box for selecting "focused on" item.

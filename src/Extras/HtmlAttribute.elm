@@ -1,4 +1,4 @@
-module Extras.HtmlAttribute exposing (fromBool, inert, showIf, showMaybe, showUnless)
+module Extras.HtmlAttribute exposing (empty, fromBool, inert, showIf, showMaybe, showUnless)
 
 import Html
 import Html.Attributes
