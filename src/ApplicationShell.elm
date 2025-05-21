@@ -14,6 +14,7 @@ import Browser.Dom as Dom
 import Browser.Navigation exposing (Key)
 import Codec
 import CommonModel exposing (CommonModel)
+import Components.Notifications
 import Data.Editability as Editability exposing (Editability)
 import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryFromDom as GlossaryFromDom
@@ -210,7 +211,7 @@ init flags url key =
             }
 
         ( listAllModel, listAllCmd ) =
-            Pages.ListAll.init common itemWithFocus
+            Pages.ListAll.init common itemWithFocus Nothing Nothing
     in
     ( { key = key, page = ListAll listAllModel }
     , Cmd.map ListAllMsg listAllCmd
@@ -236,8 +237,8 @@ type Msg
 withoutInternal : Msg -> PageMsg ()
 withoutInternal msg =
     case msg of
-        ListAllMsg (NavigateToListAll commonModel itemWithFocus) ->
-            PageMsg.NavigateToListAll commonModel itemWithFocus
+        ListAllMsg (NavigateToListAll commonModel itemWithFocus notification) ->
+            PageMsg.NavigateToListAll commonModel itemWithFocus notification
 
         ListAllMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
@@ -251,8 +252,8 @@ withoutInternal msg =
         ListAllMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
-        CreateOrEditMsg (NavigateToListAll commonModel itemWithFocus) ->
-            PageMsg.NavigateToListAll commonModel itemWithFocus
+        CreateOrEditMsg (NavigateToListAll commonModel itemWithFocus notification) ->
+            PageMsg.NavigateToListAll commonModel itemWithFocus notification
 
         CreateOrEditMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
@@ -266,8 +267,8 @@ withoutInternal msg =
         CreateOrEditMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
-        EditTitleAndAboutMsg (NavigateToListAll commonModel itemWithFocus) ->
-            PageMsg.NavigateToListAll commonModel itemWithFocus
+        EditTitleAndAboutMsg (NavigateToListAll commonModel itemWithFocus notification) ->
+            PageMsg.NavigateToListAll commonModel itemWithFocus notification
 
         EditTitleAndAboutMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
@@ -281,8 +282,8 @@ withoutInternal msg =
         EditTitleAndAboutMsg (PageMsg.Internal _) ->
             PageMsg.Internal ()
 
-        ManageTagsMsg (NavigateToListAll commonModel itemWithFocus) ->
-            PageMsg.NavigateToListAll commonModel itemWithFocus
+        ManageTagsMsg (NavigateToListAll commonModel itemWithFocus notification) ->
+            PageMsg.NavigateToListAll commonModel itemWithFocus notification
 
         ManageTagsMsg (NavigateToCreateOrEdit commonModel) ->
             PageMsg.NavigateToCreateOrEdit commonModel
@@ -377,7 +378,7 @@ update msg model =
                       else
                         { model
                             | page =
-                                Pages.ListAll.init common1 itemWithFocus
+                                Pages.ListAll.init common1 itemWithFocus Nothing Nothing
                                     |> Tuple.first
                                     |> ListAll
                         }
@@ -387,10 +388,19 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        ( _, NavigateToListAll commonModel itemWithFocus, _ ) ->
+        ( _, NavigateToListAll commonModel itemWithFocus notification, { page } ) ->
             let
+                notifications0 : Maybe Components.Notifications.Model
+                notifications0 =
+                    case page of
+                        ListAll { notifications } ->
+                            Just notifications
+
+                        _ ->
+                            Nothing
+
                 ( listAllModel, listAllCmd ) =
-                    Pages.ListAll.init commonModel itemWithFocus
+                    Pages.ListAll.init commonModel itemWithFocus notifications0 notification
             in
             ( { model | page = ListAll listAllModel }
             , Cmd.map ListAllMsg listAllCmd

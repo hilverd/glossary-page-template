@@ -59,6 +59,7 @@ import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForU
 import Data.GlossaryTitle as GlossaryTitle
 import Data.GradualVisibility as GradualVisibility exposing (GradualVisibility)
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
+import Data.Notification exposing (Notification)
 import Data.OrderItemsBy exposing (OrderItemsBy(..))
 import Data.Saving exposing (Saving(..))
 import Data.TagDescription as TagDescription
@@ -199,8 +200,26 @@ type alias Msg =
     PageMsg InternalMsg
 
 
-init : CommonModel -> Maybe GlossaryItemId -> ( Model, Cmd Msg )
-init commonModel itemWithFocus =
+init :
+    CommonModel
+    -> Maybe GlossaryItemId
+    -> Maybe Components.Notifications.Model
+    -> Maybe Notification
+    -> ( Model, Cmd Msg )
+init commonModel itemWithFocus notifications notification =
+    let
+        notifications0 : Components.Notifications.Model
+        notifications0 =
+            Maybe.withDefault Components.Notifications.init notifications
+
+        ( notifications1, notificationsCmd ) =
+            case notification of
+                Just notification_ ->
+                    Components.Notifications.addNotification notification_ notifications0
+
+                Nothing ->
+                    ( notifications0, Cmd.none )
+    in
     ( { common = commonModel
       , menuForMobileVisibility = GradualVisibility.Invisible
       , backToTopLinkVisibility = Invisible 0
@@ -240,16 +259,19 @@ init commonModel itemWithFocus =
       , savingSettings = NotCurrentlySaving
       , resultOfAttemptingToCopyEditorCommandToClipboard = Nothing
       , resultOfAttemptingToCopyItemTextToClipboard = Nothing
-      , notifications = Components.Notifications.init
+      , notifications = notifications1
       }
-    , case itemWithFocus of
-        Just id ->
-            scrollGlossaryItemIntoView id
+    , Cmd.batch
+        [ notificationsCmd |> Cmd.map (PageMsg.Internal << NotificationsMsg)
+        , case itemWithFocus of
+            Just id ->
+                scrollGlossaryItemIntoView id
 
-        Nothing ->
-            commonModel.fragment
-                |> Maybe.map (Extras.BrowserDom.scrollElementIntoView <| PageMsg.Internal NoOp)
-                |> Maybe.withDefault Cmd.none
+            Nothing ->
+                commonModel.fragment
+                    |> Maybe.map (Extras.BrowserDom.scrollElementIntoView <| PageMsg.Internal NoOp)
+                    |> Maybe.withDefault Cmd.none
+        ]
     )
 
 
@@ -693,8 +715,9 @@ update msg model =
             let
                 ( notifications_, notificationsCmd ) =
                     Components.Notifications.addNotification
-                        (text "Deleted")
-                        (text "The item has been deleted.")
+                        { title = text I18n.deleted
+                        , body = text I18n.theItemHasBeenDeleted
+                        }
                         model.notifications
 
                 common : CommonModel
@@ -915,6 +938,7 @@ update msg model =
                                     PageMsg.NavigateToListAll
                                         { common0 | glossaryForUi = Ok updatedGlossaryForUi }
                                         itemWithFocus
+                                        (Just yourChangesHaveBeenSavedNotification)
                                 )
                     in
                     ( { model
@@ -962,6 +986,7 @@ update msg model =
                                     PageMsg.NavigateToListAll
                                         { common0 | glossaryForUi = Ok updatedGlossaryForUi }
                                         itemWithFocus
+                                        (Just yourChangesHaveBeenSavedNotification)
                                 )
                     in
                     ( { model
@@ -1009,6 +1034,7 @@ update msg model =
                                     PageMsg.NavigateToListAll
                                         { common0 | glossaryForUi = Ok updatedGlossaryForUi }
                                         itemWithFocus
+                                        (Just yourChangesHaveBeenSavedNotification)
                                 )
                     in
                     ( { model
@@ -1027,16 +1053,25 @@ update msg model =
                 common : CommonModel
                 common =
                     model.common
+
+                ( notifications1, notificationsCmd ) =
+                    Components.Notifications.addNotification
+                        yourChangesHaveBeenSavedNotification
+                        model.notifications
             in
             ( { model
                 | common = { common | glossaryForUi = Ok <| updatedGlossaryForUi }
                 , savingSettings = NotCurrentlySaving
+                , notifications = notifications1
               }
-            , if common.editability == Editability.EditingInMemory then
-                Cmd.none
+            , Cmd.batch
+                [ notificationsCmd |> Cmd.map (PageMsg.Internal << NotificationsMsg)
+                , if common.editability == Editability.EditingInMemory then
+                    Cmd.none
 
-              else
-                Navigation.reload
+                  else
+                    Navigation.reload
+                ]
             )
 
         FailedToChangeSettings error ->
@@ -1155,6 +1190,13 @@ update msg model =
             ( { model | notifications = notifications_ }
             , Cmd.map (PageMsg.Internal << NotificationsMsg) cmd
             )
+
+
+yourChangesHaveBeenSavedNotification : Notification
+yourChangesHaveBeenSavedNotification =
+    { title = text I18n.saved
+    , body = text I18n.yourChangesHaveBeenSaved
+    }
 
 
 filterByTagId : Model -> Maybe TagId

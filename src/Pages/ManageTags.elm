@@ -16,6 +16,7 @@ import Data.GlossaryChangelist as GlossaryChangelist
 import Data.GlossaryForUi as Glossary
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItemsForUi as GlossaryItems
+import Data.Notification exposing (Notification)
 import Data.Saving exposing (Saving(..))
 import Data.TagDescription as TagDescription
 import Data.TagId as TagId
@@ -194,6 +195,7 @@ update msg model =
                                         PageMsg.NavigateToListAll
                                             { common0 | glossaryForUi = Ok updatedGlossaryForUi }
                                             Nothing
+                                            (Just yourChangesHaveBeenSavedNotification)
                                     )
                         in
                         ( { model | saving = saving }
@@ -207,6 +209,13 @@ update msg model =
             ( { model | saving = SavingFailed <| Extras.Http.httpErrorDescriptionAskingToReloadOnUnauthorisedOrConflict <| error }
             , Cmd.none
             )
+
+
+yourChangesHaveBeenSavedNotification : Notification
+yourChangesHaveBeenSavedNotification =
+    { title = text I18n.saved
+    , body = text I18n.yourChangesHaveBeenSaved
+    }
 
 
 
@@ -478,7 +487,7 @@ viewFooter model showValidationErrors =
             [ Components.Button.white
                 (saving /= SavingInProgress)
                 [ Html.Events.onClick <|
-                    PageMsg.NavigateToListAll model.common Nothing
+                    PageMsg.NavigateToListAll model.common Nothing Nothing
                 ]
                 [ text I18n.cancel ]
             , Components.Button.primary

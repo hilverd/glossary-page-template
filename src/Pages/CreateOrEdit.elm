@@ -28,6 +28,7 @@ import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.GlossaryTitle as GlossaryTitle
+import Data.Notification exposing (Notification)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.Saving exposing (Saving(..))
 import Data.TagId exposing (TagId)
@@ -741,6 +742,7 @@ update msg model =
                                         PageMsg.NavigateToListAll
                                             { common0 | glossaryForUi = Ok updatedGlossaryForUi }
                                             itemToGiveFocus
+                                            (Just yourChangesHaveBeenSavedNotification)
                                     )
                         in
                         ( { model | saving = saving }
@@ -754,6 +756,13 @@ update msg model =
             ( { model | saving = SavingFailed <| Extras.Http.httpErrorDescriptionAskingToReloadOnUnauthorisedOrConflict <| error }
             , Extras.BrowserDom.scrollToBottom <| PageMsg.Internal NoOp
             )
+
+
+yourChangesHaveBeenSavedNotification : Notification
+yourChangesHaveBeenSavedNotification =
+    { title = text I18n.saved
+    , body = text I18n.yourChangesHaveBeenSaved
+    }
 
 
 moveFocusAfterMovingTermUp : HowTermWasMoved -> TermIndex -> Cmd InternalMsg
@@ -1921,7 +1930,7 @@ viewCreateFormFooter model =
             [ Components.Button.white
                 (saving /= SavingInProgress)
                 [ Html.Events.onClick <|
-                    PageMsg.NavigateToListAll common model.itemBeingEdited
+                    PageMsg.NavigateToListAll common model.itemBeingEdited Nothing
                 ]
                 [ text I18n.cancel ]
             , Components.Button.primary

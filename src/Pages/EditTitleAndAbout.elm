@@ -20,6 +20,7 @@ import Data.GlossaryChangeWithChecksum exposing (GlossaryChangeWithChecksum)
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
 import Data.GlossaryForUi as Glossary
 import Data.GlossaryTitle as GlossaryTitle
+import Data.Notification exposing (Notification)
 import Data.Saving exposing (Saving(..))
 import ElementIds
 import Extras.Html
@@ -187,6 +188,7 @@ update msg model =
                                         PageMsg.NavigateToListAll
                                             { common0 | glossaryForUi = Ok updatedGlossaryForUi }
                                             Nothing
+                                            (Just yourChangesHaveBeenSavedNotification)
                                     )
                         in
                         ( { model | saving = saving }
@@ -200,6 +202,13 @@ update msg model =
             ( { model | saving = SavingFailed <| Extras.Http.httpErrorDescriptionAskingToReloadOnUnauthorisedOrConflict <| error }
             , Cmd.none
             )
+
+
+yourChangesHaveBeenSavedNotification : Notification
+yourChangesHaveBeenSavedNotification =
+    { title = text I18n.saved
+    , body = text I18n.yourChangesHaveBeenSaved
+    }
 
 
 titleFromForm : Form.TitleAndAboutForm -> GlossaryTitle.GlossaryTitle
@@ -530,7 +539,7 @@ viewCreateFormFooter model showValidationErrors =
             [ Components.Button.white
                 (saving /= SavingInProgress)
                 [ Html.Events.onClick <|
-                    PageMsg.NavigateToListAll model.common Nothing
+                    PageMsg.NavigateToListAll model.common Nothing Nothing
                 ]
                 [ text I18n.cancel ]
             , Components.Button.primary

@@ -4,11 +4,13 @@ import Accessibility.Aria
 import Accessibility.Live
 import Browser.Events
 import Data.GradualVisibility exposing (GradualVisibility(..))
+import Data.Notification exposing (Notification)
 import Extras.Html
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class)
 import Html.Events
 import Icons
+import Internationalisation as I18n
 import Process
 import Svg.Attributes
 import Task
@@ -17,12 +19,6 @@ import Time
 
 
 -- MODEL
-
-
-type alias Notification =
-    { title : Html Never
-    , body : Html Never
-    }
 
 
 type Model
@@ -83,8 +79,8 @@ notification_ model =
             Just notification
 
 
-addNotification : Html Never -> Html Never -> Model -> ( Model, Cmd Msg )
-addNotification title body model =
+addNotification : Notification -> Model -> ( Model, Cmd Msg )
+addNotification notification model =
     let
         newCounter : Int
         newCounter =
@@ -92,7 +88,7 @@ addNotification title body model =
     in
     ( EnterStart
         { counter = newCounter
-        , notification = { title = title, body = body }
+        , notification = notification
         }
     , Task.perform
         (always <| StartLeaving newCounter)
@@ -224,7 +220,7 @@ view model =
                                 ]
                                 [ span
                                     [ class "sr-only" ]
-                                    [ text "Close" ]
+                                    [ text I18n.close ]
                                 , Icons.xMark
                                     [ Svg.Attributes.class "size-5"
                                     , Accessibility.Aria.hidden True
