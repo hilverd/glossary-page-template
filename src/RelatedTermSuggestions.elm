@@ -14,11 +14,11 @@ suggest :
     -> List DisambiguatedTerm
     -> String
     -> List DisambiguatedTerm
-suggest relatedRawTermsAlreadyInForm rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated disambiguatedPreferredTermsOutside_ definitionFieldBody =
+suggest relatedRawTermsAlreadyInForm rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated disambiguatedPreferredTermsOutside definitionFieldBody =
     let
         candidateTerms : List DisambiguatedTerm
         candidateTerms =
-            disambiguatedPreferredTermsOutside_
+            disambiguatedPreferredTermsOutside
                 |> List.filter
                     (\term -> not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) relatedRawTermsAlreadyInForm)
 
