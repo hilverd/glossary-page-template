@@ -132,8 +132,8 @@ relatedTermFields glossaryItemForm =
             form.relatedTermFields
 
 
-preferredTermsOutside : GlossaryItemForm -> List DisambiguatedTerm
-preferredTermsOutside glossaryItemForm =
+disambiguatedPreferredTermsOutside : GlossaryItemForm -> List DisambiguatedTerm
+disambiguatedPreferredTermsOutside glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             form.preferredTermsOutside
@@ -170,7 +170,7 @@ validate form =
         rawPreferredTermsOutsideSet : Set String
         rawPreferredTermsOutsideSet =
             form
-                |> preferredTermsOutside
+                |> disambiguatedPreferredTermsOutside
                 |> List.map (DisambiguatedTerm.toTerm >> Term.raw >> RawTerm.toString)
                 |> Set.fromList
 
@@ -286,7 +286,7 @@ validate form =
         , disambiguationTagId = disambiguationTagId form
         , definitionField = validatedDefinitionField
         , relatedTermFields = validatedRelatedTermFields
-        , preferredTermsOutside = preferredTermsOutside form
+        , preferredTermsOutside = disambiguatedPreferredTermsOutside form
         , preferredTermsOfItemsListingThisItemAsRelated = preferredTermsOfItemsListingThisItemAsRelated form
         , needsUpdating = needsUpdating form
         , lastUpdatedDate = lastUpdatedDate form
@@ -1070,26 +1070,54 @@ suggestRelatedTerms glossaryItemForm =
                     )
                     Set.empty
 
-        candidateTerms : List DisambiguatedTerm
-        candidateTerms =
-            glossaryItemForm
-                |> preferredTermsOutside
-                |> List.filter
-                    (\term -> not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) relatedRawTermsAlreadyInForm)
-
         definitionFieldBody : String
         definitionFieldBody =
             glossaryItemForm
                 |> definitionField
                 |> DefinitionField.raw
-                |> String.toLower
 
-        preferredRawTermsOfItemsListingThisItemAsRelated : Set String
-        preferredRawTermsOfItemsListingThisItemAsRelated =
+        rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated : Set String
+        rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated =
             glossaryItemForm
                 |> preferredTermsOfItemsListingThisItemAsRelated
                 |> List.map (DisambiguatedTerm.toTerm >> Term.raw >> RawTerm.toString)
                 |> Set.fromList
+    in
+    suggestRelatedTerms_
+        relatedRawTermsAlreadyInForm
+        rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated
+        (disambiguatedPreferredTermsOutside glossaryItemForm)
+        definitionFieldBody
+
+
+toggleNeedsUpdating : GlossaryItemForm -> GlossaryItemForm
+toggleNeedsUpdating glossaryItemForm =
+    case glossaryItemForm of
+        GlossaryItemForm form ->
+            GlossaryItemForm
+                { form
+                    | needsUpdating = not form.needsUpdating
+                }
+                |> validate
+
+
+suggestRelatedTerms_ :
+    Set String
+    -> Set String
+    -> List DisambiguatedTerm
+    -> String
+    -> List DisambiguatedTerm
+suggestRelatedTerms_ relatedRawTermsAlreadyInForm rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated disambiguatedPreferredTermsOutside_ definitionFieldBody =
+    let
+        candidateTerms : List DisambiguatedTerm
+        candidateTerms =
+            disambiguatedPreferredTermsOutside_
+                |> List.filter
+                    (\term -> not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) relatedRawTermsAlreadyInForm)
+
+        definitionFieldBodyLower : String
+        definitionFieldBodyLower =
+            String.toLower definitionFieldBody
     in
     candidateTerms
         |> List.filter
@@ -1107,17 +1135,6 @@ suggestRelatedTerms glossaryItemForm =
                             |> Regex.fromString
                             |> Maybe.withDefault Regex.never
                 in
-                Set.member (candidateTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) preferredRawTermsOfItemsListingThisItemAsRelated
-                    || Regex.contains candidateTermAsWord definitionFieldBody
+                Set.member (candidateTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated
+                    || Regex.contains candidateTermAsWord definitionFieldBodyLower
             )
-
-
-toggleNeedsUpdating : GlossaryItemForm -> GlossaryItemForm
-toggleNeedsUpdating glossaryItemForm =
-    case glossaryItemForm of
-        GlossaryItemForm form ->
-            GlossaryItemForm
-                { form
-                    | needsUpdating = not form.needsUpdating
-                }
-                |> validate
