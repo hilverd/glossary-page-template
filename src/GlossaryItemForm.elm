@@ -55,6 +55,7 @@ import GlossaryItemForm.DefinitionField as DefinitionField exposing (DefinitionF
 import GlossaryItemForm.TermField as TermField exposing (TermField)
 import Internationalisation as I18n
 import Regex
+import RelatedTermSuggestions
 import Set exposing (Set)
 
 
@@ -1083,7 +1084,7 @@ suggestRelatedTerms glossaryItemForm =
                 |> List.map (DisambiguatedTerm.toTerm >> Term.raw >> RawTerm.toString)
                 |> Set.fromList
     in
-    suggestRelatedTerms_
+    RelatedTermSuggestions.suggest
         relatedRawTermsAlreadyInForm
         rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated
         (disambiguatedPreferredTermsOutside glossaryItemForm)
@@ -1099,42 +1100,3 @@ toggleNeedsUpdating glossaryItemForm =
                     | needsUpdating = not form.needsUpdating
                 }
                 |> validate
-
-
-suggestRelatedTerms_ :
-    Set String
-    -> Set String
-    -> List DisambiguatedTerm
-    -> String
-    -> List DisambiguatedTerm
-suggestRelatedTerms_ relatedRawTermsAlreadyInForm rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated disambiguatedPreferredTermsOutside_ definitionFieldBody =
-    let
-        candidateTerms : List DisambiguatedTerm
-        candidateTerms =
-            disambiguatedPreferredTermsOutside_
-                |> List.filter
-                    (\term -> not <| Set.member (term |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) relatedRawTermsAlreadyInForm)
-
-        definitionFieldBodyLower : String
-        definitionFieldBodyLower =
-            String.toLower definitionFieldBody
-    in
-    candidateTerms
-        |> List.filter
-            (\candidateTerm ->
-                let
-                    candidateTermAsWord : Regex.Regex
-                    candidateTermAsWord =
-                        ("(\\b| )"
-                            ++ Extras.Regex.escapeStringForUseInRegex
-                                (String.toLower
-                                    (candidateTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
-                                )
-                            ++ "(\\b| )"
-                        )
-                            |> Regex.fromString
-                            |> Maybe.withDefault Regex.never
-                in
-                Set.member (candidateTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated
-                    || Regex.contains candidateTermAsWord definitionFieldBodyLower
-            )
