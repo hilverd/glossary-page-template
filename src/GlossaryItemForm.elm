@@ -50,11 +50,9 @@ import Dict exposing (Dict)
 import ElementIds
 import Extras.Array
 import Extras.List
-import Extras.Regex
 import GlossaryItemForm.DefinitionField as DefinitionField exposing (DefinitionField)
 import GlossaryItemForm.TermField as TermField exposing (TermField)
 import Internationalisation as I18n
-import Regex
 import RelatedTermSuggestions
 import Set exposing (Set)
 

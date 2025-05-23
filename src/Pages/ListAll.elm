@@ -84,7 +84,6 @@ import Html.Keyed
 import Html.Lazy
 import Http
 import Icons
-import IncubatingFeatures exposing (showIncubatingFeatures)
 import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
 import Process

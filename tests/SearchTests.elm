@@ -1,6 +1,5 @@
 module SearchTests exposing (suite)
 
-import Components.SearchDialog as SearchDialog
 import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.Term as Term exposing (Term)
