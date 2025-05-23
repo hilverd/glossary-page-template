@@ -28,6 +28,7 @@
         "Data.GlossaryItemFromDom",
         "Data.GlossaryItemId",
         "Data.GlossaryItemIdDict",
+        "Data.GlossaryItemOutline",
         "Data.GlossaryItemsForUi",
         "Data.GlossaryTags",
         "Data.GlossaryTitle",

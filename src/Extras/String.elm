@@ -1,15 +1,16 @@
-module Extras.String exposing (escapeForMarkdown, firstAlphanumericCharacter, preserveOnlyAlphanumChars, emDash, enDash, isRelativeUrl)
+module Extras.String exposing (escapeForMarkdown, firstAlphanumericCharacter, preserveOnlyAlphanumChars, emDash, enDash, isRelativeUrl, compareOnlyAlphanumCharsModuloDiacritics)
 
 {-| Extra functionality for strings.
 
 
 # Strings
 
-@docs escapeForMarkdown, firstAlphanumericCharacter, preserveOnlyAlphanumChars, emDash, enDash, isRelativeUrl
+@docs escapeForMarkdown, firstAlphanumericCharacter, preserveOnlyAlphanumChars, emDash, enDash, isRelativeUrl, compareOnlyAlphanumCharsModuloDiacritics
 
 -}
 
 import Regex
+import String.Normalize
 
 
 charactersToEscapeForMarkdownRegex : Regex.Regex
@@ -105,3 +106,20 @@ absoluteUrlRegex =
 isRelativeUrl : String -> Bool
 isRelativeUrl =
     not << Regex.contains absoluteUrlRegex
+
+
+{-| Compare two strings, ignoring diacritics, case, and non-alphanumeric characters.
+-}
+compareOnlyAlphanumCharsModuloDiacritics : String -> String -> Order
+compareOnlyAlphanumCharsModuloDiacritics s1 s2 =
+    compare
+        (s1
+            |> String.Normalize.removeDiacritics
+            |> preserveOnlyAlphanumChars
+            |> String.toUpper
+        )
+        (s2
+            |> String.Normalize.removeDiacritics
+            |> preserveOnlyAlphanumChars
+            |> String.toUpper
+        )

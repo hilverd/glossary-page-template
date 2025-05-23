@@ -42,6 +42,7 @@ import Data.GlossaryItem.Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId exposing (GlossaryItemId)
+import Data.GlossaryItemOutline exposing (GlossaryItemOutline)
 import Data.GlossaryItemsForUi as GlossaryItems exposing (GlossaryItemsForUi)
 import Data.RelatedTermIndex as RelatedTermIndex exposing (RelatedTermIndex)
 import Data.TagId exposing (TagId)
@@ -372,9 +373,17 @@ fromGlossaryItemForUi items itemId item =
                 |> GlossaryItems.disambiguatedPreferredTerms Nothing
                 |> List.map Tuple.second
 
+        existingItemOutlines : List GlossaryItemOutline
+        existingItemOutlines =
+            GlossaryItems.itemOutlines Nothing items
+
         preferredTermsOfItemsListingThisItemAsRelated_ : List DisambiguatedTerm
         preferredTermsOfItemsListingThisItemAsRelated_ =
             GlossaryItems.preferredTermsOfItemsListingThisItemAsRelated itemId items
+
+        outlinesOfItemsListingThisItemAsRelated : List GlossaryItemOutline
+        outlinesOfItemsListingThisItemAsRelated =
+            GlossaryItems.outlinesOfItemsListingThisItemAsRelated itemId items
 
         disambiguationTagId_ : Maybe TagId
         disambiguationTagId_ =

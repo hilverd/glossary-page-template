@@ -119,6 +119,58 @@ suite =
                         , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Interest rate" False
                         , DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Loan" False
                         ]
+        , test "returns the outlines for all the items in the glossary" <|
+            \_ ->
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.itemOutlines Nothing
+                    |> Expect.equal
+                        [ { allTags = [ "Computer Science" ]
+                          , alternativeTerms = [ "Preset", "Factory preset" ]
+                          , disambiguatedPreferredTerm = "Default (Computer Science)"
+                          , preferredTerm = "Default"
+                          }
+                        , { allTags = [ "Finance" ]
+                          , alternativeTerms = []
+                          , disambiguatedPreferredTerm = "Default (Finance)"
+                          , preferredTerm = "Default"
+                          }
+                        , { allTags = [ "Computer Science" ]
+                          , alternativeTerms = [ "IR" ]
+                          , disambiguatedPreferredTerm = "Information retrieval"
+                          , preferredTerm = "Information retrieval"
+                          }
+                        , { allTags = [ "Finance" ]
+                          , alternativeTerms = [ "IR" ]
+                          , disambiguatedPreferredTerm = "Interest rate"
+                          , preferredTerm = "Interest rate"
+                          }
+                        , { allTags = [ "Finance" ]
+                          , alternativeTerms = []
+                          , disambiguatedPreferredTerm = "Loan"
+                          , preferredTerm = "Loan"
+                          }
+                        ]
+        , test "returns the outlines for all the items in the glossary with tag filter applied" <|
+            \_ ->
+                glossaryItemsForUi
+                    |> GlossaryItemsForUi.itemOutlines (Just financeTagId)
+                    |> Expect.equal
+                        [ { allTags = [ "Finance" ]
+                          , alternativeTerms = []
+                          , disambiguatedPreferredTerm = "Default (Finance)"
+                          , preferredTerm = "Default"
+                          }
+                        , { allTags = [ "Finance" ]
+                          , alternativeTerms = [ "IR" ]
+                          , disambiguatedPreferredTerm = "Interest rate"
+                          , preferredTerm = "Interest rate"
+                          }
+                        , { allTags = [ "Finance" ]
+                          , alternativeTerms = []
+                          , disambiguatedPreferredTerm = "Loan"
+                          , preferredTerm = "Loan"
+                          }
+                        ]
         , test "looks up the ID of the item whose disambiguated preferred term has the given ID" <|
             \_ ->
                 glossaryItemsForUi

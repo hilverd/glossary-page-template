@@ -1,7 +1,7 @@
 module Data.GlossaryItemsForUi exposing
     ( GlossaryItemsForUi
     , empty, fromList
-    , get, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
+    , get, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
 
@@ -20,7 +20,7 @@ module Data.GlossaryItemsForUi exposing
 
 # Query
 
-@docs get, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated
+@docs get, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
 
 
 # Export
@@ -39,6 +39,7 @@ import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemIdDict as GlossaryItemIdDict exposing (GlossaryItemIdDict)
+import Data.GlossaryItemOutline exposing (GlossaryItemOutline)
 import Data.GlossaryTags as GlossaryTags exposing (GlossaryTags)
 import Data.TagDescription exposing (TagDescription)
 import Data.TagId exposing (TagId)
@@ -47,6 +48,7 @@ import Dict exposing (Dict)
 import DirectedGraph exposing (DirectedGraph)
 import DuplicateRejectingDict exposing (DuplicateRejectingDict)
 import Extras.Regex
+import Extras.String
 import Internationalisation as I18n
 import Maybe
 import Regex
@@ -480,6 +482,34 @@ get =
     get_ disambiguatedPreferredTerm Nothing
 
 
+outline : GlossaryItemId -> GlossaryItemsForUi -> Maybe GlossaryItemOutline
+outline glossaryItemId glossaryItemsForUi =
+    get_ disambiguatedPreferredTerm Nothing glossaryItemId glossaryItemsForUi
+        |> Maybe.map
+            (\glossaryItemForUi ->
+                { disambiguatedPreferredTerm =
+                    glossaryItemForUi
+                        |> GlossaryItemForUi.disambiguatedPreferredTerm
+                        |> DisambiguatedTerm.toTerm
+                        |> Term.raw
+                        |> RawTerm.toString
+                , preferredTerm =
+                    glossaryItemForUi
+                        |> GlossaryItemForUi.nonDisambiguatedPreferredTerm
+                        |> Term.raw
+                        |> RawTerm.toString
+                , alternativeTerms =
+                    glossaryItemForUi
+                        |> GlossaryItemForUi.alternativeTerms
+                        |> List.map (Term.raw >> RawTerm.toString)
+                , allTags =
+                    glossaryItemForUi
+                        |> GlossaryItemForUi.allTags
+                        |> List.map Tag.raw
+                }
+            )
+
+
 {-| The tags for these glossary items. Tags can exist without being used in any items.
 -}
 tags : GlossaryItemsForUi -> List Tag
@@ -592,6 +622,33 @@ disambiguatedPreferredTerms filterByTagId ((GlossaryItemsForUi items) as glossar
         |> List.sortWith compareDisambiguatedTerms
 
 
+{-| All the outlines for the items in the glossary, ordered alphabetically by their disambiguated preferred terms.
+-}
+itemOutlines : Maybe TagId -> GlossaryItemsForUi -> List GlossaryItemOutline
+itemOutlines filterByTagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
+    let
+        itemIds : List GlossaryItemId
+        itemIds =
+            filterByTagId
+                |> Maybe.map
+                    (\tagId ->
+                        items.itemIdsByTagId
+                            |> TagIdDict.get tagId
+                            |> Maybe.withDefault []
+                    )
+                |> Maybe.withDefault (GlossaryItemIdDict.keys items.itemById)
+
+        compareOutlines : GlossaryItemOutline -> GlossaryItemOutline -> Order
+        compareOutlines item1 item2 =
+            Extras.String.compareOnlyAlphanumCharsModuloDiacritics
+                item1.disambiguatedPreferredTerm
+                item2.disambiguatedPreferredTerm
+    in
+    itemIds
+        |> List.filterMap (\itemId -> glossaryItemsForUi |> outline itemId)
+        |> List.sortWith compareOutlines
+
+
 {-| Look up the ID of the item with the given raw disambiguated preferred term.
 -}
 itemIdFromRawDisambiguatedPreferredTerm : RawTerm -> GlossaryItemsForUi -> Maybe GlossaryItemId
@@ -676,6 +733,15 @@ preferredTermsOfItemsListingThisItemAsRelated id glossaryItemsForUi =
     glossaryItemsForUi
         |> relatedForWhichItems id
         |> List.filterMap (\id_ -> disambiguatedPreferredTerm id_ glossaryItemsForUi)
+
+
+{-| The outlines of the items that list this one as a related item.
+-}
+outlinesOfItemsListingThisItemAsRelated : GlossaryItemId -> GlossaryItemsForUi -> List GlossaryItemOutline
+outlinesOfItemsListingThisItemAsRelated id glossaryItemsForUi =
+    glossaryItemsForUi
+        |> relatedForWhichItems id
+        |> List.filterMap (\id_ -> outline id_ glossaryItemsForUi)
 
 
 {-| A list of pairs associating each alternative term with the disambiguated preferred terms that it appears together with.
