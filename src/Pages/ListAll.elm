@@ -464,9 +464,9 @@ update msg model =
                                         , results =
                                             results
                                                 |> List.map
-                                                    (\({ preferredTerm } as searchResult) ->
+                                                    (\({ disambiguatedPreferredTerm } as searchResult) ->
                                                         Components.SearchDialog.searchResult
-                                                            (Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm preferredTerm)
+                                                            (Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm)
                                                             [ Search.viewItemSearchResult model.common.enableMathSupport [] searchResult ]
                                                     )
                                         }
@@ -2764,9 +2764,9 @@ viewOrderItemsBy numberOfItems enableMathSupport filterByTagId_ itemWithFocusCom
                                         , results =
                                             results
                                                 |> List.map
-                                                    (\({ preferredTerm } as result) ->
+                                                    (\({ disambiguatedPreferredTerm } as result) ->
                                                         Components.Combobox.choice
-                                                            (preferredTerm |> DisambiguatedTerm.toTerm)
+                                                            (disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm)
                                                             (\additionalAttributes ->
                                                                 Search.viewItemSearchResult
                                                                     enableMathSupport

@@ -79,7 +79,7 @@ suite =
                         |> Search.resultsForItems Nothing (always True) 10 "term"
                         |> (\{ totalNumberOfResults, results } ->
                                 { totalNumberOfResults = totalNumberOfResults
-                                , results = List.map (\{ preferredTerm } -> Term.id <| DisambiguatedTerm.toTerm preferredTerm) results
+                                , results = List.map (\{ disambiguatedPreferredTerm } -> Term.id <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm) results
                                 }
                            )
                         |> Expect.equal
@@ -96,7 +96,7 @@ suite =
                         |> Search.resultsForItems Nothing (always True) 10 "the"
                         |> (\{ totalNumberOfResults, results } ->
                                 { totalNumberOfResults = totalNumberOfResults
-                                , results = List.map (\{ preferredTerm } -> Term.id <| DisambiguatedTerm.toTerm preferredTerm) results
+                                , results = List.map (\{ disambiguatedPreferredTerm } -> Term.id <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm) results
                                 }
                            )
                         |> Expect.equal
@@ -113,7 +113,7 @@ suite =
                         |> Search.resultsForItems Nothing (always True) 10 "three"
                         |> (\{ totalNumberOfResults, results } ->
                                 { totalNumberOfResults = totalNumberOfResults
-                                , results = List.map (\{ preferredTerm } -> Term.id <| DisambiguatedTerm.toTerm preferredTerm) results
+                                , results = List.map (\{ disambiguatedPreferredTerm } -> Term.id <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm) results
                                 }
                            )
                         |> Expect.equal
@@ -129,7 +129,7 @@ suite =
                         |> Search.resultsForItems Nothing (always True) 1 "three"
                         |> (\{ totalNumberOfResults, results } ->
                                 { totalNumberOfResults = totalNumberOfResults
-                                , results = List.map (\{ preferredTerm } -> Term.id <| DisambiguatedTerm.toTerm preferredTerm) results
+                                , results = List.map (\{ disambiguatedPreferredTerm } -> Term.id <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm) results
                                 }
                            )
                         |> Expect.equal

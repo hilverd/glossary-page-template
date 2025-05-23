@@ -1597,11 +1597,11 @@ viewCreateSeeAlsoSingle1 enableMathSupport dragAndDropStatus showValidationError
                 comboboxChoices =
                     Search.resultsForItems
                         Nothing
-                        (\{ preferredTerm, alternativeTerm } ->
+                        (\{ disambiguatedPreferredTerm, alternativeTerm } ->
                             let
                                 rawPreferredTerm : RawTerm
                                 rawPreferredTerm =
-                                    preferredTerm |> DisambiguatedTerm.toTerm |> Term.raw
+                                    disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw
 
                                 rawPreferredTermString =
                                     rawPreferredTerm |> RawTerm.toString
@@ -1623,9 +1623,9 @@ viewCreateSeeAlsoSingle1 enableMathSupport dragAndDropStatus showValidationError
                                 , results =
                                     results
                                         |> List.map
-                                            (\({ preferredTerm } as result) ->
+                                            (\({ disambiguatedPreferredTerm } as result) ->
                                                 Components.Combobox.choice
-                                                    (preferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
+                                                    (disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
                                                     (\additionalAttributes ->
                                                         Search.viewItemSearchResult
                                                             enableMathSupport

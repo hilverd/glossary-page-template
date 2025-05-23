@@ -20,6 +20,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Use combo box for selecting "focused on" item.
 
 ### Fixed
+
+- Improve ordering of search results.
+
 ### Removed
 
 ## [5.5.0] - 2025-05-10

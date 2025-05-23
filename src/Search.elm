@@ -15,7 +15,7 @@ import Svg.Attributes
 
 
 type alias ItemSearchResult =
-    { preferredTerm : DisambiguatedTerm
+    { disambiguatedPreferredTerm : DisambiguatedTerm
     , alternativeTerm : Maybe Term
     , definition : Maybe Definition
     }
@@ -35,7 +35,7 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
         let
             candidates :
                 List
-                    { preferredTerm : DisambiguatedTerm
+                    { disambiguatedPreferredTerm : DisambiguatedTerm
                     , alternativeTerm : Maybe Term
                     , definition : Maybe Definition
                     }
@@ -53,7 +53,7 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
                                 definition =
                                     GlossaryItemForUi.definition item
                             in
-                            { preferredTerm = disambiguatedPreferredTerm
+                            { disambiguatedPreferredTerm = disambiguatedPreferredTerm
                             , alternativeTerm = Nothing
                             , definition = definition
                             }
@@ -61,26 +61,13 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
                                         |> GlossaryItemForUi.alternativeTerms
                                         |> List.map
                                             (\alternativeTerm ->
-                                                { preferredTerm = disambiguatedPreferredTerm
+                                                { disambiguatedPreferredTerm = disambiguatedPreferredTerm
                                                 , alternativeTerm = Just alternativeTerm
                                                 , definition = definition
                                                 }
                                             )
                                    )
                         )
-
-            termRawContainsSearchString : Term -> Bool
-            termRawContainsSearchString =
-                Term.raw
-                    >> RawTerm.toString
-                    >> String.toLower
-                    >> String.contains searchStringNormalised
-
-            termInlineTextContainsSearchString : Term -> Bool
-            termInlineTextContainsSearchString =
-                Term.inlineText
-                    >> String.toLower
-                    >> String.contains searchStringNormalised
 
             termRawStartsWithSearchString : Term -> Bool
             termRawStartsWithSearchString =
@@ -89,11 +76,24 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
                     >> String.toLower
                     >> String.startsWith searchStringNormalised
 
+            termRawContainsSearchString : Term -> Bool
+            termRawContainsSearchString =
+                Term.raw
+                    >> RawTerm.toString
+                    >> String.toLower
+                    >> String.contains searchStringNormalised
+
             termInlineTextStartsWithSearchString : Term -> Bool
             termInlineTextStartsWithSearchString =
                 Term.inlineText
                     >> String.toLower
                     >> String.startsWith searchStringNormalised
+
+            termInlineTextContainsSearchString : Term -> Bool
+            termInlineTextContainsSearchString =
+                Term.inlineText
+                    >> String.toLower
+                    >> String.contains searchStringNormalised
 
             definitionInlineTextContainsSearchString : Definition -> Bool
             definitionInlineTextContainsSearchString =
@@ -104,64 +104,43 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
         candidates
             |> List.filter filter
             |> List.filterMap
-                (\({ preferredTerm, alternativeTerm, definition } as candidate) ->
-                    if
-                        Maybe.map termRawContainsSearchString alternativeTerm
-                            == Just True
-                            || Maybe.map termInlineTextContainsSearchString alternativeTerm
-                            == Just True
-                    then
-                        if Maybe.map termRawStartsWithSearchString alternativeTerm == Just True || Maybe.map termInlineTextStartsWithSearchString alternativeTerm == Just True then
-                            Just ( candidate, 3 )
+                (\({ disambiguatedPreferredTerm, alternativeTerm, definition } as candidate) ->
+                    let
+                        disambiguatedPreferredTermAsTerm : Term
+                        disambiguatedPreferredTermAsTerm =
+                            DisambiguatedTerm.toTerm disambiguatedPreferredTerm
+                    in
+                    if alternativeTerm == Nothing && termRawStartsWithSearchString disambiguatedPreferredTermAsTerm then
+                        Just ( candidate, 1 )
 
-                        else
-                            Just ( candidate, 2 )
+                    else if alternativeTerm == Nothing && termInlineTextStartsWithSearchString disambiguatedPreferredTermAsTerm then
+                        Just ( candidate, 2 )
 
-                    else
-                        let
-                            preferredTermAsTerm : Term
-                            preferredTermAsTerm =
-                                DisambiguatedTerm.toTerm preferredTerm
-                        in
-                        if termRawContainsSearchString preferredTermAsTerm || termInlineTextContainsSearchString preferredTermAsTerm then
-                            if termRawStartsWithSearchString preferredTermAsTerm || termInlineTextStartsWithSearchString preferredTermAsTerm then
-                                Just ( candidate, 3 )
+                    else if Maybe.map termRawStartsWithSearchString alternativeTerm == Just True then
+                        Just ( candidate, 3 )
 
-                            else
-                                Just ( candidate, 2 )
+                    else if Maybe.map termInlineTextStartsWithSearchString alternativeTerm == Just True then
+                        Just ( candidate, 4 )
 
-                        else if alternativeTerm == Nothing && Maybe.map definitionInlineTextContainsSearchString definition == Just True then
-                            Just ( candidate, 1 )
+                    else if alternativeTerm == Nothing && termRawContainsSearchString disambiguatedPreferredTermAsTerm then
+                        Just ( candidate, 5 )
 
-                        else
-                            Nothing
-                )
-            |> List.sortWith
-                (\( candidate1, rank1 ) ( candidate2, rank2 ) ->
-                    if rank1 > rank2 then
-                        LT
+                    else if alternativeTerm == Nothing && termInlineTextContainsSearchString disambiguatedPreferredTermAsTerm then
+                        Just ( candidate, 6 )
 
-                    else if rank1 < rank2 then
-                        GT
+                    else if Maybe.map termRawContainsSearchString alternativeTerm == Just True then
+                        Just ( candidate, 7 )
+
+                    else if Maybe.map termInlineTextContainsSearchString alternativeTerm == Just True then
+                        Just ( candidate, 8 )
+
+                    else if alternativeTerm == Nothing && Maybe.map definitionInlineTextContainsSearchString definition == Just True then
+                        Just ( candidate, 9 )
 
                     else
-                        case ( candidate1.alternativeTerm, candidate2.alternativeTerm ) of
-                            ( Just alternativeTerm1, Just alternativeTerm2 ) ->
-                                if alternativeTerm1 == alternativeTerm2 then
-                                    DisambiguatedTerm.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
-
-                                else
-                                    Term.compareAlphabetically alternativeTerm1 alternativeTerm2
-
-                            ( Just alternativeTerm1, Nothing ) ->
-                                Term.compareAlphabetically alternativeTerm1 (DisambiguatedTerm.toTerm candidate2.preferredTerm)
-
-                            ( Nothing, Just alternativeTerm2 ) ->
-                                Term.compareAlphabetically (DisambiguatedTerm.toTerm candidate1.preferredTerm) alternativeTerm2
-
-                            ( Nothing, Nothing ) ->
-                                DisambiguatedTerm.compareAlphabetically candidate1.preferredTerm candidate2.preferredTerm
+                        Nothing
                 )
+            |> List.sortBy Tuple.second
             |> (\rawResults ->
                     { totalNumberOfResults = List.length rawResults
                     , results =
@@ -173,7 +152,7 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
 
 
 viewItemSearchResult : Bool -> List (Attribute msg) -> ItemSearchResult -> Html msg
-viewItemSearchResult enableMathSupport additionalAttributes { preferredTerm, alternativeTerm, definition } =
+viewItemSearchResult enableMathSupport additionalAttributes { disambiguatedPreferredTerm, alternativeTerm, definition } =
     case alternativeTerm of
         Just alternativeTerm_ ->
             Html.div
@@ -186,7 +165,7 @@ viewItemSearchResult enableMathSupport additionalAttributes { preferredTerm, alt
                     [ Icons.cornerDownRight
                         [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400"
                         ]
-                    , Term.view enableMathSupport additionalAttributes (DisambiguatedTerm.toTerm preferredTerm)
+                    , Term.view enableMathSupport additionalAttributes (DisambiguatedTerm.toTerm disambiguatedPreferredTerm)
                     ]
                 , Extras.Html.showMaybe
                     (\definition_ ->
@@ -208,7 +187,7 @@ viewItemSearchResult enableMathSupport additionalAttributes { preferredTerm, alt
                 []
                 [ Html.p
                     [ class "font-medium" ]
-                    [ Term.view enableMathSupport additionalAttributes (DisambiguatedTerm.toTerm preferredTerm) ]
+                    [ Term.view enableMathSupport additionalAttributes (DisambiguatedTerm.toTerm disambiguatedPreferredTerm) ]
                 , Extras.Html.showMaybe
                     (\definition_ ->
                         Html.div
