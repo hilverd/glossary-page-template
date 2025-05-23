@@ -173,13 +173,13 @@ view model =
                 [ class "transition-discrete pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black/5 dark:ring-white/5"
                 , case model of
                     EnterStart _ ->
-                        class "transform motion-reduce:transform-none ease-out duration-300 transition translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+                        class "transform motion-reduce:transform-none ease-out duration-300 transition motion-reduce:transition-none translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
 
                     EnterEnd _ ->
-                        class "transform motion-reduce:transform-none ease-out duration-300 transition translate-y-0 opacity-100 sm:translate-x-0"
+                        class "transform motion-reduce:transform-none ease-out duration-300 transition motion-reduce:transition-none translate-y-0 opacity-100 sm:translate-x-0"
 
                     Present _ ->
-                        class "transform motion-reduce:transform-none ease-out duration-300 transition translate-y-0 opacity-100 sm:translate-x-0"
+                        class "transform motion-reduce:transform-none ease-out duration-300 transition motion-reduce:transition-none translate-y-0 opacity-100 sm:translate-x-0"
 
                     LeaveStart _ ->
                         class "transition motion-reduce:transition-none ease-in duration-100 opacity-100"
