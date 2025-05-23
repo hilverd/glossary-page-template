@@ -1,7 +1,7 @@
 module RelatedTermSuggestions exposing (suggest)
 
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
-import Data.GlossaryItem.RawTerm as RawTerm
+import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemOutline exposing (GlossaryItemOutline)
 import Extras.Regex
@@ -10,50 +10,68 @@ import Set exposing (Set)
 
 
 suggest :
-    Set String
+    List Tag
+    -> Set String
     -> Set String
     -> List GlossaryItemOutline
     -> String
     -> List DisambiguatedTerm
-suggest relatedRawTermsAlreadyInForm rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated outlinesOfItemsOutside definitionFieldBody =
+suggest tags relatedRawTermsAlreadyInForm rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated outlinesOfItemsOutside definitionFieldBody =
     let
+        rawTagsSet : Set String
+        rawTagsSet =
+            tags
+                |> List.map Tag.raw
+                |> Set.fromList
+
+        hasATagInCommonWithItemBeingDefined : GlossaryItemOutline -> Bool
+        hasATagInCommonWithItemBeingDefined outlineOfItemOutside =
+            List.any
+                (\tag -> Set.member tag rawTagsSet)
+                outlineOfItemOutside.allTags
+
+        isNotAlreadyARelatedTerm : GlossaryItemOutline -> Bool
+        isNotAlreadyARelatedTerm outlineOfItemOutside =
+            not <| Set.member outlineOfItemOutside.disambiguatedPreferredTerm relatedRawTermsAlreadyInForm
+
         outlinesOfCandidateItems : List GlossaryItemOutline
         outlinesOfCandidateItems =
             outlinesOfItemsOutside
                 |> List.filter
                     (\outlineOfItemOutside ->
-                        not <| Set.member outlineOfItemOutside.disambiguatedPreferredTerm relatedRawTermsAlreadyInForm
-                    )
-
-        candidateTerms : List DisambiguatedTerm
-        candidateTerms =
-            outlinesOfCandidateItems
-                |> List.map
-                    (\itemOutline ->
-                        Term.fromMarkdown itemOutline.disambiguatedPreferredTerm False
-                            |> DisambiguatedTerm.fromTerm
+                        isNotAlreadyARelatedTerm outlineOfItemOutside
+                            && (Set.isEmpty rawTagsSet || hasATagInCommonWithItemBeingDefined outlineOfItemOutside)
                     )
 
         definitionFieldBodyLower : String
         definitionFieldBodyLower =
             String.toLower definitionFieldBody
     in
-    candidateTerms
+    outlinesOfCandidateItems
         |> List.filter
-            (\candidateTerm ->
+            (\outlineOfCandidateItem ->
                 let
-                    candidateTermAsWord : Regex.Regex
-                    candidateTermAsWord =
+                    rawDisambiguatedPreferredTermOfCandidateItem : String
+                    rawDisambiguatedPreferredTermOfCandidateItem =
+                        outlineOfCandidateItem.disambiguatedPreferredTerm
+
+                    candidateAsWord : Regex.Regex
+                    candidateAsWord =
                         ("(\\b| )"
                             ++ Extras.Regex.escapeStringForUseInRegex
                                 (String.toLower
-                                    (candidateTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
+                                    outlineOfCandidateItem.preferredTerm
                                 )
                             ++ "(\\b| )"
                         )
                             |> Regex.fromString
                             |> Maybe.withDefault Regex.never
                 in
-                Set.member (candidateTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString) rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated
-                    || Regex.contains candidateTermAsWord definitionFieldBodyLower
+                Set.member rawDisambiguatedPreferredTermOfCandidateItem rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated
+                    || Regex.contains candidateAsWord definitionFieldBodyLower
+            )
+        |> List.map
+            (\outlineOfCandidateItem ->
+                Term.fromMarkdown outlineOfCandidateItem.disambiguatedPreferredTerm False
+                    |> DisambiguatedTerm.fromTerm
             )

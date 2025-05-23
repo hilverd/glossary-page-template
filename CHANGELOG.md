@@ -18,6 +18,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Changed
 
 - Use combo box for selecting "focused on" item.
+- Improve logic for suggesting related items.
 
 ### Fixed
 

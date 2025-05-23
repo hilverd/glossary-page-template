@@ -53,6 +53,7 @@ import Extras.Array
 import Extras.List
 import GlossaryItemForm.DefinitionField as DefinitionField exposing (DefinitionField)
 import GlossaryItemForm.TermField as TermField exposing (TermField)
+import Icons exposing (check)
 import Internationalisation as I18n
 import RelatedTermSuggestions
 import Set exposing (Set)
@@ -298,6 +299,19 @@ validate form =
         , needsUpdating = needsUpdating form
         , lastUpdatedDate = lastUpdatedDate form
         }
+
+
+checkedTags : GlossaryItemForm -> List Tag
+checkedTags (GlossaryItemForm form) =
+    form.tagCheckboxes
+        |> List.filterMap
+            (\( ( _, tag ), checked ) ->
+                if checked then
+                    Just tag
+
+                else
+                    Nothing
+            )
 
 
 hasValidationErrors : GlossaryItemForm -> Bool
@@ -1118,6 +1132,7 @@ suggestRelatedTerms glossaryItemForm =
                 |> Set.fromList
     in
     RelatedTermSuggestions.suggest
+        (checkedTags glossaryItemForm)
         relatedRawTermsAlreadyInForm
         rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated
         (outlinesOfItemsOutside glossaryItemForm)
