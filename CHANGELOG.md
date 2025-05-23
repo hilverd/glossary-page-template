@@ -12,6 +12,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [5.6.0] - 2025-05-23
+
+### Added
 
 - Show "toast" notifications after saving changes (e.g. when creating/editing/deleting items).
 
@@ -23,8 +30,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 
 - Improve ordering of search results.
-
-### Removed
 
 ## [5.5.0] - 2025-05-10
 
@@ -863,7 +868,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.5.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.6.0...HEAD
+[5.6.0]: https://github.com/hilverd/glossary-page-template/compare/v5.5.0...v5.6.0
 [5.5.0]: https://github.com/hilverd/glossary-page-template/compare/v5.4.0...v5.5.0
 [5.4.0]: https://github.com/hilverd/glossary-page-template/compare/v5.3.1...v5.4.0
 [5.3.1]: https://github.com/hilverd/glossary-page-template/compare/v5.3.0...v5.3.1
