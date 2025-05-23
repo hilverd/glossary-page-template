@@ -75,6 +75,7 @@ type GlossaryItemForm
         , definitionField : DefinitionField
         , relatedTermFields : Array RelatedTermField
         , preferredTermsOutside : List DisambiguatedTerm
+        , outlinesOfItemsOutside : List GlossaryItemOutline
         , preferredTermsOfItemsListingThisItemAsRelated : List DisambiguatedTerm
         , needsUpdating : Bool
         , lastUpdatedDate : String
@@ -137,6 +138,11 @@ disambiguatedPreferredTermsOutside glossaryItemForm =
     case glossaryItemForm of
         GlossaryItemForm form ->
             form.preferredTermsOutside
+
+
+outlinesOfItemsOutside : GlossaryItemForm -> List GlossaryItemOutline
+outlinesOfItemsOutside (GlossaryItemForm form) =
+    form.outlinesOfItemsOutside
 
 
 preferredTermsOfItemsListingThisItemAsRelated : GlossaryItemForm -> List DisambiguatedTerm
@@ -287,6 +293,7 @@ validate form =
         , definitionField = validatedDefinitionField
         , relatedTermFields = validatedRelatedTermFields
         , preferredTermsOutside = disambiguatedPreferredTermsOutside form
+        , outlinesOfItemsOutside = outlinesOfItemsOutside form
         , preferredTermsOfItemsListingThisItemAsRelated = preferredTermsOfItemsListingThisItemAsRelated form
         , needsUpdating = needsUpdating form
         , lastUpdatedDate = lastUpdatedDate form
@@ -344,6 +351,7 @@ empty_ withPreferredTermsOutside allTags filterByTag =
         , definitionField = DefinitionField.empty
         , relatedTermFields = Array.empty
         , preferredTermsOutside = withPreferredTermsOutside
+        , outlinesOfItemsOutside = []
         , preferredTermsOfItemsListingThisItemAsRelated = []
         , needsUpdating = True
         , lastUpdatedDate = ""
@@ -391,7 +399,9 @@ fromGlossaryItemForUi items itemId item =
                 |> GlossaryItemForUi.disambiguationTag
                 |> Maybe.andThen (\tag -> GlossaryItems.tagIdFromTag tag items)
     in
-    fromGlossaryItemForUi_ existingDisambiguatedPreferredTerms
+    fromGlossaryItemForUi_
+        existingDisambiguatedPreferredTerms
+        existingItemOutlines
         tags
         preferredTermsOfItemsListingThisItemAsRelated_
         (GlossaryItemForUi.relatedPreferredTerms item)
@@ -401,13 +411,14 @@ fromGlossaryItemForUi items itemId item =
 
 fromGlossaryItemForUi_ :
     List DisambiguatedTerm
+    -> List GlossaryItemOutline
     -> List ( TagId, Tag )
     -> List DisambiguatedTerm
     -> List DisambiguatedTerm
     -> Maybe TagId
     -> GlossaryItemForUi
     -> GlossaryItemForm
-fromGlossaryItemForUi_ existingPreferredTerms allTags preferredTermsOfItemsListingThisItemAsRelated_ relatedTerms disambiguationTagId_ item =
+fromGlossaryItemForUi_ existingPreferredTerms existingItemOutlines allTags preferredTermsOfItemsListingThisItemAsRelated_ relatedTerms disambiguationTagId_ item =
     let
         normalTags : List Tag
         normalTags =
@@ -455,6 +466,20 @@ fromGlossaryItemForUi_ existingPreferredTerms allTags preferredTermsOfItemsListi
                 )
                 existingPreferredTerms
 
+        outlinesOfItemsOutside1 : List GlossaryItemOutline
+        outlinesOfItemsOutside1 =
+            List.filter
+                (\existingItemOutline ->
+                    existingItemOutline.disambiguatedPreferredTerm
+                        /= (item
+                                |> GlossaryItemForUi.disambiguatedPreferredTerm
+                                |> DisambiguatedTerm.toTerm
+                                |> Term.raw
+                                |> RawTerm.toString
+                           )
+                )
+                existingItemOutlines
+
         definitionField_ : DefinitionField
         definitionField_ =
             item
@@ -490,6 +515,7 @@ fromGlossaryItemForUi_ existingPreferredTerms allTags preferredTermsOfItemsListi
                     )
                 |> Array.fromList
         , preferredTermsOutside = preferredTermsOutside1
+        , outlinesOfItemsOutside = outlinesOfItemsOutside1
         , preferredTermsOfItemsListingThisItemAsRelated = preferredTermsOfItemsListingThisItemAsRelated_
         , needsUpdating = item |> GlossaryItemForUi.needsUpdating
         , lastUpdatedDate = item |> GlossaryItemForUi.lastUpdatedDateAsIso8601 |> Maybe.withDefault ""
@@ -1094,7 +1120,7 @@ suggestRelatedTerms glossaryItemForm =
     RelatedTermSuggestions.suggest
         relatedRawTermsAlreadyInForm
         rawDisambiguatedPreferredTermsOfItemsListingThisItemAsRelated
-        (disambiguatedPreferredTermsOutside glossaryItemForm)
+        (outlinesOfItemsOutside glossaryItemForm)
         definitionFieldBody
 
 
