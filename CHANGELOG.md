@@ -12,16 +12,20 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [5.7.0] - 2025-05-26
+
+### Added
 
 - Allow removing tag being filtered by directly from search dialog.
 
-### Changed
 ### Fixed
 
 - Work around [scroll-margin-top bug](https://issues.chromium.org/issues/40822817) in Google Chrome which was scrolling items partially out of view.
 - Hide "Back to top" link if menu for mobile is visible.
-
-### Removed
 
 ## [5.6.0] - 2025-05-23
 

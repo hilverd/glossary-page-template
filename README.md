@@ -32,7 +32,7 @@ https://glstatic.net/glossary-page-template@5/glossary.min.js
 https://glstatic.net/glossary-page-template@5/glossary.min.css
 ```
 
-The above assets are cached for 24 hours and get updated with any releases with a [major version number](https://semver.org/) of `5`. Alternatively you can change the URL to point to e.g. `@5.6` which gets all patch releases with version numbers of the form `5.6.x`. You can also use a specific version such as `5.6.0` — these are cached forever.
+The above assets are cached for 24 hours and get updated with any releases with a [major version number](https://semver.org/) of `5`. Alternatively you can change the URL to point to e.g. `@5.7` which gets all patch releases with version numbers of the form `5.7.x`. You can also use a specific version such as `5.7.0` — these are cached forever.
 
 #### Security considerations
 
