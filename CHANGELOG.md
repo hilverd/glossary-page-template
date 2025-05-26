@@ -17,6 +17,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 
 - Work around [scroll-margin-top bug](https://issues.chromium.org/issues/40822817) in Google Chrome which was scrolling items partially out of view.
+- Hide "Back to top" link if menu for mobile is visible.
 
 ### Removed
 

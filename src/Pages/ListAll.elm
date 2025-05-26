@@ -3277,7 +3277,9 @@ view model =
                         [ Html.Lazy.lazy2 viewBackToTopLink True model.backToTopLinkVisibility ]
                     , div
                         [ class "lg:hidden" ]
-                        [ Html.Lazy.lazy2 viewBackToTopLink False model.backToTopLinkVisibility ]
+                        [ Extras.Html.showIf (model.menuForMobileVisibility /= GradualVisibility.Visible) <|
+                            Html.Lazy.lazy2 viewBackToTopLink False model.backToTopLinkVisibility
+                        ]
                     , div
                         [ class "lg:pl-64 flex flex-col" ]
                         [ Html.Lazy.lazy5 viewTopBar
