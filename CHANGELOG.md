@@ -879,7 +879,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.6.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.7.0...HEAD
+[5.7.0]: https://github.com/hilverd/glossary-page-template/compare/v5.6.0...v5.7.0
 [5.6.0]: https://github.com/hilverd/glossary-page-template/compare/v5.5.0...v5.6.0
 [5.5.0]: https://github.com/hilverd/glossary-page-template/compare/v5.4.0...v5.5.0
 [5.4.0]: https://github.com/hilverd/glossary-page-template/compare/v5.3.1...v5.4.0
