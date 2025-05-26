@@ -10,6 +10,7 @@ port module Components.SearchDialog exposing
     , onShow
     , searchResult
     , searchResultHref
+    , searchStringFieldId
     , searchStringWasJustUpdated
     , show
     , update
@@ -166,7 +167,7 @@ update updateParentModel toParentMsg msg model =
                     ( { model_ | visibility = Visible, activeSearchResultIndex = Nothing }
                     , Cmd.batch
                         [ Maybe.withDefault Cmd.none model_.config.onShow
-                        , giveSearchFieldFocusOnceItIsPresent <| searchStringFieldId model_.idPrefix
+                        , giveSearchFieldFocusOnceItIsPresent <| searchStringFieldId model
                         ]
                     )
 
@@ -353,9 +354,9 @@ withIdPrefix suffix idPrefix =
     idPrefix ++ "-" ++ suffix
 
 
-searchStringFieldId : String -> String
-searchStringFieldId =
-    withIdPrefix "search-term-field"
+searchStringFieldId : Model parentMsg -> String
+searchStringFieldId (Model model) =
+    withIdPrefix "search-term-field" model.idPrefix
 
 
 searchResultsListId : String -> String
@@ -481,7 +482,7 @@ view toParentMsg model searchString messageAboveSearchResults messageToShowAtBot
                         , Html.Attributes.attribute "autocapitalize" "off"
                         , Html.Attributes.spellcheck False
                         , class "h-12 w-full border-0 bg-transparent dark:bg-gray-600 pl-11 pr-4 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-0"
-                        , Html.Attributes.id <| searchStringFieldId model_.idPrefix
+                        , Html.Attributes.id <| searchStringFieldId model
                         , Html.Attributes.placeholder I18n.searchPlaceholder
                         , Extras.HtmlAttribute.showMaybe Html.Events.onInput config.onChangeSearchString
                         , Html.Events.preventDefaultOn "keydown"
@@ -524,7 +525,7 @@ view toParentMsg model searchString messageAboveSearchResults messageToShowAtBot
                     Extras.Html.showMaybe
                         (\messageAboveSearchResults_ ->
                             div
-                                [ class "px-4 bg-transparent border-b dark:border-none dark:bg-gray-600 text-gray-800 dark:text-gray-200" ]
+                                [ class "px-4 bg-transparent border-b dark:border-none dark:bg-gray-600 text-gray-800 dark:text-gray-200 pb-2" ]
                                 [ messageAboveSearchResults_ ]
                         )
                         messageAboveSearchResults

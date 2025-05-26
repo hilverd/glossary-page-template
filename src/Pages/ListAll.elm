@@ -193,6 +193,7 @@ type InternalMsg
     | FilterByTag Tag
     | DoNotFilterByTag
     | NotificationsMsg Components.Notifications.Msg
+    | RemoveTagFilterButKeepSearchDialogOpen
 
 
 type alias Msg =
@@ -1180,6 +1181,40 @@ update msg model =
                 |> CommonModel.relativeUrl
                 |> Navigation.pushUrl model.common.key
             )
+
+        RemoveTagFilterButKeepSearchDialogOpen ->
+            let
+                common0 : CommonModel
+                common0 =
+                    model.common
+
+                common1 : CommonModel
+                common1 =
+                    { common0
+                        | queryParameters =
+                            common0.queryParameters
+                                |> QueryParameters.setFilterByTag Nothing
+                    }
+
+                -- Re-run the search with the current search string to update results
+                model1 : Model
+                model1 =
+                    { model | common = common1 }
+
+                urlCmd =
+                    common1
+                        |> CommonModel.relativeUrl
+                        |> Navigation.pushUrl model.common.key
+
+                focusCmd =
+                    Task.attempt
+                        (always NoOp)
+                        (Dom.focus <| Components.SearchDialog.searchStringFieldId model.itemSearchDialog.model)
+                        |> Cmd.map PageMsg.Internal
+            in
+            model1
+                |> update (UpdateItemSearchString model.itemSearchDialog.term)
+                |> (\( model2, c ) -> ( model2, Cmd.batch [ c, urlCmd, focusCmd ] ))
 
         NotificationsMsg notificationsMsg ->
             let
@@ -3035,20 +3070,18 @@ viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDia
         (filterByTagWithDescription_
             |> Maybe.map
                 (\describedTag ->
-                    span
-                        [ class "inline-flex flex-wrap items-center" ]
+                    span [ class "pt-3 flex items-center" ]
                         [ Icons.exclamation
                             [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-500 mr-1.5"
                             , Accessibility.Aria.hidden True
                             ]
                         , span
-                            [ class "mr-1" ]
+                            [ class "print:hidden mr-2 font-medium text-gray-900 dark:text-gray-100" ]
                             [ text I18n.filteringByTag ]
-                        , span []
-                            [ text " \""
-                            , Tag.view enableMathSupport [] <| DescribedTag.tag describedTag
-                            , text "\""
-                            ]
+                        , Components.Badge.withRemoveButton
+                            (PageMsg.Internal RemoveTagFilterButKeepSearchDialogOpen)
+                            [ class "print:hidden" ]
+                            [ Tag.view enableMathSupport [] <| DescribedTag.tag describedTag ]
                         ]
                 )
         )
