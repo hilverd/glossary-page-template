@@ -1889,9 +1889,8 @@ viewTagFilterAndOrderItemsByAndItemCards :
     , editing : Bool
     }
     ->
-        { filterByTagId_ : Maybe TagId
-        , tags : List Tag
-        , filterByDescribedTag_ : Maybe DescribedTag
+        { tags : List Tag
+        , filterByDescribedTag : Maybe DescribedTag
         }
     -> QueryParameters
     -> Maybe GlossaryItemId
@@ -1901,7 +1900,7 @@ viewTagFilterAndOrderItemsByAndItemCards :
     -> GlossaryItemsForUi
     -> ( List ( GlossaryItemId, GlossaryItemForUi ), List ( GlossaryItemId, GlossaryItemForUi ) )
     -> Html Msg
-viewTagFilterAndOrderItemsByAndItemCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpdatedDates, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocus resultOfAttemptingToCopyItemTextToClipboard itemWithFocusCombobox itemWithFocusComboboxInput glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
+viewTagFilterAndOrderItemsByAndItemCards { enableMathSupport, enableOrderItemsButtons, editable, enableLastUpdatedDates, editing } { tags, filterByDescribedTag } queryParameters itemWithFocus resultOfAttemptingToCopyItemTextToClipboard itemWithFocusCombobox itemWithFocusComboboxInput glossaryItemsForUi ( indexedGlossaryItems, otherIndexedGlossaryItems ) =
     let
         totalNumberOfItems : Int
         totalNumberOfItems =
@@ -1917,7 +1916,7 @@ viewTagFilterAndOrderItemsByAndItemCards { enableMathSupport, enableOrderItemsBu
                 , editable = editable
                 , editing = editing
                 }
-                { filterByTagId_ = filterByTagId_, tags = tags, filterByDescribedTag_ = filterByDescribedTag_ }
+                { tags = tags, filterByDescribedTag = filterByDescribedTag }
                 queryParameters
                 itemWithFocusCombobox
                 itemWithFocusComboboxInput
@@ -1929,7 +1928,7 @@ viewTagFilterAndOrderItemsByAndItemCards { enableMathSupport, enableOrderItemsBu
                 enableMathSupport
                 editable
                 enableLastUpdatedDates
-                filterByDescribedTag_
+                filterByDescribedTag
                 itemWithFocus
                 resultOfAttemptingToCopyItemTextToClipboard
                 indexedGlossaryItems
@@ -1945,9 +1944,8 @@ viewTagFilterAndOrderItemsBy :
     , editing : Bool
     }
     ->
-        { filterByTagId_ : Maybe TagId
-        , tags : List Tag
-        , filterByDescribedTag_ : Maybe DescribedTag
+        { tags : List Tag
+        , filterByDescribedTag : Maybe DescribedTag
         }
     -> QueryParameters
     -> Components.Combobox.Model
@@ -1955,7 +1953,7 @@ viewTagFilterAndOrderItemsBy :
     -> GlossaryItemsForUi
     -> Int
     -> List (Html Msg)
-viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, editable, editing } { filterByTagId_, tags, filterByDescribedTag_ } queryParameters itemWithFocusCombobox itemWithFocusComboboxInput glossaryItemsForUi totalNumberOfItems =
+viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, editable, editing } { tags, filterByDescribedTag } queryParameters itemWithFocusCombobox itemWithFocusComboboxInput glossaryItemsForUi totalNumberOfItems =
     let
         orderItemsFocusedOnTerm : Maybe DisambiguatedTerm
         orderItemsFocusedOnTerm =
@@ -1974,8 +1972,8 @@ viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, edita
         [ class "mb-4" ]
         [ Extras.Html.showMaybe
             (viewCurrentTagFilter { enableMathSupport = enableMathSupport })
-            filterByDescribedTag_
-        , Extras.Html.showIf (filterByDescribedTag_ == Nothing) <|
+            filterByDescribedTag
+        , Extras.Html.showIf (filterByDescribedTag == Nothing) <|
             viewAllTagFilters { enableMathSupport = enableMathSupport } tags
         , Extras.Html.showIf editing <|
             div
@@ -1997,7 +1995,7 @@ viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, edita
     , Extras.Html.showIf (editable && totalNumberOfItems > recommendedMaximumNumberOfItems) <|
         I18n.glossaryContainsTooManyItems recommendedMaximumNumberOfItems
     , Extras.Html.showIf
-        (totalNumberOfItems == 0 && filterByTagId_ /= Nothing)
+        (totalNumberOfItems == 0 && filterByDescribedTag /= Nothing)
       <|
         div
             [ class "mt-4" ]
@@ -2006,7 +2004,7 @@ viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, edita
         viewOrderItemsBy
             totalNumberOfItems
             enableMathSupport
-            filterByTagId_
+            (Maybe.map DescribedTag.id filterByDescribedTag)
             itemWithFocusCombobox
             itemWithFocusComboboxInput
             glossaryItemsForUi
@@ -2025,11 +2023,11 @@ viewItemCards :
     -> List ( GlossaryItemId, GlossaryItemForUi )
     -> List ( GlossaryItemId, GlossaryItemForUi )
     -> List (Html Msg)
-viewItemCards enableMathSupport editable enableLastUpdatedDates filterByDescribedTag_ itemWithFocus resultOfAttemptingToCopyItemTextToClipboard indexedGlossaryItems otherIndexedGlossaryItems =
+viewItemCards enableMathSupport editable enableLastUpdatedDates filterByDescribedTag itemWithFocus resultOfAttemptingToCopyItemTextToClipboard indexedGlossaryItems otherIndexedGlossaryItems =
     let
         filterByTag : Maybe Tag
         filterByTag =
-            Maybe.map DescribedTag.tag filterByDescribedTag_
+            Maybe.map DescribedTag.tag filterByDescribedTag
 
         viewIndexedItem : GlossaryItemForUi -> Html Msg
         viewIndexedItem item =
@@ -2997,18 +2995,18 @@ viewOrderItemsButtonsAndItemCards enableMathSupport editability queryParameters 
         glossaryItemsForUi =
             GlossaryForUi.items glossaryForUi
 
-        filterByTagWithDescription_ : Maybe DescribedTag
-        filterByTagWithDescription_ =
-            Maybe.andThen
-                (filterByTagWithDescription glossaryItemsForUi)
-                filterByTagId_
-
         filterByTagId_ : Maybe TagId
         filterByTagId_ =
             queryParameters
                 |> QueryParameters.filterByTag
                 |> Maybe.andThen
                     (\tag -> GlossaryItemsForUi.tagIdFromTag tag glossaryItemsForUi)
+
+        filterByTagWithDescription_ : Maybe DescribedTag
+        filterByTagWithDescription_ =
+            Maybe.andThen
+                (filterByTagWithDescription glossaryItemsForUi)
+                filterByTagId_
     in
     glossaryItemsForUi
         |> (case QueryParameters.orderItemsBy queryParameters of
@@ -3044,9 +3042,8 @@ viewOrderItemsButtonsAndItemCards enableMathSupport editability queryParameters 
             , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
             , editing = Editability.editing editability
             }
-            { filterByTagId_ = filterByTagId_
-            , tags = GlossaryItemsForUi.tags glossaryItemsForUi
-            , filterByDescribedTag_ = filterByTagWithDescription_
+            { tags = GlossaryItemsForUi.tags glossaryItemsForUi
+            , filterByDescribedTag = filterByTagWithDescription_
             }
             queryParameters
             itemWithFocus
