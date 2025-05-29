@@ -1,7 +1,7 @@
 module Data.GlossaryItemIdDict exposing
     ( GlossaryItemIdDict
     , empty, insert
-    , get
+    , isEmpty, get
     , keys, toList
     , map, foldl
     )
@@ -21,7 +21,7 @@ module Data.GlossaryItemIdDict exposing
 
 # Query
 
-@docs get
+@docs isEmpty, get
 
 
 # Lists
@@ -50,6 +50,13 @@ type GlossaryItemIdDict a
 empty : GlossaryItemIdDict a
 empty =
     GlossaryItemIdDict Dict.empty
+
+
+{-| Check if a dictionary is empty.
+-}
+isEmpty : GlossaryItemIdDict a -> Bool
+isEmpty (GlossaryItemIdDict dict) =
+    Dict.isEmpty dict
 
 
 {-| Insert a key-value pair into a dictionary. Replaces value when there is a collision.
