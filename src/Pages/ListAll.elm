@@ -84,6 +84,7 @@ import Html.Keyed
 import Html.Lazy
 import Http
 import Icons
+import IncubatingFeatures exposing (showIncubatingFeatures)
 import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
 import Process
@@ -3323,7 +3324,12 @@ view model =
                              else
                                 Nothing
                             )
-                        , div
+                        , let
+                            enableScalableLayout : Bool
+                            enableScalableLayout =
+                                GlossaryForUi.enableScalableLayout glossaryForUi
+                          in
+                          div
                             [ Html.Attributes.id ElementIds.container
                             , class "relative"
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
@@ -3372,45 +3378,50 @@ view model =
                                         , enableMathSupport = model.common.enableMathSupport
                                         }
                                 ]
-                            , header
-                                [ class "mt-0" ]
-                                [ h1
-                                    [ id ElementIds.title ]
-                                    [ filterByTagWithDescription_
-                                        |> Maybe.map
-                                            (DescribedTag.tag
-                                                >> Tag.view
-                                                    model.common.enableMathSupport
-                                                    [ class "text-3xl font-bold leading-tight" ]
-                                            )
-                                        |> Maybe.withDefault
-                                            (glossaryForUi
-                                                |> GlossaryForUi.title
-                                                |> GlossaryTitle.view model.common.enableMathSupport [ class "text-3xl font-bold leading-tight" ]
-                                            )
-                                    ]
-                                , Extras.Html.showIf (filterByTagWithDescription_ /= Nothing) <|
-                                    h2
-                                        [ class "mt-2 font-bold leading-tight" ]
-                                        [ glossaryForUi |> GlossaryForUi.title |> GlossaryTitle.view model.common.enableMathSupport [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
+                            , Extras.Html.showUnless enableScalableLayout <|
+                                header
+                                    [ class "mt-0" ]
+                                    [ h1
+                                        [ id ElementIds.title ]
+                                        [ filterByTagWithDescription_
+                                            |> Maybe.map
+                                                (DescribedTag.tag
+                                                    >> Tag.view
+                                                        model.common.enableMathSupport
+                                                        [ class "text-3xl font-bold leading-tight" ]
+                                                )
+                                            |> Maybe.withDefault
+                                                (glossaryForUi
+                                                    |> GlossaryForUi.title
+                                                    |> GlossaryTitle.view model.common.enableMathSupport [ class "text-3xl font-bold leading-tight" ]
+                                                )
                                         ]
-                                ]
-                            , viewMain
-                                filterByTagWithDescription_
-                                { enableMathSupport = model.common.enableMathSupport
-                                , noModalDialogShown_ = noModalDialogShown_
-                                }
-                                model.common.editability
-                                model.common.queryParameters
-                                model.itemWithFocus
-                                model.itemSearchDialog
-                                model.confirmDeleteId
-                                model.layout
-                                model.deleting
-                                model.resultOfAttemptingToCopyItemTextToClipboard
-                                model.itemWithFocusCombobox
-                                model.itemWithFocusComboboxInput
-                                glossaryForUi
+                                    , Extras.Html.showIf (filterByTagWithDescription_ /= Nothing) <|
+                                        h2
+                                            [ class "mt-2 font-bold leading-tight" ]
+                                            [ glossaryForUi |> GlossaryForUi.title |> GlossaryTitle.view model.common.enableMathSupport [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
+                                            ]
+                                    ]
+                            , if enableScalableLayout then
+                                text "Scalable layout"
+
+                              else
+                                viewMain
+                                    filterByTagWithDescription_
+                                    { enableMathSupport = model.common.enableMathSupport
+                                    , noModalDialogShown_ = noModalDialogShown_
+                                    }
+                                    model.common.editability
+                                    model.common.queryParameters
+                                    model.itemWithFocus
+                                    model.itemSearchDialog
+                                    model.confirmDeleteId
+                                    model.layout
+                                    model.deleting
+                                    model.resultOfAttemptingToCopyItemTextToClipboard
+                                    model.itemWithFocusCombobox
+                                    model.itemWithFocusComboboxInput
+                                    glossaryForUi
                             , Html.footer
                                 []
                                 [ div
