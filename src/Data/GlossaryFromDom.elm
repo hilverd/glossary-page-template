@@ -766,6 +766,7 @@ toHtmlTree glossaryFromDom =
         , HtmlTree.boolAttribute "data-enable-help-for-making-changes" glossaryFromDom.enableHelpForMakingChanges
         , HtmlTree.boolAttribute "data-enable-export-menu" glossaryFromDom.enableExportMenu
         , HtmlTree.boolAttribute "data-enable-order-items-buttons" glossaryFromDom.enableOrderItemsButtons
+        , HtmlTree.showAttributeMaybe "data-starting-item" .body glossaryFromDom.startingItem
         , HtmlTree.boolAttribute "data-enable-last-updated-dates" glossaryFromDom.enableLastUpdatedDates
         , CardWidth.toHtmlTreeAttribute glossaryFromDom.cardWidth
         , Theme.toHtmlTreeAttribute glossaryFromDom.defaultTheme
