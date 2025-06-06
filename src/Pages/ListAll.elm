@@ -130,6 +130,8 @@ type alias Model =
     , indexFilterString : String
     , itemSearchDialog : ItemSearchDialog
     , layout : Layout
+    , startingItemCombobox : Components.Combobox.Model
+    , startingItemComboboxInput : String
     , itemWithFocus : Maybe GlossaryItemId
     , itemWithFocusCombobox : Components.Combobox.Model
     , itemWithFocusComboboxInput : String
@@ -166,6 +168,9 @@ type InternalMsg
     | CopyItemTextToClipboard GlossaryItemId
     | ShowRelatedTermAsSingle Term
     | ChangeLayoutToShowAll
+    | StartingItemComboboxMsg Components.Combobox.Msg
+    | UpdateStartingItemComboboxInput Bool String
+    | ChangeStartingItem DisambiguatedTerm
     | ItemWithFocusComboboxMsg Components.Combobox.Msg
     | UpdateItemWithFocusComboboxInput Bool String
     | ConfirmDelete GlossaryItemId
@@ -220,11 +225,30 @@ init commonModel itemWithFocus notifications notification =
 
                 Nothing ->
                     ( notifications0, Cmd.none )
+
+        startingItemComboboxInput : String
+        startingItemComboboxInput =
+            commonModel.glossaryForUi
+                |> Result.toMaybe
+                |> Maybe.map (\glossaryForUi -> GlossaryForUi.items glossaryForUi)
+                |> Maybe.andThen
+                    (\items ->
+                        GlossaryItemsForUi.startingItem items
+                    )
+                |> Maybe.map
+                    (GlossaryItemForUi.disambiguatedPreferredTerm
+                        >> DisambiguatedTerm.toTerm
+                        >> Term.raw
+                        >> RawTerm.toString
+                    )
+                |> Maybe.withDefault ""
     in
     ( { common = commonModel
       , menuForMobileVisibility = GradualVisibility.Invisible
       , backToTopLinkVisibility = Invisible 0
       , layout = ShowAllItems
+      , startingItemCombobox = Components.Combobox.init
+      , startingItemComboboxInput = startingItemComboboxInput
       , itemWithFocus = itemWithFocus
       , itemWithFocusCombobox = Components.Combobox.init
       , itemWithFocusComboboxInput =
@@ -321,6 +345,11 @@ maximumNumberOfResultsForItemSearchDialog =
 
 maximumNumberOfResultsForItemWithFocusCombobox : Int
 maximumNumberOfResultsForItemWithFocusCombobox =
+    10
+
+
+maximumNumberOfResultsForStartingItemCombobox : Int
+maximumNumberOfResultsForStartingItemCombobox =
     10
 
 
@@ -640,6 +669,82 @@ update msg model =
                     |> Maybe.withDefault Cmd.none
                 ]
             )
+
+        StartingItemComboboxMsg msg_ ->
+            Components.Combobox.update
+                (\x -> { model | startingItemCombobox = x })
+                (PageMsg.Internal << StartingItemComboboxMsg)
+                msg_
+                model.startingItemCombobox
+
+        UpdateStartingItemComboboxInput hideChoices input ->
+            ( { model
+                | startingItemComboboxInput = input
+                , startingItemCombobox =
+                    if hideChoices then
+                        Components.Combobox.hideChoices model.startingItemCombobox
+
+                    else
+                        Components.Combobox.showChoices model.startingItemCombobox
+              }
+            , Cmd.none
+            )
+
+        ChangeStartingItem disambiguatedPreferredTerm ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
+                    let
+                        glossaryChange : GlossaryChange
+                        glossaryChange =
+                            disambiguatedPreferredTerm
+                                |> DisambiguatedTerm.toTerm
+                                |> Term.toTermFromDom
+                                |> GlossaryChange.SetStartingItem
+
+                        glossaryChangeWithChecksum : GlossaryChangeWithChecksum
+                        glossaryChangeWithChecksum =
+                            { glossaryChange = glossaryChange
+                            , checksum = GlossaryForUi.checksumForChange glossaryForUi glossaryChange
+                            }
+
+                        changelist : GlossaryChangelist
+                        changelist =
+                            GlossaryChangelist.create
+                                (GlossaryForUi.versionNumber glossaryForUi)
+                                [ glossaryChangeWithChecksum ]
+
+                        ( saving, cmd ) =
+                            Save.changeAndSave model.common.editability
+                                glossaryForUi
+                                changelist
+                                (PageMsg.Internal << FailedToChangeSettings)
+                                (\( itemWithFocus, updatedGlossaryForUi ) ->
+                                    let
+                                        common0 : CommonModel
+                                        common0 =
+                                            model.common
+                                    in
+                                    PageMsg.NavigateToListAll
+                                        { common0 | glossaryForUi = Ok updatedGlossaryForUi }
+                                        itemWithFocus
+                                        (Just yourChangesHaveBeenSavedNotification)
+                                )
+                    in
+                    ( { model
+                        | confirmDeleteId = Nothing
+                        , deleting = NotCurrentlySaving
+                        , savingSettings = saving
+                        , startingItemComboboxInput =
+                            disambiguatedPreferredTerm
+                                |> DisambiguatedTerm.toTerm
+                                |> Term.raw
+                                |> RawTerm.toString
+                      }
+                    , cmd
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
 
         ItemWithFocusComboboxMsg msg_ ->
             Components.Combobox.update
@@ -1334,8 +1439,8 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
         ]
 
 
-viewSettings : GlossaryForUi -> Editability -> Saving -> { tabbable : Bool, enableMathSupport : Bool } -> Html Msg
-viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupport } =
+viewSettings : GlossaryForUi -> Editability -> Saving -> { tabbable : Bool, enableMathSupport : Bool } -> Components.Combobox.Model -> String -> Html Msg
+viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupport } startingItemCombobox startingItemComboboxInput =
     let
         enableScalableLayout : Bool
         enableScalableLayout =
@@ -1383,7 +1488,14 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
                         ]
                 , Extras.Html.showIf (editability == EditingWithIncludedBackend) <|
                     viewSelectInputSyntax enableMathSupport
-                , viewSelectCardWidth glossaryForUi tabbable
+                , Extras.Html.showIf showIncubatingFeatures <|
+                    viewSelectStartingItem
+                        enableMathSupport
+                        (GlossaryForUi.items glossaryForUi)
+                        startingItemCombobox
+                        startingItemComboboxInput
+                , Extras.Html.showUnless showIncubatingFeatures <|
+                    viewSelectCardWidth glossaryForUi tabbable
                 , viewSelectDefaultTheme glossaryForUi tabbable
                 , Components.Button.toggle
                     (GlossaryForUi.enableExportMenu glossaryForUi)
@@ -1393,14 +1505,15 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
                         [ class "font-medium text-gray-900 dark:text-gray-300" ]
                         [ text I18n.showExportMenu ]
                     ]
-                , Components.Button.toggle
-                    (GlossaryForUi.enableOrderItemsButtons glossaryForUi)
-                    ElementIds.showOrderItemsButtons
-                    [ Html.Events.onClick <| PageMsg.Internal ToggleEnableOrderItemsButtons ]
-                    [ span
-                        [ class "font-medium text-gray-900 dark:text-gray-300" ]
-                        [ text I18n.showOrderItemsButtons ]
-                    ]
+                , Extras.Html.showUnless showIncubatingFeatures <|
+                    Components.Button.toggle
+                        (GlossaryForUi.enableOrderItemsButtons glossaryForUi)
+                        ElementIds.showOrderItemsButtons
+                        [ Html.Events.onClick <| PageMsg.Internal ToggleEnableOrderItemsButtons ]
+                        [ span
+                            [ class "font-medium text-gray-900 dark:text-gray-300" ]
+                            [ text I18n.showOrderItemsButtons ]
+                        ]
                 , Components.Button.toggle
                     (GlossaryForUi.enableLastUpdatedDates glossaryForUi)
                     ElementIds.showLastUpdatedDatesLabel
@@ -1419,6 +1532,73 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
                     _ ->
                         Extras.Html.nothing
                 ]
+            ]
+        ]
+
+
+viewSelectStartingItem :
+    Bool
+    -> GlossaryItemsForUi
+    -> Components.Combobox.Model
+    -> String
+    -> Html Msg
+viewSelectStartingItem enableMathSupport glossaryItemsForUi startingItemCombobox startingItemComboboxInput =
+    let
+        comboboxChoices : { totalNumberOfResults : Int, results : List (Components.Combobox.Choice DisambiguatedTerm (PageMsg InternalMsg)) }
+        comboboxChoices =
+            Search.resultsForItems
+                Nothing
+                (always True)
+                maximumNumberOfResultsForItemWithFocusCombobox
+                startingItemComboboxInput
+                glossaryItemsForUi
+                |> (\{ totalNumberOfResults, results } ->
+                        { totalNumberOfResults = totalNumberOfResults
+                        , results =
+                            results
+                                |> List.map
+                                    (\({ disambiguatedPreferredTerm } as result) ->
+                                        Components.Combobox.choice
+                                            disambiguatedPreferredTerm
+                                            (\additionalAttributes ->
+                                                Search.viewItemSearchResult
+                                                    enableMathSupport
+                                                    additionalAttributes
+                                                    result
+                                            )
+                                    )
+                        }
+                   )
+    in
+    div
+        []
+        [ fieldset []
+            [ legend
+                [ class "mb-4 font-medium text-gray-900 dark:text-gray-100" ]
+                [ text I18n.startingItem ]
+            , Components.Combobox.view
+                (PageMsg.Internal << StartingItemComboboxMsg)
+                startingItemCombobox
+                [ Components.Combobox.id ElementIds.startingItemCombobox
+                , Components.Combobox.onSelect (PageMsg.Internal << ChangeStartingItem)
+                , Components.Combobox.onInput (PageMsg.Internal << UpdateStartingItemComboboxInput False)
+                , Components.Combobox.onBlur
+                    (PageMsg.Internal <|
+                        UpdateStartingItemComboboxInput True startingItemComboboxInput
+                    )
+                ]
+                Nothing
+                comboboxChoices.results
+                (if comboboxChoices.totalNumberOfResults > maximumNumberOfResultsForStartingItemCombobox then
+                    Just <| I18n.showingXOfYMatches (String.fromInt maximumNumberOfResultsForStartingItemCombobox) (String.fromInt comboboxChoices.totalNumberOfResults)
+
+                 else if startingItemComboboxInput /= "" && comboboxChoices.totalNumberOfResults == 0 then
+                    Just I18n.noMatchesFound
+
+                 else
+                    Nothing
+                )
+                startingItemComboboxInput
             ]
         ]
 
@@ -3375,12 +3555,15 @@ view model =
                                 [ viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
                                     |> Extras.Html.showIf (model.common.editability == ReadOnlyWithHelpForMakingChanges)
                                 , Extras.Html.showIf (Editability.editing model.common.editability) <|
-                                    viewSettings glossaryForUi
+                                    viewSettings
+                                        glossaryForUi
                                         model.common.editability
                                         model.savingSettings
                                         { tabbable = noModalDialogShown model
                                         , enableMathSupport = model.common.enableMathSupport
                                         }
+                                        model.startingItemCombobox
+                                        model.startingItemComboboxInput
                                 ]
                             , Extras.Html.showUnless enableScalableLayout <|
                                 header
@@ -3461,6 +3644,9 @@ subscriptions model =
         , attemptedToCopyEditorCommandToClipboard (AttemptedToCopyEditorCommandToClipboard >> PageMsg.Internal)
         , attemptedToCopyItemTextToClipboard (AttemptedToCopyItemTextToClipboard >> PageMsg.Internal)
         , scrollingUpWhileFarAwayFromTheTop (always <| PageMsg.Internal ScrollingUpWhileFarAwayFromTheTop)
+        , model.startingItemCombobox
+            |> Components.Combobox.subscriptions
+            |> Sub.map (StartingItemComboboxMsg >> PageMsg.Internal)
         , model.itemWithFocusCombobox
             |> Components.Combobox.subscriptions
             |> Sub.map (ItemWithFocusComboboxMsg >> PageMsg.Internal)

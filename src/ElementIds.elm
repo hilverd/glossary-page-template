@@ -49,6 +49,7 @@ module ElementIds exposing
     , showExportMenuLabel
     , showLastUpdatedDatesLabel
     , showOrderItemsButtons
+    , startingItemCombobox
     , staticSidebarForDesktop
     , tagDescriptionInputField
     , tagInputField
@@ -162,6 +163,11 @@ orderItemsFocusedOn =
 orderItemsFocusedOnCombobox : String
 orderItemsFocusedOnCombobox =
     prefixed "order-items-focused-on-combobox"
+
+
+startingItemCombobox : String
+startingItemCombobox =
+    prefixed "starting-item-combobox"
 
 
 confirmDeleteModalTitle : String

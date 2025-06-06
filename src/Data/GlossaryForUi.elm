@@ -47,7 +47,7 @@ import Data.GlossaryFromDom exposing (GlossaryFromDom)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
-import Data.GlossaryItem.TermFromDom exposing (TermFromDom)
+import Data.GlossaryItem.TermFromDom as TermFromDom exposing (TermFromDom)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemFromDom as GlossaryItemFromDom
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
@@ -289,6 +289,16 @@ checksumForChange glossaryForUi glossaryChange =
             glossaryForUi
                 |> enableOrderItemsButtons
                 |> checkSumUsingCodec Codec.bool
+
+        GlossaryChange.SetStartingItem _ ->
+            glossaryForUi
+                |> items
+                |> GlossaryItemsForUi.startingItem
+                |> Maybe.map GlossaryItemForUi.disambiguatedPreferredTerm
+                |> Maybe.map DisambiguatedTerm.toTerm
+                |> Maybe.map Term.toTermFromDom
+                |> Maybe.map (checkSumUsingCodec TermFromDom.codec)
+                |> Maybe.withDefault (Checksum.create "")
 
         GlossaryChange.SetTitle _ ->
             glossaryForUi

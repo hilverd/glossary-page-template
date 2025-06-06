@@ -163,6 +163,12 @@ checksumForChange glossaryFromDom glossaryChange =
                 |> .enableOrderItemsButtons
                 |> checkSumUsingCodec Codec.bool
 
+        SetStartingItem _ ->
+            glossaryFromDom
+                |> .startingItem
+                |> Maybe.map (checkSumUsingCodec TermFromDom.codec)
+                |> Maybe.withDefault (Checksum.create "")
+
         SetTitle _ ->
             glossaryFromDom
                 |> .title
@@ -219,6 +225,14 @@ checksumForChange glossaryFromDom glossaryChange =
 
         _ ->
             Checksum.create ""
+
+
+setStartingItem : TermFromDom -> GlossaryFromDom -> ApplyChangesResult
+setStartingItem termFromDom glossaryFromDom =
+    ChangesApplied
+        ( Nothing
+        , { glossaryFromDom | startingItem = Just termFromDom }
+        )
 
 
 checkSumUsingCodec : Codec a -> a -> Checksum
@@ -712,6 +726,9 @@ applyChange change glossaryFromDom =
 
         ToggleEnableOrderItemsButtons ->
             ChangesApplied ( Nothing, { glossaryFromDom | enableOrderItemsButtons = not glossaryFromDom.enableOrderItemsButtons } )
+
+        SetStartingItem termFromDom ->
+            setStartingItem termFromDom glossaryFromDom
 
         SetTitle title_ ->
             ChangesApplied ( Nothing, { glossaryFromDom | title = GlossaryTitle.raw title_ } )

@@ -1,5 +1,6 @@
 module Search exposing (resultsForItems, viewItemSearchResult)
 
+import Components.SearchDialog exposing (SearchResult)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.RawTerm as RawTerm
@@ -33,12 +34,7 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
 
     else
         let
-            candidates :
-                List
-                    { disambiguatedPreferredTerm : DisambiguatedTerm
-                    , alternativeTerm : Maybe Term
-                    , definition : Maybe Definition
-                    }
+            candidates : List ItemSearchResult
             candidates =
                 glossaryItemsForUi
                     |> GlossaryItemsForUi.orderedAlphabetically filterByTagId

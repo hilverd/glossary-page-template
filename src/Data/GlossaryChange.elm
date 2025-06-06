@@ -12,6 +12,7 @@ module Data.GlossaryChange exposing (GlossaryChange(..), codec, setLastUpdatedBy
 import Codec exposing (Codec)
 import Data.AboutSection as AboutSection exposing (AboutSection)
 import Data.CardWidth as CardWidth exposing (CardWidth)
+import Data.GlossaryItem.TermFromDom as TermFromDom exposing (TermFromDom)
 import Data.GlossaryItemFromDom as GlossaryItemFromDom exposing (GlossaryItemFromDom)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
@@ -25,6 +26,7 @@ type GlossaryChange
     = ToggleEnableLastUpdatedDates
     | ToggleEnableExportMenu
     | ToggleEnableOrderItemsButtons
+    | SetStartingItem TermFromDom
     | SetTitle GlossaryTitle
     | SetAboutSection AboutSection
     | SetCardWidth CardWidth
@@ -40,7 +42,7 @@ type GlossaryChange
 codec : Codec GlossaryChange
 codec =
     Codec.custom
-        (\toggleEnableLastUpdatedDates toggleEnableExportMenu toggleEnableOrderItemsButtons setTitle setAboutSection setCardWidth setDefaultTheme changeTags insert update remove value ->
+        (\toggleEnableLastUpdatedDates toggleEnableExportMenu toggleEnableOrderItemsButtons setStartingItem setTitle setAboutSection setCardWidth setDefaultTheme changeTags insert update remove value ->
             case value of
                 ToggleEnableLastUpdatedDates ->
                     toggleEnableLastUpdatedDates
@@ -50,6 +52,9 @@ codec =
 
                 ToggleEnableOrderItemsButtons ->
                     toggleEnableOrderItemsButtons
+
+                SetStartingItem itemId ->
+                    setStartingItem itemId
 
                 SetTitle title ->
                     setTitle title
@@ -78,6 +83,7 @@ codec =
         |> Codec.variant0 "ToggleEnableLastUpdatedDates" ToggleEnableLastUpdatedDates
         |> Codec.variant0 "ToggleEnableExportMenu" ToggleEnableExportMenu
         |> Codec.variant0 "ToggleEnableOrderItemsButtons" ToggleEnableOrderItemsButtons
+        |> Codec.variant1 "SetStartingItem" SetStartingItem TermFromDom.codec
         |> Codec.variant1 "SetTitle" SetTitle GlossaryTitle.codec
         |> Codec.variant1 "SetAboutSection" SetAboutSection AboutSection.codec
         |> Codec.variant1 "SetCardWidth" SetCardWidth CardWidth.codec
