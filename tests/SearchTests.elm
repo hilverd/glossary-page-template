@@ -65,7 +65,7 @@ loadedGlossaryItemsForUi =
                 Nothing
     in
     [ one, two, three ]
-        |> GlossaryItemsForUi.fromList []
+        |> GlossaryItemsForUi.fromList [] Nothing
         |> Result.withDefault GlossaryItemsForUi.empty
 
 

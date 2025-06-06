@@ -446,6 +446,7 @@ glossaryFromDom =
     { enableLastUpdatedDates = True
     , enableExportMenu = True
     , enableOrderItemsButtons = True
+    , startingItem = Nothing
     , enableHelpForMakingChanges = False
     , cardWidth = CardWidth.Intermediate
     , title = "Example Glossary"
@@ -474,6 +475,7 @@ glossaryForUi =
         True
         True
         True
+        Nothing
         False
         CardWidth.Intermediate
         Theme.System

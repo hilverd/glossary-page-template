@@ -44,10 +44,13 @@ import Data.Checksum as Checksum exposing (Checksum)
 import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
 import Data.GlossaryFromDom exposing (GlossaryFromDom)
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag
+import Data.GlossaryItem.Term as Term
+import Data.GlossaryItem.TermFromDom exposing (TermFromDom)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemFromDom as GlossaryItemFromDom
-import Data.GlossaryItemId as GlossaryItemId
+import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVersionNumber)
@@ -162,6 +165,13 @@ fromGlossaryFromDom glossaryFromDom =
         glossaryFromDom.enableLastUpdatedDates
         glossaryFromDom.enableExportMenu
         glossaryFromDom.enableOrderItemsButtons
+        (glossaryFromDom.startingItem
+            |> Maybe.map
+                (\startingItem_ ->
+                    Term.fromMarkdown startingItem_.body False
+                        |> DisambiguatedTerm.fromTerm
+                )
+        )
         glossaryFromDom.enableHelpForMakingChanges
         glossaryFromDom.cardWidth
         glossaryFromDom.defaultTheme
@@ -190,6 +200,7 @@ create :
     Bool
     -> Bool
     -> Bool
+    -> Maybe DisambiguatedTerm
     -> Bool
     -> CardWidth
     -> Theme
@@ -200,11 +211,12 @@ create :
     -> List GlossaryItemForUi
     -> GlossaryVersionNumber
     -> GlossaryForUi
-create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ defaultTheme_ title_ aboutParagraph aboutLinks describedTags itemsForHtml versionNumber_ =
+create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ disambiguatedPreferredTermForStartingItem_ enableHelpForMakingChanges_ cardWidth_ defaultTheme_ title_ aboutParagraph aboutLinks describedTags itemsForHtml versionNumber_ =
     createWithDefaults
         (Just enableLastUpdatedDates_)
         (Just enableExportMenu_)
         (Just enableOrderItemsButtons_)
+        disambiguatedPreferredTermForStartingItem_
         (Just enableHelpForMakingChanges_)
         (Just cardWidth_)
         (Just defaultTheme_)
@@ -220,6 +232,7 @@ createWithDefaults :
     Maybe Bool
     -> Maybe Bool
     -> Maybe Bool
+    -> Maybe DisambiguatedTerm
     -> Maybe Bool
     -> Maybe CardWidth
     -> Maybe Theme
@@ -230,7 +243,7 @@ createWithDefaults :
     -> List GlossaryItemForUi
     -> Maybe GlossaryVersionNumber
     -> GlossaryForUi
-createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ defaultTheme_ title_ aboutParagraph aboutLinks describedTags itemsForHtml versionNumber_ =
+createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ disambiguatedPreferredTermForStartingItem enableHelpForMakingChanges_ cardWidth_ defaultTheme_ title_ aboutParagraph aboutLinks describedTags itemsForHtml versionNumber_ =
     let
         aboutSection_ : AboutSection
         aboutSection_ =
@@ -240,7 +253,7 @@ createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsBut
 
         items_ : Result String GlossaryItemsForUi
         items_ =
-            GlossaryItemsForUi.fromList (Maybe.withDefault [] describedTags) itemsForHtml
+            GlossaryItemsForUi.fromList (Maybe.withDefault [] describedTags) disambiguatedPreferredTermForStartingItem itemsForHtml
     in
     GlossaryForUi
         { enableLastUpdatedDates = Maybe.withDefault False enableLastUpdatedDates_
@@ -338,6 +351,12 @@ toGlossaryFromDom (GlossaryForUi glossaryForUi) =
     { enableLastUpdatedDates = glossaryForUi.enableLastUpdatedDates
     , enableExportMenu = glossaryForUi.enableExportMenu
     , enableOrderItemsButtons = glossaryForUi.enableOrderItemsButtons
+    , startingItem =
+        glossaryForUi.items
+            |> GlossaryItemsForUi.startingItem
+            |> Maybe.map GlossaryItemForUi.disambiguatedPreferredTerm
+            |> Maybe.map DisambiguatedTerm.toTerm
+            |> Maybe.map Term.toTermFromDom
     , enableHelpForMakingChanges = glossaryForUi.enableHelpForMakingChanges
     , cardWidth = glossaryForUi.cardWidth
     , defaultTheme = glossaryForUi.defaultTheme

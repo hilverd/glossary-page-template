@@ -1,6 +1,6 @@
 module Data.GlossaryItem.TermFromDom exposing
     ( TermFromDom
-    , create, codec, id
+    , create, codec, bodyOnlyCodec, id
     )
 
 {-| A glossary term as sent to Elm by JavaScript when read from the DOM.
@@ -10,7 +10,7 @@ module Data.GlossaryItem.TermFromDom exposing
 
 # Terms from the DOM
 
-@docs create, codec, id
+@docs create, codec, bodyOnlyCodec, id
 
 -}
 
@@ -50,3 +50,10 @@ codec =
         |> Codec.field "isAbbreviation" .isAbbreviation Codec.bool
         |> Codec.field "body" .body Codec.string
         |> Codec.buildObject
+
+
+{-| A codec that only encodes/decodes the body of a term, ignoring the abbreviation status.
+-}
+bodyOnlyCodec : Codec TermFromDom
+bodyOnlyCodec =
+    Codec.map (create False) .body Codec.string

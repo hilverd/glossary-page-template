@@ -41,6 +41,7 @@ import Data.DescribedTag as DescribedTag
 import Data.DescribedTagFromDom as DescribedTagFromDom exposing (DescribedTagFromDom)
 import Data.GlossaryChange exposing (GlossaryChange(..))
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
+import Data.GlossaryItem.DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.TermFromDom as TermFromDom exposing (TermFromDom)
 import Data.GlossaryItemFromDom as GlossaryItemFromDom exposing (GlossaryItemFromDom)
@@ -66,6 +67,7 @@ type alias GlossaryFromDom =
     { enableLastUpdatedDates : Bool
     , enableExportMenu : Bool
     , enableOrderItemsButtons : Bool
+    , startingItem : Maybe TermFromDom
     , enableHelpForMakingChanges : Bool
     , cardWidth : CardWidth
     , defaultTheme : Theme
@@ -82,6 +84,7 @@ create :
     Bool
     -> Bool
     -> Bool
+    -> Maybe TermFromDom
     -> Bool
     -> CardWidth
     -> Theme
@@ -92,10 +95,11 @@ create :
     -> List GlossaryItemFromDom
     -> Int
     -> GlossaryFromDom
-create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ enableHelpForMakingChanges_ cardWidth_ defaultTheme_ title_ aboutParagraph_ aboutLinks_ tags_ items_ versionNumber_ =
+create enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsButtons_ termFromDom_ enableHelpForMakingChanges_ cardWidth_ defaultTheme_ title_ aboutParagraph_ aboutLinks_ tags_ items_ versionNumber_ =
     { enableLastUpdatedDates = enableLastUpdatedDates_
     , enableExportMenu = enableExportMenu_
     , enableOrderItemsButtons = enableOrderItemsButtons_
+    , startingItem = termFromDom_
     , enableHelpForMakingChanges = enableHelpForMakingChanges_
     , cardWidth = cardWidth_
     , defaultTheme = defaultTheme_
@@ -126,6 +130,7 @@ codec =
         |> Codec.field "enableLastUpdatedDates" .enableLastUpdatedDates Codec.bool
         |> Codec.field "enableExportMenu" .enableExportMenu Codec.bool
         |> Codec.field "enableOrderItemsButtons" .enableOrderItemsButtons Codec.bool
+        |> Codec.field "startingItem" .startingItem (Codec.maybe TermFromDom.bodyOnlyCodec)
         |> Codec.field "enableHelpForMakingChanges" .enableHelpForMakingChanges Codec.bool
         |> Codec.field "cardWidth" .cardWidth CardWidth.codec
         |> Codec.field "defaultTheme" .defaultTheme Theme.codec

@@ -1337,6 +1337,10 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
 viewSettings : GlossaryForUi -> Editability -> Saving -> { tabbable : Bool, enableMathSupport : Bool } -> Html Msg
 viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupport } =
     let
+        enableScalableLayout : Bool
+        enableScalableLayout =
+            GlossaryForUi.enableScalableLayout glossaryForUi
+
         errorDiv : String -> Html msg
         errorDiv message =
             div

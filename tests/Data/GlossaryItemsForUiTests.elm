@@ -295,6 +295,7 @@ suite =
                             [ computerScienceDescribedTag
                             , financeDescribedTag
                             ]
+                            Nothing
                             [ defaultComputerScienceItem_
                             , defaultFinanceItem_
                             ]
@@ -375,6 +376,7 @@ suite =
                     , gardeningDescribedTag
                     , computerScienceDescribedTag
                     ]
+                    Nothing
                     [ GlossaryItemForUi.create
                         (GlossaryItemForUi.id defaultComputerScienceItem)
                         (Term.fromMarkdown "Foo" False)
@@ -413,6 +415,7 @@ suite =
                     , gardeningDescribedTag
                     , computerScienceDescribedTag
                     ]
+                    Nothing
                     []
                     |> Result.map GlossaryItemsForUi.tags
                     |> Expect.equal (Ok [ computerScienceTag, financeTag, gardeningTag, houseworkTag ])
@@ -424,6 +427,7 @@ suite =
                     , gardeningDescribedTag
                     , computerScienceDescribedTag
                     ]
+                    Nothing
                     []
                     |> Result.map GlossaryItemsForUi.describedTags
                     |> Expect.equal
@@ -443,6 +447,7 @@ suite =
                         financeTag
                         financeTagDescription
                     ]
+                    Nothing
                     []
                     |> Expect.equal
                         (Err "tag \"Finance\" appears multiple times")
@@ -451,6 +456,7 @@ suite =
                 -- TODO: is this test essentially the same as the one below?
                 GlossaryItemsForUi.fromList
                     [ financeDescribedTag ]
+                    Nothing
                     [ GlossaryItemForUi.create
                         (GlossaryItemId.create "Foo (Finance) 1")
                         (Term.fromMarkdown "Foo" False)
@@ -482,6 +488,7 @@ suite =
             \_ ->
                 GlossaryItemsForUi.fromList
                     [ financeDescribedTag ]
+                    Nothing
                     [ GlossaryItemForUi.create
                         (GlossaryItemId.create "Foo (Finance)")
                         (Term.fromMarkdown "Foo" False)

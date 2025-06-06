@@ -42,7 +42,7 @@ glossaryItems =
     , glossaryItemForUi "Ω"
     , glossaryItemForUi "_future_"
     ]
-        |> GlossaryItemsForUi.fromList []
+        |> GlossaryItemsForUi.fromList [] Nothing
         |> Result.withDefault GlossaryItemsForUi.empty
 
 
@@ -98,7 +98,7 @@ suite =
         , test "doesn't include 0–9 and ellipsis if not needed" <|
             \_ ->
                 []
-                    |> GlossaryItemsForUi.fromList []
+                    |> GlossaryItemsForUi.fromList [] Nothing
                     |> Result.map (IndexOfTerms.fromGlossaryItems Nothing)
                     |> Result.map IndexOfTerms.termGroups
                     |> Expect.equal

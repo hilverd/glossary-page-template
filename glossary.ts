@@ -36,6 +36,7 @@ if (containerElement) {
         containerDataset.enableExportMenu !== "false";
     const enableOrderItemsButtons: boolean =
         containerDataset.enableOrderItemsButtons !== "false";
+    const startingItem: string | null = containerDataset.startingItem || null;
     const cardWidth: string = containerDataset.cardWidth || "compact";
     const defaultTheme: string = containerDataset.defaultTheme || "system";
     const enableLastUpdatedDates: boolean =
@@ -265,6 +266,7 @@ if (containerElement) {
             enableSavingChangesInMemory: enableSavingChangesInMemory,
             enableExportMenu: enableExportMenu,
             enableOrderItemsButtons: enableOrderItemsButtons,
+            startingItem: startingItem,
             enableLastUpdatedDates: enableLastUpdatedDates,
             versionNumber: versionNumber || 0,
             separateBackendBaseUrl: separateBackendBaseUrl,

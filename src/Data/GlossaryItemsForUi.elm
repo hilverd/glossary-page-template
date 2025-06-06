@@ -1,7 +1,7 @@
 module Data.GlossaryItemsForUi exposing
     ( GlossaryItemsForUi
     , empty, fromList
-    , isEmpty, get, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
+    , isEmpty, get, startingItem, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
 
@@ -20,7 +20,7 @@ module Data.GlossaryItemsForUi exposing
 
 # Query
 
-@docs isEmpty, get, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
+@docs isEmpty, get, startingItem, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
 
 
 # Export
@@ -61,6 +61,7 @@ type GlossaryItemsForUi
     = GlossaryItemsForUi
         { tags : GlossaryTags
         , itemById : GlossaryItemIdDict GlossaryItem
+        , startingItemId : Maybe GlossaryItemId
         , disambiguationTagIdByItemId : GlossaryItemIdDict (Maybe TagId)
         , normalTagIdsByItemId : GlossaryItemIdDict (List TagId)
         , itemIdsByTagId : TagIdDict (List GlossaryItemId)
@@ -79,6 +80,7 @@ empty =
     GlossaryItemsForUi
         { tags = GlossaryTags.empty
         , itemById = GlossaryItemIdDict.empty
+        , startingItemId = Nothing
         , disambiguationTagIdByItemId = GlossaryItemIdDict.empty
         , normalTagIdsByItemId = GlossaryItemIdDict.empty
         , itemIdsByTagId = TagIdDict.empty
@@ -99,8 +101,8 @@ isEmpty (GlossaryItemsForUi items) =
 
 {-| Convert a list of glossary items for/from HTML into a `GlossaryItems`.
 -}
-fromList : List DescribedTag -> List GlossaryItemForUi -> Result String GlossaryItemsForUi
-fromList describedTags_ glossaryItemsForUi =
+fromList : List DescribedTag -> Maybe DisambiguatedTerm -> List GlossaryItemForUi -> Result String GlossaryItemsForUi
+fromList describedTags_ disambiguatedPreferredTermForStartingItem_ glossaryItemsForUi =
     GlossaryTags.fromList describedTags_
         |> Result.andThen
             (\tags_ ->
@@ -210,6 +212,23 @@ fromList describedTags_ glossaryItemsForUi =
                                     )
                                 )
                                 ( GlossaryItemIdDict.empty, ( GlossaryItemIdDict.empty, GlossaryItemIdDict.empty ) )
+
+                    startingItemId_ : Maybe GlossaryItemId
+                    startingItemId_ =
+                        disambiguatedPreferredTermForStartingItem_
+                            |> Maybe.andThen
+                                (\disambiguatedPreferredTermForStartingItem ->
+                                    disambiguatedPreferredTermByItemId
+                                        |> GlossaryItemIdDict.foldl
+                                            (\itemId disambiguatedPreferredTerm_ result ->
+                                                if disambiguatedPreferredTerm_ == Just disambiguatedPreferredTermForStartingItem then
+                                                    Just itemId
+
+                                                else
+                                                    result
+                                            )
+                                            Nothing
+                                )
 
                     itemIdByFragmentIdentifierForRawDisambiguatedPreferredTermResult : Result String (Dict String GlossaryItemId)
                     itemIdByFragmentIdentifierForRawDisambiguatedPreferredTermResult =
@@ -347,6 +366,7 @@ fromList describedTags_ glossaryItemsForUi =
                         GlossaryItemsForUi
                             { tags = tags_
                             , itemById = itemById
+                            , startingItemId = startingItemId_
                             , disambiguationTagIdByItemId = disambiguationTagIdByItemId
                             , normalTagIdsByItemId = sortedNormalTagIdsByItemId
                             , itemIdsByTagId = itemIdsByTagId_
@@ -480,6 +500,15 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItemsForUi items
                     lastUpdatedByName
                     lastUpdatedByEmailAddress
             )
+
+
+{-| Get the item associated with the starting item ID, if it exists.
+-}
+startingItem : GlossaryItemsForUi -> Maybe GlossaryItemForUi
+startingItem ((GlossaryItemsForUi items) as glossaryItemsForUi) =
+    items.startingItemId
+        |> Maybe.andThen
+            (\startingItemId -> get startingItemId glossaryItemsForUi)
 
 
 {-| Get the item associated with an ID. If the ID is not found, return `Nothing`.
