@@ -3361,6 +3361,35 @@ viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } 
         ]
 
 
+viewMainScalable :
+    Maybe DescribedTag
+    -> { enableMathSupport : Bool, noModalDialogShown_ : Bool }
+    -> Editability
+    -> QueryParameters
+    -> Maybe GlossaryItemId
+    -> ItemSearchDialog
+    -> Maybe GlossaryItemId
+    -> Saving
+    -> Maybe ( GlossaryItemId, Bool )
+    -> GlossaryForUi
+    -> Html Msg
+viewMainScalable filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters itemWithFocus itemSearchDialog confirmDeleteId deleting resultOfAttemptingToCopyItemTextToClipboard glossaryForUi =
+    Html.main_
+        []
+        [ Html.article
+            []
+            [ div
+                [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
+                [ div
+                    []
+                    [ text "Scalable layout" ]
+                ]
+            , Html.Lazy.lazy3 viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog
+            , Html.Lazy.lazy3 viewConfirmDeleteModal editability confirmDeleteId deleting
+            ]
+        ]
+
+
 view : Model -> Document Msg
 view model =
     case model.common.glossaryForUi of
@@ -3589,7 +3618,18 @@ view model =
                                             ]
                                     ]
                             , if enableScalableLayout then
-                                text "Scalable layout"
+                                viewMainScalable filterByTagWithDescription_
+                                    { enableMathSupport = model.common.enableMathSupport
+                                    , noModalDialogShown_ = noModalDialogShown_
+                                    }
+                                    model.common.editability
+                                    model.common.queryParameters
+                                    model.itemWithFocus
+                                    model.itemSearchDialog
+                                    model.confirmDeleteId
+                                    model.deleting
+                                    model.resultOfAttemptingToCopyItemTextToClipboard
+                                    glossaryForUi
 
                               else
                                 viewMain
