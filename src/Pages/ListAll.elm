@@ -84,7 +84,6 @@ import Html.Keyed
 import Html.Lazy
 import Http
 import Icons
-import IncubatingFeatures exposing (showIncubatingFeatures)
 import Internationalisation as I18n
 import PageMsg exposing (PageMsg)
 import Process
@@ -1488,13 +1487,13 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
                         ]
                 , Extras.Html.showIf (editability == EditingWithIncludedBackend) <|
                     viewSelectInputSyntax enableMathSupport
-                , Extras.Html.showIf showIncubatingFeatures <|
+                , Extras.Html.showIf enableScalableLayout <|
                     viewSelectStartingItem
                         enableMathSupport
                         (GlossaryForUi.items glossaryForUi)
                         startingItemCombobox
                         startingItemComboboxInput
-                , Extras.Html.showUnless showIncubatingFeatures <|
+                , Extras.Html.showUnless enableScalableLayout <|
                     viewSelectCardWidth glossaryForUi tabbable
                 , viewSelectDefaultTheme glossaryForUi tabbable
                 , Components.Button.toggle
@@ -1505,7 +1504,7 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
                         [ class "font-medium text-gray-900 dark:text-gray-300" ]
                         [ text I18n.showExportMenu ]
                     ]
-                , Extras.Html.showUnless showIncubatingFeatures <|
+                , Extras.Html.showUnless enableScalableLayout <|
                     Components.Button.toggle
                         (GlossaryForUi.enableOrderItemsButtons glossaryForUi)
                         ElementIds.showOrderItemsButtons
