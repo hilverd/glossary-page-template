@@ -3424,8 +3424,11 @@ viewMainScalable filterByTagWithDescription_ { enableMathSupport, noModalDialogS
             ]
         , Html.main_
             []
-            [ Html.article
-                []
+            [ Extras.Html.showMaybe
+                (viewCurrentTagFilter { enableMathSupport = enableMathSupport })
+                filterByTagWithDescription_
+            , Html.article
+                [ class "mt-4" ]
                 [ div
                     [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
                     [ div
@@ -3682,7 +3685,8 @@ view model =
                                             ]
                                     ]
                             , if enableScalableLayout then
-                                viewMainScalable filterByTagWithDescription_
+                                viewMainScalable
+                                    filterByTagWithDescription_
                                     { enableMathSupport = model.common.enableMathSupport
                                     , noModalDialogShown_ = noModalDialogShown_
                                     }
