@@ -18,6 +18,7 @@ import Components.Notifications
 import Data.Editability as Editability exposing (Editability)
 import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryFromDom as GlossaryFromDom
+import Data.GlossaryItemForUi as GlossaryItemForUi
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemsForUi as GlossaryItems
 import Data.Theme as Theme exposing (Theme)
@@ -128,6 +129,14 @@ init flags url key =
                 maybeFragment
                 (Result.toMaybe glossaryForUi)
                 |> Maybe.andThen identity
+                |> (\itemWithFocus_ ->
+                        case itemWithFocus_ of
+                            Just _ ->
+                                itemWithFocus_
+
+                            Nothing ->
+                                startItem glossaryForUi
+                   )
 
         enableHelpForMakingChanges : Bool
         enableHelpForMakingChanges =
@@ -216,6 +225,15 @@ init flags url key =
     ( { key = key, page = ListAll listAllModel }
     , Cmd.map ListAllMsg listAllCmd
     )
+
+
+startItem : Result a GlossaryForUi -> Maybe GlossaryItemId
+startItem glossaryForUi =
+    glossaryForUi
+        |> Result.toMaybe
+        |> Maybe.map GlossaryForUi.items
+        |> Maybe.andThen GlossaryItems.startingItem
+        |> Maybe.map GlossaryItemForUi.id
 
 
 {-| Messages handled by the application.
@@ -356,6 +374,14 @@ update msg model =
                                 maybeFragment
                                 (Result.toMaybe common0.glossaryForUi)
                                 |> Maybe.andThen identity
+                                |> (\itemWithFocus_ ->
+                                        case itemWithFocus_ of
+                                            Just _ ->
+                                                itemWithFocus_
+
+                                            Nothing ->
+                                                startItem common0.glossaryForUi
+                                   )
 
                         common1 : CommonModel
                         common1 =
@@ -400,7 +426,16 @@ update msg model =
                             Nothing
 
                 ( listAllModel, listAllCmd ) =
-                    Pages.ListAll.init commonModel itemWithFocus notifications0 notification
+                    Pages.ListAll.init
+                        commonModel
+                        (if itemWithFocus == Nothing then
+                            startItem commonModel.glossaryForUi
+
+                         else
+                            itemWithFocus
+                        )
+                        notifications0
+                        notification
             in
             ( { model | page = ListAll listAllModel }
             , Cmd.map ListAllMsg listAllCmd

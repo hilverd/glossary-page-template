@@ -840,7 +840,11 @@ update msg model =
             ( { model
                 | common = { common | glossaryForUi = Ok <| updatedGlossaryForUi }
                 , notifications = notifications_
-                , itemWithFocus = Nothing
+                , itemWithFocus =
+                    updatedGlossaryForUi
+                        |> GlossaryForUi.items
+                        |> GlossaryItemsForUi.startingItem
+                        |> Maybe.map GlossaryItemForUi.id
                 , confirmDeleteId = Nothing
                 , deleting = NotCurrentlySaving
                 , savingSettings = NotCurrentlySaving
@@ -3374,6 +3378,16 @@ viewMainScalable :
     -> GlossaryForUi
     -> Html Msg
 viewMainScalable filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters itemWithFocus itemSearchDialog confirmDeleteId deleting resultOfAttemptingToCopyItemTextToClipboard glossaryForUi =
+    let
+        items : GlossaryItemsForUi
+        items =
+            GlossaryForUi.items glossaryForUi
+
+        item : Maybe GlossaryItemForUi
+        item =
+            itemWithFocus
+                |> Maybe.andThen (\itemWithFocus_ -> GlossaryItemsForUi.get itemWithFocus_ items)
+    in
     Html.main_
         []
         [ Html.article
@@ -3382,7 +3396,22 @@ viewMainScalable filterByTagWithDescription_ { enableMathSupport, noModalDialogS
                 [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
                 [ div
                     []
-                    [ text "Scalable layout" ]
+                    [ viewGlossaryItem
+                        { enableMathSupport = enableMathSupport
+                        , editable = Editability.editing editability
+                        , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
+                        , shownAsSingle = False
+                        }
+                        itemWithFocus
+                        (Maybe.map DescribedTag.tag filterByTagWithDescription_)
+                        (resultOfAttemptingToCopyItemTextToClipboard
+                            |> Maybe.map
+                                (\( glossaryItemId, _ ) ->
+                                    Just glossaryItemId == itemWithFocus
+                                )
+                        )
+                        { previous = Nothing, item = item, next = Nothing }
+                    ]
                 ]
             , Html.Lazy.lazy3 viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog
             , Html.Lazy.lazy3 viewConfirmDeleteModal editability confirmDeleteId deleting
