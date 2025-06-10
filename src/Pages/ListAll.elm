@@ -3093,9 +3093,15 @@ pageTitle model glossaryForUi =
         glossaryItemsForUi : GlossaryItemsForUi
         glossaryItemsForUi =
             GlossaryForUi.items glossaryForUi
+
+        viewingSingleItem : Bool
+        viewingSingleItem =
+            model.layout
+                == ShowSingleItem
+                || GlossaryForUi.enableScalableLayout glossaryForUi
     in
-    case ( model.layout, model.itemWithFocus ) of
-        ( ShowSingleItem, Just id ) ->
+    case ( viewingSingleItem, model.itemWithFocus ) of
+        ( True, Just id ) ->
             let
                 disambiguatedPreferredTerm : Maybe String
                 disambiguatedPreferredTerm =
@@ -3387,34 +3393,63 @@ viewMainScalable filterByTagWithDescription_ { enableMathSupport, noModalDialogS
         item =
             itemWithFocus
                 |> Maybe.andThen (\itemWithFocus_ -> GlossaryItemsForUi.get itemWithFocus_ items)
+
+        itemTitle : Maybe Term
+        itemTitle =
+            Maybe.map
+                (GlossaryItemForUi.disambiguatedPreferredTerm >> DisambiguatedTerm.toTerm)
+                item
     in
-    Html.main_
+    div
         []
-        [ Html.article
-            []
-            [ div
-                [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
-                [ div
-                    []
-                    [ viewGlossaryItem
-                        { enableMathSupport = enableMathSupport
-                        , editable = Editability.editing editability
-                        , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
-                        , shownAsSingle = False
-                        }
-                        itemWithFocus
-                        (Maybe.map DescribedTag.tag filterByTagWithDescription_)
-                        (resultOfAttemptingToCopyItemTextToClipboard
-                            |> Maybe.map
-                                (\( glossaryItemId, _ ) ->
-                                    Just glossaryItemId == itemWithFocus
-                                )
-                        )
-                        { previous = Nothing, item = item, next = Nothing }
-                    ]
+        [ header
+            [ class "mt-0" ]
+            [ h1
+                [ id ElementIds.title ]
+                [ Extras.Html.showMaybe
+                    (Term.view
+                        enableMathSupport
+                        [ class "text-3xl font-bold leading-tight" ]
+                    )
+                    itemTitle
                 ]
-            , Html.Lazy.lazy3 viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog
-            , Html.Lazy.lazy3 viewConfirmDeleteModal editability confirmDeleteId deleting
+            , h2
+                [ class "mt-2 font-bold leading-tight" ]
+                [ glossaryForUi
+                    |> GlossaryForUi.title
+                    |> GlossaryTitle.view
+                        enableMathSupport
+                        [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
+                ]
+            ]
+        , Html.main_
+            []
+            [ Html.article
+                []
+                [ div
+                    [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
+                    [ div
+                        []
+                        [ viewGlossaryItem
+                            { enableMathSupport = enableMathSupport
+                            , editable = Editability.editing editability
+                            , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
+                            , shownAsSingle = False
+                            }
+                            itemWithFocus
+                            (Maybe.map DescribedTag.tag filterByTagWithDescription_)
+                            (resultOfAttemptingToCopyItemTextToClipboard
+                                |> Maybe.map
+                                    (\( glossaryItemId, _ ) ->
+                                        Just glossaryItemId == itemWithFocus
+                                    )
+                            )
+                            { previous = Nothing, item = item, next = Nothing }
+                        ]
+                    ]
+                , Html.Lazy.lazy3 viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog
+                , Html.Lazy.lazy3 viewConfirmDeleteModal editability confirmDeleteId deleting
+                ]
             ]
         ]
 
