@@ -2159,10 +2159,13 @@ viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, edita
     [ div
         [ class "mb-4" ]
         [ Extras.Html.showMaybe
-            (viewCurrentTagFilter { enableMathSupport = enableMathSupport })
+            (viewCurrentTagFilter
+                [ class "pt-3" ]
+                enableMathSupport
+            )
             filterByDescribedTag
         , Extras.Html.showIf (filterByDescribedTag == Nothing) <|
-            viewAllTagFilters { enableMathSupport = enableMathSupport } tags
+            viewAllTagFilters enableMathSupport tags
         , Extras.Html.showIf editing <|
             div
                 [ class "flex-none mt-4" ]
@@ -2260,26 +2263,33 @@ viewMenuForMobileAndStaticSidebarForDesktop :
     MenuForMobileVisibility
     -> Bool
     -> String
-    -> Maybe TagId
+    -> Maybe DescribedTag
     -> GlossaryItemsForUi
     -> Html Msg
-viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility enableMathSupport indexFilterString filterByTag items =
+viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility enableMathSupport indexFilterString filterByTagWithDescription_ items =
     let
         indexOfTerms : IndexOfTerms
         indexOfTerms =
-            IndexOfTerms.fromGlossaryItems filterByTag items
+            IndexOfTerms.fromGlossaryItems
+                (Maybe.map DescribedTag.id filterByTagWithDescription_)
+                items
     in
     div []
-        [ Html.Lazy.lazy3 viewMenuForMobile
+        [ Html.Lazy.lazy4 viewMenuForMobile
             menuForMobileVisibility
             enableMathSupport
+            filterByTagWithDescription_
             indexOfTerms
-        , Html.Lazy.lazy3 viewStaticSidebarForDesktop enableMathSupport indexFilterString indexOfTerms
+        , Html.Lazy.lazy4 viewStaticSidebarForDesktop
+            enableMathSupport
+            filterByTagWithDescription_
+            indexFilterString
+            indexOfTerms
         ]
 
 
-viewMenuForMobile : MenuForMobileVisibility -> Bool -> IndexOfTerms -> Html Msg
-viewMenuForMobile menuForMobileVisibility enableMathSupport termIndex =
+viewMenuForMobile : MenuForMobileVisibility -> Bool -> Maybe DescribedTag -> IndexOfTerms -> Html Msg
+viewMenuForMobile menuForMobileVisibility enableMathSupport filterByTagWithDescription_ termIndex =
     div
         [ class "invisible" |> Extras.HtmlAttribute.showIf (menuForMobileVisibility == GradualVisibility.Invisible)
         , class "fixed inset-0 flex z-40 lg:hidden"
@@ -2330,7 +2340,22 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport termIndex =
                 [ id ElementIds.indexForMobile
                 , class "flex-1 h-0 overflow-y-scroll"
                 ]
-                [ nav
+                [ Extras.Html.showMaybe
+                    (\describedTag ->
+                        div
+                            [ class "px-4 pt-5" ]
+                            [ span
+                                [ class "text-gray-900 dark:text-white" ]
+                                [ text <| I18n.filteringByTag ++ ":" ]
+                            , Html.br [] []
+                            , Components.Badge.withRemoveButtonAndWrappingText
+                                (PageMsg.Internal DoNotFilterByTag)
+                                [ class "print:hidden mt-2 mb-1 overflow-hidden" ]
+                                [ Tag.view enableMathSupport [] <| DescribedTag.tag describedTag ]
+                            ]
+                    )
+                    filterByTagWithDescription_
+                , nav
                     [ class "px-4 pt-5 pb-6" ]
                     [ Html.Lazy.lazy2 viewTermIndexFirstCharacterGrid False termIndex
                     , Html.Lazy.lazy3 viewIndexOfTerms enableMathSupport False termIndex
@@ -2462,11 +2487,26 @@ viewTermIndexFirstCharacterGrid staticSidebar indexOfTerms =
         )
 
 
-viewIndexFilterInputField : String -> Html Msg
-viewIndexFilterInputField indexFilterString =
+viewIndexFilterInputField : Bool -> Maybe DescribedTag -> String -> Html Msg
+viewIndexFilterInputField enableMathSupport filterByTagWithDescription_ indexFilterString =
     div
         [ class "pb-4" ]
-        [ div []
+        [ Extras.Html.showMaybe
+            (\describedTag ->
+                div
+                    []
+                    [ span
+                        [ class "text-gray-900 dark:text-white" ]
+                        [ text <| I18n.filteringByTag ++ ":" ]
+                    , Html.br [] []
+                    , Components.Badge.withRemoveButtonAndWrappingText
+                        (PageMsg.Internal DoNotFilterByTag)
+                        [ class "print:hidden mt-2 mb-2 overflow-hidden" ]
+                        [ Tag.view enableMathSupport [] <| DescribedTag.tag describedTag ]
+                    ]
+            )
+            filterByTagWithDescription_
+        , div []
             [ div
                 [ class "mt-2 grid grid-cols-1"
                 ]
@@ -2493,15 +2533,15 @@ viewIndexFilterInputField indexFilterString =
         ]
 
 
-viewLetterGrid : Bool -> String -> IndexOfTerms -> Html Msg
-viewLetterGrid staticSidebar indexFilterString indexOfTerms =
+viewLetterGrid : Bool -> Bool -> Maybe DescribedTag -> String -> IndexOfTerms -> Html Msg
+viewLetterGrid enableMathSupport staticSidebar filterByTagWithDescription_ indexFilterString indexOfTerms =
     div
         [ id ElementIds.letterGrid
         , class "z-10 -mb-6 sticky top-0 -ml-0.5"
         ]
         [ div
             [ class "pt-5 px-3 bg-white dark:bg-slate-900" ]
-            [ viewIndexFilterInputField indexFilterString
+            [ viewIndexFilterInputField enableMathSupport filterByTagWithDescription_ indexFilterString
             , viewTermIndexFirstCharacterGrid staticSidebar indexOfTerms
             ]
         , div
@@ -2510,8 +2550,8 @@ viewLetterGrid staticSidebar indexFilterString indexOfTerms =
         ]
 
 
-viewStaticSidebarForDesktop : Bool -> String -> IndexOfTerms -> Html Msg
-viewStaticSidebarForDesktop enableMathSupport indexFilterString termIndex =
+viewStaticSidebarForDesktop : Bool -> Maybe DescribedTag -> String -> IndexOfTerms -> Html Msg
+viewStaticSidebarForDesktop enableMathSupport filterByTagWithDescription_ indexFilterString termIndex =
     let
         filteredTermIndex : IndexOfTerms
         filteredTermIndex =
@@ -2524,7 +2564,7 @@ viewStaticSidebarForDesktop enableMathSupport indexFilterString termIndex =
             [ id ElementIds.staticSidebarForDesktop
             , class "h-0 flex-1 flex flex-col overflow-y-scroll"
             ]
-            [ viewLetterGrid True indexFilterString filteredTermIndex
+            [ viewLetterGrid enableMathSupport True filterByTagWithDescription_ indexFilterString filteredTermIndex
             , nav
                 [ class "px-3" ]
                 [ viewIndexOfTerms enableMathSupport True filteredTermIndex ]
@@ -2829,10 +2869,10 @@ viewSelectDefaultTheme glossaryForUi tabbable =
         ]
 
 
-viewCurrentTagFilter : { enableMathSupport : Bool } -> DescribedTag -> Html Msg
-viewCurrentTagFilter { enableMathSupport } describedTag =
+viewCurrentTagFilter : List (Accessibility.Attribute Never) -> Bool -> DescribedTag -> Html Msg
+viewCurrentTagFilter additionalAttributes enableMathSupport describedTag =
     div
-        [ class "pt-3" ]
+        additionalAttributes
         [ span
             [ class "print:hidden mr-2 font-medium text-gray-900 dark:text-gray-100" ]
             [ text I18n.filteringByTag ]
@@ -2843,8 +2883,8 @@ viewCurrentTagFilter { enableMathSupport } describedTag =
         ]
 
 
-viewAllTagFilters : { enableMathSupport : Bool } -> List Tag -> Html Msg
-viewAllTagFilters { enableMathSupport } tags =
+viewAllTagFilters : Bool -> List Tag -> Html Msg
+viewAllTagFilters enableMathSupport tags =
     Extras.Html.showIf (not <| List.isEmpty tags) <|
         div
             [ class "print:hidden pt-3" ]
@@ -3425,7 +3465,7 @@ viewMainScalable filterByTagWithDescription_ { enableMathSupport, noModalDialogS
         , Html.main_
             []
             [ Extras.Html.showMaybe
-                (viewCurrentTagFilter { enableMathSupport = enableMathSupport })
+                (viewCurrentTagFilter [] enableMathSupport)
                 filterByTagWithDescription_
             , Html.article
                 [ class "mt-4" ]
@@ -3579,7 +3619,7 @@ view model =
                             model.menuForMobileVisibility
                             model.common.enableMathSupport
                             model.indexFilterString
-                            filterByTagId_
+                            filterByTagWithDescription_
                             glossaryItemsForUi
                         ]
                     , div
