@@ -47,7 +47,7 @@ import Data.Editability as Editability exposing (Editability(..))
 import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
 import Data.GlossaryChangeWithChecksum exposing (GlossaryChangeWithChecksum)
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
-import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
+import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi, enableScalableLayout)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
@@ -2260,13 +2260,14 @@ viewItemCards enableMathSupport editable enableLastUpdatedDates filterByDescribe
 
 
 viewMenuForMobileAndStaticSidebarForDesktop :
-    MenuForMobileVisibility
+    Bool
+    -> MenuForMobileVisibility
     -> Bool
     -> String
     -> Maybe DescribedTag
     -> GlossaryItemsForUi
     -> Html Msg
-viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility enableMathSupport indexFilterString filterByTagWithDescription_ items =
+viewMenuForMobileAndStaticSidebarForDesktop enableScalableLayout menuForMobileVisibility enableMathSupport indexFilterString filterByTagWithDescription_ items =
     let
         indexOfTerms : IndexOfTerms
         indexOfTerms =
@@ -2280,7 +2281,8 @@ viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility enableMathSu
             enableMathSupport
             filterByTagWithDescription_
             indexOfTerms
-        , Html.Lazy.lazy4 viewStaticSidebarForDesktop
+        , Html.Lazy.lazy5 viewStaticSidebarForDesktop
+            enableScalableLayout
             enableMathSupport
             filterByTagWithDescription_
             indexFilterString
@@ -2550,15 +2552,20 @@ viewLetterGrid enableMathSupport staticSidebar filterByTagWithDescription_ index
         ]
 
 
-viewStaticSidebarForDesktop : Bool -> Maybe DescribedTag -> String -> IndexOfTerms -> Html Msg
-viewStaticSidebarForDesktop enableMathSupport filterByTagWithDescription_ indexFilterString termIndex =
+viewStaticSidebarForDesktop : Bool -> Bool -> Maybe DescribedTag -> String -> IndexOfTerms -> Html Msg
+viewStaticSidebarForDesktop enableScalableLayout enableMathSupport filterByTagWithDescription_ indexFilterString termIndex =
     let
         filteredTermIndex : IndexOfTerms
         filteredTermIndex =
             IndexOfTerms.filterByString indexFilterString termIndex
     in
     div
-        [ class "hidden print:hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900"
+        [ class "hidden print:hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900"
+        , if enableScalableLayout then
+            class "lg:w-78"
+
+          else
+            class "lg:w-64"
         ]
         [ div
             [ id ElementIds.staticSidebarForDesktop
@@ -3510,6 +3517,10 @@ view model =
                 glossaryItemsForUi =
                     GlossaryForUi.items glossaryForUi
 
+                enableScalableLayout : Bool
+                enableScalableLayout =
+                    GlossaryForUi.enableScalableLayout glossaryForUi
+
                 filterByTagId_ : Maybe TagId
                 filterByTagId_ =
                     filterByTagId model
@@ -3615,7 +3626,8 @@ view model =
                     [ div
                         [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) <| Extras.HtmlAttribute.inert
                         ]
-                        [ Html.Lazy.lazy5 viewMenuForMobileAndStaticSidebarForDesktop
+                        [ Html.Lazy.lazy6 viewMenuForMobileAndStaticSidebarForDesktop
+                            enableScalableLayout
                             model.menuForMobileVisibility
                             model.common.enableMathSupport
                             model.indexFilterString
@@ -3631,7 +3643,13 @@ view model =
                             Html.Lazy.lazy2 viewBackToTopLink False model.backToTopLinkVisibility
                         ]
                     , div
-                        [ class "lg:pl-64 flex flex-col" ]
+                        [ class "flex flex-col"
+                        , if enableScalableLayout then
+                            class "lg:pl-78"
+
+                          else
+                            class "lg:pl-64"
+                        ]
                         [ Html.Lazy.lazy5 viewTopBar
                             noModalDialogShown_
                             model.common.runningOnMacOs
@@ -3643,12 +3661,7 @@ view model =
                              else
                                 Nothing
                             )
-                        , let
-                            enableScalableLayout : Bool
-                            enableScalableLayout =
-                                GlossaryForUi.enableScalableLayout glossaryForUi
-                          in
-                          div
+                        , div
                             [ Html.Attributes.id ElementIds.container
                             , class "relative"
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
