@@ -3,12 +3,14 @@ port module Pages.ListAll exposing (InternalMsg, ItemSearchDialog, Layout, MenuF
 import Accessibility
     exposing
         ( Html
+        , aside
         , button
         , details
         , div
         , fieldset
         , h1
         , h2
+        , h3
         , h5
         , header
         , label
@@ -3448,58 +3450,67 @@ viewMainScalable filterByTagWithDescription_ { enableMathSupport, noModalDialogS
                 item
     in
     div
-        []
-        [ header
-            [ class "mt-0" ]
-            [ h1
-                [ id ElementIds.title ]
-                [ Extras.Html.showMaybe
-                    (Term.view
-                        enableMathSupport
-                        [ class "text-3xl font-bold leading-tight" ]
-                    )
-                    itemTitle
+        [ class "xl:grid xl:grid-cols-2 xl:gap-4" ]
+        [ div
+            []
+            [ header
+                [ class "mt-0" ]
+                [ h1
+                    [ id ElementIds.title ]
+                    [ Extras.Html.showMaybe
+                        (Term.view
+                            enableMathSupport
+                            [ class "text-3xl font-bold leading-tight" ]
+                        )
+                        itemTitle
+                    ]
+                , h2
+                    [ class "mt-2 font-bold leading-tight" ]
+                    [ glossaryForUi
+                        |> GlossaryForUi.title
+                        |> GlossaryTitle.view
+                            enableMathSupport
+                            [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
+                    ]
                 ]
-            , h2
-                [ class "mt-2 font-bold leading-tight" ]
-                [ glossaryForUi
-                    |> GlossaryForUi.title
-                    |> GlossaryTitle.view
-                        enableMathSupport
-                        [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
+            , Html.main_
+                []
+                [ Extras.Html.showMaybe
+                    (viewCurrentTagFilter [] enableMathSupport)
+                    filterByTagWithDescription_
+                , Html.article
+                    [ class "mt-4" ]
+                    [ div
+                        [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
+                        [ div
+                            []
+                            [ viewGlossaryItem
+                                { enableMathSupport = enableMathSupport
+                                , editable = Editability.editing editability
+                                , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
+                                , shownAsSingle = False
+                                }
+                                itemWithFocus
+                                (Maybe.map DescribedTag.tag filterByTagWithDescription_)
+                                (resultOfAttemptingToCopyItemTextToClipboard
+                                    |> Maybe.map
+                                        (\( glossaryItemId, _ ) ->
+                                            Just glossaryItemId == itemWithFocus
+                                        )
+                                )
+                                { previous = Nothing, item = item, next = Nothing }
+                            ]
+                        ]
+                    , Html.Lazy.lazy3 viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog
+                    , Html.Lazy.lazy3 viewConfirmDeleteModal editability confirmDeleteId deleting
+                    ]
                 ]
             ]
-        , Html.main_
-            []
-            [ Extras.Html.showMaybe
-                (viewCurrentTagFilter [] enableMathSupport)
-                filterByTagWithDescription_
-            , Html.article
-                [ class "mt-4" ]
-                [ div
-                    [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
-                    [ div
-                        []
-                        [ viewGlossaryItem
-                            { enableMathSupport = enableMathSupport
-                            , editable = Editability.editing editability
-                            , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
-                            , shownAsSingle = False
-                            }
-                            itemWithFocus
-                            (Maybe.map DescribedTag.tag filterByTagWithDescription_)
-                            (resultOfAttemptingToCopyItemTextToClipboard
-                                |> Maybe.map
-                                    (\( glossaryItemId, _ ) ->
-                                        Just glossaryItemId == itemWithFocus
-                                    )
-                            )
-                            { previous = Nothing, item = item, next = Nothing }
-                        ]
-                    ]
-                , Html.Lazy.lazy3 viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog
-                , Html.Lazy.lazy3 viewConfirmDeleteModal editability confirmDeleteId deleting
-                ]
+        , aside
+            [ class "px-6 lg:px-8 xl:px-0 pt-8 xl:pt-0" ]
+            [ h3
+                [ class "text-lg font-medium text-gray-700 dark:text-gray-300" ]
+                [ text "Related items" ]
             ]
         ]
 
