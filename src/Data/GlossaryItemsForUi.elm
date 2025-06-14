@@ -1,7 +1,7 @@
 module Data.GlossaryItemsForUi exposing
     ( GlossaryItemsForUi
     , empty, fromList
-    , isEmpty, get, startingItem, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
+    , isEmpty, get, relatedItems, startingItem, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
 
@@ -20,7 +20,7 @@ module Data.GlossaryItemsForUi exposing
 
 # Query
 
-@docs isEmpty, get, startingItem, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
+@docs isEmpty, get, relatedItems, startingItem, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
 
 
 # Export
@@ -49,6 +49,7 @@ import DirectedGraph exposing (DirectedGraph)
 import DuplicateRejectingDict exposing (DuplicateRejectingDict)
 import Extras.Regex
 import Extras.String
+import Html.Attributes exposing (rel)
 import Internationalisation as I18n
 import Maybe
 import Regex
@@ -516,6 +517,15 @@ startingItem ((GlossaryItemsForUi items) as glossaryItemsForUi) =
 get : GlossaryItemId -> GlossaryItemsForUi -> Maybe GlossaryItemForUi
 get =
     get_ disambiguatedPreferredTerm Nothing
+
+
+{-| Get the items that are related to the given item.
+-}
+relatedItems : GlossaryItemId -> GlossaryItemsForUi -> List GlossaryItemForUi
+relatedItems itemId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
+    GlossaryItemIdDict.get itemId items.relatedItemIdsById
+        |> Maybe.withDefault []
+        |> List.filterMap (\relatedItemId -> get relatedItemId glossaryItemsForUi)
 
 
 outline : GlossaryItemId -> GlossaryItemsForUi -> Maybe GlossaryItemOutline

@@ -3438,81 +3438,122 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
         items =
             GlossaryForUi.items glossaryForUi
 
-        item : Maybe GlossaryItemForUi
-        item =
+        itemAndRelatedItems : Maybe ( GlossaryItemForUi, List GlossaryItemForUi )
+        itemAndRelatedItems =
             itemWithFocus
-                |> Maybe.andThen (\itemWithFocus_ -> GlossaryItemsForUi.get itemWithFocus_ items)
+                |> Maybe.andThen
+                    (\itemWithFocus_ ->
+                        GlossaryItemsForUi.get itemWithFocus_ items
+                            |> Maybe.map
+                                (\item_ ->
+                                    ( item_
+                                    , GlossaryItemsForUi.relatedItems
+                                        (GlossaryItemForUi.id item_)
+                                        items
+                                    )
+                                )
+                    )
 
         itemTitle : Maybe Term
         itemTitle =
             Maybe.map
-                (GlossaryItemForUi.disambiguatedPreferredTerm >> DisambiguatedTerm.toTerm)
-                item
+                (Tuple.first >> GlossaryItemForUi.disambiguatedPreferredTerm >> DisambiguatedTerm.toTerm)
+                itemAndRelatedItems
     in
-    div
-        [ class "xl:grid xl:grid-cols-2 xl:gap-4" ]
-        [ div
-            []
-            [ header
-                [ class "mt-0" ]
-                [ h1
-                    [ id ElementIds.title ]
-                    [ Extras.Html.showMaybe
-                        (Term.view
-                            enableMathSupport
-                            [ class "text-3xl font-bold leading-tight" ]
-                        )
-                        itemTitle
-                    ]
-                , h2
-                    [ class "mt-2 font-bold leading-tight" ]
-                    [ glossaryForUi
-                        |> GlossaryForUi.title
-                        |> GlossaryTitle.view
-                            enableMathSupport
-                            [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
-                    ]
-                ]
-            , Html.main_
-                []
-                [ Extras.Html.showMaybe
-                    (viewCurrentTagFilter [] enableMathSupport)
-                    filterByTagWithDescription_
-                , Html.article
-                    [ class "mt-4" ]
-                    [ div
-                        [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
-                        [ div
-                            []
-                            [ viewGlossaryItem
-                                { enableMathSupport = enableMathSupport
-                                , editable = Editability.editing editability
-                                , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
-                                , shownAsSingle = False
-                                }
-                                itemWithFocus
-                                (Maybe.map DescribedTag.tag filterByTagWithDescription_)
-                                (resultOfAttemptingToCopyItemTextToClipboard
-                                    |> Maybe.map
-                                        (\( glossaryItemId, _ ) ->
-                                            Just glossaryItemId == itemWithFocus
-                                        )
+    Extras.Html.showMaybe
+        (\( item, relatedItems ) ->
+            div
+                [ class "xl:grid xl:grid-cols-2 xl:gap-4" ]
+                [ div
+                    []
+                    [ header
+                        [ class "mt-0" ]
+                        [ h1
+                            [ id ElementIds.title ]
+                            [ Extras.Html.showMaybe
+                                (Term.view
+                                    enableMathSupport
+                                    [ class "text-3xl font-bold leading-tight" ]
                                 )
-                                { previous = Nothing, item = item, next = Nothing }
+                                itemTitle
+                            ]
+                        , h2
+                            [ class "mt-2 font-bold leading-tight" ]
+                            [ glossaryForUi
+                                |> GlossaryForUi.title
+                                |> GlossaryTitle.view
+                                    enableMathSupport
+                                    [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
                             ]
                         ]
-                    , Html.Lazy.lazy3 viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog
-                    , Html.Lazy.lazy3 viewConfirmDeleteModal editability confirmDeleteId deleting
+                    , Html.main_
+                        []
+                        [ Extras.Html.showMaybe
+                            (viewCurrentTagFilter [] enableMathSupport)
+                            filterByTagWithDescription_
+                        , Html.article
+                            [ class "mt-4" ]
+                            [ div
+                                [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
+                                [ div
+                                    []
+                                    [ viewGlossaryItem
+                                        { enableMathSupport = enableMathSupport
+                                        , editable = Editability.editing editability
+                                        , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
+                                        , shownAsSingle = False
+                                        }
+                                        itemWithFocus
+                                        (Maybe.map DescribedTag.tag filterByTagWithDescription_)
+                                        (resultOfAttemptingToCopyItemTextToClipboard
+                                            |> Maybe.map
+                                                (\( glossaryItemId, _ ) ->
+                                                    Just glossaryItemId == itemWithFocus
+                                                )
+                                        )
+                                        { previous = Nothing, item = Just item, next = Nothing }
+                                    ]
+                                ]
+                            , Html.Lazy.lazy3 viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog
+                            , Html.Lazy.lazy3 viewConfirmDeleteModal editability confirmDeleteId deleting
+                            ]
+                        ]
+                    ]
+                , aside
+                    [ class "px-6 lg:px-8 xl:px-0 pt-8 xl:pt-0" ]
+                    [ h3
+                        [ class "text-lg font-medium text-gray-700 dark:text-gray-300 mb-4" ]
+                        [ text "Related items" ]
+                    , div
+                        [ class "space-y-4" ]
+                        (List.map
+                            (\relatedItem ->
+                                let
+                                    relatedItemId =
+                                        GlossaryItemForUi.id relatedItem
+                                in
+                                viewGlossaryItem
+                                    { enableMathSupport = enableMathSupport
+                                    , editable = Editability.editing editability
+                                    , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
+                                    , shownAsSingle = False
+                                    }
+                                    itemWithFocus
+                                    (Maybe.map DescribedTag.tag filterByTagWithDescription_)
+                                    (resultOfAttemptingToCopyItemTextToClipboard
+                                        |> Maybe.map
+                                            (\( glossaryItemId, _ ) ->
+                                                glossaryItemId == relatedItemId
+                                            )
+                                    )
+                                    { previous = Nothing, item = Just relatedItem, next = Nothing }
+                            )
+                            relatedItems
+                        )
                     ]
                 ]
-            ]
-        , aside
-            [ class "px-6 lg:px-8 xl:px-0 pt-8 xl:pt-0" ]
-            [ h3
-                [ class "text-lg font-medium text-gray-700 dark:text-gray-300" ]
-                [ text "Related items" ]
-            ]
-        ]
+        )
+        itemAndRelatedItems
 
 
 view : Model -> Document Msg
