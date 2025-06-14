@@ -49,7 +49,7 @@ import Data.Editability as Editability exposing (Editability(..))
 import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
 import Data.GlossaryChangeWithChecksum exposing (GlossaryChangeWithChecksum)
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
-import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi, enableScalableLayout)
+import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi, enableThreeColumnLayout)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
@@ -1447,9 +1447,9 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
 viewSettings : GlossaryForUi -> Editability -> Saving -> { tabbable : Bool, enableMathSupport : Bool } -> Components.Combobox.Model -> String -> Html Msg
 viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupport } startingItemCombobox startingItemComboboxInput =
     let
-        enableScalableLayout : Bool
-        enableScalableLayout =
-            GlossaryForUi.enableScalableLayout glossaryForUi
+        enableThreeColumnLayout : Bool
+        enableThreeColumnLayout =
+            GlossaryForUi.enableThreeColumnLayout glossaryForUi
 
         errorDiv : String -> Html msg
         errorDiv message =
@@ -1493,13 +1493,13 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
                         ]
                 , Extras.Html.showIf (editability == EditingWithIncludedBackend) <|
                     viewSelectInputSyntax enableMathSupport
-                , Extras.Html.showIf enableScalableLayout <|
+                , Extras.Html.showIf enableThreeColumnLayout <|
                     viewSelectStartingItem
                         enableMathSupport
                         (GlossaryForUi.items glossaryForUi)
                         startingItemCombobox
                         startingItemComboboxInput
-                , Extras.Html.showUnless enableScalableLayout <|
+                , Extras.Html.showUnless enableThreeColumnLayout <|
                     viewSelectCardWidth glossaryForUi tabbable
                 , viewSelectDefaultTheme glossaryForUi tabbable
                 , Components.Button.toggle
@@ -1510,7 +1510,7 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
                         [ class "font-medium text-gray-900 dark:text-gray-300" ]
                         [ text I18n.showExportMenu ]
                     ]
-                , Extras.Html.showUnless enableScalableLayout <|
+                , Extras.Html.showUnless enableThreeColumnLayout <|
                     Components.Button.toggle
                         (GlossaryForUi.enableOrderItemsButtons glossaryForUi)
                         ElementIds.showOrderItemsButtons
@@ -2269,7 +2269,7 @@ viewMenuForMobileAndStaticSidebarForDesktop :
     -> Maybe DescribedTag
     -> GlossaryItemsForUi
     -> Html Msg
-viewMenuForMobileAndStaticSidebarForDesktop enableScalableLayout menuForMobileVisibility enableMathSupport indexFilterString filterByTagWithDescription_ items =
+viewMenuForMobileAndStaticSidebarForDesktop enableThreeColumnLayout menuForMobileVisibility enableMathSupport indexFilterString filterByTagWithDescription_ items =
     let
         indexOfTerms : IndexOfTerms
         indexOfTerms =
@@ -2284,7 +2284,7 @@ viewMenuForMobileAndStaticSidebarForDesktop enableScalableLayout menuForMobileVi
             filterByTagWithDescription_
             indexOfTerms
         , Html.Lazy.lazy5 viewStaticSidebarForDesktop
-            enableScalableLayout
+            enableThreeColumnLayout
             enableMathSupport
             filterByTagWithDescription_
             indexFilterString
@@ -2555,7 +2555,7 @@ viewLetterGrid enableMathSupport staticSidebar filterByTagWithDescription_ index
 
 
 viewStaticSidebarForDesktop : Bool -> Bool -> Maybe DescribedTag -> String -> IndexOfTerms -> Html Msg
-viewStaticSidebarForDesktop enableScalableLayout enableMathSupport filterByTagWithDescription_ indexFilterString termIndex =
+viewStaticSidebarForDesktop enableThreeColumnLayout enableMathSupport filterByTagWithDescription_ indexFilterString termIndex =
     let
         filteredTermIndex : IndexOfTerms
         filteredTermIndex =
@@ -2563,7 +2563,7 @@ viewStaticSidebarForDesktop enableScalableLayout enableMathSupport filterByTagWi
     in
     div
         [ class "hidden print:hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900"
-        , if enableScalableLayout then
+        , if enableThreeColumnLayout then
             class "lg:w-78"
 
           else
@@ -3147,7 +3147,7 @@ pageTitle model glossaryForUi =
         viewingSingleItem =
             model.layout
                 == ShowSingleItem
-                || GlossaryForUi.enableScalableLayout glossaryForUi
+                || GlossaryForUi.enableThreeColumnLayout glossaryForUi
     in
     case ( viewingSingleItem, model.itemWithFocus ) of
         ( True, Just id ) ->
@@ -3420,7 +3420,7 @@ viewMain filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } 
         ]
 
 
-viewMainScalable :
+viewMainThreeColumnLayout :
     Maybe DescribedTag
     -> { enableMathSupport : Bool, noModalDialogShown_ : Bool }
     -> Editability
@@ -3432,7 +3432,7 @@ viewMainScalable :
     -> Maybe ( GlossaryItemId, Bool )
     -> GlossaryForUi
     -> Html Msg
-viewMainScalable filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters itemWithFocus itemSearchDialog confirmDeleteId deleting resultOfAttemptingToCopyItemTextToClipboard glossaryForUi =
+viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters itemWithFocus itemSearchDialog confirmDeleteId deleting resultOfAttemptingToCopyItemTextToClipboard glossaryForUi =
     let
         items : GlossaryItemsForUi
         items =
@@ -3528,9 +3528,9 @@ view model =
                 glossaryItemsForUi =
                     GlossaryForUi.items glossaryForUi
 
-                enableScalableLayout : Bool
-                enableScalableLayout =
-                    GlossaryForUi.enableScalableLayout glossaryForUi
+                enableThreeColumnLayout : Bool
+                enableThreeColumnLayout =
+                    GlossaryForUi.enableThreeColumnLayout glossaryForUi
 
                 filterByTagId_ : Maybe TagId
                 filterByTagId_ =
@@ -3638,7 +3638,7 @@ view model =
                         [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) <| Extras.HtmlAttribute.inert
                         ]
                         [ Html.Lazy.lazy6 viewMenuForMobileAndStaticSidebarForDesktop
-                            enableScalableLayout
+                            enableThreeColumnLayout
                             model.menuForMobileVisibility
                             model.common.enableMathSupport
                             model.indexFilterString
@@ -3655,7 +3655,7 @@ view model =
                         ]
                     , div
                         [ class "flex flex-col"
-                        , if enableScalableLayout then
+                        , if enableThreeColumnLayout then
                             class "lg:pl-78"
 
                           else
@@ -3724,7 +3724,7 @@ view model =
                                         model.startingItemCombobox
                                         model.startingItemComboboxInput
                                 ]
-                            , Extras.Html.showUnless enableScalableLayout <|
+                            , Extras.Html.showUnless enableThreeColumnLayout <|
                                 header
                                     [ class "mt-0" ]
                                     [ h1
@@ -3748,8 +3748,8 @@ view model =
                                             [ glossaryForUi |> GlossaryForUi.title |> GlossaryTitle.view model.common.enableMathSupport [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
                                             ]
                                     ]
-                            , if enableScalableLayout then
-                                viewMainScalable
+                            , if enableThreeColumnLayout then
+                                viewMainThreeColumnLayout
                                     filterByTagWithDescription_
                                     { enableMathSupport = model.common.enableMathSupport
                                     , noModalDialogShown_ = noModalDialogShown_

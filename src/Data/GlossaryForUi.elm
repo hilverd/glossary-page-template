@@ -1,7 +1,7 @@
 module Data.GlossaryForUi exposing
     ( GlossaryForUi
     , create, fromGlossaryFromDom
-    , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, enableScalableLayout, cardWidth, defaultTheme, title, aboutSection, items, versionNumber
+    , enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, enableThreeColumnLayout, cardWidth, defaultTheme, title, aboutSection, items, versionNumber
     , checksumForChange
     , toGlossaryFromDom
     )
@@ -21,7 +21,7 @@ module Data.GlossaryForUi exposing
 
 # Query
 
-@docs enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, enableScalableLayout, cardWidth, defaultTheme, title, aboutSection, items, versionNumber
+@docs enableLastUpdatedDates, enableExportMenu, enableOrderItemsButtons, enableHelpForMakingChanges, enableThreeColumnLayout, cardWidth, defaultTheme, title, aboutSection, items, versionNumber
 
 
 # Checksums
@@ -70,7 +70,7 @@ type GlossaryForUi
         , enableExportMenu : Bool
         , enableOrderItemsButtons : Bool
         , enableHelpForMakingChanges : Bool
-        , enableScalableLayout : Bool
+        , enableThreeColumnLayout : Bool
         , cardWidth : CardWidth
         , defaultTheme : Theme
         , title : GlossaryTitle
@@ -108,11 +108,11 @@ enableHelpForMakingChanges (GlossaryForUi glossaryForUi) =
     glossaryForUi.enableHelpForMakingChanges
 
 
-{-| Whether or not the scalable layout is enabled.
+{-| Whether or not the three-column layout is enabled.
 -}
-enableScalableLayout : GlossaryForUi -> Bool
-enableScalableLayout (GlossaryForUi glossaryForUi) =
-    glossaryForUi.enableScalableLayout
+enableThreeColumnLayout : GlossaryForUi -> Bool
+enableThreeColumnLayout (GlossaryForUi glossaryForUi) =
+    glossaryForUi.enableThreeColumnLayout
 
 
 {-| Get the card width configuration for a GlossaryForUi.
@@ -260,7 +260,7 @@ createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsBut
         , enableExportMenu = Maybe.withDefault True enableExportMenu_
         , enableOrderItemsButtons = Maybe.withDefault True enableOrderItemsButtons_
         , enableHelpForMakingChanges = Maybe.withDefault False enableHelpForMakingChanges_
-        , enableScalableLayout = showIncubatingFeatures
+        , enableThreeColumnLayout = showIncubatingFeatures
         , cardWidth = Maybe.withDefault CardWidth.Compact cardWidth_
         , defaultTheme = Maybe.withDefault Theme.System defaultTheme_
         , title = Maybe.withDefault (GlossaryTitle.fromMarkdown I18n.elementNotFound) title_
