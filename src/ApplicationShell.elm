@@ -135,7 +135,7 @@ init flags url key =
                                 itemWithFocus_
 
                             Nothing ->
-                                startItem glossaryForUi
+                                startingItem glossaryForUi
                    )
 
         enableHelpForMakingChanges : Bool
@@ -227,8 +227,8 @@ init flags url key =
     )
 
 
-startItem : Result a GlossaryForUi -> Maybe GlossaryItemId
-startItem glossaryForUi =
+startingItem : Result a GlossaryForUi -> Maybe GlossaryItemId
+startingItem glossaryForUi =
     glossaryForUi
         |> Result.toMaybe
         |> Maybe.map GlossaryForUi.items
@@ -380,7 +380,7 @@ update msg model =
                                                 itemWithFocus_
 
                                             Nothing ->
-                                                startItem common0.glossaryForUi
+                                                startingItem common0.glossaryForUi
                                    )
 
                         common1 : CommonModel
@@ -429,7 +429,7 @@ update msg model =
                     Pages.ListAll.init
                         commonModel
                         (if itemWithFocus == Nothing then
-                            startItem commonModel.glossaryForUi
+                            startingItem commonModel.glossaryForUi
 
                          else
                             itemWithFocus
