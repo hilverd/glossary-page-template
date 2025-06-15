@@ -39,6 +39,7 @@ import Components.Combobox
 import Components.Dividers
 import Components.DropdownMenu
 import Components.GlossaryItemCard
+import Components.IncubatingGlossaryItemCard
 import Components.ModalDialog
 import Components.Notifications
 import Components.SearchDialog
@@ -3497,21 +3498,23 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                                 [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
                                 [ div
                                     []
-                                    [ viewGlossaryItem
+                                    [ Components.IncubatingGlossaryItemCard.view
                                         { enableMathSupport = enableMathSupport
-                                        , editable = Editability.editing editability
                                         , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
-                                        , shownAsSingle = False
+                                        , onClickCopyToClipboard = PageMsg.Internal <| CopyItemTextToClipboard <| GlossaryItemForUi.id item
+                                        , onClickEdit = PageMsg.NavigateToCreateOrEdit <| Just <| GlossaryItemForUi.id item
+                                        , onClickDelete = PageMsg.Internal <| ConfirmDelete <| GlossaryItemForUi.id item
+                                        , onClickTag = PageMsg.Internal << FilterByTag
+                                        , resultOfAttemptingToCopyItemTextToClipboard =
+                                            resultOfAttemptingToCopyItemTextToClipboard
+                                                |> Maybe.map
+                                                    (\( glossaryItemId, _ ) ->
+                                                        Just glossaryItemId == itemWithFocus
+                                                    )
+                                        , editable = Editability.editing editability
                                         }
-                                        itemWithFocus
                                         (Maybe.map DescribedTag.tag filterByTagWithDescription_)
-                                        (resultOfAttemptingToCopyItemTextToClipboard
-                                            |> Maybe.map
-                                                (\( glossaryItemId, _ ) ->
-                                                    Just glossaryItemId == itemWithFocus
-                                                )
-                                        )
-                                        { previous = Nothing, item = Just item, next = Nothing }
+                                        item
                                     ]
                                 ]
                             , Html.Lazy.lazy3 viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog
