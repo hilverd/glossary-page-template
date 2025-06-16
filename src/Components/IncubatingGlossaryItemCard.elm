@@ -1,9 +1,26 @@
 module Components.IncubatingGlossaryItemCard exposing (view, viewRelatedItem)
 
-import Data.GlossaryItem.Tag exposing (Tag)
+import Accessibility exposing (Html, div, span, text)
+import Accessibility.Aria
+import Components.Button
+import Data.GlossaryItem.Definition as Definition exposing (Definition)
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
+import Data.GlossaryItem.Tag as Tag exposing (Tag)
+import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId exposing (GlossaryItemId)
-import Html exposing (Html, text)
+import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
+import ElementIds
+import Extras.Html
+import Extras.HtmlAttribute
+import Extras.HtmlEvents
+import Extras.Url exposing (fragmentOnly)
+import Html
+import Html.Attributes exposing (class, id, target)
+import Html.Events
+import Icons
+import Internationalisation as I18n
+import Svg.Attributes
 
 
 view :
@@ -21,10 +38,6 @@ view :
     -> Html msg
 view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClickEdit, onClickDelete, onClickTag, resultOfAttemptingToCopyItemTextToClipboard, editable } tagBeingFilteredBy glossaryItem =
     let
-        index : GlossaryItemId
-        index =
-            GlossaryItemForUi.id glossaryItem
-
         tags : List Tag
         tags =
             GlossaryItemForUi.allTags glossaryItem
@@ -44,8 +57,299 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
         lastUpdatedByEmailAddress : Maybe String
         lastUpdatedByEmailAddress =
             GlossaryItemForUi.lastUpdatedByEmailAddress glossaryItem
+
+        disambiguatedPreferredTerm : Term
+        disambiguatedPreferredTerm =
+            glossaryItem
+                |> GlossaryItemForUi.disambiguatedPreferredTerm
+                |> DisambiguatedTerm.toTerm
+
+        alternativeTerms : List Term
+        alternativeTerms =
+            GlossaryItemForUi.alternativeTerms glossaryItem
+
+        itemHasADefinition : Bool
+        itemHasADefinition =
+            GlossaryItemForUi.definition glossaryItem /= Nothing
+
+        definition : Maybe Definition
+        definition =
+            GlossaryItemForUi.definition glossaryItem
+
+        relatedTerms : List DisambiguatedTerm
+        relatedTerms =
+            GlossaryItemForUi.relatedPreferredTerms glossaryItem
+
+        needsUpdating : Bool
+        needsUpdating =
+            GlossaryItemForUi.needsUpdating glossaryItem
     in
-    text "TODO"
+    if editable then
+        div
+            [ class "flex flex-col justify-items-end bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0"
+            ]
+            [ div
+                [ class "" ]
+                (viewGlossaryTerm
+                    { enableMathSupport = enableMathSupport
+                    , isPreferred = True
+                    }
+                    disambiguatedPreferredTerm
+                    :: List.map
+                        (viewGlossaryTerm
+                            { enableMathSupport = enableMathSupport
+                            , isPreferred = False
+                            }
+                        )
+                        alternativeTerms
+                    ++ (if needsUpdating then
+                            [ Html.dd
+                                [ class "mt-1 py-2 print:py-2 text-gray-600 dark:text-gray-300 print:text-black needs-updating" ]
+                                [ span
+                                    [ class "inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-400/10 px-2 py-1 text-sm font-medium text-yellow-800 dark:text-yellow-500 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-400/20" ]
+                                    [ text I18n.needsUpdating ]
+                                ]
+                            ]
+
+                        else
+                            []
+                       )
+                    ++ [ viewTags
+                            { enableMathSupport = enableMathSupport
+                            , onClickTag = Just onClickTag
+                            }
+                            tagsNotBeingFilteredBy
+                       , definition
+                            |> Extras.Html.showMaybe
+                                (viewGlossaryItemDefinition
+                                    { enableMathSupport = enableMathSupport }
+                                )
+                       ]
+                    ++ viewGlossaryItemRelatedTerms enableMathSupport False itemHasADefinition Nothing relatedTerms
+                )
+            , div
+                [ class "print:hidden mt-3 flex flex-col grow justify-end" ]
+                [ Extras.Html.showIf enableLastUpdatedDates <|
+                    Extras.Html.showMaybe
+                        (I18n.updatedOn lastUpdatedByName lastUpdatedByEmailAddress)
+                        lastUpdatedDate
+                , div
+                    [ class "flex justify-between" ]
+                    [ span
+                        [ class "inline-flex items-center" ]
+                        [ Components.Button.text
+                            [ Html.Events.onClick onClickEdit
+                            ]
+                            [ Icons.pencil
+                                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
+                            , span
+                                [ class "font-medium text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-400" ]
+                                [ text I18n.edit ]
+                            ]
+                        ]
+                    , span
+                        [ class "ml-3 inline-flex items-center" ]
+                        [ Components.Button.text
+                            [ Html.Events.onClick onClickDelete
+                            ]
+                            [ Icons.trash
+                                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
+                            , span
+                                [ class "font-medium text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-400" ]
+                                [ text I18n.delete ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+
+    else
+        div
+            [ class "flex flex-col justify-between overflow-x-clip bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0"
+            ]
+            [ div
+                [ class "flex-1" ]
+                [ div []
+                    (viewGlossaryTerm
+                        { enableMathSupport = enableMathSupport
+                        , isPreferred = True
+                        }
+                        disambiguatedPreferredTerm
+                        :: List.map
+                            (viewGlossaryTerm
+                                { enableMathSupport = enableMathSupport
+                                , isPreferred = False
+                                }
+                            )
+                            alternativeTerms
+                        ++ (if needsUpdating then
+                                [ Html.dd
+                                    [ class "needs-updating" ]
+                                    [ span
+                                        []
+                                        [ text I18n.needsUpdating ]
+                                    ]
+                                ]
+
+                            else
+                                []
+                           )
+                        ++ [ viewTags
+                                { enableMathSupport = enableMathSupport
+                                , onClickTag = Just onClickTag
+                                }
+                                tagsNotBeingFilteredBy
+                           , definition
+                                |> Extras.Html.showMaybe
+                                    (viewGlossaryItemDefinition
+                                        { enableMathSupport = enableMathSupport }
+                                    )
+                           ]
+                        ++ viewGlossaryItemRelatedTerms
+                            enableMathSupport
+                            False
+                            itemHasADefinition
+                            Nothing
+                            relatedTerms
+                    )
+                ]
+            , div
+                [ class "flex justify-between items-center w-full" ]
+                [ Components.Button.text
+                    [ class "print:hidden"
+                    , Extras.HtmlAttribute.showIf (resultOfAttemptingToCopyItemTextToClipboard == Nothing) <|
+                        Html.Events.onClick onClickCopyToClipboard
+                    , Html.Attributes.title I18n.copyToClipboard
+                    , Accessibility.Aria.label I18n.copyToClipboard
+                    ]
+                    [ if resultOfAttemptingToCopyItemTextToClipboard == Just True then
+                        Icons.tick
+                            [ Svg.Attributes.class "h-5 w-5 text-green-700 dark:text-green-300" ]
+
+                      else
+                        Icons.copy
+                            [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
+                    ]
+                , Extras.Html.showIf enableLastUpdatedDates <|
+                    Extras.Html.showMaybe
+                        (I18n.updatedOn lastUpdatedByName lastUpdatedByEmailAddress)
+                        lastUpdatedDate
+                ]
+            ]
+
+
+viewGlossaryTerm :
+    { enableMathSupport : Bool, isPreferred : Bool }
+    -> Term
+    -> Html msg
+viewGlossaryTerm { enableMathSupport, isPreferred } term =
+    let
+        viewTerm : Html msg
+        viewTerm =
+            if isPreferred then
+                Term.view enableMathSupport [] term
+
+            else
+                span
+                    [ class "inline-flex items-center" ]
+                    [ Icons.cornerLeftUp
+                        [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-1 mr-1.5 text-gray-400 dark:text-gray-400 print:hidden"
+                        ]
+                    , Term.view enableMathSupport [ class "font-normal" ] term
+                    ]
+    in
+    div
+        [ class "flex justify-between"
+        , Extras.HtmlAttribute.showIf isPreferred <| class "mb-1"
+        ]
+        [ Html.dt
+            [ class "font-semibold print:font-normal text-gray-600 dark:text-gray-200 print:text-black" ]
+            [ span [ class "mr-1.5 hidden print:inline" ] [ text "➢" ]
+            , Html.dfn
+                [ class "not-italic" ]
+                [ if Term.isAbbreviation term then
+                    Html.abbr []
+                        [ viewTerm ]
+
+                  else
+                    viewTerm
+                ]
+            ]
+        ]
+
+
+viewTags :
+    { enableMathSupport : Bool, onClickTag : Maybe (Tag -> msg) }
+    -> List Tag
+    -> Html msg
+viewTags { enableMathSupport, onClickTag } tags =
+    Html.div
+        [ class "mt-4" ]
+        (List.map
+            (\tag ->
+                Components.Button.softSmall
+                    (onClickTag /= Nothing)
+                    [ class "mr-2 mb-2"
+                    , Html.Attributes.title <| I18n.tag ++ ": " ++ Tag.inlineText tag
+                    , Extras.HtmlAttribute.showMaybe (\onClickTag_ -> Html.Events.onClick <| onClickTag_ tag) onClickTag
+                    ]
+                    [ Tag.view enableMathSupport
+                        [ class "text-sm" ]
+                        tag
+                    ]
+            )
+            tags
+        )
+
+
+viewGlossaryItemDefinition : { enableMathSupport : Bool } -> Definition -> Html msg
+viewGlossaryItemDefinition { enableMathSupport } definition =
+    Html.dd
+        [ class "mt-1 print:mt-0 py-2 print:py-0 text-gray-600 dark:text-gray-300 print:text-black" ]
+        [ Definition.view { enableMathSupport = enableMathSupport } definition
+        ]
+
+
+viewGlossaryItemRelatedTerms : Bool -> Bool -> Bool -> Maybe (Term -> msg) -> List DisambiguatedTerm -> List (Html msg)
+viewGlossaryItemRelatedTerms enableMathSupport preview itemHasADefinition onClick relatedTerms =
+    if List.isEmpty relatedTerms then
+        []
+
+    else
+        [ Html.dd
+            [ class "related-terms mt-1 print:mt-0 py-2 print:py-0 text-gray-600 dark:text-gray-300" ]
+            (text
+                (if itemHasADefinition then
+                    I18n.seeAlso ++ ": "
+
+                 else
+                    I18n.see ++ ": "
+                )
+                :: (relatedTerms
+                        |> List.map DisambiguatedTerm.toTerm
+                        |> List.map
+                            (\relatedTerm ->
+                                Html.a
+                                    [ (if preview then
+                                        "#"
+
+                                       else
+                                        relatedTerm |> Term.id |> fragmentOnly
+                                      )
+                                        |> Html.Attributes.href
+                                    , target "_self"
+                                    , Extras.HtmlAttribute.showMaybe
+                                        (\onClick1 ->
+                                            Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <| onClick1 relatedTerm
+                                        )
+                                        onClick
+                                    ]
+                                    [ Term.view enableMathSupport [] relatedTerm ]
+                            )
+                        |> List.intersperse (text ", ")
+                   )
+            )
+        ]
 
 
 viewRelatedItem : Html msg
