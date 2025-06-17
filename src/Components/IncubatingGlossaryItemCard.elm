@@ -92,12 +92,14 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                 [ class "" ]
                 (viewGlossaryTerm
                     { enableMathSupport = enableMathSupport
+                    , withLink = False
                     , isPreferred = True
                     }
                     disambiguatedPreferredTerm
                     :: List.map
                         (viewGlossaryTerm
                             { enableMathSupport = enableMathSupport
+                            , withLink = False
                             , isPreferred = False
                             }
                         )
@@ -172,12 +174,14 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                 [ div []
                     (viewGlossaryTerm
                         { enableMathSupport = enableMathSupport
+                        , withLink = False
                         , isPreferred = True
                         }
                         disambiguatedPreferredTerm
                         :: List.map
                             (viewGlossaryTerm
                                 { enableMathSupport = enableMathSupport
+                                , withLink = False
                                 , isPreferred = False
                                 }
                             )
@@ -239,15 +243,23 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
 
 
 viewGlossaryTerm :
-    { enableMathSupport : Bool, isPreferred : Bool }
+    { enableMathSupport : Bool, withLink : Bool, isPreferred : Bool }
     -> Term
     -> Html msg
-viewGlossaryTerm { enableMathSupport, isPreferred } term =
+viewGlossaryTerm { enableMathSupport, withLink, isPreferred } term =
     let
         viewTerm : Html msg
         viewTerm =
             if isPreferred then
-                Term.view enableMathSupport [] term
+                if withLink then
+                    Html.a
+                        [ term |> Term.id |> fragmentOnly |> Html.Attributes.href
+                        , target "_self"
+                        ]
+                        [ Term.view enableMathSupport [] term ]
+
+                else
+                    Term.view enableMathSupport [] term
 
             else
                 span
@@ -352,6 +364,49 @@ viewGlossaryItemRelatedTerms enableMathSupport preview itemHasADefinition onClic
         ]
 
 
-viewRelatedItem : Html msg
-viewRelatedItem =
-    text "TODO"
+viewRelatedItem : Bool -> GlossaryItemForUi -> Html msg
+viewRelatedItem enableMathSupport glossaryItem =
+    let
+        disambiguatedPreferredTerm : Term
+        disambiguatedPreferredTerm =
+            glossaryItem
+                |> GlossaryItemForUi.disambiguatedPreferredTerm
+                |> DisambiguatedTerm.toTerm
+
+        alternativeTerms : List Term
+        alternativeTerms =
+            GlossaryItemForUi.alternativeTerms glossaryItem
+
+        definition : Maybe Definition
+        definition =
+            GlossaryItemForUi.definition glossaryItem
+    in
+    div
+        [ class "flex flex-col justify-between overflow-x-clip bg-white dark:bg-black print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0"
+        ]
+        [ div
+            [ class "flex-1" ]
+            [ div []
+                (viewGlossaryTerm
+                    { enableMathSupport = enableMathSupport
+                    , withLink = True
+                    , isPreferred = True
+                    }
+                    disambiguatedPreferredTerm
+                    :: List.map
+                        (viewGlossaryTerm
+                            { enableMathSupport = enableMathSupport
+                            , withLink = False
+                            , isPreferred = False
+                            }
+                        )
+                        alternativeTerms
+                    ++ [ definition
+                            |> Extras.Html.showMaybe
+                                (viewGlossaryItemDefinition
+                                    { enableMathSupport = enableMathSupport }
+                                )
+                       ]
+                )
+            ]
+        ]

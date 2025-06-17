@@ -1462,7 +1462,8 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
                 ]
     in
     div
-        [ class "pt-4 pr-4 pl-4 pb-2 mb-5 rounded-md max-w-xl overflow-x-auto"
+        [ class "pt-4 pr-4 pl-4 pb-2 rounded-md max-w-xl overflow-x-auto"
+        , Extras.HtmlAttribute.showUnless enableThreeColumnLayout <| class "mb-5"
         , if enableThreeColumnLayout then
             class "bg-gray-100 dark:bg-gray-900"
 
@@ -1981,7 +1982,7 @@ viewConfirmDeleteModal editability itemToDelete deleting =
 viewStartEditingButton : Editability -> Bool -> Html Msg
 viewStartEditingButton editability tabbable =
     div
-        [ class "mb-4 flex-none print:hidden" ]
+        [ class "flex-none print:hidden" ]
         [ Components.Button.white True
             [ Html.Events.onClick <| PageMsg.Internal StartEditing
             , Accessibility.Key.tabbable tabbable
@@ -2006,7 +2007,7 @@ viewStartEditingButton editability tabbable =
 viewStopEditingButton : Bool -> Html Msg
 viewStopEditingButton tabbable =
     div
-        [ class "mb-4 flex-none print:hidden" ]
+        [ class "flex-none print:hidden" ]
         [ Components.Button.white True
             [ Html.Events.onClick <| PageMsg.Internal StopEditing
             , Accessibility.Key.tabbable tabbable
@@ -3468,95 +3469,81 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
     Extras.Html.showMaybe
         (\( item, relatedItems ) ->
             div
-                [ class "xl:grid xl:grid-cols-2 xl:gap-8 px-6 lg:px-8" ]
-                [ div
-                    []
-                    [ header
-                        [ class "mt-0 three-column-layout" ]
-                        [ h1
-                            [ id ElementIds.title ]
-                            [ Extras.Html.showMaybe
-                                (Term.view
-                                    enableMathSupport
-                                    [ class "text-3xl font-bold leading-tight" ]
-                                )
-                                itemTitle
-                            ]
-                        , h2
-                            [ class "mt-2 font-bold leading-tight" ]
-                            [ glossaryForUi
-                                |> GlossaryForUi.title
-                                |> GlossaryTitle.view
-                                    enableMathSupport
-                                    [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
-                            ]
-                        ]
-                    , Html.main_
-                        [ class "three-column-layout" ]
-                        [ Extras.Html.showMaybe
-                            (viewCurrentTagFilter [] enableMathSupport)
-                            filterByTagWithDescription_
-                        , Html.article
-                            [ class "mt-4" ]
-                            [ div
-                                [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
-                                [ div
-                                    []
-                                    [ Components.IncubatingGlossaryItemCard.view
-                                        { enableMathSupport = enableMathSupport
-                                        , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
-                                        , onClickCopyToClipboard = PageMsg.Internal <| CopyItemTextToClipboard <| GlossaryItemForUi.id item
-                                        , onClickEdit = PageMsg.NavigateToCreateOrEdit <| Just <| GlossaryItemForUi.id item
-                                        , onClickDelete = PageMsg.Internal <| ConfirmDelete <| GlossaryItemForUi.id item
-                                        , onClickTag = PageMsg.Internal << FilterByTag
-                                        , resultOfAttemptingToCopyItemTextToClipboard =
-                                            resultOfAttemptingToCopyItemTextToClipboard
-                                                |> Maybe.map
-                                                    (\( glossaryItemId, _ ) ->
-                                                        Just glossaryItemId == itemWithFocus
-                                                    )
-                                        , editable = Editability.editing editability
-                                        }
-                                        (Maybe.map DescribedTag.tag filterByTagWithDescription_)
-                                        item
-                                    ]
-                                ]
-                            , Html.Lazy.lazy3 viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog
-                            , Html.Lazy.lazy3 viewConfirmDeleteModal editability confirmDeleteId deleting
-                            ]
-                        ]
-                    ]
-                , aside
-                    [ class "px-6 lg:px-8 xl:px-0 pt-8 xl:pt-0" ]
-                    [ h3
-                        [ class "text-lg font-medium text-gray-700 dark:text-gray-300 mb-4" ]
-                        [ text "Related items" ]
-                    , div
-                        [ class "space-y-4" ]
-                        (List.map
-                            (\relatedItem ->
-                                let
-                                    relatedItemId =
-                                        GlossaryItemForUi.id relatedItem
-                                in
-                                viewGlossaryItem
-                                    { enableMathSupport = enableMathSupport
-                                    , editable = Editability.editing editability
-                                    , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
-                                    , shownAsSingle = False
-                                    }
-                                    itemWithFocus
-                                    (Maybe.map DescribedTag.tag filterByTagWithDescription_)
-                                    (resultOfAttemptingToCopyItemTextToClipboard
-                                        |> Maybe.map
-                                            (\( glossaryItemId, _ ) ->
-                                                glossaryItemId == relatedItemId
-                                            )
+                []
+                [ Extras.Html.showMaybe
+                    (viewCurrentTagFilter
+                        [ class "mt-4 mb-4 px-6 lg:px-8 mb-6" ]
+                        enableMathSupport
+                    )
+                    filterByTagWithDescription_
+                , div
+                    [ class "xl:grid xl:grid-cols-2 xl:gap-8 px-6 lg:px-8 mt-6" ]
+                    [ div
+                        []
+                        [ header
+                            [ class "three-column-layout" ]
+                            [ h1
+                                [ id ElementIds.title ]
+                                [ Extras.Html.showMaybe
+                                    (Term.view
+                                        enableMathSupport
+                                        [ class "text-3xl font-bold leading-tight" ]
                                     )
-                                    { previous = Nothing, item = Just relatedItem, next = Nothing }
+                                    itemTitle
+                                ]
+                            , h2
+                                [ class "mt-2 font-bold leading-tight" ]
+                                [ glossaryForUi
+                                    |> GlossaryForUi.title
+                                    |> GlossaryTitle.view
+                                        enableMathSupport
+                                        [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
+                                ]
+                            ]
+                        , Html.main_
+                            [ class "three-column-layout" ]
+                            [ Html.article
+                                [ class "mt-4" ]
+                                [ div
+                                    [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
+                                    [ div
+                                        []
+                                        [ Components.IncubatingGlossaryItemCard.view
+                                            { enableMathSupport = enableMathSupport
+                                            , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
+                                            , onClickCopyToClipboard = PageMsg.Internal <| CopyItemTextToClipboard <| GlossaryItemForUi.id item
+                                            , onClickEdit = PageMsg.NavigateToCreateOrEdit <| Just <| GlossaryItemForUi.id item
+                                            , onClickDelete = PageMsg.Internal <| ConfirmDelete <| GlossaryItemForUi.id item
+                                            , onClickTag = PageMsg.Internal << FilterByTag
+                                            , resultOfAttemptingToCopyItemTextToClipboard =
+                                                resultOfAttemptingToCopyItemTextToClipboard
+                                                    |> Maybe.map
+                                                        (\( glossaryItemId, _ ) ->
+                                                            Just glossaryItemId == itemWithFocus
+                                                        )
+                                            , editable = Editability.editing editability
+                                            }
+                                            (Maybe.map DescribedTag.tag filterByTagWithDescription_)
+                                            item
+                                        ]
+                                    ]
+                                , Html.Lazy.lazy3 viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog
+                                , Html.Lazy.lazy3 viewConfirmDeleteModal editability confirmDeleteId deleting
+                                ]
+                            ]
+                        ]
+                    , aside
+                        [ class "px-6 lg:px-8 xl:px-0 pt-8 xl:pt-0" ]
+                        [ h3
+                            [ class "text-lg font-medium text-gray-700 dark:text-gray-300 mb-4" ]
+                            [ text I18n.relatedItems ]
+                        , div
+                            [ class "space-y-4" ]
+                            (List.map
+                                (Components.IncubatingGlossaryItemCard.viewRelatedItem enableMathSupport)
+                                relatedItems
                             )
-                            relatedItems
-                        )
+                        ]
                     ]
                 ]
         )
@@ -3764,21 +3751,27 @@ view model =
                                         ]
                                     ]
                                 ]
-                            , div
-                                [ class "mt-6 px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-full" ]
-                                [ viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
-                                    |> Extras.Html.showIf (model.common.editability == ReadOnlyWithHelpForMakingChanges)
-                                , Extras.Html.showIf (Editability.editing model.common.editability) <|
-                                    viewSettings
-                                        glossaryForUi
-                                        model.common.editability
-                                        model.savingSettings
-                                        { tabbable = noModalDialogShown model
-                                        , enableMathSupport = model.common.enableMathSupport
-                                        }
-                                        model.startingItemCombobox
-                                        model.startingItemComboboxInput
-                                ]
+                            , Extras.Html.showIf
+                                ((model.common.editability == ReadOnlyWithHelpForMakingChanges)
+                                    || Editability.editing model.common.editability
+                                    || not enableThreeColumnLayout
+                                )
+                              <|
+                                div
+                                    [ class "mt-6 px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-full" ]
+                                    [ viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
+                                        |> Extras.Html.showIf (model.common.editability == ReadOnlyWithHelpForMakingChanges)
+                                    , Extras.Html.showIf (Editability.editing model.common.editability) <|
+                                        viewSettings
+                                            glossaryForUi
+                                            model.common.editability
+                                            model.savingSettings
+                                            { tabbable = noModalDialogShown model
+                                            , enableMathSupport = model.common.enableMathSupport
+                                            }
+                                            model.startingItemCombobox
+                                            model.startingItemComboboxInput
+                                    ]
                             , Extras.Html.showUnless enableThreeColumnLayout <|
                                 header
                                     [ class "mt-0" ]
