@@ -86,7 +86,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
     in
     if editable then
         div
-            [ class "flex flex-col justify-items-end bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0"
+            [ class "flex flex-col justify-items-end bg-white dark:bg-black print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0"
             ]
             [ div
                 [ class "" ]
@@ -165,7 +165,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
 
     else
         div
-            [ class "flex flex-col justify-between overflow-x-clip bg-white dark:bg-gray-800 print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0"
+            [ class "flex flex-col justify-between overflow-x-clip bg-white dark:bg-black print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0"
             ]
             [ div
                 [ class "flex-1" ]

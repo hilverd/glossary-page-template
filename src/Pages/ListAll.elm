@@ -1462,8 +1462,12 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
                 ]
     in
     div
-        [ class "mb-5 rounded-md max-w-xl overflow-x-auto bg-amber-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 print:hidden"
-        , class "pt-4 pr-4 pl-4 pb-2"
+        [ class "pt-4 pr-4 pl-4 pb-2 mb-5 rounded-md max-w-xl overflow-x-auto"
+        , if enableThreeColumnLayout then
+            class "bg-gray-100 dark:bg-gray-900"
+
+          else
+            class "bg-amber-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 print:hidden"
         ]
         [ details
             [ Accessibility.Key.tabbable tabbable
@@ -3464,11 +3468,11 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
     Extras.Html.showMaybe
         (\( item, relatedItems ) ->
             div
-                [ class "xl:grid xl:grid-cols-2 xl:gap-4" ]
+                [ class "xl:grid xl:grid-cols-2 xl:gap-8 px-6 lg:px-8" ]
                 [ div
                     []
                     [ header
-                        [ class "mt-0" ]
+                        [ class "mt-0 three-column-layout" ]
                         [ h1
                             [ id ElementIds.title ]
                             [ Extras.Html.showMaybe
@@ -3488,7 +3492,7 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                             ]
                         ]
                     , Html.main_
-                        []
+                        [ class "three-column-layout" ]
                         [ Extras.Html.showMaybe
                             (viewCurrentTagFilter [] enableMathSupport)
                             filterByTagWithDescription_
@@ -3719,11 +3723,18 @@ view model =
                         , div
                             [ Html.Attributes.id ElementIds.container
                             , class "relative"
+                            , Extras.HtmlAttribute.showIf enableThreeColumnLayout <| class "three-column-layout"
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
                             , glossaryForUi |> GlossaryForUi.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
                             ]
                             [ div
-                                [ class "pt-4 px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-full lg:sticky lg:top-0 lg:z-20 bg-gray-100 dark:bg-gray-900 lg:bg-white lg:dark:bg-gray-900 lg:border-b lg:border-gray-200 lg:dark:border-gray-800 print:bg-white" ]
+                                [ class "pt-4 px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-full lg:sticky lg:top-0 lg:z-20 lg:border-b lg:border-gray-200 lg:dark:border-gray-800 print:bg-white"
+                                , if enableThreeColumnLayout then
+                                    class "bg-white dark:bg-black"
+
+                                  else
+                                    class "bg-gray-100 dark:bg-gray-900 lg:bg-white lg:dark:bg-gray-900"
+                                ]
                               <|
                                 let
                                     showExportButton : Bool
@@ -3825,9 +3836,9 @@ view model =
                                     model.itemWithFocusComboboxInput
                                     glossaryForUi
                             , Html.footer
-                                []
+                                [ class "px-6 lg:px-8 print:px-0 pt-16 pb-6 mt-auto" ]
                                 [ div
-                                    []
+                                    [ class "pt-6 w-full flex justify-center text-sm text-gray-600 dark:text-gray-300 print:text-black" ]
                                     [ I18n.builtUsingGlossaryPageTemplate noModalDialogShown_ ]
                                 ]
                             ]
