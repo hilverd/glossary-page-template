@@ -2307,7 +2307,7 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport filterByTagWithDescr
         , Accessibility.Aria.modal True
         ]
         [ Html.div
-            [ class "fixed inset-0 bg-black/75"
+            [ class "fixed inset-0 bg-black/75 dark:bg-black/70"
             , if menuForMobileVisibility == GradualVisibility.Visible then
                 class "transition-opacity motion-reduce:transition-none ease-linear duration-300 opacity-100"
 
@@ -3585,6 +3585,7 @@ view model =
             , body =
                 [ Html.div
                     [ class "min-h-full focus:outline-hidden"
+                    , Extras.HtmlAttribute.showIf enableThreeColumnLayout <| class "bg-white dark:bg-black"
                     , Html.Attributes.id ElementIds.outer
                     , Accessibility.Key.tabbable True
                     , Html.Events.preventDefaultOn "keydown"
