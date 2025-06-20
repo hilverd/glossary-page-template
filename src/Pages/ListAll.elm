@@ -3507,26 +3507,23 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                                 [ class "mt-4" ]
                                 [ div
                                     [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
-                                    [ div
-                                        []
-                                        [ Components.IncubatingGlossaryItemCard.view
-                                            { enableMathSupport = enableMathSupport
-                                            , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
-                                            , onClickCopyToClipboard = PageMsg.Internal <| CopyItemTextToClipboard <| GlossaryItemForUi.id item
-                                            , onClickEdit = PageMsg.NavigateToCreateOrEdit <| Just <| GlossaryItemForUi.id item
-                                            , onClickDelete = PageMsg.Internal <| ConfirmDelete <| GlossaryItemForUi.id item
-                                            , onClickTag = PageMsg.Internal << FilterByTag
-                                            , resultOfAttemptingToCopyItemTextToClipboard =
-                                                resultOfAttemptingToCopyItemTextToClipboard
-                                                    |> Maybe.map
-                                                        (\( glossaryItemId, _ ) ->
-                                                            Just glossaryItemId == itemWithFocus
-                                                        )
-                                            , editable = Editability.editing editability
-                                            }
-                                            (Maybe.map DescribedTag.tag filterByTagWithDescription_)
-                                            item
-                                        ]
+                                    [ Components.IncubatingGlossaryItemCard.view
+                                        { enableMathSupport = enableMathSupport
+                                        , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
+                                        , onClickCopyToClipboard = PageMsg.Internal <| CopyItemTextToClipboard <| GlossaryItemForUi.id item
+                                        , onClickEdit = PageMsg.NavigateToCreateOrEdit <| Just <| GlossaryItemForUi.id item
+                                        , onClickDelete = PageMsg.Internal <| ConfirmDelete <| GlossaryItemForUi.id item
+                                        , onClickTag = PageMsg.Internal << FilterByTag
+                                        , resultOfAttemptingToCopyItemTextToClipboard =
+                                            resultOfAttemptingToCopyItemTextToClipboard
+                                                |> Maybe.map
+                                                    (\( glossaryItemId, _ ) ->
+                                                        Just glossaryItemId == itemWithFocus
+                                                    )
+                                        , editable = Editability.editing editability
+                                        }
+                                        (Maybe.map DescribedTag.tag filterByTagWithDescription_)
+                                        item
                                     ]
                                 , Html.Lazy.lazy3 viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog
                                 , Html.Lazy.lazy3 viewConfirmDeleteModal editability confirmDeleteId deleting
