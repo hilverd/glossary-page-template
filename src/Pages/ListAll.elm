@@ -3534,7 +3534,7 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                         [ class "xl:shrink pt-8 xl:pt-0" ]
                         [ Extras.Html.showIf (not <| List.isEmpty relatedItems) <|
                             h3
-                                [ class "text-lg font-medium text-gray-700 dark:text-gray-300 mb-4" ]
+                                [ class "text-xl font-medium text-gray-700 dark:text-gray-300 mb-4" ]
                                 [ text I18n.relatedItems ]
                         , div
                             [ class "space-y-4" ]

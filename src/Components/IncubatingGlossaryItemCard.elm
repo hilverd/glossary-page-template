@@ -188,9 +188,9 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                             alternativeTerms
                         ++ (if needsUpdating then
                                 [ Html.dd
-                                    [ class "needs-updating" ]
+                                    [ class "mt-1 py-2 print:py-2 text-gray-600 dark:text-gray-300 print:text-black needs-updating" ]
                                     [ span
-                                        []
+                                        [ class "inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-400/10 px-2 py-1 text-sm font-medium text-yellow-800 dark:text-yellow-500 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-400/20" ]
                                         [ text I18n.needsUpdating ]
                                     ]
                                 ]
