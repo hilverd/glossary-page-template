@@ -25,7 +25,7 @@ import Data.GradualVisibility exposing (GradualVisibility(..))
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Html
-import Html.Attributes exposing (attribute, class, href)
+import Html.Attributes exposing (attribute, class)
 import Html.Events
 import Icons
 import Internationalisation as I18n
@@ -330,17 +330,16 @@ view toParentMsg (Model model) enabled buttonShape choices =
                         (\choiceIndex choice_ ->
                             case choice_ of
                                 Choice { body, onSelect } ->
-                                    Html.a
-                                        [ class "group flex items-center px-4 py-2 hover:no-underline"
+                                    Html.button
+                                        [ class "group flex items-center px-4 py-2 hover:no-underline w-full text-left"
                                         , if model.activeChoice == Just choiceIndex then
                                             class "text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-900"
 
                                           else
                                             class "text-gray-700 dark:text-gray-300"
-                                        , href "#"
                                         , Accessibility.Role.menuItem
                                         , Accessibility.Key.tabbable False
-                                        , Extras.HtmlEvents.onClickPreventDefault onSelect
+                                        , Html.Events.onClick onSelect
                                         , Html.Events.onMouseEnter <| toParentMsg <| ActivateChoice choiceIndex
                                         , Html.Events.onMouseLeave <| toParentMsg <| DeactivateChoice choiceIndex
                                         ]

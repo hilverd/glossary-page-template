@@ -17,6 +17,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Changed
 ### Fixed
+
+- Make drop down menus not change URL when clicking on a choice.
+
 ### Removed
 
 ## [5.7.0] - 2025-05-26
