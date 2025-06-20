@@ -85,7 +85,9 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
             case style of
                 Preview ->
                     div
-                        [ Html.Attributes.style "max-height" "100%" ]
+                        [ Html.Attributes.style "max-height" "100%"
+                        , class "max-w-[69ch]"
+                        ]
                         (viewGlossaryTerm
                             { enableMathSupport = enableMathSupport
                             , showSilcrow = False
