@@ -1473,6 +1473,7 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
         [ details
             [ Accessibility.Key.tabbable tabbable
             , class "relative"
+            , Extras.HtmlAttribute.showIf (Components.Combobox.choicesVisible startingItemCombobox) <| class "sm:pb-20"
             ]
             [ Extras.Html.showIf (savingSettings == SavingInProgress) <|
                 div
