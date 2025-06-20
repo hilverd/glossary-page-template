@@ -317,8 +317,10 @@ viewTags { enableMathSupport, onClickTag } tags =
 viewGlossaryItemDefinition : { enableMathSupport : Bool } -> Definition -> Html msg
 viewGlossaryItemDefinition { enableMathSupport } definition =
     Html.dd
-        [ class "mt-1 print:mt-0 py-2 print:py-0 text-gray-600 dark:text-gray-300 print:text-black" ]
-        [ Definition.view { enableMathSupport = enableMathSupport } definition
+        [ class "mt-1 print:mt-0 py-2 print:py-0 text-gray-600 dark:text-gray-300 print:text-black item-definition" ]
+        [ Definition.view
+            { enableMathSupport = enableMathSupport }
+            definition
         ]
 
 
