@@ -384,10 +384,10 @@ viewRelatedItem enableMathSupport glossaryItem =
             GlossaryItemForUi.definition glossaryItem
     in
     div
-        [ class "w-[69ch] max-w-full flex flex-col justify-between overflow-x-clip bg-white dark:bg-black print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0"
+        [ class "w-[69ch] relative max-w-full flex flex-col justify-between overflow-x-clip bg-white dark:bg-black print:bg-white border dark:border-gray-700 print:border-none rounded-lg"
         ]
         [ div
-            [ class "flex-1" ]
+            [ class "flex-1 max-h-40 overflow-hidden print:px-0 px-4 pt-4 pb-6 print:py-0" ]
             [ div []
                 (viewGlossaryTerm
                     { enableMathSupport = enableMathSupport
@@ -411,4 +411,7 @@ viewRelatedItem enableMathSupport glossaryItem =
                        ]
                 )
             ]
+        , div
+            [ class "absolute bottom-0 left-4 right-4 h-8 bg-gradient-to-t from-white dark:from-black to-transparent pointer-events-none" ]
+            []
         ]
