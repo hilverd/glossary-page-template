@@ -171,7 +171,8 @@ type InternalMsg
     | ShowRelatedTermAsSingle Term
     | ChangeLayoutToShowAll
     | StartingItemComboboxMsg Components.Combobox.Msg
-    | UpdateStartingItemComboboxInput Bool String
+    | UpdateStartingItemComboboxInput String
+    | UpdateStartingItemComboboxInputToCurrent
     | ChangeStartingItem DisambiguatedTerm
     | ItemWithFocusComboboxMsg Components.Combobox.Msg
     | UpdateItemWithFocusComboboxInput Bool String
@@ -679,15 +680,35 @@ update msg model =
                 msg_
                 model.startingItemCombobox
 
-        UpdateStartingItemComboboxInput hideChoices input ->
+        UpdateStartingItemComboboxInput input ->
             ( { model
                 | startingItemComboboxInput = input
-                , startingItemCombobox =
-                    if hideChoices then
-                        Components.Combobox.hideChoices model.startingItemCombobox
+                , startingItemCombobox = Components.Combobox.showChoices model.startingItemCombobox
+              }
+            , Cmd.none
+            )
 
-                    else
-                        Components.Combobox.showChoices model.startingItemCombobox
+        UpdateStartingItemComboboxInputToCurrent ->
+            let
+                currentStartItem =
+                    model.common.glossaryForUi
+                        |> Result.toMaybe
+                        |> Maybe.map (\glossaryForUi -> GlossaryForUi.items glossaryForUi)
+                        |> Maybe.andThen
+                            (\items ->
+                                GlossaryItemsForUi.startingItem items
+                            )
+                        |> Maybe.map
+                            (GlossaryItemForUi.disambiguatedPreferredTerm
+                                >> DisambiguatedTerm.toTerm
+                                >> Term.raw
+                                >> RawTerm.toString
+                            )
+                        |> Maybe.withDefault ""
+            in
+            ( { model
+                | startingItemComboboxInput = currentStartItem
+                , startingItemCombobox = Components.Combobox.hideChoices model.startingItemCombobox
               }
             , Cmd.none
             )
@@ -1452,6 +1473,16 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
         enableThreeColumnLayout =
             GlossaryForUi.enableThreeColumnLayout glossaryForUi
 
+        startingItem : Maybe String
+        startingItem =
+            glossaryForUi
+                |> GlossaryForUi.items
+                |> GlossaryItemsForUi.startingItem
+                |> Maybe.map GlossaryItemForUi.disambiguatedPreferredTerm
+                |> Maybe.map DisambiguatedTerm.toTerm
+                |> Maybe.map Term.raw
+                |> Maybe.map RawTerm.toString
+
         errorDiv : String -> Html msg
         errorDiv message =
             div
@@ -1504,6 +1535,7 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
                     viewSelectStartingItem
                         enableMathSupport
                         (GlossaryForUi.items glossaryForUi)
+                        startingItem
                         startingItemCombobox
                         startingItemComboboxInput
                 , Extras.Html.showUnless enableThreeColumnLayout <|
@@ -1551,10 +1583,11 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
 viewSelectStartingItem :
     Bool
     -> GlossaryItemsForUi
+    -> Maybe String
     -> Components.Combobox.Model
     -> String
     -> Html Msg
-viewSelectStartingItem enableMathSupport glossaryItemsForUi startingItemCombobox startingItemComboboxInput =
+viewSelectStartingItem enableMathSupport glossaryItemsForUi currentStartingItem startingItemCombobox startingItemComboboxInput =
     let
         comboboxChoices : { totalNumberOfResults : Int, results : List (Components.Combobox.Choice DisambiguatedTerm (PageMsg InternalMsg)) }
         comboboxChoices =
@@ -1593,10 +1626,10 @@ viewSelectStartingItem enableMathSupport glossaryItemsForUi startingItemCombobox
                 startingItemCombobox
                 [ Components.Combobox.id ElementIds.startingItemCombobox
                 , Components.Combobox.onSelect (PageMsg.Internal << ChangeStartingItem)
-                , Components.Combobox.onInput (PageMsg.Internal << UpdateStartingItemComboboxInput False)
+                , Components.Combobox.onInput (PageMsg.Internal << UpdateStartingItemComboboxInput)
                 , Components.Combobox.onBlur
                     (PageMsg.Internal <|
-                        UpdateStartingItemComboboxInput True startingItemComboboxInput
+                        UpdateStartingItemComboboxInputToCurrent
                     )
                 ]
                 Nothing
