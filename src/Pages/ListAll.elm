@@ -1620,7 +1620,7 @@ viewSelectStartingItem enableMathSupport glossaryItemsForUi currentStartingItem 
         [ fieldset []
             [ legend
                 [ class "mb-4 font-medium text-gray-900 dark:text-gray-100" ]
-                [ text I18n.startingItem ]
+                [ text I18n.startingItemForNewLayout ]
             , Components.Combobox.view
                 (PageMsg.Internal << StartingItemComboboxMsg)
                 startingItemCombobox
