@@ -3591,7 +3591,7 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                             , h2
                                 [ class "mt-2 font-bold leading-tight" ]
                                 [ Html.a
-                                    [ href "#" ]
+                                    [ href "?" ]
                                     [ glossaryForUi
                                         |> GlossaryForUi.title
                                         |> GlossaryTitle.view
