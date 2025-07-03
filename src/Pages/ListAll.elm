@@ -1581,14 +1581,12 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
                         ]
                 , Extras.Html.showIf (editability == EditingWithIncludedBackend) <|
                     viewSelectInputSyntax enableMathSupport
-                , Extras.Html.showIf enableThreeColumnLayout <|
-                    viewSelectStartingItem
-                        enableMathSupport
-                        (GlossaryForUi.items glossaryForUi)
-                        startingItem
-                        startingItemCombobox
-                        startingItemComboboxInput
-                , Extras.Html.showIf enableThreeColumnLayout viewSwitchBackToOldLayout
+                , viewSelectStartingItem
+                    enableMathSupport
+                    (GlossaryForUi.items glossaryForUi)
+                    startingItem
+                    startingItemCombobox
+                    startingItemComboboxInput
                 , Extras.Html.showUnless enableThreeColumnLayout <|
                     viewSelectCardWidth glossaryForUi tabbable
                 , viewSelectDefaultTheme glossaryForUi tabbable
@@ -1696,13 +1694,17 @@ viewSelectStartingItem enableMathSupport glossaryItemsForUi currentStartingItem 
                 )
                 startingItemComboboxInput
             ]
+        , Extras.Html.showIf
+            (GlossaryItemsForUi.startingItem glossaryItemsForUi /= Nothing)
+          <|
+            viewSwitchBackToOldLayout
         ]
 
 
 viewSwitchBackToOldLayout : Html Msg
 viewSwitchBackToOldLayout =
     div
-        []
+        [ class "mt-4" ]
         [ Components.Button.white True
             [ Html.Events.onClick <| PageMsg.Internal ClearStartingItem ]
             [ text I18n.switchBackToOldLayout ]

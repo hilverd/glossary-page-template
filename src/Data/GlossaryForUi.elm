@@ -47,10 +47,10 @@ import Data.GlossaryFromDom exposing (GlossaryFromDom)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
-import Data.GlossaryItem.TermFromDom as TermFromDom exposing (TermFromDom)
+import Data.GlossaryItem.TermFromDom as TermFromDom
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemFromDom as GlossaryItemFromDom
-import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
+import Data.GlossaryItemId as GlossaryItemId
 import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.GlossaryVersionNumber as GlossaryVersionNumber exposing (GlossaryVersionNumber)
@@ -58,7 +58,6 @@ import Data.TagDescription as TagDescription
 import Data.TagId as TagId
 import Data.Theme as Theme exposing (Theme)
 import Extras.Md5
-import IncubatingFeatures exposing (showIncubatingFeatures)
 import Internationalisation as I18n
 
 
@@ -260,7 +259,7 @@ createWithDefaults enableLastUpdatedDates_ enableExportMenu_ enableOrderItemsBut
         , enableExportMenu = Maybe.withDefault True enableExportMenu_
         , enableOrderItemsButtons = Maybe.withDefault True enableOrderItemsButtons_
         , enableHelpForMakingChanges = Maybe.withDefault False enableHelpForMakingChanges_
-        , enableThreeColumnLayout = showIncubatingFeatures
+        , enableThreeColumnLayout = disambiguatedPreferredTermForStartingItem /= Nothing
         , cardWidth = Maybe.withDefault CardWidth.Compact cardWidth_
         , defaultTheme = Maybe.withDefault Theme.System defaultTheme_
         , title = Maybe.withDefault (GlossaryTitle.fromMarkdown I18n.elementNotFound) title_
