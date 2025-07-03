@@ -3527,11 +3527,14 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                                 ]
                             , h2
                                 [ class "mt-2 font-bold leading-tight" ]
-                                [ glossaryForUi
-                                    |> GlossaryForUi.title
-                                    |> GlossaryTitle.view
-                                        enableMathSupport
-                                        [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
+                                [ Html.a
+                                    [ href "#" ]
+                                    [ glossaryForUi
+                                        |> GlossaryForUi.title
+                                        |> GlossaryTitle.view
+                                            enableMathSupport
+                                            [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
+                                    ]
                                 ]
                             ]
                         , Html.main_
