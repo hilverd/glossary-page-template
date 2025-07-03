@@ -169,6 +169,12 @@ checksumForChange glossaryFromDom glossaryChange =
                 |> Maybe.map (checkSumUsingCodec TermFromDom.codec)
                 |> Maybe.withDefault (Checksum.create "")
 
+        ClearStartingItem ->
+            glossaryFromDom
+                |> .startingItem
+                |> Maybe.map (checkSumUsingCodec TermFromDom.codec)
+                |> Maybe.withDefault (Checksum.create "")
+
         SetTitle _ ->
             glossaryFromDom
                 |> .title
@@ -729,6 +735,12 @@ applyChange change glossaryFromDom =
 
         SetStartingItem termFromDom ->
             setStartingItem termFromDom glossaryFromDom
+
+        ClearStartingItem ->
+            ChangesApplied
+                ( Nothing
+                , { glossaryFromDom | startingItem = Nothing }
+                )
 
         SetTitle title_ ->
             ChangesApplied ( Nothing, { glossaryFromDom | title = GlossaryTitle.raw title_ } )

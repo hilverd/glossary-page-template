@@ -174,6 +174,7 @@ type InternalMsg
     | UpdateStartingItemComboboxInput String
     | UpdateStartingItemComboboxInputToCurrent
     | ChangeStartingItem DisambiguatedTerm
+    | ClearStartingItem
     | ItemWithFocusComboboxMsg Components.Combobox.Msg
     | UpdateItemWithFocusComboboxInput Bool String
     | ConfirmDelete GlossaryItemId
@@ -762,6 +763,55 @@ update msg model =
                                 |> DisambiguatedTerm.toTerm
                                 |> Term.raw
                                 |> RawTerm.toString
+                      }
+                    , cmd
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        ClearStartingItem ->
+            case model.common.glossaryForUi of
+                Ok glossaryForUi ->
+                    let
+                        glossaryChange : GlossaryChange
+                        glossaryChange =
+                            GlossaryChange.ClearStartingItem
+
+                        glossaryChangeWithChecksum : GlossaryChangeWithChecksum
+                        glossaryChangeWithChecksum =
+                            { glossaryChange = glossaryChange
+                            , checksum = GlossaryForUi.checksumForChange glossaryForUi glossaryChange
+                            }
+
+                        changelist : GlossaryChangelist
+                        changelist =
+                            GlossaryChangelist.create
+                                (GlossaryForUi.versionNumber glossaryForUi)
+                                [ glossaryChangeWithChecksum ]
+
+                        ( saving, cmd ) =
+                            Save.changeAndSave model.common.editability
+                                glossaryForUi
+                                changelist
+                                (PageMsg.Internal << FailedToChangeSettings)
+                                (\( itemWithFocus, updatedGlossaryForUi ) ->
+                                    let
+                                        common0 : CommonModel
+                                        common0 =
+                                            model.common
+                                    in
+                                    PageMsg.NavigateToListAll
+                                        { common0 | glossaryForUi = Ok updatedGlossaryForUi }
+                                        itemWithFocus
+                                        (Just yourChangesHaveBeenSavedNotification)
+                                )
+                    in
+                    ( { model
+                        | confirmDeleteId = Nothing
+                        , deleting = NotCurrentlySaving
+                        , savingSettings = saving
+                        , startingItemComboboxInput = ""
                       }
                     , cmd
                     )
@@ -1538,6 +1588,7 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
                         startingItem
                         startingItemCombobox
                         startingItemComboboxInput
+                , Extras.Html.showIf enableThreeColumnLayout viewSwitchBackToOldLayout
                 , Extras.Html.showUnless enableThreeColumnLayout <|
                     viewSelectCardWidth glossaryForUi tabbable
                 , viewSelectDefaultTheme glossaryForUi tabbable
@@ -1645,6 +1696,16 @@ viewSelectStartingItem enableMathSupport glossaryItemsForUi currentStartingItem 
                 )
                 startingItemComboboxInput
             ]
+        ]
+
+
+viewSwitchBackToOldLayout : Html Msg
+viewSwitchBackToOldLayout =
+    div
+        []
+        [ Components.Button.white True
+            [ Html.Events.onClick <| PageMsg.Internal ClearStartingItem ]
+            [ text I18n.switchBackToOldLayout ]
         ]
 
 

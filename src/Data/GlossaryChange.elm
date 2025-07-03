@@ -27,6 +27,7 @@ type GlossaryChange
     | ToggleEnableExportMenu
     | ToggleEnableOrderItemsButtons
     | SetStartingItem TermFromDom
+    | ClearStartingItem
     | SetTitle GlossaryTitle
     | SetAboutSection AboutSection
     | SetCardWidth CardWidth
@@ -42,7 +43,7 @@ type GlossaryChange
 codec : Codec GlossaryChange
 codec =
     Codec.custom
-        (\toggleEnableLastUpdatedDates toggleEnableExportMenu toggleEnableOrderItemsButtons setStartingItem setTitle setAboutSection setCardWidth setDefaultTheme changeTags insert update remove value ->
+        (\toggleEnableLastUpdatedDates toggleEnableExportMenu toggleEnableOrderItemsButtons setStartingItem clearStartingItem setTitle setAboutSection setCardWidth setDefaultTheme changeTags insert update remove value ->
             case value of
                 ToggleEnableLastUpdatedDates ->
                     toggleEnableLastUpdatedDates
@@ -55,6 +56,9 @@ codec =
 
                 SetStartingItem itemId ->
                     setStartingItem itemId
+
+                ClearStartingItem ->
+                    clearStartingItem
 
                 SetTitle title ->
                     setTitle title
@@ -84,6 +88,7 @@ codec =
         |> Codec.variant0 "ToggleEnableExportMenu" ToggleEnableExportMenu
         |> Codec.variant0 "ToggleEnableOrderItemsButtons" ToggleEnableOrderItemsButtons
         |> Codec.variant1 "SetStartingItem" SetStartingItem TermFromDom.codec
+        |> Codec.variant0 "ClearStartingItem" ClearStartingItem
         |> Codec.variant1 "SetTitle" SetTitle GlossaryTitle.codec
         |> Codec.variant1 "SetAboutSection" SetAboutSection AboutSection.codec
         |> Codec.variant1 "SetCardWidth" SetCardWidth CardWidth.codec
