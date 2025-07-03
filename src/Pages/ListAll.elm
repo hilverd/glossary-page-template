@@ -690,7 +690,7 @@ update msg model =
 
         UpdateStartingItemComboboxInputToCurrent ->
             let
-                currentStartItem =
+                currentStartingItem =
                     model.common.glossaryForUi
                         |> Result.toMaybe
                         |> Maybe.map (\glossaryForUi -> GlossaryForUi.items glossaryForUi)
@@ -707,7 +707,7 @@ update msg model =
                         |> Maybe.withDefault ""
             in
             ( { model
-                | startingItemComboboxInput = currentStartItem
+                | startingItemComboboxInput = currentStartingItem
                 , startingItemCombobox = Components.Combobox.hideChoices model.startingItemCombobox
               }
             , Cmd.none
