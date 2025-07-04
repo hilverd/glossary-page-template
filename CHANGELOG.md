@@ -13,9 +13,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 
+- Introduce a new design where a single item is shown on the left and previews of its related items (if any) are shown on the right. You can opt in to this by picking a _starting item_ in the settings menu. This layout is optional for now but will replace the existing design in the next major release. The main motivation is that for larger glossaries, having all items on a single page is too taxing on the browser and doesn't seem necessary from a usability point of view anyway.
 - Show tag being filtered by above index.
 
 ### Changed
+
+- The print layout has been made worse as part of the introduction of the new design. I never use this layout and am planning to remove support for printing entirely when the new design becomes the only option.
+
 ### Fixed
 
 - Make drop down menus not change URL when clicking on a choice.
