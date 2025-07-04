@@ -86,7 +86,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                 Preview ->
                     div
                         [ Html.Attributes.style "max-height" "100%"
-                        , class "max-w-[69ch]"
+                        , class "max-w-[69ch] overflow-x-clip"
                         ]
                         (viewGlossaryTerm
                             { enableMathSupport = enableMathSupport
