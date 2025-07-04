@@ -3577,7 +3577,11 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
         (\( item, relatedItems ) ->
             div
                 []
-                [ Extras.Html.showMaybe
+                [ Extras.Html.showIf (Editability.editing editability) <|
+                    div
+                        [ class "flex-none mt-8 px-6 lg:px-8" ]
+                        [ viewManageTagsButton ]
+                , Extras.Html.showMaybe
                     (viewCurrentTagFilter
                         [ class "mt-4 mb-4 px-6 lg:px-8 mb-6" ]
                         enableMathSupport
