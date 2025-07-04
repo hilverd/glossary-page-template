@@ -899,6 +899,10 @@ update msg model =
                         }
                         model.notifications
 
+                enableThreeColumnLayout : Bool
+                enableThreeColumnLayout =
+                    GlossaryForUi.enableThreeColumnLayout updatedGlossaryForUi
+
                 common : CommonModel
                 common =
                     model.common
@@ -909,6 +913,11 @@ update msg model =
                         [ allowBackgroundScrolling ()
                         , giveFocusToOuter
                         , Cmd.map (PageMsg.Internal << NotificationsMsg) notificationsCmd
+                        , if enableThreeColumnLayout then
+                            Cmd.map PageMsg.Internal <| Extras.BrowserDom.scrollToTop NoOp
+
+                          else
+                            Cmd.none
                         ]
             in
             ( { model

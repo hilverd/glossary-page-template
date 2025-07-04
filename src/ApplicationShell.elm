@@ -22,6 +22,7 @@ import Data.GlossaryItemForUi as GlossaryItemForUi
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemsForUi as GlossaryItems
 import Data.Theme as Theme exposing (Theme)
+import Extras.BrowserDom
 import Html
 import Json.Decode as Decode
 import PageMsg exposing (PageMsg(..))
@@ -390,6 +391,12 @@ update msg model =
                                 , fragment = maybeFragment
                             }
 
+                        enableThreeColumnLayout : Bool
+                        enableThreeColumnLayout =
+                            common1.glossaryForUi
+                                |> Result.map GlossaryForUi.enableThreeColumnLayout
+                                |> Result.withDefault False
+
                         listAllModel1 : Pages.ListAll.Model
                         listAllModel1 =
                             { listAllModel
@@ -408,7 +415,11 @@ update msg model =
                                     |> Tuple.first
                                     |> ListAll
                         }
-                    , Cmd.none
+                    , if enableThreeColumnLayout then
+                        Extras.BrowserDom.scrollToTop NoOp
+
+                      else
+                        Cmd.none
                     )
 
                 _ ->
