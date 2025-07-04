@@ -27,7 +27,7 @@
     }
 
     body {
-        @apply antialiased print:bg-white min-h-full;
+        @apply antialiased bg-white dark:bg-black print:bg-white min-h-full;
     }
 
     div#glossary-page-container:not(.three-column-layout) {

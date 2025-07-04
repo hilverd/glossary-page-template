@@ -3584,7 +3584,7 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                                 [ Extras.Html.showMaybe
                                     (Term.view
                                         enableMathSupport
-                                        [ class "text-3xl font-bold leading-tight" ]
+                                        [ class "text-3xl font-bold leading-tight print:text-black" ]
                                     )
                                     itemTitle
                                 ]
@@ -3683,7 +3683,7 @@ view model =
             , body =
                 [ Html.div
                     [ class "min-h-full focus:outline-hidden"
-                    , Extras.HtmlAttribute.showIf enableThreeColumnLayout <| class "bg-white dark:bg-black"
+                    , Extras.HtmlAttribute.showIf enableThreeColumnLayout <| class "bg-white dark:bg-black print:bg-white"
                     , Html.Attributes.id ElementIds.outer
                     , Accessibility.Key.tabbable True
                     , Html.Events.preventDefaultOn "keydown"
@@ -3808,7 +3808,7 @@ view model =
                             )
                         , div
                             [ Html.Attributes.id ElementIds.container
-                            , class "relative"
+                            , class "relative print:bg-white"
                             , Extras.HtmlAttribute.showIf enableThreeColumnLayout <| class "three-column-layout"
                             , Extras.HtmlAttribute.fromBool "data-markdown-rendered" True
                             , glossaryForUi |> GlossaryForUi.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
@@ -3886,13 +3886,17 @@ view model =
                                             |> Maybe.withDefault
                                                 (glossaryForUi
                                                     |> GlossaryForUi.title
-                                                    |> GlossaryTitle.view model.common.enableMathSupport [ class "text-3xl font-bold leading-tight" ]
+                                                    |> GlossaryTitle.view model.common.enableMathSupport [ class "text-3xl font-bold leading-tight print:text-black" ]
                                                 )
                                         ]
                                     , Extras.Html.showIf (filterByTagWithDescription_ /= Nothing) <|
                                         h2
                                             [ class "mt-2 font-bold leading-tight" ]
-                                            [ glossaryForUi |> GlossaryForUi.title |> GlossaryTitle.view model.common.enableMathSupport [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
+                                            [ glossaryForUi
+                                                |> GlossaryForUi.title
+                                                |> GlossaryTitle.view
+                                                    model.common.enableMathSupport
+                                                    [ class "text-xl font-medium text-gray-700 dark:text-gray-300 print:text-black" ]
                                             ]
                                     ]
                             , if enableThreeColumnLayout then
