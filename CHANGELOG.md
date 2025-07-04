@@ -12,6 +12,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [5.8.0] - 2025-07-04
+
+### Added
 
 - Introduce a new design where a single item is shown on the left and previews of its related items (if any) are shown on the right. You can opt in to this by picking a _starting item_ in the settings menu. This layout is optional for now but will replace the existing design in the next major release. The main motivation is that for larger glossaries, having all items on a single page is too taxing on the browser and doesn't seem necessary from a usability point of view anyway.
 - Show tag being filtered by above index.
@@ -23,8 +30,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 
 - Make drop down menus not change URL when clicking on a choice.
-
-### Removed
 
 ## [5.7.0] - 2025-05-26
 
@@ -889,7 +894,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.7.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.8.0...HEAD
+[5.8.0]: https://github.com/hilverd/glossary-page-template/compare/v5.7.0...v5.8.0
 [5.7.0]: https://github.com/hilverd/glossary-page-template/compare/v5.6.0...v5.7.0
 [5.6.0]: https://github.com/hilverd/glossary-page-template/compare/v5.5.0...v5.6.0
 [5.5.0]: https://github.com/hilverd/glossary-page-template/compare/v5.4.0...v5.5.0
