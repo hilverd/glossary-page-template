@@ -21,6 +21,7 @@ import Html.Events
 import Icons
 import Internationalisation as I18n
 import Svg.Attributes
+import Url.Builder
 
 
 view :
@@ -29,14 +30,14 @@ view :
     , onClickCopyToClipboard : msg
     , onClickEdit : msg
     , onClickDelete : msg
-    , onClickTag : Tag -> msg
     , resultOfAttemptingToCopyItemTextToClipboard : Maybe Bool
     , editable : Bool
     }
     -> Maybe Tag
+    -> Maybe String
     -> GlossaryItemForUi
     -> Html msg
-view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClickEdit, onClickDelete, onClickTag, resultOfAttemptingToCopyItemTextToClipboard, editable } tagBeingFilteredBy glossaryItem =
+view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClickEdit, onClickDelete, resultOfAttemptingToCopyItemTextToClipboard, editable } tagBeingFilteredBy currentFragment glossaryItem =
     let
         tags : List Tag
         tags =
@@ -118,7 +119,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                        )
                     ++ [ viewTags
                             { enableMathSupport = enableMathSupport
-                            , onClickTag = Just onClickTag
+                            , currentFragment = currentFragment
                             }
                             tagsNotBeingFilteredBy
                        , definition
@@ -200,7 +201,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                            )
                         ++ [ viewTags
                                 { enableMathSupport = enableMathSupport
-                                , onClickTag = Just onClickTag
+                                , currentFragment = currentFragment
                                 }
                                 tagsNotBeingFilteredBy
                            , definition
@@ -290,20 +291,44 @@ viewGlossaryTerm { enableMathSupport, withLink, isPreferred } term =
         ]
 
 
+{-| Build a URL with a filter-by-tag query parameter and optional fragment.
+-}
+buildTagFilterUrl : Tag -> Maybe String -> String
+buildTagFilterUrl tag maybeFragment =
+    let
+        queryUrl : String
+        queryUrl =
+            [ Tag.toQueryParameter tag ]
+                |> Url.Builder.relative []
+                |> (\urlString ->
+                        if urlString == "" then
+                            "?"
+
+                        else
+                            urlString
+                   )
+    in
+    case maybeFragment of
+        Just fragment ->
+            queryUrl ++ "#" ++ fragment
+
+        Nothing ->
+            queryUrl
+
+
 viewTags :
-    { enableMathSupport : Bool, onClickTag : Maybe (Tag -> msg) }
+    { enableMathSupport : Bool, currentFragment : Maybe String }
     -> List Tag
     -> Html msg
-viewTags { enableMathSupport, onClickTag } tags =
+viewTags { enableMathSupport, currentFragment } tags =
     Html.div
         [ class "mt-4" ]
         (List.map
             (\tag ->
-                Components.Button.softSmall
-                    (onClickTag /= Nothing)
-                    [ class "mr-2 mb-2"
+                Html.a
+                    [ class "inline-flex items-center rounded-full max-w-3xs border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-700 dark:text-gray-100 shadow-xs hover:bg-gray-100 dark:hover:bg-gray-700 no-underline hover:no-underline mr-2 mb-2"
                     , Html.Attributes.title <| I18n.tag ++ ": " ++ Tag.inlineText tag
-                    , Extras.HtmlAttribute.showMaybe (\onClickTag_ -> Html.Events.onClick <| onClickTag_ tag) onClickTag
+                    , Html.Attributes.href <| buildTagFilterUrl tag currentFragment
                     ]
                     [ Tag.view enableMathSupport
                         [ class "text-sm" ]

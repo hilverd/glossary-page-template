@@ -3542,9 +3542,10 @@ viewMainThreeColumnLayout :
     -> Maybe GlossaryItemId
     -> Saving
     -> Maybe ( GlossaryItemId, Bool )
+    -> Maybe String
     -> GlossaryForUi
     -> Html Msg
-viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters itemWithFocus itemSearchDialog confirmDeleteId deleting resultOfAttemptingToCopyItemTextToClipboard glossaryForUi =
+viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noModalDialogShown_ } editability queryParameters itemWithFocus itemSearchDialog confirmDeleteId deleting resultOfAttemptingToCopyItemTextToClipboard currentFragment glossaryForUi =
     let
         items : GlossaryItemsForUi
         items =
@@ -3621,7 +3622,6 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                                         , onClickCopyToClipboard = PageMsg.Internal <| CopyItemTextToClipboard <| GlossaryItemForUi.id item
                                         , onClickEdit = PageMsg.NavigateToCreateOrEdit <| Just <| GlossaryItemForUi.id item
                                         , onClickDelete = PageMsg.Internal <| ConfirmDelete <| GlossaryItemForUi.id item
-                                        , onClickTag = PageMsg.Internal << FilterByTag
                                         , resultOfAttemptingToCopyItemTextToClipboard =
                                             resultOfAttemptingToCopyItemTextToClipboard
                                                 |> Maybe.map
@@ -3631,6 +3631,7 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                                         , editable = Editability.editing editability
                                         }
                                         (Maybe.map DescribedTag.tag filterByTagWithDescription_)
+                                        currentFragment
                                         item
                                     ]
                                 , Html.Lazy.lazy3 viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDialog
@@ -3921,6 +3922,7 @@ view model =
                                     model.confirmDeleteId
                                     model.deleting
                                     model.resultOfAttemptingToCopyItemTextToClipboard
+                                    model.common.fragment
                                     glossaryForUi
 
                               else
