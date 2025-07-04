@@ -7,7 +7,7 @@ import Data.DescribedTagFromDom exposing (DescribedTagFromDom)
 import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
 import Data.GlossaryChangeWithChecksum exposing (GlossaryChangeWithChecksum)
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
-import Data.GlossaryFromDom as GlossaryFromDom exposing (ApplyChangesResult(..))
+import Data.GlossaryFromDom as GlossaryFromDom exposing (ApplyChangesResult(..), GlossaryFromDom)
 import Data.GlossaryItem.TermFromDom as TermFromDom
 import Data.GlossaryItemForUi as GlossaryItemForUi
 import Data.GlossaryItemFromDom exposing (GlossaryItemFromDom)
@@ -177,6 +177,64 @@ suite =
                                         , financeDescribedTagFromDom
                                         , gardeningDescribedTagFromDom
                                         ]
+                                    , items =
+                                        [ loanRenamedToAdvance
+                                        , defaultComputerScienceItemFromDom
+                                        , defaultFinanceNowPointingToAdvance
+                                        , informationRetrievalItemFromDom
+                                        , interestRateNowPointingToAdvance
+                                        ]
+                                    , versionNumber =
+                                        GlossaryVersionNumber.initial
+                                            |> GlossaryVersionNumber.increment
+                                            |> GlossaryVersionNumber.toInt
+                                  }
+                                )
+                            )
+            , test "that update details of the starting item" <|
+                \_ ->
+                    let
+                        glossaryWithStartingItem : GlossaryFromDom
+                        glossaryWithStartingItem =
+                            { glossaryFromDom | startingItem = Just loanItemFromDom.preferredTerm }
+
+                        loanRenamedToAdvance : GlossaryItemFromDom
+                        loanRenamedToAdvance =
+                            { loanItemFromDom
+                                | preferredTerm =
+                                    { isAbbreviation = False, body = "Advance" }
+                            }
+
+                        defaultFinanceNowPointingToAdvance : GlossaryItemFromDom
+                        defaultFinanceNowPointingToAdvance =
+                            { defaultFinanceItemFromDom
+                                | relatedPreferredTerms = [ { isAbbreviation = False, body = "Advance" } ]
+                            }
+
+                        interestRateNowPointingToAdvance : GlossaryItemFromDom
+                        interestRateNowPointingToAdvance =
+                            { interestRateItemFromDom
+                                | relatedPreferredTerms = [ { isAbbreviation = False, body = "Advance" } ]
+                            }
+
+                        change : GlossaryChange
+                        change =
+                            GlossaryChange.Update loanRenamedToAdvance
+
+                        changeList : GlossaryChangelist
+                        changeList =
+                            GlossaryChangelist.create (GlossaryVersionNumber.create 99)
+                                [ change
+                                    |> glossaryChangeWithChecksum (GlossaryFromDom.checksumForChange glossaryWithStartingItem change)
+                                ]
+                    in
+                    glossaryWithStartingItem
+                        |> GlossaryFromDom.applyChanges changeList
+                        |> Expect.equal
+                            (ChangesApplied
+                                ( Just <| GlossaryItemForUi.id loanItem
+                                , { glossaryWithStartingItem
+                                    | startingItem = Just { isAbbreviation = False, body = "Advance" }
                                     , items =
                                         [ loanRenamedToAdvance
                                         , defaultComputerScienceItemFromDom

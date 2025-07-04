@@ -483,8 +483,25 @@ update itemId glossaryItemFromDom glossaryFromDom =
 
             else
                 glossaryFromDom
+
+        glossaryFromDomAfterUpdatingStartingItem : GlossaryFromDom
+        glossaryFromDomAfterUpdatingStartingItem =
+            case ( currentDisambiguatedPreferredTerm, glossaryFromDom.startingItem ) of
+                ( Just disambiguatedPreferredTerm, Just startingTerm ) ->
+                    if disambiguatedPreferredTerm == startingTerm then
+                        { glossaryFromDomAfterUpdatingOtherItemsAsNeeded
+                            | startingItem =
+                                Just <|
+                                    GlossaryItemFromDom.disambiguatedPreferredTerm glossaryItemFromDom
+                        }
+
+                    else
+                        glossaryFromDomAfterUpdatingOtherItemsAsNeeded
+
+                _ ->
+                    glossaryFromDomAfterUpdatingOtherItemsAsNeeded
     in
-    glossaryFromDomAfterUpdatingOtherItemsAsNeeded
+    glossaryFromDomAfterUpdatingStartingItem
         |> remove itemId
         |> (\removeResult ->
                 case removeResult of
