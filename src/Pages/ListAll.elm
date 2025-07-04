@@ -3586,7 +3586,7 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                 , div
                     [ class "xl:flex xl:gap-8 px-6 lg:px-8 mt-6" ]
                     [ div
-                        [ class "xl:shrink-0" ]
+                        [ class "xl:shrink min-w-0 overflow-x-hidden max-w-[70ch]" ]
                         [ header
                             [ class "three-column-layout" ]
                             [ h1
@@ -3640,7 +3640,7 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                             ]
                         ]
                     , aside
-                        [ class "xl:shrink pt-8 xl:pt-0" ]
+                        [ class "xl:flex-1 min-w-0 pt-8 xl:pt-0" ]
                         [ Extras.Html.showIf (not <| List.isEmpty relatedItems) <|
                             h3
                                 [ class "text-xl font-medium text-gray-700 dark:text-gray-300 mb-4" ]
