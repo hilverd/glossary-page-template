@@ -2103,15 +2103,11 @@ viewStartEditingButton editability tabbable =
                     [ text "e" ]
                 ]
             ]
-        , Extras.Html.showIf (editability == Editability.EditingInMemory) <|
-            div
-                [ class "my-4 text-sm text-gray-500 dark:text-gray-400" ]
-                [ text I18n.savingChangesInMemoryMessage ]
         ]
 
 
-viewStopEditingButton : Bool -> Html Msg
-viewStopEditingButton tabbable =
+viewStopEditingButton : Editability -> Bool -> Html Msg
+viewStopEditingButton editability tabbable =
     div
         [ class "flex-none print:hidden" ]
         [ Components.Button.white True
@@ -2119,6 +2115,10 @@ viewStopEditingButton tabbable =
             , Accessibility.Key.tabbable tabbable
             ]
             [ text I18n.stopEditing ]
+        , Extras.Html.showIf (editability == Editability.EditingInMemory) <|
+            span
+                [ class "ml-2 mr-0.5 text-sm text-gray-500 dark:text-gray-400" ]
+                [ text I18n.changesAreLostWhenYouReload ]
         ]
 
 
@@ -3846,7 +3846,7 @@ view model =
                                     [ Extras.Html.showIf (Editability.canEdit model.common.editability) <|
                                         viewStartEditingButton model.common.editability noModalDialogShown_
                                     , Extras.Html.showIf (Editability.editing model.common.editability) <|
-                                        viewStopEditingButton noModalDialogShown_
+                                        viewStopEditingButton model.common.editability noModalDialogShown_
                                     , div
                                         [ class "hidden lg:block ml-auto pt-0.5" ]
                                         [ viewQuickItemSearchButton model.common.runningOnMacOs
