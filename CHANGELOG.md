@@ -16,6 +16,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 
 - Reinstate new item button that was lost in new layout.
+- Show related item suggestions when creating new item.
 
 ### Removed
 

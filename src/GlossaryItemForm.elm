@@ -345,13 +345,19 @@ empty items filterByTag =
                 |> Maybe.andThen (\tag -> GlossaryItems.tagIdFromTag tag items)
     in
     empty_
+        items
         existingDisambiguatedPreferredTerms
         tags
         filterByTagId
 
 
-empty_ : List DisambiguatedTerm -> List ( TagId, Tag ) -> Maybe TagId -> GlossaryItemForm
-empty_ withPreferredTermsOutside allTags filterByTag =
+empty_ : GlossaryItemsForUi -> List DisambiguatedTerm -> List ( TagId, Tag ) -> Maybe TagId -> GlossaryItemForm
+empty_ items withPreferredTermsOutside allTags filterByTag =
+    let
+        existingItemOutlines : List GlossaryItemOutline
+        existingItemOutlines =
+            GlossaryItems.itemOutlines Nothing items
+    in
     GlossaryItemForm
         { preferredTermField = TermField.empty
         , alternativeTermFields = Array.empty
@@ -365,7 +371,7 @@ empty_ withPreferredTermsOutside allTags filterByTag =
         , definitionField = DefinitionField.empty
         , relatedTermFields = Array.empty
         , preferredTermsOutside = withPreferredTermsOutside
-        , outlinesOfItemsOutside = []
+        , outlinesOfItemsOutside = existingItemOutlines
         , preferredTermsOfItemsListingThisItemAsRelated = []
         , needsUpdating = True
         , lastUpdatedDate = ""
@@ -402,10 +408,6 @@ fromGlossaryItemForUi items itemId item =
         preferredTermsOfItemsListingThisItemAsRelated_ : List DisambiguatedTerm
         preferredTermsOfItemsListingThisItemAsRelated_ =
             GlossaryItems.preferredTermsOfItemsListingThisItemAsRelated itemId items
-
-        outlinesOfItemsListingThisItemAsRelated : List GlossaryItemOutline
-        outlinesOfItemsListingThisItemAsRelated =
-            GlossaryItems.outlinesOfItemsListingThisItemAsRelated itemId items
 
         disambiguationTagId_ : Maybe TagId
         disambiguationTagId_ =
