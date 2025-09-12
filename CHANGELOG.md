@@ -16,7 +16,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 ### Removed
 
-## [5.8.1] - 2025-09-12
+## [5.8.2] - 2025-09-12
 
 ### Fixed
 
@@ -901,8 +901,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.8.1...HEAD
-[5.8.1]: https://github.com/hilverd/glossary-page-template/compare/v5.8.0...v5.8.1
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.8.2...HEAD
+[5.8.2]: https://github.com/hilverd/glossary-page-template/compare/v5.8.0...v5.8.2
 [5.8.0]: https://github.com/hilverd/glossary-page-template/compare/v5.7.0...v5.8.0
 [5.7.0]: https://github.com/hilverd/glossary-page-template/compare/v5.6.0...v5.7.0
 [5.6.0]: https://github.com/hilverd/glossary-page-template/compare/v5.5.0...v5.6.0
