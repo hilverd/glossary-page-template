@@ -14,11 +14,14 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+### Removed
+
+## [5.8.1] - 2025-09-12
+
+### Fixed
 
 - Reinstate new item button that was lost in new layout.
 - Show related item suggestions when creating new item.
-
-### Removed
 
 ## [5.8.0] - 2025-07-04
 
@@ -898,7 +901,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.8.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.8.1...HEAD
+[5.8.1]: https://github.com/hilverd/glossary-page-template/compare/v5.8.0...v5.8.1
 [5.8.0]: https://github.com/hilverd/glossary-page-template/compare/v5.7.0...v5.8.0
 [5.7.0]: https://github.com/hilverd/glossary-page-template/compare/v5.6.0...v5.7.0
 [5.6.0]: https://github.com/hilverd/glossary-page-template/compare/v5.5.0...v5.6.0
