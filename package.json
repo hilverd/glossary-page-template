@@ -30,7 +30,7 @@
         "elm-test": "0.19.1-revision16",
         "elm-verify-examples": "^6.0.3",
         "tailwindcss": "^4.1.13",
-        "vite": "^7.1.4",
+        "vite": "^7.1.5",
         "vite-plugin-elm": "^3.0.1"
     }
 }
