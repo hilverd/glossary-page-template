@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- Reinstate new item button that was lost in new layout.
+
 ### Removed
 
 ## [5.8.0] - 2025-07-04

@@ -3587,6 +3587,15 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                         enableMathSupport
                     )
                     filterByTagWithDescription_
+                , Extras.Html.showIf (Editability.editing editability) <|
+                    div
+                        [ class "px-6 lg:px-8 pt-2" ]
+                        [ if GlossaryItemsForUi.isEmpty items then
+                            viewCreateGlossaryItemButtonForEmptyState
+
+                          else
+                            viewCreateGlossaryItemButton
+                        ]
                 , div
                     [ class "xl:flex xl:gap-8 px-6 lg:px-8 mt-6" ]
                     [ div
