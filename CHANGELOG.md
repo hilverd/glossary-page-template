@@ -17,6 +17,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 - When filtering by a tag in new layout, only show related items that have that tag.
 - On small screens, don't show text label for Export button, just icon.
+- Make search button more prominent.
 
 ### Fixed
 ### Removed

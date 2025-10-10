@@ -2085,40 +2085,33 @@ viewConfirmDeleteModal editability itemToDelete deleting =
         (itemToDelete /= Nothing)
 
 
-viewStartEditingButton : Editability -> Bool -> Html Msg
-viewStartEditingButton editability tabbable =
-    div
-        [ class "flex-none print:hidden" ]
-        [ Components.Button.white True
-            [ Html.Events.onClick <| PageMsg.Internal StartEditing
-            , Accessibility.Key.tabbable tabbable
-            ]
-            [ Icons.pencil
-                [ Svg.Attributes.class "h-5 w-5" ]
-            , span
-                [ class "ml-2 inline-flex items-center" ]
-                [ text I18n.startEditing
-                , Html.kbd
-                    [ class "ml-2 inline-flex items-center rounded-xs border border-gray-700 dark:border-gray-300 px-1 font-sans text-xs" ]
-                    [ text "e" ]
-                ]
+viewStartEditingButton : Bool -> Html Msg
+viewStartEditingButton tabbable =
+    Components.Button.white True
+        [ Html.Events.onClick <| PageMsg.Internal StartEditing
+        , Accessibility.Key.tabbable tabbable
+        ]
+        [ Icons.pencil
+            [ Svg.Attributes.class "h-5 w-5" ]
+        , span
+            [ class "hidden sm:ml-2 sm:inline-flex items-center" ]
+            [ text I18n.startEditing
+            , Html.kbd
+                [ class "ml-2 inline-flex items-center rounded-xs border border-gray-700 dark:border-gray-300 px-1 font-sans text-xs" ]
+                [ text "e" ]
             ]
         ]
 
 
-viewStopEditingButton : Editability -> Bool -> Html Msg
-viewStopEditingButton editability tabbable =
+viewStopEditingButton : Bool -> Html Msg
+viewStopEditingButton tabbable =
     div
-        [ class "flex-none print:hidden" ]
+        []
         [ Components.Button.white True
             [ Html.Events.onClick <| PageMsg.Internal StopEditing
             , Accessibility.Key.tabbable tabbable
             ]
             [ text I18n.stopEditing ]
-        , Extras.Html.showIf (editability == Editability.EditingInMemory) <|
-            span
-                [ class "ml-2 mr-0.5 text-sm text-gray-500 dark:text-gray-400" ]
-                [ text I18n.changesAreLostWhenYouReload ]
         ]
 
 
@@ -2539,12 +2532,12 @@ viewBackToTopLink staticSidebar visibility =
 viewQuickItemSearchButton : Bool -> Html Msg
 viewQuickItemSearchButton runningOnMacOs =
     div
-        []
+        [ class "w-full" ]
         [ div
             [ class "bg-gray-50 dark:bg-slate-900 relative pointer-events-auto" ]
             [ button
                 [ Html.Attributes.type_ "button"
-                , class "w-full flex items-center text-sm leading-6 text-slate-500 dark:text-slate-400 rounded-md ring-1 ring-slate-900/10 dark:ring-slate-600 shadow-xs py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-400 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800 select-none"
+                , class "w-full flex items-center leading-6 text-slate-500 dark:text-slate-400 rounded-md ring-1 ring-slate-900/10 dark:ring-slate-600 shadow-xs py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-400 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800 select-none"
                 , Html.Events.onClick <| PageMsg.Internal <| ItemSearchDialogMsg Components.SearchDialog.show
                 , Accessibility.Aria.hidden True
                 ]
@@ -2555,7 +2548,7 @@ viewQuickItemSearchButton runningOnMacOs =
                     ]
                 , text I18n.searchPlaceholder
                 , span
-                    [ class "ml-auto pl-3 flex-none text-xs font-semibold" ]
+                    [ class "ml-auto pl-3 pr-1 flex-none text-sm font-semibold" ]
                     [ text <|
                         if runningOnMacOs then
                             I18n.commandK
@@ -2693,12 +2686,12 @@ viewStaticSidebarForDesktop enableThreeColumnLayout enableMathSupport filterByTa
         ]
 
 
-viewTopBar : Bool -> Bool -> Theme -> Components.DropdownMenu.Model -> Maybe Components.DropdownMenu.Model -> Html Msg
-viewTopBar tabbable runningOnMacOs theme themeDropdownMenu maybeExportDropdownMenu =
+viewTopBar : Bool -> Bool -> Editability -> Theme -> Components.DropdownMenu.Model -> Maybe Components.DropdownMenu.Model -> Html Msg
+viewTopBar tabbable runningOnMacOs editability theme themeDropdownMenu maybeExportDropdownMenu =
     div
-        [ class "sticky top-0 z-20 shrink-0 flex justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
+        [ class "sticky top-0 z-20 shrink-0 flex flex-row justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
         [ div
-            [ class "flex-1" ]
+            [ class "flex items-center" ]
             [ button
                 [ Html.Attributes.type_ "button"
                 , class "px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 focus:outline-hidden lg:hidden"
@@ -2714,10 +2707,10 @@ viewTopBar tabbable runningOnMacOs theme themeDropdownMenu maybeExportDropdownMe
                 ]
             ]
         , div
-            [ class "hidden sm:block pr-4" ]
+            [ class "hidden sm:block flex-1 pr-4" ]
             [ viewQuickItemSearchButton runningOnMacOs ]
         , div
-            [ class "pr-4 sm:hidden" ]
+            [ class "pr-4 sm:hidden flex-1" ]
             [ button
                 [ Html.Attributes.type_ "button"
                 , class "ml-auto text-slate-500 w-8 h-8 -my-1 flex items-center justify-center hover:text-slate-600 lg:hidden dark:text-slate-400 dark:hover:text-slate-300"
@@ -2733,6 +2726,10 @@ viewTopBar tabbable runningOnMacOs theme themeDropdownMenu maybeExportDropdownMe
                     ]
                 ]
             ]
+        , Extras.Html.showIf (Editability.canEdit editability) <|
+            div
+                [ class "mr-4" ]
+                [ viewStartEditingButton tabbable ]
         , div
             [ class "flex pr-4" ]
             [ viewThemeButton tabbable theme themeDropdownMenu ]
@@ -3828,9 +3825,10 @@ view model =
                           else
                             class "lg:pl-64"
                         ]
-                        [ Html.Lazy.lazy5 viewTopBar
+                        [ Html.Lazy.lazy6 viewTopBar
                             noModalDialogShown_
                             model.common.runningOnMacOs
+                            model.common.editability
                             model.common.theme
                             model.themeDropdownMenu
                             (if GlossaryForUi.enableExportMenu glossaryForUi then
@@ -3861,14 +3859,20 @@ view model =
                                         GlossaryForUi.enableExportMenu glossaryForUi
                                 in
                                 [ div
-                                    [ class "flex flex-row justify-start lg:justify-end" ]
-                                    [ Extras.Html.showIf (Editability.canEdit model.common.editability) <|
-                                        viewStartEditingButton model.common.editability noModalDialogShown_
-                                    , Extras.Html.showIf (Editability.editing model.common.editability) <|
-                                        viewStopEditingButton model.common.editability noModalDialogShown_
-                                    , div
-                                        [ class "hidden lg:block ml-auto pt-0.5" ]
+                                    [ class "flex flex-row" ]
+                                    [ div
+                                        [ class "hidden lg:flex lg:flex-1 pt-0.5" ]
                                         [ viewQuickItemSearchButton model.common.runningOnMacOs
+                                        ]
+                                    , div
+                                        [ class "hidden lg:block lg:ml-4 flex-none print:hidden" ]
+                                        [ Extras.Html.showIf (Editability.canEdit model.common.editability) <|
+                                            viewStartEditingButton noModalDialogShown_
+                                        ]
+                                    , div
+                                        [ class "ml-auto lg:ml-0 flex-none print:hidden" ]
+                                        [ Extras.Html.showIf (Editability.editing model.common.editability) <|
+                                            viewStopEditingButton noModalDialogShown_
                                         ]
                                     , div
                                         [ class "hidden lg:block pl-4 pb-3 pt-0.5" ]
