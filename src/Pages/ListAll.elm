@@ -3859,32 +3859,32 @@ view model =
                                         GlossaryForUi.enableExportMenu glossaryForUi
                                 in
                                 [ div
-                                    [ class "flex flex-row" ]
+                                    [ class "flex flex-row gap-4" ]
                                     [ div
                                         [ class "hidden lg:flex lg:flex-1 pt-0.5" ]
                                         [ viewQuickItemSearchButton model.common.runningOnMacOs
                                         ]
+                                    , Extras.Html.showIf (Editability.canEdit model.common.editability) <|
+                                        div
+                                            [ class "hidden lg:block flex-none print:hidden" ]
+                                            [ viewStartEditingButton noModalDialogShown_
+                                            ]
+                                    , Extras.Html.showIf (Editability.editing model.common.editability) <|
+                                        div
+                                            [ class "ml-auto flex-none print:hidden" ]
+                                            [ viewStopEditingButton noModalDialogShown_
+                                            ]
                                     , div
-                                        [ class "hidden lg:block lg:ml-4 flex-none print:hidden" ]
-                                        [ Extras.Html.showIf (Editability.canEdit model.common.editability) <|
-                                            viewStartEditingButton noModalDialogShown_
-                                        ]
-                                    , div
-                                        [ class "ml-auto lg:ml-0 flex-none print:hidden" ]
-                                        [ Extras.Html.showIf (Editability.editing model.common.editability) <|
-                                            viewStopEditingButton noModalDialogShown_
-                                        ]
-                                    , div
-                                        [ class "hidden lg:block pl-4 pb-3 pt-0.5" ]
+                                        [ class "hidden lg:block pb-3 pt-0.5" ]
                                         [ viewThemeButton noModalDialogShown_ model.common.theme model.themeDropdownMenu
                                         ]
-                                    , div
-                                        [ class "hidden lg:block" ]
-                                        [ Extras.Html.showIf showExportButton <|
-                                            span
-                                                [ class "pl-4 pb-3" ]
+                                    , Extras.Html.showIf showExportButton <|
+                                        div
+                                            [ class "hidden lg:block" ]
+                                            [ span
+                                                [ class "pb-3" ]
                                                 [ viewExportButton noModalDialogShown_ model.exportDropdownMenu ]
-                                        ]
+                                            ]
                                     ]
                                 ]
                             , Extras.Html.showIf
