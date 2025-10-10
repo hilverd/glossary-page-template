@@ -2808,8 +2808,10 @@ viewExportButton enabled exportDropdownMenu =
         enabled
         (Components.DropdownMenu.Chevron
             [ Icons.documentDownload
-                [ Svg.Attributes.class "h-5 w-5 mr-2" ]
-            , text I18n.export
+                [ Svg.Attributes.class "h-5 w-5" ]
+            , span
+                [ class "hidden sm:inline ml-2" ]
+                [ text I18n.export ]
             ]
         )
         [ Components.DropdownMenu.choice
