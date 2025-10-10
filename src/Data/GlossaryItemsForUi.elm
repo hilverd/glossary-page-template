@@ -1,7 +1,7 @@
 module Data.GlossaryItemsForUi exposing
     ( GlossaryItemsForUi
     , empty, fromList
-    , isEmpty, get, relatedItems, startingItem, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
+    , isEmpty, get, getWithRelatedTermsFilteredByTagId, relatedItems, startingItem, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
 
@@ -20,7 +20,7 @@ module Data.GlossaryItemsForUi exposing
 
 # Query
 
-@docs isEmpty, get, relatedItems, startingItem, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
+@docs isEmpty, get, getWithRelatedTermsFilteredByTagId, relatedItems, startingItem, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
 
 
 # Export
@@ -421,7 +421,7 @@ relatedPreferredTerms_ disambiguatedPreferredTerm_ filterByTagId itemId ((Glossa
 get_ : (GlossaryItemId -> GlossaryItemsForUi -> Maybe DisambiguatedTerm) -> Maybe TagId -> GlossaryItemId -> GlossaryItemsForUi -> Maybe GlossaryItemForUi
 get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
     GlossaryItemIdDict.get itemId items.itemById
-        |> Maybe.map
+        |> Maybe.andThen
             (\item ->
                 let
                     id : GlossaryItemId
@@ -440,27 +440,29 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItemsForUi items
                     tagById =
                         GlossaryTags.tagById items.tags
 
-                    disambiguationTag : Maybe Tag
-                    disambiguationTag =
+                    disambiguationTagId : Maybe TagId
+                    disambiguationTagId =
                         items.disambiguationTagIdByItemId
                             |> GlossaryItemIdDict.get itemId
                             |> Maybe.andThen identity
+
+                    disambiguationTag : Maybe Tag
+                    disambiguationTag =
+                        disambiguationTagId
                             |> Maybe.andThen
-                                (\disambiguationTagId ->
-                                    TagIdDict.get disambiguationTagId tagById
-                                )
+                                (\tagId -> TagIdDict.get tagId tagById)
+
+                    normalTagIds : List TagId
+                    normalTagIds =
+                        items.normalTagIdsByItemId
+                            |> GlossaryItemIdDict.get itemId
+                            |> Maybe.withDefault []
 
                     normalTags : List Tag
                     normalTags =
-                        items.normalTagIdsByItemId
-                            |> GlossaryItemIdDict.get itemId
-                            |> Maybe.map
-                                (List.filterMap
-                                    (\normalTagId ->
-                                        TagIdDict.get normalTagId tagById
-                                    )
-                                )
-                            |> Maybe.withDefault []
+                        normalTagIds
+                            |> List.filterMap
+                                (\normalTagId -> TagIdDict.get normalTagId tagById)
 
                     definition : Maybe Definition
                     definition =
@@ -488,18 +490,35 @@ get_ disambiguatedPreferredTerm_ filterByTagId itemId ((GlossaryItemsForUi items
                     lastUpdatedByEmailAddress =
                         GlossaryItem.lastUpdatedByEmailAddress item
                 in
-                GlossaryItemForUi.create
-                    id
-                    preferredTerm
-                    alternativeTerms
-                    disambiguationTag
-                    normalTags
-                    definition
-                    relatedPreferredTerms
-                    needsUpdating
-                    lastUpdatedDateAsIso8601
-                    lastUpdatedByName
-                    lastUpdatedByEmailAddress
+                -- Only return the item if it matches the filterByTagId, otherwise return Nothing.
+                let
+                    matchesTagFilter : Bool
+                    matchesTagFilter =
+                        case filterByTagId of
+                            Nothing ->
+                                True
+
+                            Just tagId ->
+                                (disambiguationTagId == Just tagId)
+                                    || List.member tagId normalTagIds
+                in
+                if matchesTagFilter then
+                    Just <|
+                        GlossaryItemForUi.create
+                            id
+                            preferredTerm
+                            alternativeTerms
+                            disambiguationTag
+                            normalTags
+                            definition
+                            relatedPreferredTerms
+                            needsUpdating
+                            lastUpdatedDateAsIso8601
+                            lastUpdatedByName
+                            lastUpdatedByEmailAddress
+
+                else
+                    Nothing
             )
 
 
@@ -519,13 +538,20 @@ get =
     get_ disambiguatedPreferredTerm Nothing
 
 
+{-| Get the item associated with an ID, restricting its related terms to those that have the given tag ID. If the item ID is not found, return `Nothing`.
+-}
+getWithRelatedTermsFilteredByTagId : Maybe TagId -> GlossaryItemId -> GlossaryItemsForUi -> Maybe GlossaryItemForUi
+getWithRelatedTermsFilteredByTagId filterByTagId =
+    get_ disambiguatedPreferredTerm filterByTagId
+
+
 {-| Get the items that are related to the given item.
 -}
-relatedItems : GlossaryItemId -> GlossaryItemsForUi -> List GlossaryItemForUi
-relatedItems itemId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
+relatedItems : GlossaryItemId -> Maybe TagId -> GlossaryItemsForUi -> List GlossaryItemForUi
+relatedItems itemId filterByTagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
     GlossaryItemIdDict.get itemId items.relatedItemIdsById
         |> Maybe.withDefault []
-        |> List.filterMap (\relatedItemId -> get relatedItemId glossaryItemsForUi)
+        |> List.filterMap (\relatedItemId -> getWithRelatedTermsFilteredByTagId filterByTagId relatedItemId glossaryItemsForUi)
 
 
 outline : GlossaryItemId -> GlossaryItemsForUi -> Maybe GlossaryItemOutline

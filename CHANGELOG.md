@@ -12,7 +12,11 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+
 ### Changed
+
+- When filtering by a tag in new layout, only show related items that have that tag.
+
 ### Fixed
 ### Removed
 

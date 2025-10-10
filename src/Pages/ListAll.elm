@@ -3551,17 +3551,25 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
         items =
             GlossaryForUi.items glossaryForUi
 
+        filterByTagId_ : Maybe TagId
+        filterByTagId_ =
+            queryParameters
+                |> QueryParameters.filterByTag
+                |> Maybe.andThen
+                    (\tag -> GlossaryItemsForUi.tagIdFromTag tag items)
+
         itemAndRelatedItems : Maybe ( GlossaryItemForUi, List GlossaryItemForUi )
         itemAndRelatedItems =
             itemWithFocus
                 |> Maybe.andThen
                     (\itemWithFocus_ ->
-                        GlossaryItemsForUi.get itemWithFocus_ items
+                        GlossaryItemsForUi.getWithRelatedTermsFilteredByTagId filterByTagId_ itemWithFocus_ items
                             |> Maybe.map
                                 (\item_ ->
                                     ( item_
                                     , GlossaryItemsForUi.relatedItems
                                         (GlossaryItemForUi.id item_)
+                                        filterByTagId_
                                         items
                                     )
                                 )
