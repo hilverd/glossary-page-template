@@ -13,6 +13,8 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 
+- Include warning in "raw" `glossary.html` and `empty.html` files about not opening them directly from the repository.
+
 ### Changed
 
 - When filtering by a tag in new layout, only show related items that have that tag.
