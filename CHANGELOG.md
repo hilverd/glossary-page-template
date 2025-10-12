@@ -12,6 +12,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [5.9.0] - 2025-10-12
+
+### Added
 
 - Include warning in "raw" `glossary.html` and `empty.html` files about not opening them directly from the repository.
 
@@ -24,8 +31,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 
 - In new layout, keep current item visible when you stop filtering by a tag.
-
-### Removed
 
 ## [5.8.2] - 2025-09-12
 
@@ -912,7 +917,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.8.2...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.9.0...HEAD
+[5.9.0]: https://github.com/hilverd/glossary-page-template/compare/v5.8.2...v5.9.0
 [5.8.2]: https://github.com/hilverd/glossary-page-template/compare/v5.8.0...v5.8.2
 [5.8.0]: https://github.com/hilverd/glossary-page-template/compare/v5.7.0...v5.8.0
 [5.7.0]: https://github.com/hilverd/glossary-page-template/compare/v5.6.0...v5.7.0
