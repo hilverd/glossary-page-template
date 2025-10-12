@@ -24,12 +24,22 @@ type alias CommonModel =
 
 relativeUrl : CommonModel -> String
 relativeUrl commonModel =
-    commonModel.queryParameters
-        |> QueryParameters.toRelativeUrl
-        |> (\urlString ->
-                if urlString == "" then
-                    "?"
+    let
+        queryUrl : String
+        queryUrl =
+            commonModel.queryParameters
+                |> QueryParameters.toRelativeUrl
+                |> (\urlString ->
+                        if urlString == "" then
+                            "?"
 
-                else
-                    urlString
-           )
+                        else
+                            urlString
+                   )
+    in
+    case commonModel.fragment of
+        Just fragment ->
+            queryUrl ++ "#" ++ fragment
+
+        Nothing ->
+            queryUrl

@@ -22,6 +22,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Make search button more prominent.
 
 ### Fixed
+
+- In new layout, keep current item visible when you stop filtering by a tag.
+
 ### Removed
 
 ## [5.8.2] - 2025-09-12
