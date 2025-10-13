@@ -14,10 +14,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+### Removed
+
+## [5.9.1] - 2025-10-13
+
+### Fixed
 
 - Improve styling of edit and delete buttons when hovering over them.
-
-### Removed
 
 ## [5.9.0] - 2025-10-12
 
@@ -920,7 +923,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.9.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.9.1...HEAD
+[5.9.1]: https://github.com/hilverd/glossary-page-template/compare/v5.9.0...v5.9.1
 [5.9.0]: https://github.com/hilverd/glossary-page-template/compare/v5.8.2...v5.9.0
 [5.8.2]: https://github.com/hilverd/glossary-page-template/compare/v5.8.0...v5.8.2
 [5.8.0]: https://github.com/hilverd/glossary-page-template/compare/v5.7.0...v5.8.0
