@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- Improve styling of edit and delete buttons when hovering over them.
+
 ### Removed
 
 ## [5.9.0] - 2025-10-12

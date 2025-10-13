@@ -2122,9 +2122,10 @@ viewEditTitleAndAboutButton tabbable =
         [ Components.Button.text
             [ Html.Events.onClick <| PageMsg.NavigateToEditTitleAndAbout
             , Accessibility.Key.tabbable tabbable
+            , class "group"
             ]
             [ Icons.pencil
-                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
+                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100" ]
             , span
                 [ class "ml-2" ]
                 [ text I18n.editTitleAndAboutSectionButton ]
@@ -3031,9 +3032,10 @@ viewManageTagsButton =
         [ class "pb-3 print:hidden" ]
         [ Components.Button.text
             [ Html.Events.onClick <| PageMsg.NavigateToManageTags
+            , class "group"
             ]
             [ Icons.pencil
-                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
+                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100" ]
             , span
                 [ class "ml-2" ]
                 [ text I18n.manageTags ]

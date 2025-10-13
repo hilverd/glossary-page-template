@@ -142,11 +142,12 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                         [ class "inline-flex items-center" ]
                         [ Components.Button.text
                             [ Html.Events.onClick onClickEdit
+                            , class "group"
                             ]
                             [ Icons.pencil
-                                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
+                                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100" ]
                             , span
-                                [ class "font-medium text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-400" ]
+                                [ class "font-medium text-gray-600 dark:text-gray-300 group-hover:text-gray-800 dark:group-hover:text-gray-100" ]
                                 [ text I18n.edit ]
                             ]
                         ]
@@ -154,11 +155,12 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                         [ class "ml-3 inline-flex items-center" ]
                         [ Components.Button.text
                             [ Html.Events.onClick onClickDelete
+                            , class "group"
                             ]
                             [ Icons.trash
-                                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400" ]
+                                [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100" ]
                             , span
-                                [ class "font-medium text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-400" ]
+                                [ class "font-medium text-gray-600 dark:text-gray-300 group-hover:text-gray-800 dark:group-hover:text-gray-100" ]
                                 [ text I18n.delete ]
                             ]
                         ]
