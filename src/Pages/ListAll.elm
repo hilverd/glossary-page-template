@@ -59,7 +59,7 @@ import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
-import Data.GlossaryTitle as GlossaryTitle
+import Data.GlossaryTitle as GlossaryTitle exposing (GlossaryTitle)
 import Data.GradualVisibility as GradualVisibility exposing (GradualVisibility)
 import Data.IndexOfTerms as IndexOfTerms exposing (IndexOfTerms, TermGroup)
 import Data.Notification exposing (Notification)
@@ -963,14 +963,14 @@ update msg model =
                             |> Task.andThen
                                 (\termIndexGroupElement ->
                                     if staticSidebar then
-                                        ElementIds.letterGrid
+                                        ElementIds.letterLinksGrid
                                             |> Dom.getElement
                                             |> Task.andThen
-                                                (\letterGridElement ->
+                                                (\letterLinksGridElement ->
                                                     let
                                                         height : Float
                                                         height =
-                                                            letterGridElement.element.height
+                                                            letterLinksGridElement.element.height
                                                     in
                                                     Dom.setViewportOf idOfSidebarOrMenu 0 (viewport.viewport.y + termIndexGroupElement.element.y - termIndexGroupElement.viewport.y - height)
                                                         |> Task.onError
@@ -2373,9 +2373,10 @@ viewMenuForMobileAndStaticSidebarForDesktop :
     -> Bool
     -> String
     -> Maybe DescribedTag
+    -> GlossaryTitle
     -> GlossaryItemsForUi
     -> Html Msg
-viewMenuForMobileAndStaticSidebarForDesktop enableThreeColumnLayout menuForMobileVisibility enableMathSupport indexFilterString filterByTagWithDescription_ items =
+viewMenuForMobileAndStaticSidebarForDesktop enableThreeColumnLayout menuForMobileVisibility enableMathSupport indexFilterString filterByTagWithDescription_ glossaryTitle items =
     let
         indexOfTerms : IndexOfTerms
         indexOfTerms =
@@ -2384,22 +2385,25 @@ viewMenuForMobileAndStaticSidebarForDesktop enableThreeColumnLayout menuForMobil
                 items
     in
     div []
-        [ Html.Lazy.lazy4 viewMenuForMobile
+        [ Html.Lazy.lazy6 viewMenuForMobile
             menuForMobileVisibility
             enableMathSupport
+            enableThreeColumnLayout
+            glossaryTitle
             filterByTagWithDescription_
             indexOfTerms
-        , Html.Lazy.lazy5 viewStaticSidebarForDesktop
+        , Html.Lazy.lazy6 viewStaticSidebarForDesktop
             enableThreeColumnLayout
             enableMathSupport
+            glossaryTitle
             filterByTagWithDescription_
             indexFilterString
             indexOfTerms
         ]
 
 
-viewMenuForMobile : MenuForMobileVisibility -> Bool -> Maybe DescribedTag -> IndexOfTerms -> Html Msg
-viewMenuForMobile menuForMobileVisibility enableMathSupport filterByTagWithDescription_ termIndex =
+viewMenuForMobile : MenuForMobileVisibility -> Bool -> Bool -> GlossaryTitle -> Maybe DescribedTag -> IndexOfTerms -> Html Msg
+viewMenuForMobile menuForMobileVisibility enableMathSupport enableThreeColumnLayout glossaryTitle filterByTagWithDescription_ termIndex =
     div
         [ class "invisible" |> Extras.HtmlAttribute.showIf (menuForMobileVisibility == GradualVisibility.Invisible)
         , class "fixed inset-0 flex z-40 lg:hidden"
@@ -2467,7 +2471,18 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport filterByTagWithDescr
                     filterByTagWithDescription_
                 , nav
                     [ class "px-4 pt-5 pb-6" ]
-                    [ Html.Lazy.lazy2 viewTermIndexFirstCharacterGrid False termIndex
+                    [ Extras.Html.showIf enableThreeColumnLayout <|
+                        h2
+                            [ class "mb-3 font-bold leading-tight" ]
+                            [ Html.a
+                                [ href "?" ]
+                                [ glossaryTitle
+                                    |> GlossaryTitle.view
+                                        enableMathSupport
+                                        [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
+                                ]
+                            ]
+                    , Html.Lazy.lazy2 viewTermIndexFirstCharacterGrid False termIndex
                     , Html.Lazy.lazy3 viewIndexOfTerms enableMathSupport False termIndex
                     ]
                 ]
@@ -2606,12 +2621,12 @@ viewIndexFilterInputField enableMathSupport filterByTagWithDescription_ indexFil
                 div
                     []
                     [ span
-                        [ class "text-gray-900 dark:text-white" ]
+                        [ class "ml-1.5 text-gray-900 dark:text-white" ]
                         [ text <| I18n.filteringByTag ++ ":" ]
                     , Html.br [] []
                     , Components.Badge.withRemoveButtonAndWrappingText
                         (PageMsg.Internal DoNotFilterByTag)
-                        [ class "print:hidden mt-2 mb-2 overflow-hidden" ]
+                        [ class "print:hidden ml-1.5 mt-2 mb-2 overflow-hidden" ]
                         [ Tag.view enableMathSupport [] <| DescribedTag.tag describedTag ]
                     ]
             )
@@ -2643,15 +2658,26 @@ viewIndexFilterInputField enableMathSupport filterByTagWithDescription_ indexFil
         ]
 
 
-viewLetterGrid : Bool -> Bool -> Maybe DescribedTag -> String -> IndexOfTerms -> Html Msg
-viewLetterGrid enableMathSupport staticSidebar filterByTagWithDescription_ indexFilterString indexOfTerms =
+viewLetterLinksGrid : Bool -> Bool -> Bool -> GlossaryTitle -> Maybe DescribedTag -> String -> IndexOfTerms -> Html Msg
+viewLetterLinksGrid enableMathSupport enableThreeColumnLayout staticSidebar glossaryTitle filterByTagWithDescription_ indexFilterString indexOfTerms =
     div
-        [ id ElementIds.letterGrid
+        [ id ElementIds.letterLinksGrid
         , class "z-10 -mb-6 sticky top-0 -ml-0.5"
         ]
         [ div
             [ class "pt-5 px-3 bg-white dark:bg-slate-900" ]
-            [ viewIndexFilterInputField enableMathSupport filterByTagWithDescription_ indexFilterString
+            [ Extras.Html.showIf enableThreeColumnLayout <|
+                h2
+                    [ class "ml-1.5 mb-2 font-bold leading-tight" ]
+                    [ Html.a
+                        [ href "?" ]
+                        [ glossaryTitle
+                            |> GlossaryTitle.view
+                                enableMathSupport
+                                [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
+                        ]
+                    ]
+            , viewIndexFilterInputField enableMathSupport filterByTagWithDescription_ indexFilterString
             , viewTermIndexFirstCharacterGrid staticSidebar indexOfTerms
             ]
         , div
@@ -2660,8 +2686,8 @@ viewLetterGrid enableMathSupport staticSidebar filterByTagWithDescription_ index
         ]
 
 
-viewStaticSidebarForDesktop : Bool -> Bool -> Maybe DescribedTag -> String -> IndexOfTerms -> Html Msg
-viewStaticSidebarForDesktop enableThreeColumnLayout enableMathSupport filterByTagWithDescription_ indexFilterString termIndex =
+viewStaticSidebarForDesktop : Bool -> Bool -> GlossaryTitle -> Maybe DescribedTag -> String -> IndexOfTerms -> Html Msg
+viewStaticSidebarForDesktop enableThreeColumnLayout enableMathSupport glossaryTitle filterByTagWithDescription_ indexFilterString termIndex =
     let
         filteredTermIndex : IndexOfTerms
         filteredTermIndex =
@@ -2679,7 +2705,7 @@ viewStaticSidebarForDesktop enableThreeColumnLayout enableMathSupport filterByTa
             [ id ElementIds.staticSidebarForDesktop
             , class "h-0 flex-1 flex flex-col overflow-y-scroll"
             ]
-            [ viewLetterGrid enableMathSupport True filterByTagWithDescription_ indexFilterString filteredTermIndex
+            [ viewLetterLinksGrid enableMathSupport enableThreeColumnLayout True glossaryTitle filterByTagWithDescription_ indexFilterString filteredTermIndex
             , nav
                 [ class "px-3" ]
                 [ viewIndexOfTerms enableMathSupport True filteredTermIndex ]
@@ -3606,36 +3632,13 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                             viewCreateGlossaryItemButton
                         ]
                 , div
-                    [ class "xl:flex xl:gap-8 px-6 lg:px-8 mt-6" ]
+                    [ class "xl:flex xl:gap-8 px-6 lg:px-8 mt-2 lg:mt-6" ]
                     [ div
                         [ class "xl:shrink min-w-0 overflow-x-hidden max-w-[70ch]" ]
-                        [ header
-                            [ class "three-column-layout" ]
-                            [ h1
-                                [ id ElementIds.title ]
-                                [ Extras.Html.showMaybe
-                                    (Term.view
-                                        enableMathSupport
-                                        [ class "text-3xl font-bold leading-tight print:text-black" ]
-                                    )
-                                    itemTitle
-                                ]
-                            , h2
-                                [ class "mt-2 font-bold leading-tight" ]
-                                [ Html.a
-                                    [ href "?" ]
-                                    [ glossaryForUi
-                                        |> GlossaryForUi.title
-                                        |> GlossaryTitle.view
-                                            enableMathSupport
-                                            [ class "text-xl font-medium text-gray-700 dark:text-gray-300" ]
-                                    ]
-                                ]
-                            ]
-                        , Html.main_
+                        [ Html.main_
                             [ class "three-column-layout" ]
                             [ Html.article
-                                [ class "mt-4" ]
+                                []
                                 [ div
                                     [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) Extras.HtmlAttribute.inert ]
                                     [ Components.IncubatingGlossaryItemCard.view
@@ -3803,12 +3806,13 @@ view model =
                     [ div
                         [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) <| Extras.HtmlAttribute.inert
                         ]
-                        [ Html.Lazy.lazy6 viewMenuForMobileAndStaticSidebarForDesktop
+                        [ Html.Lazy.lazy7 viewMenuForMobileAndStaticSidebarForDesktop
                             enableThreeColumnLayout
                             model.menuForMobileVisibility
                             model.common.enableMathSupport
                             model.indexFilterString
                             filterByTagWithDescription_
+                            (glossaryForUi |> GlossaryForUi.title)
                             glossaryItemsForUi
                         ]
                     , div

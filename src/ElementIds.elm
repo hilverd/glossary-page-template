@@ -29,7 +29,8 @@ module ElementIds exposing
     , indexForMobile
     , itemSearchDialog
     , items
-    , letterGrid
+    , letterButtonsGrid
+    , letterLinksGrid
     , moreOptionsForRelatedTermDropdownMenu
     , moreOptionsForTermDropdownMenu
     , moveRelatedTermDownButton
@@ -239,9 +240,14 @@ staticSidebarForDesktop =
     prefixed "static-sidebar-for-desktop"
 
 
-letterGrid : String
-letterGrid =
-    prefixed "letter-grid"
+letterButtonsGrid : String
+letterButtonsGrid =
+    prefixed "letter-buttons-grid"
+
+
+letterLinksGrid : String
+letterLinksGrid =
+    prefixed "letter-links-grid"
 
 
 termsIndex : Bool -> String

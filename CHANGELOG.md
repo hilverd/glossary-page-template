@@ -13,6 +13,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+
+- Move glossary title to top left in new layout.
+
 ### Fixed
 ### Removed
 

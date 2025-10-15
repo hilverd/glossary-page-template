@@ -87,7 +87,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
     in
     if editable then
         div
-            [ class "w-[69ch] max-w-full flex flex-col justify-items-end bg-white overflow-x-clip dark:bg-black print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0"
+            [ class "w-[69ch] max-w-full flex flex-col justify-items-end bg-white overflow-x-clip dark:bg-black print:bg-white"
             ]
             [ div
                 [ class "" ]
@@ -95,6 +95,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                     { enableMathSupport = enableMathSupport
                     , withLink = False
                     , isPreferred = True
+                    , largeFont = True
                     }
                     disambiguatedPreferredTerm
                     :: List.map
@@ -102,6 +103,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                             { enableMathSupport = enableMathSupport
                             , withLink = False
                             , isPreferred = False
+                            , largeFont = True
                             }
                         )
                         alternativeTerms
@@ -170,7 +172,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
 
     else
         div
-            [ class "w-[69ch] max-w-full flex flex-col justify-between overflow-x-clip bg-white dark:bg-black print:bg-white border dark:border-gray-700 print:border-none rounded-lg print:px-0 px-4 py-4 print:py-0"
+            [ class "w-[69ch] max-w-full flex flex-col justify-between overflow-x-clip bg-white dark:bg-black print:bg-white"
             ]
             [ div
                 [ class "flex-1" ]
@@ -179,6 +181,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                         { enableMathSupport = enableMathSupport
                         , withLink = False
                         , isPreferred = True
+                        , largeFont = True
                         }
                         disambiguatedPreferredTerm
                         :: List.map
@@ -186,6 +189,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                                 { enableMathSupport = enableMathSupport
                                 , withLink = False
                                 , isPreferred = False
+                                , largeFont = True
                                 }
                             )
                             alternativeTerms
@@ -246,10 +250,10 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
 
 
 viewGlossaryTerm :
-    { enableMathSupport : Bool, withLink : Bool, isPreferred : Bool }
+    { enableMathSupport : Bool, withLink : Bool, isPreferred : Bool, largeFont : Bool }
     -> Term
     -> Html msg
-viewGlossaryTerm { enableMathSupport, withLink, isPreferred } term =
+viewGlossaryTerm { enableMathSupport, withLink, isPreferred, largeFont } term =
     let
         viewTerm : Html msg
         viewTerm =
@@ -259,10 +263,17 @@ viewGlossaryTerm { enableMathSupport, withLink, isPreferred } term =
                         [ term |> Term.id |> fragmentOnly |> Html.Attributes.href
                         , target "_self"
                         ]
-                        [ Term.view enableMathSupport [] term ]
+                        [ Term.view
+                            enableMathSupport
+                            [ Extras.HtmlAttribute.showIf largeFont <| class "text-2xl/7 font-bold" ]
+                            term
+                        ]
 
                 else
-                    Term.view enableMathSupport [] term
+                    Term.view
+                        enableMathSupport
+                        [ Extras.HtmlAttribute.showIf largeFont <| class "text-2xl/7 font-bold" ]
+                        term
 
             else
                 span
@@ -270,7 +281,12 @@ viewGlossaryTerm { enableMathSupport, withLink, isPreferred } term =
                     [ Icons.cornerLeftUp
                         [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-1 mr-1.5 text-gray-400 dark:text-gray-400 print:hidden"
                         ]
-                    , Term.view enableMathSupport [ class "font-normal" ] term
+                    , Term.view
+                        enableMathSupport
+                        [ class "font-normal"
+                        , Extras.HtmlAttribute.showIf largeFont <| class "text-xl"
+                        ]
+                        term
                     ]
     in
     div
@@ -420,6 +436,7 @@ viewRelatedItem enableMathSupport glossaryItem =
                     { enableMathSupport = enableMathSupport
                     , withLink = True
                     , isPreferred = True
+                    , largeFont = False
                     }
                     disambiguatedPreferredTerm
                     :: List.map
@@ -427,6 +444,7 @@ viewRelatedItem enableMathSupport glossaryItem =
                             { enableMathSupport = enableMathSupport
                             , withLink = False
                             , isPreferred = False
+                            , largeFont = False
                             }
                         )
                         alternativeTerms
