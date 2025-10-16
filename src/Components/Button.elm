@@ -1,4 +1,4 @@
-module Components.Button exposing (emptyState, primary, radio, rounded, roundedWithoutBorder, secondary, soft, softSmall, text, textWrapNormal, toggle, white)
+module Components.Button exposing (emptyState, primary, radio, rounded, roundedWithoutBorder, secondary, soft, softLarge, softSmall, text, textWrapNormal, toggle, white)
 
 import Accessibility exposing (Attribute)
 import Accessibility.Aria
@@ -125,7 +125,25 @@ soft : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 soft enabled =
     withAdditionalAttributes
         [ class "rounded-full max-w-xs border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-2 py-1 text-gray-700 dark:text-gray-200 shadow-xs"
-        , Extras.HtmlAttribute.showIf enabled <| class "hover:bg-gray-100 dark:hover:bg-gray-800"
+        , if enabled then
+            class "hover:bg-gray-100 dark:hover:bg-gray-800"
+
+          else
+            class "opacity-25"
+        , Html.Attributes.disabled <| not enabled
+        , Accessibility.Key.tabbable enabled
+        ]
+
+
+softLarge : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
+softLarge enabled =
+    withAdditionalAttributes
+        [ class "rounded-full max-w-md text-xl border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-4.5 py-4 text-gray-700 dark:text-gray-200 shadow-xs"
+        , if enabled then
+            class "hover:bg-gray-100 dark:hover:bg-gray-800"
+
+          else
+            class "opacity-25"
         , Html.Attributes.disabled <| not enabled
         , Accessibility.Key.tabbable enabled
         ]

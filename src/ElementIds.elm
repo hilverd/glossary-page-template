@@ -29,7 +29,6 @@ module ElementIds exposing
     , indexForMobile
     , itemSearchDialog
     , items
-    , letterButtonsGrid
     , letterLinksGrid
     , moreOptionsForRelatedTermDropdownMenu
     , moreOptionsForTermDropdownMenu
@@ -238,11 +237,6 @@ indexForMobile =
 staticSidebarForDesktop : String
 staticSidebarForDesktop =
     prefixed "static-sidebar-for-desktop"
-
-
-letterButtonsGrid : String
-letterButtonsGrid =
-    prefixed "letter-buttons-grid"
 
 
 letterLinksGrid : String

@@ -2579,17 +2579,31 @@ viewQuickItemSearchButton runningOnMacOs =
 
 viewTermIndexFirstCharacter : Bool -> String -> Bool -> Html Msg
 viewTermIndexFirstCharacter staticSidebar firstCharacter enabled =
-    Components.Button.white enabled
-        [ class "m-0.5 px-3 py-2 leading-4"
-        , Html.Events.onClick <|
-            PageMsg.Internal <|
-                if enabled then
-                    JumpToTermIndexGroup staticSidebar firstCharacter
+    if staticSidebar then
+        Components.Button.soft enabled
+            [ class "m-0.5 px-3 py-2 leading-4"
+            , Html.Events.onClick <|
+                PageMsg.Internal <|
+                    if enabled then
+                        JumpToTermIndexGroup staticSidebar firstCharacter
 
-                else
-                    NoOp
-        ]
-        [ text firstCharacter ]
+                    else
+                        NoOp
+            ]
+            [ text firstCharacter ]
+
+    else
+        Components.Button.softLarge enabled
+            [ class "m-1 leading-4"
+            , Html.Events.onClick <|
+                PageMsg.Internal <|
+                    if enabled then
+                        JumpToTermIndexGroup staticSidebar firstCharacter
+
+                    else
+                        NoOp
+            ]
+            [ text firstCharacter ]
 
 
 viewTermIndexFirstCharacterGrid : Bool -> IndexOfTerms -> Html Msg
