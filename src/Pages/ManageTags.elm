@@ -325,7 +325,7 @@ viewEditTag { enableMathSupport, showValidationErrors } index tagField tagDescri
                     div
                         [ class "pb-4" ]
                         [ Components.Button.soft
-                            False
+                            True
                             [ class "mr-2 mt-2"
                             ]
                             [ Tag.view enableMathSupport

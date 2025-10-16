@@ -349,7 +349,7 @@ viewTags { enableMathSupport, currentFragment } tags =
                     , Html.Attributes.href <| buildTagFilterUrl tag currentFragment
                     ]
                     [ Tag.view enableMathSupport
-                        [ class "text-sm" ]
+                        [ class "text-sm select-none" ]
                         tag
                     ]
             )

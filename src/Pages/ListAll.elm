@@ -3040,7 +3040,11 @@ viewCurrentTagFilter additionalAttributes enableMathSupport describedTag =
         , Components.Badge.withRemoveButton
             (PageMsg.Internal DoNotFilterByTag)
             [ class "print:hidden mt-2" ]
-            [ Tag.view enableMathSupport [] <| DescribedTag.tag describedTag ]
+            [ Tag.view enableMathSupport
+                [ class "select-none" ]
+              <|
+                DescribedTag.tag describedTag
+            ]
         ]
 
 
