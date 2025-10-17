@@ -348,7 +348,9 @@ viewTags { enableMathSupport, currentFragment } tags =
                     , Html.Attributes.title <| I18n.tag ++ ": " ++ Tag.inlineText tag
                     , Html.Attributes.href <| buildTagFilterUrl tag currentFragment
                     ]
-                    [ Tag.view enableMathSupport
+                    [ Icons.tag
+                        [ Svg.Attributes.class "h-4 w-4 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100" ]
+                    , Tag.view enableMathSupport
                         [ class "text-sm select-none" ]
                         tag
                     ]

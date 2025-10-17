@@ -2465,7 +2465,10 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport enableThreeColumnLay
                             , Components.Badge.withRemoveButtonAndWrappingText
                                 (PageMsg.Internal DoNotFilterByTag)
                                 [ class "print:hidden mt-2 mb-1 overflow-hidden" ]
-                                [ Tag.view enableMathSupport [] <| DescribedTag.tag describedTag ]
+                                [ Icons.tag
+                                    [ Svg.Attributes.class "h-5 w-5 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100" ]
+                                , Tag.view enableMathSupport [] <| DescribedTag.tag describedTag
+                                ]
                             ]
                     )
                     filterByTagWithDescription_
@@ -2641,7 +2644,10 @@ viewIndexFilterInputField enableMathSupport filterByTagWithDescription_ indexFil
                     , Components.Badge.withRemoveButtonAndWrappingText
                         (PageMsg.Internal DoNotFilterByTag)
                         [ class "print:hidden ml-1.5 mt-2 mb-2 overflow-hidden" ]
-                        [ Tag.view enableMathSupport [] <| DescribedTag.tag describedTag ]
+                        [ Icons.tag
+                            [ Svg.Attributes.class "h-5 w-5 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100" ]
+                        , Tag.view enableMathSupport [] <| DescribedTag.tag describedTag
+                        ]
                     ]
             )
             filterByTagWithDescription_
@@ -3039,8 +3045,10 @@ viewCurrentTagFilter additionalAttributes enableMathSupport describedTag =
             [ text I18n.filteringByTag ]
         , Components.Badge.withRemoveButton
             (PageMsg.Internal DoNotFilterByTag)
-            [ class "print:hidden mt-2" ]
-            [ Tag.view enableMathSupport
+            [ class "print:hidden" ]
+            [ Icons.tag
+                [ Svg.Attributes.class "h-5 w-5 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100" ]
+            , Tag.view enableMathSupport
                 [ class "select-none" ]
               <|
                 DescribedTag.tag describedTag
@@ -3064,7 +3072,10 @@ viewAllTagFilters enableMathSupport tags =
                                     [ class "mr-2 mt-2"
                                     , Html.Events.onClick <| PageMsg.Internal <| FilterByTag tag
                                     ]
-                                    [ Tag.view enableMathSupport [] tag ]
+                                    [ Icons.tag
+                                        [ Svg.Attributes.class "h-5 w-5 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100" ]
+                                    , Tag.view enableMathSupport [] tag
+                                    ]
                             )
                    )
             )
@@ -3478,7 +3489,10 @@ viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDia
                         , Components.Badge.withRemoveButton
                             (PageMsg.Internal RemoveTagFilterButKeepSearchDialogOpen)
                             [ class "print:hidden" ]
-                            [ Tag.view enableMathSupport [] <| DescribedTag.tag describedTag ]
+                            [ Icons.tag
+                                [ Svg.Attributes.class "h-5 w-5 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100" ]
+                            , Tag.view enableMathSupport [] <| DescribedTag.tag describedTag
+                            ]
                         ]
                 )
         )
@@ -3636,7 +3650,7 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                         [ viewManageTagsButton ]
                 , Extras.Html.showMaybe
                     (viewCurrentTagFilter
-                        [ class "mt-4 mb-4 px-6 lg:px-8 mb-6" ]
+                        [ class "inline-flex items-center mt-4 mb-4 px-6 lg:px-8 mb-6" ]
                         enableMathSupport
                     )
                     filterByTagWithDescription_

@@ -27,6 +27,7 @@ module Icons exposing
     , plus
     , search
     , sun
+    , tag
     , tick
     , trash
     , viewGridAdd
@@ -86,6 +87,30 @@ pencil =
         ]
         [ path
             [ d "M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" ]
+            []
+        ]
+
+
+tag : List (Html.Attribute msg) -> Html msg
+tag =
+    withAdditionalAttributes
+        [ viewBox "0 0 24 24"
+        , fill "none"
+        , stroke "currentColor"
+        , strokeWidth "2"
+        , strokeLinecap "round"
+        , strokeLinejoin "round"
+        ]
+        [ path
+            [ d "M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"
+            ]
+            []
+        , Svg.circle
+            [ cx "7.5"
+            , cy "7.5"
+            , r "0.5"
+            , fill "currentColor"
+            ]
             []
         ]
 

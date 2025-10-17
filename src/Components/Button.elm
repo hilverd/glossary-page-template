@@ -114,7 +114,7 @@ rounded enabled =
 softSmall : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 softSmall enabled =
     withAdditionalAttributes
-        [ class "rounded-full max-w-3xs border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-700 dark:text-gray-100 shadow-xs"
+        [ class "inline-flex items-center rounded-full max-w-3xs border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-700 dark:text-gray-100 shadow-xs"
         , Extras.HtmlAttribute.showIf enabled <| class "hover:bg-gray-100 dark:hover:bg-gray-700"
         , Html.Attributes.disabled <| not enabled
         , Accessibility.Key.tabbable enabled
@@ -124,7 +124,7 @@ softSmall enabled =
 soft : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 soft enabled =
     withAdditionalAttributes
-        [ class "rounded-full max-w-xs border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-2 py-1 text-gray-700 dark:text-gray-200 shadow-xs"
+        [ class "inline-flex items-center rounded-full max-w-xs border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-2 py-1 text-gray-700 dark:text-gray-200 shadow-xs"
         , if enabled then
             class "hover:bg-gray-100 dark:hover:bg-gray-800"
 

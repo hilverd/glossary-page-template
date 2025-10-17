@@ -1312,7 +1312,9 @@ viewTags enableMathSupport addTagCombobox addTagComboboxInput tagCheckboxes =
                         Components.Badge.withRemoveButton
                             (PageMsg.Internal <| DeleteTag tag)
                             [ class "mr-2 mt-2" ]
-                            [ Tag.view enableMathSupport
+                            [ Icons.tag
+                                [ Svg.Attributes.class "h-5 w-5 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100" ]
+                            , Tag.view enableMathSupport
                                 [ class "select-none" ]
                                 tag
                             ]
