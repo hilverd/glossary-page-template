@@ -2478,7 +2478,7 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport enableThreeColumnLay
                                 [ class "print:hidden mt-2 mb-1 overflow-hidden" ]
                                 [ Icons.tag
                                     [ Svg.Attributes.class "h-5 w-5 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
-                                , Tag.view enableMathSupport [ class "" ] <| DescribedTag.tag describedTag
+                                , Tag.view enableMathSupport [] <| DescribedTag.tag describedTag
                                 ]
                             ]
                     )
@@ -3075,7 +3075,7 @@ viewAllTagFilters enableMathSupport tags =
                                     ]
                                     [ Icons.tag
                                         [ Svg.Attributes.class "h-5 w-5 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
-                                    , Tag.view enableMathSupport [ class "" ] tag
+                                    , Tag.view enableMathSupport [] tag
                                     ]
                             )
                    )
@@ -3481,7 +3481,7 @@ viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDia
                 (\describedTag ->
                     span [ class "pt-3 flex items-center" ]
                         [ Icons.exclamation
-                            [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-500 mr-1.5"
+                            [ Svg.Attributes.class "h-6 w-6 text-red-600 dark:text-red-500 mr-1.5 shrink-0"
                             , Accessibility.Aria.hidden True
                             ]
                         , span
@@ -3492,7 +3492,7 @@ viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDia
                             [ class "print:hidden" ]
                             [ Icons.tag
                                 [ Svg.Attributes.class "h-5 w-5 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
-                            , Tag.view enableMathSupport [ class "whitespace-nowrap" ] <| DescribedTag.tag describedTag
+                            , Tag.view enableMathSupport [] <| DescribedTag.tag describedTag
                             ]
                         ]
                 )
