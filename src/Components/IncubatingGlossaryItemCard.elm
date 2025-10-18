@@ -344,12 +344,12 @@ viewTags { enableMathSupport, currentFragment } tags =
         (List.map
             (\tag ->
                 Html.a
-                    [ class "inline-flex items-center rounded-full max-w-3xs border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-700 dark:text-gray-100 shadow-xs hover:bg-gray-100 dark:hover:bg-gray-700 no-underline hover:no-underline mr-2 mb-2"
+                    [ class "inline-flex items-center rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-700 dark:text-gray-100 shadow-xs hover:bg-gray-100 dark:hover:bg-gray-700 no-underline hover:no-underline mr-2 mb-2"
                     , Html.Attributes.title <| I18n.tag ++ ": " ++ Tag.inlineText tag
                     , Html.Attributes.href <| buildTagFilterUrl tag currentFragment
                     ]
                     [ Icons.tag
-                        [ Svg.Attributes.class "h-4 w-4 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100" ]
+                        [ Svg.Attributes.class "h-4 w-4 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
                     , Tag.view enableMathSupport
                         [ class "text-sm select-none" ]
                         tag

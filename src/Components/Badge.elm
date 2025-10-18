@@ -11,9 +11,9 @@ import Svg.Attributes
 withRemoveButton : msg -> List (Attribute Never) -> List (Html msg) -> Html msg
 withRemoveButton onClick additionalAttributes children =
     span
-        (class "inline-flex items-center max-w-xs gap-x-0.5 rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-3 py-1 text-gray-700 dark:text-gray-200 shadow-xs" :: additionalAttributes)
+        (class "inline-flex items-center gap-x-0.5 rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-3 py-1 text-gray-700 dark:text-gray-200 shadow-xs" :: additionalAttributes)
         [ span
-            [ class "whitespace-nowrap overflow-hidden text-ellipsis inline-flex items-center" ]
+            [ class "inline-flex items-center" ]
             children
         , button
             [ Html.Attributes.type_ "button"
@@ -35,7 +35,7 @@ withRemoveButton onClick additionalAttributes children =
 withRemoveButtonAndWrappingText : msg -> List (Attribute Never) -> List (Html msg) -> Html msg
 withRemoveButtonAndWrappingText onClick additionalAttributes children =
     span
-        (class "select-none inline-flex items-center max-w-xs gap-x-0.5 rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-3 py-1 text-gray-700 dark:text-gray-200 shadow-xs" :: additionalAttributes)
+        (class "select-none inline-flex items-center gap-x-0.5 rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-3 py-1 text-gray-700 dark:text-gray-200 shadow-xs" :: additionalAttributes)
         [ span
             [ class "inline-flex items-center" ]
             children
