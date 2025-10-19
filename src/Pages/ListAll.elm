@@ -2268,7 +2268,7 @@ viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, edita
         [ class "mb-4" ]
         [ Extras.Html.showMaybe
             (viewCurrentTagFilter
-                [ class "pt-3" ]
+                [ class "pt-3 inline-flex items-center flex-wrap" ]
                 enableMathSupport
             )
             filterByDescribedTag
@@ -3041,7 +3041,7 @@ viewCurrentTagFilter additionalAttributes enableMathSupport describedTag =
     div
         additionalAttributes
         [ span
-            [ class "print:hidden mr-2 font-medium text-gray-900 dark:text-gray-100" ]
+            [ class "print:hidden mr-2 mb-1 font-medium text-gray-900 dark:text-gray-100" ]
             [ text I18n.filteringByTag ]
         , Components.Badge.withRemoveButton
             (PageMsg.Internal DoNotFilterByTag)
