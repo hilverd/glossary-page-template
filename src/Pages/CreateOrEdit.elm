@@ -2148,7 +2148,7 @@ view model =
                                     [ Html.fieldset
                                         [ class "pt-4 lg:sticky lg:top-5" ]
                                         [ Html.legend
-                                            [ class "text-xl text-center text-gray-800 dark:text-gray-300 px-1 select-none" ]
+                                            [ class "text-xl text-gray-800 dark:text-gray-300 px-1 select-none" ]
                                             [ text I18n.preview ]
                                         , article
                                             [ id ElementIds.items ]
