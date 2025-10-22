@@ -2553,7 +2553,7 @@ viewQuickItemSearchButton runningOnMacOs =
                     , height "24"
                     , Svg.Attributes.class "mr-3 flex-none"
                     ]
-                , text I18n.searchPlaceholder
+                , text I18n.searchEllipsis
                 , span
                     [ class "ml-auto pl-3 pr-1 flex-none text-sm font-semibold" ]
                     [ text <|
