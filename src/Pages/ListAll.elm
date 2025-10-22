@@ -1532,16 +1532,6 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
         enableThreeColumnLayout =
             GlossaryForUi.enableThreeColumnLayout glossaryForUi
 
-        startingItem : Maybe String
-        startingItem =
-            glossaryForUi
-                |> GlossaryForUi.items
-                |> GlossaryItemsForUi.startingItem
-                |> Maybe.map GlossaryItemForUi.disambiguatedPreferredTerm
-                |> Maybe.map DisambiguatedTerm.toTerm
-                |> Maybe.map Term.raw
-                |> Maybe.map RawTerm.toString
-
         errorDiv : String -> Html msg
         errorDiv message =
             div
@@ -1593,7 +1583,6 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
                 , viewSelectStartingItem
                     enableMathSupport
                     (GlossaryForUi.items glossaryForUi)
-                    startingItem
                     startingItemCombobox
                     startingItemComboboxInput
                 , Extras.Html.showUnless enableThreeColumnLayout <|
@@ -1641,11 +1630,10 @@ viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupp
 viewSelectStartingItem :
     Bool
     -> GlossaryItemsForUi
-    -> Maybe String
     -> Components.Combobox.Model
     -> String
     -> Html Msg
-viewSelectStartingItem enableMathSupport glossaryItemsForUi currentStartingItem startingItemCombobox startingItemComboboxInput =
+viewSelectStartingItem enableMathSupport glossaryItemsForUi startingItemCombobox startingItemComboboxInput =
     let
         comboboxChoices : { totalNumberOfResults : Int, results : List (Components.Combobox.Choice DisambiguatedTerm (PageMsg InternalMsg)) }
         comboboxChoices =
@@ -3634,12 +3622,6 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                                     )
                                 )
                     )
-
-        itemTitle : Maybe Term
-        itemTitle =
-            Maybe.map
-                (Tuple.first >> GlossaryItemForUi.disambiguatedPreferredTerm >> DisambiguatedTerm.toTerm)
-                itemAndRelatedItems
     in
     Extras.Html.showMaybe
         (\( item, relatedItems ) ->
