@@ -483,7 +483,7 @@ view toParentMsg model searchString messageAboveSearchResults messageToShowAtBot
                         , Html.Attributes.spellcheck False
                         , class "h-12 w-full border-0 bg-transparent dark:bg-gray-600 pl-11 pr-4 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-0"
                         , Html.Attributes.id <| searchStringFieldId model
-                        , Html.Attributes.placeholder I18n.searchEllipsis
+                        , Html.Attributes.placeholder I18n.search
                         , Extras.HtmlAttribute.showMaybe Html.Events.onInput config.onChangeSearchString
                         , Html.Events.preventDefaultOn "keydown"
                             (Extras.HtmlEvents.preventDefaultOnDecoder
