@@ -2659,7 +2659,7 @@ viewIndexFilterInputField enableMathSupport filterByTagWithDescription_ indexFil
                     [ Html.Attributes.type_ "search"
                     , id ElementIds.indexFilterInputField
                     , class "col-start-1 row-start-1 block w-full pl-9 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                    , Html.Attributes.placeholder "Filter"
+                    , Html.Attributes.placeholder I18n.filter
                     , Html.Attributes.autocomplete False
                     , Html.Attributes.attribute "autocorrect" "off"
                     , Html.Attributes.attribute "autocapitalize" "off"
