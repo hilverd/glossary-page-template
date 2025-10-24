@@ -1122,6 +1122,7 @@ viewMoreOptionsForTermDropdownButton numberOfTerms index dropdownMenuWithMoreOpt
     Components.DropdownMenu.view
         (PageMsg.Internal << DropdownMenuWithMoreOptionsForTermMsg indexInt)
         dropdownMenuWithMoreOptionsForTerm
+        Nothing
         True
         Components.DropdownMenu.Ellipsis
         (List.filterMap identity
@@ -1700,6 +1701,7 @@ viewMoreOptionsForRelatedTermDropdownButton numberOfRelatedTerms index dropdownM
     Components.DropdownMenu.view
         (PageMsg.Internal << DropdownMenuWithMoreOptionsForRelatedTermMsg indexInt)
         dropdownMenuWithMoreOptionsForRelatedTerm
+        Nothing
         True
         Components.DropdownMenu.Ellipsis
         (List.filterMap identity

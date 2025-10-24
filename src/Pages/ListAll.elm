@@ -1776,7 +1776,7 @@ viewTermIndexGroup enableMathSupport staticSidebar { label, entries } =
         [ id <| ElementIds.termIndexGroupLabel staticSidebar label
         , class "mt-6"
         ]
-        [ h5
+        [ h3
             [ class "mb-8 lg:mb-3 font-semibold" ]
             [ span
                 [ class "inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-400/10 px-2 py-1 text-gray-600 dark:text-gray-400 ring-1 ring-inset ring-gray-500/10 dark:ring-gray-400/20" ]
@@ -2397,6 +2397,7 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport enableThreeColumnLay
         , class "fixed inset-0 flex z-40 lg:hidden"
         , Accessibility.Role.dialog
         , Accessibility.Aria.modal True
+        , Accessibility.Aria.label I18n.sidebar
         ]
         [ Html.div
             [ class "fixed inset-0 bg-black/75 dark:bg-black/70"
@@ -2766,12 +2767,12 @@ viewTopBar tabbable runningOnMacOs editability theme themeDropdownMenu maybeExpo
                 [ viewStartEditingButton tabbable ]
         , div
             [ class "flex pr-4" ]
-            [ viewThemeButton tabbable theme themeDropdownMenu ]
+            [ viewThemeButton True tabbable theme themeDropdownMenu ]
         , Extras.Html.showMaybe
             (\exportDropdownMenu ->
                 div
                     [ class "flex pr-4" ]
-                    [ viewExportButton tabbable exportDropdownMenu ]
+                    [ viewExportButton True tabbable exportDropdownMenu ]
             )
             maybeExportDropdownMenu
         ]
@@ -2790,11 +2791,17 @@ themeIcon theme =
             Icons.computerDesktop
 
 
-viewThemeButton : Bool -> Theme -> Components.DropdownMenu.Model -> Html Msg
-viewThemeButton enabled theme themeDropdownMenu =
+viewThemeButton : Bool -> Bool -> Theme -> Components.DropdownMenu.Model -> Html Msg
+viewThemeButton forTopBar enabled theme themeDropdownMenu =
     Components.DropdownMenu.view
         (PageMsg.Internal << ThemeDropdownMenuMsg)
         themeDropdownMenu
+        (if forTopBar then
+            Just ElementIds.themeDropdownButtonForTopBar
+
+         else
+            Nothing
+        )
         enabled
         (Components.DropdownMenu.Chevron
             [ themeIcon theme
@@ -2831,11 +2838,17 @@ viewThemeButton enabled theme themeDropdownMenu =
         ]
 
 
-viewExportButton : Bool -> Components.DropdownMenu.Model -> Html Msg
-viewExportButton enabled exportDropdownMenu =
+viewExportButton : Bool -> Bool -> Components.DropdownMenu.Model -> Html Msg
+viewExportButton forTopBar enabled exportDropdownMenu =
     Components.DropdownMenu.view
         (PageMsg.Internal << ExportDropdownMenuMsg)
         exportDropdownMenu
+        (if forTopBar then
+            Just ElementIds.exportDropdownButtonForTopBar
+
+         else
+            Nothing
+        )
         enabled
         (Components.DropdownMenu.Chevron
             [ Icons.documentDownload
@@ -3896,14 +3909,14 @@ view model =
                                             ]
                                     , div
                                         [ class "hidden lg:block pb-3 pt-0.5" ]
-                                        [ viewThemeButton noModalDialogShown_ model.common.theme model.themeDropdownMenu
+                                        [ viewThemeButton False noModalDialogShown_ model.common.theme model.themeDropdownMenu
                                         ]
                                     , Extras.Html.showIf showExportButton <|
                                         div
                                             [ class "hidden lg:block" ]
                                             [ span
                                                 [ class "pb-3" ]
-                                                [ viewExportButton noModalDialogShown_ model.exportDropdownMenu ]
+                                                [ viewExportButton False noModalDialogShown_ model.exportDropdownMenu ]
                                             ]
                                     ]
                                 ]

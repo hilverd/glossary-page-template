@@ -416,6 +416,7 @@ view toParentMsg model searchString messageAboveSearchResults messageToShowAtBot
     div
         [ Accessibility.Aria.modal True
         , Accessibility.Role.dialog
+        , Accessibility.Aria.label I18n.search
         , class "relative z-20"
         ]
         [ Html.div

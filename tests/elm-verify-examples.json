@@ -42,6 +42,7 @@
         "Extras.Array",
         "Extras.HtmlTree",
         "Extras.List",
+        "Extras.Maybe",
         "Extras.String",
         "Extras.Url",
         "GlossaryItemForm.DefinitionField",

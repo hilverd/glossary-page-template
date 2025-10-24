@@ -24,6 +24,7 @@ import Components.Button
 import Data.GradualVisibility exposing (GradualVisibility(..))
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
+import Extras.Maybe
 import Html
 import Html.Attributes exposing (attribute, class)
 import Html.Events
@@ -176,11 +177,12 @@ configFromProperties =
 view :
     (Msg -> parentMsg)
     -> Model
+    -> Maybe String
     -> Bool
     -> ButtonShape parentMsg
     -> List (Choice parentMsg)
     -> Html parentMsg
-view toParentMsg (Model model) enabled buttonShape choices =
+view toParentMsg (Model model) overrideId enabled buttonShape choices =
     let
         config : Config
         config =
@@ -197,7 +199,7 @@ view toParentMsg (Model model) enabled buttonShape choices =
 
             buttonAttributes : List (Html.Attribute parentMsg)
             buttonAttributes =
-                [ Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
+                [ Extras.HtmlAttribute.showMaybe Html.Attributes.id (overrideId |> Extras.Maybe.orElse config.id)
                 , Accessibility.Aria.expanded <| model.visibility == Visible
                 , Accessibility.Aria.hasMenuPopUp
                 , Extras.HtmlEvents.onClickPreventDefaultAndStopPropagation <|

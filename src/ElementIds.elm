@@ -24,6 +24,7 @@ module ElementIds exposing
     , draggableSeeAlsoSelect
     , draggableTermInputField
     , exportDropdownButton
+    , exportDropdownButtonForTopBar
     , glossaryItemDiv
     , indexFilterInputField
     , indexForMobile
@@ -59,6 +60,7 @@ module ElementIds exposing
     , termsIndex
     , textFieldWithCommandToRunEditor
     , themeDropdownButton
+    , themeDropdownButtonForTopBar
     , title
     , titleInputField
     , viewSingleItemModalTitle
@@ -268,9 +270,19 @@ themeDropdownButton =
     prefixed "theme-dropdown-button"
 
 
+themeDropdownButtonForTopBar : String
+themeDropdownButtonForTopBar =
+    prefixed "theme-dropdown-button-for-top-bar"
+
+
 exportDropdownButton : String
 exportDropdownButton =
     prefixed "export-dropdown-button"
+
+
+exportDropdownButtonForTopBar : String
+exportDropdownButtonForTopBar =
+    prefixed "export-dropdown-button-for-top-bar"
 
 
 moreOptionsForTermDropdownMenu : Int -> String
