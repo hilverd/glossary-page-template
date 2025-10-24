@@ -1,4 +1,4 @@
-module CommonModel exposing (CommonModel, relativeUrl)
+module CommonModel exposing (CommonModel, initialUrlWithoutQueryOrFragment, relativeUrl)
 
 import Browser.Navigation exposing (Key)
 import Data.Editability exposing (Editability)
@@ -43,3 +43,31 @@ relativeUrl commonModel =
 
         Nothing ->
             queryUrl
+
+
+initialUrlWithoutQueryOrFragment : CommonModel -> String
+initialUrlWithoutQueryOrFragment commonModel =
+    let
+        url : Url
+        url =
+            commonModel.initialUrl
+
+        protocolString : String
+        protocolString =
+            case url.protocol of
+                Url.Http ->
+                    "http://"
+
+                Url.Https ->
+                    "https://"
+
+        portString : String
+        portString =
+            case url.port_ of
+                Nothing ->
+                    ""
+
+                Just port_ ->
+                    ":" ++ String.fromInt port_
+    in
+    protocolString ++ url.host ++ portString ++ url.path

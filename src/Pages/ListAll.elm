@@ -2363,8 +2363,9 @@ viewMenuForMobileAndStaticSidebarForDesktop :
     -> Maybe DescribedTag
     -> GlossaryTitle
     -> GlossaryItemsForUi
+    -> String
     -> Html Msg
-viewMenuForMobileAndStaticSidebarForDesktop enableThreeColumnLayout menuForMobileVisibility enableMathSupport indexFilterString filterByTagWithDescription_ glossaryTitle items =
+viewMenuForMobileAndStaticSidebarForDesktop enableThreeColumnLayout menuForMobileVisibility enableMathSupport indexFilterString filterByTagWithDescription_ glossaryTitle items initialUrlWithoutQueryOrFragment =
     let
         indexOfTerms : IndexOfTerms
         indexOfTerms =
@@ -2373,25 +2374,27 @@ viewMenuForMobileAndStaticSidebarForDesktop enableThreeColumnLayout menuForMobil
                 items
     in
     div []
-        [ Html.Lazy.lazy6 viewMenuForMobile
+        [ Html.Lazy.lazy7 viewMenuForMobile
             menuForMobileVisibility
             enableMathSupport
             enableThreeColumnLayout
             glossaryTitle
             filterByTagWithDescription_
             indexOfTerms
-        , Html.Lazy.lazy6 viewStaticSidebarForDesktop
+            initialUrlWithoutQueryOrFragment
+        , Html.Lazy.lazy7 viewStaticSidebarForDesktop
             enableThreeColumnLayout
             enableMathSupport
             glossaryTitle
             filterByTagWithDescription_
             indexFilterString
             indexOfTerms
+            initialUrlWithoutQueryOrFragment
         ]
 
 
-viewMenuForMobile : MenuForMobileVisibility -> Bool -> Bool -> GlossaryTitle -> Maybe DescribedTag -> IndexOfTerms -> Html Msg
-viewMenuForMobile menuForMobileVisibility enableMathSupport enableThreeColumnLayout glossaryTitle filterByTagWithDescription_ termIndex =
+viewMenuForMobile : MenuForMobileVisibility -> Bool -> Bool -> GlossaryTitle -> Maybe DescribedTag -> IndexOfTerms -> String -> Html Msg
+viewMenuForMobile menuForMobileVisibility enableMathSupport enableThreeColumnLayout glossaryTitle filterByTagWithDescription_ termIndex initialUrlWithoutQueryOrFragment =
     div
         [ class "invisible" |> Extras.HtmlAttribute.showIf (menuForMobileVisibility == GradualVisibility.Invisible)
         , class "fixed inset-0 flex z-40 lg:hidden"
@@ -2447,7 +2450,7 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport enableThreeColumnLay
                     h2
                         [ class "px-4 mt-5 font-bold leading-tight" ]
                         [ Html.a
-                            [ href "?" ]
+                            [ href initialUrlWithoutQueryOrFragment ]
                             [ glossaryTitle
                                 |> GlossaryTitle.view
                                     enableMathSupport
@@ -2664,8 +2667,8 @@ viewIndexFilterInputField enableMathSupport filterByTagWithDescription_ indexFil
         ]
 
 
-viewLetterLinksGrid : Bool -> Bool -> Bool -> GlossaryTitle -> Maybe DescribedTag -> String -> IndexOfTerms -> Html Msg
-viewLetterLinksGrid enableMathSupport enableThreeColumnLayout staticSidebar glossaryTitle filterByTagWithDescription_ indexFilterString indexOfTerms =
+viewLetterLinksGrid : Bool -> Bool -> Bool -> GlossaryTitle -> Maybe DescribedTag -> String -> IndexOfTerms -> String -> Html Msg
+viewLetterLinksGrid enableMathSupport enableThreeColumnLayout staticSidebar glossaryTitle filterByTagWithDescription_ indexFilterString indexOfTerms initialUrlWithoutQueryOrFragment =
     div
         [ id ElementIds.letterLinksGrid
         , class "z-10 -mb-6 sticky top-0 -ml-0.5"
@@ -2676,7 +2679,7 @@ viewLetterLinksGrid enableMathSupport enableThreeColumnLayout staticSidebar glos
                 h2
                     [ class "ml-1.5 mb-3 font-bold leading-tight" ]
                     [ Html.a
-                        [ href "?" ]
+                        [ href initialUrlWithoutQueryOrFragment ]
                         [ glossaryTitle
                             |> GlossaryTitle.view
                                 enableMathSupport
@@ -2692,8 +2695,8 @@ viewLetterLinksGrid enableMathSupport enableThreeColumnLayout staticSidebar glos
         ]
 
 
-viewStaticSidebarForDesktop : Bool -> Bool -> GlossaryTitle -> Maybe DescribedTag -> String -> IndexOfTerms -> Html Msg
-viewStaticSidebarForDesktop enableThreeColumnLayout enableMathSupport glossaryTitle filterByTagWithDescription_ indexFilterString termIndex =
+viewStaticSidebarForDesktop : Bool -> Bool -> GlossaryTitle -> Maybe DescribedTag -> String -> IndexOfTerms -> String -> Html Msg
+viewStaticSidebarForDesktop enableThreeColumnLayout enableMathSupport glossaryTitle filterByTagWithDescription_ indexFilterString termIndex initialUrlWithoutQueryOrFragment =
     let
         filteredTermIndex : IndexOfTerms
         filteredTermIndex =
@@ -2711,7 +2714,7 @@ viewStaticSidebarForDesktop enableThreeColumnLayout enableMathSupport glossaryTi
             [ id ElementIds.staticSidebarForDesktop
             , class "h-0 flex-1 flex flex-col overflow-y-scroll"
             ]
-            [ viewLetterLinksGrid enableMathSupport enableThreeColumnLayout True glossaryTitle filterByTagWithDescription_ indexFilterString filteredTermIndex
+            [ viewLetterLinksGrid enableMathSupport enableThreeColumnLayout True glossaryTitle filterByTagWithDescription_ indexFilterString filteredTermIndex initialUrlWithoutQueryOrFragment
             , nav
                 [ class "px-3" ]
                 [ viewIndexOfTerms enableMathSupport True filteredTermIndex ]
@@ -3831,7 +3834,7 @@ view model =
                     [ div
                         [ Extras.HtmlAttribute.showIf (not noModalDialogShown_) <| Extras.HtmlAttribute.inert
                         ]
-                        [ Html.Lazy.lazy7 viewMenuForMobileAndStaticSidebarForDesktop
+                        [ Html.Lazy.lazy8 viewMenuForMobileAndStaticSidebarForDesktop
                             enableThreeColumnLayout
                             model.menuForMobileVisibility
                             model.common.enableMathSupport
@@ -3839,6 +3842,7 @@ view model =
                             filterByTagWithDescription_
                             (glossaryForUi |> GlossaryForUi.title)
                             glossaryItemsForUi
+                            (CommonModel.initialUrlWithoutQueryOrFragment model.common)
                         ]
                     , div
                         [ class "hidden lg:block" ]
