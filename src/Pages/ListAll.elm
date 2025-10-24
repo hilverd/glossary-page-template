@@ -2639,28 +2639,26 @@ viewIndexFilterInputField enableMathSupport filterByTagWithDescription_ indexFil
                     ]
             )
             filterByTagWithDescription_
-        , div []
-            [ div
-                [ class "mt-2 grid grid-cols-1"
+        , div
+            [ class "mt-2 grid grid-cols-1"
+            ]
+            [ Html.input
+                [ Html.Attributes.type_ "search"
+                , id ElementIds.indexFilterInputField
+                , class "col-start-1 row-start-1 block w-full pl-9 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                , Html.Attributes.placeholder I18n.filter
+                , Html.Attributes.autocomplete False
+                , Html.Attributes.attribute "autocorrect" "off"
+                , Html.Attributes.attribute "autocapitalize" "off"
+                , Html.Attributes.spellcheck False
+                , Html.Attributes.value indexFilterString
+                , Html.Events.onInput (PageMsg.Internal << UpdateIndexFilterString)
                 ]
-                [ Html.input
-                    [ Html.Attributes.type_ "search"
-                    , id ElementIds.indexFilterInputField
-                    , class "col-start-1 row-start-1 block w-full pl-9 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                    , Html.Attributes.placeholder I18n.filter
-                    , Html.Attributes.autocomplete False
-                    , Html.Attributes.attribute "autocorrect" "off"
-                    , Html.Attributes.attribute "autocapitalize" "off"
-                    , Html.Attributes.spellcheck False
-                    , Html.Attributes.value indexFilterString
-                    , Html.Events.onInput (PageMsg.Internal << UpdateIndexFilterString)
-                    ]
-                    []
-                , Icons.filter
-                    [ Svg.Attributes.class "pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 dark:text-gray-500"
-                    , Html.Attributes.attribute "aria-hidden" "true"
-                    , Html.Attributes.attribute "data-slot" "icon"
-                    ]
+                []
+            , Icons.filter
+                [ Svg.Attributes.class "pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 dark:text-gray-500"
+                , Html.Attributes.attribute "aria-hidden" "true"
+                , Html.Attributes.attribute "data-slot" "icon"
                 ]
             ]
         ]
