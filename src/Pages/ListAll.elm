@@ -11,7 +11,6 @@ import Accessibility
         , h1
         , h2
         , h3
-        , h5
         , header
         , label
         , legend
