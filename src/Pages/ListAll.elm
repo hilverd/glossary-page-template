@@ -2138,7 +2138,7 @@ viewStartEditingButton tabbable =
         [ Icons.pencil
             [ Svg.Attributes.class "h-5 w-5" ]
         , span
-            [ class "hidden sm:ml-2 sm:inline-flex items-center" ]
+            [ class "hidden xl:ml-2 xl:inline-flex items-center" ]
             [ text I18n.edit
             , Html.kbd
                 [ class "ml-2 inline-flex items-center rounded-xs border border-gray-700 dark:border-gray-300 px-1 font-sans text-xs" ]
@@ -2650,7 +2650,7 @@ viewItemSearchCombobox runningOnMacOs forTopBar enableMathSupport glossaryItemsF
                 UpdateSearchComboboxInput True ""
             )
         ]
-        [ class "w-full" ]
+        [ class "w-full max-w-3xl" ]
         Nothing
         comboboxChoices.results
         (if comboboxChoices.totalNumberOfResults > maximumNumberOfResultsForItemWithFocusCombobox then
@@ -2950,7 +2950,7 @@ viewExportButton forTopBar enabled exportDropdownMenu =
             [ Icons.documentDownload
                 [ Svg.Attributes.class "h-5 w-5" ]
             , span
-                [ class "hidden sm:inline ml-2" ]
+                [ class "hidden xl:inline ml-2" ]
                 [ text I18n.export ]
             ]
         )
