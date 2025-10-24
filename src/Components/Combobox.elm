@@ -1,4 +1,4 @@
-port module Components.Combobox exposing (Choice, Model, Msg, choice, choicesVisible, hideChoices, id, init, onBlur, onInput, onSelect, placeholder, showChoices, showValidationErrors, subscriptions, update, validationError, view)
+port module Components.Combobox exposing (Choice, Model, Msg, choice, choicesVisible, hideChoices, icon, id, init, onBlur, onInput, onSelect, placeholder, showChoices, showValidationErrors, subscriptions, update, validationError, view)
 
 import Accessibility
 import Accessibility.Aria
@@ -33,6 +33,7 @@ type alias Config value parentMsg =
     , onSelect : Maybe (value -> parentMsg)
     , onInput : Maybe (String -> parentMsg)
     , onBlur : Maybe parentMsg
+    , icon : Maybe (List (Attribute parentMsg) -> Html parentMsg)
     }
 
 
@@ -184,6 +185,7 @@ type Property value parentMsg
     | OnBlur parentMsg
     | ShowValidationErrors Bool
     | ValidationError (Maybe String)
+    | Icon (List (Attribute parentMsg) -> Html parentMsg)
 
 
 type alias ChoiceIndex =
@@ -237,6 +239,11 @@ showValidationErrors =
     ShowValidationErrors
 
 
+icon : (List (Attribute parentMsg) -> Html parentMsg) -> Property value parentMsg
+icon =
+    Icon
+
+
 configFromProperties : List (Property value parentMsg) -> Config value parentMsg
 configFromProperties =
     List.foldl
@@ -262,6 +269,9 @@ configFromProperties =
 
                 ValidationError validationError_ ->
                     { config | validationError = validationError_ }
+
+                Icon icon_ ->
+                    { config | icon = Just icon_ }
         )
         { id = Nothing
         , placeholder = Nothing
@@ -270,6 +280,7 @@ configFromProperties =
         , onBlur = Nothing
         , showValidationErrors = False
         , validationError = Nothing
+        , icon = Nothing
         }
 
 
@@ -293,11 +304,27 @@ view toParentMsg (Model model) properties valueForSelectedChoice choices message
         [ div
             [ class "relative"
             ]
-            [ Accessibility.inputText
+            [ Extras.Html.showMaybe
+                (\icon_ ->
+                    div
+                        [ class "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3" ]
+                        [ icon_
+                            [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-500"
+                            , Accessibility.Aria.hidden True
+                            ]
+                        ]
+                )
+                config.icon
+            , Accessibility.inputText
                 input
                 [ Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
                 , Html.Attributes.type_ "text"
-                , class "block w-full rounded-md bg-white dark:bg-gray-900 py-1.5 pr-12 pl-3 text-gray-900 dark:text-gray-200 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-1 focus:-outline-offset-1 focus:outline-indigo-600 dark:focus:outline-indigo-300"
+                , class "block w-full rounded-md bg-white dark:bg-gray-900 py-1.5 pr-12 text-gray-900 dark:text-gray-200 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-1 focus:-outline-offset-1 focus:outline-indigo-600 dark:focus:outline-indigo-300"
+                , if config.icon /= Nothing then
+                    class "pl-10"
+
+                  else
+                    class "pl-3"
                 , Accessibility.Role.comboBox
                 , Accessibility.Aria.controls [ optionsId ]
                 , Accessibility.Aria.expanded model.choicesVisible

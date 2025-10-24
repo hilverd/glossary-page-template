@@ -1390,6 +1390,7 @@ viewTags enableMathSupport addTagCombobox addTagComboboxInput tagCheckboxes =
                 addTagCombobox
                 [ Components.Combobox.placeholder I18n.addTag
                 , Components.Combobox.id ElementIds.addTagCombobox
+                , Components.Combobox.icon Icons.tag
                 , Components.Combobox.onSelect (PageMsg.Internal << ToggleTagCheckbox)
                 , Components.Combobox.onInput (PageMsg.Internal << UpdateAddTagComboboxInput False)
                 , Components.Combobox.onBlur
