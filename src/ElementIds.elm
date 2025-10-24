@@ -46,6 +46,7 @@ module ElementIds exposing
     , outer
     , relatedTermCombobox
     , reserved
+    , searchCombobox
     , seeAlsoSelect
     , showExportMenuLabel
     , showLastUpdatedDatesLabel
@@ -413,3 +414,15 @@ comboboxChoice comboboxId index =
 addTagCombobox : String
 addTagCombobox =
     prefixed "add-tag-combobox"
+
+
+searchCombobox : Bool -> String
+searchCombobox forTopBar =
+    prefixed <|
+        "search-combobox-"
+            ++ (if forTopBar then
+                    "for-top-bar"
+
+                else
+                    "for-main-content"
+               )

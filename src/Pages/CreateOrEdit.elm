@@ -1390,7 +1390,11 @@ viewTags enableMathSupport addTagCombobox addTagComboboxInput tagCheckboxes =
                 addTagCombobox
                 [ Components.Combobox.placeholder I18n.addTag
                 , Components.Combobox.id ElementIds.addTagCombobox
-                , Components.Combobox.icon Icons.tag
+                , Components.Combobox.icon <|
+                    Icons.tag
+                        [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-500"
+                        , Accessibility.Aria.hidden True
+                        ]
                 , Components.Combobox.onSelect (PageMsg.Internal << ToggleTagCheckbox)
                 , Components.Combobox.onInput (PageMsg.Internal << UpdateAddTagComboboxInput False)
                 , Components.Combobox.onBlur
@@ -1398,6 +1402,7 @@ viewTags enableMathSupport addTagCombobox addTagComboboxInput tagCheckboxes =
                         UpdateAddTagComboboxInput True ""
                     )
                 ]
+                [ class "w-full max-w-md" ]
                 Nothing
                 (comboboxMatches
                     |> List.map
@@ -1664,6 +1669,7 @@ viewCreateSeeAlsoSingle1 enableMathSupport dragAndDropStatus showValidationError
                                     relatedTerm.raw
                     )
                 ]
+                [ class "w-full max-w-md" ]
                 (relatedTerm.raw |> Maybe.map RawTerm.toString)
                 comboboxChoices.results
                 (if comboboxChoices.totalNumberOfResults > maximumNumberOfResultsForTermCombobox then

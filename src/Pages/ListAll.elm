@@ -131,6 +131,8 @@ type alias Model =
     , indexFilterString : String
     , itemSearchDialog : ItemSearchDialog
     , layout : Layout
+    , searchCombobox : Components.Combobox.Model
+    , searchComboboxInput : String
     , startingItemCombobox : Components.Combobox.Model
     , startingItemComboboxInput : String
     , itemWithFocus : Maybe GlossaryItemId
@@ -153,6 +155,9 @@ type InternalMsg
     | StartHidingMenuForMobile
     | CompleteHidingMenuForMobile
     | BackToTop Bool Int
+    | ItemSearchComboboxMsg Components.Combobox.Msg
+    | UpdateSearchComboboxInput Bool String
+    | SelectSearchResult DisambiguatedTerm
     | ThemeDropdownMenuMsg Components.DropdownMenu.Msg
     | ExportDropdownMenuMsg Components.DropdownMenu.Msg
     | ItemSearchDialogMsg Components.SearchDialog.Msg
@@ -250,6 +255,8 @@ init commonModel itemWithFocus notifications notification =
       , menuForMobileVisibility = GradualVisibility.Invisible
       , backToTopLinkVisibility = Invisible 0
       , layout = ShowAllItems
+      , searchCombobox = Components.Combobox.init
+      , searchComboboxInput = ""
       , startingItemCombobox = Components.Combobox.init
       , startingItemComboboxInput = startingItemComboboxInput
       , itemWithFocus = itemWithFocus
@@ -433,16 +440,65 @@ update msg model =
                 ]
             )
 
+        ItemSearchComboboxMsg msg_ ->
+            Components.Combobox.update
+                (\x ->
+                    { model
+                        | searchCombobox = x
+                        , themeDropdownMenu = Components.DropdownMenu.hidden model.themeDropdownMenu
+                        , exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu
+                    }
+                )
+                (PageMsg.Internal << ItemSearchComboboxMsg)
+                msg_
+                model.searchCombobox
+
+        UpdateSearchComboboxInput hideChoices input ->
+            ( { model
+                | searchComboboxInput = input
+                , searchCombobox =
+                    if hideChoices then
+                        Components.Combobox.hideChoices model.searchCombobox
+
+                    else
+                        Components.Combobox.showChoices model.searchCombobox
+                , themeDropdownMenu = Components.DropdownMenu.hidden model.themeDropdownMenu
+                , exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu
+              }
+            , Cmd.none
+            )
+
+        SelectSearchResult disambiguatedPreferredTerm ->
+            let
+                url =
+                    Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm
+            in
+            ( model
+            , Navigation.load url
+            )
+
         ThemeDropdownMenuMsg msg_ ->
             Components.DropdownMenu.update
-                (\x -> { model | themeDropdownMenu = x, exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu })
+                (\x ->
+                    { model
+                        | searchCombobox = Components.Combobox.hideChoices model.searchCombobox
+                        , themeDropdownMenu = x
+                        , exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu
+                    }
+                )
                 (PageMsg.Internal << ThemeDropdownMenuMsg)
                 msg_
                 model.themeDropdownMenu
 
         ExportDropdownMenuMsg msg_ ->
             Components.DropdownMenu.update
-                (\x -> { model | themeDropdownMenu = Components.DropdownMenu.hidden model.themeDropdownMenu, exportDropdownMenu = x })
+                (\x ->
+                    { model
+                        | searchCombobox = Components.Combobox.hideChoices model.searchCombobox
+                        , themeDropdownMenu = Components.DropdownMenu.hidden model.themeDropdownMenu
+                        , exportDropdownMenu = x
+                    }
+                )
                 (PageMsg.Internal << ExportDropdownMenuMsg)
                 msg_
                 model.exportDropdownMenu
@@ -1677,6 +1733,7 @@ viewSelectStartingItem enableMathSupport glossaryItemsForUi startingItemCombobox
                         UpdateStartingItemComboboxInputToCurrent
                     )
                 ]
+                [ class "w-full max-w-md" ]
                 Nothing
                 comboboxChoices.results
                 (if comboboxChoices.totalNumberOfResults > maximumNumberOfResultsForStartingItemCombobox then
@@ -2082,7 +2139,7 @@ viewStartEditingButton tabbable =
             [ Svg.Attributes.class "h-5 w-5" ]
         , span
             [ class "hidden sm:ml-2 sm:inline-flex items-center" ]
-            [ text I18n.startEditing
+            [ text I18n.edit
             , Html.kbd
                 [ class "ml-2 inline-flex items-center rounded-xs border border-gray-700 dark:border-gray-300 px-1 font-sans text-xs" ]
                 [ text "e" ]
@@ -2539,35 +2596,73 @@ viewBackToTopLink staticSidebar visibility =
         ]
 
 
-viewQuickItemSearchButton : Bool -> Html Msg
-viewQuickItemSearchButton runningOnMacOs =
-    div
-        [ class "w-full" ]
-        [ div
-            [ class "bg-gray-50 dark:bg-slate-900 relative pointer-events-auto" ]
-            [ button
-                [ Html.Attributes.type_ "button"
-                , class "w-full flex items-center leading-6 text-slate-500 dark:text-slate-400 rounded-md ring-1 ring-slate-900/10 dark:ring-slate-600 shadow-xs py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-400 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800 select-none"
-                , Html.Events.onClick <| PageMsg.Internal <| ItemSearchDialogMsg Components.SearchDialog.show
+viewItemSearchCombobox :
+    Bool
+    -> Bool
+    -> Bool
+    -> GlossaryItemsForUi
+    -> Maybe TagId
+    -> Components.Combobox.Model
+    -> String
+    -> Html Msg
+viewItemSearchCombobox runningOnMacOs forTopBar enableMathSupport glossaryItemsForUi filterByTagId_ comboboxModel comboboxInput =
+    let
+        comboboxChoices : { totalNumberOfResults : Int, results : List (Components.Combobox.Choice DisambiguatedTerm (PageMsg InternalMsg)) }
+        comboboxChoices =
+            Search.resultsForItems
+                filterByTagId_
+                (always True)
+                maximumNumberOfResultsForItemWithFocusCombobox
+                comboboxInput
+                glossaryItemsForUi
+                |> (\{ totalNumberOfResults, results } ->
+                        { totalNumberOfResults = totalNumberOfResults
+                        , results =
+                            results
+                                |> List.map
+                                    (\({ disambiguatedPreferredTerm } as result) ->
+                                        Components.Combobox.choice
+                                            disambiguatedPreferredTerm
+                                            (\additionalAttributes ->
+                                                Search.viewItemSearchResult
+                                                    enableMathSupport
+                                                    additionalAttributes
+                                                    result
+                                            )
+                                    )
+                        }
+                   )
+    in
+    Components.Combobox.view
+        (PageMsg.Internal << ItemSearchComboboxMsg)
+        comboboxModel
+        [ Components.Combobox.icon <|
+            Icons.search
+                [ Svg.Attributes.class "h-5 w-5 mb-1 text-gray-400 dark:text-gray-500"
+                , Accessibility.Aria.hidden True
                 ]
-                [ Icons.search
-                    [ width "24"
-                    , height "24"
-                    , Svg.Attributes.class "mr-3 flex-none"
-                    ]
-                , text I18n.searchEllipsis
-                , span
-                    [ class "ml-auto pl-3 pr-1 flex-none text-sm font-semibold" ]
-                    [ text <|
-                        if runningOnMacOs then
-                            I18n.commandK
-
-                        else
-                            I18n.controlK
-                    ]
-                ]
-            ]
+        , Components.Combobox.placeholder I18n.search
+        , Components.Combobox.id <| ElementIds.searchCombobox forTopBar
+        , Components.Combobox.onSelect (PageMsg.Internal << SelectSearchResult)
+        , Components.Combobox.onInput (PageMsg.Internal << UpdateSearchComboboxInput False)
+        , Components.Combobox.onBlur
+            (PageMsg.Internal <|
+                UpdateSearchComboboxInput True ""
+            )
         ]
+        [ class "w-full" ]
+        Nothing
+        comboboxChoices.results
+        (if comboboxChoices.totalNumberOfResults > maximumNumberOfResultsForItemWithFocusCombobox then
+            Just <| I18n.showingXOfYMatches (String.fromInt maximumNumberOfResultsForItemWithFocusCombobox) (String.fromInt comboboxChoices.totalNumberOfResults)
+
+         else if comboboxInput /= "" && comboboxChoices.totalNumberOfResults == 0 then
+            Just I18n.noMatchesFound
+
+         else
+            Nothing
+        )
+        comboboxInput
 
 
 viewTermIndexFirstCharacter : Bool -> String -> Bool -> Html Msg
@@ -2721,15 +2816,15 @@ viewStaticSidebarForDesktop enableThreeColumnLayout enableMathSupport glossaryTi
         ]
 
 
-viewTopBar : Bool -> Bool -> Editability -> Theme -> Components.DropdownMenu.Model -> Maybe Components.DropdownMenu.Model -> Html Msg
-viewTopBar tabbable runningOnMacOs editability theme themeDropdownMenu maybeExportDropdownMenu =
+viewTopBar : Bool -> Bool -> Bool -> GlossaryItemsForUi -> Maybe TagId -> Components.Combobox.Model -> String -> Editability -> Theme -> Components.DropdownMenu.Model -> Maybe Components.DropdownMenu.Model -> Html Msg
+viewTopBar tabbable runningOnMacOs enableMathSupport glossaryItemsForUi filterByTagId_ searchComboboxModel searchComboboxInput editability theme themeDropdownMenu maybeExportDropdownMenu =
     div
         [ class "sticky top-0 z-20 shrink-0 flex flex-row justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
         [ div
             [ class "flex items-center" ]
             [ button
                 [ Html.Attributes.type_ "button"
-                , class "px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 focus:outline-hidden lg:hidden"
+                , class "px-4 text-gray-500 focus:outline-hidden lg:hidden"
                 , Html.Events.onClick <| PageMsg.Internal ShowMenuForMobile
                 ]
                 [ span
@@ -2743,7 +2838,8 @@ viewTopBar tabbable runningOnMacOs editability theme themeDropdownMenu maybeExpo
             ]
         , div
             [ class "hidden sm:block flex-1 pr-4" ]
-            [ viewQuickItemSearchButton runningOnMacOs ]
+            [ viewItemSearchCombobox runningOnMacOs True enableMathSupport glossaryItemsForUi filterByTagId_ searchComboboxModel searchComboboxInput
+            ]
         , div
             [ class "pr-4 sm:hidden flex-1" ]
             [ button
@@ -3227,6 +3323,7 @@ viewOrderItemsBy numberOfItems enableMathSupport filterByTagId_ itemWithFocusCom
                                 UpdateItemWithFocusComboboxInput True itemWithFocusComboboxInput
                             )
                         ]
+                        [ class "w-full max-w-md" ]
                         Nothing
                         comboboxChoices.results
                         (if comboboxChoices.totalNumberOfResults > maximumNumberOfResultsForItemWithFocusCombobox then
@@ -3859,9 +3956,14 @@ view model =
                           else
                             class "lg:pl-64"
                         ]
-                        [ Html.Lazy.lazy6 viewTopBar
+                        [ viewTopBar
                             noModalDialogShown_
                             model.common.runningOnMacOs
+                            model.common.enableMathSupport
+                            glossaryItemsForUi
+                            filterByTagId_
+                            model.searchCombobox
+                            model.searchComboboxInput
                             model.common.editability
                             model.common.theme
                             model.themeDropdownMenu
@@ -3879,7 +3981,7 @@ view model =
                             , glossaryForUi |> GlossaryForUi.cardWidth |> CardWidth.toHtmlTreeAttribute |> HtmlTree.attributeToHtmlAttribute
                             ]
                             [ div
-                                [ class "pt-4 px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-full lg:sticky lg:top-0 lg:z-20 lg:border-b lg:border-gray-200 lg:dark:border-gray-800 print:bg-white"
+                                [ class "py-4 px-4 sm:px-6 lg:px-8 print:px-0 print:max-w-full lg:sticky lg:top-0 lg:z-20 lg:border-b lg:border-gray-200 lg:dark:border-gray-800 print:bg-white"
                                 , if enableThreeColumnLayout then
                                     class "bg-white dark:bg-black"
 
@@ -3893,10 +3995,17 @@ view model =
                                         GlossaryForUi.enableExportMenu glossaryForUi
                                 in
                                 [ div
-                                    [ class "flex flex-row gap-4" ]
+                                    [ class "flex flex-row items-center gap-4" ]
                                     [ div
                                         [ class "hidden lg:flex lg:flex-1 pt-0.5" ]
-                                        [ viewQuickItemSearchButton model.common.runningOnMacOs
+                                        [ viewItemSearchCombobox
+                                            model.common.runningOnMacOs
+                                            False
+                                            model.common.enableMathSupport
+                                            glossaryItemsForUi
+                                            filterByTagId_
+                                            model.searchCombobox
+                                            model.searchComboboxInput
                                         ]
                                     , Extras.Html.showIf (Editability.canEdit model.common.editability) <|
                                         div
@@ -3909,14 +4018,14 @@ view model =
                                             [ viewStopEditingButton noModalDialogShown_
                                             ]
                                     , div
-                                        [ class "hidden lg:block pb-3 pt-0.5" ]
+                                        [ class "hidden lg:block" ]
                                         [ viewThemeButton False noModalDialogShown_ model.common.theme model.themeDropdownMenu
                                         ]
                                     , Extras.Html.showIf showExportButton <|
                                         div
                                             [ class "hidden lg:block" ]
                                             [ span
-                                                [ class "pb-3" ]
+                                                [ class "" ]
                                                 [ viewExportButton False noModalDialogShown_ model.exportDropdownMenu ]
                                             ]
                                     ]
@@ -4038,6 +4147,9 @@ subscriptions model =
         , attemptedToCopyEditorCommandToClipboard (AttemptedToCopyEditorCommandToClipboard >> PageMsg.Internal)
         , attemptedToCopyItemTextToClipboard (AttemptedToCopyItemTextToClipboard >> PageMsg.Internal)
         , scrollingUpWhileFarAwayFromTheTop (always <| PageMsg.Internal ScrollingUpWhileFarAwayFromTheTop)
+        , model.searchCombobox
+            |> Components.Combobox.subscriptions
+            |> Sub.map (ItemSearchComboboxMsg >> PageMsg.Internal)
         , model.startingItemCombobox
             |> Components.Combobox.subscriptions
             |> Sub.map (StartingItemComboboxMsg >> PageMsg.Internal)

@@ -14,6 +14,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 
+- Turn search button into a combo box except on very small screens.
 - Move glossary title to top left in new layout.
 - Change styling of letter grid buttons for index, and make them larger on mobile.
 

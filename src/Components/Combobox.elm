@@ -33,7 +33,7 @@ type alias Config value parentMsg =
     , onSelect : Maybe (value -> parentMsg)
     , onInput : Maybe (String -> parentMsg)
     , onBlur : Maybe parentMsg
-    , icon : Maybe (List (Attribute parentMsg) -> Html parentMsg)
+    , icon : Maybe (Html parentMsg)
     }
 
 
@@ -185,7 +185,7 @@ type Property value parentMsg
     | OnBlur parentMsg
     | ShowValidationErrors Bool
     | ValidationError (Maybe String)
-    | Icon (List (Attribute parentMsg) -> Html parentMsg)
+    | Icon (Html parentMsg)
 
 
 type alias ChoiceIndex =
@@ -239,7 +239,7 @@ showValidationErrors =
     ShowValidationErrors
 
 
-icon : (List (Attribute parentMsg) -> Html parentMsg) -> Property value parentMsg
+icon : Html parentMsg -> Property value parentMsg
 icon =
     Icon
 
@@ -284,8 +284,17 @@ configFromProperties =
         }
 
 
-view : (Msg -> parentMsg) -> Model -> List (Property value parentMsg) -> Maybe value -> List (Choice value parentMsg) -> Maybe String -> String -> Html parentMsg
-view toParentMsg (Model model) properties valueForSelectedChoice choices messageToShowAtBottom input =
+view :
+    (Msg -> parentMsg)
+    -> Model
+    -> List (Property value parentMsg)
+    -> List (Attribute parentMsg)
+    -> Maybe value
+    -> List (Choice value parentMsg)
+    -> Maybe String
+    -> String
+    -> Html parentMsg
+view toParentMsg (Model model) properties additionalAttributes valueForSelectedChoice choices messageToShowAtBottom input =
     let
         config : Config value parentMsg
         config =
@@ -300,19 +309,14 @@ view toParentMsg (Model model) properties valueForSelectedChoice choices message
             id_ ++ "-options"
     in
     div
-        [ class "w-full max-w-md" ]
+        additionalAttributes
         [ div
-            [ class "relative"
-            ]
+            [ class "relative" ]
             [ Extras.Html.showMaybe
                 (\icon_ ->
                     div
                         [ class "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3" ]
-                        [ icon_
-                            [ Svg.Attributes.class "h-5 w-5 text-gray-400 dark:text-gray-500"
-                            , Accessibility.Aria.hidden True
-                            ]
-                        ]
+                        [ icon_ ]
                 )
                 config.icon
             , Accessibility.inputText
