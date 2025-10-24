@@ -2546,7 +2546,6 @@ viewQuickItemSearchButton runningOnMacOs =
                 [ Html.Attributes.type_ "button"
                 , class "w-full flex items-center leading-6 text-slate-500 dark:text-slate-400 rounded-md ring-1 ring-slate-900/10 dark:ring-slate-600 shadow-xs py-1.5 pl-2 pr-3 hover:ring-slate-400 dark:hover:ring-slate-400 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-800 select-none"
                 , Html.Events.onClick <| PageMsg.Internal <| ItemSearchDialogMsg Components.SearchDialog.show
-                , Accessibility.Aria.hidden True
                 ]
                 [ Icons.search
                     [ width "24"
