@@ -19,6 +19,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Change styling of letter grid buttons for index, and make them larger on mobile.
 
 ### Fixed
+
+- When creating a new item, add it to the URL as the fragment identifier.
+
 ### Removed
 
 ## [5.9.1] - 2025-10-13

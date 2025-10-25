@@ -18,9 +18,12 @@ import Components.Notifications
 import Data.Editability as Editability exposing (Editability)
 import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryFromDom as GlossaryFromDom
-import Data.GlossaryItemForUi as GlossaryItemForUi
+import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
+import Data.GlossaryItem.RawTerm as RawTerm
+import Data.GlossaryItem.Term as Term
+import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId exposing (GlossaryItemId)
-import Data.GlossaryItemsForUi as GlossaryItems
+import Data.GlossaryItemsForUi as GlossaryItems exposing (GlossaryItemsForUi)
 import Data.Theme as Theme exposing (Theme)
 import Extras.BrowserDom
 import Html
@@ -436,9 +439,47 @@ update msg model =
                         _ ->
                             Nothing
 
+                glossaryItemsForUi : Maybe GlossaryItemsForUi
+                glossaryItemsForUi =
+                    commonModel.glossaryForUi
+                        |> Result.toMaybe
+                        |> Maybe.map GlossaryForUi.items
+
+                maybeFragment : Maybe String
+                maybeFragment =
+                    Maybe.map2
+                        (\glossaryItemsForUi_ itemWithFocus_ ->
+                            let
+                                item : Maybe GlossaryItemForUi
+                                item =
+                                    GlossaryItems.get itemWithFocus_ glossaryItemsForUi_
+
+                                fragment : Maybe String
+                                fragment =
+                                    item
+                                        |> Maybe.map GlossaryItemForUi.disambiguatedPreferredTerm
+                                        |> Maybe.map DisambiguatedTerm.toTerm
+                                        |> Maybe.map Term.id
+                            in
+                            fragment
+                        )
+                        glossaryItemsForUi
+                        itemWithFocus
+                        |> Maybe.andThen identity
+
+                -- Update the CommonModel to include the fragment for the focused item
+                commonModelWithFragment : CommonModel
+                commonModelWithFragment =
+                    case maybeFragment of
+                        Just fragment ->
+                            { commonModel | fragment = Just fragment }
+
+                        Nothing ->
+                            commonModel
+
                 ( listAllModel, listAllCmd ) =
                     Pages.ListAll.init
-                        commonModel
+                        commonModelWithFragment
                         (if itemWithFocus == Nothing then
                             startingItem commonModel.glossaryForUi
 
@@ -447,9 +488,23 @@ update msg model =
                         )
                         notifications0
                         notification
+
+                -- Update the URL with the fragment
+                urlUpdateCmd : Cmd Msg
+                urlUpdateCmd =
+                    case maybeFragment of
+                        Just fragment ->
+                            let
+                                url =
+                                    CommonModel.initialUrlWithoutQueryOrFragment commonModelWithFragment ++ "#" ++ fragment
+                            in
+                            Browser.Navigation.pushUrl commonModelWithFragment.key url
+
+                        Nothing ->
+                            Cmd.none
             in
             ( { model | page = ListAll listAllModel }
-            , Cmd.map ListAllMsg listAllCmd
+            , Cmd.batch [ Cmd.map ListAllMsg listAllCmd, urlUpdateCmd ]
             )
 
         ( _, NavigateToCreateOrEdit itemBeingEdited, _ ) ->
