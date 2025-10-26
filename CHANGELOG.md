@@ -21,6 +21,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 
 - When creating a new item, add it to the URL as the fragment identifier.
+- When cancelling an attempt to create a new item, navigate back to the item that previously had focus.
 
 ### Removed
 

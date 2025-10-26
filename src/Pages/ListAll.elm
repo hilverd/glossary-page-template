@@ -1886,7 +1886,7 @@ viewGlossaryItem { enableMathSupport, editable, enableLastUpdatedDates, shownAsS
                 (Components.GlossaryItemCard.Normal
                     { onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForUi.id item
                     , onClickCopyToClipboard = PageMsg.Internal <| CopyItemTextToClipboard <| GlossaryItemForUi.id item
-                    , onClickEdit = PageMsg.NavigateToCreateOrEdit <| Just <| GlossaryItemForUi.id item
+                    , onClickEdit = PageMsg.NavigateToCreateOrEdit itemWithFocus <| Just <| GlossaryItemForUi.id item
                     , onClickDelete = PageMsg.Internal <| ConfirmDelete <| GlossaryItemForUi.id item
                     , onClickTag = PageMsg.Internal << FilterByTag
                     , onClickItem = PageMsg.Internal << ChangeLayoutToShowSingle
@@ -2177,13 +2177,13 @@ viewEditTitleAndAboutButton tabbable =
         ]
 
 
-viewCreateGlossaryItemButtonForEmptyState : Html Msg
-viewCreateGlossaryItemButtonForEmptyState =
+viewCreateGlossaryItemButtonForEmptyState : Maybe GlossaryItemId -> Html Msg
+viewCreateGlossaryItemButtonForEmptyState itemWithFocus =
     div
         [ class "pt-4 print:hidden" ]
         [ Components.Button.emptyState
             [ class "p-9"
-            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit Nothing
+            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit itemWithFocus Nothing
             ]
             [ Icons.viewGridAdd
                 [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
@@ -2198,12 +2198,12 @@ viewCreateGlossaryItemButtonForEmptyState =
         ]
 
 
-viewCreateGlossaryItemButton : Html Msg
-viewCreateGlossaryItemButton =
+viewCreateGlossaryItemButton : Maybe GlossaryItemId -> Html Msg
+viewCreateGlossaryItemButton itemWithFocus =
     div
         [ class "pb-2 print:hidden" ]
         [ Components.Button.secondary
-            [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit Nothing
+            [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit itemWithFocus Nothing
             ]
             [ Icons.viewGridAdd
                 [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5"
@@ -2255,6 +2255,7 @@ viewTagFilterAndOrderItemsByAndItemCards { enableMathSupport, enableOrderItemsBu
                 , enableOrderItemsButtons = enableOrderItemsButtons
                 , editable = editable
                 , editing = editing
+                , itemWithFocus = itemWithFocus
                 }
                 { tags = tags, filterByDescribedTag = filterByDescribedTag }
                 queryParameters
@@ -2282,6 +2283,7 @@ viewTagFilterAndOrderItemsBy :
     , enableOrderItemsButtons : Bool
     , editable : Bool
     , editing : Bool
+    , itemWithFocus : Maybe GlossaryItemId
     }
     ->
         { tags : List Tag
@@ -2293,7 +2295,7 @@ viewTagFilterAndOrderItemsBy :
     -> GlossaryItemsForUi
     -> Int
     -> List (Html Msg)
-viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, editable, editing } { tags, filterByDescribedTag } queryParameters itemWithFocusCombobox itemWithFocusComboboxInput glossaryItemsForUi totalNumberOfItems =
+viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, editable, editing, itemWithFocus } { tags, filterByDescribedTag } queryParameters itemWithFocusCombobox itemWithFocusComboboxInput glossaryItemsForUi totalNumberOfItems =
     let
         orderItemsFocusedOnTerm : Maybe DisambiguatedTerm
         orderItemsFocusedOnTerm =
@@ -2329,10 +2331,10 @@ viewTagFilterAndOrderItemsBy { enableMathSupport, enableOrderItemsButtons, edita
             div
                 [ class "pt-2" ]
                 [ if totalNumberOfItems == 0 then
-                    viewCreateGlossaryItemButtonForEmptyState
+                    viewCreateGlossaryItemButtonForEmptyState itemWithFocus
 
                   else
-                    viewCreateGlossaryItemButton
+                    viewCreateGlossaryItemButton itemWithFocus
                 ]
         ]
     , Extras.Html.showIf (editable && totalNumberOfItems > recommendedMaximumNumberOfItems) <|
@@ -3750,10 +3752,10 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                     div
                         [ class "px-6 lg:px-8 pt-2" ]
                         [ if GlossaryItemsForUi.isEmpty items then
-                            viewCreateGlossaryItemButtonForEmptyState
+                            viewCreateGlossaryItemButtonForEmptyState itemWithFocus
 
                           else
-                            viewCreateGlossaryItemButton
+                            viewCreateGlossaryItemButton itemWithFocus
                         ]
                 , div
                     [ class "xl:flex xl:gap-8 px-6 lg:px-8 mt-2 lg:mt-6" ]
@@ -3769,7 +3771,7 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                                         { enableMathSupport = enableMathSupport
                                         , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
                                         , onClickCopyToClipboard = PageMsg.Internal <| CopyItemTextToClipboard <| GlossaryItemForUi.id item
-                                        , onClickEdit = PageMsg.NavigateToCreateOrEdit <| Just <| GlossaryItemForUi.id item
+                                        , onClickEdit = PageMsg.NavigateToCreateOrEdit itemWithFocus <| Just <| GlossaryItemForUi.id item
                                         , onClickDelete = PageMsg.Internal <| ConfirmDelete <| GlossaryItemForUi.id item
                                         , resultOfAttemptingToCopyItemTextToClipboard =
                                             resultOfAttemptingToCopyItemTextToClipboard
@@ -3920,7 +3922,7 @@ view model =
                                             Just <| ( PageMsg.Internal StartEditing, True )
 
                                         else if Editability.editing model.common.editability && Extras.HtmlEvents.isN event && not event.isFormField then
-                                            Just <| ( PageMsg.NavigateToCreateOrEdit Nothing, True )
+                                            Just <| ( PageMsg.NavigateToCreateOrEdit model.itemWithFocus Nothing, True )
 
                                         else
                                             Nothing

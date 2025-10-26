@@ -71,6 +71,7 @@ type TentativeDragAndDropChangesToShow
 
 type alias Model =
     { common : CommonModel
+    , itemWithFocus : Maybe GlossaryItemId
     , itemBeingEdited : Maybe GlossaryItemId
     , form : GlossaryItemForm
     , tentativeDragAndDropChangesToShow : TentativeDragAndDropChangesToShow
@@ -140,8 +141,8 @@ type HowTermWasMoved
     | TermDragButton
 
 
-init : CommonModel -> Maybe GlossaryItemId -> ( Model, Cmd Msg )
-init commonModel itemBeingEdited =
+init : CommonModel -> Maybe GlossaryItemId -> Maybe GlossaryItemId -> ( Model, Cmd Msg )
+init commonModel itemWithFocus itemBeingEdited =
     case commonModel.glossaryForUi of
         Ok glossaryForUi ->
             let
@@ -172,7 +173,8 @@ init commonModel itemBeingEdited =
                         itemBeingEdited
                         |> Maybe.withDefault emptyForm
             in
-            ( { itemBeingEdited = itemBeingEdited
+            ( { itemWithFocus = itemWithFocus
+              , itemBeingEdited = itemBeingEdited
               , common = commonModel
               , form = form
               , tentativeDragAndDropChangesToShow = NoDragAndDropInProgress
@@ -195,7 +197,8 @@ init commonModel itemBeingEdited =
             )
 
         Err _ ->
-            ( { itemBeingEdited = itemBeingEdited
+            ( { itemWithFocus = itemWithFocus
+              , itemBeingEdited = itemBeingEdited
               , common = commonModel
               , form = Form.empty GlossaryItemsForUi.empty Nothing
               , tentativeDragAndDropChangesToShow = NoDragAndDropInProgress
@@ -1944,7 +1947,7 @@ viewCreateFormFooter model =
             [ Components.Button.white
                 (saving /= SavingInProgress)
                 [ Html.Events.onClick <|
-                    PageMsg.NavigateToListAll common model.itemBeingEdited Nothing
+                    PageMsg.NavigateToListAll common model.itemWithFocus Nothing
                 ]
                 [ text I18n.cancel ]
             , Components.Button.primary

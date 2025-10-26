@@ -19,7 +19,6 @@ import Data.Editability as Editability exposing (Editability)
 import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi)
 import Data.GlossaryFromDom as GlossaryFromDom
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
-import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId exposing (GlossaryItemId)
@@ -262,8 +261,8 @@ withoutInternal msg =
         ListAllMsg (NavigateToListAll commonModel itemWithFocus notification) ->
             PageMsg.NavigateToListAll commonModel itemWithFocus notification
 
-        ListAllMsg (NavigateToCreateOrEdit commonModel) ->
-            PageMsg.NavigateToCreateOrEdit commonModel
+        ListAllMsg (NavigateToCreateOrEdit itemWithFocus itemBeingEdited) ->
+            PageMsg.NavigateToCreateOrEdit itemWithFocus itemBeingEdited
 
         ListAllMsg NavigateToEditTitleAndAbout ->
             PageMsg.NavigateToEditTitleAndAbout
@@ -277,8 +276,8 @@ withoutInternal msg =
         CreateOrEditMsg (NavigateToListAll commonModel itemWithFocus notification) ->
             PageMsg.NavigateToListAll commonModel itemWithFocus notification
 
-        CreateOrEditMsg (NavigateToCreateOrEdit commonModel) ->
-            PageMsg.NavigateToCreateOrEdit commonModel
+        CreateOrEditMsg (NavigateToCreateOrEdit itemWithFocus itemBeingEdited) ->
+            PageMsg.NavigateToCreateOrEdit itemWithFocus itemBeingEdited
 
         CreateOrEditMsg NavigateToEditTitleAndAbout ->
             PageMsg.NavigateToEditTitleAndAbout
@@ -292,8 +291,8 @@ withoutInternal msg =
         EditTitleAndAboutMsg (NavigateToListAll commonModel itemWithFocus notification) ->
             PageMsg.NavigateToListAll commonModel itemWithFocus notification
 
-        EditTitleAndAboutMsg (NavigateToCreateOrEdit commonModel) ->
-            PageMsg.NavigateToCreateOrEdit commonModel
+        EditTitleAndAboutMsg (NavigateToCreateOrEdit itemWithFocus itemBeingEdited) ->
+            PageMsg.NavigateToCreateOrEdit itemWithFocus itemBeingEdited
 
         EditTitleAndAboutMsg NavigateToEditTitleAndAbout ->
             PageMsg.NavigateToEditTitleAndAbout
@@ -307,8 +306,8 @@ withoutInternal msg =
         ManageTagsMsg (NavigateToListAll commonModel itemWithFocus notification) ->
             PageMsg.NavigateToListAll commonModel itemWithFocus notification
 
-        ManageTagsMsg (NavigateToCreateOrEdit commonModel) ->
-            PageMsg.NavigateToCreateOrEdit commonModel
+        ManageTagsMsg (NavigateToCreateOrEdit itemWithFocus itemBeingEdited) ->
+            PageMsg.NavigateToCreateOrEdit itemWithFocus itemBeingEdited
 
         ManageTagsMsg NavigateToEditTitleAndAbout ->
             PageMsg.NavigateToEditTitleAndAbout
@@ -507,14 +506,14 @@ update msg model =
             , Cmd.batch [ Cmd.map ListAllMsg listAllCmd, urlUpdateCmd ]
             )
 
-        ( _, NavigateToCreateOrEdit itemBeingEdited, _ ) ->
+        ( _, NavigateToCreateOrEdit itemWithFocus itemBeingEdited, _ ) ->
             let
                 common0 : CommonModel
                 common0 =
                     commonModelForPage model.page
 
                 ( createOrEditModel, createOrEditCmd ) =
-                    Pages.CreateOrEdit.init common0 itemBeingEdited
+                    Pages.CreateOrEdit.init common0 itemWithFocus itemBeingEdited
             in
             ( { model | page = CreateOrEdit createOrEditModel }
             , Cmd.batch [ resetViewport, Cmd.map CreateOrEditMsg createOrEditCmd ]
