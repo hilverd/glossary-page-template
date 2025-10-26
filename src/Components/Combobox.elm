@@ -391,19 +391,10 @@ view toParentMsg (Model model) properties additionalAttributes valueForSelectedC
                         )
                     )
                 ]
-            , button
-                [ Html.Attributes.type_ "button"
-                , class "absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-hidden"
-                , Html.Events.onMouseDown <|
-                    toParentMsg <|
-                        if model.choicesVisible == False then
-                            StartShowingChoices id_
-
-                        else
-                            HideChoices (Just id_)
-                ]
+            , span
+                [ class "absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-hidden text-gray-400 dark:text-gray-500" ]
                 [ Icons.chevronUpDown
-                    [ Svg.Attributes.class "size-6 text-gray-400 dark:text-gray-500"
+                    [ Svg.Attributes.class "size-6"
                     , Accessibility.Aria.hidden True
                     , attribute "data-slot" "icon"
                     ]
