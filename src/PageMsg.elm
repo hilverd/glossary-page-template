@@ -7,7 +7,10 @@ import Data.Notification exposing (Notification)
 
 type PageMsg a
     = NavigateToListAll CommonModel (Maybe GlossaryItemId) (Maybe Notification)
-    | NavigateToCreateOrEdit (Maybe GlossaryItemId) (Maybe GlossaryItemId)
+    | NavigateToCreateOrEdit
+        { itemWithFocus : Maybe GlossaryItemId
+        , itemBeingEdited : Maybe GlossaryItemId
+        }
     | NavigateToEditTitleAndAbout
     | NavigateToManageTags
     | Internal a

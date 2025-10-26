@@ -261,8 +261,8 @@ withoutInternal msg =
         ListAllMsg (NavigateToListAll commonModel itemWithFocus notification) ->
             PageMsg.NavigateToListAll commonModel itemWithFocus notification
 
-        ListAllMsg (NavigateToCreateOrEdit itemWithFocus itemBeingEdited) ->
-            PageMsg.NavigateToCreateOrEdit itemWithFocus itemBeingEdited
+        ListAllMsg (NavigateToCreateOrEdit { itemWithFocus, itemBeingEdited }) ->
+            PageMsg.NavigateToCreateOrEdit { itemWithFocus = itemWithFocus, itemBeingEdited = itemBeingEdited }
 
         ListAllMsg NavigateToEditTitleAndAbout ->
             PageMsg.NavigateToEditTitleAndAbout
@@ -276,8 +276,8 @@ withoutInternal msg =
         CreateOrEditMsg (NavigateToListAll commonModel itemWithFocus notification) ->
             PageMsg.NavigateToListAll commonModel itemWithFocus notification
 
-        CreateOrEditMsg (NavigateToCreateOrEdit itemWithFocus itemBeingEdited) ->
-            PageMsg.NavigateToCreateOrEdit itemWithFocus itemBeingEdited
+        CreateOrEditMsg (NavigateToCreateOrEdit { itemWithFocus, itemBeingEdited }) ->
+            PageMsg.NavigateToCreateOrEdit { itemWithFocus = itemWithFocus, itemBeingEdited = itemBeingEdited }
 
         CreateOrEditMsg NavigateToEditTitleAndAbout ->
             PageMsg.NavigateToEditTitleAndAbout
@@ -291,8 +291,8 @@ withoutInternal msg =
         EditTitleAndAboutMsg (NavigateToListAll commonModel itemWithFocus notification) ->
             PageMsg.NavigateToListAll commonModel itemWithFocus notification
 
-        EditTitleAndAboutMsg (NavigateToCreateOrEdit itemWithFocus itemBeingEdited) ->
-            PageMsg.NavigateToCreateOrEdit itemWithFocus itemBeingEdited
+        EditTitleAndAboutMsg (NavigateToCreateOrEdit { itemWithFocus, itemBeingEdited }) ->
+            PageMsg.NavigateToCreateOrEdit { itemWithFocus = itemWithFocus, itemBeingEdited = itemBeingEdited }
 
         EditTitleAndAboutMsg NavigateToEditTitleAndAbout ->
             PageMsg.NavigateToEditTitleAndAbout
@@ -306,8 +306,8 @@ withoutInternal msg =
         ManageTagsMsg (NavigateToListAll commonModel itemWithFocus notification) ->
             PageMsg.NavigateToListAll commonModel itemWithFocus notification
 
-        ManageTagsMsg (NavigateToCreateOrEdit itemWithFocus itemBeingEdited) ->
-            PageMsg.NavigateToCreateOrEdit itemWithFocus itemBeingEdited
+        ManageTagsMsg (NavigateToCreateOrEdit { itemWithFocus, itemBeingEdited }) ->
+            PageMsg.NavigateToCreateOrEdit { itemWithFocus = itemWithFocus, itemBeingEdited = itemBeingEdited }
 
         ManageTagsMsg NavigateToEditTitleAndAbout ->
             PageMsg.NavigateToEditTitleAndAbout
@@ -506,7 +506,7 @@ update msg model =
             , Cmd.batch [ Cmd.map ListAllMsg listAllCmd, urlUpdateCmd ]
             )
 
-        ( _, NavigateToCreateOrEdit itemWithFocus itemBeingEdited, _ ) ->
+        ( _, NavigateToCreateOrEdit { itemWithFocus, itemBeingEdited }, _ ) ->
             let
                 common0 : CommonModel
                 common0 =

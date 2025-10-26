@@ -1886,7 +1886,11 @@ viewGlossaryItem { enableMathSupport, editable, enableLastUpdatedDates, shownAsS
                 (Components.GlossaryItemCard.Normal
                     { onClickViewFull = PageMsg.Internal <| ChangeLayoutToShowSingle <| GlossaryItemForUi.id item
                     , onClickCopyToClipboard = PageMsg.Internal <| CopyItemTextToClipboard <| GlossaryItemForUi.id item
-                    , onClickEdit = PageMsg.NavigateToCreateOrEdit itemWithFocus <| Just <| GlossaryItemForUi.id item
+                    , onClickEdit =
+                        PageMsg.NavigateToCreateOrEdit
+                            { itemWithFocus = itemWithFocus
+                            , itemBeingEdited = Just <| GlossaryItemForUi.id item
+                            }
                     , onClickDelete = PageMsg.Internal <| ConfirmDelete <| GlossaryItemForUi.id item
                     , onClickTag = PageMsg.Internal << FilterByTag
                     , onClickItem = PageMsg.Internal << ChangeLayoutToShowSingle
@@ -2183,7 +2187,11 @@ viewCreateGlossaryItemButtonForEmptyState itemWithFocus =
         [ class "pt-4 print:hidden" ]
         [ Components.Button.emptyState
             [ class "p-9"
-            , Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit itemWithFocus Nothing
+            , Html.Events.onClick <|
+                PageMsg.NavigateToCreateOrEdit
+                    { itemWithFocus = itemWithFocus
+                    , itemBeingEdited = Nothing
+                    }
             ]
             [ Icons.viewGridAdd
                 [ Svg.Attributes.class "mx-auto h-12 w-12 text-gray-400" ]
@@ -2203,7 +2211,11 @@ viewCreateGlossaryItemButton itemWithFocus =
     div
         [ class "pb-2 print:hidden" ]
         [ Components.Button.secondary
-            [ Html.Events.onClick <| PageMsg.NavigateToCreateOrEdit itemWithFocus Nothing
+            [ Html.Events.onClick <|
+                PageMsg.NavigateToCreateOrEdit
+                    { itemWithFocus = itemWithFocus
+                    , itemBeingEdited = Nothing
+                    }
             ]
             [ Icons.viewGridAdd
                 [ Svg.Attributes.class "mx-auto -ml-1 mr-2 h-5 w-5"
@@ -3771,7 +3783,11 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                                         { enableMathSupport = enableMathSupport
                                         , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
                                         , onClickCopyToClipboard = PageMsg.Internal <| CopyItemTextToClipboard <| GlossaryItemForUi.id item
-                                        , onClickEdit = PageMsg.NavigateToCreateOrEdit itemWithFocus <| Just <| GlossaryItemForUi.id item
+                                        , onClickEdit =
+                                            PageMsg.NavigateToCreateOrEdit
+                                                { itemWithFocus = itemWithFocus
+                                                , itemBeingEdited = Just <| GlossaryItemForUi.id item
+                                                }
                                         , onClickDelete = PageMsg.Internal <| ConfirmDelete <| GlossaryItemForUi.id item
                                         , resultOfAttemptingToCopyItemTextToClipboard =
                                             resultOfAttemptingToCopyItemTextToClipboard
@@ -3922,7 +3938,13 @@ view model =
                                             Just <| ( PageMsg.Internal StartEditing, True )
 
                                         else if Editability.editing model.common.editability && Extras.HtmlEvents.isN event && not event.isFormField then
-                                            Just <| ( PageMsg.NavigateToCreateOrEdit model.itemWithFocus Nothing, True )
+                                            Just <|
+                                                ( PageMsg.NavigateToCreateOrEdit
+                                                    { itemWithFocus = model.itemWithFocus
+                                                    , itemBeingEdited = Nothing
+                                                    }
+                                                , True
+                                                )
 
                                         else
                                             Nothing
