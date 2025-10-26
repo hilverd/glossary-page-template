@@ -1,6 +1,5 @@
 module Search exposing (resultsForItems, viewItemSearchResult)
 
-import Components.SearchDialog exposing (SearchResult)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.RawTerm as RawTerm

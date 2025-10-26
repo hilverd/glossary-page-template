@@ -49,7 +49,6 @@ import DirectedGraph exposing (DirectedGraph)
 import DuplicateRejectingDict exposing (DuplicateRejectingDict)
 import Extras.Regex
 import Extras.String
-import Html.Attributes exposing (rel)
 import Internationalisation as I18n
 import Maybe
 import Regex

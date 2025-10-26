@@ -41,7 +41,6 @@ import Data.DescribedTag as DescribedTag
 import Data.DescribedTagFromDom as DescribedTagFromDom exposing (DescribedTagFromDom)
 import Data.GlossaryChange exposing (GlossaryChange(..))
 import Data.GlossaryChangelist as GlossaryChangelist exposing (GlossaryChangelist)
-import Data.GlossaryItem.DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.TermFromDom as TermFromDom exposing (TermFromDom)
 import Data.GlossaryItemFromDom as GlossaryItemFromDom exposing (GlossaryItemFromDom)

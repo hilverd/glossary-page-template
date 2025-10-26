@@ -53,7 +53,6 @@ import Extras.Array
 import Extras.List
 import GlossaryItemForm.DefinitionField as DefinitionField exposing (DefinitionField)
 import GlossaryItemForm.TermField as TermField exposing (TermField)
-import Icons exposing (check)
 import Internationalisation as I18n
 import RelatedTermSuggestions
 import Set exposing (Set)

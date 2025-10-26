@@ -8,15 +8,12 @@ import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (Disamb
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
-import Data.GlossaryItemId exposing (GlossaryItemId)
-import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
-import ElementIds
 import Extras.Html
 import Extras.HtmlAttribute
 import Extras.HtmlEvents
 import Extras.Url exposing (fragmentOnly)
 import Html
-import Html.Attributes exposing (class, id, target)
+import Html.Attributes exposing (class, target)
 import Html.Events
 import Icons
 import Internationalisation as I18n
