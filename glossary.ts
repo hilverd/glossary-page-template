@@ -399,6 +399,34 @@ if (containerElement) {
         }
     });
 
+    app.ports.tryFocusVisibleSearchCombobox.subscribe(() => {
+        // Try to focus on search combobox inputs, checking if they're visible
+        // Try main content search first (visible on lg+ screens)
+        const mainSearchInput = document.getElementById(
+            "glossary-page-search-combobox-for-main-content",
+        );
+
+        if (mainSearchInput instanceof HTMLInputElement && elementIsVisible(mainSearchInput)) {
+            mainSearchInput.focus();
+            app.ports.searchComboboxFocusResult.send(true);
+            return;
+        }
+
+        // Try top bar search (visible on sm-lg screens)
+        const topBarSearchInput = document.getElementById(
+            "glossary-page-search-combobox-for-top-bar",
+        );
+
+        if (topBarSearchInput instanceof HTMLInputElement && elementIsVisible(topBarSearchInput)) {
+            topBarSearchInput.focus();
+            app.ports.searchComboboxFocusResult.send(true);
+            return;
+        }
+
+        // Neither search combobox is visible, report failure
+        app.ports.searchComboboxFocusResult.send(false);
+    });
+
     app.ports.dragStart.subscribe(function (event) {
         const dragImage = event.target.closest('.drag-image');
         if (dragImage) {

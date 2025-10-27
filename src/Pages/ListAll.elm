@@ -158,6 +158,8 @@ type InternalMsg
     | ItemSearchComboboxMsg Components.Combobox.Msg
     | UpdateSearchComboboxInput Bool String
     | SelectSearchResult DisambiguatedTerm
+    | TryFocusSearchComboboxOrShowDialog
+    | SearchComboboxFocusResult Bool
     | ThemeDropdownMenuMsg Components.DropdownMenu.Msg
     | ExportDropdownMenuMsg Components.DropdownMenu.Msg
     | ItemSearchDialogMsg Components.SearchDialog.Msg
@@ -344,6 +346,12 @@ port selectAllInTextFieldWithCommandToRunEditor : () -> Cmd msg
 port scrollingUpWhileFarAwayFromTheTop : (() -> msg) -> Sub msg
 
 
+port tryFocusVisibleSearchCombobox : () -> Cmd msg
+
+
+port searchComboboxFocusResult : (Bool -> msg) -> Sub msg
+
+
 
 -- UPDATE
 
@@ -476,6 +484,22 @@ update msg model =
             ( model
             , Navigation.load url
             )
+
+        TryFocusSearchComboboxOrShowDialog ->
+            -- Use a port to check visibility and focus on a visible search combobox
+            -- The JavaScript will try both comboboxes and report back success/failure
+            ( model
+            , tryFocusVisibleSearchCombobox ()
+            )
+
+        SearchComboboxFocusResult success ->
+            if success then
+                -- Successfully focused on a visible search combobox
+                ( model, Cmd.none )
+
+            else
+                -- No visible search combobox, show the modal dialog instead
+                update (ItemSearchDialogMsg Components.SearchDialog.show) model
 
         ThemeDropdownMenuMsg msg_ ->
             Components.DropdownMenu.update
@@ -3938,7 +3962,7 @@ view model =
 
                                     NoMenuOrDialogShown ->
                                         if isControlOrCommandK_ event then
-                                            Just <| ( PageMsg.Internal <| ItemSearchDialogMsg Components.SearchDialog.show, True )
+                                            Just <| ( PageMsg.Internal TryFocusSearchComboboxOrShowDialog, True )
 
                                         else if Editability.canEdit model.common.editability && Extras.HtmlEvents.isE event && not event.isFormField then
                                             Just <| ( PageMsg.Internal StartEditing, True )
@@ -4177,6 +4201,7 @@ subscriptions model =
         , attemptedToCopyEditorCommandToClipboard (AttemptedToCopyEditorCommandToClipboard >> PageMsg.Internal)
         , attemptedToCopyItemTextToClipboard (AttemptedToCopyItemTextToClipboard >> PageMsg.Internal)
         , scrollingUpWhileFarAwayFromTheTop (always <| PageMsg.Internal ScrollingUpWhileFarAwayFromTheTop)
+        , searchComboboxFocusResult (SearchComboboxFocusResult >> PageMsg.Internal)
         , model.searchCombobox
             |> Components.Combobox.subscriptions
             |> Sub.map (ItemSearchComboboxMsg >> PageMsg.Internal)
