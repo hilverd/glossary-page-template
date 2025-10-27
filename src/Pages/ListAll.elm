@@ -2663,6 +2663,12 @@ viewItemSearchCombobox runningOnMacOs forTopBar enableMathSupport glossaryItemsF
             (PageMsg.Internal <|
                 UpdateSearchComboboxInput True ""
             )
+        , Components.Combobox.keyboardShortcut <|
+            if runningOnMacOs then
+                I18n.commandK
+
+            else
+                I18n.controlK
         ]
         [ class "w-full max-w-3xl" ]
         Nothing

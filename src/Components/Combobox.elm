@@ -1,4 +1,4 @@
-port module Components.Combobox exposing (Choice, Model, Msg, choice, choicesVisible, hideChoices, icon, id, init, onBlur, onInput, onSelect, placeholder, showChoices, showValidationErrors, subscriptions, update, validationError, view)
+port module Components.Combobox exposing (Choice, Model, Msg, choice, choicesVisible, hideChoices, icon, id, init, keyboardShortcut, onBlur, onInput, onSelect, placeholder, showChoices, showValidationErrors, subscriptions, update, validationError, view)
 
 import Accessibility
 import Accessibility.Aria
@@ -34,6 +34,7 @@ type alias Config value parentMsg =
     , onInput : Maybe (String -> parentMsg)
     , onBlur : Maybe parentMsg
     , icon : Maybe (Html parentMsg)
+    , keyboardShortcut : Maybe String
     }
 
 
@@ -186,6 +187,7 @@ type Property value parentMsg
     | ShowValidationErrors Bool
     | ValidationError (Maybe String)
     | Icon (Html parentMsg)
+    | KeyboardShortcut String
 
 
 type alias ChoiceIndex =
@@ -244,6 +246,11 @@ icon =
     Icon
 
 
+keyboardShortcut : String -> Property value parentMsg
+keyboardShortcut =
+    KeyboardShortcut
+
+
 configFromProperties : List (Property value parentMsg) -> Config value parentMsg
 configFromProperties =
     List.foldl
@@ -272,6 +279,9 @@ configFromProperties =
 
                 Icon icon_ ->
                     { config | icon = Just icon_ }
+
+                KeyboardShortcut keyboardShortcut_ ->
+                    { config | keyboardShortcut = Just keyboardShortcut_ }
         )
         { id = Nothing
         , placeholder = Nothing
@@ -281,6 +291,7 @@ configFromProperties =
         , showValidationErrors = False
         , validationError = Nothing
         , icon = Nothing
+        , keyboardShortcut = Nothing
         }
 
 
@@ -391,6 +402,16 @@ view toParentMsg (Model model) properties additionalAttributes valueForSelectedC
                         )
                     )
                 ]
+            , Extras.Html.showMaybe
+                (\shortcut ->
+                    span
+                        [ class "pointer-events-none absolute inset-y-0 right-0 flex items-center pr-10" ]
+                        [ span
+                            [ class "rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-1.5 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400" ]
+                            [ text shortcut ]
+                        ]
+                )
+                config.keyboardShortcut
             , span
                 [ class "absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-hidden text-gray-400 dark:text-gray-500" ]
                 [ Icons.chevronUpDown
