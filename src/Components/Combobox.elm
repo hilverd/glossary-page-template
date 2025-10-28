@@ -16,7 +16,6 @@ import Html.Attributes exposing (attribute, class)
 import Html.Events
 import Icons
 import Json.Decode as Decode
-import Process
 import Svg.Attributes
 import Task
 
@@ -81,8 +80,6 @@ port scrollChoiceIntoView : String -> Cmd msg
 
 type Msg
     = NoOp
-    | StartShowingChoices String
-    | ShowChoices String
     | HideChoices (Maybe String)
     | ActivateChoice ChoiceIndex
     | DeactivateChoice ChoiceIndex
@@ -96,20 +93,6 @@ update updateParentModel toParentMsg msg (Model model) =
             case msg of
                 NoOp ->
                     ( Model model, Cmd.none )
-
-                StartShowingChoices id_ ->
-                    if model.choicesVisible == False then
-                        ( Model model
-                        , Process.sleep 50 |> Task.perform (always <| ShowChoices id_)
-                        )
-
-                    else
-                        ( Model model, Cmd.none )
-
-                ShowChoices id_ ->
-                    ( Model { model | choicesVisible = True }
-                    , Dom.focus id_ |> Task.attempt (\_ -> NoOp)
-                    )
 
                 HideChoices id_ ->
                     ( Model { model | choicesVisible = False }
