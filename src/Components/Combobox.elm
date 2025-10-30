@@ -41,6 +41,7 @@ type Model
     = Model
         { choicesVisible : Bool
         , activeChoiceIndex : Maybe ChoiceIndex
+        , mouseHasMoved : Bool
         }
 
 
@@ -49,6 +50,7 @@ init =
     Model
         { choicesVisible = False
         , activeChoiceIndex = Just 0
+        , mouseHasMoved = False
         }
 
 
@@ -69,7 +71,7 @@ showChoices (Model model) =
 
 showChoicesAndReset : (Msg -> parentMsg) -> String -> ( Model, Cmd parentMsg )
 showChoicesAndReset toParentMsg comboboxId =
-    ( Model { choicesVisible = True, activeChoiceIndex = Nothing }
+    ( Model { choicesVisible = True, activeChoiceIndex = Nothing, mouseHasMoved = False }
     , Cmd.map toParentMsg <| scrollChoiceIntoView <| ElementIds.comboboxChoice comboboxId 0
     )
 
@@ -92,6 +94,7 @@ type Msg
     | ActivateChoice ChoiceIndex
     | DeactivateChoice ChoiceIndex
     | ActivatePreviousOrNextChoice String Int Bool
+    | MouseMoved
 
 
 update : (Model -> parentModel) -> (Msg -> parentMsg) -> Msg -> Model -> ( parentModel, Cmd parentMsg )
@@ -110,12 +113,21 @@ update updateParentModel toParentMsg msg (Model model) =
                     )
 
                 ShowChoicesAndReset comboboxId ->
-                    ( Model { model | choicesVisible = True, activeChoiceIndex = Nothing }
+                    ( Model { model | choicesVisible = True, activeChoiceIndex = Nothing, mouseHasMoved = False }
                     , scrollChoiceIntoView <| ElementIds.comboboxChoice comboboxId 0
                     )
 
+                MouseMoved ->
+                    ( Model { model | mouseHasMoved = True }, Cmd.none )
+
                 ActivateChoice choiceIndex ->
-                    ( Model { model | activeChoiceIndex = Just choiceIndex }, Cmd.none )
+                    ( if model.mouseHasMoved then
+                        Model { model | activeChoiceIndex = Just choiceIndex }
+
+                      else
+                        Model model
+                    , Cmd.none
+                    )
 
                 DeactivateChoice choiceIndex ->
                     ( Model
@@ -161,7 +173,7 @@ update updateParentModel toParentMsg msg (Model model) =
                                             Just new
                                    )
                     in
-                    ( Model { model | activeChoiceIndex = activeChoiceIndex_ }
+                    ( Model { model | activeChoiceIndex = activeChoiceIndex_, mouseHasMoved = False }
                     , activeChoiceIndex_
                         |> Maybe.map (\index -> scrollChoiceIntoView <| ElementIds.comboboxChoice comboboxId index)
                         |> Maybe.withDefault Cmd.none
@@ -453,7 +465,7 @@ view toParentMsg (Model model) properties additionalAttributes valueForSelectedC
                                             , attribute "role" "option"
                                             , Accessibility.Key.tabbable False
                                             , Html.Attributes.id <| ElementIds.comboboxChoice id_ choiceIndex
-                                            , Html.Events.onMouseEnter <| toParentMsg <| ActivateChoice choiceIndex
+                                            , Html.Events.on "mousemove" <| Decode.succeed <| toParentMsg <| ActivateChoice choiceIndex
                                             , Html.Events.onMouseLeave <| toParentMsg <| DeactivateChoice choiceIndex
                                             , Extras.HtmlAttribute.showMaybe
                                                 (\onSelect_ ->
@@ -522,7 +534,14 @@ view toParentMsg (Model model) properties additionalAttributes valueForSelectedC
 subscriptions : Model -> Sub Msg
 subscriptions (Model model) =
     if model.choicesVisible then
-        Events.onMouseDown <| Decode.succeed <| HideChoices Nothing
+        Sub.batch
+            [ Events.onMouseDown <| Decode.succeed <| HideChoices Nothing
+            , if not model.mouseHasMoved then
+                Events.onMouseMove <| Decode.succeed MouseMoved
+
+              else
+                Sub.none
+            ]
 
     else
         Sub.none
