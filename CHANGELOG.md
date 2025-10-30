@@ -22,6 +22,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 - When creating a new item, add it to the URL as the fragment identifier.
 - When cancelling an attempt to create a new item, navigate back to the item that previously had focus.
+- Improve combo box behaviour (don't preserve active choice between showing/hiding choices, scroll back to top when input changes).
 
 ### Removed
 

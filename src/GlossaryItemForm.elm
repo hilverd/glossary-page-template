@@ -29,6 +29,7 @@ module GlossaryItemForm exposing
     , updateDefinition
     , updateDisambiguationTagId
     , updateRelatedTermComboboxInput
+    , updateRelatedTermComboboxInputText
     , updateRelatedTermFieldCombobox
     , updateTerm
     )
@@ -979,6 +980,23 @@ updateRelatedTermComboboxInput hideChoices index input (GlossaryItemForm form) =
                                 )
                                     relatedTermField.combobox
                             , comboboxInput = input
+                        }
+                    )
+                    (RelatedTermIndex.toInt index)
+                    form.relatedTermFields
+        }
+        |> validate
+
+
+updateRelatedTermComboboxInputText : RelatedTermIndex -> String -> GlossaryItemForm -> GlossaryItemForm
+updateRelatedTermComboboxInputText index input (GlossaryItemForm form) =
+    GlossaryItemForm
+        { form
+            | relatedTermFields =
+                Extras.Array.update
+                    (\relatedTermField ->
+                        { relatedTermField
+                            | comboboxInput = input
                         }
                     )
                     (RelatedTermIndex.toInt index)

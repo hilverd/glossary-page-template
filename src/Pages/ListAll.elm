@@ -462,18 +462,30 @@ update msg model =
                 model.searchCombobox
 
         UpdateSearchComboboxInput hideChoices input ->
-            ( { model
-                | searchComboboxInput = input
-                , searchCombobox =
+            let
+                ( searchCombobox, comboboxCmd ) =
                     if hideChoices then
-                        Components.Combobox.hideChoices model.searchCombobox
+                        ( Components.Combobox.hideChoices model.searchCombobox, Cmd.none )
 
                     else
-                        Components.Combobox.showChoices model.searchCombobox
+                        -- We have two instances of the search combobox (top bar and mobile view)
+                        -- Try scrolling for both IDs; only the visible one will scroll
+                        let
+                            ( combobox1, cmd1 ) =
+                                Components.Combobox.showChoicesAndReset (PageMsg.Internal << ItemSearchComboboxMsg) (ElementIds.searchCombobox True)
+
+                            ( _, cmd2 ) =
+                                Components.Combobox.showChoicesAndReset (PageMsg.Internal << ItemSearchComboboxMsg) (ElementIds.searchCombobox False)
+                        in
+                        ( combobox1, Cmd.batch [ cmd1, cmd2 ] )
+            in
+            ( { model
+                | searchComboboxInput = input
+                , searchCombobox = searchCombobox
                 , themeDropdownMenu = Components.DropdownMenu.hidden model.themeDropdownMenu
                 , exportDropdownMenu = Components.DropdownMenu.hidden model.exportDropdownMenu
               }
-            , Cmd.none
+            , comboboxCmd
             )
 
         SelectSearchResult disambiguatedPreferredTerm ->
@@ -761,11 +773,17 @@ update msg model =
                 model.startingItemCombobox
 
         UpdateStartingItemComboboxInput input ->
+            let
+                ( startingItemCombobox, comboboxCmd ) =
+                    Components.Combobox.showChoicesAndReset
+                        (PageMsg.Internal << StartingItemComboboxMsg)
+                        ElementIds.startingItemCombobox
+            in
             ( { model
                 | startingItemComboboxInput = input
-                , startingItemCombobox = Components.Combobox.showChoices model.startingItemCombobox
+                , startingItemCombobox = startingItemCombobox
               }
-            , Cmd.none
+            , comboboxCmd
             )
 
         UpdateStartingItemComboboxInputToCurrent ->
@@ -906,16 +924,19 @@ update msg model =
                 model.itemWithFocusCombobox
 
         UpdateItemWithFocusComboboxInput hideChoices input ->
-            ( { model
-                | itemWithFocusComboboxInput = input
-                , itemWithFocusCombobox =
+            let
+                ( itemWithFocusCombobox, comboboxCmd ) =
                     if hideChoices then
-                        Components.Combobox.hideChoices model.itemWithFocusCombobox
+                        ( Components.Combobox.hideChoices model.itemWithFocusCombobox, Cmd.none )
 
                     else
-                        Components.Combobox.showChoices model.itemWithFocusCombobox
+                        Components.Combobox.showChoicesAndReset (PageMsg.Internal << ItemWithFocusComboboxMsg) ElementIds.orderItemsFocusedOnCombobox
+            in
+            ( { model
+                | itemWithFocusComboboxInput = input
+                , itemWithFocusCombobox = itemWithFocusCombobox
               }
-            , Cmd.none
+            , comboboxCmd
             )
 
         ConfirmDelete index ->

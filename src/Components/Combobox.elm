@@ -1,4 +1,4 @@
-port module Components.Combobox exposing (Choice, Model, Msg, choice, choicesVisible, hideChoices, icon, id, init, keyboardShortcut, onBlur, onInput, onSelect, placeholder, showChoices, showValidationErrors, subscriptions, update, validationError, view)
+port module Components.Combobox exposing (Choice, Model, Msg, choice, choicesVisible, hideChoices, icon, id, init, keyboardShortcut, onBlur, onInput, onSelect, placeholder, showChoices, showChoicesAndReset, showValidationErrors, subscriptions, update, validationError, view)
 
 import Accessibility
 import Accessibility.Aria
@@ -67,6 +67,13 @@ showChoices (Model model) =
     Model { model | choicesVisible = True }
 
 
+showChoicesAndReset : (Msg -> parentMsg) -> String -> ( Model, Cmd parentMsg )
+showChoicesAndReset toParentMsg comboboxId =
+    ( Model { choicesVisible = True, activeChoiceIndex = Nothing }
+    , Cmd.map toParentMsg <| scrollChoiceIntoView <| ElementIds.comboboxChoice comboboxId 0
+    )
+
+
 
 -- PORTS
 
@@ -81,6 +88,7 @@ port scrollChoiceIntoView : String -> Cmd msg
 type Msg
     = NoOp
     | HideChoices (Maybe String)
+    | ShowChoicesAndReset String
     | ActivateChoice ChoiceIndex
     | DeactivateChoice ChoiceIndex
     | ActivatePreviousOrNextChoice String Int Bool
@@ -99,6 +107,11 @@ update updateParentModel toParentMsg msg (Model model) =
                     , id_
                         |> Maybe.map (Dom.focus >> Task.attempt (\_ -> NoOp))
                         |> Maybe.withDefault Cmd.none
+                    )
+
+                ShowChoicesAndReset comboboxId ->
+                    ( Model { model | choicesVisible = True, activeChoiceIndex = Nothing }
+                    , scrollChoiceIntoView <| ElementIds.comboboxChoice comboboxId 0
                     )
 
                 ActivateChoice choiceIndex ->

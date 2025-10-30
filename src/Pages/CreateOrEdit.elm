@@ -416,16 +416,19 @@ update msg model =
             ( updateForm (Form.updateDefinition body) model, Cmd.none )
 
         UpdateAddTagComboboxInput hideChoices input ->
-            ( { model
-                | addTagComboboxInput = input
-                , addTagCombobox =
+            let
+                ( addTagCombobox, comboboxCmd ) =
                     if hideChoices then
-                        Components.Combobox.hideChoices model.addTagCombobox
+                        ( Components.Combobox.hideChoices model.addTagCombobox, Cmd.none )
 
                     else
-                        Components.Combobox.showChoices model.addTagCombobox
+                        Components.Combobox.showChoicesAndReset (PageMsg.Internal << AddTagComboboxMsg) ElementIds.addTagCombobox
+            in
+            ( { model
+                | addTagComboboxInput = input
+                , addTagCombobox = addTagCombobox
               }
-            , Cmd.none
+            , comboboxCmd
             )
 
         AddTagComboboxMsg msg_ ->
@@ -475,8 +478,38 @@ update msg model =
             )
 
         UpdateRelatedTermComboboxInput hideChoices relatedTermIndex input ->
-            ( updateForm (Form.updateRelatedTermComboboxInput hideChoices relatedTermIndex input) model
-            , Cmd.none
+            let
+                ( updatedForm, cmd ) =
+                    if hideChoices then
+                        ( Form.updateRelatedTermComboboxInput hideChoices relatedTermIndex input model.form
+                        , Cmd.none
+                        )
+
+                    else
+                        -- We have two instances of each related term combobox (draggable and non-draggable)
+                        -- Try scrolling for both IDs; only the visible one will scroll
+                        let
+                            ( combobox1, cmd1 ) =
+                                Components.Combobox.showChoicesAndReset
+                                    (PageMsg.Internal << RelatedTermComboboxMsg relatedTermIndex)
+                                    (ElementIds.relatedTermCombobox relatedTermIndex)
+
+                            ( _, cmd2 ) =
+                                Components.Combobox.showChoicesAndReset
+                                    (PageMsg.Internal << RelatedTermComboboxMsg relatedTermIndex)
+                                    (ElementIds.draggableRelatedTermCombobox relatedTermIndex)
+
+                            -- Update the form: set the combobox to the reset state, and update input text
+                            updatedForm1 =
+                                Form.updateRelatedTermFieldCombobox relatedTermIndex combobox1 model.form
+                                    |> Form.updateRelatedTermComboboxInputText relatedTermIndex input
+                        in
+                        ( updatedForm1
+                        , Cmd.batch [ cmd1, cmd2 ]
+                        )
+            in
+            ( updateForm (always updatedForm) model
+            , cmd
             )
 
         SelectRelatedTerm relatedTermIndex selection ->
