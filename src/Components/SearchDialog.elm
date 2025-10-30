@@ -185,7 +185,7 @@ update updateParentModel toParentMsg msg model =
                 SearchStringWasJustUpdated ->
                     ( { model_
                         | searchStringWasJustUpdated = True
-                        , activeSearchResultIndex = Just 0
+                        , activeSearchResultIndex = Nothing
                       }
                     , Process.sleep 200
                         |> Task.perform (always <| SearchStringWasNotJustUpdated)
