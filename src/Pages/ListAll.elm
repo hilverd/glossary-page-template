@@ -3862,7 +3862,7 @@ viewMainThreeColumnLayout filterByTagWithDescription_ { enableMathSupport, noMod
                         [ Extras.Html.showIf (not <| List.isEmpty relatedItems) <|
                             h3
                                 [ class "text-xl font-medium text-gray-700 dark:text-gray-300 mb-4" ]
-                                [ text I18n.relatedItems ]
+                                [ text I18n.seeAlso ]
                         , div
                             [ class "space-y-4" ]
                             (List.map
