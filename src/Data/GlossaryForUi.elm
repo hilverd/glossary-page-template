@@ -45,6 +45,7 @@ import Data.DescribedTag as DescribedTag exposing (DescribedTag)
 import Data.GlossaryChange as GlossaryChange exposing (GlossaryChange)
 import Data.GlossaryFromDom exposing (GlossaryFromDom)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
+import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Tag as Tag
 import Data.GlossaryItem.Term as Term
 import Data.GlossaryItem.TermFromDom as TermFromDom
@@ -129,10 +130,28 @@ defaultTheme (GlossaryForUi glossaryForUi) =
 
 
 {-| Get the title for a GlossaryForUi.
+If the glossary has three-column layout enabled and a starting item,
+returns the starting item's disambiguated preferred term as the title.
+Otherwise returns the glossary's configured title.
 -}
 title : GlossaryForUi -> GlossaryTitle
 title (GlossaryForUi glossaryForUi) =
-    glossaryForUi.title
+    if glossaryForUi.enableThreeColumnLayout then
+        glossaryForUi.items
+            |> GlossaryItemsForUi.startingItem
+            |> Maybe.map
+                (\startingItem ->
+                    startingItem
+                        |> GlossaryItemForUi.disambiguatedPreferredTerm
+                        |> DisambiguatedTerm.toTerm
+                        |> Term.raw
+                        |> RawTerm.toString
+                        |> GlossaryTitle.fromMarkdown
+                )
+            |> Maybe.withDefault glossaryForUi.title
+
+    else
+        glossaryForUi.title
 
 
 {-| Get the about section for a GlossaryForUi.
