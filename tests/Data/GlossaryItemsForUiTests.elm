@@ -1,6 +1,7 @@
 module Data.GlossaryItemsForUiTests exposing (suite)
 
 import Data.DescribedTag as DescribedTag
+import Data.GlossaryItem.Definition as Definition
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm
 import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Term as Term
@@ -516,4 +517,280 @@ suite =
                     ]
                     |> Expect.equal
                         (Err "There are multiple items with (disambiguated) preferred term identifier \"Foo_(Finance)\"")
+        , test "when starting item has no related items, falls back to items whose disambiguated preferred term matches a tag they have" <|
+            \_ ->
+                let
+                    -- Create a starting item with no related items
+                    startingItem_ : GlossaryItemForUi
+                    startingItem_ =
+                        GlossaryItemForUi.create
+                            (GlossaryItemId.create "Start")
+                            (Term.fromMarkdown "Start" False)
+                            []
+                            Nothing
+                            []
+                            (Just <| Definition.fromMarkdown "Starting item")
+                            []
+                            False
+                            (Just "2023-10-30T08:25:30.335Z")
+                            Nothing
+                            Nothing
+
+                    -- Create items whose disambiguated preferred terms match tags
+                    -- Finance has 3 items (defaultFinance, interestRate, loan)
+                    financeItem_ : GlossaryItemForUi
+                    financeItem_ =
+                        GlossaryItemForUi.create
+                            (GlossaryItemId.create "Finance")
+                            (Term.fromMarkdown "Finance" False)
+                            []
+                            Nothing
+                            [ financeTag ]
+                            (Just <| Definition.fromMarkdown "About finance")
+                            []
+                            False
+                            (Just "2023-10-30T08:25:30.335Z")
+                            Nothing
+                            Nothing
+
+                    -- Computer Science has 2 items (defaultComputerScience, informationRetrieval)
+                    computerScienceItem_ : GlossaryItemForUi
+                    computerScienceItem_ =
+                        GlossaryItemForUi.create
+                            (GlossaryItemId.create "Computer Science")
+                            (Term.fromMarkdown "Computer Science" False)
+                            []
+                            Nothing
+                            [ computerScienceTag ]
+                            (Just <| Definition.fromMarkdown "About computer science")
+                            []
+                            False
+                            (Just "2023-10-30T08:25:30.335Z")
+                            Nothing
+                            Nothing
+
+                    -- Gardening has 1 item (only the Gardening item itself)
+                    gardeningItem_ : GlossaryItemForUi
+                    gardeningItem_ =
+                        GlossaryItemForUi.create
+                            (GlossaryItemId.create "Gardening")
+                            (Term.fromMarkdown "Gardening" False)
+                            []
+                            Nothing
+                            [ gardeningTag ]
+                            (Just <| Definition.fromMarkdown "About gardening")
+                            []
+                            False
+                            (Just "2023-10-30T08:25:30.335Z")
+                            Nothing
+                            Nothing
+
+                    glossaryItems_ : Result String GlossaryItemsForUi
+                    glossaryItems_ =
+                        GlossaryItemsForUi.fromList
+                            [ computerScienceDescribedTag
+                            , financeDescribedTag
+                            , gardeningDescribedTag
+                            ]
+                            (Just <| DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Start" False)
+                            [ startingItem_
+                            , defaultComputerScienceItem
+                            , defaultFinanceItem
+                            , informationRetrievalItem
+                            , interestRateItem
+                            , loanItem
+                            , financeItem_
+                            , computerScienceItem_
+                            , gardeningItem_
+                            ]
+                in
+                glossaryItems_
+                    |> Result.map
+                        (\items ->
+                            GlossaryItemsForUi.relatedItems
+                                (GlossaryItemId.create "Start")
+                                Nothing
+                                items
+                                |> List.map GlossaryItemForUi.id
+                        )
+                    |> Expect.equal
+                        (Ok
+                            [ GlossaryItemId.create "Finance"
+                            , GlossaryItemId.create "Computer Science"
+                            , GlossaryItemId.create "Gardening"
+                            ]
+                        )
+        , test "when starting item has no related items, respects tag filter" <|
+            \_ ->
+                let
+                    startingItem_ : GlossaryItemForUi
+                    startingItem_ =
+                        GlossaryItemForUi.create
+                            (GlossaryItemId.create "Start")
+                            (Term.fromMarkdown "Start" False)
+                            []
+                            Nothing
+                            []
+                            (Just <| Definition.fromMarkdown "Starting item")
+                            []
+                            False
+                            (Just "2023-10-30T08:25:30.335Z")
+                            Nothing
+                            Nothing
+
+                    financeItem_ : GlossaryItemForUi
+                    financeItem_ =
+                        GlossaryItemForUi.create
+                            (GlossaryItemId.create "Finance")
+                            (Term.fromMarkdown "Finance" False)
+                            []
+                            Nothing
+                            [ financeTag ]
+                            (Just <| Definition.fromMarkdown "About finance")
+                            []
+                            False
+                            (Just "2023-10-30T08:25:30.335Z")
+                            Nothing
+                            Nothing
+
+                    computerScienceItem_ : GlossaryItemForUi
+                    computerScienceItem_ =
+                        GlossaryItemForUi.create
+                            (GlossaryItemId.create "Computer Science")
+                            (Term.fromMarkdown "Computer Science" False)
+                            []
+                            Nothing
+                            [ computerScienceTag ]
+                            (Just <| Definition.fromMarkdown "About computer science")
+                            []
+                            False
+                            (Just "2023-10-30T08:25:30.335Z")
+                            Nothing
+                            Nothing
+
+                    glossaryItems_ : Result String GlossaryItemsForUi
+                    glossaryItems_ =
+                        GlossaryItemsForUi.fromList
+                            [ computerScienceDescribedTag
+                            , financeDescribedTag
+                            ]
+                            (Just <| DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Start" False)
+                            [ startingItem_
+                            , defaultComputerScienceItem
+                            , defaultFinanceItem
+                            , informationRetrievalItem
+                            , interestRateItem
+                            , loanItem
+                            , financeItem_
+                            , computerScienceItem_
+                            ]
+                in
+                glossaryItems_
+                    |> Result.map
+                        (\items ->
+                            GlossaryItemsForUi.relatedItems
+                                (GlossaryItemId.create "Start")
+                                (Just financeTagId)
+                                items
+                                |> List.map GlossaryItemForUi.id
+                        )
+                    |> Expect.equal
+                        (Ok
+                            [ GlossaryItemId.create "Finance"
+                            ]
+                        )
+        , test "when starting item has related items, uses them instead of fallback" <|
+            \_ ->
+                let
+                    startingItem_ : GlossaryItemForUi
+                    startingItem_ =
+                        GlossaryItemForUi.create
+                            (GlossaryItemId.create "Start")
+                            (Term.fromMarkdown "Start" False)
+                            []
+                            Nothing
+                            []
+                            (Just <| Definition.fromMarkdown "Starting item")
+                            [ DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Loan" False ]
+                            False
+                            (Just "2023-10-30T08:25:30.335Z")
+                            Nothing
+                            Nothing
+
+                    financeItem_ : GlossaryItemForUi
+                    financeItem_ =
+                        GlossaryItemForUi.create
+                            (GlossaryItemId.create "Finance")
+                            (Term.fromMarkdown "Finance" False)
+                            []
+                            Nothing
+                            [ financeTag ]
+                            (Just <| Definition.fromMarkdown "About finance")
+                            []
+                            False
+                            (Just "2023-10-30T08:25:30.335Z")
+                            Nothing
+                            Nothing
+
+                    glossaryItems_ : Result String GlossaryItemsForUi
+                    glossaryItems_ =
+                        GlossaryItemsForUi.fromList
+                            [ financeDescribedTag
+                            ]
+                            (Just <| DisambiguatedTerm.fromTerm <| Term.fromMarkdown "Start" False)
+                            [ startingItem_
+                            , loanItem
+                            , financeItem_
+                            ]
+                in
+                glossaryItems_
+                    |> Result.map
+                        (\items ->
+                            GlossaryItemsForUi.relatedItems
+                                (GlossaryItemId.create "Start")
+                                Nothing
+                                items
+                                |> List.map GlossaryItemForUi.id
+                        )
+                    |> Expect.equal
+                        (Ok
+                            [ GlossaryItemId.create "Loan"
+                            ]
+                        )
+        , test "when non-starting item has no related items, returns empty list" <|
+            \_ ->
+                let
+                    itemWithNoRelated : GlossaryItemForUi
+                    itemWithNoRelated =
+                        GlossaryItemForUi.create
+                            (GlossaryItemId.create "NoRelated")
+                            (Term.fromMarkdown "NoRelated" False)
+                            []
+                            Nothing
+                            []
+                            (Just <| Definition.fromMarkdown "An item with no related items")
+                            []
+                            False
+                            (Just "2023-10-30T08:25:30.335Z")
+                            Nothing
+                            Nothing
+
+                    glossaryItems_ : Result String GlossaryItemsForUi
+                    glossaryItems_ =
+                        GlossaryItemsForUi.fromList
+                            []
+                            Nothing
+                            [ itemWithNoRelated
+                            ]
+                in
+                glossaryItems_
+                    |> Result.map
+                        (\items ->
+                            GlossaryItemsForUi.relatedItems
+                                (GlossaryItemId.create "NoRelated")
+                                Nothing
+                                items
+                                |> List.map GlossaryItemForUi.id
+                        )
+                    |> Expect.equal (Ok [])
         ]

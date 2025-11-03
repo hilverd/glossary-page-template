@@ -18,6 +18,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Move glossary title to top left in new layout.
 - Change styling of letter grid buttons for index, and make them larger on mobile.
 - In new layout with a starting item, use the starting item's disambiguated preferred term as the page title instead of the glossary title.
+- In new layout, when viewing starting item, if it has no related items then show items for all tags.
 
 ### Fixed
 
