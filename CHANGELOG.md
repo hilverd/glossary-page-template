@@ -13,6 +13,12 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+### Fixed
+### Removed
+
+## [5.10.0] - 2025-11-04
+
+### Changed
 
 - Turn search button into a combo box except on very small screens.
 - Move glossary title to top left in new layout.
@@ -25,8 +31,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - When creating a new item, add it to the URL as the fragment identifier.
 - When cancelling an attempt to create a new item, navigate back to the item that previously had focus.
 - Improve combo box behaviour (don't preserve active choice between showing/hiding choices, scroll back to top when input changes, don't highlight choice under mouse pointer until mouse moves).
-
-### Removed
 
 ## [5.9.1] - 2025-10-13
 
@@ -935,7 +939,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.9.1...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.10.0...HEAD
+[5.10.0]: https://github.com/hilverd/glossary-page-template/compare/v5.9.1...v5.10.0
 [5.9.1]: https://github.com/hilverd/glossary-page-template/compare/v5.9.0...v5.9.1
 [5.9.0]: https://github.com/hilverd/glossary-page-template/compare/v5.8.2...v5.9.0
 [5.8.2]: https://github.com/hilverd/glossary-page-template/compare/v5.8.0...v5.8.2
