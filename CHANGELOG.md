@@ -13,6 +13,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+
+- Prioritise search results where search string matches term completely.
+
 ### Fixed
 
 - Fix bug where scrolling stayed disabled after clicking on glossary title from mobile menu.

@@ -138,5 +138,55 @@ suite =
                                 [ "The_term_three"
                                 ]
                             }
+            , test "exact match on raw term ranks highest" <|
+                \_ ->
+                    loadedGlossaryItemsForUi
+                        |> Search.resultsForItems Nothing (always True) 10 "second the term"
+                        |> (\{ totalNumberOfResults, results } ->
+                                { totalNumberOfResults = totalNumberOfResults
+                                , results = List.map (\{ disambiguatedPreferredTerm } -> Term.id <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm) results
+                                }
+                           )
+                        |> Expect.equal
+                            { totalNumberOfResults = 1
+                            , results =
+                                [ "Second_the_term"
+                                ]
+                            }
+            , test "exact match on inline text ranks second highest" <|
+                \_ ->
+                    let
+                        itemWithSpecialTerm : GlossaryItemForUi
+                        itemWithSpecialTerm =
+                            GlossaryItemForUi.create
+                                (GlossaryItemId.create "HTML")
+                                (termFromBody "<abbr>HTML</abbr>")
+                                []
+                                Nothing
+                                []
+                                (Just <| Definition.fromMarkdown "HyperText Markup Language")
+                                []
+                                False
+                                Nothing
+                                Nothing
+                                Nothing
+
+                        glossaryWithSpecialTerm : GlossaryItemsForUi
+                        glossaryWithSpecialTerm =
+                            [ itemWithSpecialTerm ]
+                                |> GlossaryItemsForUi.fromList [] Nothing
+                                |> Result.withDefault GlossaryItemsForUi.empty
+                    in
+                    glossaryWithSpecialTerm
+                        |> Search.resultsForItems Nothing (always True) 10 "HTML"
+                        |> (\{ totalNumberOfResults, results } ->
+                                { totalNumberOfResults = totalNumberOfResults
+                                , results = List.map (\{ disambiguatedPreferredTerm } -> Term.id <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm) results
+                                }
+                           )
+                        |> Expect.equal
+                            { totalNumberOfResults = 1
+                            , results = [ "<abbr>HTML</abbr>" ]
+                            }
             ]
         ]

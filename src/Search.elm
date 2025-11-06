@@ -64,6 +64,19 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
                                    )
                         )
 
+            termRawEqualsSearchString : Term -> Bool
+            termRawEqualsSearchString =
+                Term.raw
+                    >> RawTerm.toString
+                    >> String.toLower
+                    >> (==) searchStringNormalised
+
+            termInlineTextEqualsSearchString : Term -> Bool
+            termInlineTextEqualsSearchString =
+                Term.inlineText
+                    >> String.toLower
+                    >> (==) searchStringNormalised
+
             termRawStartsWithSearchString : Term -> Bool
             termRawStartsWithSearchString =
                 Term.raw
@@ -105,32 +118,38 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
                         disambiguatedPreferredTermAsTerm =
                             DisambiguatedTerm.toTerm disambiguatedPreferredTerm
                     in
-                    if alternativeTerm == Nothing && termRawStartsWithSearchString disambiguatedPreferredTermAsTerm then
+                    if alternativeTerm == Nothing && termRawEqualsSearchString disambiguatedPreferredTermAsTerm then
                         Just ( candidate, 1 )
 
-                    else if alternativeTerm == Nothing && termInlineTextStartsWithSearchString disambiguatedPreferredTermAsTerm then
+                    else if alternativeTerm == Nothing && termInlineTextEqualsSearchString disambiguatedPreferredTermAsTerm then
                         Just ( candidate, 2 )
 
-                    else if Maybe.map termRawStartsWithSearchString alternativeTerm == Just True then
+                    else if alternativeTerm == Nothing && termRawStartsWithSearchString disambiguatedPreferredTermAsTerm then
                         Just ( candidate, 3 )
 
-                    else if Maybe.map termInlineTextStartsWithSearchString alternativeTerm == Just True then
+                    else if alternativeTerm == Nothing && termInlineTextStartsWithSearchString disambiguatedPreferredTermAsTerm then
                         Just ( candidate, 4 )
 
-                    else if alternativeTerm == Nothing && termRawContainsSearchString disambiguatedPreferredTermAsTerm then
+                    else if Maybe.map termRawStartsWithSearchString alternativeTerm == Just True then
                         Just ( candidate, 5 )
 
-                    else if alternativeTerm == Nothing && termInlineTextContainsSearchString disambiguatedPreferredTermAsTerm then
+                    else if Maybe.map termInlineTextStartsWithSearchString alternativeTerm == Just True then
                         Just ( candidate, 6 )
 
-                    else if Maybe.map termRawContainsSearchString alternativeTerm == Just True then
+                    else if alternativeTerm == Nothing && termRawContainsSearchString disambiguatedPreferredTermAsTerm then
                         Just ( candidate, 7 )
 
-                    else if Maybe.map termInlineTextContainsSearchString alternativeTerm == Just True then
+                    else if alternativeTerm == Nothing && termInlineTextContainsSearchString disambiguatedPreferredTermAsTerm then
                         Just ( candidate, 8 )
 
-                    else if alternativeTerm == Nothing && Maybe.map definitionInlineTextContainsSearchString definition == Just True then
+                    else if Maybe.map termRawContainsSearchString alternativeTerm == Just True then
                         Just ( candidate, 9 )
+
+                    else if Maybe.map termInlineTextContainsSearchString alternativeTerm == Just True then
+                        Just ( candidate, 10 )
+
+                    else if alternativeTerm == Nothing && Maybe.map definitionInlineTextContainsSearchString definition == Just True then
+                        Just ( candidate, 11 )
 
                     else
                         Nothing
