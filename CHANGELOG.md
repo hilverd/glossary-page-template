@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- Fix bug where scrolling stayed disabled after clicking on glossary title from mobile menu.
+
 ### Removed
 
 ## [5.10.0] - 2025-11-04

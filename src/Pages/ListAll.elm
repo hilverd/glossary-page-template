@@ -424,7 +424,9 @@ update msg model =
             )
 
         CompleteHidingMenuForMobile ->
-            ( { model | menuForMobileVisibility = GradualVisibility.Invisible }, Cmd.none )
+            ( { model | menuForMobileVisibility = GradualVisibility.Invisible }
+            , allowBackgroundScrolling ()
+            )
 
         BackToTop staticSidebar counter ->
             let
@@ -1823,7 +1825,7 @@ viewTermIndexItem enableMathSupport entry =
                     [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
                     , Html.Attributes.href <| Extras.Url.fragmentOnly <| Term.id term
                     , Html.Attributes.target "_self"
-                    , Html.Events.onClick <| PageMsg.Internal <| JumpToItem itemId
+                    , Extras.HtmlEvents.onClickPreventDefault <| PageMsg.Internal <| JumpToItem itemId
                     ]
                     [ Term.view enableMathSupport [] term ]
                 ]
@@ -1856,7 +1858,7 @@ viewTermIndexItem enableMathSupport entry =
                                 [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
                                 , Html.Attributes.href <| Extras.Url.fragmentOnly <| Term.id preferredTerm
                                 , Html.Attributes.target "_self"
-                                , Html.Events.onClick <| PageMsg.Internal <| JumpToItem itemId
+                                , Extras.HtmlEvents.onClickPreventDefault <| PageMsg.Internal <| JumpToItem itemId
                                 ]
                                 [ span
                                     [ class "inline-flex items-center group-hover:underline" ]
@@ -2565,7 +2567,9 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport enableThreeColumnLay
                     h2
                         [ class "px-4 mt-5 font-bold leading-tight" ]
                         [ Html.a
-                            [ href initialUrlWithoutQueryOrFragment ]
+                            [ href initialUrlWithoutQueryOrFragment
+                            , Extras.HtmlEvents.onClickPreventDefault <| PageMsg.Internal CompleteHidingMenuForMobile
+                            ]
                             [ glossaryTitle
                                 |> GlossaryTitle.view
                                     enableMathSupport
