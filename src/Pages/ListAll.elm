@@ -1825,7 +1825,7 @@ viewTermIndexItem enableMathSupport entry =
                     [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
                     , Html.Attributes.href <| Extras.Url.fragmentOnly <| Term.id term
                     , Html.Attributes.target "_self"
-                    , Extras.HtmlEvents.onClickPreventDefault <| PageMsg.Internal <| JumpToItem itemId
+                    , Html.Events.onClick <| PageMsg.Internal <| JumpToItem itemId
                     ]
                     [ Term.view enableMathSupport [] term ]
                 ]
@@ -1858,7 +1858,7 @@ viewTermIndexItem enableMathSupport entry =
                                 [ class "group block border-l pl-4 -ml-px border-transparent hover:border-slate-400 dark:hover:border-slate-400 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
                                 , Html.Attributes.href <| Extras.Url.fragmentOnly <| Term.id preferredTerm
                                 , Html.Attributes.target "_self"
-                                , Extras.HtmlEvents.onClickPreventDefault <| PageMsg.Internal <| JumpToItem itemId
+                                , Html.Events.onClick <| PageMsg.Internal <| JumpToItem itemId
                                 ]
                                 [ span
                                     [ class "inline-flex items-center group-hover:underline" ]
@@ -2568,7 +2568,7 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport enableThreeColumnLay
                         [ class "px-4 mt-5 font-bold leading-tight" ]
                         [ Html.a
                             [ href initialUrlWithoutQueryOrFragment
-                            , Extras.HtmlEvents.onClickPreventDefault <| PageMsg.Internal CompleteHidingMenuForMobile
+                            , Html.Events.onClick <| PageMsg.Internal CompleteHidingMenuForMobile
                             ]
                             [ glossaryTitle
                                 |> GlossaryTitle.view
