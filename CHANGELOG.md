@@ -13,14 +13,18 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 ### Changed
+### Fixed
+### Removed
+
+## [5.10.1] - 2025-11-06
+
+### Changed
 
 - Prioritise search results where search string matches term completely.
 
 ### Fixed
 
 - Fix bug where scrolling stayed disabled after clicking on glossary title from mobile menu.
-
-### Removed
 
 ## [5.10.0] - 2025-11-04
 
@@ -945,7 +949,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.10.0...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.10.1...HEAD
+[5.10.1]: https://github.com/hilverd/glossary-page-template/compare/v5.10.0...v5.10.1
 [5.10.0]: https://github.com/hilverd/glossary-page-template/compare/v5.9.1...v5.10.0
 [5.9.1]: https://github.com/hilverd/glossary-page-template/compare/v5.9.0...v5.9.1
 [5.9.0]: https://github.com/hilverd/glossary-page-template/compare/v5.8.2...v5.9.0
