@@ -1814,7 +1814,7 @@ viewSwitchBackToOldLayout =
 viewTermIndexItem : Bool -> IndexOfTerms.Entry -> List (Html Msg)
 viewTermIndexItem enableMathSupport entry =
     case entry of
-        IndexOfTerms.PreferredTerm itemId disambiguatedTerm _ ->
+        IndexOfTerms.PreferredTerm itemId disambiguatedTerm isForTag ->
             let
                 term : Term
                 term =
@@ -1827,15 +1827,15 @@ viewTermIndexItem enableMathSupport entry =
                     , Html.Attributes.target "_self"
                     , Html.Events.onClick <| PageMsg.Internal <| JumpToItem itemId
                     ]
-                    [ Term.view enableMathSupport False [] term ]
+                    [ Term.view enableMathSupport isForTag [] term ]
                 ]
             ]
 
         IndexOfTerms.AlternativeTerm term disambiguatedPreferredTerms ->
             let
-                preferredTerms : List ( GlossaryItemId, Term )
+                preferredTerms : List ( GlossaryItemId, ( Term, Bool ) )
                 preferredTerms =
-                    List.map (\( id_, term_, _ ) -> ( id_, DisambiguatedTerm.toTerm term_ )) disambiguatedPreferredTerms
+                    List.map (\( id_, term_, isForTag ) -> ( id_, ( DisambiguatedTerm.toTerm term_, isForTag ) )) disambiguatedPreferredTerms
             in
             li
                 [ Html.Attributes.attribute "style" "margin-top: 1rem" ]
@@ -1845,7 +1845,7 @@ viewTermIndexItem enableMathSupport entry =
                     ]
                 ]
                 :: List.indexedMap
-                    (\index ( itemId, preferredTerm ) ->
+                    (\index ( itemId, ( preferredTerm, isForTag ) ) ->
                         li
                             [ Extras.HtmlAttribute.showIf (index + 1 == List.length preferredTerms) <|
                                 Html.Attributes.attribute "style" "margin-bottom: 1rem"
@@ -1865,7 +1865,7 @@ viewTermIndexItem enableMathSupport entry =
                                     [ Icons.cornerDownRight
                                         [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300"
                                         ]
-                                    , Term.view enableMathSupport False [] preferredTerm
+                                    , Term.view enableMathSupport isForTag [] preferredTerm
                                     ]
                                 ]
                             ]
