@@ -271,7 +271,7 @@ viewGlossaryTerm { enableMathSupport, withLink, isPreferred, isItemForTag, large
                         [ Term.view
                             enableMathSupport
                             isItemForTag
-                            [ Extras.HtmlAttribute.showIf largeFont <| class "text-2xl/7 font-bold" ]
+                            [ Extras.HtmlAttribute.showIf largeFont <| class "text-3xl font-bold" ]
                             term
                         ]
 
@@ -279,7 +279,7 @@ viewGlossaryTerm { enableMathSupport, withLink, isPreferred, isItemForTag, large
                     Term.view
                         enableMathSupport
                         isItemForTag
-                        [ Extras.HtmlAttribute.showIf largeFont <| class "text-2xl/7 font-bold" ]
+                        [ Extras.HtmlAttribute.showIf largeFont <| class "text-3xl font-bold" ]
                         term
 
             else
