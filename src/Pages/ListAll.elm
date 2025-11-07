@@ -1827,7 +1827,7 @@ viewTermIndexItem enableMathSupport entry =
                     , Html.Attributes.target "_self"
                     , Html.Events.onClick <| PageMsg.Internal <| JumpToItem itemId
                     ]
-                    [ Term.view enableMathSupport [] term ]
+                    [ Term.view enableMathSupport False [] term ]
                 ]
             ]
 
@@ -1841,7 +1841,7 @@ viewTermIndexItem enableMathSupport entry =
                 [ Html.Attributes.attribute "style" "margin-top: 1rem" ]
                 [ Html.span
                     [ class "block border-l pl-4 -ml-px border-transparent select-none" ]
-                    [ Term.view enableMathSupport [] term
+                    [ Term.view enableMathSupport False [] term
                     ]
                 ]
                 :: List.indexedMap
@@ -1865,7 +1865,7 @@ viewTermIndexItem enableMathSupport entry =
                                     [ Icons.cornerDownRight
                                         [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300"
                                         ]
-                                    , Term.view enableMathSupport [] preferredTerm
+                                    , Term.view enableMathSupport False [] preferredTerm
                                     ]
                                 ]
                             ]
@@ -3414,7 +3414,7 @@ viewOrderItemsBy numberOfItems enableMathSupport filterByTagId_ itemWithFocusCom
                 [ text I18n.explanationForMostMentionedFirst ]
         , Extras.Html.showMaybe
             (DisambiguatedTerm.toTerm
-                >> Term.view enableMathSupport []
+                >> Term.view enableMathSupport False []
                 >> I18n.explanationForFocusedOn
             )
             orderItemsFocusedOnTerm

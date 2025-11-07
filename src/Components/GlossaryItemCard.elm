@@ -402,12 +402,14 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                 Html.abbr []
                     [ Term.view
                         enableMathSupport
+                        False
                         [ class "text-sm" ]
                         preferredTerm
                     ]
 
             else
                 Term.view enableMathSupport
+                    False
                     [ class "text-sm" ]
                     preferredTerm
     in
@@ -599,7 +601,7 @@ viewGlossaryTerm { enableMathSupport, showSilcrow, isPreferred } term =
         viewTerm : Html msg
         viewTerm =
             if isPreferred then
-                Term.view enableMathSupport [] term
+                Term.view enableMathSupport False [] term
 
             else
                 span
@@ -607,7 +609,7 @@ viewGlossaryTerm { enableMathSupport, showSilcrow, isPreferred } term =
                     [ Icons.cornerLeftUp
                         [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-1 mr-1.5 text-gray-400 dark:text-gray-400 print:hidden"
                         ]
-                    , Term.view enableMathSupport [ class "font-normal" ] term
+                    , Term.view enableMathSupport False [ class "font-normal" ] term
                     ]
     in
     div
@@ -707,7 +709,7 @@ viewGlossaryItemRelatedTerms enableMathSupport preview itemHasADefinition onClic
                                         )
                                         onClick
                                     ]
-                                    [ Term.view enableMathSupport [] relatedTerm ]
+                                    [ Term.view enableMathSupport False [] relatedTerm ]
                             )
                         |> List.intersperse (text ", ")
                    )

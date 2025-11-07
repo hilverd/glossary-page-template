@@ -20,10 +20,12 @@ import Extras.HtmlTree exposing (HtmlTree)
 import Extras.String exposing (enDash)
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class)
+import Icons
 import Internationalisation as I18n
 import Markdown.Renderer as Renderer
 import MarkdownRenderers
 import String.Normalize
+import Svg.Attributes
 
 
 {-| A term.
@@ -156,19 +158,26 @@ markdown (MarkdownTerm { body }) =
                 ]
             ]
 
-    fromMarkdown "The _ideal_ case" False |> view False []
+    fromMarkdown "The _ideal_ case" False |> view False False []
     --> expected
 
 -}
-view : Bool -> List (Attribute msg) -> Term -> Html msg
-view enableMathSupport additionalAttributes (MarkdownTerm { body }) =
+view : Bool -> Bool -> List (Attribute msg) -> Term -> Html msg
+view enableMathSupport showTagIcon additionalAttributes (MarkdownTerm { body }) =
     case MarkdownFragment.parsed body of
         Ok blocks ->
             case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
                 Ok rendered ->
                     Html.span
                         (class "prose dark:prose-invert print:prose-neutral dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" :: additionalAttributes)
-                        rendered
+                        (if showTagIcon then
+                            Icons.tag
+                                [ Svg.Attributes.class "h-4 w-4 mr-1 text-gray-400 dark:text-gray-300 inline-block flex-shrink-0" ]
+                                :: rendered
+
+                         else
+                            rendered
+                        )
 
                 Err renderingError ->
                     text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError

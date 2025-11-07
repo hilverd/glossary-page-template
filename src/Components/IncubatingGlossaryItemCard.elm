@@ -262,6 +262,7 @@ viewGlossaryTerm { enableMathSupport, withLink, isPreferred, largeFont } term =
                         ]
                         [ Term.view
                             enableMathSupport
+                            False
                             [ Extras.HtmlAttribute.showIf largeFont <| class "text-2xl/7 font-bold" ]
                             term
                         ]
@@ -269,6 +270,7 @@ viewGlossaryTerm { enableMathSupport, withLink, isPreferred, largeFont } term =
                 else
                     Term.view
                         enableMathSupport
+                        False
                         [ Extras.HtmlAttribute.showIf largeFont <| class "text-2xl/7 font-bold" ]
                         term
 
@@ -280,6 +282,7 @@ viewGlossaryTerm { enableMathSupport, withLink, isPreferred, largeFont } term =
                         ]
                     , Term.view
                         enableMathSupport
+                        False
                         [ class "font-normal"
                         , Extras.HtmlAttribute.showIf largeFont <| class "text-xl"
                         ]
@@ -400,7 +403,7 @@ viewGlossaryItemRelatedTerms enableMathSupport preview itemHasADefinition onClic
                                         )
                                         onClick
                                     ]
-                                    [ Term.view enableMathSupport [] relatedTerm ]
+                                    [ Term.view enableMathSupport False [] relatedTerm ]
                             )
                         |> List.intersperse (text ", ")
                    )
