@@ -7,7 +7,7 @@ import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
-import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
+import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi, isItemForTag)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
 import ElementIds
@@ -81,6 +81,10 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                 needsUpdating : Bool
                 needsUpdating =
                     GlossaryItemForUi.needsUpdating glossaryItem
+
+                isItemForTag : Bool
+                isItemForTag =
+                    GlossaryItemForUi.isItemForTag glossaryItem
             in
             case style of
                 Preview ->
@@ -92,6 +96,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                             { enableMathSupport = enableMathSupport
                             , showSilcrow = False
                             , isPreferred = True
+                            , isItemForTag = isItemForTag
                             }
                             disambiguatedPreferredTerm
                             :: List.map
@@ -99,6 +104,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                                     { enableMathSupport = enableMathSupport
                                     , showSilcrow = False
                                     , isPreferred = False
+                                    , isItemForTag = isItemForTag
                                     }
                                 )
                                 alternativeTerms
@@ -207,6 +213,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                                             { enableMathSupport = enableMathSupport
                                             , showSilcrow = True
                                             , isPreferred = True
+                                            , isItemForTag = isItemForTag
                                             }
                                             disambiguatedPreferredTerm
                                             :: List.map
@@ -214,6 +221,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                                                     { enableMathSupport = enableMathSupport
                                                     , showSilcrow = False
                                                     , isPreferred = False
+                                                    , isItemForTag = isItemForTag
                                                     }
                                                 )
                                                 alternativeTerms
@@ -308,6 +316,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                                             { enableMathSupport = enableMathSupport
                                             , showSilcrow = True
                                             , isPreferred = True
+                                            , isItemForTag = isItemForTag
                                             }
                                             disambiguatedPreferredTerm
                                             :: List.map
@@ -315,6 +324,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                                                     { enableMathSupport = enableMathSupport
                                                     , showSilcrow = False
                                                     , isPreferred = False
+                                                    , isItemForTag = isItemForTag
                                                     }
                                                 )
                                                 alternativeTerms
@@ -397,19 +407,22 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                     glossaryItem
                         |> GlossaryItemForUi.disambiguatedPreferredTerm
                         |> DisambiguatedTerm.toTerm
+
+                isItemForTag : Bool
+                isItemForTag =
+                    GlossaryItemForUi.isItemForTag glossaryItem
             in
             if Term.isAbbreviation preferredTerm then
                 Html.abbr []
-                    [ Term.view
-                        enableMathSupport
-                        False
+                    [ Term.view enableMathSupport
+                        isItemForTag
                         [ class "text-sm" ]
                         preferredTerm
                     ]
 
             else
                 Term.view enableMathSupport
-                    False
+                    isItemForTag
                     [ class "text-sm" ]
                     preferredTerm
     in
@@ -455,6 +468,10 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                 lastUpdatedByEmailAddress : Maybe String
                 lastUpdatedByEmailAddress =
                     GlossaryItemForUi.lastUpdatedByEmailAddress glossaryItem
+
+                isItemForTag : Bool
+                isItemForTag =
+                    GlossaryItemForUi.isItemForTag glossaryItem
             in
             Html.div []
                 [ Html.nav
@@ -484,6 +501,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                             { enableMathSupport = enableMathSupport
                             , showSilcrow = False
                             , isPreferred = True
+                            , isItemForTag = isItemForTag
                             }
                             disambiguatedPreferredTerm
                             :: List.map
@@ -491,6 +509,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                                     { enableMathSupport = enableMathSupport
                                     , showSilcrow = False
                                     , isPreferred = False
+                                    , isItemForTag = isItemForTag
                                     }
                                 )
                                 alternativeTerms
@@ -519,6 +538,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                         { enableMathSupport = enableMathSupport
                         , showSilcrow = False
                         , isPreferred = True
+                        , isItemForTag = isItemForTag
                         }
                         disambiguatedPreferredTerm
                         :: List.map
@@ -526,6 +546,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                                 { enableMathSupport = enableMathSupport
                                 , showSilcrow = False
                                 , isPreferred = False
+                                , isItemForTag = isItemForTag
                                 }
                             )
                             alternativeTerms
@@ -593,15 +614,15 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
 
 
 viewGlossaryTerm :
-    { enableMathSupport : Bool, showSilcrow : Bool, isPreferred : Bool }
+    { enableMathSupport : Bool, showSilcrow : Bool, isPreferred : Bool, isItemForTag : Bool }
     -> Term
     -> Html msg
-viewGlossaryTerm { enableMathSupport, showSilcrow, isPreferred } term =
+viewGlossaryTerm { enableMathSupport, showSilcrow, isPreferred, isItemForTag } term =
     let
         viewTerm : Html msg
         viewTerm =
             if isPreferred then
-                Term.view enableMathSupport False [] term
+                Term.view enableMathSupport isItemForTag [] term
 
             else
                 span

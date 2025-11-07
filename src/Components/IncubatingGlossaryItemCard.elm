@@ -81,6 +81,10 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
         needsUpdating : Bool
         needsUpdating =
             GlossaryItemForUi.needsUpdating glossaryItem
+
+        isItemForTag : Bool
+        isItemForTag =
+            GlossaryItemForUi.isItemForTag glossaryItem
     in
     if editable then
         div
@@ -92,6 +96,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                     { enableMathSupport = enableMathSupport
                     , withLink = False
                     , isPreferred = True
+                    , isItemForTag = isItemForTag
                     , largeFont = True
                     }
                     disambiguatedPreferredTerm
@@ -100,6 +105,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                             { enableMathSupport = enableMathSupport
                             , withLink = False
                             , isPreferred = False
+                            , isItemForTag = isItemForTag
                             , largeFont = True
                             }
                         )
@@ -178,6 +184,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                         { enableMathSupport = enableMathSupport
                         , withLink = False
                         , isPreferred = True
+                        , isItemForTag = isItemForTag
                         , largeFont = True
                         }
                         disambiguatedPreferredTerm
@@ -186,6 +193,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                                 { enableMathSupport = enableMathSupport
                                 , withLink = False
                                 , isPreferred = False
+                                , isItemForTag = isItemForTag
                                 , largeFont = True
                                 }
                             )
@@ -247,10 +255,10 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
 
 
 viewGlossaryTerm :
-    { enableMathSupport : Bool, withLink : Bool, isPreferred : Bool, largeFont : Bool }
+    { enableMathSupport : Bool, withLink : Bool, isPreferred : Bool, isItemForTag : Bool, largeFont : Bool }
     -> Term
     -> Html msg
-viewGlossaryTerm { enableMathSupport, withLink, isPreferred, largeFont } term =
+viewGlossaryTerm { enableMathSupport, withLink, isPreferred, isItemForTag, largeFont } term =
     let
         viewTerm : Html msg
         viewTerm =
@@ -262,7 +270,7 @@ viewGlossaryTerm { enableMathSupport, withLink, isPreferred, largeFont } term =
                         ]
                         [ Term.view
                             enableMathSupport
-                            False
+                            isItemForTag
                             [ Extras.HtmlAttribute.showIf largeFont <| class "text-2xl/7 font-bold" ]
                             term
                         ]
@@ -270,7 +278,7 @@ viewGlossaryTerm { enableMathSupport, withLink, isPreferred, largeFont } term =
                 else
                     Term.view
                         enableMathSupport
-                        False
+                        isItemForTag
                         [ Extras.HtmlAttribute.showIf largeFont <| class "text-2xl/7 font-bold" ]
                         term
 
@@ -427,6 +435,10 @@ viewRelatedItem enableMathSupport glossaryItem =
         definition : Maybe Definition
         definition =
             GlossaryItemForUi.definition glossaryItem
+
+        isItemForTag : Bool
+        isItemForTag =
+            GlossaryItemForUi.isItemForTag glossaryItem
     in
     div
         [ class "w-[69ch] relative max-w-full flex flex-col justify-between overflow-x-clip bg-white dark:bg-black print:bg-white border dark:border-gray-700 print:border-none rounded-lg"
@@ -438,6 +450,7 @@ viewRelatedItem enableMathSupport glossaryItem =
                     { enableMathSupport = enableMathSupport
                     , withLink = True
                     , isPreferred = True
+                    , isItemForTag = isItemForTag
                     , largeFont = False
                     }
                     disambiguatedPreferredTerm
@@ -446,6 +459,7 @@ viewRelatedItem enableMathSupport glossaryItem =
                             { enableMathSupport = enableMathSupport
                             , withLink = False
                             , isPreferred = False
+                            , isItemForTag = isItemForTag
                             , largeFont = False
                             }
                         )
