@@ -1,7 +1,7 @@
 module Data.GlossaryItemsForUi exposing
     ( GlossaryItemsForUi
     , empty, fromList
-    , isEmpty, get, getWithRelatedTermsFilteredByTagId, relatedItems, startingItem, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
+    , isEmpty, get, getWithRelatedTermsFilteredByTagId, relatedItems, startingItem, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated, itemWhoseDisambiguatedPreferredTermMatchesTag
     , orderedAlphabetically, orderedByMostMentionedFirst, orderedFocusedOn
     )
 
@@ -20,7 +20,7 @@ module Data.GlossaryItemsForUi exposing
 
 # Query
 
-@docs isEmpty, get, getWithRelatedTermsFilteredByTagId, relatedItems, startingItem, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated
+@docs isEmpty, get, getWithRelatedTermsFilteredByTagId, relatedItems, startingItem, tags, describedTags, tagByIdList, tagIdFromTag, tagFromId, tagDescriptionFromId, disambiguatedPreferredTerm, disambiguatedPreferredTerms, itemOutlines, disambiguatedPreferredTermsByAlternativeTerm, itemIdFromRawDisambiguatedPreferredTerm, itemIdFromFragmentIdentifier, disambiguatedPreferredTermFromRaw, disambiguatedPreferredTermsWhichHaveDefinitions, relatedForWhichItems, preferredTermsOfItemsListingThisItemAsRelated, outlinesOfItemsListingThisItemAsRelated, itemWhoseDisambiguatedPreferredTermMatchesTag
 
 
 # Export
@@ -544,6 +544,72 @@ getWithRelatedTermsFilteredByTagId filterByTagId =
     get_ disambiguatedPreferredTerm filterByTagId
 
 
+{-| Get the item whose disambiguated preferred term matches the given tag, if such an item exists and has that tag. Returns `Nothing` if the tag doesn't exist, if no item's disambiguated preferred term matches the tag's raw string, or if the matching item doesn't have that tag.
+-}
+itemWhoseDisambiguatedPreferredTermMatchesTag : TagId -> GlossaryItemsForUi -> Maybe GlossaryItemForUi
+itemWhoseDisambiguatedPreferredTermMatchesTag tagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
+    let
+        tagById : TagIdDict Tag
+        tagById =
+            GlossaryTags.tagById items.tags
+
+        -- Get the tag's raw string
+        maybeTag : Maybe Tag
+        maybeTag =
+            TagIdDict.get tagId tagById
+
+        maybeTagRaw : Maybe String
+        maybeTagRaw =
+            maybeTag |> Maybe.map Tag.raw
+    in
+    maybeTagRaw
+        |> Maybe.andThen
+            (\tagRaw ->
+                -- Find an item whose disambiguated preferred term matches this tag
+                items.itemById
+                    |> GlossaryItemIdDict.toList
+                    |> List.filterMap
+                        (\( candidateId, _ ) ->
+                            disambiguatedPreferredTerm candidateId glossaryItemsForUi
+                                |> Maybe.andThen
+                                    (\disambiguatedTerm ->
+                                        let
+                                            termRaw : String
+                                            termRaw =
+                                                disambiguatedTerm
+                                                    |> DisambiguatedTerm.toTerm
+                                                    |> Term.raw
+                                                    |> RawTerm.toString
+                                        in
+                                        if termRaw == tagRaw then
+                                            -- Check if this item has this tag
+                                            let
+                                                hasTag : Bool
+                                                hasTag =
+                                                    (items.disambiguationTagIdByItemId
+                                                        |> GlossaryItemIdDict.get candidateId
+                                                        |> (==) (Just <| Just tagId)
+                                                    )
+                                                        || (items.normalTagIdsByItemId
+                                                                |> GlossaryItemIdDict.get candidateId
+                                                                |> Maybe.map (List.member tagId)
+                                                                |> Maybe.withDefault False
+                                                           )
+                                            in
+                                            if hasTag then
+                                                get candidateId glossaryItemsForUi
+
+                                            else
+                                                Nothing
+
+                                        else
+                                            Nothing
+                                    )
+                        )
+                    |> List.head
+            )
+
+
 itemsWhoseDisambiguatedPreferredTermMatchesATagTheyHave : Maybe TagId -> GlossaryItemsForUi -> List GlossaryItemForUi
 itemsWhoseDisambiguatedPreferredTermMatchesATagTheyHave filterByTagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
     let
@@ -552,58 +618,25 @@ itemsWhoseDisambiguatedPreferredTermMatchesATagTheyHave filterByTagId ((Glossary
             GlossaryTags.tagById items.tags
 
         -- Find items where their disambiguated preferred term matches one of their tags
+        -- by checking each tag using the existing function
         candidateItems : List ( GlossaryItemId, GlossaryItemForUi, TagId )
         candidateItems =
-            items.itemById
-                |> GlossaryItemIdDict.toList
+            tagById
+                |> TagIdDict.toList
                 |> List.filterMap
-                    (\( candidateId, _ ) ->
-                        disambiguatedPreferredTerm candidateId glossaryItemsForUi
+                    (\( tagId, _ ) ->
+                        itemWhoseDisambiguatedPreferredTermMatchesTag tagId glossaryItemsForUi
                             |> Maybe.andThen
-                                (\disambiguatedTerm ->
-                                    let
-                                        termRaw : String
-                                        termRaw =
-                                            disambiguatedTerm
-                                                |> DisambiguatedTerm.toTerm
-                                                |> Term.raw
-                                                |> RawTerm.toString
-                                    in
-                                    -- Find a tag that matches this term
-                                    tagById
-                                        |> TagIdDict.toList
-                                        |> List.filterMap
-                                            (\( tagId, tag ) ->
-                                                if Tag.raw tag == termRaw then
-                                                    -- Check if this item has this tag
-                                                    let
-                                                        hasTag : Bool
-                                                        hasTag =
-                                                            (items.disambiguationTagIdByItemId
-                                                                |> GlossaryItemIdDict.get candidateId
-                                                                |> (==) (Just <| Just tagId)
-                                                            )
-                                                                || (items.normalTagIdsByItemId
-                                                                        |> GlossaryItemIdDict.get candidateId
-                                                                        |> Maybe.map (List.member tagId)
-                                                                        |> Maybe.withDefault False
-                                                                   )
-                                                    in
-                                                    if hasTag then
-                                                        Just ( candidateId, tagId )
+                                (\item ->
+                                    -- Apply the filterByTagId if present
+                                    case filterByTagId of
+                                        Nothing ->
+                                            Just ( GlossaryItemForUi.id item, item, tagId )
 
-                                                    else
-                                                        Nothing
-
-                                                else
-                                                    Nothing
-                                            )
-                                        |> List.head
-                                )
-                            |> Maybe.andThen
-                                (\( candidateIdWithTag, matchingTagId ) ->
-                                    getWithRelatedTermsFilteredByTagId filterByTagId candidateIdWithTag glossaryItemsForUi
-                                        |> Maybe.map (\item -> ( candidateIdWithTag, item, matchingTagId ))
+                                        Just _ ->
+                                            -- Re-get the item with filtered related terms
+                                            getWithRelatedTermsFilteredByTagId filterByTagId (GlossaryItemForUi.id item) glossaryItemsForUi
+                                                |> Maybe.map (\filteredItem -> ( GlossaryItemForUi.id item, filteredItem, tagId ))
                                 )
                     )
 
@@ -671,8 +704,51 @@ relatedItems itemId filterByTagId ((GlossaryItemsForUi items) as glossaryItemsFo
         itemsWhoseDisambiguatedPreferredTermMatchesATagTheyHave filterByTagId glossaryItemsForUi
 
     else
-        relatedItemIds
-            |> List.filterMap (\relatedItemId -> getWithRelatedTermsFilteredByTagId filterByTagId relatedItemId glossaryItemsForUi)
+        let
+            explicitlyRelatedItems : List GlossaryItemForUi
+            explicitlyRelatedItems =
+                relatedItemIds
+                    |> List.filterMap (\relatedItemId -> getWithRelatedTermsFilteredByTagId filterByTagId relatedItemId glossaryItemsForUi)
+
+            itemForTagBeingFilteredBy : Maybe GlossaryItemForUi
+            itemForTagBeingFilteredBy =
+                if isStartingItem then
+                    Nothing
+
+                else
+                    filterByTagId
+                        |> Maybe.andThen
+                            (\tagId ->
+                                itemWhoseDisambiguatedPreferredTermMatchesTag tagId glossaryItemsForUi
+                            )
+                        |> Maybe.andThen
+                            (\itemForTag ->
+                                if GlossaryItemForUi.id itemForTag == itemId then
+                                    Nothing
+
+                                else
+                                    Just itemForTag
+                            )
+        in
+        explicitlyRelatedItems
+            ++ ([ itemForTagBeingFilteredBy
+                    |> Maybe.andThen
+                        (\item ->
+                            if
+                                List.any
+                                    (\explicitlyRelatedItem ->
+                                        GlossaryItemForUi.id explicitlyRelatedItem == GlossaryItemForUi.id item
+                                    )
+                                    explicitlyRelatedItems
+                            then
+                                Nothing
+
+                            else
+                                Just item
+                        )
+                ]
+                    |> List.filterMap identity
+               )
 
 
 outline : GlossaryItemId -> GlossaryItemsForUi -> Maybe GlossaryItemOutline

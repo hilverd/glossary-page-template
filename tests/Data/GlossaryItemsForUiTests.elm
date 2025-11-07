@@ -793,4 +793,197 @@ suite =
                                 |> List.map GlossaryItemForUi.id
                         )
                     |> Expect.equal (Ok [])
+        , describe "itemWhoseDisambiguatedPreferredTermMatchesTag"
+            [ test "finds item whose disambiguated preferred term matches tag (normal tag)" <|
+                \_ ->
+                    let
+                        financeItem_ : GlossaryItemForUi
+                        financeItem_ =
+                            GlossaryItemForUi.create
+                                (GlossaryItemId.create "Finance")
+                                (Term.fromMarkdown "Finance" False)
+                                []
+                                Nothing
+                                [ financeTag ]
+                                (Just <| Definition.fromMarkdown "About finance")
+                                []
+                                False
+                                (Just "2023-10-30T08:25:30.335Z")
+                                Nothing
+                                Nothing
+
+                        glossaryItems_ : Result String GlossaryItemsForUi
+                        glossaryItems_ =
+                            GlossaryItemsForUi.fromList
+                                [ financeDescribedTag ]
+                                Nothing
+                                [ financeItem_ ]
+                    in
+                    glossaryItems_
+                        |> Result.toMaybe
+                        |> Maybe.andThen
+                            (\items ->
+                                GlossaryItemsForUi.itemWhoseDisambiguatedPreferredTermMatchesTag financeTagId items
+                            )
+                        |> Maybe.map GlossaryItemForUi.id
+                        |> Expect.equal (Just <| GlossaryItemId.create "Finance")
+            , test "finds item whose disambiguated preferred term matches tag (disambiguation tag)" <|
+                \_ ->
+                    let
+                        -- When an item has "Finance" as both its preferred term and disambiguation tag,
+                        -- the disambiguated preferred term becomes "Finance (Finance)"
+                        financeItem_ : GlossaryItemForUi
+                        financeItem_ =
+                            GlossaryItemForUi.create
+                                (GlossaryItemId.create "Finance")
+                                (Term.fromMarkdown "Finance" False)
+                                []
+                                (Just financeTag)
+                                []
+                                (Just <| Definition.fromMarkdown "About finance")
+                                []
+                                False
+                                (Just "2023-10-30T08:25:30.335Z")
+                                Nothing
+                                Nothing
+
+                        glossaryItems_ : Result String GlossaryItemsForUi
+                        glossaryItems_ =
+                            GlossaryItemsForUi.fromList
+                                [ financeDescribedTag ]
+                                Nothing
+                                [ financeItem_ ]
+                    in
+                    glossaryItems_
+                        |> Result.toMaybe
+                        |> Maybe.andThen
+                            (\items ->
+                                -- This should NOT find the item because the disambiguated term
+                                -- is "Finance (Finance)", not "Finance"
+                                GlossaryItemsForUi.itemWhoseDisambiguatedPreferredTermMatchesTag financeTagId items
+                            )
+                        |> Expect.equal Nothing
+            , test "returns Nothing when tag doesn't exist" <|
+                \_ ->
+                    glossaryItemsForUi
+                        |> GlossaryItemsForUi.itemWhoseDisambiguatedPreferredTermMatchesTag (TagId.create "nonexistent")
+                        |> Expect.equal Nothing
+            , test "returns Nothing when no item matches tag" <|
+                \_ ->
+                    let
+                        -- Create an item that doesn't match the gardening tag
+                        financeItem_ : GlossaryItemForUi
+                        financeItem_ =
+                            GlossaryItemForUi.create
+                                (GlossaryItemId.create "Finance")
+                                (Term.fromMarkdown "Finance" False)
+                                []
+                                Nothing
+                                [ financeTag ]
+                                (Just <| Definition.fromMarkdown "About finance")
+                                []
+                                False
+                                (Just "2023-10-30T08:25:30.335Z")
+                                Nothing
+                                Nothing
+
+                        glossaryItems_ : Result String GlossaryItemsForUi
+                        glossaryItems_ =
+                            GlossaryItemsForUi.fromList
+                                [ financeDescribedTag
+                                , gardeningDescribedTag
+                                ]
+                                Nothing
+                                [ financeItem_ ]
+                    in
+                    glossaryItems_
+                        |> Result.toMaybe
+                        |> Maybe.andThen
+                            (\items ->
+                                GlossaryItemsForUi.itemWhoseDisambiguatedPreferredTermMatchesTag gardeningTagId items
+                            )
+                        |> Expect.equal Nothing
+            , test "returns Nothing when item term matches tag but item doesn't have that tag" <|
+                \_ ->
+                    let
+                        -- Create an item with term "Finance" but without the finance tag
+                        financeItem_ : GlossaryItemForUi
+                        financeItem_ =
+                            GlossaryItemForUi.create
+                                (GlossaryItemId.create "Finance")
+                                (Term.fromMarkdown "Finance" False)
+                                []
+                                Nothing
+                                []
+                                (Just <| Definition.fromMarkdown "About finance")
+                                []
+                                False
+                                (Just "2023-10-30T08:25:30.335Z")
+                                Nothing
+                                Nothing
+
+                        glossaryItems_ : Result String GlossaryItemsForUi
+                        glossaryItems_ =
+                            GlossaryItemsForUi.fromList
+                                [ financeDescribedTag ]
+                                Nothing
+                                [ financeItem_ ]
+                    in
+                    glossaryItems_
+                        |> Result.toMaybe
+                        |> Maybe.andThen
+                            (\items ->
+                                GlossaryItemsForUi.itemWhoseDisambiguatedPreferredTermMatchesTag financeTagId items
+                            )
+                        |> Expect.equal Nothing
+            , test "returns first matching item when multiple items match" <|
+                \_ ->
+                    let
+                        financeItem1 : GlossaryItemForUi
+                        financeItem1 =
+                            GlossaryItemForUi.create
+                                (GlossaryItemId.create "Finance1")
+                                (Term.fromMarkdown "Finance" False)
+                                []
+                                Nothing
+                                [ financeTag ]
+                                (Just <| Definition.fromMarkdown "About finance 1")
+                                []
+                                False
+                                (Just "2023-10-30T08:25:30.335Z")
+                                Nothing
+                                Nothing
+
+                        financeItem2 : GlossaryItemForUi
+                        financeItem2 =
+                            GlossaryItemForUi.create
+                                (GlossaryItemId.create "Finance2")
+                                (Term.fromMarkdown "Finance" False)
+                                []
+                                (Just financeTag)
+                                []
+                                (Just <| Definition.fromMarkdown "About finance 2")
+                                []
+                                False
+                                (Just "2023-10-30T08:25:30.335Z")
+                                Nothing
+                                Nothing
+
+                        glossaryItems_ : Result String GlossaryItemsForUi
+                        glossaryItems_ =
+                            GlossaryItemsForUi.fromList
+                                [ financeDescribedTag ]
+                                Nothing
+                                [ financeItem1, financeItem2 ]
+                    in
+                    glossaryItems_
+                        |> Result.toMaybe
+                        |> Maybe.andThen
+                            (\items ->
+                                GlossaryItemsForUi.itemWhoseDisambiguatedPreferredTermMatchesTag financeTagId items
+                            )
+                        |> Maybe.map GlossaryItemForUi.id
+                        |> Maybe.map (\id -> List.member id [ GlossaryItemId.create "Finance1", GlossaryItemId.create "Finance2" ])
+                        |> Expect.equal (Just True)
+            ]
         ]
