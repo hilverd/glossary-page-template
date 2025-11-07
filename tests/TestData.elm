@@ -1,4 +1,4 @@
-module TestData exposing (computerScienceDescribedTag, computerScienceDescribedTagFromDom, computerScienceRawTag, computerScienceTag, computerScienceTagId, computerScienceTagRawDescription, defaultComputerScienceDefinition, defaultComputerScienceItem, defaultComputerScienceItemFromDom, defaultFinanceDefinition, defaultFinanceItem, defaultFinanceItemFromDom, financeDescribedTag, financeDescribedTagFromDom, financeRawTag, financeTag, financeTagDescription, financeTagId, financeTagRawDescription, gardeningDescribedTag, gardeningDescribedTagFromDom, gardeningTag, gardeningTagDescription, gardeningTagId, glossaryForUi, glossaryFromDom, glossaryItemsForUi, houseworkRawTag, houseworkTag, houseworkTagDescription, houseworkTagRawDescription, houseworkTagRawId, informationRetrievalItem, informationRetrievalItemFromDom, interestRateItem, interestRateItemFromDom, loanItem, loanItemFromDom, spadeItem, spadeItemFromDom)
+module TestData exposing (computerScienceDescribedTag, computerScienceDescribedTagFromDom, computerScienceRawTag, computerScienceTag, computerScienceTagId, computerScienceTagRawDescription, defaultComputerScienceDefinition, defaultComputerScienceItem, defaultComputerScienceItemFromDom, defaultFinanceDefinition, defaultFinanceItem, defaultFinanceItemFromDom, financeDescribedTag, financeDescribedTagFromDom, financeItemForTag, financeItemWithDisambiguationTag, financeRawTag, financeTag, financeTagDescription, financeTagId, financeTagRawDescription, gardeningDescribedTag, gardeningDescribedTagFromDom, gardeningTag, gardeningTagDescription, gardeningTagId, glossaryForUi, glossaryFromDom, glossaryItemsForUi, houseworkRawTag, houseworkTag, houseworkTagDescription, houseworkTagRawDescription, houseworkTagRawId, informationRetrievalItem, informationRetrievalItemFromDom, interestRateItem, interestRateItemFromDom, itemWithNoTags, loanItem, loanItemFromDom, spadeItem, spadeItemFromDom)
 
 import Data.AboutParagraph as AboutParagraph
 import Data.CardWidth as CardWidth
@@ -498,3 +498,60 @@ glossaryForUi =
 glossaryItemsForUi : GlossaryItemsForUi
 glossaryItemsForUi =
     GlossaryForUi.items glossaryForUi
+
+
+{-| An item where the disambiguated preferred term matches a normal tag.
+For example, preferred term is "Finance" and it has a normal tag "Finance".
+-}
+financeItemForTag : GlossaryItemForUi
+financeItemForTag =
+    GlossaryItemForUi.create
+        (GlossaryItemId.create "Finance")
+        (Term.fromMarkdown "Finance" False)
+        []
+        Nothing
+        [ financeTag ]
+        (Just <| Definition.fromMarkdown "The management of money and other assets.")
+        []
+        False
+        (Just "2023-10-30T08:25:30.335Z")
+        Nothing
+        Nothing
+
+
+{-| An item where the disambiguated preferred term matches the disambiguation tag.
+For example, preferred term is "Finance" and it has a disambiguation tag "Finance",
+making the disambiguated preferred term "Finance (Finance)".
+-}
+financeItemWithDisambiguationTag : GlossaryItemForUi
+financeItemWithDisambiguationTag =
+    GlossaryItemForUi.create
+        (GlossaryItemId.create "Finance (Finance)")
+        (Term.fromMarkdown "Finance" False)
+        []
+        (Just financeTag)
+        []
+        (Just <| Definition.fromMarkdown "The management of money and other assets.")
+        []
+        False
+        (Just "2023-10-30T08:25:30.335Z")
+        Nothing
+        Nothing
+
+
+{-| An item with no tags at all.
+-}
+itemWithNoTags : GlossaryItemForUi
+itemWithNoTags =
+    GlossaryItemForUi.create
+        (GlossaryItemId.create "Example")
+        (Term.fromMarkdown "Example" False)
+        []
+        Nothing
+        []
+        (Just <| Definition.fromMarkdown "An example item.")
+        []
+        False
+        Nothing
+        Nothing
+        Nothing

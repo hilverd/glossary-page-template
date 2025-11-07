@@ -22,4 +22,26 @@ suite =
                     |> Codec.encodeToString 2 GlossaryItemForUi.codec
                     |> Codec.decodeString GlossaryItemForUi.codec
                     |> Expect.equal (Ok TestData.defaultComputerScienceItem)
+        , describe "isItemForTag"
+            [ test "returns True when disambiguated preferred term matches a normal tag" <|
+                \_ ->
+                    TestData.financeItemForTag
+                        |> GlossaryItemForUi.isItemForTag
+                        |> Expect.equal True
+            , test "returns False when item has disambiguation tag (disambiguated term won't match)" <|
+                \_ ->
+                    TestData.financeItemWithDisambiguationTag
+                        |> GlossaryItemForUi.isItemForTag
+                        |> Expect.equal False
+            , test "returns False when disambiguated preferred term does not match any tag" <|
+                \_ ->
+                    TestData.defaultComputerScienceItem
+                        |> GlossaryItemForUi.isItemForTag
+                        |> Expect.equal False
+            , test "returns False when item has no tags" <|
+                \_ ->
+                    TestData.itemWithNoTags
+                        |> GlossaryItemForUi.isItemForTag
+                        |> Expect.equal False
+            ]
         ]

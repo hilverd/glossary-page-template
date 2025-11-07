@@ -1,7 +1,7 @@
 module Data.GlossaryItemForUi exposing
     ( GlossaryItemForUi
     , create, codec, fromGlossaryItemFromDom
-    , disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
+    , disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, isItemForTag, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
     , toGlossaryItemFromDom
     , disambiguatedTerm
     )
@@ -21,7 +21,7 @@ module Data.GlossaryItemForUi exposing
 
 # Query
 
-@docs disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
+@docs disambiguatedPreferredTerm, id, nonDisambiguatedPreferredTerm, alternativeTerms, allTerms, disambiguationTag, normalTags, allTags, isItemForTag, definition, relatedPreferredTerms, needsUpdating, lastUpdatedDateAsIso8601, lastUpdatedByName, lastUpdatedByEmailAddress
 
 
 # Exporting
@@ -38,6 +38,7 @@ module Data.GlossaryItemForUi exposing
 import Codec exposing (Codec)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
+import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
 import Data.GlossaryItem.Term as Term exposing (Term)
 import Data.GlossaryItemFromDom exposing (GlossaryItemFromDom)
@@ -219,6 +220,32 @@ allTags (GlossaryItemForUi item) =
     item.disambiguationTag
         |> Maybe.map (\disambiguationTag_ -> disambiguationTag_ :: item.normalTags)
         |> Maybe.withDefault item.normalTags
+
+
+{-| Whether the disambiguated preferred term of this glossary item matches one of its tags.
+-}
+isItemForTag : GlossaryItemForUi -> Bool
+isItemForTag (GlossaryItemForUi item) =
+    let
+        disambiguatedPreferredTermString : String
+        disambiguatedPreferredTermString =
+            item.disambiguationTag
+                |> Maybe.map
+                    (\disambiguationTag_ ->
+                        disambiguatedTerm disambiguationTag_ item.preferredTerm
+                    )
+                |> Maybe.withDefault (DisambiguatedTerm.fromTerm item.preferredTerm)
+                |> DisambiguatedTerm.toTerm
+                |> Term.raw
+                |> RawTerm.toString
+
+        allTagStrings : List String
+        allTagStrings =
+            item.disambiguationTag
+                |> Maybe.map (\disambiguationTag_ -> Tag.raw disambiguationTag_ :: List.map Tag.raw item.normalTags)
+                |> Maybe.withDefault (List.map Tag.raw item.normalTags)
+    in
+    List.member disambiguatedPreferredTermString allTagStrings
 
 
 {-| The definition for this glossary item.
