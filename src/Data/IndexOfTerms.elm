@@ -11,6 +11,7 @@ module Data.IndexOfTerms exposing (Entry(..), TermGroup, IndexOfTerms, fromGloss
 
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItemForUi as GlossaryItemForUi
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.TagId exposing (TagId)
@@ -22,8 +23,8 @@ Alternative terms may be associated with multiple items, so they do not link any
 Instead, each alternative term is followed by the list of all preferred terms for items that the alternative term appears in.
 -}
 type Entry
-    = PreferredTerm GlossaryItemId DisambiguatedTerm
-    | AlternativeTerm Term (List ( GlossaryItemId, DisambiguatedTerm ))
+    = PreferredTerm GlossaryItemId DisambiguatedTerm Bool
+    | AlternativeTerm Term (List ( GlossaryItemId, DisambiguatedTerm, Bool ))
 
 
 {-| A group of terms, where `label` is the first character of each item in `terms`.
@@ -56,6 +57,12 @@ fromGlossaryItems filterByTagId glossaryItemsForUi =
                 preferredTermsByAlternativeTerm =
                     GlossaryItemsForUi.disambiguatedPreferredTermsByAlternativeTerm filterByTagId glossaryItemsForUi
 
+                isItemForTag : GlossaryItemId -> Bool
+                isItemForTag itemId =
+                    GlossaryItemsForUi.get itemId glossaryItemsForUi
+                        |> Maybe.map GlossaryItemForUi.isItemForTag
+                        |> Maybe.withDefault False
+
                 resultAfterAddingPreferredTerms : Dict String (List Entry)
                 resultAfterAddingPreferredTerms =
                     disambiguatedPreferredTerms
@@ -65,8 +72,8 @@ fromGlossaryItems filterByTagId glossaryItemsForUi =
                                     (preferredTerm |> DisambiguatedTerm.toTerm |> Term.indexGroupString)
                                     (\termList ->
                                         termList
-                                            |> Maybe.map (\terms -> PreferredTerm itemId preferredTerm :: terms)
-                                            |> Maybe.withDefault [ PreferredTerm itemId preferredTerm ]
+                                            |> Maybe.map (\terms -> PreferredTerm itemId preferredTerm (isItemForTag itemId) :: terms)
+                                            |> Maybe.withDefault [ PreferredTerm itemId preferredTerm (isItemForTag itemId) ]
                                             |> Just
                                     )
                                     result
@@ -77,11 +84,12 @@ fromGlossaryItems filterByTagId glossaryItemsForUi =
                 |> List.foldl
                     (\( alternativeTerm, preferredTerms_ ) result ->
                         let
-                            sortedPreferredTerms : List ( GlossaryItemId, DisambiguatedTerm )
+                            sortedPreferredTerms : List ( GlossaryItemId, DisambiguatedTerm, Bool )
                             sortedPreferredTerms =
                                 preferredTerms_
+                                    |> List.map (\( itemId, term ) -> ( itemId, term, isItemForTag itemId ))
                                     |> List.sortWith
-                                        (\( _, t1 ) ( _, t2 ) -> DisambiguatedTerm.compareAlphabetically t1 t2)
+                                        (\( _, t1, _ ) ( _, t2, _ ) -> DisambiguatedTerm.compareAlphabetically t1 t2)
 
                             entry : Entry
                             entry =
@@ -126,7 +134,7 @@ fromGlossaryItems filterByTagId glossaryItemsForUi =
         termForEntry : Entry -> Term
         termForEntry entry =
             case entry of
-                PreferredTerm _ term ->
+                PreferredTerm _ term _ ->
                     DisambiguatedTerm.toTerm term
 
                 AlternativeTerm term _ ->
@@ -180,7 +188,7 @@ filterByString filterString (IndexOfTerms index) =
                         |> List.filter
                             (\entry ->
                                 case entry of
-                                    PreferredTerm _ disambiguatedTerm ->
+                                    PreferredTerm _ disambiguatedTerm _ ->
                                         disambiguatedTerm
                                             |> DisambiguatedTerm.toTerm
                                             |> Term.inlineText

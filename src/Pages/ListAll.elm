@@ -1814,7 +1814,7 @@ viewSwitchBackToOldLayout =
 viewTermIndexItem : Bool -> IndexOfTerms.Entry -> List (Html Msg)
 viewTermIndexItem enableMathSupport entry =
     case entry of
-        IndexOfTerms.PreferredTerm itemId disambiguatedTerm ->
+        IndexOfTerms.PreferredTerm itemId disambiguatedTerm _ ->
             let
                 term : Term
                 term =
@@ -1835,7 +1835,7 @@ viewTermIndexItem enableMathSupport entry =
             let
                 preferredTerms : List ( GlossaryItemId, Term )
                 preferredTerms =
-                    List.map (Tuple.mapSecond DisambiguatedTerm.toTerm) disambiguatedPreferredTerms
+                    List.map (\( id_, term_, _ ) -> ( id_, DisambiguatedTerm.toTerm term_ )) disambiguatedPreferredTerms
             in
             li
                 [ Html.Attributes.attribute "style" "margin-top: 1rem" ]
