@@ -544,6 +544,111 @@ getWithRelatedTermsFilteredByTagId filterByTagId =
     get_ disambiguatedPreferredTerm filterByTagId
 
 
+itemsWhoseDisambiguatedPreferredTermMatchesATagTheyHave : Maybe TagId -> GlossaryItemsForUi -> List GlossaryItemForUi
+itemsWhoseDisambiguatedPreferredTermMatchesATagTheyHave filterByTagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
+    let
+        tagById : TagIdDict Tag
+        tagById =
+            GlossaryTags.tagById items.tags
+
+        -- Find items where their disambiguated preferred term matches one of their tags
+        candidateItems : List ( GlossaryItemId, GlossaryItemForUi, TagId )
+        candidateItems =
+            items.itemById
+                |> GlossaryItemIdDict.toList
+                |> List.filterMap
+                    (\( candidateId, _ ) ->
+                        disambiguatedPreferredTerm candidateId glossaryItemsForUi
+                            |> Maybe.andThen
+                                (\disambiguatedTerm ->
+                                    let
+                                        termRaw : String
+                                        termRaw =
+                                            disambiguatedTerm
+                                                |> DisambiguatedTerm.toTerm
+                                                |> Term.raw
+                                                |> RawTerm.toString
+                                    in
+                                    -- Find a tag that matches this term
+                                    tagById
+                                        |> TagIdDict.toList
+                                        |> List.filterMap
+                                            (\( tagId, tag ) ->
+                                                if Tag.raw tag == termRaw then
+                                                    -- Check if this item has this tag
+                                                    let
+                                                        hasTag : Bool
+                                                        hasTag =
+                                                            (items.disambiguationTagIdByItemId
+                                                                |> GlossaryItemIdDict.get candidateId
+                                                                |> (==) (Just <| Just tagId)
+                                                            )
+                                                                || (items.normalTagIdsByItemId
+                                                                        |> GlossaryItemIdDict.get candidateId
+                                                                        |> Maybe.map (List.member tagId)
+                                                                        |> Maybe.withDefault False
+                                                                   )
+                                                    in
+                                                    if hasTag then
+                                                        Just ( candidateId, tagId )
+
+                                                    else
+                                                        Nothing
+
+                                                else
+                                                    Nothing
+                                            )
+                                        |> List.head
+                                )
+                            |> Maybe.andThen
+                                (\( candidateIdWithTag, matchingTagId ) ->
+                                    getWithRelatedTermsFilteredByTagId filterByTagId candidateIdWithTag glossaryItemsForUi
+                                        |> Maybe.map (\item -> ( candidateIdWithTag, item, matchingTagId ))
+                                )
+                    )
+
+        -- Count how many items have each tag
+        itemCountByTagId : TagIdDict Int
+        itemCountByTagId =
+            items.itemIdsByTagId
+                |> TagIdDict.foldl
+                    (\tagId itemIds acc ->
+                        TagIdDict.insert tagId (List.length itemIds) acc
+                    )
+                    TagIdDict.empty
+
+        -- Sort by tag popularity (most popular first)
+        sortedCandidates : List GlossaryItemForUi
+        sortedCandidates =
+            candidateItems
+                |> List.sortWith
+                    (\( _, _, tagId1 ) ( _, _, tagId2 ) ->
+                        let
+                            count1 : Int
+                            count1 =
+                                TagIdDict.get tagId1 itemCountByTagId
+                                    |> Maybe.withDefault 0
+
+                            count2 : Int
+                            count2 =
+                                TagIdDict.get tagId2 itemCountByTagId
+                                    |> Maybe.withDefault 0
+                        in
+                        case compare count1 count2 of
+                            LT ->
+                                GT
+
+                            EQ ->
+                                EQ
+
+                            GT ->
+                                LT
+                    )
+                |> List.map (\( _, item, _ ) -> item)
+    in
+    sortedCandidates
+
+
 {-| Get the items that are related to the given item.
 -}
 relatedItems : GlossaryItemId -> Maybe TagId -> GlossaryItemsForUi -> List GlossaryItemForUi
@@ -563,108 +668,7 @@ relatedItems itemId filterByTagId ((GlossaryItemsForUi items) as glossaryItemsFo
             List.isEmpty relatedItemIds
     in
     if isStartingItem && hasNoRelatedItems then
-        -- Fallback: return items whose disambiguated preferred term matches a tag they have
-        let
-            tagById : TagIdDict Tag
-            tagById =
-                GlossaryTags.tagById items.tags
-
-            -- Find items where their disambiguated preferred term matches one of their tags
-            candidateItems : List ( GlossaryItemId, GlossaryItemForUi, TagId )
-            candidateItems =
-                items.itemById
-                    |> GlossaryItemIdDict.toList
-                    |> List.filterMap
-                        (\( candidateId, _ ) ->
-                            disambiguatedPreferredTerm candidateId glossaryItemsForUi
-                                |> Maybe.andThen
-                                    (\disambiguatedTerm ->
-                                        let
-                                            termRaw : String
-                                            termRaw =
-                                                disambiguatedTerm
-                                                    |> DisambiguatedTerm.toTerm
-                                                    |> Term.raw
-                                                    |> RawTerm.toString
-                                        in
-                                        -- Find a tag that matches this term
-                                        tagById
-                                            |> TagIdDict.toList
-                                            |> List.filterMap
-                                                (\( tagId, tag ) ->
-                                                    if Tag.raw tag == termRaw then
-                                                        -- Check if this item has this tag
-                                                        let
-                                                            hasTag : Bool
-                                                            hasTag =
-                                                                (items.disambiguationTagIdByItemId
-                                                                    |> GlossaryItemIdDict.get candidateId
-                                                                    |> (==) (Just <| Just tagId)
-                                                                )
-                                                                    || (items.normalTagIdsByItemId
-                                                                            |> GlossaryItemIdDict.get candidateId
-                                                                            |> Maybe.map (List.member tagId)
-                                                                            |> Maybe.withDefault False
-                                                                       )
-                                                        in
-                                                        if hasTag then
-                                                            Just ( candidateId, tagId )
-
-                                                        else
-                                                            Nothing
-
-                                                    else
-                                                        Nothing
-                                                )
-                                            |> List.head
-                                    )
-                                |> Maybe.andThen
-                                    (\( candidateIdWithTag, matchingTagId ) ->
-                                        getWithRelatedTermsFilteredByTagId filterByTagId candidateIdWithTag glossaryItemsForUi
-                                            |> Maybe.map (\item -> ( candidateIdWithTag, item, matchingTagId ))
-                                    )
-                        )
-
-            -- Count how many items have each tag
-            itemCountByTagId : TagIdDict Int
-            itemCountByTagId =
-                items.itemIdsByTagId
-                    |> TagIdDict.foldl
-                        (\tagId itemIds acc ->
-                            TagIdDict.insert tagId (List.length itemIds) acc
-                        )
-                        TagIdDict.empty
-
-            -- Sort by tag popularity (most popular first)
-            sortedCandidates : List GlossaryItemForUi
-            sortedCandidates =
-                candidateItems
-                    |> List.sortWith
-                        (\( _, _, tagId1 ) ( _, _, tagId2 ) ->
-                            let
-                                count1 : Int
-                                count1 =
-                                    TagIdDict.get tagId1 itemCountByTagId
-                                        |> Maybe.withDefault 0
-
-                                count2 : Int
-                                count2 =
-                                    TagIdDict.get tagId2 itemCountByTagId
-                                        |> Maybe.withDefault 0
-                            in
-                            case compare count1 count2 of
-                                LT ->
-                                    GT
-
-                                EQ ->
-                                    EQ
-
-                                GT ->
-                                    LT
-                        )
-                    |> List.map (\( _, item, _ ) -> item)
-        in
-        sortedCandidates
+        itemsWhoseDisambiguatedPreferredTermMatchesATagTheyHave filterByTagId glossaryItemsForUi
 
     else
         relatedItemIds
