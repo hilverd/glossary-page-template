@@ -166,7 +166,7 @@ type TagIconAppearance
                 ]
             ]
 
-    fromMarkdown "The _ideal_ case" NoTagIcon |> view False False []
+    fromMarkdown "The _ideal_ case" False |> view False NoTagIcon []
     --> expected
 
 -}
