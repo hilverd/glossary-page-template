@@ -23,7 +23,7 @@ import Data.GlossaryForUi as Glossary
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
-import Data.GlossaryItem.Term as Term
+import Data.GlossaryItem.Term as Term exposing (TagIconAppearance(..))
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
@@ -1908,7 +1908,7 @@ viewAddSuggestedSeeAlso enableMathSupport suggestedRelatedTerms =
                                 ]
                                 [ Icons.plus
                                     [ Svg.Attributes.class "shrink-0 -ml-1 mr-2 h-4 w-4" ]
-                                , Term.view enableMathSupport False [ class "truncate" ] (DisambiguatedTerm.toTerm suggestedRelatedTerm)
+                                , Term.view enableMathSupport NoTagIcon [ class "truncate" ] (DisambiguatedTerm.toTerm suggestedRelatedTerm)
                                 ]
                         )
                 )

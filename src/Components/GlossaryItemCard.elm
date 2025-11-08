@@ -6,7 +6,7 @@ import Components.Button
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
-import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItem.Term as Term exposing (TagIconAppearance(..), Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi, isItemForTag)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
@@ -85,6 +85,14 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                 isItemForTag : Bool
                 isItemForTag =
                     GlossaryItemForUi.isItemForTag glossaryItem
+
+                tagIconAppearance : TagIconAppearance
+                tagIconAppearance =
+                    if isItemForTag then
+                        NormalTagIcon
+
+                    else
+                        NoTagIcon
             in
             case style of
                 Preview ->
@@ -96,7 +104,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                             { enableMathSupport = enableMathSupport
                             , showSilcrow = False
                             , isPreferred = True
-                            , isItemForTag = isItemForTag
+                            , tagIconAppearance = tagIconAppearance
                             }
                             disambiguatedPreferredTerm
                             :: List.map
@@ -104,7 +112,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                                     { enableMathSupport = enableMathSupport
                                     , showSilcrow = False
                                     , isPreferred = False
-                                    , isItemForTag = isItemForTag
+                                    , tagIconAppearance = tagIconAppearance
                                     }
                                 )
                                 alternativeTerms
@@ -213,7 +221,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                                             { enableMathSupport = enableMathSupport
                                             , showSilcrow = True
                                             , isPreferred = True
-                                            , isItemForTag = isItemForTag
+                                            , tagIconAppearance = tagIconAppearance
                                             }
                                             disambiguatedPreferredTerm
                                             :: List.map
@@ -221,7 +229,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                                                     { enableMathSupport = enableMathSupport
                                                     , showSilcrow = False
                                                     , isPreferred = False
-                                                    , isItemForTag = isItemForTag
+                                                    , tagIconAppearance = tagIconAppearance
                                                     }
                                                 )
                                                 alternativeTerms
@@ -316,7 +324,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                                             { enableMathSupport = enableMathSupport
                                             , showSilcrow = True
                                             , isPreferred = True
-                                            , isItemForTag = isItemForTag
+                                            , tagIconAppearance = tagIconAppearance
                                             }
                                             disambiguatedPreferredTerm
                                             :: List.map
@@ -324,7 +332,7 @@ view { enableMathSupport, enableLastUpdatedDates } style tagBeingFilteredBy item
                                                     { enableMathSupport = enableMathSupport
                                                     , showSilcrow = False
                                                     , isPreferred = False
-                                                    , isItemForTag = isItemForTag
+                                                    , tagIconAppearance = tagIconAppearance
                                                     }
                                                 )
                                                 alternativeTerms
@@ -411,18 +419,25 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                 isItemForTag : Bool
                 isItemForTag =
                     GlossaryItemForUi.isItemForTag glossaryItem
+
+                tagIconAppearance =
+                    if isItemForTag then
+                        NormalTagIcon
+
+                    else
+                        NoTagIcon
             in
             if Term.isAbbreviation preferredTerm then
                 Html.abbr []
                     [ Term.view enableMathSupport
-                        isItemForTag
+                        tagIconAppearance
                         [ class "text-sm" ]
                         preferredTerm
                     ]
 
             else
                 Term.view enableMathSupport
-                    isItemForTag
+                    tagIconAppearance
                     [ class "text-sm" ]
                     preferredTerm
     in
@@ -472,6 +487,14 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                 isItemForTag : Bool
                 isItemForTag =
                     GlossaryItemForUi.isItemForTag glossaryItem
+
+                tagIconAppearance : TagIconAppearance
+                tagIconAppearance =
+                    if isItemForTag then
+                        NormalTagIcon
+
+                    else
+                        NoTagIcon
             in
             Html.div []
                 [ Html.nav
@@ -501,7 +524,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                             { enableMathSupport = enableMathSupport
                             , showSilcrow = False
                             , isPreferred = True
-                            , isItemForTag = isItemForTag
+                            , tagIconAppearance = tagIconAppearance
                             }
                             disambiguatedPreferredTerm
                             :: List.map
@@ -509,7 +532,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                                     { enableMathSupport = enableMathSupport
                                     , showSilcrow = False
                                     , isPreferred = False
-                                    , isItemForTag = isItemForTag
+                                    , tagIconAppearance = tagIconAppearance
                                     }
                                 )
                                 alternativeTerms
@@ -538,7 +561,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                         { enableMathSupport = enableMathSupport
                         , showSilcrow = False
                         , isPreferred = True
-                        , isItemForTag = isItemForTag
+                        , tagIconAppearance = tagIconAppearance
                         }
                         disambiguatedPreferredTerm
                         :: List.map
@@ -546,7 +569,7 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
                                 { enableMathSupport = enableMathSupport
                                 , showSilcrow = False
                                 , isPreferred = False
-                                , isItemForTag = isItemForTag
+                                , tagIconAppearance = tagIconAppearance
                                 }
                             )
                             alternativeTerms
@@ -614,15 +637,19 @@ viewAsSingle { enableMathSupport, enableLastUpdatedDates, onClickItem, onClickCo
 
 
 viewGlossaryTerm :
-    { enableMathSupport : Bool, showSilcrow : Bool, isPreferred : Bool, isItemForTag : Bool }
+    { enableMathSupport : Bool
+    , showSilcrow : Bool
+    , isPreferred : Bool
+    , tagIconAppearance : TagIconAppearance
+    }
     -> Term
     -> Html msg
-viewGlossaryTerm { enableMathSupport, showSilcrow, isPreferred, isItemForTag } term =
+viewGlossaryTerm { enableMathSupport, showSilcrow, isPreferred, tagIconAppearance } term =
     let
         viewTerm : Html msg
         viewTerm =
             if isPreferred then
-                Term.view enableMathSupport isItemForTag [] term
+                Term.view enableMathSupport tagIconAppearance [] term
 
             else
                 span
@@ -630,7 +657,7 @@ viewGlossaryTerm { enableMathSupport, showSilcrow, isPreferred, isItemForTag } t
                     [ Icons.cornerLeftUp
                         [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-1 mr-1.5 text-gray-400 dark:text-gray-400 print:hidden"
                         ]
-                    , Term.view enableMathSupport False [ class "font-normal" ] term
+                    , Term.view enableMathSupport NoTagIcon [ class "font-normal" ] term
                     ]
     in
     div
@@ -730,7 +757,7 @@ viewGlossaryItemRelatedTerms enableMathSupport preview itemHasADefinition onClic
                                         )
                                         onClick
                                     ]
-                                    [ Term.view enableMathSupport False [] relatedTerm ]
+                                    [ Term.view enableMathSupport NoTagIcon [] relatedTerm ]
                             )
                         |> List.intersperse (text ", ")
                    )

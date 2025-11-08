@@ -53,7 +53,7 @@ import Data.GlossaryForUi as GlossaryForUi exposing (GlossaryForUi, enableThreeC
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.RawTerm as RawTerm
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
-import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItem.Term as Term exposing (TagIconAppearance(..), Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId as GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemWithPreviousAndNext exposing (GlossaryItemWithPreviousAndNext)
@@ -1819,6 +1819,14 @@ viewTermIndexItem enableMathSupport entry =
                 term : Term
                 term =
                     DisambiguatedTerm.toTerm disambiguatedTerm
+
+                tagIconAppearance : TagIconAppearance
+                tagIconAppearance =
+                    if isForTag then
+                        NormalTagIcon
+
+                    else
+                        NoTagIcon
             in
             [ li []
                 [ Html.a
@@ -1827,7 +1835,7 @@ viewTermIndexItem enableMathSupport entry =
                     , Html.Attributes.target "_self"
                     , Html.Events.onClick <| PageMsg.Internal <| JumpToItem itemId
                     ]
-                    [ Term.view enableMathSupport isForTag [] term ]
+                    [ Term.view enableMathSupport tagIconAppearance [] term ]
                 ]
             ]
 
@@ -1841,11 +1849,20 @@ viewTermIndexItem enableMathSupport entry =
                 [ Html.Attributes.attribute "style" "margin-top: 1rem" ]
                 [ Html.span
                     [ class "block border-l pl-4 -ml-px border-transparent select-none" ]
-                    [ Term.view enableMathSupport False [] term
+                    [ Term.view enableMathSupport NoTagIcon [] term
                     ]
                 ]
                 :: List.indexedMap
                     (\index ( itemId, ( preferredTerm, isForTag ) ) ->
+                        let
+                            tagIconAppearance : TagIconAppearance
+                            tagIconAppearance =
+                                if isForTag then
+                                    NormalTagIcon
+
+                                else
+                                    NoTagIcon
+                        in
                         li
                             [ Extras.HtmlAttribute.showIf (index + 1 == List.length preferredTerms) <|
                                 Html.Attributes.attribute "style" "margin-bottom: 1rem"
@@ -1865,7 +1882,7 @@ viewTermIndexItem enableMathSupport entry =
                                     [ Icons.cornerDownRight
                                         [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300"
                                         ]
-                                    , Term.view enableMathSupport isForTag [] preferredTerm
+                                    , Term.view enableMathSupport tagIconAppearance [] preferredTerm
                                     ]
                                 ]
                             ]
@@ -3414,7 +3431,7 @@ viewOrderItemsBy numberOfItems enableMathSupport filterByTagId_ itemWithFocusCom
                 [ text I18n.explanationForMostMentionedFirst ]
         , Extras.Html.showMaybe
             (DisambiguatedTerm.toTerm
-                >> Term.view enableMathSupport False []
+                >> Term.view enableMathSupport NoTagIcon []
                 >> I18n.explanationForFocusedOn
             )
             orderItemsFocusedOnTerm

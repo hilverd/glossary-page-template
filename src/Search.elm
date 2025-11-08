@@ -3,7 +3,7 @@ module Search exposing (resultsForItems, viewItemSearchResult)
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.RawTerm as RawTerm
-import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItem.Term as Term exposing (TagIconAppearance(..), Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi
 import Data.GlossaryItemsForUi as GlossaryItemsForUi exposing (GlossaryItemsForUi)
 import Data.TagId exposing (TagId)
@@ -173,13 +173,13 @@ viewItemSearchResult enableMathSupport additionalAttributes { disambiguatedPrefe
                 [ class "flex flex-col" ]
                 [ Html.div
                     [ class "font-medium" ]
-                    [ Term.view enableMathSupport False additionalAttributes alternativeTerm_ ]
+                    [ Term.view enableMathSupport NoTagIcon additionalAttributes alternativeTerm_ ]
                 , Html.div
                     [ class "inline-flex items-center group-hover:underline font-medium" ]
                     [ Icons.cornerDownRight
                         [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400"
                         ]
-                    , Term.view enableMathSupport False additionalAttributes (DisambiguatedTerm.toTerm disambiguatedPreferredTerm)
+                    , Term.view enableMathSupport NoTagIcon additionalAttributes (DisambiguatedTerm.toTerm disambiguatedPreferredTerm)
                     ]
                 , Extras.Html.showMaybe
                     (\definition_ ->
@@ -201,7 +201,7 @@ viewItemSearchResult enableMathSupport additionalAttributes { disambiguatedPrefe
                 []
                 [ Html.p
                     [ class "font-medium" ]
-                    [ Term.view enableMathSupport False additionalAttributes (DisambiguatedTerm.toTerm disambiguatedPreferredTerm) ]
+                    [ Term.view enableMathSupport NoTagIcon additionalAttributes (DisambiguatedTerm.toTerm disambiguatedPreferredTerm) ]
                 , Extras.Html.showMaybe
                     (\definition_ ->
                         Html.div

@@ -6,7 +6,7 @@ import Components.Button
 import Data.GlossaryItem.Definition as Definition exposing (Definition)
 import Data.GlossaryItem.DisambiguatedTerm as DisambiguatedTerm exposing (DisambiguatedTerm)
 import Data.GlossaryItem.Tag as Tag exposing (Tag)
-import Data.GlossaryItem.Term as Term exposing (Term)
+import Data.GlossaryItem.Term as Term exposing (TagIconAppearance(..), Term)
 import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Extras.Html
 import Extras.HtmlAttribute
@@ -85,6 +85,14 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
         isItemForTag : Bool
         isItemForTag =
             GlossaryItemForUi.isItemForTag glossaryItem
+
+        tagIconAppearance : TagIconAppearance
+        tagIconAppearance =
+            if isItemForTag then
+                LargeTagIcon
+
+            else
+                NoTagIcon
     in
     if editable then
         div
@@ -96,7 +104,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                     { enableMathSupport = enableMathSupport
                     , withLink = False
                     , isPreferred = True
-                    , isItemForTag = isItemForTag
+                    , tagIconAppearance = tagIconAppearance
                     , largeFont = True
                     }
                     disambiguatedPreferredTerm
@@ -105,7 +113,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                             { enableMathSupport = enableMathSupport
                             , withLink = False
                             , isPreferred = False
-                            , isItemForTag = isItemForTag
+                            , tagIconAppearance = tagIconAppearance
                             , largeFont = True
                             }
                         )
@@ -184,7 +192,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                         { enableMathSupport = enableMathSupport
                         , withLink = False
                         , isPreferred = True
-                        , isItemForTag = isItemForTag
+                        , tagIconAppearance = tagIconAppearance
                         , largeFont = True
                         }
                         disambiguatedPreferredTerm
@@ -193,7 +201,7 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
                                 { enableMathSupport = enableMathSupport
                                 , withLink = False
                                 , isPreferred = False
-                                , isItemForTag = isItemForTag
+                                , tagIconAppearance = tagIconAppearance
                                 , largeFont = True
                                 }
                             )
@@ -255,10 +263,15 @@ view { enableMathSupport, enableLastUpdatedDates, onClickCopyToClipboard, onClic
 
 
 viewGlossaryTerm :
-    { enableMathSupport : Bool, withLink : Bool, isPreferred : Bool, isItemForTag : Bool, largeFont : Bool }
+    { enableMathSupport : Bool
+    , withLink : Bool
+    , isPreferred : Bool
+    , tagIconAppearance : TagIconAppearance
+    , largeFont : Bool
+    }
     -> Term
     -> Html msg
-viewGlossaryTerm { enableMathSupport, withLink, isPreferred, isItemForTag, largeFont } term =
+viewGlossaryTerm { enableMathSupport, withLink, isPreferred, tagIconAppearance, largeFont } term =
     let
         viewTerm : Html msg
         viewTerm =
@@ -270,7 +283,7 @@ viewGlossaryTerm { enableMathSupport, withLink, isPreferred, isItemForTag, large
                         ]
                         [ Term.view
                             enableMathSupport
-                            isItemForTag
+                            tagIconAppearance
                             [ Extras.HtmlAttribute.showIf largeFont <| class "text-3xl font-bold" ]
                             term
                         ]
@@ -278,7 +291,7 @@ viewGlossaryTerm { enableMathSupport, withLink, isPreferred, isItemForTag, large
                 else
                     Term.view
                         enableMathSupport
-                        isItemForTag
+                        tagIconAppearance
                         [ Extras.HtmlAttribute.showIf largeFont <| class "text-3xl font-bold" ]
                         term
 
@@ -290,7 +303,7 @@ viewGlossaryTerm { enableMathSupport, withLink, isPreferred, isItemForTag, large
                         ]
                     , Term.view
                         enableMathSupport
-                        False
+                        NoTagIcon
                         [ class "font-normal"
                         , Extras.HtmlAttribute.showIf largeFont <| class "text-xl"
                         ]
@@ -411,7 +424,7 @@ viewGlossaryItemRelatedTerms enableMathSupport preview itemHasADefinition onClic
                                         )
                                         onClick
                                     ]
-                                    [ Term.view enableMathSupport False [] relatedTerm ]
+                                    [ Term.view enableMathSupport NoTagIcon [] relatedTerm ]
                             )
                         |> List.intersperse (text ", ")
                    )
@@ -439,6 +452,14 @@ viewRelatedItem enableMathSupport glossaryItem =
         isItemForTag : Bool
         isItemForTag =
             GlossaryItemForUi.isItemForTag glossaryItem
+
+        tagIconAppearance : TagIconAppearance
+        tagIconAppearance =
+            if isItemForTag then
+                NormalTagIcon
+
+            else
+                NoTagIcon
     in
     div
         [ class "w-[69ch] relative max-w-full flex flex-col justify-between overflow-x-clip bg-white dark:bg-black print:bg-white border dark:border-gray-700 print:border-none rounded-lg"
@@ -450,7 +471,7 @@ viewRelatedItem enableMathSupport glossaryItem =
                     { enableMathSupport = enableMathSupport
                     , withLink = True
                     , isPreferred = True
-                    , isItemForTag = isItemForTag
+                    , tagIconAppearance = tagIconAppearance
                     , largeFont = False
                     }
                     disambiguatedPreferredTerm
@@ -459,7 +480,7 @@ viewRelatedItem enableMathSupport glossaryItem =
                             { enableMathSupport = enableMathSupport
                             , withLink = False
                             , isPreferred = False
-                            , isItemForTag = isItemForTag
+                            , tagIconAppearance = tagIconAppearance
                             , largeFont = False
                             }
                         )

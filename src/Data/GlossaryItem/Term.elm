@@ -1,4 +1,4 @@
-module Data.GlossaryItem.Term exposing (Term, fromMarkdown, codec, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki, toTermFromDom)
+module Data.GlossaryItem.Term exposing (Term, fromMarkdown, codec, id, isAbbreviation, raw, inlineText, markdown, TagIconAppearance(..), view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki, toTermFromDom)
 
 {-| A term in a glossary item.
 A term's `id` is used to be able to refer to this term (as a related one) from other glossary items.
@@ -8,7 +8,7 @@ The `body` is the actual term.
 
 # Terms
 
-@docs Term, fromMarkdown, codec, id, isAbbreviation, raw, inlineText, markdown, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki, toTermFromDom
+@docs Term, fromMarkdown, codec, id, isAbbreviation, raw, inlineText, markdown, TagIconAppearance, view, indexGroupString, compareAlphabetically, updateRaw, htmlTreeForAnki, toTermFromDom
 
 -}
 
@@ -144,6 +144,14 @@ markdown (MarkdownTerm { body }) =
     MarkdownFragment.raw body
 
 
+{-| How a tag icon should appear next to a term.
+-}
+type TagIconAppearance
+    = NoTagIcon
+    | NormalTagIcon
+    | LargeTagIcon
+
+
 {-| View a term as HTML.
 
     import Html exposing (Html)
@@ -158,25 +166,31 @@ markdown (MarkdownTerm { body }) =
                 ]
             ]
 
-    fromMarkdown "The _ideal_ case" False |> view False False []
+    fromMarkdown "The _ideal_ case" NoTagIcon |> view False False []
     --> expected
 
 -}
-view : Bool -> Bool -> List (Attribute msg) -> Term -> Html msg
-view enableMathSupport showTagIcon additionalAttributes (MarkdownTerm { body }) =
+view : Bool -> TagIconAppearance -> List (Attribute msg) -> Term -> Html msg
+view enableMathSupport tagIconAppearance additionalAttributes (MarkdownTerm { body }) =
     case MarkdownFragment.parsed body of
         Ok blocks ->
             case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
                 Ok rendered ->
                     Html.span
                         (class "prose dark:prose-invert print:prose-neutral dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" :: additionalAttributes)
-                        (if showTagIcon then
-                            Icons.tag
-                                [ Svg.Attributes.class "h-4 w-4 mr-1.5 text-gray-400 dark:text-gray-300 inline-block flex-shrink-0" ]
-                                :: rendered
+                        (case tagIconAppearance of
+                            NoTagIcon ->
+                                rendered
 
-                         else
-                            rendered
+                            NormalTagIcon ->
+                                Icons.tag
+                                    [ Svg.Attributes.class "h-4 w-4 mr-1.5 text-gray-400 dark:text-gray-300 inline-block flex-shrink-0" ]
+                                    :: rendered
+
+                            LargeTagIcon ->
+                                Icons.tag
+                                    [ Svg.Attributes.class "h-6 w-6 mr-2 text-gray-400 dark:text-gray-300 inline-block flex-shrink-0" ]
+                                    :: rendered
                         )
 
                 Err renderingError ->
