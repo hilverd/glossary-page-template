@@ -18,10 +18,17 @@ type alias ItemSearchResult =
     { disambiguatedPreferredTerm : DisambiguatedTerm
     , alternativeTerm : Maybe Term
     , definition : Maybe Definition
+    , isForTag : Bool
     }
 
 
-resultsForItems : Maybe TagId -> (ItemSearchResult -> Bool) -> Int -> String -> GlossaryItemsForUi -> { totalNumberOfResults : Int, results : List ItemSearchResult }
+resultsForItems :
+    Maybe TagId
+    -> (ItemSearchResult -> Bool)
+    -> Int
+    -> String
+    -> GlossaryItemsForUi
+    -> { totalNumberOfResults : Int, results : List ItemSearchResult }
 resultsForItems filterByTagId filter maximumNumberOfResults searchString glossaryItemsForUi =
     let
         searchStringNormalised : String
@@ -47,10 +54,15 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
                                 definition : Maybe Definition
                                 definition =
                                     GlossaryItemForUi.definition item
+
+                                isForTag : Bool
+                                isForTag =
+                                    GlossaryItemForUi.isItemForTag item
                             in
                             { disambiguatedPreferredTerm = disambiguatedPreferredTerm
                             , alternativeTerm = Nothing
                             , definition = definition
+                            , isForTag = isForTag
                             }
                                 :: (item
                                         |> GlossaryItemForUi.alternativeTerms
@@ -59,6 +71,7 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
                                                 { disambiguatedPreferredTerm = disambiguatedPreferredTerm
                                                 , alternativeTerm = Just alternativeTerm
                                                 , definition = definition
+                                                , isForTag = isForTag
                                                 }
                                             )
                                    )
@@ -166,7 +179,16 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
 
 
 viewItemSearchResult : Bool -> List (Attribute msg) -> ItemSearchResult -> Html msg
-viewItemSearchResult enableMathSupport additionalAttributes { disambiguatedPreferredTerm, alternativeTerm, definition } =
+viewItemSearchResult enableMathSupport additionalAttributes { disambiguatedPreferredTerm, alternativeTerm, definition, isForTag } =
+    let
+        tagIconAppearance : TagIconAppearance
+        tagIconAppearance =
+            if isForTag then
+                NormalTagIcon
+
+            else
+                NoTagIcon
+    in
     case alternativeTerm of
         Just alternativeTerm_ ->
             Html.div
@@ -179,7 +201,11 @@ viewItemSearchResult enableMathSupport additionalAttributes { disambiguatedPrefe
                     [ Icons.cornerDownRight
                         [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400"
                         ]
-                    , Term.view enableMathSupport NoTagIcon additionalAttributes (DisambiguatedTerm.toTerm disambiguatedPreferredTerm)
+                    , Term.view
+                        enableMathSupport
+                        tagIconAppearance
+                        additionalAttributes
+                        (DisambiguatedTerm.toTerm disambiguatedPreferredTerm)
                     ]
                 , Extras.Html.showMaybe
                     (\definition_ ->
@@ -201,7 +227,7 @@ viewItemSearchResult enableMathSupport additionalAttributes { disambiguatedPrefe
                 []
                 [ Html.p
                     [ class "font-medium" ]
-                    [ Term.view enableMathSupport NoTagIcon additionalAttributes (DisambiguatedTerm.toTerm disambiguatedPreferredTerm) ]
+                    [ Term.view enableMathSupport tagIconAppearance additionalAttributes (DisambiguatedTerm.toTerm disambiguatedPreferredTerm) ]
                 , Extras.Html.showMaybe
                     (\definition_ ->
                         Html.div
