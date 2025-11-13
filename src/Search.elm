@@ -207,7 +207,12 @@ viewItemSearchResult enableMathSupport active { disambiguatedPreferredTerm, alte
                 , Html.div
                     [ class "inline-flex items-center group-hover:underline font-medium" ]
                     [ Icons.cornerDownRight
-                        [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5 text-gray-400 dark:text-gray-400"
+                        [ Svg.Attributes.class "h-5 w-5 shrink-0 pb-0.5 mr-1.5"
+                        , if active then
+                            Svg.Attributes.class "text-gray-200 dark:text-gray-600"
+
+                          else
+                            Svg.Attributes.class "text-gray-400 dark:text-gray-400"
                         ]
                     , Term.view
                         enableMathSupport

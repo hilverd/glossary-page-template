@@ -20,6 +20,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - In new layout, when viewing an item X while filtering by a tag T, if there is an item with the same (disambiguated) preferred term as T, then show that item under "See also" on the right, if it isn't already there.
 
 ### Fixed
+
+- Improve styling of "corner down right" icon when highlighting a search result.
+
 ### Removed
 
 ## [5.10.1] - 2025-11-06
