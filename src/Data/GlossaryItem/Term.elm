@@ -16,6 +16,7 @@ import Codec exposing (Codec)
 import Data.GlossaryItem.RawTerm as RawTerm exposing (RawTerm)
 import Data.GlossaryItem.TermFromDom exposing (TermFromDom)
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
+import Extras.Html
 import Extras.HtmlTree exposing (HtmlTree)
 import Extras.String exposing (enDash)
 import Html exposing (Attribute, Html, text)
@@ -177,21 +178,22 @@ view enableMathSupport tagIconAppearance additionalAttributes (MarkdownTerm { bo
             case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
                 Ok rendered ->
                     Html.span
-                        (class "prose dark:prose-invert print:prose-neutral dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" :: additionalAttributes)
-                        (case tagIconAppearance of
+                        []
+                        [ case tagIconAppearance of
                             NoTagIcon ->
-                                rendered
+                                Extras.Html.nothing
 
                             NormalTagIcon ->
                                 Icons.tag
-                                    [ Svg.Attributes.class "h-4 w-4 mr-1.5 text-gray-400 dark:text-gray-300 inline-block flex-shrink-0" ]
-                                    :: rendered
+                                    [ Svg.Attributes.class "h-4 w-4 mr-1.5 text-gray-400 dark:text-gray-500 inline-block flex-shrink-0" ]
 
                             LargeTagIcon ->
                                 Icons.tag
-                                    [ Svg.Attributes.class "h-6 w-6 mr-2 text-gray-400 dark:text-gray-300 inline-block flex-shrink-0" ]
-                                    :: rendered
-                        )
+                                    [ Svg.Attributes.class "h-6 w-6 mr-2 text-gray-400 dark:text-gray-500 inline-block flex-shrink-0" ]
+                        , Html.span
+                            (class "prose dark:prose-invert print:prose-neutral dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" :: additionalAttributes)
+                            rendered
+                        ]
 
                 Err renderingError ->
                     text <| I18n.failedToRenderMarkdown ++ ": " ++ renderingError

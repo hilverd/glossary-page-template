@@ -456,12 +456,12 @@ view toParentMsg (Model model) properties additionalAttributes valueForSelectedC
                                                 model.activeChoiceIndex == Just choiceIndex
                                         in
                                         li
-                                            [ class "relative cursor-default py-2 pr-9 pl-3 dark:text-white select-none"
+                                            [ class "relative cursor-default py-2 pr-9 pl-3 select-none"
                                             , if active then
-                                                class "text-white bg-indigo-600 dark:bg-indigo-300 outline-hidden"
+                                                class "bg-indigo-600 dark:bg-indigo-300 outline-hidden"
 
                                               else
-                                                class "text-gray-900 dark:text-gray-200"
+                                                class ""
                                             , attribute "role" "option"
                                             , Accessibility.Key.tabbable False
                                             , Html.Attributes.id <| ElementIds.comboboxChoice id_ choiceIndex
