@@ -178,7 +178,7 @@ view enableMathSupport tagIconAppearance additionalAttributes (MarkdownTerm { bo
             case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
                 Ok rendered ->
                     Html.span
-                        []
+                        [ class "inline-flex items-center" ]
                         [ case tagIconAppearance of
                             NoTagIcon ->
                                 Extras.Html.nothing
