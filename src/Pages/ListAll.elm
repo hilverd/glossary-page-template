@@ -595,7 +595,7 @@ update msg model =
                                                     (\({ disambiguatedPreferredTerm } as searchResult) ->
                                                         Components.SearchDialog.searchResult
                                                             (Extras.Url.fragmentOnly <| Term.id <| DisambiguatedTerm.toTerm disambiguatedPreferredTerm)
-                                                            [ Search.viewItemSearchResult model.common.enableMathSupport [] searchResult ]
+                                                            [ Search.viewItemSearchResult model.common.enableMathSupport False searchResult ]
                                                     )
                                         }
                                    )
@@ -1753,10 +1753,10 @@ viewSelectStartingItem enableMathSupport glossaryItemsForUi startingItemCombobox
                                     (\({ disambiguatedPreferredTerm } as result) ->
                                         Components.Combobox.choice
                                             disambiguatedPreferredTerm
-                                            (\additionalAttributes ->
+                                            (\active ->
                                                 Search.viewItemSearchResult
                                                     enableMathSupport
-                                                    additionalAttributes
+                                                    active
                                                     result
                                             )
                                     )
@@ -2703,10 +2703,10 @@ viewItemSearchCombobox runningOnMacOs forTopBar enableMathSupport glossaryItemsF
                                     (\({ disambiguatedPreferredTerm } as result) ->
                                         Components.Combobox.choice
                                             disambiguatedPreferredTerm
-                                            (\additionalAttributes ->
+                                            (\active ->
                                                 Search.viewItemSearchResult
                                                     enableMathSupport
-                                                    additionalAttributes
+                                                    active
                                                     result
                                             )
                                     )
@@ -3388,10 +3388,10 @@ viewOrderItemsBy numberOfItems enableMathSupport filterByTagId_ itemWithFocusCom
                                                     (\({ disambiguatedPreferredTerm } as result) ->
                                                         Components.Combobox.choice
                                                             (disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm)
-                                                            (\additionalAttributes ->
+                                                            (\active ->
                                                                 Search.viewItemSearchResult
                                                                     enableMathSupport
-                                                                    additionalAttributes
+                                                                    active
                                                                     result
                                                             )
                                                     )

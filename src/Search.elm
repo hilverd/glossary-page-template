@@ -178,8 +178,8 @@ resultsForItems filterByTagId filter maximumNumberOfResults searchString glossar
                )
 
 
-viewItemSearchResult : Bool -> List (Attribute msg) -> ItemSearchResult -> Html msg
-viewItemSearchResult enableMathSupport additionalAttributes { disambiguatedPreferredTerm, alternativeTerm, definition, isForTag } =
+viewItemSearchResult : Bool -> Bool -> ItemSearchResult -> Html msg
+viewItemSearchResult enableMathSupport active { disambiguatedPreferredTerm, alternativeTerm, definition, isForTag } =
     let
         tagIconAppearance : TagIconAppearance
         tagIconAppearance =
@@ -188,6 +188,14 @@ viewItemSearchResult enableMathSupport additionalAttributes { disambiguatedPrefe
 
             else
                 NoTagIcon
+
+        additionalAttributes =
+            [ if active then
+                class "text-white dark:text-gray-900 bg-indigo-600 dark:bg-indigo-300 outline-hidden"
+
+              else
+                class "text-gray-900 dark:text-gray-200"
+            ]
     in
     case alternativeTerm of
         Just alternativeTerm_ ->

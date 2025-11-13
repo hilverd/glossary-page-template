@@ -1445,7 +1445,16 @@ viewTags enableMathSupport addTagCombobox addTagComboboxInput tagCheckboxes =
                         (\tag ->
                             Components.Combobox.choice
                                 tag
-                                (\additionalAttributes ->
+                                (\active ->
+                                    let
+                                        additionalAttributes =
+                                            [ if active then
+                                                class "text-white dark:text-gray-900 bg-indigo-600 dark:bg-indigo-300 outline-hidden"
+
+                                              else
+                                                class "text-gray-900 dark:text-gray-200"
+                                            ]
+                                    in
                                     Tag.view enableMathSupport additionalAttributes tag
                                 )
                         )
@@ -1674,10 +1683,10 @@ viewCreateSeeAlsoSingle1 enableMathSupport dragAndDropStatus showValidationError
                                             (\({ disambiguatedPreferredTerm } as result) ->
                                                 Components.Combobox.choice
                                                     (disambiguatedPreferredTerm |> DisambiguatedTerm.toTerm |> Term.raw |> RawTerm.toString)
-                                                    (\additionalAttributes ->
+                                                    (\active ->
                                                         Search.viewItemSearchResult
                                                             enableMathSupport
-                                                            additionalAttributes
+                                                            active
                                                             result
                                                     )
                                             )

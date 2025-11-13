@@ -205,11 +205,11 @@ type alias ChoiceIndex =
 type Choice value parentMsg
     = Choice
         { value : value
-        , body : List (Attribute parentMsg) -> Html parentMsg
+        , body : Bool -> Html parentMsg
         }
 
 
-choice : value -> (List (Attribute parentMsg) -> Html parentMsg) -> Choice value parentMsg
+choice : value -> (Bool -> Html parentMsg) -> Choice value parentMsg
 choice value body =
     Choice { value = value, body = body }
 
@@ -475,14 +475,7 @@ view toParentMsg (Model model) properties additionalAttributes valueForSelectedC
                                             ]
                                             [ span
                                                 [ class "block truncate" ]
-                                                [ body
-                                                    [ if active then
-                                                        class "text-white dark:text-gray-900 bg-indigo-600 dark:bg-indigo-300 outline-hidden"
-
-                                                      else
-                                                        class "text-gray-900 dark:text-gray-200"
-                                                    ]
-                                                ]
+                                                [ body active ]
                                             , Extras.Html.showIf selected <|
                                                 span
                                                     [ class "absolute inset-y-0 right-0 flex items-center pr-4"
