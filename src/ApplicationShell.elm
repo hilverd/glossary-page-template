@@ -24,6 +24,7 @@ import Data.GlossaryItemForUi as GlossaryItemForUi exposing (GlossaryItemForUi)
 import Data.GlossaryItemId exposing (GlossaryItemId)
 import Data.GlossaryItemsForUi as GlossaryItems exposing (GlossaryItemsForUi)
 import Data.Theme as Theme exposing (Theme)
+import ElementIds
 import Extras.BrowserDom
 import Html
 import Json.Decode as Decode
@@ -421,7 +422,13 @@ update msg model =
                         Extras.BrowserDom.scrollToTop NoOp
 
                       else
-                        Cmd.none
+                        itemWithFocus
+                            |> Maybe.map
+                                (\itemWithFocus_ ->
+                                    Extras.BrowserDom.scrollElementIntoView NoOp <|
+                                        ElementIds.glossaryItemDiv itemWithFocus_
+                                )
+                            |> Maybe.withDefault Cmd.none
                     )
 
                 _ ->

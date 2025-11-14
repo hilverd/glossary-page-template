@@ -22,6 +22,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 
 - Improve styling of "corner down right" icon when highlighting a search result.
+- Fix scrolling issue.
 
 ### Removed
 
