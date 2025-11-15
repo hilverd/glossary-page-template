@@ -220,11 +220,11 @@
      https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */
 
     .grow-wrap {
-        @apply grid;
+        @apply grid min-w-0;
     }
 
     .grow-wrap::after {
-        @apply whitespace-pre-wrap invisible;
+        @apply whitespace-pre-wrap invisible break-all;
         content: attr(data-replicated-value) " ";
     }
 
@@ -234,7 +234,7 @@
 
     .grow-wrap>textarea,
     .grow-wrap::after {
-        @apply shadow-xs w-full rounded-md border;
+        @apply shadow-xs w-full min-w-0 rounded-md border;
         grid-area: 1 / 1 / 2 / 2;
     }
 

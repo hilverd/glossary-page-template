@@ -23,6 +23,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 - Improve styling of "corner down right" icon when highlighting a search result.
 - Fix scrolling issue.
+- Fix issue on create/edit page where very long text in the definition textarea could cause the left side of the page to become too wide.
 
 ### Removed
 
