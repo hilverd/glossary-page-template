@@ -185,7 +185,7 @@ view enableMathSupport tagIconAppearance additionalAttributes (MarkdownTerm { bo
 
                             NormalTagIcon ->
                                 Icons.tag
-                                    [ Svg.Attributes.class "h-4 w-4 mr-1 text-gray-400 dark:text-gray-500 inline-block flex-shrink-0" ]
+                                    [ Svg.Attributes.class "h-4 w-4 mr-1.5 text-gray-400 dark:text-gray-500 inline-block flex-shrink-0" ]
 
                             LargeTagIcon ->
                                 Icons.tag

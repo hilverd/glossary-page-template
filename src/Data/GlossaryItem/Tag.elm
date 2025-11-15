@@ -140,7 +140,7 @@ view enableMathSupport additionalAttributes (MarkdownTag { body }) =
             case Renderer.render (MarkdownRenderers.inlineHtmlMsgRenderer enableMathSupport) blocks of
                 Ok rendered ->
                     Html.span
-                        (class "prose dark:prose-invert print:prose-neutral dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" :: additionalAttributes)
+                        (class "prose dark:prose-invert print:prose-neutral dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-5" :: additionalAttributes)
                         rendered
 
                 Err renderingError ->
