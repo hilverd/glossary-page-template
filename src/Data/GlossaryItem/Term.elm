@@ -156,14 +156,19 @@ type TagIconAppearance
 {-| View a term as HTML.
 
     import Html exposing (Html)
+    import Extras.Html
 
     expected : Html msg
     expected =
         Html.span []
-            [ Html.span []
-                [ Html.text "The "
-                , Html.em [] [ Html.text "ideal" ]
-                , Html.text " case"
+            [ Extras.Html.nothing,
+              Html.span
+                []
+                [ Html.span []
+                    [ Html.text "The "
+                    , Html.em [] [ Html.text "ideal" ]
+                    , Html.text " case"
+                    ]
                 ]
             ]
 
