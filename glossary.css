@@ -224,8 +224,9 @@
     }
 
     .grow-wrap::after {
-        @apply whitespace-pre-wrap invisible break-all;
+        @apply whitespace-pre-wrap invisible;
         content: attr(data-replicated-value) " ";
+        overflow-wrap: anywhere;
     }
 
     .grow-wrap>textarea {
