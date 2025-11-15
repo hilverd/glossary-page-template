@@ -370,7 +370,7 @@ viewTags { enableMathSupport, currentFragment } tags =
                     , Html.Attributes.href <| buildTagFilterUrl tag currentFragment
                     ]
                     [ Icons.tag
-                        [ Svg.Attributes.class "h-4 w-4 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
+                        [ Svg.Attributes.class "h-4 w-4 mr-1.5 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
                     , Tag.view enableMathSupport
                         [ class "text-sm select-none" ]
                         tag

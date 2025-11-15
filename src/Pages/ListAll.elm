@@ -2605,7 +2605,7 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport enableThreeColumnLay
                                 (PageMsg.Internal DoNotFilterByTag)
                                 [ class "print:hidden mt-2 mb-1 overflow-hidden" ]
                                 [ Icons.tag
-                                    [ Svg.Attributes.class "h-5 w-5 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
+                                    [ Svg.Attributes.class "h-5 w-5 mr-1.5 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
                                 , Tag.view enableMathSupport [] <| DescribedTag.tag describedTag
                                 ]
                             ]
@@ -2816,7 +2816,7 @@ viewIndexFilterInputField enableMathSupport filterByTagWithDescription_ indexFil
                         (PageMsg.Internal DoNotFilterByTag)
                         [ class "print:hidden ml-1.5 mt-2 mb-2 overflow-hidden" ]
                         [ Icons.tag
-                            [ Svg.Attributes.class "h-5 w-5 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
+                            [ Svg.Attributes.class "h-5 w-5 mr-1.5 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
                         , Tag.view enableMathSupport [] <| DescribedTag.tag describedTag
                         ]
                     ]
@@ -3229,7 +3229,7 @@ viewCurrentTagFilter additionalAttributes enableMathSupport describedTag =
             (PageMsg.Internal DoNotFilterByTag)
             [ class "print:hidden" ]
             [ Icons.tag
-                [ Svg.Attributes.class "h-5 w-5 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
+                [ Svg.Attributes.class "h-5 w-5 mr-1.5 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
             , Tag.view enableMathSupport
                 [ class "select-none" ]
               <|
@@ -3256,7 +3256,7 @@ viewAllTagFilters enableMathSupport tags =
                                     , Html.Events.onClick <| PageMsg.Internal <| FilterByTag tag
                                     ]
                                     [ Icons.tag
-                                        [ Svg.Attributes.class "h-5 w-5 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
+                                        [ Svg.Attributes.class "h-5 w-5 mr-1.5 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
                                     , Tag.view enableMathSupport [] tag
                                     ]
                             )
@@ -3674,7 +3674,7 @@ viewItemSearchDialog filterByTagWithDescription_ enableMathSupport itemSearchDia
                             (PageMsg.Internal RemoveTagFilterButKeepSearchDialogOpen)
                             [ class "print:hidden" ]
                             [ Icons.tag
-                                [ Svg.Attributes.class "h-5 w-5 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
+                                [ Svg.Attributes.class "h-5 w-5 mr-1.5 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
                             , Tag.view enableMathSupport [] <| DescribedTag.tag describedTag
                             ]
                         ]

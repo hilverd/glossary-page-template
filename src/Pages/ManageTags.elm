@@ -329,7 +329,7 @@ viewEditTag { enableMathSupport, showValidationErrors } index tagField tagDescri
                             [ class "mr-2 mt-2"
                             ]
                             [ Icons.tag
-                                [ Svg.Attributes.class "h-5 w-5 mr-1 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
+                                [ Svg.Attributes.class "h-5 w-5 mr-1.5 text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-gray-100 flex-shrink-0" ]
                             , Tag.view enableMathSupport
                                 [ class "text-gray-700 dark:text-gray-100" ]
                                 (tagField
