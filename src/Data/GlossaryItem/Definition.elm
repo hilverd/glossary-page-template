@@ -12,7 +12,7 @@ module Data.GlossaryItem.Definition exposing (Definition, fromMarkdown, raw, inl
 import Data.MarkdownFragment as MarkdownFragment exposing (MarkdownFragment)
 import Extras.HtmlTree exposing (HtmlTree)
 import Html exposing (Attribute, Html, text)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, style)
 import Internationalisation as I18n
 import Markdown.Block as Block exposing (Block)
 import Markdown.Html
@@ -123,7 +123,9 @@ view { enableMathSupport } (MarkdownDefinition { body }) =
             of
                 Ok rendered ->
                     Html.div
-                        [ class "prose print:prose-pre:overflow-x-hidden max-w-3xl prose-pre:bg-inherit prose-pre:text-gray-700 prose-pre:border print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" ]
+                        [ class "prose print:prose-pre:overflow-x-hidden max-w-3xl prose-pre:bg-inherit prose-pre:text-gray-700 prose-pre:border print:prose-neutral dark:prose-invert dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal"
+                        , style "overflow-wrap" "anywhere"
+                        ]
                         rendered
 
                 Err renderingError ->
