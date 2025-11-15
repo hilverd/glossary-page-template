@@ -191,7 +191,7 @@ view enableMathSupport tagIconAppearance additionalAttributes (MarkdownTerm { bo
                                 Icons.tag
                                     [ Svg.Attributes.class "h-6 w-6 mr-2 text-gray-400 dark:text-gray-500 inline-block flex-shrink-0" ]
                         , Html.span
-                            (class "prose dark:prose-invert print:prose-neutral dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden leading-normal" :: additionalAttributes)
+                            (class "prose dark:prose-invert print:prose-neutral dark:prose-pre:text-gray-200 prose-code:before:hidden prose-code:after:hidden" :: additionalAttributes)
                             rendered
                         ]
 
