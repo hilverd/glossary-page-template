@@ -442,7 +442,7 @@ view toParentMsg model searchString messageAboveSearchResults messageToShowAtBot
                             NoOp
             ]
             [ Html.div
-                [ class "mx-auto max-w-xl transform motion-reduce:transform-none overflow-hidden bg-white dark:bg-gray-700 shadow-2xl ring-1 ring-black/5 transition-all motion-reduce:transition-none"
+                [ class "mx-auto max-w-xl transform motion-reduce:transform-none overflow-hidden bg-white dark:bg-black shadow-2xl ring-1 ring-black/5 transition-all motion-reduce:transition-none"
                 , if messageToShowAtBottom == Nothing then
                     class "rounded-xl"
 

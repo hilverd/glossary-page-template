@@ -413,7 +413,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                     ]
                 ]
             , div
-                [ class "flex-1 isolate -space-y-px rounded-md shadow-xs bg-white dark:bg-gray-700" ]
+                [ class "flex-1 isolate -space-y-px rounded-md shadow-xs bg-white dark:bg-black" ]
                 [ div
                     [ if not showValidationErrors || aboutLinkHref.validationError == Nothing then
                         class "relative border border-gray-300 dark:border-gray-500 rounded-md rounded-b-none px-3 py-2 focus-within:z-10 focus-within:ring-1 focus-within:ring-indigo-600 focus-within:border-indigo-600"
@@ -464,7 +464,7 @@ viewEditAboutLink showValidationErrors index ( aboutLinkHref, aboutLinkBody ) =
                                 False
                                 showValidationErrors
                                 aboutLinkBody.validationError
-                                [ class "block w-full border-0 p-0 focus:ring-0 dark:bg-gray-700 dark:text-white"
+                                [ class "block w-full border-0 p-0 focus:ring-0 dark:bg-black dark:text-white"
                                 , id <| ElementIds.aboutLinkBody index
                                 , name <| ElementIds.aboutLinkBody index
                                 , placeholder I18n.example

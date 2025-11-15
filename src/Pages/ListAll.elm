@@ -2071,7 +2071,7 @@ viewSingleItemModalDialog itemWithFocus enableMathSupport editable tagBeingFilte
                 (PageMsg.Internal ChangeLayoutToShowAll)
                 ElementIds.viewSingleItemModalTitle
                 True
-                [ class "relative max-w-xl lg:max-w-3xl mx-1.5 bg-white dark:bg-gray-800" ]
+                [ class "relative max-w-xl lg:max-w-3xl mx-1.5 bg-white dark:bg-black" ]
                 (Html.div
                     []
                     [ Html.div
@@ -2117,7 +2117,7 @@ viewConfirmDeleteModal editability itemToDelete deleting =
         (PageMsg.Internal CancelDelete)
         ElementIds.confirmDeleteModalTitle
         False
-        [ class "sm:max-w-lg bg-white dark:bg-gray-700" ]
+        [ class "sm:max-w-lg bg-white dark:bg-black" ]
         (Html.div []
             [ div
                 [ class "sm:flex sm:items-start" ]
@@ -2548,7 +2548,7 @@ viewMenuForMobile menuForMobileVisibility enableMathSupport enableThreeColumnLay
             ]
             []
         , div
-            [ class "relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-gray-900"
+            [ class "relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-black"
             , if menuForMobileVisibility == GradualVisibility.Visible then
                 class "transition motion-reduce:transition-none ease-in-out duration-300 transform motion-reduce:transform-none translate-x-0"
 
@@ -2788,7 +2788,7 @@ viewTermIndexFirstCharacterGrid staticSidebar indexOfTerms =
             IndexOfTerms.termGroups indexOfTerms
     in
     div
-        [ class "bg-white dark:bg-slate-900 select-none pointer-events-auto" ]
+        [ class "bg-white dark:bg-black select-none pointer-events-auto" ]
         (List.map
             (\termIndexGroup ->
                 viewTermIndexFirstCharacter
@@ -2828,7 +2828,7 @@ viewIndexFilterInputField enableMathSupport filterByTagWithDescription_ indexFil
             [ Html.input
                 [ Html.Attributes.type_ "search"
                 , id ElementIds.indexFilterInputField
-                , class "col-start-1 row-start-1 block w-full pl-9 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                , class "col-start-1 row-start-1 block w-full pl-9 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 bg-white dark:bg-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 , Html.Attributes.placeholder I18n.filter
                 , Html.Attributes.autocomplete False
                 , Html.Attributes.attribute "autocorrect" "off"
@@ -2854,7 +2854,7 @@ viewLetterLinksGrid enableMathSupport enableThreeColumnLayout staticSidebar glos
         , class "z-10 -mb-6 sticky top-0 -ml-0.5"
         ]
         [ div
-            [ class "pt-5 px-3 bg-white dark:bg-slate-900" ]
+            [ class "pt-5 px-3 bg-white dark:bg-black" ]
             [ Extras.Html.showIf enableThreeColumnLayout <|
                 h2
                     [ class "ml-1.5 mb-3 font-bold leading-tight" ]
@@ -2870,7 +2870,7 @@ viewLetterLinksGrid enableMathSupport enableThreeColumnLayout staticSidebar glos
             , viewTermIndexFirstCharacterGrid staticSidebar indexOfTerms
             ]
         , div
-            [ class "h-8 bg-linear-to-b from-white dark:from-slate-900" ]
+            [ class "h-8 bg-linear-to-b from-white dark:from-black" ]
             []
         ]
 
@@ -2883,7 +2883,7 @@ viewStaticSidebarForDesktop enableThreeColumnLayout enableMathSupport glossaryTi
             IndexOfTerms.filterByString indexFilterString termIndex
     in
     div
-        [ class "hidden print:hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-900"
+        [ class "hidden print:hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-black"
         , if enableThreeColumnLayout then
             class "lg:w-78"
 
@@ -2905,7 +2905,7 @@ viewStaticSidebarForDesktop enableThreeColumnLayout enableMathSupport glossaryTi
 viewTopBar : Bool -> Bool -> Bool -> GlossaryItemsForUi -> Maybe TagId -> Components.Combobox.Model -> String -> Editability -> Theme -> Components.DropdownMenu.Model -> Maybe Components.DropdownMenu.Model -> Html Msg
 viewTopBar tabbable runningOnMacOs enableMathSupport glossaryItemsForUi filterByTagId_ searchComboboxModel searchComboboxInput editability theme themeDropdownMenu maybeExportDropdownMenu =
     div
-        [ class "sticky top-0 z-20 shrink-0 flex flex-row justify-between h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
+        [ class "sticky top-0 z-20 shrink-0 flex flex-row justify-between h-16 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 lg:hidden print:hidden items-center" ]
         [ div
             [ class "flex items-center" ]
             [ button
@@ -3044,7 +3044,7 @@ viewExportButton forTopBar enabled exportDropdownMenu =
             [ span
                 [ class "inline-flex items-center" ]
                 [ Icons.anki
-                    [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-600 mr-2" ]
+                    [ Svg.Attributes.class "h-5 w-5 text-gray-500 dark:text-gray-700 mr-2" ]
                 , text I18n.ankiDeck
                 ]
             ]
@@ -4082,7 +4082,7 @@ view model =
                                     class "bg-white dark:bg-black"
 
                                   else
-                                    class "bg-gray-100 dark:bg-gray-900 lg:bg-white lg:dark:bg-gray-900"
+                                    class "bg-gray-100 dark:bg-black lg:bg-white lg:dark:bg-black"
                                 ]
                               <|
                                 let

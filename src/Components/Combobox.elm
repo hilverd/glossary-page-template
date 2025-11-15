@@ -342,7 +342,7 @@ view toParentMsg (Model model) properties additionalAttributes valueForSelectedC
                 input
                 [ Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
                 , Html.Attributes.type_ "text"
-                , class "block w-full rounded-md bg-white dark:bg-gray-900 py-1.5 pr-12 text-gray-900 dark:text-gray-200 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-1 focus:-outline-offset-1 focus:outline-indigo-600 dark:focus:outline-indigo-300"
+                , class "block w-full rounded-md bg-white dark:bg-black py-1.5 pr-12 text-gray-900 dark:text-gray-200 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-1 focus:-outline-offset-1 focus:outline-indigo-600 dark:focus:outline-indigo-300"
                 , if config.icon /= Nothing then
                     class "pl-10"
 
@@ -415,7 +415,7 @@ view toParentMsg (Model model) properties additionalAttributes valueForSelectedC
                     span
                         [ class "pointer-events-none absolute inset-y-0 right-0 flex items-center pr-10" ]
                         [ span
-                            [ class "rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-1.5 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400" ]
+                            [ class "rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-950 px-1.5 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400" ]
                             [ text shortcut ]
                         ]
                 )
@@ -431,7 +431,7 @@ view toParentMsg (Model model) properties additionalAttributes valueForSelectedC
             , div
                 [ class "absolute z-10 mt-1 w-full" ]
                 [ ul
-                    [ class "max-h-60 overflow-x-hidden overflow-y-auto bg-white dark:bg-gray-800 py-1 ring-1 shadow-lg ring-black/5 dark:ring-gray-100/5 focus:outline-hidden"
+                    [ class "max-h-60 overflow-x-hidden overflow-y-auto bg-white dark:bg-black py-1 ring-1 shadow-lg ring-black/5 dark:ring-gray-100/5 focus:outline-hidden"
                     , if messageToShowAtBottom == Nothing then
                         class "rounded-md"
 

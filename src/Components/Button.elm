@@ -51,10 +51,10 @@ white enabled =
     withAdditionalAttributes
         [ class "inline-flex justify-center items-center rounded-md border border-gray-300 dark:border-gray-700 shadow-xs px-4 py-2 font-medium"
         , if enabled then
-            class "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
+            class "bg-white dark:bg-black text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
 
           else
-            class "text-gray-300 dark:text-slate-600 bg-white dark:bg-slate-900"
+            class "text-gray-300 dark:text-slate-600 bg-white dark:bg-black"
         , Html.Attributes.disabled <| not enabled
         , Accessibility.Key.tabbable enabled
         ]
@@ -100,7 +100,7 @@ emptyState =
 rounded : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 rounded enabled =
     withAdditionalAttributes
-        [ class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-xs rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
+        [ class "inline-flex items-center p-1.5 mr-2 border border-gray-300 dark:border-gray-500 shadow-xs rounded-full text-gray-700 dark:text-gray-300 bg-white dark:bg-black"
         , if enabled then
             class "hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-800 dark:focus:ring-offset-indigo-300"
 
@@ -114,7 +114,7 @@ rounded enabled =
 softSmall : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 softSmall enabled =
     withAdditionalAttributes
-        [ class "inline-flex items-center rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-700 dark:text-gray-100 shadow-xs"
+        [ class "inline-flex items-center rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-black px-2 py-1 text-sm text-gray-700 dark:text-gray-100 shadow-xs"
         , Extras.HtmlAttribute.showIf enabled <| class "hover:bg-gray-100 dark:hover:bg-gray-700"
         , Html.Attributes.disabled <| not enabled
         , Accessibility.Key.tabbable enabled
@@ -124,7 +124,7 @@ softSmall enabled =
 soft : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 soft enabled =
     withAdditionalAttributes
-        [ class "inline-flex items-center rounded-full max-w-xs border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-2 py-1 text-gray-700 dark:text-gray-200 shadow-xs"
+        [ class "inline-flex items-center rounded-full max-w-xs border border-gray-300 dark:border-gray-500 bg-white dark:bg-black px-2 py-1 text-gray-700 dark:text-gray-200 shadow-xs"
         , if enabled then
             class "hover:bg-gray-100 dark:hover:bg-gray-800"
 
@@ -138,7 +138,7 @@ soft enabled =
 softLarge : Bool -> List (Attribute msg) -> List (Html msg) -> Html msg
 softLarge enabled =
     withAdditionalAttributes
-        [ class "rounded-full max-w-md text-xl border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900 px-4.5 py-4 text-gray-700 dark:text-gray-200 shadow-xs"
+        [ class "rounded-full max-w-md text-xl border border-gray-300 dark:border-gray-500 bg-white dark:bg-black px-4.5 py-4 text-gray-700 dark:text-gray-200 shadow-xs"
         , if enabled then
             class "hover:bg-gray-100 dark:hover:bg-gray-800"
 

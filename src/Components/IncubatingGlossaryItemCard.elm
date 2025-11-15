@@ -365,7 +365,7 @@ viewTags { enableMathSupport, currentFragment } tags =
         (List.map
             (\tag ->
                 Html.a
-                    [ class "inline-flex items-center rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-700 dark:text-gray-100 shadow-xs hover:bg-gray-100 dark:hover:bg-gray-700 no-underline hover:no-underline mr-2 mb-2"
+                    [ class "inline-flex items-center rounded-full border border-gray-300 dark:border-gray-500 bg-white dark:bg-black px-2 py-1 text-sm text-gray-700 dark:text-gray-100 shadow-xs hover:bg-gray-100 dark:hover:bg-gray-700 no-underline hover:no-underline mr-2 mb-2"
                     , Html.Attributes.title <| I18n.tag ++ ": " ++ Tag.inlineText tag
                     , Html.Attributes.href <| buildTagFilterUrl tag currentFragment
                     ]

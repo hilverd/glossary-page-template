@@ -170,7 +170,7 @@ view model =
         [ div
             [ class "flex w-full flex-col items-center space-y-4 sm:items-end" ]
             [ div
-                [ class "transition-discrete pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black/5 dark:ring-white/5"
+                [ class "transition-discrete pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white dark:bg-gray-900 shadow-lg ring-1 ring-black/5 dark:ring-white/5"
                 , case model of
                     EnterStart _ ->
                         class "transform motion-reduce:transform-none ease-out duration-300 transition motion-reduce:transition-none translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
@@ -215,7 +215,7 @@ view model =
                             [ class "ml-4 flex shrink-0" ]
                             [ button
                                 [ Html.Attributes.type_ "button"
-                                , class "inline-flex rounded-md bg-white dark:bg-gray-800 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:outline-hidden"
+                                , class "inline-flex rounded-md bg-white dark:bg-gray-900 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:outline-hidden"
                                 , Html.Events.onClick <| StartLeaving <| counter_ model
                                 ]
                                 [ span
