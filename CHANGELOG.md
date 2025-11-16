@@ -12,6 +12,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+## [5.11.0] - 2025-11-16
+
+### Added
 
 - If a term has a corresponding tag then render a tag icon in front of it (in most places).
 
@@ -24,8 +31,6 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 - Improve styling of "corner down right" icon when highlighting a search result.
 - Fix scrolling issue when navigating to search result in old layout.
 - Fix issue on create/edit page where very long text in the definition textarea could cause the left side of the page to become too wide.
-
-### Removed
 
 ## [5.10.1] - 2025-11-06
 
@@ -960,7 +965,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.10.1...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.11.0...HEAD
+[5.11.0]: https://github.com/hilverd/glossary-page-template/compare/v5.10.1...v5.11.0
 [5.10.1]: https://github.com/hilverd/glossary-page-template/compare/v5.10.0...v5.10.1
 [5.10.0]: https://github.com/hilverd/glossary-page-template/compare/v5.9.1...v5.10.0
 [5.9.1]: https://github.com/hilverd/glossary-page-template/compare/v5.9.0...v5.9.1
