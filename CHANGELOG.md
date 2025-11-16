@@ -13,7 +13,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ### Added
 
-- Render tag icons in front of terms (in most places) if that term has a corresponding tag.
+- If a term has a corresponding tag then render a tag icon in front of it (in most places).
 
 ### Changed
 
@@ -22,7 +22,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 
 - Improve styling of "corner down right" icon when highlighting a search result.
-- Fix scrolling issue.
+- Fix scrolling issue when navigating to search result in old layout.
 - Fix issue on create/edit page where very long text in the definition textarea could cause the left side of the page to become too wide.
 
 ### Removed
