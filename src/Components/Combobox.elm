@@ -433,10 +433,10 @@ view toParentMsg (Model model) properties additionalAttributes valueForSelectedC
                 [ ul
                     [ class "max-h-60 overflow-x-hidden overflow-y-auto bg-white dark:bg-black py-1 ring-1 shadow-lg ring-black/5 dark:ring-gray-100/5 focus:outline-hidden"
                     , if messageToShowAtBottom == Nothing then
-                        class "rounded-md"
+                        class "rounded-md shadow-lg ring-1 ring-black/5 dark:ring-gray-600 "
 
                       else
-                        class "rounded-t-md"
+                        class "rounded-t-md shadow-lg ring-1 ring-black/5 dark:ring-gray-600 "
                     , Html.Attributes.id optionsId
                     , Accessibility.Role.listBox
                     , Extras.HtmlAttribute.showUnless (model.choicesVisible && List.length choices > 0) <| class "hidden"
