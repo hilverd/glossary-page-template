@@ -120,7 +120,7 @@ view properties choices =
         [ class "grow" ]
         [ select
             [ Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
-            , class "mt-1 block w-full truncate pl-3 pr-10 py-2 dark:bg-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-500 focus:outline-hidden focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
+            , class "mt-1 block w-full truncate pl-3 pr-10 py-2 dark:bg-black dark:text-gray-200 border-gray-300 dark:border-gray-500 focus:outline-hidden focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
             , Extras.HtmlAttribute.showMaybe Accessibility.Aria.label config.ariaLabel
             , Extras.HtmlAttribute.showMaybe
                 (\handler ->
