@@ -240,6 +240,28 @@
     }
 
     /* End of trick for autogrowing textareas */
+
+    /* Scrollbar styling for dark mode */
+    .dark *::-webkit-scrollbar-track {
+        @apply bg-gray-800;
+    }
+
+    .dark *::-webkit-scrollbar-thumb {
+        @apply bg-gray-400 rounded;
+    }
+
+    .dark *::-webkit-scrollbar-thumb:hover {
+        @apply bg-gray-300;
+    }
+
+    .dark *::-webkit-scrollbar-button {
+        @apply bg-gray-500;
+    }
+
+    /* Firefox scrollbar styling for dark mode */
+    .dark * {
+        scrollbar-color: rgb(156 163 175) rgb(31 41 55); /* gray-400 gray-800 */
+    }
 }
 
 /* source-sans-3-200 - latin */
