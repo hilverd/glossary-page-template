@@ -325,7 +325,7 @@ view toParentMsg (Model model) properties additionalAttributes valueForSelectedC
 
         optionsId : String
         optionsId =
-            id_ ++ "-options"
+            id_ ++ "-combobox-options"
     in
     div
         additionalAttributes
@@ -440,6 +440,7 @@ view toParentMsg (Model model) properties additionalAttributes valueForSelectedC
                     , Html.Attributes.id optionsId
                     , Accessibility.Role.listBox
                     , Extras.HtmlAttribute.showUnless (model.choicesVisible && List.length choices > 0) <| class "hidden"
+                    , Extras.HtmlEvents.onMouseDownPreventDefault (toParentMsg NoOp)
                     ]
                     (choices
                         |> List.indexedMap
@@ -528,7 +529,7 @@ subscriptions : Model -> Sub Msg
 subscriptions (Model model) =
     if model.choicesVisible then
         Sub.batch
-            [ Events.onMouseDown <| Decode.succeed <| HideChoices Nothing
+            [ Events.onMouseDown <| mouseDownOutsideComboboxDecoder
             , if not model.mouseHasMoved then
                 Events.onMouseMove <| Decode.succeed MouseMoved
 
@@ -538,3 +539,37 @@ subscriptions (Model model) =
 
     else
         Sub.none
+
+
+mouseDownOutsideComboboxDecoder : Decode.Decoder Msg
+mouseDownOutsideComboboxDecoder =
+    Decode.field "target" (isOutsideCombobox [])
+        |> Decode.andThen
+            (\isOutside ->
+                if isOutside then
+                    Decode.succeed <| HideChoices Nothing
+
+                else
+                    Decode.fail "clicked inside combobox"
+            )
+
+
+isOutsideCombobox : List String -> Decode.Decoder Bool
+isOutsideCombobox classNames =
+    Decode.oneOf
+        [ Decode.field "id" Decode.string
+            |> Decode.andThen
+                (\elementId ->
+                    if String.startsWith "combobox" elementId || String.contains "-combobox-options" elementId then
+                        Decode.succeed False
+
+                    else
+                        Decode.field "parentElement" (isOutsideCombobox classNames)
+                )
+        , Decode.field "className" Decode.string
+            |> Decode.andThen
+                (\className ->
+                    Decode.field "parentElement" (isOutsideCombobox (className :: classNames))
+                )
+        , Decode.null True
+        ]

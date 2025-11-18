@@ -16,6 +16,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 
 - Improve dark mode styling.
+- Make combo box scrollbar usable via mouse instead of having this cause the combo box to close.
 
 ### Removed
 
