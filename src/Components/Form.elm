@@ -45,10 +45,10 @@ inputText value_ markdownBasedSyntaxEnabled mathSupportEnabled showValidationErr
             [ class "relative" ]
             [ Accessibility.inputText value_
                 ([ if not showValidationErrors || validationError == Nothing then
-                    class "w-full min-w-0 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    class "w-full min-w-0 rounded-md focus:ring-0 focus:outline-2 focus:-outline-offset-1 focus:outline-indigo-600 dark:focus:outline-indigo-500 border-gray-300 dark:border-gray-500 dark:bg-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
 
                    else
-                    class "w-full min-w-0 rounded-md border-red-300 dark:border-red-700 dark:bg-black text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-hidden focus:ring-red-500 focus:border-red-500"
+                    class "w-full min-w-0 rounded-md focus:ring-0 focus:outline-2 focus:-outline-offset-1 border-2 focus:outline-red-500 dark:focus-outline-red-300 border-red-300 dark:border-amber-800 dark:bg-black text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-amber-800 focus:outline-hidden focus:ring-red-500 focus:border-red-500 dark:focus:border-red-500"
                  , Accessibility.Aria.invalid <| validationError /= Nothing
                  ]
                     ++ additionalAttributes
@@ -73,7 +73,7 @@ textarea body markdownBasedSyntaxEnabled mathSupportEnabled showValidationErrors
             ]
             [ Accessibility.textarea
                 ([ if not showValidationErrors || validationError == Nothing then
-                    class "shadow-xs w-full min-w-0 rounded-md border border-gray-300 dark:border-gray-500 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    class "shadow-xs w-full min-w-0 rounded-md border border-gray-300 dark:border-gray-500 focus:ring-indigo-500 focus:border-indigo-500 focus:ring-0 focus:outline-2 focus:-outline-offset-1 focus:outline-indigo-600 dark:focus:outline-indigo-500 dark:bg-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
 
                    else
                     class "shadow-xs w-full min-w-0 rounded-md border-red-300 text-red-900 dark:text-red-300 placeholder-red-300 dark:placeholder-red-700 focus:outline-hidden focus:ring-red-500 focus:border-red-500 dark:bg-black"

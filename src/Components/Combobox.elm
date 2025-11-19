@@ -342,7 +342,7 @@ view toParentMsg (Model model) properties additionalAttributes valueForSelectedC
                 input
                 [ Extras.HtmlAttribute.showMaybe Html.Attributes.id config.id
                 , Html.Attributes.type_ "text"
-                , class "block w-full rounded-md bg-white dark:bg-black py-1.5 pr-12 text-gray-900 dark:text-gray-200 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-1 focus:-outline-offset-1 focus:outline-indigo-600 dark:focus:outline-indigo-300"
+                , class "block w-full rounded-md bg-white dark:bg-black py-1.5 pr-12 text-gray-900 dark:text-gray-200 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-0 focus:outline-2 focus:-outline-offset-1 focus:outline-indigo-600 dark:focus:outline-indigo-500"
                 , if config.icon /= Nothing then
                     class "pl-10"
 
