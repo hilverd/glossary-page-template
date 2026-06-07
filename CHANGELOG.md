@@ -16,6 +16,12 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Fixed
 ### Removed
 
+## [5.12.2] - 2026-06-07
+
+### Fixed
+
+- Second attempt to undo the changes from 5.12.0 until a better solution is implemented.
+
 ## [5.12.1] - 2026-06-07
 
 ### Fixed
@@ -987,7 +993,10 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.11.1...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.12.2...HEAD
+[5.12.2]: https://github.com/hilverd/glossary-page-template/compare/v5.12.1...v5.12.2
+[5.12.1]: https://github.com/hilverd/glossary-page-template/compare/v5.12.0...v5.12.1
+[5.12.0]: https://github.com/hilverd/glossary-page-template/compare/v5.11.1...v5.12.0
 [5.11.1]: https://github.com/hilverd/glossary-page-template/compare/v5.11.0...v5.11.1
 [5.11.0]: https://github.com/hilverd/glossary-page-template/compare/v5.10.1...v5.11.0
 [5.10.1]: https://github.com/hilverd/glossary-page-template/compare/v5.10.0...v5.10.1
