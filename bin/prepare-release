@@ -40,10 +40,27 @@ sed -i \
 
 grep -q 'http://example\.com' "glossary-$release_tag".min.js || fail 'Failed to apply Browser.application hack'
 
+# Keep an unpatched copy for glstatic.net — it serves the JS as an ES module
+# where import.meta.url is valid and document.currentScript is null.
+mkdir -p "$SCRIPT_DIR/../release"
+cp "glossary-$release_tag".min.js "$SCRIPT_DIR/../release/glossary-$release_tag".min.js
+cp "glossary-$release_tag".min.css "$SCRIPT_DIR/../release/glossary-$release_tag".min.css
+
+# Patch the copy that goes into the tar.gz so it works when opened directly
+# from the filesystem. Chrome blocks module scripts loaded from file://, so the
+# local release package loads the bundle as a classic script instead.
+perl -0pi \
+  -e 's!import\.meta\.url!document.currentScript.src!g' \
+  "glossary-$release_tag".min.js
+
+grep -q 'document\.currentScript\.src' "glossary-$release_tag".min.js || fail 'Failed to replace import.meta.url'
+
 for template in glossary empty; do
   cat $template.html | \
     sed 's!/assets/glossary-[^\.]*.js!'"glossary-$release_tag"'.min.js!' | \
     sed 's!/assets/glossary-[^\.]*.css!'"glossary-$release_tag"'.min.css!' | \
+    sed 's!<script type="module" crossorigin src="\([^"]*\)"></script>!<script defer src="\1"></script>!' | \
+    sed 's!<link rel="stylesheet" crossorigin href="\([^"]*\)">!<link rel="stylesheet" href="\1">!' | \
     sed '/warning-about-not-opening-html-file-straight-from-repository/ d' \
     >$template-with-correct-file-names.html
 
