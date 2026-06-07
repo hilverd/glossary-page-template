@@ -18,6 +18,8 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 ## [5.12.1] - 2026-06-07
 
+### Fixed
+
 - Temporarily undo the "fix" from 5.12.0, as it does not work in all scenarios for using the static assets.
 
 ## [5.12.0] - 2026-06-07
