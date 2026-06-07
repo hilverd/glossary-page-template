@@ -28,6 +28,8 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 
 - Fix CORS issue with local release package assets.
 
+### Removed
+
 ## [5.11.1] - 2025-11-19
 
 ### Fixed
@@ -985,9 +987,7 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.12.1...HEAD
-[5.12.1]: https://github.com/hilverd/glossary-page-template/compare/v5.12.0...v5.12.1
-[5.12.0]: https://github.com/hilverd/glossary-page-template/compare/v5.11.1...v5.12.0
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.11.1...HEAD
 [5.11.1]: https://github.com/hilverd/glossary-page-template/compare/v5.11.0...v5.11.1
 [5.11.0]: https://github.com/hilverd/glossary-page-template/compare/v5.10.1...v5.11.0
 [5.10.1]: https://github.com/hilverd/glossary-page-template/compare/v5.10.0...v5.10.1

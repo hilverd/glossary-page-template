@@ -1,7 +1,6 @@
 #! /usr/bin/env bash
 #
-# Builds release-ready HTML files and archives from Vite output.
-# Rewrites asset references for hosted and local release packages.
+# Prepares files to be released.
 #
 # * release/glossary.html contains a template with static assets hosted by glstatic.net
 # * release/glossary-page-template-$release_tag contains a template including static assets
@@ -35,27 +34,16 @@ mv assets/glossary-*.css "glossary-$release_tag".min.css
 # Elm will fail when trying to initialise a `Browser.application` for `file://` URLs.
 # The command below makes `file://` URLs look like `http://example.com/...` ones.
 # See also https://github.com/elm/core/blob/1.0.0/hints/1.md
-perl -pi \
-  -e 's! ([a-zA-Z0-9]+\(\$?[a-zA-Z0-9]+\.location\.href)\)\.a\|\|! $1).a||$1.replace(/^file:\\/\\//, "http://example.com")).a||!' \
+sed -i \
+  -e 's! \([a-zA-Z0-9]\+(\$\?[a-zA-Z0-9]\+\.location\.href\))\.a||! \1).a||\1.replace(/^file:\\/\\//, "http://example.com")).a||!' \
   "glossary-$release_tag".min.js
 
 grep -q 'http://example\.com' "glossary-$release_tag".min.js || fail 'Failed to apply Browser.application hack'
-
-# Make the packaged JS bundle work when opened directly from the filesystem.
-# Chrome blocks module scripts loaded from file://, so the local release package
-# loads the bundle as a classic script instead.
-perl -0pi \
-  -e 's!import\.meta\.url!document.currentScript.src!g' \
-  "glossary-$release_tag".min.js
-
-grep -q 'document\.currentScript\.src' "glossary-$release_tag".min.js || fail 'Failed to replace import.meta.url'
 
 for template in glossary empty; do
   cat $template.html | \
     sed 's!/assets/glossary-[^\.]*.js!'"glossary-$release_tag"'.min.js!' | \
     sed 's!/assets/glossary-[^\.]*.css!'"glossary-$release_tag"'.min.css!' | \
-    sed 's!<script type="module" crossorigin src="\([^"]*\)"></script>!<script defer src="\1"></script>!' | \
-    sed 's!<link rel="stylesheet" crossorigin href="\([^"]*\)">!<link rel="stylesheet" href="\1">!' | \
     sed '/warning-about-not-opening-html-file-straight-from-repository/ d' \
     >$template-with-correct-file-names.html
 
