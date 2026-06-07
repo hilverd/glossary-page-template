@@ -14,6 +14,9 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+
+- Fix CORS issue with local release package assets.
+
 ### Removed
 
 ## [5.11.1] - 2025-11-19
