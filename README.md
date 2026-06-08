@@ -25,7 +25,7 @@ Download [`glossary.html`](https://github.com/hilverd/glossary-page-template/rel
 
 ### Static assets
 
-The HTML file points to `glstatic.net` for static assets hosted using Cloudflare:
+By default, the HTML file points to `glstatic.net` for static assets hosted using Cloudflare:
 
 ```
 https://glstatic.net/glossary-page-template@5/glossary.min.js
@@ -34,13 +34,25 @@ https://glstatic.net/glossary-page-template@5/glossary.min.css
 
 The above assets are cached for 24 hours and get updated with any releases with a [major version number](https://semver.org/) of `5`. Alternatively you can change the URL to point to e.g. `@5.12` which gets all patch releases with version numbers of the form `5.12.x`. You can also use a specific version such as `5.12.2` — these are cached forever.
 
+#### Opening the HTML file and static asset files locally in a browser
+
+Instead of using `glstatic.net`, you can load both the HTML file and the static asset files locally in a browser:
+
+1. get the JS and CSS files from inside the `.tar.gz` package in a release
+2. modify the HTML file to point to the asset files from inside the `<head>` element:
+
+```
+<script defer src="glossary-v5.12.2.min.js"></script>
+<link rel="stylesheet" href="glossary-v5.12.2.min.css">
+```
+
 #### Security considerations
 
-The approach above is the easiest one, but the [safest option](https://css-tricks.com/potential-dangers-of-third-party-javascript/) would be to either host the static assets yourself or use [Subresource Integrity](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity) (SRI) by specifying hashes for the static assets.
+Using assets hosted at `glstatic.net` is the easiest approach, but the [safest option](https://css-tricks.com/potential-dangers-of-third-party-javascript/) would be to either host the static assets yourself or use [Subresource Integrity](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity) (SRI) by specifying hashes for the static assets.
 
-To host the static assets yourself, you can get them from the `.tar.gz` package in a release, which also contains a glossary template file that uses them.
+To host the static assets yourself, you can use the same approach as described above for loading them in a browser.
 
-To use SRI, change the two lines at the end of the `<head>` element so they
+Alternatively, to continue using `glstatic.net` but with SRI, change the two lines at the end of the `<head>` element so they
 
 * point to a specific version of the JS and CSS files,
 * have a `crossorigin` attribute, and

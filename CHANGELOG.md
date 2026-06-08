@@ -15,7 +15,7 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Changed
 ### Fixed
 
-- Fixed an issue where opening the glossary from the downloaded `.tar.gz` package directly in Google Chrome would show a blank page due to a CORS error. The JavaScript bundle included in the package is now loaded differently to work around a Chrome restriction on local files.
+- Fix an issue where opening the glossary from the downloaded `.tar.gz` package directly in Google Chrome would show a blank page due to a CORS error. The JavaScript bundle included in the package is now loaded differently to work around a Chrome restriction on local files.
 
 ### Removed
 
