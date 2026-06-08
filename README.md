@@ -32,7 +32,7 @@ https://glstatic.net/glossary-page-template@5/glossary.min.js
 https://glstatic.net/glossary-page-template@5/glossary.min.css
 ```
 
-The above assets are cached for 24 hours and get updated with any releases with a [major version number](https://semver.org/) of `5`. Alternatively you can change the URL to point to e.g. `@5.12` which gets all patch releases with version numbers of the form `5.12.x`. You can also use a specific version such as `5.12.2` — these are cached forever.
+The above assets are cached for 24 hours and get updated with any releases with a [major version number](https://semver.org/) of `5`. Alternatively you can change the URL to point to e.g. `@5.13` which gets all patch releases with version numbers of the form `5.13.x`. You can also use a specific version such as `5.13.0` — these are cached forever.
 
 #### Opening the HTML file and static asset files locally in a browser
 
@@ -42,8 +42,8 @@ Instead of using `glstatic.net`, you can load both the HTML file and the static 
 2. modify the HTML file to point to the asset files from inside the `<head>` element:
 
 ```
-<script defer src="glossary-v5.12.2.min.js"></script>
-<link rel="stylesheet" href="glossary-v5.12.2.min.css">
+<script defer src="glossary-v5.13.0.min.js"></script>
+<link rel="stylesheet" href="glossary-v5.13.0.min.css">
 ```
 
 #### Security considerations

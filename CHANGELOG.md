@@ -14,10 +14,13 @@ This applies from version 0.5.0 onwards, as some versions before that have broke
 ### Added
 ### Changed
 ### Fixed
+### Removed
+
+## [5.13.0] - 2026-06-08
+
+### Fixed
 
 - Fix an issue where opening the glossary from the downloaded `.tar.gz` package directly in Google Chrome would show a blank page due to a CORS error. The JavaScript bundle included in the package is now loaded differently to work around a Chrome restriction on local files.
-
-### Removed
 
 ## [5.12.2] - 2026-06-07
 
@@ -996,7 +999,8 @@ Make the [relevant changes](https://github.com/hilverd/glossary-page-template/co
 
 - Initial release.
 
-[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.12.2...HEAD
+[Unreleased]: https://github.com/hilverd/glossary-page-template/compare/v5.13.0...HEAD
+[5.13.0]: https://github.com/hilverd/glossary-page-template/compare/v5.12.2...v5.13.0
 [5.12.2]: https://github.com/hilverd/glossary-page-template/compare/v5.12.1...v5.12.2
 [5.12.1]: https://github.com/hilverd/glossary-page-template/compare/v5.12.0...v5.12.1
 [5.12.0]: https://github.com/hilverd/glossary-page-template/compare/v5.11.1...v5.12.0
